@@ -1,11 +1,11 @@
-import React, { Component, useState } from 'react';
+import React, { useState } from 'react';
 import { Text, View, StyleSheet, Platform, ScrollView, TouchableOpacity } from 'react-native';
 import Constants from 'expo-constants';
 import PlayerScore from '../components/PlayerScore'
 import Rounds from '../components/Rounds';
 import { cloneDeep } from 'lodash';
 
-export default function App() {
+export default function ScoreBoardScreen({ navigation }) {
     // const palette = ["7d9cd4", "de8383", "a4d4a7", "c188d1", "a4d4a7", "c188d1", "de8383"];
     // https://coolors.co/f4f1de-e07a5f-8f5d5d-3d405b-5f797b-81b29a-babf95-f2cc8f
     const palette = ["e07a5f", "8f5d5d", "3d405b", "5f797b", "81b29a", "babf95", "f2cc8f"]
@@ -18,9 +18,16 @@ export default function App() {
         'Player 4': [0],
         // 'Player 5': [0],
         // 'Player 6': [0],
+        // 'Player 7': [0],
+        // 'Player 8': [0],
+        // 'Player 9': [0],
+        // 'Player 10': [0],
+        // 'Player 11': [0],
+        // 'Player 12': [0],
+        // 'Player 13': [0],
+        // 'Player 14': [0],
     });
     const players = Object.keys(scores);
-
 
     const updatePlayerRoundScore = (name, round, score) => {
         const newScores = cloneDeep(scores);
@@ -46,7 +53,7 @@ export default function App() {
                 {players.map((item, index) => (
                     <PlayerScore
                         name={item}
-                        color={palette[index]}
+                        color={palette[index % palette.length]}
                         round={currentRound}
                         roundScore={scores[item][currentRound] || 0}
                         totalScore={scores[item].reduce((a, b) => { return (a || 0) + (b || 0); })}
@@ -61,6 +68,7 @@ export default function App() {
                 style={styles.footerStyle}
                 scores={scores}
                 currentRound={currentRound}
+                navigation={navigation}
                 onRoundChange={newRound => updateRound(newRound)} />
         </View>
     );
@@ -81,6 +89,7 @@ const styles = StyleSheet.create({
         flexGrow: 1,
         flexWrap: 'wrap',
         alignContent: 'stretch',
+        flexDirection: 'row',
     },
     footerStyle: {
         flex: 1,

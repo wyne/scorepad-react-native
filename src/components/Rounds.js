@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Feather } from '@expo/vector-icons';
 import { EvilIcons } from '@expo/vector-icons';
 
-function Rounds({ scores, currentRound, onRoundChange }) {
+function Rounds({ scores, currentRound, onRoundChange, navigation }) {
     const players = Object.keys(scores);
     const totalRounds = scores[players[0]].length;
 
@@ -26,6 +26,10 @@ function Rounds({ scores, currentRound, onRoundChange }) {
                 {players.map((name, index) => (
                     <Text key={index} style={{ color: 'white' }}>{name}</Text>
                 ))}
+
+                <TouchableOpacity style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+                    onPress={() => { navigation.navigate("Configure") }}>
+                </TouchableOpacity>
             </View>
 
             <ScrollView horizontal={true} contentContainerStyle={{ flexDirection: 'row' }}>

@@ -5,16 +5,29 @@ import { StyleSheet, Text, View } from 'react-native';
 import { createAppContainer } from "react-navigation";
 import { createStackNavigator } from "react-navigation-stack";
 import ScoreBoardScreen from "./src/screens/ScoreBoardScreen";
+import ConfigureScreen from "./src/screens/ConfigureScreen";
 
 const navigator = createStackNavigator(
   {
-    ScoreBoard: ScoreBoardScreen,
+    ScoreBoard: {
+      screen: ScoreBoardScreen,
+      navigationOptions: ({ navigation }) => ({
+        headerShown: false,
+      }),
+    },
+    Configure: {
+      screen: ConfigureScreen,
+      // Optional: Override the `navigationOptions` for the screen
+      navigationOptions: ({ navigation }) => ({
+        title: "Configure",
+        headerBackTitle: "Back"
+      }),
+    },
   },
   {
     initialRouteName: "ScoreBoard",
     defaultNavigationOptions: {
-      title: "KeepScore",
-      headerShown: false,
+      title: "Home",
     },
   }
 );
