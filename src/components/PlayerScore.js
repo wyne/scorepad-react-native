@@ -62,6 +62,7 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         textAlign: 'center',
         color: 'white',
+        fontVariant: ['tabular-nums'],
     },
     roundScore: {
         opacity: .7,
@@ -76,6 +77,7 @@ const styles = StyleSheet.create({
     },
     roundLabel: {
         opacity: .7,
+        fontVariant: ['tabular-nums'],
     },
 });
 

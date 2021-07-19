@@ -1,6 +1,8 @@
 import React, { Component, useState } from 'react';
 import { Text, View, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { Feather } from '@expo/vector-icons';
+import { EvilIcons } from '@expo/vector-icons';
 
 function Rounds({ scores, currentRound, onRoundChange }) {
     const players = Object.keys(scores);
@@ -13,12 +15,14 @@ function Rounds({ scores, currentRound, onRoundChange }) {
                 style={{ justifyContent: 'center', }}
                 onPress={() => { onRoundChange(currentRound - 1); }} >
                 <View><Text>
-                    <Ionicons name="caret-back-circle-outline" style={styles.roundButton} color="black" />
+                    <Feather name="chevron-left" style={styles.roundButton} color="black" />
                 </Text></View>
             </TouchableOpacity>
 
             <View style={{ padding: 10, color: 'white' }}>
-                <Text style={{ color: 'white' }}>&nbsp;</Text>
+                <Text style={{ color: 'white' }}>
+                    <EvilIcons style={{ color: 'white', textAlign: 'center' }} name="gear" size={24} color="black" />
+                </Text>
                 {players.map((name, index) => (
                     <Text key={index} style={{ color: 'white' }}>{name}</Text>
                 ))}
@@ -35,7 +39,7 @@ function Rounds({ scores, currentRound, onRoundChange }) {
                             textAlign: 'center',
                         }}>{round + 1}</Text>
                         {players.map((player, playerIndex) => (
-                            <Text key={playerIndex} style={{ color: 'white', textAlign: 'center' }}>
+                            <Text key={playerIndex} style={styles.scoreEntry}>
                                 {scores[player][round]}
                             </Text>
                         ))}
@@ -47,7 +51,7 @@ function Rounds({ scores, currentRound, onRoundChange }) {
                 style={{ justifyContent: 'center', }}
                 onPress={() => { onRoundChange(currentRound + 1); }} >
                 <View>
-                    <Ionicons name="caret-forward-circle-outline" style={styles.roundButton} color="black" />
+                    <Feather name="chevron-right" style={styles.roundButton} color="black" />
                 </View>
             </TouchableOpacity>
         </View>
@@ -58,6 +62,11 @@ const styles = StyleSheet.create({
     roundButton: {
         fontSize: 50,
         paddingHorizontal: 10,
+        color: 'white',
+    },
+    scoreEntry: {
+        fontVariant: ['tabular-nums'],
+        textAlign: 'center',
         color: 'white',
     }
 });
