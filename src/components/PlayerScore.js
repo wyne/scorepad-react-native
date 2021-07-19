@@ -3,15 +3,23 @@ import { Text, View, StyleSheet, TouchableOpacity } from 'react-native';
 
 function PlayerScore({ name, color, round, totalScore, roundScore, onScoreChange }) {
     return (
-        <View style={{ flex: 1, justifyContent: 'center', backgroundColor: '#' + color }}>
+        <View style={{ flexGrow: 1, justifyContent: 'center', alignContent: 'stretch', backgroundColor: '#' + color }}>
             <Text style={[styles.name]}>
                 {name}
             </Text>
             <View>
                 <Text style={styles.score}>{totalScore}</Text>
-                <Text style={styles.label}>Total</Text>
-                <Text style={[styles.score, styles.roundScore]}>{roundScore}</Text>
-                <Text style={[styles.label, styles.roundLabel]}>Round {round + 1}</Text>
+                <View style={{
+                    padding: 5,
+                    borderRadius: 5,
+                    borderWidth: 2,
+                    borderColor: 'white',
+                    alignSelf: 'center',
+                    opacity: 0.7,
+                }}>
+                    <Text style={[styles.score, styles.roundScore]}>{roundScore}</Text>
+                    <Text style={[styles.label, styles.roundLabel]}>Round {round + 1}</Text>
+                </View>
             </View>
 
             <TouchableOpacity style={[styles.surface, styles.surfaceAdd]}
@@ -50,7 +58,7 @@ const styles = StyleSheet.create({
     score: {
         margin: 2,
         marginTop: 15,
-        fontSize: 60,
+        fontSize: 90,
         fontWeight: 'bold',
         textAlign: 'center',
         color: 'white',
@@ -58,6 +66,9 @@ const styles = StyleSheet.create({
     roundScore: {
         opacity: .7,
         fontSize: 40,
+        margin: 0,
+        marginTop: 0,
+        padding: 0,
     },
     label: {
         textAlign: 'center',

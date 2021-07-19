@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "keepscore",
+    "name": "KeepScore",
     "slug": "keepscore",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -17,17 +17,22 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.wyne.keepscore",
+      "buildNumber": "0.0.1"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
-      }
+      },
+      "package": "com.wyne.keepscore",
+      "versionCode": "0.0.1"
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "description": ""
+    "description": "",
+    "githubUrl": "https://github.com/wyne/keepscore"
   }
 }
