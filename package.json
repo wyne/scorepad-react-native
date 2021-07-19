@@ -15,6 +15,7 @@
     "react": "16.13.1",
     "react-dom": "16.13.1",
     "react-native": "https://github.com/expo/react-native/archive/sdk-42.0.0.tar.gz",
+    "react-native-picker-select": "^8.0.4",
     "react-native-web": "~0.13.12",
     "react-navigation": "^4.4.4",
     "react-navigation-stack": "^2.10.4"

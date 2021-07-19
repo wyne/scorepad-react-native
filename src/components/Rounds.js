@@ -19,17 +19,18 @@ function Rounds({ scores, currentRound, onRoundChange, navigation }) {
                 </Text></View>
             </TouchableOpacity>
 
+            <TouchableOpacity style={{ justifyContent: 'center' }}
+                onPress={() => { navigation.navigate("Configure") }}>
+                <EvilIcons style={{ fontSize: 50, color: 'white', textAlign: 'center' }} name="gear" color="black" />
+            </TouchableOpacity>
+
             <View style={{ padding: 10, color: 'white' }}>
                 <Text style={{ color: 'white' }}>
-                    <EvilIcons style={{ color: 'white', textAlign: 'center' }} name="gear" size={24} color="black" />
+                    &nbsp;
                 </Text>
                 {players.map((name, index) => (
                     <Text key={index} style={{ color: 'white' }}>{name}</Text>
                 ))}
-
-                <TouchableOpacity style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
-                    onPress={() => { navigation.navigate("Configure") }}>
-                </TouchableOpacity>
             </View>
 
             <ScrollView horizontal={true} contentContainerStyle={{ flexDirection: 'row' }}>
