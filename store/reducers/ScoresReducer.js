@@ -36,7 +36,7 @@ const scoresReducer = (state = initialState, action) => {
                 const copy = { ...state };
 
                 const players = [0, 1, 2, 3];
-                players.forEach((name, index) => {
+                players.players.forEach((name, index) => {
                     copy[index][nextRound] = 0;
                 })
                 return {

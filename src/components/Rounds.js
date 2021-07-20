@@ -41,7 +41,7 @@ function Rounds({ navigation }) {
                 <Text style={{ color: 'white' }}>
                     &nbsp;
                 </Text>
-                {players.map((name, index) => (
+                {players.players.map((name, index) => (
                     <Text key={index} style={{ color: 'white' }}>{name}</Text>
                 ))}
             </View>
@@ -56,7 +56,7 @@ function Rounds({ navigation }) {
                             opacity: .6,
                             textAlign: 'center',
                         }}>{round + 1}</Text>
-                        {players.map((player, playerIndex) => (
+                        {players.players.map((player, playerIndex) => (
                             <Text key={playerIndex} style={styles.scoreEntry}>
                                 {scores[playerIndex][round]}
                             </Text>

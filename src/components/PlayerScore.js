@@ -21,7 +21,7 @@ function PlayerScore({ playerIndex, color }) {
     return (
         <View style={{ flexGrow: 1, justifyContent: 'center', alignContent: 'stretch', backgroundColor: '#' + color }}>
             <Text style={[styles.name]}>
-                {players[playerIndex]}
+                {players.players[playerIndex]}
             </Text>
             <View>
                 <Text style={styles.score}>{scores[playerIndex].reduce((a, b) => { return (a || 0) + (b || 0); })}</Text>

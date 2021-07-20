@@ -8,7 +8,8 @@ import { createStackNavigator } from "react-navigation-stack";
 import ScoreBoardScreen from "./src/screens/ScoreBoardScreen";
 import ConfigureScreen from "./src/screens/ConfigureScreen";
 
-import { store } from './redux/store';
+import { PersistGate } from 'redux-persist/integration/react';
+import { store, persistor } from './redux/store';
 
 const navigator = createStackNavigator(
     {
@@ -42,7 +43,9 @@ export default class App extends React.Component {
     render() {
         return (
             <Provider store={store}>
-                <Navigation />
+                <PersistGate loading={null} persistor={persistor}>
+                    <Navigation />
+                </PersistGate>
             </Provider>
         );
     }

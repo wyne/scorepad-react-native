@@ -14,7 +14,7 @@ export default function ScoreBoardScreen({ navigation }) {
     return (
         <View style={styles.appContainer}>
             <View style={styles.contentStyle}>
-                {players.map((name, index) => (
+                {players.players.map((name, index) => (
                     <PlayerScore
                         key={index}
                         playerIndex={index}

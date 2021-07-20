@@ -24,7 +24,7 @@ const ConfigureScreen = ({ navigation }) => {
                     setGameLock(false)
                 )} />
 
-            {players.map((name, index) => (
+            {players.players.map((name, index) => (
                 <View style={styles.playerContainer} key={index}>
                     <Text>Player {index + 1}</Text>
                     <TextInput
