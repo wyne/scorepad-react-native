@@ -1,7 +1,7 @@
 import React, { Component, useState } from 'react';
 import { Text, View, StyleSheet, TouchableOpacity } from 'react-native';
 
-function PlayerScore({ name, color, round, totalScore, roundScore, onScoreChange }) {
+function PlayerScore({ name, playerIndex, color, round, totalScore, roundScore, onScoreChange }) {
     return (
         <View style={{ flexGrow: 1, justifyContent: 'center', alignContent: 'stretch', backgroundColor: '#' + color }}>
             <Text style={[styles.name]}>
@@ -24,12 +24,12 @@ function PlayerScore({ name, color, round, totalScore, roundScore, onScoreChange
 
             <TouchableOpacity style={[styles.surface, styles.surfaceAdd]}
                 onPress={() => {
-                    onScoreChange(name, round, roundScore + 1);
+                    onScoreChange(playerIndex, roundScore + 1);
                 }}
             />
             <TouchableOpacity style={[styles.surface, styles.surfaceSubtract]}
                 onPress={() => {
-                    onScoreChange(name, round, roundScore - 1);
+                    onScoreChange(playerIndex, roundScore - 1);
                 }}
             />
         </View>

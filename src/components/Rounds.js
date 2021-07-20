@@ -4,10 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Feather } from '@expo/vector-icons';
 import { EvilIcons } from '@expo/vector-icons';
 
-function Rounds({ scores, currentRound, onRoundChange, navigation }) {
-    const players = Object.keys(scores);
-    const totalRounds = scores[players[0]].length;
-
+function Rounds({ scoreMatrix, players, currentRound, onRoundChange, navigation }) {
     return (
         <View style={{ flexDirection: 'row', backgroundColor: 'black' }}>
 
@@ -28,14 +25,14 @@ function Rounds({ scores, currentRound, onRoundChange, navigation }) {
                 <Text style={{ color: 'white' }}>
                     &nbsp;
                 </Text>
-                {players.map((name, index) => (
-                    <Text key={index} style={{ color: 'white' }}>{name}</Text>
+                {players.map(name => (
+                    <Text key={name} style={{ color: 'white' }}>{name}</Text>
                 ))}
             </View>
 
             <ScrollView horizontal={true} contentContainerStyle={{ flexDirection: 'row' }}>
 
-                {scores[players[0]].map((item, round) => (
+                {scoreMatrix[0].map((item, round) => (
                     <View key={round} style={{ padding: 10 }}>
                         <Text style={{
                             color: currentRound == round ? 'red' : 'white',
@@ -45,7 +42,7 @@ function Rounds({ scores, currentRound, onRoundChange, navigation }) {
                         }}>{round + 1}</Text>
                         {players.map((player, playerIndex) => (
                             <Text key={playerIndex} style={styles.scoreEntry}>
-                                {scores[player][round]}
+                                {scoreMatrix[playerIndex][round]}
                             </Text>
                         ))}
                     </View>
