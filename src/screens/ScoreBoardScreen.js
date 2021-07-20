@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { Text, View, StyleSheet, Platform, ScrollView, TouchableOpacity } from 'react-native';
-import Constants from 'expo-constants';
+import { Text, View, StyleSheet, } from 'react-native';
 import PlayerScore from '../components/PlayerScore'
 import Rounds from '../components/Rounds';
 import { useSelector } from 'react-redux';

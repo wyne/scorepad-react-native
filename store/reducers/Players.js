@@ -1,3 +1,5 @@
+import { SET_PLAYER_NAME } from "../actions/Players";
+
 const initialState = [
     'Player 1',
     'Player 2',
@@ -6,7 +8,14 @@ const initialState = [
 ];
 
 const playersReducer = (state = initialState, action) => {
-    return state;
-};
+    switch (action.type) {
+        case SET_PLAYER_NAME:
+            let copy = [...state];
+            copy[action.index] = action.name;
+            return copy;
+        default:
+            return state;
+    }
+}
 
-export default playersReducer;
+export default playersReducer
