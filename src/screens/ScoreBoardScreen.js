@@ -3,7 +3,7 @@ import { Text, View, StyleSheet, Platform, ScrollView, TouchableOpacity } from '
 import Constants from 'expo-constants';
 import PlayerScore from '../components/PlayerScore'
 import Rounds from '../components/Rounds';
-import { cloneDeep } from 'lodash';
+import { useSelector } from 'react-redux';
 
 export default function ScoreBoardScreen({ navigation }) {
     // https://coolors.co/f4f1de-e07a5f-8f5d5d-3d405b-5f797b-81b29a-babf95-f2cc8f
@@ -11,12 +11,9 @@ export default function ScoreBoardScreen({ navigation }) {
     // const palette = ["e07a5f", "8f5d5d", "3d405b", "5f797b", "81b29a", "babf95", "f2cc8f"]
 
     const [currentRound, setCurrentRound] = useState(0);
-    const [players, setPlayers] = useState([
-        'Player 1',
-        'Player 2',
-        'Player 3',
-        'Player 4',
-    ]);
+
+    const players = useSelector(state => state.players);
+
     const [scoreMatrix, setScoreMatrix] = useState(
         Array.from({ length: players.length }, () => Array.from({ length: 1 }, () => 0))
     );
@@ -59,7 +56,6 @@ export default function ScoreBoardScreen({ navigation }) {
             </View>
             <Rounds
                 style={styles.footerStyle}
-                players={players}
                 scoreMatrix={scoreMatrix}
                 currentRound={currentRound}
                 navigation={navigation}

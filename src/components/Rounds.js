@@ -1,10 +1,14 @@
 import React, { Component, useState } from 'react';
 import { Text, View, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { useSelector } from 'react-redux';
+
 import { Ionicons } from '@expo/vector-icons';
 import { Feather } from '@expo/vector-icons';
 import { EvilIcons } from '@expo/vector-icons';
 
-function Rounds({ scoreMatrix, players, currentRound, onRoundChange, navigation }) {
+function Rounds({ scoreMatrix, currentRound, onRoundChange, navigation }) {
+    const players = useSelector(state => state.players);
+
     return (
         <View style={{ flexDirection: 'row', backgroundColor: 'black' }}>
 
