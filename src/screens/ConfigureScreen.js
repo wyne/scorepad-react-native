@@ -8,35 +8,38 @@ const ConfigureScreen = ({ navigation }) => {
     const players = useSelector(state => state.players);
 
     const dispatch = useDispatch();
-    const setPlayerNameHandler = () => {
-        dispatch(setPlayerName(2, 'Justin'));
+    const setPlayerNameHandler = (index, name) => {
+        dispatch(setPlayerName(index, name));
     }
 
     return (<>
         <View style={styles.container}>
 
-            <Button title="Reset Scores" style={{ padding: 50 }} />
+            <Text>Reset scores to change number of players.</Text>
+            <Button title="Reset Scores" />
 
-            <Button title="Change name" style={{ padding: 50 }}
-                onPress={setPlayerNameHandler}
-            />
+            {players.map((name, index) => (
+                <View style={styles.playerContainer}>
+                    <Text>Player {index + 1}</Text>
+                    <TextInput
+                        defaultValue={name}
+                        style={styles.input}
+                        maxLength={20}
+                        onChangeText={(text) => setPlayerNameHandler(index, text)}
+                    />
+                </View>
+            ))}
 
-            <Text>Player 1</Text>
-            <TextInput defaultValue="Player 1" style={styles.input}></TextInput>
+            <Button title="Add Player" />
 
-            <Text>Player 2</Text>
-            <TextInput defaultValue="Player 2" style={styles.input}></TextInput>
-
-            <Text>Player 3</Text>
-            <TextInput defaultValue="Player 3" style={styles.input}></TextInput>
-
-            <Text>Player 4</Text>
-            <TextInput defaultValue="Player 4" style={styles.input}></TextInput>
         </View>
     </>);
 }
 
 const styles = StyleSheet.create({
+    playerContainer: {
+        margin: 10,
+    },
     input: {
         borderWidth: 1,
         borderColor: 'black',
@@ -45,7 +48,7 @@ const styles = StyleSheet.create({
         fontSize: 25,
         padding: 5,
         paddingHorizontal: 10,
-        margin: 10,
+        marginVertical: 20,
     },
     configContainer: {
         backgroundColor: 'white',

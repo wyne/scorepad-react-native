@@ -28,8 +28,8 @@ function Rounds({ scoreMatrix, currentRound, onRoundChange, navigation }) {
                 <Text style={{ color: 'white' }}>
                     &nbsp;
                 </Text>
-                {players.map(name => (
-                    <Text key={name} style={{ color: 'white' }}>{name}</Text>
+                {players.map((name, index) => (
+                    <Text key={index} style={{ color: 'white' }}>{name}</Text>
                 ))}
             </View>
 
