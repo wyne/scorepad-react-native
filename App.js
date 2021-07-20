@@ -1,7 +1,6 @@
 import { StatusBar } from 'expo-status-bar';
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { createStore, combineReducers } from 'redux';
 import { Provider } from 'react-redux';
 
 import { createAppContainer } from "react-navigation";
@@ -9,15 +8,7 @@ import { createStackNavigator } from "react-navigation-stack";
 import ScoreBoardScreen from "./src/screens/ScoreBoardScreen";
 import ConfigureScreen from "./src/screens/ConfigureScreen";
 
-import playersReducer from './store/reducers/Players';
-import scoresReducer from './store/reducers/ScoresReducer';
-
-const rootReducer = combineReducers({
-    players: playersReducer,
-    scores: scoresReducer,
-})
-
-const store = createStore(rootReducer);
+import { store } from './redux/store';
 
 const navigator = createStackNavigator(
     {
