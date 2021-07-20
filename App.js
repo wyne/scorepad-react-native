@@ -10,9 +10,11 @@ import ScoreBoardScreen from "./src/screens/ScoreBoardScreen";
 import ConfigureScreen from "./src/screens/ConfigureScreen";
 
 import playersReducer from './store/reducers/Players';
+import scoresReducer from './store/reducers/ScoresReducer';
 
 const rootReducer = combineReducers({
-    players: playersReducer
+    players: playersReducer,
+    scores: scoresReducer,
 })
 
 const store = createStore(rootReducer);

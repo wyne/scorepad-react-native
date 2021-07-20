@@ -1,19 +1,32 @@
 import React from 'react';
 import { Text, View, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
+
+import { nextRound, prevRound } from '../../store/actions/ScoresActions';
 
 import { Feather } from '@expo/vector-icons';
 import { EvilIcons } from '@expo/vector-icons';
 
-function Rounds({ scoreMatrix, currentRound, onRoundChange, navigation }) {
+function Rounds({ navigation }) {
+    const dispatch = useDispatch();
+
+    const nextRoundHandler = () => {
+        dispatch(nextRound());
+    }
+
+    const prevRoundHandler = () => {
+        dispatch(prevRound());
+    }
+
     const players = useSelector(state => state.players);
+    const scores = useSelector(state => state.scores);
 
     return (
         <View style={{ flexDirection: 'row', backgroundColor: 'black' }}>
 
             <TouchableOpacity
-                style={{ justifyContent: 'center', }}
-                onPress={() => { onRoundChange(currentRound - 1); }} >
+                style={{ justifyContent: 'center' }}
+                onPress={prevRoundHandler} >
                 <View><Text>
                     <Feather name="chevron-left" style={styles.roundButton} color="black" />
                 </Text></View>
@@ -35,17 +48,17 @@ function Rounds({ scoreMatrix, currentRound, onRoundChange, navigation }) {
 
             <ScrollView horizontal={true} contentContainerStyle={{ flexDirection: 'row' }}>
 
-                {scoreMatrix[0].map((item, round) => (
+                {scores[0].map((item, round) => (
                     <View key={round} style={{ padding: 10 }}>
                         <Text style={{
-                            color: currentRound == round ? 'red' : 'white',
+                            color: scores.currentRound == round ? 'red' : 'white',
                             fontWeight: 'bold',
                             opacity: .6,
                             textAlign: 'center',
                         }}>{round + 1}</Text>
                         {players.map((player, playerIndex) => (
                             <Text key={playerIndex} style={styles.scoreEntry}>
-                                {scoreMatrix[playerIndex][round]}
+                                {scores[playerIndex][round]}
                             </Text>
                         ))}
                     </View>
@@ -54,7 +67,7 @@ function Rounds({ scoreMatrix, currentRound, onRoundChange, navigation }) {
 
             <TouchableOpacity
                 style={{ justifyContent: 'center', }}
-                onPress={() => { onRoundChange(currentRound + 1); }} >
+                onPress={nextRoundHandler} >
                 <View>
                     <Feather name="chevron-right" style={styles.roundButton} color="black" />
                 </View>

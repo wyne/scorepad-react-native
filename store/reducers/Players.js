@@ -18,4 +18,4 @@ const playersReducer = (state = initialState, action) => {
     }
 }
 
-export default playersReducer
+export default playersReducer;
