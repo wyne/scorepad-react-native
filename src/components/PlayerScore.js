@@ -20,14 +20,23 @@ function PlayerScore({ playerIndex, color }) {
     }
 
     return (
-        <View style={{ flexGrow: 1, justifyContent: 'center', alignContent: 'stretch', backgroundColor: '#' + color }}>
-            <Text style={[styles.name]}>
+        <View style={[
+            styles.playerCard,
+            { backgroundColor: '#' + color },
+        ]}>
+            <Text style={[
+                styles.name,
+                { fontSize: players.length > 4 ? 30 : 50 }
+            ]}>
                 {players[playerIndex].name}
             </Text>
             <View>
-                <Text style={styles.score}>{
-                    scores[playerIndex].reduce((a, b) => { return (a || 0) + (b || 0); })
-                }</Text>
+                <Text style={[
+                    styles.score,
+                    { fontSize: players.length > 4 ? 50 : 90 }
+                ]}>{
+                        scores[playerIndex].reduce((a, b) => { return (a || 0) + (b || 0); })
+                    }</Text>
                 <View style={{
                     padding: 5,
                     borderRadius: 5,
@@ -36,7 +45,11 @@ function PlayerScore({ playerIndex, color }) {
                     alignSelf: 'center',
                     opacity: 0.7,
                 }}>
-                    <Text style={[styles.score, styles.roundScore]}>{scores[playerIndex][currentRound] || 0}</Text>
+                    <Text style={[
+                        styles.score,
+                        styles.roundScore,
+                        { fontSize: players.length > 4 ? 30 : 40 }
+                    ]}>{scores[playerIndex][currentRound] || 0}</Text>
                     <Text style={[styles.label, styles.roundLabel]}>Round {currentRound + 1}</Text>
                 </View>
             </View>
@@ -52,9 +65,16 @@ function PlayerScore({ playerIndex, color }) {
 }
 
 const styles = StyleSheet.create({
+    playerCard: {
+        padding: 5,
+        flexGrow: 1,
+        justifyContent: 'center',
+        alignContent: 'stretch',
+    },
     surface: {
         position: 'absolute',
         width: '100%',
+        borderColor: 'red',
     },
     surfaceAdd: {
         top: 0,
@@ -72,7 +92,6 @@ const styles = StyleSheet.create({
     },
     score: {
         margin: 2,
-        marginTop: 15,
         fontSize: 90,
         fontWeight: 'bold',
         textAlign: 'center',

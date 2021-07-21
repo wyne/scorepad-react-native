@@ -46,7 +46,7 @@ const styles = StyleSheet.create({
         flexGrow: 1,
         flexWrap: 'wrap',
         alignContent: 'stretch',
-        flexDirection: 'row',
+        flexDirection: 'column',
     },
     footerStyle: {
         flex: 1,
