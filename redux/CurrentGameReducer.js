@@ -1,4 +1,4 @@
-import { INC_PLAYER_ROUND_SCORE, DEC_PLAYER_ROUND_SCORE, NEXT_ROUND, PREV_ROUND, SET_PLAYER_NAME } from "./CurrentGameActions"
+import { INC_PLAYER_ROUND_SCORE, DEC_PLAYER_ROUND_SCORE, NEXT_ROUND, PREV_ROUND, SET_PLAYER_NAME, NEW_GAME } from "./CurrentGameActions"
 
 const initialState = {
     players: [
@@ -14,7 +14,6 @@ const initialState = {
         3: [4],
     },
     currentRound: 0,
-    totalRounds: 1,
 }
 
 const currentGameReducer = (state = initialState, action) => {
@@ -65,6 +64,17 @@ const currentGameReducer = (state = initialState, action) => {
             let copy = [...state.players];
             copy[action.index] = { name: action.name };
             return { ...state, players: copy };
+
+        case NEW_GAME:
+            let newScores = {};
+            state.players.forEach((name, index) => {
+                newScores[index] = [0]
+            })
+            return {
+                ...state,
+                scores: newScores,
+                currentRound: 0,
+            };
 
         default:
             return state;

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Text, View, ScrollView, StyleSheet, TextInput, Button, } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
-import { setPlayerName } from '../../redux/CurrentGameActions';
+import { setPlayerName, newGame } from '../../redux/CurrentGameActions';
 
 const ConfigureScreen = ({ navigation }) => {
     const [gameLock, setGameLock] = useState(true);
@@ -9,8 +9,14 @@ const ConfigureScreen = ({ navigation }) => {
     const players = useSelector(state => state.currentGame.players);
 
     const dispatch = useDispatch();
+
     const setPlayerNameHandler = (index, name) => {
         dispatch(setPlayerName(index, name));
+    }
+
+    const newGameHandler = () => {
+        dispatch(newGame());
+        setGameLock(false);
     }
 
     return (<>
@@ -19,10 +25,7 @@ const ConfigureScreen = ({ navigation }) => {
             <Text>Tap the top half of a player's card to add a point. Tap the bottom half subtract.</Text>
             <Text>Tip: To add or subtract faster, try tapping with two alternating fingers.</Text>
 
-            <Button title="New Game"
-                onPress={() => (
-                    setGameLock(false)
-                )} />
+            <Button title="New Game" onPress={newGameHandler} />
 
             {players.map((player, index) => (
                 <View style={styles.playerContainer} key={index}>
