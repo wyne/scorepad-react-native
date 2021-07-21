@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Text, View, ScrollView, StyleSheet, TextInput, Button, } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
-import { setPlayerName, newGame, addPlayer } from '../../redux/CurrentGameActions';
+import { setPlayerName, newGame, addPlayer, removePlayer } from '../../redux/CurrentGameActions';
 
 const ConfigureScreen = ({ navigation }) => {
     const [gameLock, setGameLock] = useState(true);
@@ -20,10 +20,12 @@ const ConfigureScreen = ({ navigation }) => {
     }
 
     const addPlayerHandler = () => {
-        console.log("Addplayer");
         dispatch(addPlayer('Player'));
     }
 
+    const removePlayerHandler = (index) => {
+        dispatch(removePlayer(index));
+    }
 
     return (<>
         <ScrollView style={styles.configContainer}>
@@ -34,7 +36,7 @@ const ConfigureScreen = ({ navigation }) => {
             <Button title="New Game" onPress={newGameHandler} />
 
             {players.map((player, index) => (
-                <View style={styles.playerContainer} key={index}>
+                <View style={styles.playerContainer} key={index + player.name}>
                     <Text>Player {index + 1}</Text>
                     <TextInput
                         defaultValue={player.name}
@@ -42,7 +44,7 @@ const ConfigureScreen = ({ navigation }) => {
                         maxLength={20}
                         onChangeText={(text) => setPlayerNameHandler(index, text)}
                     />
-                    <Button title="Delete"></Button>
+                    <Button title="Delete" onPress={() => removePlayerHandler(index)}></Button>
                 </View>
             ))}
 

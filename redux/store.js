@@ -1,7 +1,5 @@
 
 import { createStore, combineReducers } from 'redux';
-import playersReducer from '../store/reducers/Players';
-import scoresReducer from '../store/reducers/ScoresReducer';
 import currentGameReducer from './CurrentGameReducer';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -14,8 +12,6 @@ const persistConfig = {
 
 const rootReducer = combineReducers({
     currentGame: persistReducer(persistConfig, currentGameReducer),
-    players: persistReducer(persistConfig, playersReducer),
-    scores: scoresReducer,
 })
 
 export const store = createStore(rootReducer);

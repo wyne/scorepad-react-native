@@ -25,7 +25,9 @@ function PlayerScore({ playerIndex, color }) {
                 {players[playerIndex].name}
             </Text>
             <View>
-                <Text style={styles.score}>{scores[playerIndex].reduce((a, b) => { return (a || 0) + (b || 0); })}</Text>
+                <Text style={styles.score}>{
+                    scores[playerIndex].reduce((a, b) => { return (a || 0) + (b || 0); })
+                }</Text>
                 <View style={{
                     padding: 5,
                     borderRadius: 5,

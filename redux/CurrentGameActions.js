@@ -35,6 +35,6 @@ export const addPlayer = (name) => {
     return { type: ADD_PLAYER, name: name }
 }
 
-export const removePlayer = () => {
-    return { type: REMOVE_PLAYER }
+export const removePlayer = (index) => {
+    return { type: REMOVE_PLAYER, index: index }
 }
