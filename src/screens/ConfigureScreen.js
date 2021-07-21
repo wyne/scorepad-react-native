@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Text, View, ScrollView, StyleSheet, TextInput, Button, } from 'react-native';
+import { Platform, Text, View, ScrollView, StyleSheet, TextInput, Button, } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import { setPlayerName, newGame, addPlayer, removePlayer } from '../../redux/CurrentGameActions';
 
@@ -27,43 +27,53 @@ const ConfigureScreen = ({ navigation }) => {
         dispatch(removePlayer(index));
     }
 
+    const saveHandler = () => {
+        dispatch(removePlayer(index));
+    }
+
     return (<>
         <ScrollView style={styles.configContainer}>
 
-            <Text>Tap the top half of a player's card to add a point. Tap the bottom half subtract.</Text>
-            <Text>Tip: To add or subtract faster, try tapping with two alternating fingers.</Text>
+            <Text style={styles.text}>Tap the top half of a player's card to add a point. Tap the bottom half subtract.</Text>
+            <Text style={styles.text}>Tip: To add or subtract faster, try tapping with two alternating fingers.</Text>
 
             <Button title="New Game" onPress={newGameHandler} />
 
             {players.map((player, index) => (
-                <View style={styles.playerContainer} key={index + player.name}>
-                    <Text>Player {index + 1}</Text>
+                <View style={styles.playerContainer} key={index}>
+                    <Text style={{ fontSize: 20, padding: 5 }}>Player {index + 1}</Text>
                     <TextInput
                         defaultValue={player.name}
                         style={styles.input}
                         maxLength={20}
                         onChangeText={(text) => setPlayerNameHandler(index, text)}
                     />
-                    <Button title="Delete" onPress={() => removePlayerHandler(index)}></Button>
+                    {index > 0 &&
+                        <Button title="Delete" onPress={() => removePlayerHandler(index)}></Button>
+                    }
                 </View>
             ))}
 
-            <Button title="Add Player" disabled={gameLock} onPress={addPlayerHandler} />
-
             {gameLock &&
-                <Text>Press "New Game" to change number of players.</Text>
+                <Text style={styles.text}>Press "New Game" to change number of players.</Text>
             }
+            <Button title="Add Player" disabled={gameLock} onPress={addPlayerHandler} />
 
         </ScrollView>
     </>);
 }
 
 const styles = StyleSheet.create({
+    text: {
+        textAlign: 'center',
+        fontSize: 20,
+        margin: 5,
+    },
     playerContainer: {
         margin: 10,
-        width: '50%',
-        justifyContent: 'center',
-        alignContent: 'center',
+        justifyContent: 'flex-start',
+        alignItems: 'center',
+        flexDirection: 'row',
     },
     input: {
         borderWidth: 1,
@@ -73,11 +83,11 @@ const styles = StyleSheet.create({
         fontSize: 25,
         padding: 5,
         paddingHorizontal: 10,
-        marginVertical: 20,
+        margin: 10,
+        width: 200,
     },
     configContainer: {
         flex: 1,
-        alignContent: 'center'
     },
 });
 
