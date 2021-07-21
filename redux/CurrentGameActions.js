@@ -2,6 +2,7 @@ export const INC_PLAYER_ROUND_SCORE = 'INC_PLAYER_ROUND_SCORE';
 export const DEC_PLAYER_ROUND_SCORE = 'DEC_PLAYER_ROUND_SCORE';
 export const NEXT_ROUND = 'NEXT_ROUND'
 export const PREV_ROUND = 'PREV_ROUND'
+export const SET_PLAYER_NAME = 'SET_PLAYER_NAME';
 
 export const incPlayerRoundScore = (index) => {
     return { type: INC_PLAYER_ROUND_SCORE, index: index, }
@@ -17,4 +18,8 @@ export const nextRound = (index, round) => {
 
 export const prevRound = (index, round) => {
     return { type: PREV_ROUND }
+}
+
+export const setPlayerName = (index, name) => {
+    return { type: SET_PLAYER_NAME, index: index, name: name }
 }

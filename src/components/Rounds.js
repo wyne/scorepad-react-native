@@ -1,8 +1,8 @@
 import React from 'react';
 import { Text, View, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
-import { useSelector, useDispatch } from 'react-redux';
 
-import { nextRound, prevRound } from '../../store/actions/ScoresActions';
+import { useSelector, useDispatch } from 'react-redux';
+import { nextRound, prevRound } from '../../redux/CurrentGameActions';
 
 import { Feather } from '@expo/vector-icons';
 import { EvilIcons } from '@expo/vector-icons';
@@ -18,8 +18,9 @@ function Rounds({ navigation }) {
         dispatch(prevRound());
     }
 
-    const players = useSelector(state => state.players);
-    const scores = useSelector(state => state.scores);
+    const players = useSelector(state => state.currentGame.players);
+    const scores = useSelector(state => state.currentGame.scores);
+    const currentRound = useSelector(state => state.currentGame.currentRound);
 
     return (
         <View style={{ flexDirection: 'row', backgroundColor: 'black' }}>
@@ -41,8 +42,8 @@ function Rounds({ navigation }) {
                 <Text style={{ color: 'white' }}>
                     &nbsp;
                 </Text>
-                {players.players.map((name, index) => (
-                    <Text key={index} style={{ color: 'white' }}>{name}</Text>
+                {players.map((player, index) => (
+                    <Text key={index} style={{ color: 'white' }}>{player.name}</Text>
                 ))}
             </View>
 
@@ -51,12 +52,12 @@ function Rounds({ navigation }) {
                 {scores[0].map((item, round) => (
                     <View key={round} style={{ padding: 10 }}>
                         <Text style={{
-                            color: scores.currentRound == round ? 'red' : 'white',
+                            color: currentRound == round ? 'red' : 'white',
                             fontWeight: 'bold',
                             opacity: .6,
                             textAlign: 'center',
                         }}>{round + 1}</Text>
-                        {players.players.map((player, playerIndex) => (
+                        {players.map((player, playerIndex) => (
                             <Text key={playerIndex} style={styles.scoreEntry}>
                                 {scores[playerIndex][round]}
                             </Text>

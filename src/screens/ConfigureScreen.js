@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { Text, View, ScrollView, StyleSheet, TextInput, Button, } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
-import { setPlayerName } from '../../store/actions/Players';
+import { setPlayerName } from '../../redux/CurrentGameActions';
 
 const ConfigureScreen = ({ navigation }) => {
     const [gameLock, setGameLock] = useState(true);
 
-    const players = useSelector(state => state.players);
+    const players = useSelector(state => state.currentGame.players);
 
     const dispatch = useDispatch();
     const setPlayerNameHandler = (index, name) => {
@@ -24,11 +24,11 @@ const ConfigureScreen = ({ navigation }) => {
                     setGameLock(false)
                 )} />
 
-            {players.players.map((name, index) => (
+            {players.map((player, index) => (
                 <View style={styles.playerContainer} key={index}>
                     <Text>Player {index + 1}</Text>
                     <TextInput
-                        defaultValue={name}
+                        defaultValue={player.name}
                         style={styles.input}
                         maxLength={20}
                         onChangeText={(text) => setPlayerNameHandler(index, text)}

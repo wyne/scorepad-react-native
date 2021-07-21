@@ -2,11 +2,12 @@ import React from 'react';
 import { Text, View, StyleSheet, TouchableOpacity } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { incPlayerRoundScore, decPlayerRoundScore } from '../../store/actions/ScoresActions';
+import { incPlayerRoundScore, decPlayerRoundScore } from '../../redux/CurrentGameActions';
 
 function PlayerScore({ playerIndex, color }) {
-    const scores = useSelector(state => state.scores);
-    const players = useSelector(state => state.players);
+    const scores = useSelector(state => state.currentGame.scores);
+    const players = useSelector(state => state.currentGame.players);
+    const currentRound = useSelector(state => state.currentGame.currentRound);
 
     const dispatch = useDispatch();
 
@@ -21,7 +22,7 @@ function PlayerScore({ playerIndex, color }) {
     return (
         <View style={{ flexGrow: 1, justifyContent: 'center', alignContent: 'stretch', backgroundColor: '#' + color }}>
             <Text style={[styles.name]}>
-                {players.players[playerIndex]}
+                {players[playerIndex].name}
             </Text>
             <View>
                 <Text style={styles.score}>{scores[playerIndex].reduce((a, b) => { return (a || 0) + (b || 0); })}</Text>
@@ -33,8 +34,8 @@ function PlayerScore({ playerIndex, color }) {
                     alignSelf: 'center',
                     opacity: 0.7,
                 }}>
-                    <Text style={[styles.score, styles.roundScore]}>{scores[playerIndex][scores.currentRound] || 0}</Text>
-                    <Text style={[styles.label, styles.roundLabel]}>Round {scores.currentRound + 1}</Text>
+                    <Text style={[styles.score, styles.roundScore]}>{scores[playerIndex][currentRound] || 0}</Text>
+                    <Text style={[styles.label, styles.roundLabel]}>Round {currentRound + 1}</Text>
                 </View>
             </View>
 
