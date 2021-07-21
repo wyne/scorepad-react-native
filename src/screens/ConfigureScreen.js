@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Text, View, ScrollView, StyleSheet, TextInput, Button, } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
-import { setPlayerName, newGame } from '../../redux/CurrentGameActions';
+import { setPlayerName, newGame, addPlayer } from '../../redux/CurrentGameActions';
 
 const ConfigureScreen = ({ navigation }) => {
     const [gameLock, setGameLock] = useState(true);
@@ -18,6 +18,12 @@ const ConfigureScreen = ({ navigation }) => {
         dispatch(newGame());
         setGameLock(false);
     }
+
+    const addPlayerHandler = () => {
+        console.log("Addplayer");
+        dispatch(addPlayer('Player'));
+    }
+
 
     return (<>
         <ScrollView style={styles.configContainer}>
@@ -40,13 +46,7 @@ const ConfigureScreen = ({ navigation }) => {
                 </View>
             ))}
 
-            <Button title="Add Player" disabled={gameLock}
-                onPress={() => (
-                    false
-                    // setPlayerNameHandler(players.length, 'Player')
-                    // SET NEW PLAYER SCORES HERE
-                )}
-            />
+            <Button title="Add Player" disabled={gameLock} onPress={addPlayerHandler} />
 
             {gameLock &&
                 <Text>Press "New Game" to change number of players.</Text>

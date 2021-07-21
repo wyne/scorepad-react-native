@@ -1,17 +1,17 @@
-import { INC_PLAYER_ROUND_SCORE, DEC_PLAYER_ROUND_SCORE, NEXT_ROUND, PREV_ROUND, SET_PLAYER_NAME, NEW_GAME } from "./CurrentGameActions"
+import { INC_PLAYER_ROUND_SCORE, DEC_PLAYER_ROUND_SCORE, NEXT_ROUND, PREV_ROUND, SET_PLAYER_NAME, NEW_GAME, ADD_PLAYER, REMOVE_PLAYER } from "./CurrentGameActions"
 
 const initialState = {
     players: [
-        { name: 'CG Player 1' },
-        { name: 'CG Player 2' },
-        { name: 'CG Player 3' },
-        { name: 'CG Player 4' },
+        { name: 'Player 1' },
+        { name: 'Player 2' },
+        { name: 'Player 3' },
+        { name: 'Player 4' },
     ],
     scores: {
-        0: [1],
-        1: [2],
-        2: [3],
-        3: [4],
+        0: [0],
+        1: [0],
+        2: [0],
+        3: [0],
     },
     currentRound: 0,
 }
@@ -64,6 +64,18 @@ const currentGameReducer = (state = initialState, action) => {
             let copy = [...state.players];
             copy[action.index] = { name: action.name };
             return { ...state, players: copy };
+
+        case ADD_PLAYER:
+            let apCopy = [...state.players].concat({ name: action.name });
+            console.log("apCopy", apCopy);
+            const apScores = { ...state.scores };
+            apScores[state.players.length] = [0];
+            return { ...state, players: apCopy, scores: apScores };
+
+        case REMOVE_PLAYER:
+            let rpCopy = [...state.players];
+            rpCopy.splice(index, 1)
+            return { ...state, players: rpCopy };
 
         case NEW_GAME:
             let newScores = {};
