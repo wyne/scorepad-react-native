@@ -56,8 +56,11 @@ const ConfigureScreen = ({ navigation }) => {
                 </View>
             ))}
 
-            <Button title="Add Player" disabled={gameLock} onPress={addPlayerHandler} />
-            {gameLock &&
+            <Button title="Add Player" disabled={gameLock || players.length >= 12} onPress={addPlayerHandler} />
+            {players.length >= 12 &&
+                <Text style={styles.text}>Max players reached.</Text>
+            }
+            {gameLock && players.length < 12 &&
                 <Text style={styles.text}>Press "New Game" to add players.</Text>
             }
 
