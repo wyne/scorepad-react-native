@@ -34,10 +34,12 @@ const ConfigureScreen = ({ navigation }) => {
     return (<>
         <ScrollView style={styles.configContainer}>
 
-            <Text style={styles.text}>Tap the top half of a player's card to add a point. Tap the bottom half subtract.</Text>
+            <Text style={styles.text}>Tap the top half of a player's card to add a point. Tap the bottom half to subtract.</Text>
             <Text style={styles.text}>Tip: To add or subtract faster, try tapping with two alternating fingers.</Text>
 
-            <Button title="New Game" onPress={newGameHandler} />
+            <View style={{ margin: 10 }}>
+                <Button title="New Game" onPress={newGameHandler} />
+            </View>
 
             {players.map((player, index) => (
                 <View style={styles.playerContainer} key={index}>
@@ -54,16 +56,23 @@ const ConfigureScreen = ({ navigation }) => {
                 </View>
             ))}
 
-            {gameLock &&
-                <Text style={styles.text}>Press "New Game" to change number of players.</Text>
-            }
             <Button title="Add Player" disabled={gameLock} onPress={addPlayerHandler} />
+            {gameLock &&
+                <Text style={styles.text}>Press "New Game" to add players.</Text>
+            }
+
+            <View style={{ margin: 70 }}><Text>&nbsp;</Text></View>
 
         </ScrollView>
     </>);
 }
 
 const styles = StyleSheet.create({
+    configContainer: {
+        flex: 1,
+        padding: 20,
+        paddingBottom: 50,
+    },
     text: {
         textAlign: 'center',
         fontSize: 20,
@@ -71,6 +80,7 @@ const styles = StyleSheet.create({
     },
     playerContainer: {
         margin: 10,
+        marginVertical: 5,
         justifyContent: 'flex-start',
         alignItems: 'center',
         flexDirection: 'row',
@@ -85,9 +95,6 @@ const styles = StyleSheet.create({
         paddingHorizontal: 10,
         margin: 10,
         width: 200,
-    },
-    configContainer: {
-        flex: 1,
     },
 });
 

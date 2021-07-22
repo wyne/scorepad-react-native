@@ -19,7 +19,12 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.wyne.keepscore",
-      "buildNumber": "0.0.1"
+      "buildNumber": "0.0.1",
+      "requirefullscreen": false,
+      "splash": {
+        "tabletImage": "./assets/splash-ipad.png",
+        "resizeMode": "cover"
+      }
     },
     "android": {
       "adaptiveIcon": {
