@@ -8,7 +8,7 @@
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "cover",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#000000"
     },
     "updates": {
       "fallbackToCacheTimeout": 0
@@ -20,7 +20,6 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.wyne.keepscore",
       "buildNumber": "0.0.1",
-      "requirefullscreen": false,
       "splash": {
         "tabletImage": "./assets/splash-ipad.png",
         "resizeMode": "cover"
