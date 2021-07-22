@@ -1,6 +1,7 @@
 import React from 'react';
 import { Text, View, StyleSheet, TouchableOpacity } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
+import { Dimensions } from 'react-native';
 
 import { incPlayerRoundScore, decPlayerRoundScore } from '../../redux/CurrentGameActions';
 
@@ -24,12 +25,19 @@ function PlayerScore({ playerIndex, color }) {
             styles.playerCard,
             { backgroundColor: '#' + color },
         ]}>
-            <Text style={[
-                styles.name,
-                { fontSize: players.length > 4 ? 30 : 50 }
-            ]}>
-                {players[playerIndex].name}
-            </Text>
+
+            <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+                <Text style={[
+                    styles.name,
+                    { fontSize: players.length > 4 ? 30 : 50 },
+                    { maxWidth: players.length > 4 ? Dimensions.get('window').width / 4 : Dimensions.get('window').width / 3 },
+                ]}
+                    adjustsFontSizeToFit={true}
+                    numberOfLines={1}
+                >
+                    {players[playerIndex].name}
+                </Text>
+            </View>
             <View>
                 <Text style={[
                     styles.score,
@@ -66,10 +74,10 @@ function PlayerScore({ playerIndex, color }) {
 
 const styles = StyleSheet.create({
     playerCard: {
-        padding: 5,
+        padding: 10,
         flexGrow: 1,
         justifyContent: 'center',
-        alignContent: 'stretch',
+        alignItems: 'center',
     },
     surface: {
         position: 'absolute',
@@ -89,6 +97,8 @@ const styles = StyleSheet.create({
         fontSize: 50,
         fontWeight: 'bold',
         textAlign: 'center',
+        justifyContent: 'center',
+        alignSelf: 'center',
     },
     score: {
         margin: 2,
@@ -99,7 +109,7 @@ const styles = StyleSheet.create({
         fontVariant: ['tabular-nums'],
     },
     roundScore: {
-        opacity: .7,
+        opacity: .8,
         fontSize: 40,
         margin: 0,
         marginTop: 0,
