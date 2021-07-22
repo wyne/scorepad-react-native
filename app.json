@@ -31,7 +31,8 @@
         "backgroundColor": "#FFFFFF"
       },
       "package": "com.wyne.keepscore",
-      "versionCode": 1
+      "versionCode": 1,
+      "permissions": []
     },
     "web": {
       "favicon": "./assets/favicon.png"
