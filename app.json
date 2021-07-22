@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "KeepScore",
-    "slug": "keepscore",
+    "name": "ScorePad with Rounds",
+    "slug": "scorepad",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -18,7 +18,7 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.wyne.keepscore",
+      "bundleIdentifier": "com.wyne.scorepad",
       "buildNumber": "0.0.1",
       "splash": {
         "tabletImage": "./assets/splash-ipad.png",
@@ -28,10 +28,10 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#FFFFFF"
+        "backgroundColor": "#000000"
       },
-      "package": "com.wyne.keepscore",
-      "versionCode": 1,
+      "package": "com.wyne.scorepad",
+      "versionCode": 3,
       "permissions": []
     },
     "web": {
