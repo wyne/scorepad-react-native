@@ -5,11 +5,6 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "splash": {
-      "image": "./assets/adaptive-splash.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#000000"
-    },
     "updates": {
       "fallbackToCacheTimeout": 0
     },
@@ -20,10 +15,6 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.wyne.scorepad",
       "buildNumber": "0.0.1",
-      "splash": {
-        "tabletImage": "./assets/adaptive-splash.png",
-        "resizeMode": "contain"
-      }
     },
     "android": {
       "adaptiveIcon": {
@@ -31,7 +22,7 @@
         "backgroundColor": "#7d9cd4"
       },
       "package": "com.wyne.scorepad",
-      "versionCode": 4,
+      "versionCode": 5,
       "permissions": []
     },
     "web": {
