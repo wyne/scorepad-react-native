@@ -6,32 +6,32 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "splash": {
-      "image": "./assets/splash.png",
-      "resizeMode": "cover",
+      "image": "./assets/adaptive-splash.png",
+      "resizeMode": "contain",
       "backgroundColor": "#000000"
     },
     "updates": {
       "fallbackToCacheTimeout": 0
     },
     "assetBundlePatterns": [
-      "**/*"
+      "assets/*"
     ],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.wyne.scorepad",
       "buildNumber": "0.0.1",
       "splash": {
-        "tabletImage": "./assets/splash-ipad.png",
-        "resizeMode": "cover"
+        "tabletImage": "./assets/adaptive-splash.png",
+        "resizeMode": "contain"
       }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#000000"
+        "backgroundColor": "#7d9cd4"
       },
       "package": "com.wyne.scorepad",
-      "versionCode": 3,
+      "versionCode": 4,
       "permissions": []
     },
     "web": {
