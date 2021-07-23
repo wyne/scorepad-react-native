@@ -24,6 +24,7 @@ function PlayerScore({ playerIndex, color }) {
         <View style={[
             styles.playerCard,
             { backgroundColor: '#' + color },
+            { maxWidth: Math.ceil(Dimensions.get('window').width / Math.ceil(players.length / 3)) + 20 },
         ]}>
 
             <View style={{ justifyContent: 'center', alignItems: 'center' }}>
