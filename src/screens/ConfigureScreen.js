@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Platform, Text, View, ScrollView, StyleSheet, TextInput, Button, } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import { setPlayerName, newGame, addPlayer, removePlayer } from '../../redux/CurrentGameActions';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 const ConfigureScreen = ({ navigation }) => {
     const [gameLock, setGameLock] = useState(true);
@@ -32,7 +33,7 @@ const ConfigureScreen = ({ navigation }) => {
     }
 
     return (<>
-        <ScrollView style={styles.configContainer}>
+        <KeyboardAwareScrollView style={styles.configContainer}>
 
             <Text style={styles.text}>Tap the top half of a player's card to add a point. Tap the bottom half to subtract.</Text>
             <Text style={styles.text}>Tip: To add or subtract faster, try tapping with two alternating fingers.</Text>
@@ -41,9 +42,10 @@ const ConfigureScreen = ({ navigation }) => {
                 <Button title="New Game" onPress={newGameHandler} />
             </View>
 
+            <Text style={{ fontSize: 20, textAlign: 'center' }}>Players</Text>
             {players.map((player, index) => (
                 <View style={styles.playerContainer} key={index}>
-                    <Text style={{ fontSize: 20, padding: 5 }}>Player {index + 1}</Text>
+                    <Text style={{ fontSize: 20, padding: 5 }}>{index + 1}</Text>
                     <TextInput
                         defaultValue={player.name}
                         style={styles.input}
@@ -56,7 +58,12 @@ const ConfigureScreen = ({ navigation }) => {
                 </View>
             ))}
 
-            <Button title="Add Player" disabled={gameLock || players.length >= 12} onPress={addPlayerHandler} />
+            <View style={{ margin: 10 }}>
+                <Button title="Add Player"
+                    disabled={gameLock || players.length >= 12}
+                    onPress={addPlayerHandler} />
+            </View>
+
             {players.length >= 12 &&
                 <Text style={styles.text}>Max players reached.</Text>
             }
@@ -66,7 +73,7 @@ const ConfigureScreen = ({ navigation }) => {
 
             <View style={{ margin: 70 }}><Text>&nbsp;</Text></View>
 
-        </ScrollView>
+        </KeyboardAwareScrollView>
     </>);
 }
 
@@ -75,6 +82,7 @@ const styles = StyleSheet.create({
         flex: 1,
         padding: 20,
         paddingBottom: 50,
+        backgroundColor: 'white',
     },
     text: {
         textAlign: 'center',
@@ -89,15 +97,15 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
     },
     input: {
+        flex: 1,
         borderWidth: 1,
         borderColor: 'black',
         backgroundColor: 'white',
         borderRadius: 5,
-        fontSize: 25,
+        fontSize: 20,
         padding: 5,
         paddingHorizontal: 10,
-        margin: 10,
-        width: 200,
+        margin: 5,
     },
 });
 
