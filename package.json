@@ -30,6 +30,6 @@
     "@babel/core": "^7.9.0",
     "gh-pages": "^3.2.3"
   },
-  "homepage": "/keepscore-app",
+  "homepage": "/scorepad-app",
   "private": true
 }
