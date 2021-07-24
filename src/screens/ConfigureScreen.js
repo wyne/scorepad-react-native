@@ -5,8 +5,6 @@ import { setPlayerName, newGame, addPlayer, removePlayer } from '../../redux/Cur
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 const ConfigureScreen = ({ navigation }) => {
-    const [gameLock, setGameLock] = useState(true);
-
     const players = useSelector(state => state.currentGame.players);
 
     const dispatch = useDispatch();
@@ -17,11 +15,10 @@ const ConfigureScreen = ({ navigation }) => {
 
     const newGameHandler = () => {
         dispatch(newGame());
-        setGameLock(false);
     }
 
     const addPlayerHandler = () => {
-        dispatch(addPlayer('Player'));
+        dispatch(addPlayer('Player ' + (players.length + 1)));
     }
 
     const removePlayerHandler = (index) => {
@@ -42,7 +39,6 @@ const ConfigureScreen = ({ navigation }) => {
                 <Button title="New Game" onPress={newGameHandler} />
             </View>
 
-            <Text style={{ fontSize: 20, textAlign: 'center' }}>Players</Text>
             {players.map((player, index) => (
                 <View style={styles.playerContainer} key={player.uuid}>
                     <Text style={{ fontSize: 20, padding: 5 }}>{index + 1}</Text>
@@ -60,15 +56,12 @@ const ConfigureScreen = ({ navigation }) => {
 
             <View style={{ margin: 10 }}>
                 <Button title="Add Player"
-                    disabled={gameLock || players.length >= 12}
+                    disabled={players.length >= 12}
                     onPress={addPlayerHandler} />
             </View>
 
             {players.length >= 12 &&
                 <Text style={styles.text}>Max players reached.</Text>
-            }
-            {gameLock && players.length < 12 &&
-                <Text style={styles.text}>Press "New Game" to add players.</Text>
             }
 
             <View style={{ margin: 70 }}><Text>&nbsp;</Text></View>

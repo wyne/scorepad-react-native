@@ -1,3 +1,4 @@
+import { v4 as uuidv4 } from 'uuid';
 import { INC_PLAYER_ROUND_SCORE, DEC_PLAYER_ROUND_SCORE, NEXT_ROUND, PREV_ROUND, SET_PLAYER_NAME, NEW_GAME, ADD_PLAYER, REMOVE_PLAYER } from "./CurrentGameActions"
 
 const initialState = {
@@ -70,6 +71,9 @@ const currentGameReducer = (state = initialState, action) => {
                 name: action.name,
                 uuid: uuidv4()
             });
+            const apScores = [...state.scores].concat([
+                Array(state.scores[0].length).fill(0)
+            ]);
             return { ...state, players: apPlayers, scores: apScores };
 
         case REMOVE_PLAYER:
@@ -77,6 +81,7 @@ const currentGameReducer = (state = initialState, action) => {
             rpCopy.splice(action.index, 1)
 
             const rpScores = [...state.scores];
+            rpScores.splice(action.index, 1)
             return { ...state, players: rpCopy, scores: rpScores };
 
         case NEW_GAME:
