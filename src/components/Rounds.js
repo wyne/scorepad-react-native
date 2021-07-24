@@ -58,7 +58,11 @@ function Rounds({ navigation }) {
                             textAlign: 'center',
                         }}>{round + 1}</Text>
                         {players.map((player, playerIndex) => (
-                            <Text key={playerIndex} style={styles.scoreEntry}>
+                            <Text key={playerIndex} style={[
+                                styles.scoreEntry,
+                                { color: scores[playerIndex][round] == 0 ? '#555' : 'white' }
+                            ]
+                            }>
                                 {scores[playerIndex][round]}
                             </Text>
                         ))}

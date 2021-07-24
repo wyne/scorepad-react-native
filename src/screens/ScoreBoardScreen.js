@@ -12,9 +12,16 @@ export default function ScoreBoardScreen({ navigation }) {
 
     const players = useSelector(state => state.currentGame.players);
 
+    const measureView = (e) => {
+        // console.log(e.nativeEvent.layout.height);
+        // set in redux, don't whitelist it
+    }
+
     return (
         <View style={styles.appContainer}>
-            <View style={styles.contentStyle}>
+            <View style={styles.contentStyle}
+                onLayout={(event) => measureView(event)}
+            >
                 {players.map((name, index) => (
                     <PlayerScore
                         key={index}
@@ -47,6 +54,7 @@ const styles = StyleSheet.create({
         flexWrap: 'wrap',
         alignContent: 'stretch',
         flexDirection: 'column',
+        maxWidth: '100%',
     },
     footerStyle: {
         flex: 1,

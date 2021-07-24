@@ -20,18 +20,31 @@ function PlayerScore({ playerIndex, color }) {
         dispatch(decPlayerRoundScore(playerIndex));
     }
 
+    let cardHeights = null;
+    const measureView = (e) => {
+        // cardHeights = e.nativeEvent.layout.height;
+        // console.log("card height", cardHeights);
+    }
+
     return (
         <View style={[
             styles.playerCard,
             { backgroundColor: '#' + color },
-            { maxWidth: Math.ceil(Dimensions.get('window').width / Math.ceil(players.length / 3)) + 20 },
-        ]}>
+            // { maxWidth: Math.ceil(Dimensions.get('window').width / Math.ceil(players.length / 3)) + 20 },
+            // { maxWidth: '25%' }
+            // { flexBasis: '50%' }
+            // rows = (content height + 1) / cardHeights
+            // 100 / (ceil(count / rows)
+        ]}
+            onLayout={(playerIndex <= 1) ? (event) => measureView(event) : false}
+        >
 
             <View style={{ justifyContent: 'center', alignItems: 'center' }}>
                 <Text style={[
                     styles.name,
                     { fontSize: players.length > 4 ? 30 : 50 },
-                    { maxWidth: players.length > 4 ? Dimensions.get('window').width / 4 : Dimensions.get('window').width / 3 },
+                    // { maxWidth: players.length > 4 ? Dimensions.get('window').width / 4 : Dimensions.get('window').width / 3 },
+                    // { minHeight: players.length > 4 ? '25%' : Dimensions.get('window').width / 3 },
                 ]}
                     adjustsFontSizeToFit={true}
                     numberOfLines={1}
@@ -43,9 +56,9 @@ function PlayerScore({ playerIndex, color }) {
                 <Text style={[
                     styles.score,
                     { fontSize: players.length > 4 ? 50 : 90 }
-                ]}>{
-                        scores[playerIndex].reduce((a, b) => { return (a || 0) + (b || 0); })
-                    }</Text>
+                ]}>
+                    {scores[playerIndex].reduce((a, b) => { return (a || 0) + (b || 0); })}
+                </Text>
                 <View style={{
                     padding: 5,
                     borderRadius: 5,
