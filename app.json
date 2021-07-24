@@ -3,7 +3,7 @@
     "name": "ScorePad with Rounds",
     "slug": "scorepad",
     "version": "1.0.3",
-    "orientation": "portrait",
+    "orientation": "default",
     "icon": "./assets/icon.png",
     "updates": {
       "fallbackToCacheTimeout": 0
@@ -12,9 +12,10 @@
       "assets/*"
     ],
     "ios": {
-      "supportsTablet": true,
       "bundleIdentifier": "com.wyne.scorepad",
       "buildNumber": "0.0.3",
+      "supportsTablet": true,
+      "requireFullScreen": false,
       "infoPlist": {
         "UISupportedInterfaceOrientations~iphone": [
           "UIInterfaceOrientationPortrait"
