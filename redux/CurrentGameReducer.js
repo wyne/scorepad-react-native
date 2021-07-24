@@ -1,16 +1,19 @@
 import { v4 as uuidv4 } from 'uuid';
-import { INC_PLAYER_ROUND_SCORE, DEC_PLAYER_ROUND_SCORE, NEXT_ROUND, PREV_ROUND, SET_PLAYER_NAME, NEW_GAME, ADD_PLAYER, REMOVE_PLAYER } from "./CurrentGameActions"
+import {
+    INC_PLAYER_ROUND_SCORE,
+    DEC_PLAYER_ROUND_SCORE,
+    NEXT_ROUND, PREV_ROUND,
+    SET_PLAYER_NAME, NEW_GAME,
+    ADD_PLAYER,
+    REMOVE_PLAYER
+} from "./CurrentGameActions"
 
 const initialState = {
     players: [
         { name: 'Player 1', uuid: uuidv4() },
         { name: 'Player 2', uuid: uuidv4() },
-        { name: 'Player 3', uuid: uuidv4() },
-        { name: 'Player 4', uuid: uuidv4() },
     ],
     scores: [
-        [0],
-        [0],
         [0],
         [0],
     ],
