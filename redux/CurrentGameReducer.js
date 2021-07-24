@@ -2,10 +2,10 @@ import { INC_PLAYER_ROUND_SCORE, DEC_PLAYER_ROUND_SCORE, NEXT_ROUND, PREV_ROUND,
 
 const initialState = {
     players: [
-        { name: 'Player 1' },
-        { name: 'Player 2' },
-        { name: 'Player 3' },
-        { name: 'Player 4' },
+        { name: 'Player 1', uuid: uuidv4() },
+        { name: 'Player 2', uuid: uuidv4() },
+        { name: 'Player 3', uuid: uuidv4() },
+        { name: 'Player 4', uuid: uuidv4() },
     ],
     scores: [
         [0],
@@ -62,12 +62,14 @@ const currentGameReducer = (state = initialState, action) => {
 
         case SET_PLAYER_NAME:
             let copy = [...state.players];
-            copy[action.index] = { name: action.name };
+            copy[action.index] = { ...copy[action.index], name: action.name };
             return { ...state, players: copy };
 
         case ADD_PLAYER:
-            let apPlayers = [...state.players].concat({ name: action.name });
-            const apScores = [...state.scores].concat([[0]]);
+            let apPlayers = [...state.players].concat({
+                name: action.name,
+                uuid: uuidv4()
+            });
             return { ...state, players: apPlayers, scores: apScores };
 
         case REMOVE_PLAYER:
