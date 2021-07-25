@@ -6,7 +6,11 @@ import { useDispatch, useSelector } from 'react-redux';
 
 export default function ScoreBoardScreen({ navigation }) {
     // https://coolors.co/7d9cd4-de8383-a4d4a7-c188d1-8787d4-a1b8e3-d67187
-    const palette = ["7d9cd4", "de8383", "a4d4a7", "c188d1", "8787d4", "a1b8e3", "d67187"]
+    // const palette = ["7d9cd4", "de8383", "a4d4a7", "c188d1", "8787d4", "a1b8e3", "d67187"]
+    const palette = ["01497c", "c25858", "f5c800", "275436"]
+    const fontPalette = ["FFFFFF", "FFFFFF", "000000", "FFFFFF"]
+
+
     // https://coolors.co/f4f1de-e07a5f-8f5d5d-3d405b-5f797b-81b29a-babf95-f2cc8f
     // const palette = ["e07a5f", "8f5d5d", "3d405b", "5f797b", "81b29a", "babf95", "f2cc8f"]
 
@@ -27,6 +31,7 @@ export default function ScoreBoardScreen({ navigation }) {
                         key={index}
                         playerIndex={index}
                         color={palette[index % palette.length]}
+                        fontColor={fontPalette[index % palette.length]}
                     />
                 ))}
             </View>

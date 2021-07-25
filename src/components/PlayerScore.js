@@ -5,7 +5,7 @@ import { Dimensions } from 'react-native';
 
 import { incPlayerRoundScore, decPlayerRoundScore } from '../../redux/CurrentGameActions';
 
-function PlayerScore({ playerIndex, color }) {
+function PlayerScore({ playerIndex, color, fontColor }) {
     const scores = useSelector(state => state.currentGame.scores);
     const players = useSelector(state => state.currentGame.players);
     const currentRound = useSelector(state => state.currentGame.currentRound);
@@ -42,7 +42,10 @@ function PlayerScore({ playerIndex, color }) {
             <View style={{ justifyContent: 'center', alignItems: 'center' }}>
                 <Text style={[
                     styles.name,
-                    { fontSize: players.length > 4 ? 30 : 50 },
+                    {
+                        fontSize: players.length > 4 ? 30 : 50,
+                        color: '#' + fontColor
+                    },
                     // { maxWidth: players.length > 4 ? Dimensions.get('window').width / 4 : Dimensions.get('window').width / 3 },
                     // { minHeight: players.length > 4 ? '25%' : Dimensions.get('window').width / 3 },
                 ]}
@@ -55,7 +58,10 @@ function PlayerScore({ playerIndex, color }) {
             <View>
                 <Text style={[
                     styles.score,
-                    { fontSize: players.length > 4 ? 50 : 90 }
+                    {
+                        fontSize: players.length > 4 ? 50 : 90,
+                        color: '#' + fontColor
+                    }
                 ]}>
                     {scores[playerIndex].reduce((a, b) => { return (a || 0) + (b || 0); })}
                 </Text>
@@ -63,16 +69,24 @@ function PlayerScore({ playerIndex, color }) {
                     padding: 5,
                     borderRadius: 5,
                     borderWidth: 2,
-                    borderColor: 'white',
+                    borderColor: '#' + fontColor,
                     alignSelf: 'center',
-                    opacity: 0.7,
                 }}>
                     <Text style={[
                         styles.score,
                         styles.roundScore,
-                        { fontSize: players.length > 4 ? 30 : 40 }
+                        {
+                            fontSize: players.length > 4 ? 30 : 40,
+                            color: '#' + fontColor
+                        }
                     ]}>{scores[playerIndex][currentRound] || 0}</Text>
-                    <Text style={[styles.label, styles.roundLabel]}>Round {currentRound + 1}</Text>
+                    <Text style={[
+                        styles.label,
+                        styles.roundLabel],
+                        { color: '#' + fontColor }
+                    }>
+                        Round {currentRound + 1}
+                    </Text>
                 </View>
             </View>
 
@@ -123,7 +137,6 @@ const styles = StyleSheet.create({
         fontVariant: ['tabular-nums'],
     },
     roundScore: {
-        opacity: .8,
         fontSize: 40,
         margin: 0,
         marginTop: 0,
@@ -134,7 +147,6 @@ const styles = StyleSheet.create({
         color: 'white',
     },
     roundLabel: {
-        opacity: .7,
         fontVariant: ['tabular-nums'],
     },
 });

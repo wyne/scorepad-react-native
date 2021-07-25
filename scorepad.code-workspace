@@ -1,0 +1,14 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../scorepad-landing"
+		},
+		{
+			"path": "../scorepad-app"
+		}
+	],
+	"settings": {}
+}
