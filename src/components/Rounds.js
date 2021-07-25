@@ -23,7 +23,7 @@ function Rounds({ navigation }) {
     const currentRound = useSelector(state => state.currentGame.currentRound);
 
     return (
-        <View style={{ flexDirection: 'row', backgroundColor: 'black' }}>
+        <View style={{ flexDirection: 'row', backgroundColor: 'black', paddingBottom: 10 }}>
 
             <TouchableOpacity
                 style={{ justifyContent: 'center' }}
@@ -52,9 +52,8 @@ function Rounds({ navigation }) {
                 {scores[0].map((item, round) => (
                     <View key={round} style={{ padding: 10 }}>
                         <Text style={{
-                            color: currentRound == round ? 'red' : 'white',
+                            color: currentRound == round ? 'red' : 'yellow',
                             fontWeight: 'bold',
-                            opacity: .6,
                             textAlign: 'center',
                         }}>{round + 1}</Text>
                         {players.map((player, playerIndex) => (
