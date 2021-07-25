@@ -15,18 +15,7 @@
       "bundleIdentifier": "com.wyne.scorepad",
       "buildNumber": "8",
       "supportsTablet": true,
-      "requireFullScreen": false,
-      "infoPlist": {
-        "UISupportedInterfaceOrientations~iphone": [
-          "UIInterfaceOrientationPortrait"
-        ],
-        "UISupportedInterfaceOrientations~ipad": [
-          "UIInterfaceOrientationLandscapeRight",
-          "UIInterfaceOrientationLandscapeLeft",
-          "UIInterfaceOrientationPortrait",
-          "UIInterfaceOrientationPortraitUpsideDown"
-        ]
-      }
+      "requireFullScreen": false
     },
     "android": {
       "adaptiveIcon": {
