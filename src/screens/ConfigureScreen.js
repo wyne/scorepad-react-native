@@ -5,8 +5,9 @@ import { setPlayerName, newGame, addPlayer, removePlayer } from '../../redux/Cur
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 const ConfigureScreen = ({ navigation }) => {
-    const players = useSelector(state => state.currentGame.players);
+    const [isNewGame, setIsNewGame] = useState(false)
 
+    const players = useSelector(state => state.currentGame.players);
     const dispatch = useDispatch();
 
     const setPlayerNameHandler = (index, name) => {
@@ -15,6 +16,7 @@ const ConfigureScreen = ({ navigation }) => {
 
     const newGameHandler = () => {
         dispatch(newGame());
+        setIsNewGame(true);
     }
 
     const addPlayerHandler = () => {
@@ -25,11 +27,7 @@ const ConfigureScreen = ({ navigation }) => {
         dispatch(removePlayer(index));
     }
 
-    const saveHandler = () => {
-        dispatch(removePlayer(index));
-    }
-
-    return (<>
+    return (
         <KeyboardAwareScrollView style={styles.configContainer}>
 
             <Text style={styles.text}>Tap the top half of a player's card to add a point. Tap the bottom half to subtract.</Text>
@@ -37,6 +35,9 @@ const ConfigureScreen = ({ navigation }) => {
 
             <View style={{ margin: 10 }}>
                 <Button title="New Game" onPress={newGameHandler} />
+                {isNewGame &&
+                    <Text style={{ textAlign: 'center' }}>Scores have been reset!</Text>
+                }
             </View>
 
             {players.map((player, index) => (
@@ -60,14 +61,14 @@ const ConfigureScreen = ({ navigation }) => {
                     onPress={addPlayerHandler} />
             </View>
 
-            {players.length >= 12 &&
+            {players.length >= 9 &&
                 <Text style={styles.text}>Max players reached.</Text>
             }
 
             <View style={{ margin: 70 }}><Text>&nbsp;</Text></View>
 
         </KeyboardAwareScrollView>
-    </>);
+    );
 }
 
 const styles = StyleSheet.create({
