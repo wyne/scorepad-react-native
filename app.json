@@ -18,9 +18,10 @@
       "requireFullScreen": false
     },
     "android": {
+      "icon": "./assets/adaptive-icon.png",
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#000000"
+        "foregroundImage": "./assets/adaptive-icon-fg.png",
+        "backgroundImage": "./assets/adaptive-icon-bg.png"
       },
       "package": "com.wyne.scorepad",
       "versionCode": 9,
