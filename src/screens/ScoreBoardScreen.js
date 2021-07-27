@@ -19,7 +19,6 @@ export default function ScoreBoardScreen({ navigation }) {
             const columns = [...new Set(lefts)].length
             setCols(columns);
             setRows(Math.ceil(players.length / columns));
-        } else {
         }
     }
     useEffect(() => {

@@ -79,10 +79,10 @@ const PlayerScore = ({ playerIndex, color, fontColor, cols, rows, parentFn }) =>
 
     const measureView = (e) => {
         dispatch(setCardData(playerIndex, e.nativeEvent.layout));
-        parentFn();
+        if (playerIndex == players.length - 1) {
+            parentFn();
+        }
     }
-
-    console.log("rows", rows)
 
     return (
         <View style={[
