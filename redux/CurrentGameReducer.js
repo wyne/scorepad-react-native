@@ -67,7 +67,7 @@ const currentGameReducer = (state = initialState, action) => {
 
         case SET_PLAYER_NAME:
             let copy = [...state.players];
-            copy[action.index] = { ...copy[action.index], name: action.name };
+            copy[action.index] = { ...copy[action.index], name: action.name, };
             return { ...state, players: copy };
 
         case ADD_PLAYER:

@@ -5,26 +5,34 @@ import Rounds from '../components/Rounds';
 import { useDispatch, useSelector } from 'react-redux';
 
 export default function ScoreBoardScreen({ navigation }) {
-    const [cols, setCols] = useState(1);
+    const [cols, setCols] = useState(0);
     const palette = ["01497c", "c25858", "f5c800", "275436"]
     const fontPalette = ["FFFFFF", "FFFFFF", "000000", "FFFFFF"]
 
     const players = useSelector(state => state.currentGame.players);
     const cardDatas = useSelector(state => state.currentGame.cards);
 
-    useEffect(() => {
-        if (Object.keys(cardDatas || {}).length == players.length) {
-            const columns = [...new Set(players.map((name, index) => { return (cardDatas[index] || {}).left }))].length
-            console.log("columns:", columns);
+    const resize = () => {
+        if (Object.keys(cardDatas || {}).length >= players.length) {
+            const lefts = players.map((name, index) => { return (cardDatas[index] || {}).x })
+            console.log("lefts", lefts)
+            const columns = [...new Set(lefts)].length
             setCols(columns);
         }
-    }, [cardDatas])
+    }
+    useEffect(() => {
+        resize()
+    }, [cardDatas, setCols])
 
-    const [childrenData, setChildrenData] = useState({ a: 'test' });
+    const onLayout = () => {
+        resize()
+    }
 
     return (
         <View style={styles.appContainer}>
-            <View style={styles.contentStyle}
+            <View
+                style={styles.contentStyle}
+                onLayout={onLayout}
             >
                 {players.map((name, index) => (
                     <PlayerScore

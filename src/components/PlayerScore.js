@@ -78,6 +78,7 @@ const PlayerScore = ({ playerIndex, color, fontColor, cols }) => {
     }
 
     const measureView = (e) => {
+        // console.log(e.nativeEvent);
         dispatch(setCardData(playerIndex, e.nativeEvent.layout));
     }
 
@@ -85,7 +86,7 @@ const PlayerScore = ({ playerIndex, color, fontColor, cols }) => {
         <View style={[
             styles.playerCard,
             { backgroundColor: '#' + color },
-            { width: (100 / cols) + '%' },
+            { width: cols === undefined ? 'auto' : (100 / cols) + '%' },
         ]}
             onLayout={(event) => measureView(event)}
         >
