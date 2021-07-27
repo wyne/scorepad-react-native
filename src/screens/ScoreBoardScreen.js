@@ -6,6 +6,7 @@ import { useDispatch, useSelector } from 'react-redux';
 
 export default function ScoreBoardScreen({ navigation }) {
     const [cols, setCols] = useState(0);
+    const [rows, setRows] = useState(0);
     const palette = ["01497c", "c25858", "f5c800", "275436"]
     const fontPalette = ["FFFFFF", "FFFFFF", "000000", "FFFFFF"]
 
@@ -15,24 +16,19 @@ export default function ScoreBoardScreen({ navigation }) {
     const resize = () => {
         if (Object.keys(cardDatas || {}).length >= players.length) {
             const lefts = players.map((name, index) => { return (cardDatas[index] || {}).x })
-            console.log("lefts", lefts)
             const columns = [...new Set(lefts)].length
             setCols(columns);
+            setRows(Math.ceil(players.length / columns));
         } else {
-            console.log("NOPE")
         }
     }
     useEffect(() => {
-        console.log("effect")
         resize()
     }, [players])
 
     const onLayout = () => {
-        console.log("layout")
         resize()
     }
-
-    console.log("columns", cols)
 
     return (
         <View style={styles.appContainer}>
@@ -47,6 +43,7 @@ export default function ScoreBoardScreen({ navigation }) {
                         color={palette[index % palette.length]}
                         fontColor={fontPalette[index % palette.length]}
                         cols={cols}
+                        rows={rows}
                         parentFn={onLayout}
                     />
                 ))}
@@ -61,8 +58,6 @@ export default function ScoreBoardScreen({ navigation }) {
 
 const styles = StyleSheet.create({
     appContainer: {
-        // paddingTop: Constants.statusBarHeight,
-        // height: Platform.OS === 'web' ? '100vh' : '100%',
         top: 0,
         left: 0,
         right: 0,

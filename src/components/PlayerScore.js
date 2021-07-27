@@ -64,7 +64,7 @@ const TotalScore = ({ fontColor, playerIndex }) => {
     );
 }
 
-const PlayerScore = ({ playerIndex, color, fontColor, cols, parentFn }) => {
+const PlayerScore = ({ playerIndex, color, fontColor, cols, rows, parentFn }) => {
     const players = useSelector(state => state.currentGame.players);
 
     const dispatch = useDispatch();
@@ -79,9 +79,10 @@ const PlayerScore = ({ playerIndex, color, fontColor, cols, parentFn }) => {
 
     const measureView = (e) => {
         dispatch(setCardData(playerIndex, e.nativeEvent.layout));
-        console.log("playerIndex", playerIndex, e.nativeEvent.layout.x);
         parentFn();
     }
+
+    console.log("rows", rows)
 
     return (
         <View style={[
@@ -89,6 +90,7 @@ const PlayerScore = ({ playerIndex, color, fontColor, cols, parentFn }) => {
             { backgroundColor: '#' + color },
             { overflow: 'hidden' },
             { width: cols === undefined ? 'auto' : (100 / cols) + '%' },
+            { minHeight: rows == 0 ? 'auto' : (100 / 3) + '%' },
         ]}
             onLayout={(event) => measureView(event)}
         >
@@ -101,8 +103,6 @@ const PlayerScore = ({ playerIndex, color, fontColor, cols, parentFn }) => {
                             fontSize: players.length > 4 ? 30 : 50,
                             color: '#' + fontColor
                         },
-                        // { maxWidth: players.length > 4 ? Dimensions.get('window').width / 4 : Dimensions.get('window').width / 3 },
-                        // { minHeight: players.length > 4 ? '25%' : Dimensions.get('window').width / 3 },
                     ]}
                         adjustsFontSizeToFit={true}
                         numberOfLines={1}
