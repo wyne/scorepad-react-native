@@ -57,11 +57,11 @@ const ConfigureScreen = ({ navigation }) => {
 
             <View style={{ margin: 10 }}>
                 <Button title="Add Player"
-                    disabled={players.length >= 12}
+                    disabled={players.length >= 8}
                     onPress={addPlayerHandler} />
             </View>
 
-            {players.length >= 9 &&
+            {players.length >= 8 &&
                 <Text style={styles.text}>Max players reached.</Text>
             }
 
