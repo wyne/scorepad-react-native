@@ -1,30 +1,30 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Text, View, StyleSheet, } from 'react-native';
 import PlayerScore from '../components/PlayerScore'
 import Rounds from '../components/Rounds';
 import { useDispatch, useSelector } from 'react-redux';
 
 export default function ScoreBoardScreen({ navigation }) {
-    // https://coolors.co/7d9cd4-de8383-a4d4a7-c188d1-8787d4-a1b8e3-d67187
-    // const palette = ["7d9cd4", "de8383", "a4d4a7", "c188d1", "8787d4", "a1b8e3", "d67187"]
+    const [cols, setCols] = useState(1);
     const palette = ["01497c", "c25858", "f5c800", "275436"]
     const fontPalette = ["FFFFFF", "FFFFFF", "000000", "FFFFFF"]
 
-
-    // https://coolors.co/f4f1de-e07a5f-8f5d5d-3d405b-5f797b-81b29a-babf95-f2cc8f
-    // const palette = ["e07a5f", "8f5d5d", "3d405b", "5f797b", "81b29a", "babf95", "f2cc8f"]
-
     const players = useSelector(state => state.currentGame.players);
+    const cardDatas = useSelector(state => state.currentGame.cards);
 
-    const measureView = (e) => {
-        // console.log(e.nativeEvent.layout.height);
-        // set in redux, don't whitelist it
-    }
+    useEffect(() => {
+        if (Object.keys(cardDatas || {}).length == players.length) {
+            const columns = [...new Set(players.map((name, index) => { return (cardDatas[index] || {}).left }))].length
+            console.log("columns:", columns);
+            setCols(columns);
+        }
+    }, [cardDatas])
+
+    const [childrenData, setChildrenData] = useState({ a: 'test' });
 
     return (
         <View style={styles.appContainer}>
             <View style={styles.contentStyle}
-                onLayout={(event) => measureView(event)}
             >
                 {players.map((name, index) => (
                     <PlayerScore
@@ -32,6 +32,7 @@ export default function ScoreBoardScreen({ navigation }) {
                         playerIndex={index}
                         color={palette[index % palette.length]}
                         fontColor={fontPalette[index % palette.length]}
+                        cols={cols}
                     />
                 ))}
             </View>
