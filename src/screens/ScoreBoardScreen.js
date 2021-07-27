@@ -18,15 +18,21 @@ export default function ScoreBoardScreen({ navigation }) {
             console.log("lefts", lefts)
             const columns = [...new Set(lefts)].length
             setCols(columns);
+        } else {
+            console.log("NOPE")
         }
     }
     useEffect(() => {
+        console.log("effect")
         resize()
-    }, [cardDatas, setCols])
+    }, [players])
 
     const onLayout = () => {
+        console.log("layout")
         resize()
     }
+
+    console.log("columns", cols)
 
     return (
         <View style={styles.appContainer}>
@@ -41,6 +47,7 @@ export default function ScoreBoardScreen({ navigation }) {
                         color={palette[index % palette.length]}
                         fontColor={fontPalette[index % palette.length]}
                         cols={cols}
+                        parentFn={onLayout}
                     />
                 ))}
             </View>

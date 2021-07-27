@@ -64,7 +64,7 @@ const TotalScore = ({ fontColor, playerIndex }) => {
     );
 }
 
-const PlayerScore = ({ playerIndex, color, fontColor, cols }) => {
+const PlayerScore = ({ playerIndex, color, fontColor, cols, parentFn }) => {
     const players = useSelector(state => state.currentGame.players);
 
     const dispatch = useDispatch();
@@ -78,14 +78,16 @@ const PlayerScore = ({ playerIndex, color, fontColor, cols }) => {
     }
 
     const measureView = (e) => {
-        // console.log(e.nativeEvent);
         dispatch(setCardData(playerIndex, e.nativeEvent.layout));
+        console.log("playerIndex", playerIndex, e.nativeEvent.layout.x);
+        parentFn();
     }
 
     return (
         <View style={[
             styles.playerCard,
             { backgroundColor: '#' + color },
+            { overflow: 'hidden' },
             { width: cols === undefined ? 'auto' : (100 / cols) + '%' },
         ]}
             onLayout={(event) => measureView(event)}
