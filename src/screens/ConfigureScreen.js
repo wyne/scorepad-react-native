@@ -41,7 +41,7 @@ const ConfigureScreen = ({ navigation }) => {
             </View>
 
             {players.map((player, index) => (
-                <View style={styles.playerContainer} key={player.uuid}>
+                <View style={styles.playerContainer} key={player.uuid || 1}>
                     <Text style={{ fontSize: 20, padding: 5 }}>{index + 1}</Text>
                     <TextInput
                         defaultValue={player.name}
