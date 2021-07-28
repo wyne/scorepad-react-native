@@ -80,8 +80,22 @@ const PlayerScore = ({ playerIndex, color, fontColor, cols, rows, parentFn }) =>
     const measureView = (e) => {
         dispatch(setCardData(playerIndex, e.nativeEvent.layout));
         if (playerIndex == players.length - 1) {
-            parentFn();
+            // setTimeout(parentFn, 3000)
+            parentFn
         }
+    }
+
+    let width = null;
+    let height = null;
+
+    if (rows == 0 && cols == 0) {
+        // console.log("rendering card with zeros!")
+    } else {
+        // console.log("rendering card with rows, cols", rows, cols)
+        width = Math.floor(100 / cols) + '%'
+        height = Math.floor(100 / rows) + '%'
+        // console.log("width", width)
+        // console.log("height", height)
     }
 
     return (
@@ -89,8 +103,9 @@ const PlayerScore = ({ playerIndex, color, fontColor, cols, rows, parentFn }) =>
             styles.playerCard,
             { backgroundColor: '#' + color },
             { overflow: 'hidden' },
-            { width: cols === undefined ? 'auto' : (100 / cols) + '%' },
-            { minHeight: rows == 0 ? 'auto' : (100 / 3) + '%' },
+            { width: cols === 0 ? 'auto' : width },
+            // { minHeight: rows == 0 ? 'auto' : height },
+            { height: rows == 0 ? 'auto' : height },
         ]}
             onLayout={(event) => measureView(event)}
         >
