@@ -95,13 +95,13 @@ export default function ScoreBoardScreen({ navigation, children }) {
         const newCols = [...new Set(lefts)].length;
         const newRows = Math.ceil(players.length / newCols);
         if (newRows != grid.rows || newCols != grid.cols) {
-            console.log("cardDatas", lefts)
+            // console.log("cardDatas", lefts)
             if (lefts.length == players.length) {
-                console.log("EVAL NOW!!!")
+                // console.log("EVAL NOW!!!")
                 resize("useEffect no args")
             }
         } else {
-            console.log("same")
+            // console.log("same")
         }
     })
 

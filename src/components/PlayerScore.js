@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Text, View, StyleSheet, TouchableOpacity, Animated, TouchableHighlight } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { Dimensions } from 'react-native';
@@ -65,6 +65,7 @@ const TotalScore = ({ fontColor, playerIndex }) => {
 }
 
 const PlayerScore = ({ playerIndex, color, fontColor, cols, rows, parentFn }) => {
+    const [opacity, setOpacity] = useState(0)
     const players = useSelector(state => state.currentGame.players);
 
     const dispatch = useDispatch();
@@ -99,6 +100,21 @@ const PlayerScore = ({ playerIndex, color, fontColor, cols, rows, parentFn }) =>
         height = (100 / rows) + '%'
     }
 
+    if (cols == 0 || rows == 0) {
+        if (opacity == 1) {
+            setOpacity(0);
+        }
+    }
+    useEffect(() => {
+        if (cols == 0 || rows == 0) {
+            setOpacity(0);
+        } else {
+            setTimeout(() => {
+                setOpacity(1);
+            }, 100)
+        }
+    })
+
     return (
         <View style={[
             styles.playerCard,
@@ -106,6 +122,7 @@ const PlayerScore = ({ playerIndex, color, fontColor, cols, rows, parentFn }) =>
             { overflow: 'hidden' },
             { width: cols === 0 ? 'auto' : width },
             { height: rows == 0 ? 'auto' : height },
+            { opacity: opacity }
         ]}
             onLayout={(event) => measureView(event)}
         >

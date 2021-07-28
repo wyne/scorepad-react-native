@@ -66,6 +66,7 @@ const ConfigureScreen = ({ navigation }) => {
             }
 
             <View style={{ margin: 70 }}><Text>&nbsp;</Text></View>
+            <Text style={{ marginVertical: 30, textAlign: 'center' }}>Version 1.0.0</Text>
 
         </KeyboardAwareScrollView>
     );
