@@ -105,6 +105,8 @@ export default function ScoreBoardScreen({ navigation, children }) {
         }
     })
 
+    const debug = false;
+
     return (
         <View style={styles.appContainer}>
             <View
@@ -123,12 +125,14 @@ export default function ScoreBoardScreen({ navigation, children }) {
                     />
                 ))}
             </View>
-            <View style={{ flexDirection: 'row' }}>
-                <Button onPress={handleResetRows} title="reset rows"></Button>
-                <Button onPress={handleEval} title="eval"></Button>
-                <Button onPress={handleTest} title="test"></Button>
-                <Button onPress={handleResetCards} title="reset card data"></Button>
-            </View>
+            {debug &&
+                <View style={{ flexDirection: 'row' }}>
+                    <Button onPress={handleResetRows} title="reset rows"></Button>
+                    <Button onPress={handleEval} title="eval"></Button>
+                    <Button onPress={handleTest} title="test"></Button>
+                    <Button onPress={handleResetCards} title="reset card data"></Button>
+                </View>
+            }
             <Rounds
                 style={styles.footerStyle}
                 navigation={navigation}
