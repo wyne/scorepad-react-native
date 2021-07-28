@@ -31,22 +31,23 @@ export default function ScoreBoardScreen({ navigation, children }) {
                 // dispatch(resetCardData());
             }
         }
+        // Todo: this delay is necessary unfortunately.
         setTimeout(fn, 100, src);
         // fn(src);
     }
 
     useEffect(() => {
         // resize("effect [ grid.rows, grid.cols ] =>")
-        console.log("use effect grid", grid)
+        // console.log("use effect grid", grid)
     }, [grid])
 
     useEffect(() => {
         // resize("effect [ grid.rows, grid.cols ] =>")
-        console.log("use effect []", grid)
+        // console.log("use effect []", grid)
     }, [])
 
     const handleResetRows = (src) => {
-        console.log("set grid zeros")
+        // console.log("set grid zeros")
         setGrid({ rows: 0, cols: 0 })
         // dispatch(resetCardData());
     }
@@ -54,18 +55,18 @@ export default function ScoreBoardScreen({ navigation, children }) {
     const handleResetCards = (src) => {
         dispatch(resetCardData());
         const lefts = getLefts();
-        console.log("reset card data", lefts)
+        // console.log("reset card data", lefts)
     }
 
     const handleEval = (src) => {
         const lefts = getLefts();
-        console.log("eval", lefts)
+        // console.log("eval", lefts)
         resize(src)
     }
 
     const handleTest = (src) => {
         const lefts = getLefts();
-        console.log("test", lefts)
+        // console.log("test", lefts)
         // resize(src)
     }
 
@@ -80,14 +81,14 @@ export default function ScoreBoardScreen({ navigation, children }) {
 
     const onLayout = (e) => {
         const lefts = getLefts();
-        console.log("onLayout", lefts);
+        // console.log("onLayout", lefts);
         handleResetRows("layout");
         handleResetCards("layout");
         // handleEval("layout");
     }
 
     const pFn = () => {
-        console.log("pFn", grid)
+        // console.log("pFn", grid)
     }
 
     useEffect(() => {

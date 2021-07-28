@@ -115,11 +115,13 @@ const PlayerScore = ({ playerIndex, color, fontColor, cols, rows, parentFn }) =>
                     <Text style={[
                         styles.name,
                         {
+                            // Todo factor in screen width
+                            // DON'T factor in card attributes
                             fontSize: players.length > 4 ? 30 : 50,
                             color: '#' + fontColor
                         },
                     ]}
-                        adjustsFontSizeToFit={true}
+                        // adjustsFontSizeToFit={true}
                         numberOfLines={1}
                     >
                         {players[playerIndex].name}
