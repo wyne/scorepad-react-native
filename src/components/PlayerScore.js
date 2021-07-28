@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Text, View, StyleSheet, TouchableOpacity, Animated, TouchableHighlight } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { Dimensions } from 'react-native';
@@ -78,24 +78,25 @@ const PlayerScore = ({ playerIndex, color, fontColor, cols, rows, parentFn }) =>
     }
 
     const measureView = (e) => {
-        dispatch(setCardData(playerIndex, e.nativeEvent.layout));
-        if (playerIndex == players.length - 1) {
-            // setTimeout(parentFn, 3000)
-            parentFn
+        if (rows == 0 && cols == 0) {
+            dispatch(setCardData(playerIndex, e.nativeEvent.layout));
         }
+        // if (playerIndex == players.length - 1) {
+        parentFn
+        // }
     }
+
+    useEffect(() => {
+        parentFn()
+    }, [])
 
     let width = null;
     let height = null;
 
     if (rows == 0 && cols == 0) {
-        // console.log("rendering card with zeros!")
     } else {
-        // console.log("rendering card with rows, cols", rows, cols)
-        width = Math.floor(100 / cols) + '%'
-        height = Math.floor(100 / rows) + '%'
-        // console.log("width", width)
-        // console.log("height", height)
+        width = (100 / cols) + '%'
+        height = (100 / rows) + '%'
     }
 
     return (
@@ -104,7 +105,6 @@ const PlayerScore = ({ playerIndex, color, fontColor, cols, rows, parentFn }) =>
             { backgroundColor: '#' + color },
             { overflow: 'hidden' },
             { width: cols === 0 ? 'auto' : width },
-            // { minHeight: rows == 0 ? 'auto' : height },
             { height: rows == 0 ? 'auto' : height },
         ]}
             onLayout={(event) => measureView(event)}

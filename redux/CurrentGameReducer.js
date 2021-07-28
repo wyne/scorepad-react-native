@@ -6,7 +6,8 @@ import {
     SET_PLAYER_NAME, NEW_GAME,
     ADD_PLAYER,
     REMOVE_PLAYER,
-    SET_CARD_DATA
+    SET_CARD_DATA,
+    RESET_CARD_DATA
 } from "./CurrentGameActions"
 
 const initialState = {
@@ -105,6 +106,12 @@ const currentGameReducer = (state = initialState, action) => {
             return {
                 ...state,
                 cards: cdCopy
+            }
+
+        case RESET_CARD_DATA:
+            return {
+                ...state,
+                cards: {},
             }
 
         default:

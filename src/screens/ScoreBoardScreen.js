@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Text, View, StyleSheet, SliderComponent, Button, } from 'react-native';
+import { Text, View, StyleSheet, SliderComponent, Button, Dimensions } from 'react-native';
 import PlayerScore from '../components/PlayerScore'
 import Rounds from '../components/Rounds';
 import { useDispatch, useSelector } from 'react-redux';
+import { resetCardData } from '../../redux/CurrentGameActions';
 
 // export default class ScoreBoardScreen extends React.Component {
 export default function ScoreBoardScreen({ navigation, children }) {
@@ -16,79 +17,93 @@ export default function ScoreBoardScreen({ navigation, children }) {
     const players = useSelector(state => state.currentGame.players);
     const cardDatas = useSelector(state => state.currentGame.cards);
 
+    const dispatch = useDispatch();
+
     const resize = (src) => {
         const fn = (src) => {
             if (Object.keys(cardDatas || {}).length >= players.length) {
-                const lefts = players.map((name, index) => { return (cardDatas[index] || {}).x })
-                console.log("lefts", lefts)
+                const lefts = getLefts();
                 const newCols = [...new Set(lefts)].length;
                 const newRows = Math.ceil(players.length / newCols);
-                console.log(src, "resizing: set rows, cols", newRows, newCols);
                 if (newRows != grid.rows || newCols != grid.cols) {
                     setGrid({ rows: newRows, cols: newCols })
                 }
-                // setCols(newCols);
-                // setRows(newRows);
-            } else {
-                console.log(src, "resizing, but invalid cardDatas")
+                // dispatch(resetCardData());
             }
         }
-        setTimeout(fn, 0, src);
+        setTimeout(fn, 100, src);
+        // fn(src);
     }
-    // console.log("rows, rols", rows, cols)
-    useEffect(() => {
-        // resize("effect [ grid.rows, grid.cols ] =>")
-    }, [grid.rows, grid.cols])
 
     useEffect(() => {
-        // resize("effect [ grid ] =>")
+        // resize("effect [ grid.rows, grid.cols ] =>")
+        console.log("use effect grid", grid)
     }, [grid])
 
     useEffect(() => {
-        // resize("effect [ players ] =>")
-    }, [players])
-
-    useEffect(() => {
-        // resize("effect [ ] =>")
+        // resize("effect [ grid.rows, grid.cols ] =>")
+        console.log("use effect []", grid)
     }, [])
 
-    useEffect(() => {
-        // resize("effect no arg =>")
-    })
-
-    const handleReset = (src) => {
+    const handleResetRows = (src) => {
+        console.log("set grid zeros")
         setGrid({ rows: 0, cols: 0 })
-        console.log(src, "set grid zeros")
+        // dispatch(resetCardData());
+    }
+
+    const handleResetCards = (src) => {
+        dispatch(resetCardData());
+        const lefts = getLefts();
+        console.log("reset card data", lefts)
     }
 
     const handleEval = (src) => {
+        const lefts = getLefts();
+        console.log("eval", lefts)
         resize(src)
     }
 
+    const handleTest = (src) => {
+        const lefts = getLefts();
+        console.log("test", lefts)
+        // resize(src)
+    }
+
+    const getLefts = () => {
+        if (cardDatas === undefined) return []
+        const d = players.map((name, index) => {
+            return (cardDatas[index] || {}).x
+        })
+        return d.filter(i => i !== undefined);
+    }
+
+
     const onLayout = (e) => {
-        // let lefts = [];
-        // console.log("nativeEvent", JSON.stringify(e.nativeEvent))
-        // console.log("childnodes", e.nativeEvent.target.childNodes)
-        // for (let node of e.nativeEvent.target.childNodes) {
-        //     lefts = lefts.concat(node.offsetLeft)
-        // }
-        // console.log("lefts", lefts);
-        // const newCols = [...new Set(lefts)].length;
-        // const newRows = Math.ceil(players.length / newCols);
-        // if (newRows != grid.rows || newCols != grid.cols) {
-        //     setGrid({ rows: newRows, cols: newCols })
-        //     console.log("resizing: set rows, cols", newRows, newCols);
-        // }
-        // resize("parent layout =>")
-        handleReset("layout");
-        handleEval("layout");
+        const lefts = getLefts();
+        console.log("onLayout", lefts);
+        handleResetRows("layout");
+        handleResetCards("layout");
+        // handleEval("layout");
     }
 
     const pFn = () => {
-        // resize("child layout =>");
+        console.log("pFn", grid)
     }
 
-    // console.log("component render, grid:", grid)
+    useEffect(() => {
+        const lefts = getLefts();
+        const newCols = [...new Set(lefts)].length;
+        const newRows = Math.ceil(players.length / newCols);
+        if (newRows != grid.rows || newCols != grid.cols) {
+            console.log("cardDatas", lefts)
+            if (lefts.length == players.length) {
+                console.log("EVAL NOW!!!")
+                resize("useEffect no args")
+            }
+        } else {
+            console.log("same")
+        }
+    })
 
     return (
         <View style={styles.appContainer}>
@@ -109,8 +124,10 @@ export default function ScoreBoardScreen({ navigation, children }) {
                 ))}
             </View>
             <View style={{ flexDirection: 'row' }}>
-                <Button onPress={handleReset} title="reset"></Button>
+                <Button onPress={handleResetRows} title="reset rows"></Button>
                 <Button onPress={handleEval} title="eval"></Button>
+                <Button onPress={handleTest} title="test"></Button>
+                <Button onPress={handleResetCards} title="reset card data"></Button>
             </View>
             <Rounds
                 style={styles.footerStyle}
