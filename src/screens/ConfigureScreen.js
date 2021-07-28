@@ -41,12 +41,12 @@ const ConfigureScreen = ({ navigation }) => {
             </View>
 
             {players.map((player, index) => (
-                <View style={styles.playerContainer} key={player.uuid || 1}>
+                <View style={styles.playerContainer} key={player.uuid}>
                     <Text style={{ fontSize: 20, padding: 5 }}>{index + 1}</Text>
                     <TextInput
                         defaultValue={player.name}
                         style={styles.input}
-                        maxLength={20}
+                        maxLength={15}
                         onChangeText={(text) => setPlayerNameHandler(index, text)}
                     />
                     {index > 0 &&
@@ -66,6 +66,7 @@ const ConfigureScreen = ({ navigation }) => {
             }
 
             <View style={{ margin: 70 }}><Text>&nbsp;</Text></View>
+            <Text style={{ marginVertical: 30, textAlign: 'center' }}>Version 1.0.0</Text>
 
         </KeyboardAwareScrollView>
     );

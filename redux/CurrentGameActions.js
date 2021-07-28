@@ -8,6 +8,7 @@ export const ADD_PLAYER = 'ADD_PLAYER';
 export const REMOVE_PLAYER = 'REMOVE_PLAYER';
 
 export const SET_CARD_DATA = 'SET_CARD_DATA';
+export const RESET_CARD_DATA = 'RESET_CARD_DATA';
 
 export const incPlayerRoundScore = (index) => {
     return { type: INC_PLAYER_ROUND_SCORE, index: index, }
@@ -43,4 +44,8 @@ export const removePlayer = (index) => {
 
 export const setCardData = (index, data) => {
     return { type: SET_CARD_DATA, index: index, data: data }
+}
+
+export const resetCardData = () => {
+    return { type: RESET_CARD_DATA }
 }
