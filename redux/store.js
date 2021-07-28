@@ -7,16 +7,16 @@ import createMigrate from 'redux-persist/es/createMigrate';
 import { v4 as uuidv4 } from 'uuid';
 
 const migrations = {
-    0: (state) => {
-        const players = state.players
-        return {
-            ...state,
-            players: [
-                { name: 'Player 1', uuid: uuidv4() },
-                { name: 'Player 2', uuid: uuidv4() },
-            ],
-        }
-    }
+    // 0: (state) => {
+    // const players = state.players
+    // return {
+    //     ...state,
+    //     players: [
+    //         { name: 'player 1', uuid: uuidv4() },
+    //         { name: 'player 2', uuid: uuidv4() },
+    //     ],
+    // }
+    // }
 }
 const persistConfig = {
     key: 'root',
