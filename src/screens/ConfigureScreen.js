@@ -4,6 +4,8 @@ import { useSelector, useDispatch } from 'react-redux';
 import { setPlayerName, newGame, addPlayer, removePlayer } from '../../redux/CurrentGameActions';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
+const appJson = require('../../app.json');
+
 const ConfigureScreen = ({ navigation }) => {
     const [isNewGame, setIsNewGame] = useState(false)
 
@@ -66,7 +68,18 @@ const ConfigureScreen = ({ navigation }) => {
             }
 
             <View style={{ margin: 70 }}><Text>&nbsp;</Text></View>
-            <Text style={{ marginVertical: 30, textAlign: 'center' }}>Version 1.0.0</Text>
+
+            <View style={{ marginVertical: 30, textAlign: 'center' }}>
+                <Text>
+                    Version {appJson.expo.version}
+                </Text>
+                {Platform.OS == 'ios' &&
+                    <Text>{Platform.OS} build {appJson.expo.ios.buildNumber} </Text>
+                }
+                {Platform.OS == 'android' &&
+                    <Text>{Platform.OS} build {appJson.expo.android.versionCode} </Text>
+                }
+            </View>
 
         </KeyboardAwareScrollView>
     );
