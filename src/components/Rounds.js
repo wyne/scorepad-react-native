@@ -7,6 +7,15 @@ import { nextRound, prevRound } from '../../redux/CurrentGameActions';
 import { Feather } from '@expo/vector-icons';
 import { EvilIcons } from '@expo/vector-icons';
 
+const ConfigureButton = () => {
+    return (
+        <TouchableOpacity style={{ justifyContent: 'center' }}
+            onPress={() => { navigation.navigate("Configure") }}>
+            <EvilIcons style={{ fontSize: 50, color: 'white', textAlign: 'center' }} name="gear" color="black" />
+        </TouchableOpacity>
+    )
+}
+
 function Rounds({ navigation }) {
     const dispatch = useDispatch();
 
@@ -33,22 +42,23 @@ function Rounds({ navigation }) {
                 </Text></View>
             </TouchableOpacity>
 
-            <TouchableOpacity style={{ justifyContent: 'center' }}
-                onPress={() => { navigation.navigate("Configure") }}>
-                <EvilIcons style={{ fontSize: 50, color: 'white', textAlign: 'center' }} name="gear" color="black" />
-            </TouchableOpacity>
+            <ConfigureButton />
 
             <View style={{ padding: 10, color: 'white' }}>
                 <Text style={{ color: 'white' }}>
                     &nbsp;
                 </Text>
                 {players.map((player, index) => (
-                    <Text key={index} style={{ color: 'white' }}>{player.name}</Text>
+                    <Text key={index} style={{
+                        color: 'white',
+                        maxWidth: 100,
+                    }}
+                        numberOfLines={1}
+                    >{player.name}</Text>
                 ))}
             </View>
 
             <ScrollView horizontal={true} contentContainerStyle={{ flexDirection: 'row' }}>
-
                 {scores[0].map((item, round) => (
                     <View key={round} style={{ padding: 10 }}>
                         <Text style={{
