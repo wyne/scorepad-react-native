@@ -4,6 +4,8 @@ import { useSelector, useDispatch } from 'react-redux';
 import { setPlayerName, newGame, addPlayer, removePlayer } from '../../redux/CurrentGameActions';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
+const appJson = require('../../app.json');
+
 const ConfigureScreen = ({ navigation }) => {
     const [isNewGame, setIsNewGame] = useState(false)
 
@@ -46,7 +48,7 @@ const ConfigureScreen = ({ navigation }) => {
                     <TextInput
                         defaultValue={player.name}
                         style={styles.input}
-                        maxLength={20}
+                        maxLength={15}
                         onChangeText={(text) => setPlayerNameHandler(index, text)}
                     />
                     {index > 0 &&
@@ -66,6 +68,18 @@ const ConfigureScreen = ({ navigation }) => {
             }
 
             <View style={{ margin: 70 }}><Text>&nbsp;</Text></View>
+
+            <View style={{ marginVertical: 30 }}>
+                <Text style={{ textAlign: 'center' }} >
+                    Version {appJson.expo.version}
+                </Text>
+                {Platform.OS == 'ios' &&
+                    <Text style={{ textAlign: 'center' }}>{Platform.OS} build {appJson.expo.ios.buildNumber} </Text>
+                }
+                {Platform.OS == 'android' &&
+                    <Text style={{ textAlign: 'center' }}>{Platform.OS} build {appJson.expo.android.versionCode} </Text>
+                }
+            </View>
 
         </KeyboardAwareScrollView>
     );

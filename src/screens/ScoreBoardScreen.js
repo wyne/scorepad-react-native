@@ -1,24 +1,68 @@
-import React, { useState } from 'react';
-import { Text, View, StyleSheet, } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { Text, View, StyleSheet, Button, Dimensions } from 'react-native';
 import PlayerScore from '../components/PlayerScore'
 import Rounds from '../components/Rounds';
 import { useDispatch, useSelector } from 'react-redux';
+import { resetCardData } from '../../redux/CurrentGameActions';
 
 export default function ScoreBoardScreen({ navigation }) {
     const palette = ["01497c", "c25858", "f5c800", "275436", "dc902c", "62516a", "755647", "925561"]
     const fontPalette = ["FFFFFF", "FFFFFF", "000000", "FFFFFF", "FFFFFF", "FFFFFF", "FFFFFF", "FFFFFF"]
 
+    const [grid, setGrid] = useState({ rows: null, cols: null });
     const players = useSelector(state => state.currentGame.players);
+    const cardDatas = useSelector(state => state.currentGame.cards);
+    const dispatch = useDispatch();
 
-    const measureView = (e) => {
-        // console.log(e.nativeEvent.layout.height);
-        // set in redux, don't whitelist it
+    const resize = () => {
+        const fn = () => {
+            if (Object.keys(cardDatas || {}).length >= players.length) {
+                const newCols = countColumns();
+                const newRows = Math.ceil(players.length / newCols);
+                if (newRows != grid.rows || newCols != grid.cols) {
+                    setGrid({ rows: newRows, cols: newCols })
+                }
+            }
+        }
+        // Todo: this delay is necessary unfortunately.
+        setTimeout(fn, 100);
     }
+
+    const countColumns = () => {
+        if (cardDatas === undefined) return []
+        const d = players.map((name, index) => {
+            return (cardDatas[index] || {}).x
+        })
+        const lefts = d.filter(i => i !== undefined);
+        return [...new Set(lefts)].length;
+    }
+
+    const handleResetRows = () => {
+        setGrid({ rows: 0, cols: 0 })
+    }
+
+    const handleResetCards = () => {
+        dispatch(resetCardData());
+    }
+
+    const handleEval = () => {
+        resize()
+    }
+
+    const onLayout = (e) => {
+        handleResetRows();
+        handleResetCards();
+    }
+
+    useEffect(() => {
+        resize()
+    })
 
     return (
         <View style={styles.appContainer}>
-            <View style={styles.contentStyle}
-                onLayout={(event) => measureView(event)}
+            <View
+                style={styles.contentStyle}
+                onLayout={onLayout}
             >
                 {players.map((name, index) => (
                     <PlayerScore
@@ -26,9 +70,17 @@ export default function ScoreBoardScreen({ navigation }) {
                         playerIndex={index}
                         color={palette[index % palette.length]}
                         fontColor={fontPalette[index % palette.length]}
+                        cols={(grid.rows != null && grid.cols != null) ? grid.cols : 0}
+                        rows={(grid.rows != null && grid.cols != null) ? grid.rows : 0}
                     />
                 ))}
             </View>
+            {false && <View style={{ flexDirection: 'row' }}>
+                <Button onPress={handleResetRows} title="reset rows"></Button>
+                <Button onPress={handleEval} title="eval"></Button>
+                <Button onPress={handleTest} title="test"></Button>
+                <Button onPress={handleResetCards} title="reset card data"></Button>
+            </View>}
             <Rounds
                 style={styles.footerStyle}
                 navigation={navigation}
@@ -39,8 +91,6 @@ export default function ScoreBoardScreen({ navigation }) {
 
 const styles = StyleSheet.create({
     appContainer: {
-        // paddingTop: Constants.statusBarHeight,
-        // height: Platform.OS === 'web' ? '100vh' : '100%',
         top: 0,
         left: 0,
         right: 0,
@@ -54,6 +104,7 @@ const styles = StyleSheet.create({
         alignContent: 'stretch',
         flexDirection: 'column',
         maxWidth: '100%',
+        backgroundColor: '#000000'
     },
     footerStyle: {
         flex: 1,
