@@ -69,15 +69,15 @@ const ConfigureScreen = ({ navigation }) => {
 
             <View style={{ margin: 70 }}><Text>&nbsp;</Text></View>
 
-            <View style={{ marginVertical: 30, textAlign: 'center' }}>
-                <Text>
+            <View style={{ marginVertical: 30 }}>
+                <Text style={{ textAlign: 'center' }} >
                     Version {appJson.expo.version}
                 </Text>
                 {Platform.OS == 'ios' &&
-                    <Text>{Platform.OS} build {appJson.expo.ios.buildNumber} </Text>
+                    <Text style={{ textAlign: 'center' }}>{Platform.OS} build {appJson.expo.ios.buildNumber} </Text>
                 }
                 {Platform.OS == 'android' &&
-                    <Text>{Platform.OS} build {appJson.expo.android.versionCode} </Text>
+                    <Text style={{ textAlign: 'center' }}>{Platform.OS} build {appJson.expo.android.versionCode} </Text>
                 }
             </View>
 
