@@ -3,7 +3,7 @@ import { Text, View, StyleSheet, TouchableOpacity, Animated, TouchableHighlight 
 import { useDispatch, useSelector } from 'react-redux';
 import { Dimensions } from 'react-native';
 
-import { incPlayerRoundScore, decPlayerRoundScore } from '../../redux/CurrentGameActions';
+import { incPlayerRoundScore, decPlayerRoundScore, setCardData } from '../../redux/CurrentGameActions';
 
 const RoundScore = ({ fontColor, playerIndex }) => {
     const scores = useSelector(state => state.currentGame.scores);
@@ -64,7 +64,7 @@ const TotalScore = ({ fontColor, playerIndex }) => {
     );
 }
 
-const PlayerScore = ({ playerIndex, color, fontColor }) => {
+const PlayerScore = ({ playerIndex, color, fontColor, cols, rows, parentFn }) => {
     const players = useSelector(state => state.currentGame.players);
 
     const dispatch = useDispatch();
@@ -77,23 +77,22 @@ const PlayerScore = ({ playerIndex, color, fontColor }) => {
         dispatch(decPlayerRoundScore(playerIndex));
     }
 
-    let cardHeights = null;
     const measureView = (e) => {
-        // cardHeights = e.nativeEvent.layout.height;
-        // console.log("card height", cardHeights);
+        dispatch(setCardData(playerIndex, e.nativeEvent.layout));
+        if (playerIndex == players.length - 1) {
+            parentFn();
+        }
     }
 
     return (
         <View style={[
             styles.playerCard,
             { backgroundColor: '#' + color },
-            // { maxWidth: Math.ceil(Dimensions.get('window').width / Math.ceil(players.length / 3)) + 20 },
-            // { maxWidth: '25%' }
-            // { flexBasis: '50%' }
-            // rows = (content height + 1) / cardHeights
-            // 100 / (ceil(count / rows)
+            { overflow: 'hidden' },
+            { width: cols === undefined ? 'auto' : (100 / cols) + '%' },
+            { minHeight: rows == 0 ? 'auto' : (100 / 3) + '%' },
         ]}
-            onLayout={(playerIndex <= 1) ? (event) => measureView(event) : false}
+            onLayout={(event) => measureView(event)}
         >
 
             <View style={{ padding: 10, }}>
@@ -104,8 +103,6 @@ const PlayerScore = ({ playerIndex, color, fontColor }) => {
                             fontSize: players.length > 4 ? 30 : 50,
                             color: '#' + fontColor
                         },
-                        // { maxWidth: players.length > 4 ? Dimensions.get('window').width / 4 : Dimensions.get('window').width / 3 },
-                        // { minHeight: players.length > 4 ? '25%' : Dimensions.get('window').width / 3 },
                     ]}
                         adjustsFontSizeToFit={true}
                         numberOfLines={1}

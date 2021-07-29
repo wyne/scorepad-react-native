@@ -7,6 +7,7 @@ import { persistStore, persistReducer } from 'redux-persist';
 const persistConfig = {
     key: 'root',
     storage: AsyncStorage,
+    whitelist: ['players', 'scores', 'currentRound',]
 };
 
 const rootReducer = combineReducers({
