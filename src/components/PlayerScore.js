@@ -1,7 +1,6 @@
-import React, { useEffect, useState } from 'react';
-import { Text, View, StyleSheet, TouchableOpacity, Animated, TouchableHighlight } from 'react-native';
+import React from 'react';
+import { Text, View, StyleSheet, TouchableHighlight } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
-import { Dimensions } from 'react-native';
 
 import { incPlayerRoundScore, decPlayerRoundScore, setCardData } from '../../redux/CurrentGameActions';
 
@@ -64,9 +63,8 @@ const TotalScore = ({ fontColor, playerIndex }) => {
     );
 }
 
-const PlayerScore = ({ playerIndex, color, fontColor, cols, rows, parentFn }) => {
+const PlayerScore = ({ playerIndex, color, fontColor, cols, rows }) => {
     const players = useSelector(state => state.currentGame.players);
-
     const dispatch = useDispatch();
 
     const incPlayerRoundScoreHandler = () => {
@@ -81,14 +79,7 @@ const PlayerScore = ({ playerIndex, color, fontColor, cols, rows, parentFn }) =>
         if (rows == 0 && cols == 0) {
             dispatch(setCardData(playerIndex, e.nativeEvent.layout));
         }
-        // if (playerIndex == players.length - 1) {
-        parentFn
-        // }
     }
-
-    useEffect(() => {
-        parentFn()
-    }, [])
 
     let width = null;
     let height = null;
@@ -112,17 +103,17 @@ const PlayerScore = ({ playerIndex, color, fontColor, cols, rows, parentFn }) =>
 
             <View style={{ padding: 10, }}>
                 <View style={{ justifyContent: 'center', alignItems: 'center' }}>
-                    <Text style={[
-                        styles.name,
-                        {
-                            // Todo factor in screen width
-                            // DON'T factor in card attributes
-                            fontSize: players.length > 4 ? 30 : 50,
-                            color: '#' + fontColor
-                        },
-                    ]}
-                        // adjustsFontSizeToFit={true}
+                    <Text
                         numberOfLines={1}
+                        style={[
+                            styles.name,
+                            {
+                                // Todo factor in screen width
+                                // DON'T factor in card attributes
+                                fontSize: players.length > 4 ? 30 : 50,
+                                color: '#' + fontColor
+                            },
+                        ]}
                     >
                         {players[playerIndex].name}
                     </Text>
@@ -138,9 +129,7 @@ const PlayerScore = ({ playerIndex, color, fontColor, cols, rows, parentFn }) =>
                 activeOpacity={1}
                 onPress={incPlayerRoundScoreHandler}
             >
-                <Text style={{ fontSize: 100, opacity: 0, color: '#' + color, textAlign: 'center' }}>
-                    {/* +1  */}
-                </Text>
+                <Text style={{ fontSize: 100, opacity: 0, color: '#' + color, textAlign: 'center' }}> </Text>
             </TouchableHighlight>
 
             <TouchableHighlight style={[styles.surface, styles.surfaceSubtract]}
@@ -148,9 +137,7 @@ const PlayerScore = ({ playerIndex, color, fontColor, cols, rows, parentFn }) =>
                 activeOpacity={1}
                 onPress={decPlayerRoundScoreHandler}
             >
-                <Text style={{ fontSize: 100, opacity: 0, color: '#' + color, textAlign: 'center' }}>
-                    {/* -1 */}
-                </Text>
+                <Text style={{ fontSize: 100, opacity: 0, color: '#' + color, textAlign: 'center' }}> </Text>
             </TouchableHighlight>
         </View>
     );
