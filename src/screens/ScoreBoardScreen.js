@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Text, View, StyleSheet, Button, Dimensions } from 'react-native';
+import { Text, View, StyleSheet, Button, Dimensions, Platform, PixelRatio } from 'react-native';
+
 import PlayerScore from '../components/PlayerScore'
 import Rounds from '../components/Rounds';
 import { useDispatch, useSelector } from 'react-redux';
@@ -68,8 +69,8 @@ export default function ScoreBoardScreen({ navigation }) {
                     <PlayerScore
                         key={index}
                         playerIndex={index}
-                        color={palette[index % palette.length]}
-                        fontColor={fontPalette[index % palette.length]}
+                        color={'#' + palette[index % palette.length]}
+                        fontColor={'#' + fontPalette[index % palette.length]}
                         cols={(grid.rows != 0 && grid.cols != 0) ? grid.cols : 0}
                         rows={(grid.rows != 0 && grid.cols != 0) ? grid.rows : 0}
                     />
@@ -78,7 +79,6 @@ export default function ScoreBoardScreen({ navigation }) {
             {false && <View style={{ flexDirection: 'row' }}>
                 <Button onPress={handleResetRows} title="reset rows"></Button>
                 <Button onPress={handleEval} title="eval"></Button>
-                <Button onPress={handleTest} title="test"></Button>
                 <Button onPress={handleResetCards} title="reset card data"></Button>
             </View>}
             <Rounds

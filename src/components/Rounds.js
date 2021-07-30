@@ -7,15 +7,6 @@ import { nextRound, prevRound } from '../../redux/CurrentGameActions';
 import { Feather } from '@expo/vector-icons';
 import { EvilIcons } from '@expo/vector-icons';
 
-const ConfigureButton = () => {
-    return (
-        <TouchableOpacity style={{ justifyContent: 'center' }}
-            onPress={() => { navigation.navigate("Configure") }}>
-            <EvilIcons style={{ fontSize: 50, color: 'white', textAlign: 'center' }} name="gear" color="black" />
-        </TouchableOpacity>
-    )
-}
-
 function Rounds({ navigation }) {
     const dispatch = useDispatch();
 
@@ -42,7 +33,10 @@ function Rounds({ navigation }) {
                 </Text></View>
             </TouchableOpacity>
 
-            <ConfigureButton />
+            <TouchableOpacity style={{ justifyContent: 'center' }}
+                onPress={() => { navigation.navigate("Configure") }}>
+                <EvilIcons style={{ fontSize: 50, color: 'white', textAlign: 'center' }} name="gear" color="black" />
+            </TouchableOpacity>
 
             <View style={{ padding: 10, color: 'white' }}>
                 <Text style={{ color: 'white' }}>
