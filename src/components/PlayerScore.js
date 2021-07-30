@@ -13,9 +13,7 @@ const PlayerScore = ({ playerIndex, color, fontColor, cols, rows }) => {
     const dispatch = useDispatch();
 
     const totalScore = scores[playerIndex].reduce(
-        (a, b) => {
-            return (a || 0) + (b || 0);
-        }
+        (a, b) => { return (a || 0) + (b || 0); }
     );
 
     const incPlayerRoundScoreHandler = () => {
@@ -35,64 +33,35 @@ const PlayerScore = ({ playerIndex, color, fontColor, cols, rows }) => {
     let width = null;
     let height = null;
 
-    if (rows == 0 && cols == 0) {
-    } else {
+    if (rows > 0 && cols > 0) {
         width = (100 / cols) + '%'
         height = (100 / rows) + '%'
     }
 
     const fontScale = (size) => {
-        if (cols == 0 || rows == 0) {
-            // return s(size);
-            // return ms(size);
-            return ms(size, (10 - players.length / 2) / 7);
-        } else {
-            // return s(size);
-            return ms(size, (10 - players.length / 2) / 7);
-            // 8 => 0
-            // 1 => 2
-            // return size * 2;
-        }
+        return ms(size, .5);
     }
 
     return (
-        <View style={[
-            styles.playerCard,
+        <View onLayout={(event) => measureView(event)}
+            style={[styles.playerCard,
             { backgroundColor: color },
-            { overflow: 'hidden' },
             { width: cols === 0 ? 'auto' : width },
             { height: rows == 0 ? 'auto' : height },
-        ]}
-            onLayout={(event) => measureView(event)}
-        >
+            ]}>
 
-            <View style={{ padding: 10, }}>
+            <View style={{ padding: 10 }}>
                 <View style={{ justifyContent: 'center', alignItems: 'center' }}>
-                    <Text
-                        numberOfLines={1}
-                        style={[
-                            styles.name,
-                            {
-                                fontSize: fontScale(20),
-                                color: fontColor
-                            },
-                        ]}
-                    >
+                    <Text numberOfLines={1} style={[styles.name, { fontSize: fontScale(30), color: fontColor }]}>
                         {players[playerIndex].name}
                     </Text>
                 </View>
                 <View>
-                    <Text style={[styles.totalScore, { color: fontColor, fontSize: fontScale(40) },]}>
+                    <Text style={[styles.totalScore, { color: fontColor, fontSize: fontScale(60) },]}>
                         {totalScore}
                     </Text>
                     <View style={[styles.roundBox, { borderColor: fontColor, }]}>
-                        <Text style={[
-                            styles.roundScore,
-                            {
-                                fontSize: fontScale(20),
-                                color: fontColor
-                            }
-                        ]}>
+                        <Text style={[styles.roundScore, { fontSize: fontScale(20), color: fontColor }]}>
                             {scores[playerIndex][currentRound] || 0}
                         </Text>
                         <Text style={[styles.label, styles.roundLabel, { color: fontColor }]}>
@@ -105,16 +74,14 @@ const PlayerScore = ({ playerIndex, color, fontColor, cols, rows }) => {
             <TouchableHighlight style={[styles.surface, styles.surfaceAdd]}
                 underlayColor={fontColor + '30'}
                 activeOpacity={1}
-                onPress={incPlayerRoundScoreHandler}
-            >
+                onPress={incPlayerRoundScoreHandler}>
                 <Text style={{ fontSize: 100, opacity: 0, color: color, textAlign: 'center' }}> </Text>
             </TouchableHighlight>
 
             <TouchableHighlight style={[styles.surface, styles.surfaceSubtract]}
                 underlayColor={fontColor + '30'}
                 activeOpacity={1}
-                onPress={decPlayerRoundScoreHandler}
-            >
+                onPress={decPlayerRoundScoreHandler}>
                 <Text style={{ fontSize: 100, opacity: 0, color: color, textAlign: 'center' }}> </Text>
             </TouchableHighlight>
         </View>
@@ -126,6 +93,7 @@ const styles = ScaledSheet.create({
         flexGrow: 1,
         justifyContent: 'center',
         alignItems: 'center',
+        overflow: 'hidden',
     },
     surface: {
         position: 'absolute',
