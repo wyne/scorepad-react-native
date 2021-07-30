@@ -15,6 +15,7 @@ const ConfigureScreen = () => {
 
     const setPlayerNameHandler = (index, name) => {
         dispatch(setPlayerName(index, name));
+        setPlayerWasAdded(true)
     }
 
     const newGameHandler = () => {
@@ -50,12 +51,12 @@ const ConfigureScreen = () => {
                     <TextInput
                         defaultValue={index == players.length - 1 && playerWasAdded ? null : player.name}
                         style={styles.input}
-                        autoFocus={index == players.length - 1}
+                        autoFocus={index == players.length - 1 && playerWasAdded}
                         placeholder={'Player ' + (index + 1)}
                         selectTextOnFocus={true}
                         onEndEditing={(e) => {
                             if (e.nativeEvent.text == "") {
-                                dispatch(setPlayerName(index, 'Player ' + (index + 1)));
+                                setPlayerNameHandler(index, 'Player ' + (index + 1));
                             }
                         }}
                         maxLength={15}
