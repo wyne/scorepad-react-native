@@ -1,71 +1,20 @@
 import React from 'react';
-import { Text, View, StyleSheet, TouchableHighlight } from 'react-native';
+import { Text, View, StyleSheet, TouchableHighlight, Dimensions, Platform, PixelRatio } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
+import { ScaledSheet } from 'react-native-size-matters';
+import { s, vs, ms, mvs } from 'react-native-size-matters';
 
 import { incPlayerRoundScore, decPlayerRoundScore, setCardData } from '../../redux/CurrentGameActions';
 
-const RoundScore = ({ fontColor, playerIndex }) => {
-    const scores = useSelector(state => state.currentGame.scores);
-    const players = useSelector(state => state.currentGame.players);
-    const currentRound = useSelector(state => state.currentGame.currentRound);
-
-    return (
-        <View style={{
-            padding: 5,
-            borderRadius: 5,
-            borderWidth: 2,
-            borderColor: '#' + fontColor,
-            alignSelf: 'center'
-        }}>
-            <Text style={[
-                styles.roundScore,
-                {
-                    fontSize: players.length > 4 ? 30 : 40,
-                    color: '#' + fontColor
-                }
-            ]}>{scores[playerIndex][currentRound] || 0}</Text>
-            <Text style={[
-                styles.label,
-                styles.roundLabel,
-                { color: '#' + fontColor }
-            ]}>
-                Round {currentRound + 1}
-            </Text>
-        </View>
-    );
-}
-
-const TotalScore = ({ fontColor, playerIndex }) => {
-    const scores = useSelector(state => state.currentGame.scores);
-    const players = useSelector(state => state.currentGame.players);
-
-    const totalScore = scores[playerIndex].reduce(
-        (a, b) => {
-            return (a || 0) + (b || 0);
-        }
-    );
-
-    const _styles = [{
-        margin: 2,
-        fontSize: 90,
-        fontWeight: 'bold',
-        textAlign: 'center',
-        color: 'white',
-        fontVariant: ['tabular-nums'],
-        fontSize: players.length > 4 ? 50 : 90,
-        color: '#' + fontColor
-    }];
-
-    return (
-        <Text style={_styles}>
-            {totalScore}
-        </Text>
-    );
-}
-
 const PlayerScore = ({ playerIndex, color, fontColor, cols, rows }) => {
     const players = useSelector(state => state.currentGame.players);
+    const scores = useSelector(state => state.currentGame.scores);
+    const currentRound = useSelector(state => state.currentGame.currentRound);
     const dispatch = useDispatch();
+
+    const totalScore = scores[playerIndex].reduce(
+        (a, b) => { return (a || 0) + (b || 0); }
+    );
 
     const incPlayerRoundScoreHandler = () => {
         dispatch(incPlayerRoundScore(playerIndex));
@@ -84,70 +33,67 @@ const PlayerScore = ({ playerIndex, color, fontColor, cols, rows }) => {
     let width = null;
     let height = null;
 
-    if (rows == 0 && cols == 0) {
-    } else {
+    if (rows > 0 && cols > 0) {
         width = (100 / cols) + '%'
         height = (100 / rows) + '%'
     }
 
+    const fontScale = (size) => {
+        return ms(size, .5);
+    }
+
     return (
-        <View style={[
-            styles.playerCard,
-            { backgroundColor: '#' + color },
-            { overflow: 'hidden' },
+        <View onLayout={(event) => measureView(event)}
+            style={[styles.playerCard,
+            { backgroundColor: color },
             { width: cols === 0 ? 'auto' : width },
             { height: rows == 0 ? 'auto' : height },
-        ]}
-            onLayout={(event) => measureView(event)}
-        >
+            ]}>
 
-            <View style={{ padding: 10, }}>
+            <View style={{ padding: 10 }}>
                 <View style={{ justifyContent: 'center', alignItems: 'center' }}>
-                    <Text
-                        numberOfLines={1}
-                        style={[
-                            styles.name,
-                            {
-                                // Todo factor in screen width
-                                // DON'T factor in card attributes
-                                fontSize: players.length > 4 ? 30 : 50,
-                                color: '#' + fontColor
-                            },
-                        ]}
-                    >
+                    <Text numberOfLines={1} style={[styles.name, { fontSize: fontScale(30), color: fontColor }]}>
                         {players[playerIndex].name}
                     </Text>
                 </View>
                 <View>
-                    <TotalScore fontColor={fontColor} playerIndex={playerIndex} />
-                    <RoundScore fontColor={fontColor} playerIndex={playerIndex} />
+                    <Text style={[styles.totalScore, { color: fontColor, fontSize: fontScale(60) },]}>
+                        {totalScore}
+                    </Text>
+                    <View style={[styles.roundBox, { borderColor: fontColor, }]}>
+                        <Text style={[styles.roundScore, { fontSize: fontScale(20), color: fontColor }]}>
+                            {scores[playerIndex][currentRound] || 0}
+                        </Text>
+                        <Text style={[styles.label, styles.roundLabel, { color: fontColor }]}>
+                            Round {currentRound + 1}
+                        </Text>
+                    </View>
                 </View>
             </View>
 
             <TouchableHighlight style={[styles.surface, styles.surfaceAdd]}
-                underlayColor={'#' + fontColor + '30'}
+                underlayColor={fontColor + '30'}
                 activeOpacity={1}
-                onPress={incPlayerRoundScoreHandler}
-            >
-                <Text style={{ fontSize: 100, opacity: 0, color: '#' + color, textAlign: 'center' }}> </Text>
+                onPress={incPlayerRoundScoreHandler}>
+                <Text style={{ fontSize: 100, opacity: 0, color: color, textAlign: 'center' }}> </Text>
             </TouchableHighlight>
 
             <TouchableHighlight style={[styles.surface, styles.surfaceSubtract]}
-                underlayColor={'#' + fontColor + '30'}
+                underlayColor={fontColor + '30'}
                 activeOpacity={1}
-                onPress={decPlayerRoundScoreHandler}
-            >
-                <Text style={{ fontSize: 100, opacity: 0, color: '#' + color, textAlign: 'center' }}> </Text>
+                onPress={decPlayerRoundScoreHandler}>
+                <Text style={{ fontSize: 100, opacity: 0, color: color, textAlign: 'center' }}> </Text>
             </TouchableHighlight>
         </View>
     );
 }
 
-const styles = StyleSheet.create({
+const styles = ScaledSheet.create({
     playerCard: {
         flexGrow: 1,
         justifyContent: 'center',
         alignItems: 'center',
+        overflow: 'hidden',
     },
     surface: {
         position: 'absolute',
@@ -169,6 +115,19 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         justifyContent: 'center',
         alignSelf: 'center',
+    },
+    totalScore: {
+        margin: 2,
+        fontWeight: 'bold',
+        textAlign: 'center',
+        color: 'white',
+        fontVariant: ['tabular-nums'],
+    },
+    roundBox: {
+        padding: 5,
+        borderRadius: 5,
+        borderWidth: 2,
+        alignSelf: 'center'
     },
     roundScore: {
         alignSelf: 'center',

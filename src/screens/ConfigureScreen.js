@@ -6,7 +6,7 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view
 
 const appJson = require('../../app.json');
 
-const ConfigureScreen = ({ navigation }) => {
+const ConfigureScreen = () => {
     const [isNewGame, setIsNewGame] = useState(false)
 
     const players = useSelector(state => state.currentGame.players);
