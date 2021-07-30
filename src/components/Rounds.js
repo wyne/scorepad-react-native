@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Text, View, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 
 import { useSelector, useDispatch } from 'react-redux';
@@ -21,6 +21,14 @@ function Rounds({ navigation }) {
     const players = useSelector(state => state.currentGame.players);
     const scores = useSelector(state => state.currentGame.scores);
     const currentRound = useSelector(state => state.currentGame.currentRound);
+    const currentRoundEl = useRef()
+    const roundsScrollViewEl = useRef()
+
+    useEffect(() => {
+        currentRoundEl.current.measure((ox, oy, width, height, px, py) => {
+            roundsScrollViewEl.current.scrollTo({ x: ox, animated: true })
+        })
+    })
 
     return (
         <View style={{ flexDirection: 'row', backgroundColor: 'black', paddingBottom: 10 }}>
@@ -39,33 +47,30 @@ function Rounds({ navigation }) {
             </TouchableOpacity>
 
             <View style={{ padding: 10, color: 'white' }}>
-                <Text style={{ color: 'white' }}>
-                    &nbsp;
-                </Text>
+                <Text style={{ color: 'white' }}> &nbsp; </Text>
                 {players.map((player, index) => (
-                    <Text key={index} style={{
-                        color: 'white',
-                        maxWidth: 100,
-                    }}
+                    <Text key={index} style={{ color: 'white', maxWidth: 100, }}
                         numberOfLines={1}
                     >{player.name}</Text>
                 ))}
             </View>
 
-            <ScrollView horizontal={true} contentContainerStyle={{ flexDirection: 'row' }}>
+            <ScrollView horizontal={true} contentContainerStyle={{ flexDirection: 'row' }} ref={roundsScrollViewEl}>
                 {scores[0].map((item, round) => (
-                    <View key={round} style={{ padding: 10 }}>
+                    <View key={round} style={{ padding: 10 }}
+                        ref={currentRound == round ? currentRoundEl : null}
+                        backgroundColor={round == currentRound ? '#111' : 'black'}>
                         <Text style={{
                             color: currentRound == round ? 'red' : 'yellow',
                             fontWeight: 'bold',
                             textAlign: 'center',
-                        }}>{round + 1}</Text>
+                        }}>
+                            {round + 1}
+                        </Text>
                         {players.map((player, playerIndex) => (
                             <Text key={playerIndex} style={[
                                 styles.scoreEntry,
-                                { color: scores[playerIndex][round] == 0 ? '#555' : 'white' }
-                            ]
-                            }>
+                                { color: scores[playerIndex][round] == 0 ? '#555' : 'white' }]}>
                                 {scores[playerIndex][round]}
                             </Text>
                         ))}
