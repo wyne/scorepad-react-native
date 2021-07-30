@@ -15,7 +15,7 @@ const ConfigureScreen = () => {
 
     const setPlayerNameHandler = (index, name) => {
         dispatch(setPlayerName(index, name));
-        setPlayerWasAdded(true)
+        setPlayerWasAdded(false)
     }
 
     const newGameHandler = () => {
