@@ -9,7 +9,7 @@ export default function ScoreBoardScreen({ navigation }) {
     const palette = ["01497c", "c25858", "f5c800", "275436", "dc902c", "62516a", "755647", "925561"]
     const fontPalette = ["FFFFFF", "FFFFFF", "000000", "FFFFFF", "FFFFFF", "FFFFFF", "FFFFFF", "FFFFFF"]
 
-    const [grid, setGrid] = useState({ rows: null, cols: null });
+    const [grid, setGrid] = useState({ rows: 0, cols: 0 });
     const players = useSelector(state => state.currentGame.players);
     const cardDatas = useSelector(state => state.currentGame.cards);
     const dispatch = useDispatch();
@@ -70,8 +70,8 @@ export default function ScoreBoardScreen({ navigation }) {
                         playerIndex={index}
                         color={palette[index % palette.length]}
                         fontColor={fontPalette[index % palette.length]}
-                        cols={(grid.rows != null && grid.cols != null) ? grid.cols : 0}
-                        rows={(grid.rows != null && grid.cols != null) ? grid.rows : 0}
+                        cols={(grid.rows != 0 && grid.cols != 0) ? grid.cols : 0}
+                        rows={(grid.rows != 0 && grid.cols != 0) ? grid.rows : 0}
                     />
                 ))}
             </View>
