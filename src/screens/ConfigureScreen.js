@@ -8,12 +8,14 @@ const appJson = require('../../app.json');
 
 const ConfigureScreen = () => {
     const [isNewGame, setIsNewGame] = useState(false)
+    const [playerWasAdded, setPlayerWasAdded] = useState(false)
 
     const players = useSelector(state => state.currentGame.players);
     const dispatch = useDispatch();
 
     const setPlayerNameHandler = (index, name) => {
         dispatch(setPlayerName(index, name));
+        setPlayerWasAdded(true)
     }
 
     const newGameHandler = () => {
@@ -23,6 +25,7 @@ const ConfigureScreen = () => {
 
     const addPlayerHandler = () => {
         dispatch(addPlayer('Player ' + (players.length + 1)));
+        setPlayerWasAdded(true)
     }
 
     const removePlayerHandler = (index) => {
@@ -46,11 +49,18 @@ const ConfigureScreen = () => {
                 <View style={styles.playerContainer} key={player.uuid}>
                     <Text style={{ fontSize: 20, padding: 5 }}>{index + 1}</Text>
                     <TextInput
-                        defaultValue={player.name}
+                        defaultValue={index == players.length - 1 && playerWasAdded ? null : player.name}
                         style={styles.input}
+                        autoFocus={index == players.length - 1 && playerWasAdded}
+                        placeholder={'Player ' + (index + 1)}
+                        selectTextOnFocus={true}
+                        onEndEditing={(e) => {
+                            if (e.nativeEvent.text == "") {
+                                setPlayerNameHandler(index, 'Player ' + (index + 1));
+                            }
+                        }}
                         maxLength={15}
-                        onChangeText={(text) => setPlayerNameHandler(index, text)}
-                    />
+                        onChangeText={(text) => setPlayerNameHandler(index, text)} />
                     {index > 0 &&
                         <Button title="Delete" onPress={() => removePlayerHandler(index)}></Button>
                     }
