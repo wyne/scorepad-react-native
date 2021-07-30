@@ -11,6 +11,7 @@
     "assetBundlePatterns": [
       "assets/*"
     ],
+    "backgroundColor": "#000000",
     "ios": {
       "bundleIdentifier": "com.wyne.scorepad",
       "buildNumber": "9",

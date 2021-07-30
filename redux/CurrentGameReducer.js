@@ -5,7 +5,9 @@ import {
     NEXT_ROUND, PREV_ROUND,
     SET_PLAYER_NAME, NEW_GAME,
     ADD_PLAYER,
-    REMOVE_PLAYER
+    REMOVE_PLAYER,
+    SET_CARD_DATA,
+    RESET_CARD_DATA
 } from "./CurrentGameActions"
 
 const initialState = {
@@ -66,7 +68,7 @@ const currentGameReducer = (state = initialState, action) => {
 
         case SET_PLAYER_NAME:
             let copy = [...state.players];
-            copy[action.index] = { ...copy[action.index], name: action.name };
+            copy[action.index] = { ...copy[action.index], name: action.name, };
             return { ...state, players: copy };
 
         case ADD_PLAYER:
@@ -97,6 +99,20 @@ const currentGameReducer = (state = initialState, action) => {
                 scores: newScores,
                 currentRound: 0,
             };
+
+        case SET_CARD_DATA:
+            let cdCopy = { ...state.cards };
+            cdCopy[action.index] = action.data;
+            return {
+                ...state,
+                cards: cdCopy
+            }
+
+        case RESET_CARD_DATA:
+            return {
+                ...state,
+                cards: {},
+            }
 
         default:
             return state;
