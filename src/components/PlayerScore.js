@@ -1,7 +1,6 @@
 import React from 'react';
-import { Text, View, StyleSheet, TouchableHighlight, Dimensions, Platform, PixelRatio } from 'react-native';
+import { Text, View, StyleSheet, TouchableHighlight } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
-import { ScaledSheet } from 'react-native-size-matters';
 import { s, vs, ms, mvs } from 'react-native-size-matters';
 
 import { incPlayerRoundScore, decPlayerRoundScore, setCardData } from '../../redux/CurrentGameActions';
@@ -61,7 +60,7 @@ const PlayerScore = ({ playerIndex, color, fontColor, cols, rows }) => {
                         {totalScore}
                     </Text>
                     <View style={[styles.roundBox, { borderColor: fontColor, }]}>
-                        <Text style={[styles.roundScore, { fontSize: fontScale(20), color: fontColor }]}>
+                        <Text style={[styles.roundScore, { fontSize: fontScale(35), color: fontColor }]}>
                             {scores[playerIndex][currentRound] || 0}
                         </Text>
                         <Text style={[styles.label, styles.roundLabel, { color: fontColor }]}>
@@ -74,21 +73,17 @@ const PlayerScore = ({ playerIndex, color, fontColor, cols, rows }) => {
             <TouchableHighlight style={[styles.surface, styles.surfaceAdd]}
                 underlayColor={fontColor + '30'}
                 activeOpacity={1}
-                onPress={incPlayerRoundScoreHandler}>
-                <Text style={{ fontSize: 100, opacity: 0, color: color, textAlign: 'center' }}> </Text>
-            </TouchableHighlight>
+                onPress={incPlayerRoundScoreHandler}><></></TouchableHighlight>
 
             <TouchableHighlight style={[styles.surface, styles.surfaceSubtract]}
                 underlayColor={fontColor + '30'}
                 activeOpacity={1}
-                onPress={decPlayerRoundScoreHandler}>
-                <Text style={{ fontSize: 100, opacity: 0, color: color, textAlign: 'center' }}> </Text>
-            </TouchableHighlight>
+                onPress={decPlayerRoundScoreHandler}><></></TouchableHighlight>
         </View>
     );
 }
 
-const styles = ScaledSheet.create({
+const styles = StyleSheet.create({
     playerCard: {
         flexGrow: 1,
         justifyContent: 'center',

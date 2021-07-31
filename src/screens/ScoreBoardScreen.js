@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Text, View, StyleSheet, Button, Dimensions, Platform, PixelRatio } from 'react-native';
+import { Text, View, StyleSheet, Button } from 'react-native';
 
 import PlayerScore from '../components/PlayerScore'
 import Rounds from '../components/Rounds';
@@ -61,10 +61,7 @@ export default function ScoreBoardScreen({ navigation }) {
 
     return (
         <View style={styles.appContainer}>
-            <View
-                style={styles.contentStyle}
-                onLayout={onLayout}
-            >
+            <View style={styles.contentStyle} onLayout={onLayout} >
                 {players.map((name, index) => (
                     <PlayerScore
                         key={index}
@@ -76,15 +73,14 @@ export default function ScoreBoardScreen({ navigation }) {
                     />
                 ))}
             </View>
+
             {false && <View style={{ flexDirection: 'row' }}>
                 <Button onPress={handleResetRows} title="reset rows"></Button>
                 <Button onPress={handleEval} title="eval"></Button>
                 <Button onPress={handleResetCards} title="reset card data"></Button>
             </View>}
-            <Rounds
-                style={styles.footerStyle}
-                navigation={navigation}
-            />
+
+            <Rounds style={styles.footerStyle} navigation={navigation} />
         </View>
     );
 }
