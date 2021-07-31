@@ -33,70 +33,72 @@ const ConfigureScreen = () => {
     }
 
     return (
-        <KeyboardAwareScrollView style={styles.configContainer}>
+        <KeyboardAwareScrollView style={styles.configScrollContainer}>
+            <View style={{ maxWidth: 500, alignSelf: 'center' }}>
 
-            <Text style={styles.text}>Tap the top half of a player's card to add a point. Tap the bottom half to subtract.</Text>
-            <Text style={styles.text}>Tip: To add or subtract faster, try tapping with two alternating fingers.</Text>
+                <Text style={styles.text}>Tap the top half of a player's card to add a point. Tap the bottom half to subtract.</Text>
+                <Text style={styles.text}>Tip: To add or subtract faster, try tapping with two alternating fingers.</Text>
 
-            <View style={{ margin: 10 }}>
-                <Button title="New Game" onPress={newGameHandler} />
-                {isNewGame &&
-                    <Text style={{ textAlign: 'center' }}>Scores have been reset!</Text>
-                }
-            </View>
-
-            {players.map((player, index) => (
-                <View style={styles.playerContainer} key={player.uuid}>
-                    <Text style={{ fontSize: 20, padding: 5 }}>{index + 1}</Text>
-                    <TextInput
-                        defaultValue={index == players.length - 1 && playerWasAdded ? null : player.name}
-                        style={styles.input}
-                        autoFocus={index == players.length - 1 && playerWasAdded}
-                        placeholder={'Player ' + (index + 1)}
-                        selectTextOnFocus={true}
-                        onEndEditing={(e) => {
-                            if (e.nativeEvent.text == "") {
-                                setPlayerNameHandler(index, 'Player ' + (index + 1));
-                            }
-                        }}
-                        maxLength={15}
-                        onChangeText={(text) => setPlayerNameHandler(index, text)} />
-                    {index > 0 &&
-                        <Button title="Delete" onPress={() => removePlayerHandler(index)}></Button>
+                <View style={{ margin: 10 }}>
+                    <Button title="New Game" onPress={newGameHandler} />
+                    {isNewGame &&
+                        <Text style={{ textAlign: 'center' }}>Scores have been reset!</Text>
                     }
                 </View>
-            ))}
 
-            <View style={{ margin: 10 }}>
-                <Button title="Add Player"
-                    disabled={players.length >= 8}
-                    onPress={addPlayerHandler} />
-            </View>
+                {players.map((player, index) => (
+                    <View style={styles.playerContainer} key={player.uuid}>
+                        <Text style={{ fontSize: 20, padding: 5 }}>{index + 1}</Text>
+                        <TextInput
+                            defaultValue={index == players.length - 1 && playerWasAdded ? null : player.name}
+                            style={styles.input}
+                            autoFocus={index == players.length - 1 && playerWasAdded}
+                            placeholder={'Player ' + (index + 1)}
+                            selectTextOnFocus={true}
+                            onEndEditing={(e) => {
+                                if (e.nativeEvent.text == "") {
+                                    setPlayerNameHandler(index, 'Player ' + (index + 1));
+                                }
+                            }}
+                            maxLength={15}
+                            onChangeText={(text) => setPlayerNameHandler(index, text)} />
+                        {index > 0 &&
+                            <Button title="Delete" onPress={() => removePlayerHandler(index)}></Button>
+                        }
+                    </View>
+                ))}
 
-            {players.length >= 8 &&
-                <Text style={styles.text}>Max players reached.</Text>
-            }
+                <View style={{ margin: 10 }}>
+                    <Button title="Add Player"
+                        disabled={players.length >= 8}
+                        onPress={addPlayerHandler} />
+                </View>
 
-            <View style={{ margin: 70 }}><Text>&nbsp;</Text></View>
-
-            <View style={{ marginVertical: 30 }}>
-                <Text style={{ textAlign: 'center' }} >
-                    Version {appJson.expo.version}
-                </Text>
-                {Platform.OS == 'ios' &&
-                    <Text style={{ textAlign: 'center' }}>{Platform.OS} build {appJson.expo.ios.buildNumber} </Text>
+                {players.length >= 8 &&
+                    <Text style={styles.text}>Max players reached.</Text>
                 }
-                {Platform.OS == 'android' &&
-                    <Text style={{ textAlign: 'center' }}>{Platform.OS} build {appJson.expo.android.versionCode} </Text>
-                }
-            </View>
 
+                <View style={{ margin: 70 }}><Text>&nbsp;</Text></View>
+
+                <View style={{ marginVertical: 30 }}>
+                    <Text style={{ textAlign: 'center' }} >
+                        Version {appJson.expo.version}
+                    </Text>
+                    {Platform.OS == 'ios' &&
+                        <Text style={{ textAlign: 'center' }}>{Platform.OS} build {appJson.expo.ios.buildNumber} </Text>
+                    }
+                    {Platform.OS == 'android' &&
+                        <Text style={{ textAlign: 'center' }}>{Platform.OS} build {appJson.expo.android.versionCode} </Text>
+                    }
+                </View>
+
+            </View>
         </KeyboardAwareScrollView>
     );
 }
 
 const styles = StyleSheet.create({
-    configContainer: {
+    configScrollContainer: {
         flex: 1,
         padding: 20,
         paddingBottom: 50,
