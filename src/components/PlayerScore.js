@@ -125,6 +125,7 @@ const styles = StyleSheet.create({
         alignSelf: 'center'
     },
     roundScore: {
+        fontVariant: ['tabular-nums'],
         alignSelf: 'center',
         fontSize: 40,
         margin: 0,
