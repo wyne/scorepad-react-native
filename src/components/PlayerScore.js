@@ -59,7 +59,7 @@ const PlayerScore = ({ playerIndex, color, fontColor, cols, rows }) => {
                     <Text style={[styles.totalScore, { color: fontColor, fontSize: fontScale(60) },]}>
                         {totalScore}
                     </Text>
-                    <View style={[styles.roundBox, { borderColor: fontColor, }]}>
+                    <View style={[styles.roundBox, { borderColor: fontColor, padding: ms(5, .4) }]}>
                         <Text style={[styles.roundScore, { fontSize: fontScale(35), color: fontColor }]}>
                             {scores[playerIndex][currentRound] || 0}
                         </Text>

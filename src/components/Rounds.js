@@ -47,13 +47,13 @@ function Rounds({ navigation }) {
                 style={{ justifyContent: 'center' }}
                 onPress={prevRoundHandler} >
                 <View><Text>
-                    <Feather name="chevron-left" style={styles.roundButton} color="black" />
+                    <Feather name="chevron-left" style={[styles.roundButton, { fontSize: ms(40, .4) }]} color="black" />
                 </Text></View>
             </TouchableOpacity>
 
             <TouchableOpacity style={{ justifyContent: 'center' }}
                 onPress={() => { navigation.navigate("Configure") }}>
-                <EvilIcons style={{ fontSize: ms(40, .5), color: 'white', textAlign: 'center' }} name="gear" color="black" />
+                <EvilIcons style={{ fontSize: ms(40, .4), color: 'white', textAlign: 'center' }} name="gear" color="black" />
             </TouchableOpacity>
 
             <View style={{ padding: 10, color: 'white' }}>
@@ -93,7 +93,7 @@ function Rounds({ navigation }) {
                 style={{ justifyContent: 'center', }}
                 onPress={nextRoundHandler} >
                 <View>
-                    <Feather name="chevron-right" style={styles.roundButton} color="black" />
+                    <Feather name="chevron-right" style={[styles.roundButton, { fontSize: ms(40, .4) }]} color="black" />
                 </View>
             </TouchableOpacity>
         </View>
