@@ -14,6 +14,7 @@ const PlayerScore = ({ playerIndex, color, fontColor, cols, rows }) => {
     const totalScore = scores[playerIndex].reduce(
         (a, b) => { return (a || 0) + (b || 0); }
     );
+    const roundScore = scores[playerIndex][currentRound] || 0
 
     const incPlayerRoundScoreHandler = () => {
         dispatch(incPlayerRoundScore(playerIndex));
@@ -37,8 +38,17 @@ const PlayerScore = ({ playerIndex, color, fontColor, cols, rows }) => {
         height = (100 / rows) + '%'
     }
 
-    const fontScale = (size) => {
-        return ms(size, .5);
+    const lengthScale = (lengthOf, size) => {
+        return ms(size - (lengthOf).toString().length * 4, .5) - players.length;
+    }
+    const nameLengthScale = () => {
+        const lengthOf = players[playerIndex].name.toString().length
+        const baseSize = 30
+        if (lengthOf > 5) {
+            return ms(baseSize - (lengthOf).toString().length * 5, .5);
+        } else {
+            return ms(baseSize, .5)
+        }
     }
 
     return (
@@ -51,17 +61,18 @@ const PlayerScore = ({ playerIndex, color, fontColor, cols, rows }) => {
 
             <View style={{ padding: 10 }}>
                 <View style={{ justifyContent: 'center', alignItems: 'center' }}>
-                    <Text numberOfLines={1} style={[styles.name, { fontSize: fontScale(30), color: fontColor }]}>
+                    <Text numberOfLines={1} style={[styles.name, { fontSize: nameLengthScale(), lineHeight: s(30), color: fontColor }]}>
                         {players[playerIndex].name}
                     </Text>
                 </View>
                 <View>
-                    <Text style={[styles.totalScore, { color: fontColor, fontSize: fontScale(60) },]}>
+                    <Text numberOfLines={1}
+                        style={[styles.totalScore, { color: fontColor, fontSize: lengthScale(totalScore, 60), lineHeight: ms(60, .5) },]}>
                         {totalScore}
                     </Text>
                     <View style={[styles.roundBox, { borderColor: fontColor, padding: ms(5, .4) }]}>
-                        <Text style={[styles.roundScore, { fontSize: fontScale(35), color: fontColor }]}>
-                            {scores[playerIndex][currentRound] || 0}
+                        <Text style={[styles.roundScore, { fontSize: lengthScale(roundScore, 35), lineHeight: ms(35, .5), color: fontColor }]}>
+                            {roundScore}
                         </Text>
                         <Text style={[styles.label, styles.roundLabel, { color: fontColor }]}>
                             Round {currentRound + 1}
