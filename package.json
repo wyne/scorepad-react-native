@@ -29,7 +29,7 @@
     "uuid": "^3.4.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.9.0",
+    "@babel/core": "^7.15.0",
     "gh-pages": "^3.2.3"
   },
   "homepage": "/scorepad-app",
