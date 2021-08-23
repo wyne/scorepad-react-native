@@ -1,8 +1,7 @@
-<img src="assets/icon.png" height="25">
-ScorePad with Rounds
+<img src="assets/icon.png" height="25"> ScorePad with Rounds
 ---
 
-> An open-source, multi-platform score keeping app with per-round score history.
+An open-source, multi-platform score keeping app with per-round score history.
 
 ## Website
 
@@ -14,9 +13,11 @@ https://wyne.github.io/scorepad/
 - [Web App](https://wyne.github.io/scorepad-app/)
 
 ## Screen Shots
-<img src="assets-stores/pixel4xl/Screenshot_20210725-021238.png" width="150">
-<img src="assets-stores/pixel4xl/Screenshot_20210725-021323.png" width="150">
-<img src="assets-stores/pixel4xl/Screenshot_20210725-021245.png" width="150">
+Device | Two Players | Four Players | Settings
+--- | ------------ | ------------ | -------------
+Phone | <img src="assets-stores/pixel4xl/Screenshot_20210725-021238.png" height="150"> | <img src="assets-stores/pixel4xl/Screenshot_20210725-021323.png" height="150"> | <img src="assets-stores/pixel4xl/Screenshot_20210725-021245.png" height="150">
+Tablet | <img src="assets-stores/ipadpro12-9/Simulator Screen Shot - iPad Pro (12.9-inch) (5th generation) - 2021-07-25 at 02.40.00.png" height="150"> | <img src="assets-stores/ipadpro12-9/Simulator Screen Shot - iPad Pro (12.9-inch) (5th generation) - 2021-07-25 at 02.40.38.png" height="150"> | <img src="assets-stores/ipadpro12-9/Simulator Screen Shot - iPad Pro (12.9-inch) (5th generation) - 2021-07-25 at 02.40.04.png" height="150">
+
 
 ## Contributing
 
