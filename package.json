@@ -10,7 +10,7 @@
   "dependencies": {
     "@react-native-async-storage/async-storage": "^1.15.11",
     "@react-navigation/stack": "^5.14.5",
-    "expo": "~42.0.3",
+    "expo": "~43.0.3",
     "expo-screen-orientation": "~3.2.1",
     "expo-status-bar": "~1.0.4",
     "react": "16.14.0",
