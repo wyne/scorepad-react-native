@@ -4,6 +4,7 @@ import currentGameReducer from './CurrentGameReducer';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { persistStore, persistReducer } from 'redux-persist';
 import createMigrate from 'redux-persist/es/createMigrate';
+import 'react-native-get-random-values';
 import { v4 as uuidv4 } from 'uuid';
 
 const migrations = {
@@ -18,6 +19,7 @@ const migrations = {
     // }
     // }
 }
+
 const persistConfig = {
     key: 'root',
     version: '0',
