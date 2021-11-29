@@ -1,19 +1,25 @@
 import React, { useEffect, useState } from 'react';
-import { Text, View, StyleSheet, Button } from 'react-native';
+import { Text, View, StyleSheet, Button, SafeAreaView } from 'react-native';
 
 import PlayerScore from '../components/PlayerScore'
 import Rounds from '../components/Rounds';
 import { useDispatch, useSelector } from 'react-redux';
 import { resetCardData } from '../../redux/CurrentGameActions';
+import { getContrastRatio } from 'colorsheet';
 
 export default function ScoreBoardScreen({ navigation }) {
     const palette = ["01497c", "c25858", "f5c800", "275436", "dc902c", "62516a", "755647", "925561"]
-    const fontPalette = ["FFFFFF", "FFFFFF", "000000", "FFFFFF", "FFFFFF", "FFFFFF", "FFFFFF", "FFFFFF"]
 
     const [grid, setGrid] = useState({ rows: 0, cols: 0 });
     const players = useSelector(state => state.currentGame.players);
     const cardDatas = useSelector(state => state.currentGame.cards);
     const dispatch = useDispatch();
+
+    const navigationOptions = ({ navigation }) => {
+        return {
+            title: navigation.getParam('Title', 'Default Title'),
+        };
+    };
 
     const resize = () => {
         const fn = () => {
@@ -56,32 +62,34 @@ export default function ScoreBoardScreen({ navigation }) {
     }
 
     useEffect(() => {
-        resize()
+        resize();
     })
 
     return (
-        <View style={styles.appContainer}>
-            <View style={styles.contentStyle} onLayout={onLayout} >
-                {players.map((name, index) => (
-                    <PlayerScore
-                        key={index}
-                        playerIndex={index}
-                        color={'#' + palette[index % palette.length]}
-                        fontColor={'#' + fontPalette[index % palette.length]}
-                        cols={(grid.rows != 0 && grid.cols != 0) ? grid.cols : 0}
-                        rows={(grid.rows != 0 && grid.cols != 0) ? grid.rows : 0}
-                    />
-                ))}
+        <SafeAreaView style={{ flex: 1, borderWidth: 3, borderColor: 'red' }}>
+            <View style={styles.appContainer}>
+                <View style={styles.contentStyle} onLayout={onLayout} >
+                    {players.map((name, index) => (
+                        <PlayerScore
+                            key={index}
+                            playerIndex={index}
+                            color={'#' + palette[index % palette.length]}
+                            fontColor={getContrastRatio('#' + palette[index % palette.length], '#000').number > 7 ? "black" : "white"}
+                            cols={(grid.rows != 0 && grid.cols != 0) ? grid.cols : 0}
+                            rows={(grid.rows != 0 && grid.cols != 0) ? grid.rows : 0}
+                        />
+                    ))}
+                </View>
+
+                {false && <View style={{ flexDirection: 'row' }}>
+                    <Button onPress={handleResetRows} title="reset rows"></Button>
+                    <Button onPress={handleEval} title="eval"></Button>
+                    <Button onPress={handleResetCards} title="reset card data"></Button>
+                </View>}
+
+                <Rounds style={styles.footerStyle} navigation={navigation} />
             </View>
-
-            {false && <View style={{ flexDirection: 'row' }}>
-                <Button onPress={handleResetRows} title="reset rows"></Button>
-                <Button onPress={handleEval} title="eval"></Button>
-                <Button onPress={handleResetCards} title="reset card data"></Button>
-            </View>}
-
-            <Rounds style={styles.footerStyle} navigation={navigation} />
-        </View>
+        </SafeAreaView>
     );
 }
 
@@ -92,6 +100,7 @@ const styles = StyleSheet.create({
         right: 0,
         bottom: 0,
         position: 'absolute',
+        // display: 'none',
     },
     contentStyle: {
         flex: 1,

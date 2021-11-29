@@ -66,16 +66,19 @@ const PlayerScore = ({ playerIndex, color, fontColor, cols, rows }) => {
                     </Text>
                 </View>
                 <View>
-                    <Text numberOfLines={1}
-                        style={[styles.totalScore, { color: fontColor, fontSize: lengthScale(totalScore, 60), lineHeight: ms(60, .5) },]}>
-                        {totalScore}
+                    <Text style={[styles.roundScore, { fontSize: lengthScale(roundScore, 55), lineHeight: ms(55, .5), color: fontColor }]}>
+                        {roundScore}
                     </Text>
+                    {/* <Text style={[styles.label, styles.roundLabel, { color: fontColor }]}> */}
+                    {/* Round {currentRound + 1} */}
+                    {/* </Text> */}
                     <View style={[styles.roundBox, { borderColor: fontColor, padding: ms(5, .4) }]}>
-                        <Text style={[styles.roundScore, { fontSize: lengthScale(roundScore, 35), lineHeight: ms(35, .5), color: fontColor }]}>
-                            {roundScore}
+                        <Text numberOfLines={1}
+                            style={[styles.totalScore, { color: fontColor, fontSize: lengthScale(totalScore, 35), lineHeight: ms(35, .5) },]}>
+                            {totalScore}
                         </Text>
                         <Text style={[styles.label, styles.roundLabel, { color: fontColor }]}>
-                            Round {currentRound + 1}
+                            Total
                         </Text>
                     </View>
                 </View>
@@ -124,21 +127,21 @@ const styles = StyleSheet.create({
     },
     totalScore: {
         margin: 2,
-        fontWeight: 'bold',
         textAlign: 'center',
         color: 'white',
         fontVariant: ['tabular-nums'],
     },
     roundBox: {
-        padding: 5,
+        // padding: 5,
+        padding: 10,
         borderRadius: 5,
         borderWidth: 2,
         alignSelf: 'center'
     },
     roundScore: {
         fontVariant: ['tabular-nums'],
+        fontWeight: 'bold',
         alignSelf: 'center',
-        fontSize: 40,
         margin: 0,
         marginTop: 0,
         padding: 0,

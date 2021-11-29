@@ -28,6 +28,7 @@
       "versionCode": 13,
       "permissions": []
     },
+    "userInterfaceStyle": "dark",
     "web": {
       "favicon": "./assets/favicon.png"
     },
