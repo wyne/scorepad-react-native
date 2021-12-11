@@ -10,6 +10,7 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import { PersistGate } from 'redux-persist/integration/react';
 import { store, persistor } from './redux/store';
+import RoundTitle from './src/components/RoundTitle';
 
 const navigator = createStackNavigator(
     {
@@ -17,6 +18,9 @@ const navigator = createStackNavigator(
             screen: ScoreBoardScreen,
             navigationOptions: ({ navigation }) => ({
                 headerShown: true,
+                header: (navigation) => {
+                    return <RoundTitle />;
+                }
             }),
         },
         Configure: {

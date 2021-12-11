@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Text, View, StyleSheet, Button, SafeAreaView } from 'react-native';
+import { Text, View, StyleSheet, Button } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import PlayerScore from '../components/PlayerScore'
 import Rounds from '../components/Rounds';
@@ -14,12 +15,6 @@ export default function ScoreBoardScreen({ navigation }) {
     const players = useSelector(state => state.currentGame.players);
     const cardDatas = useSelector(state => state.currentGame.cards);
     const dispatch = useDispatch();
-
-    const navigationOptions = ({ navigation }) => {
-        return {
-            title: navigation.getParam('Title', 'Default Title'),
-        };
-    };
 
     const resize = () => {
         const fn = () => {
@@ -66,7 +61,7 @@ export default function ScoreBoardScreen({ navigation }) {
     })
 
     return (
-        <SafeAreaView style={{ flex: 1, borderWidth: 3, borderColor: 'red' }}>
+        <SafeAreaView style={{ flex: 1 }}>
             <View style={styles.appContainer}>
                 <View style={styles.contentStyle} onLayout={onLayout} >
                     {players.map((name, index) => (
