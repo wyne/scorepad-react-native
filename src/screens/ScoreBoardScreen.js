@@ -1,11 +1,10 @@
-import React, { useEffect, useState } from 'react';
-import { Text, View, StyleSheet, Button } from 'react-native';
+import React, { useState } from 'react';
+import { Text, View, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import PlayerScore from '../components/PlayerScore'
 import Rounds from '../components/Rounds';
-import { useDispatch, useSelector } from 'react-redux';
-import { resetCardData } from '../../redux/CurrentGameActions';
+import { useSelector } from 'react-redux';
 import { getContrastRatio } from 'colorsheet';
 
 export default function ScoreBoardScreen({ navigation }) {
@@ -13,52 +12,39 @@ export default function ScoreBoardScreen({ navigation }) {
 
     const [grid, setGrid] = useState({ rows: 0, cols: 0 });
     const players = useSelector(state => state.currentGame.players);
-    const cardDatas = useSelector(state => state.currentGame.cards);
-    const dispatch = useDispatch();
 
-    const resize = () => {
-        const fn = () => {
-            if (Object.keys(cardDatas || {}).length >= players.length) {
-                const newCols = countColumns();
-                const newRows = Math.ceil(players.length / newCols);
-                if (newRows != grid.rows || newCols != grid.cols) {
-                    setGrid({ rows: newRows, cols: newCols })
-                }
-            }
-        }
-        // Todo: this delay is necessary unfortunately.
-        setTimeout(fn, 100);
-    }
-
-    const countColumns = () => {
-        if (cardDatas === undefined) return []
-        const d = players.map((name, index) => {
-            return (cardDatas[index] || {}).x
-        })
-        const lefts = d.filter(i => i !== undefined);
-        return [...new Set(lefts)].length;
-    }
-
-    const handleResetRows = () => {
-        setGrid({ rows: 0, cols: 0 })
-    }
-
-    const handleResetCards = () => {
-        dispatch(resetCardData());
-    }
-
-    const handleEval = () => {
-        resize()
-    }
+    const desiredAspectRatio = 1.0 / 1.0;
 
     const onLayout = (e) => {
-        handleResetRows();
-        handleResetCards();
-    }
+        var { x, y, width, height } = e.nativeEvent.layout;
 
-    useEffect(() => {
-        resize();
-    })
+        let diff = 99;
+        let idealRows = 1;
+        for (let rows = 1; rows <= players.length; rows++) {
+            const cols = Math.ceil(players.length / rows);
+
+            //TODO: skip if too imbalanced
+            if (players.length % rows > 0 && rows - players.length % rows > 1) {
+                console.log("skipped", players.length % rows, rows);
+                continue;
+            }
+
+            const w = width / cols;
+            let h = height / rows;
+
+            const ratio = w / h;
+
+            console.log(rows, 'x', cols, '=', ratio);
+
+            if (Math.abs(desiredAspectRatio - ratio) < diff) {
+                diff = Math.abs(desiredAspectRatio - ratio);
+                idealRows = rows;
+            }
+        }
+
+        console.log("Best: ", idealRows, 'x', Math.ceil(players.length / idealRows));
+        setGrid({ rows: idealRows, cols: Math.ceil(players.length / idealRows) })
+    }
 
     return (
         <SafeAreaView style={{ flex: 1 }}>
@@ -76,12 +62,6 @@ export default function ScoreBoardScreen({ navigation }) {
                     ))}
                 </View>
 
-                {false && <View style={{ flexDirection: 'row' }}>
-                    <Button onPress={handleResetRows} title="reset rows"></Button>
-                    <Button onPress={handleEval} title="eval"></Button>
-                    <Button onPress={handleResetCards} title="reset card data"></Button>
-                </View>}
-
                 <Rounds style={styles.footerStyle} navigation={navigation} />
             </View>
         </SafeAreaView>
@@ -95,7 +75,6 @@ const styles = StyleSheet.create({
         right: 0,
         bottom: 0,
         position: 'absolute',
-        // display: 'none',
     },
     contentStyle: {
         flex: 1,

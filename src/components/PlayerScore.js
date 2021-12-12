@@ -3,7 +3,7 @@ import { Text, View, StyleSheet, TouchableHighlight } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { s, vs, ms, mvs } from 'react-native-size-matters';
 
-import { incPlayerRoundScore, decPlayerRoundScore, setCardData } from '../../redux/CurrentGameActions';
+import { incPlayerRoundScore, decPlayerRoundScore } from '../../redux/CurrentGameActions';
 
 const PlayerScore = ({ playerIndex, color, fontColor, cols, rows }) => {
     const players = useSelector(state => state.currentGame.players);
@@ -14,6 +14,7 @@ const PlayerScore = ({ playerIndex, color, fontColor, cols, rows }) => {
     const totalScore = scores[playerIndex].reduce(
         (a, b) => { return (a || 0) + (b || 0); }
     );
+
     const roundScore = scores[playerIndex][currentRound] || 0
 
     const incPlayerRoundScoreHandler = () => {
@@ -24,23 +25,13 @@ const PlayerScore = ({ playerIndex, color, fontColor, cols, rows }) => {
         dispatch(decPlayerRoundScore(playerIndex));
     }
 
-    const measureView = (e) => {
-        if (rows == 0 && cols == 0) {
-            dispatch(setCardData(playerIndex, e.nativeEvent.layout));
-        }
-    }
-
-    let width = null;
-    let height = null;
-
-    if (rows > 0 && cols > 0) {
-        width = (100 / cols) + '%'
-        height = (100 / rows) + '%'
-    }
+    const width = (100 / cols) + '%';
+    const height = (100 / rows) + '%';
 
     const lengthScale = (lengthOf, size) => {
         return ms(size - (lengthOf).toString().length * 4, .5) - players.length;
     }
+
     const nameLengthScale = () => {
         const lengthOf = players[playerIndex].name.toString().length
         const baseSize = 30
@@ -52,12 +43,11 @@ const PlayerScore = ({ playerIndex, color, fontColor, cols, rows }) => {
     }
 
     return (
-        <View onLayout={(event) => measureView(event)}
-            style={[styles.playerCard,
-            { backgroundColor: color },
-            { width: cols === 0 ? 'auto' : width },
-            { height: rows == 0 ? 'auto' : height },
-            ]}>
+        <View style={[styles.playerCard,
+        { backgroundColor: color },
+        { width: width },
+        { height: height },
+        ]}>
 
             <View style={{ padding: 10 }}>
                 <View style={{ justifyContent: 'center', alignItems: 'center' }}>
