@@ -8,7 +8,7 @@ function RoundTitle({ navigation }) {
     const currentRound = useSelector(state => state.currentGame.currentRound);
 
     return (
-        <SafeAreaView style={[styles.title]}>
+        <SafeAreaView edges={['top']} style={[styles.title]}>
             <Text style={{ fontSize: 20, color: 'white' }}>Round {currentRound + 1}</Text>
         </SafeAreaView>
     );

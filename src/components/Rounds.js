@@ -4,6 +4,7 @@ import { s, vs, ms, mvs } from 'react-native-size-matters';
 
 import { useSelector, useDispatch } from 'react-redux';
 import { nextRound, prevRound } from '../../redux/CurrentGameActions';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Feather } from '@expo/vector-icons';
 import { EvilIcons } from '@expo/vector-icons';
@@ -41,7 +42,7 @@ function Rounds({ navigation }) {
     }
 
     return (
-        <View style={{ flexDirection: 'row', backgroundColor: 'black', paddingBottom: 10 }}>
+        <SafeAreaView edges={['right', 'left']} style={{ flexDirection: 'row', backgroundColor: 'black', paddingBottom: 10 }}>
 
             <View style={{ padding: 10, color: 'white' }}>
                 <Text style={{ color: 'white', fontSize: 25 }}> &nbsp; </Text>
@@ -109,9 +110,9 @@ function Rounds({ navigation }) {
                 <TouchableOpacity
                     style={{ justifyContent: 'center' }}
                     onPress={prevRoundHandler} >
-                    <View><Text>
+                    <View>
                         <Feather name="chevron-left" style={[styles.roundButton, { fontSize: ms(40, .4) }]} color="black" />
-                    </Text></View>
+                    </View>
                 </TouchableOpacity>
 
                 <TouchableOpacity
@@ -127,7 +128,7 @@ function Rounds({ navigation }) {
                     <EvilIcons style={{ fontSize: ms(40, .4), color: 'white', textAlign: 'center' }} name="gear" color="black" />
                 </TouchableOpacity>
             </View>
-        </View >
+        </SafeAreaView >
     );
 }
 

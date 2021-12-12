@@ -72,15 +72,15 @@ const PlayerScore = ({ playerIndex, color, fontColor, cols, rows }) => {
                     {/* <Text style={[styles.label, styles.roundLabel, { color: fontColor }]}> */}
                     {/* Round {currentRound + 1} */}
                     {/* </Text> */}
-                    <View style={[styles.roundBox, { borderColor: fontColor, padding: ms(5, .4) }]}>
-                        <Text numberOfLines={1}
-                            style={[styles.totalScore, { color: fontColor, fontSize: lengthScale(totalScore, 35), lineHeight: ms(35, .5) },]}>
-                            {totalScore}
-                        </Text>
-                        <Text style={[styles.label, styles.roundLabel, { color: fontColor }]}>
-                            Total
-                        </Text>
-                    </View>
+                    {/* <View style={[styles.roundBox, { borderColor: fontColor, padding: ms(5, .4) }]}> */}
+                    {/* <Text numberOfLines={1} */}
+                    {/* style={[styles.totalScore, { color: fontColor, fontSize: lengthScale(totalScore, 35), lineHeight: ms(35, .5) },]}> */}
+                    {/* {totalScore} */}
+                    {/* </Text> */}
+                    {/* <Text style={[styles.label, styles.roundLabel, { color: fontColor }]}> */}
+                    {/* Total */}
+                    {/* </Text> */}
+                    {/* </View> */}
                 </View>
             </View>
 
