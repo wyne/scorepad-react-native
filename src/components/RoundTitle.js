@@ -1,8 +1,8 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Text, View, StyleSheet, TouchableOpacity, ScrollView, Platform } from 'react-native';
+import React from 'react';
+import { Text, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 
 function RoundTitle({ navigation }) {
     const currentRound = useSelector(state => state.currentGame.currentRound);

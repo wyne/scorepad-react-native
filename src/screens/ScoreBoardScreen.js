@@ -13,37 +13,32 @@ export default function ScoreBoardScreen({ navigation }) {
     const [grid, setGrid] = useState({ rows: 0, cols: 0 });
     const players = useSelector(state => state.currentGame.players);
 
-    const desiredAspectRatio = 1.0 / 1.0;
+    const desiredAspectRatio = 1.0;
 
     const onLayout = (e) => {
         var { x, y, width, height } = e.nativeEvent.layout;
 
-        let diff = 99;
-        let idealRows = 1;
+        let closestAspectRatio = Number.MAX_SAFE_INTEGER
+        let bestRowCount = 1;
+
         for (let rows = 1; rows <= players.length; rows++) {
             const cols = Math.ceil(players.length / rows);
 
-            //TODO: skip if too imbalanced
             if (players.length % rows > 0 && rows - players.length % rows > 1) {
-                console.log("skipped", players.length % rows, rows);
                 continue;
             }
 
             const w = width / cols;
-            let h = height / rows;
-
+            const h = height / rows;
             const ratio = w / h;
 
-            console.log(rows, 'x', cols, '=', ratio);
-
-            if (Math.abs(desiredAspectRatio - ratio) < diff) {
-                diff = Math.abs(desiredAspectRatio - ratio);
-                idealRows = rows;
+            if (Math.abs(desiredAspectRatio - ratio) < Math.abs(closestAspectRatio - ratio)) {
+                closestAspectRatio = ratio;
+                bestRowCount = rows;
             }
         }
 
-        console.log("Best: ", idealRows, 'x', Math.ceil(players.length / idealRows));
-        setGrid({ rows: idealRows, cols: Math.ceil(players.length / idealRows) })
+        setGrid({ rows: bestRowCount, cols: Math.ceil(players.length / bestRowCount) })
     }
 
     return (

@@ -53,18 +53,8 @@ function Rounds({ navigation }) {
                 ))}
             </View>
 
-
-            <View key={'total'} style={{ padding: 10 }}
-            // ref={currentRound == round ? currentRoundEl : null}
-            // onLayout={(e) => handleCurrentRoundLayout(e, round)}
-            // backgroundColor={round == currentRound ? '#111' : 'black'}
-            >
-                <Text style={{
-                    color: 'blue',
-                    fontWeight: 'bold',
-                    textAlign: 'center',
-                    fontSize: 25,
-                }}>
+            <View key={'total'} style={{ padding: 10 }}>
+                <Text style={[styles.sumHeader]}>
                     Total
                 </Text>
                 {players.map((player, playerIndex) => (
@@ -76,7 +66,6 @@ function Rounds({ navigation }) {
                         {scores[playerIndex].reduce(
                             (a, b) => { return (a || 0) + (b || 0); }
                         )}
-
                     </Text>
                 ))}
             </View>
@@ -133,6 +122,12 @@ function Rounds({ navigation }) {
 }
 
 const styles = StyleSheet.create({
+    sumHeader: {
+        color: 'blue',
+        fontWeight: 'bold',
+        textAlign: 'center',
+        fontSize: 25,
+    },
     roundButton: {
         fontSize: 50,
         paddingHorizontal: 10,
