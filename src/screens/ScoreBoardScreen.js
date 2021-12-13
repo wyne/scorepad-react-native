@@ -1,87 +1,65 @@
-import React, { useEffect, useState } from 'react';
-import { Text, View, StyleSheet, Button } from 'react-native';
+import React, { useState } from 'react';
+import { Text, View, StyleSheet } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import PlayerScore from '../components/PlayerScore'
 import Rounds from '../components/Rounds';
-import { useDispatch, useSelector } from 'react-redux';
-import { resetCardData } from '../../redux/CurrentGameActions';
+import { useSelector } from 'react-redux';
+import { getContrastRatio } from 'colorsheet';
 
 export default function ScoreBoardScreen({ navigation }) {
     const palette = ["01497c", "c25858", "f5c800", "275436", "dc902c", "62516a", "755647", "925561"]
-    const fontPalette = ["FFFFFF", "FFFFFF", "000000", "FFFFFF", "FFFFFF", "FFFFFF", "FFFFFF", "FFFFFF"]
 
     const [grid, setGrid] = useState({ rows: 0, cols: 0 });
     const players = useSelector(state => state.currentGame.players);
-    const cardDatas = useSelector(state => state.currentGame.cards);
-    const dispatch = useDispatch();
 
-    const resize = () => {
-        const fn = () => {
-            if (Object.keys(cardDatas || {}).length >= players.length) {
-                const newCols = countColumns();
-                const newRows = Math.ceil(players.length / newCols);
-                if (newRows != grid.rows || newCols != grid.cols) {
-                    setGrid({ rows: newRows, cols: newCols })
-                }
-            }
-        }
-        // Todo: this delay is necessary unfortunately.
-        setTimeout(fn, 100);
-    }
-
-    const countColumns = () => {
-        if (cardDatas === undefined) return []
-        const d = players.map((name, index) => {
-            return (cardDatas[index] || {}).x
-        })
-        const lefts = d.filter(i => i !== undefined);
-        return [...new Set(lefts)].length;
-    }
-
-    const handleResetRows = () => {
-        setGrid({ rows: 0, cols: 0 })
-    }
-
-    const handleResetCards = () => {
-        dispatch(resetCardData());
-    }
-
-    const handleEval = () => {
-        resize()
-    }
+    const desiredAspectRatio = 0.8;
 
     const onLayout = (e) => {
-        handleResetRows();
-        handleResetCards();
+        var { x, y, width, height } = e.nativeEvent.layout;
+
+        let closestAspectRatio = Number.MAX_SAFE_INTEGER
+        let bestRowCount = 1;
+
+        for (let rows = 1; rows <= players.length; rows++) {
+            const cols = Math.ceil(players.length / rows);
+
+            if (players.length % rows > 0 && rows - players.length % rows > 1) {
+                continue;
+            }
+
+            const w = width / cols;
+            const h = height / rows;
+            const ratio = w / h;
+
+            if (Math.abs(desiredAspectRatio - ratio) < Math.abs(desiredAspectRatio - closestAspectRatio)) {
+                closestAspectRatio = ratio;
+                bestRowCount = rows;
+            }
+        }
+
+        setGrid({ rows: bestRowCount, cols: Math.ceil(players.length / bestRowCount) })
     }
 
-    useEffect(() => {
-        resize()
-    })
-
     return (
-        <View style={styles.appContainer}>
-            <View style={styles.contentStyle} onLayout={onLayout} >
-                {players.map((name, index) => (
-                    <PlayerScore
-                        key={index}
-                        playerIndex={index}
-                        color={'#' + palette[index % palette.length]}
-                        fontColor={'#' + fontPalette[index % palette.length]}
-                        cols={(grid.rows != 0 && grid.cols != 0) ? grid.cols : 0}
-                        rows={(grid.rows != 0 && grid.cols != 0) ? grid.rows : 0}
-                    />
-                ))}
+        <SafeAreaView style={{ flex: 1 }}>
+            <View style={styles.appContainer}>
+                <View style={styles.contentStyle} onLayout={onLayout} >
+                    {players.map((name, index) => (
+                        <PlayerScore
+                            key={index}
+                            playerIndex={index}
+                            color={'#' + palette[index % palette.length]}
+                            fontColor={getContrastRatio('#' + palette[index % palette.length], '#000').number > 7 ? "#000000" : "#FFFFFF"}
+                            cols={(grid.rows != 0 && grid.cols != 0) ? grid.cols : 0}
+                            rows={(grid.rows != 0 && grid.cols != 0) ? grid.rows : 0}
+                        />
+                    ))}
+                </View>
+
+                <Rounds style={styles.footerStyle} navigation={navigation} />
             </View>
-
-            {false && <View style={{ flexDirection: 'row' }}>
-                <Button onPress={handleResetRows} title="reset rows"></Button>
-                <Button onPress={handleEval} title="eval"></Button>
-                <Button onPress={handleResetCards} title="reset card data"></Button>
-            </View>}
-
-            <Rounds style={styles.footerStyle} navigation={navigation} />
-        </View>
+        </SafeAreaView>
     );
 }
 
@@ -98,7 +76,7 @@ const styles = StyleSheet.create({
         flexGrow: 1,
         flexWrap: 'wrap',
         alignContent: 'stretch',
-        flexDirection: 'column',
+        flexDirection: 'row',
         maxWidth: '100%',
         backgroundColor: '#000000'
     },
