@@ -10,6 +10,7 @@ import { Feather } from '@expo/vector-icons';
 import { EvilIcons } from '@expo/vector-icons';
 
 function Rounds({ navigation, show }) {
+    const palette = ["01497c", "c25858", "f5c800", "275436", "dc902c", "62516a", "755647", "925561"];
     const [roundScollOffsets, setRoundScrollOffsets] = useState([]);
 
     const dispatch = useDispatch();
@@ -47,9 +48,11 @@ function Rounds({ navigation, show }) {
             <View style={{ padding: 10, color: 'white' }}>
                 <Text style={{ color: 'white', fontSize: 20 }}> &nbsp; </Text>
                 {players.map((player, index) => (
-                    <Text key={index} style={{ color: 'white', maxWidth: 100, fontSize: 20, }}
-                        numberOfLines={1}
-                    >{player.name}</Text>
+                    <View key={index} style={{ paddingLeft: 2, borderLeftWidth: 5, borderColor: "#" + palette[index] }}>
+                        <Text key={index} style={{ color: 'white', maxWidth: 100, fontSize: 20, }}
+                            numberOfLines={1}
+                        >{player.name}</Text>
+                    </View>
                 ))}
             </View>
 
@@ -58,11 +61,7 @@ function Rounds({ navigation, show }) {
                     Total
                 </Text>
                 {players.map((player, playerIndex) => (
-                    <Text key={playerIndex} style={[
-                        styles.scoreEntry,
-                    ]}
-                    // { color: scores[playerIndex][round] == 0 ? '#555' : 'white' }]}
-                    >
+                    <Text key={playerIndex} style={[styles.scoreEntry, { color: '#0a84ff' }]} >
                         {scores[playerIndex].reduce(
                             (a, b) => { return (a || 0) + (b || 0); }
                         )}
@@ -123,7 +122,7 @@ function Rounds({ navigation, show }) {
 
 const styles = StyleSheet.create({
     sumHeader: {
-        color: 'blue',
+        color: '#0a84ff',
         fontWeight: 'bold',
         textAlign: 'center',
         fontSize: 20,
