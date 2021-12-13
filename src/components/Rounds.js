@@ -9,7 +9,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { EvilIcons } from '@expo/vector-icons';
 
-function Rounds({ navigation }) {
+function Rounds({ navigation, show }) {
     const [roundScollOffsets, setRoundScrollOffsets] = useState([]);
 
     const dispatch = useDispatch();
@@ -42,7 +42,7 @@ function Rounds({ navigation }) {
     }
 
     return (
-        <SafeAreaView edges={['right', 'left']} style={{ flexDirection: 'row', backgroundColor: 'black', paddingBottom: 10 }}>
+        <SafeAreaView edges={['right', 'left']} style={{ flexDirection: 'row', backgroundColor: 'black', paddingBottom: 10, height: show ? 'auto' : 0 }}>
 
             <View style={{ padding: 10, color: 'white' }}>
                 <Text style={{ color: 'white', fontSize: 20 }}> &nbsp; </Text>
