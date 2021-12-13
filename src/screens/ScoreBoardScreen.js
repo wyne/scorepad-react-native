@@ -76,7 +76,7 @@ const styles = StyleSheet.create({
         flexGrow: 1,
         flexWrap: 'wrap',
         alignContent: 'stretch',
-        flexDirection: 'column',
+        flexDirection: 'row',
         maxWidth: '100%',
         backgroundColor: '#000000'
     },
