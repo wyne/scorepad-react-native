@@ -3,25 +3,13 @@ import { Text, View, StyleSheet, TouchableOpacity, ScrollView, Platform } from '
 import { s, vs, ms, mvs } from 'react-native-size-matters';
 
 import { useSelector, useDispatch } from 'react-redux';
-import { nextRound, prevRound } from '../../redux/CurrentGameActions';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { Feather } from '@expo/vector-icons';
 import { EvilIcons } from '@expo/vector-icons';
 
 function Rounds({ navigation, show }) {
     const palette = ["01497c", "c25858", "f5c800", "275436", "dc902c", "62516a", "755647", "925561"];
     const [roundScollOffsets, setRoundScrollOffsets] = useState([]);
-
-    const dispatch = useDispatch();
-
-    const nextRoundHandler = () => {
-        dispatch(nextRound());
-    }
-
-    const prevRoundHandler = () => {
-        dispatch(prevRound());
-    }
 
     const players = useSelector(state => state.currentGame.players);
     const scores = useSelector(state => state.currentGame.scores);
@@ -95,22 +83,6 @@ function Rounds({ navigation, show }) {
             </ScrollView>
 
             <View style={{ flexDirection: 'column', justifyContent: 'space-around' }}>
-                <TouchableOpacity
-                    style={{ justifyContent: 'center' }}
-                    onPress={prevRoundHandler} >
-                    <View>
-                        <Feather name="chevron-left" style={[styles.roundButton, { fontSize: ms(40, .4) }]} color="black" />
-                    </View>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                    style={{ justifyContent: 'center', }}
-                    onPress={nextRoundHandler} >
-                    <View>
-                        <Feather name="chevron-right" style={[styles.roundButton, { fontSize: ms(40, .4) }]} color="black" />
-                    </View>
-                </TouchableOpacity>
-
                 <TouchableOpacity style={{ justifyContent: 'center' }}
                     onPress={() => { navigation.navigate("Configure") }}>
                     <EvilIcons style={{ fontSize: ms(40, .4), color: 'white', textAlign: 'center' }} name="gear" color="black" />
@@ -126,11 +98,6 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         textAlign: 'center',
         fontSize: 20,
-    },
-    roundButton: {
-        fontSize: 50,
-        paddingHorizontal: 10,
-        color: 'white',
     },
     scoreEntry: {
         fontVariant: ['tabular-nums'],
