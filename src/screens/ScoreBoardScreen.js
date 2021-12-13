@@ -32,7 +32,7 @@ export default function ScoreBoardScreen({ navigation }) {
             const h = height / rows;
             const ratio = w / h;
 
-            if (Math.abs(desiredAspectRatio - ratio) < Math.abs(closestAspectRatio - ratio)) {
+            if (Math.abs(desiredAspectRatio - ratio) < Math.abs(desiredAspectRatio - closestAspectRatio)) {
                 closestAspectRatio = ratio;
                 bestRowCount = rows;
             }
