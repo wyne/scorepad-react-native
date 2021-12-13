@@ -56,21 +56,20 @@ const PlayerScore = ({ playerIndex, color, fontColor, cols, rows }) => {
                     </Text>
                 </View>
                 <View>
-                    <Text style={[styles.roundScore, { fontSize: lengthScale(roundScore, 55), lineHeight: ms(55, .5), color: fontColor }]}>
-                        {roundScore}
+                    <Text style={[styles.totalScore, { fontSize: lengthScale(totalScore, 55), lineHeight: ms(55, .5), color: fontColor }]}>
+                        {totalScore}
                     </Text>
-                    {/* <Text style={[styles.label, styles.roundLabel, { color: fontColor }]}> */}
-                    {/* Round {currentRound + 1} */}
-                    {/* </Text> */}
-                    {/* <View style={[styles.roundBox, { borderColor: fontColor, padding: ms(5, .4) }]}> */}
-                    {/* <Text numberOfLines={1} */}
-                    {/* style={[styles.totalScore, { color: fontColor, fontSize: lengthScale(totalScore, 35), lineHeight: ms(35, .5) },]}> */}
-                    {/* {totalScore} */}
-                    {/* </Text> */}
-                    {/* <Text style={[styles.label, styles.roundLabel, { color: fontColor }]}> */}
-                    {/* Total */}
-                    {/* </Text> */}
-                    {/* </View> */}
+                    {roundScore != 0 &&
+                        <View style={[styles.roundBox, { borderColor: fontColor + '75', padding: ms(5, .4) }]}>
+                            <Text numberOfLines={1}
+                                style={[styles.roundScore, { color: fontColor + '75', fontSize: lengthScale(roundScore, 35), lineHeight: ms(25, .5) },]}>
+                                {roundScore > 0 && "+"} {roundScore}
+                            </Text>
+                            <Text style={[styles.label, styles.totalLabel, { color: fontColor + '75' }]}>
+                                this round
+                            </Text>
+                        </View>
+                    }
                 </View>
             </View>
 
@@ -115,7 +114,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignSelf: 'center',
     },
-    totalScore: {
+    roundScore: {
         margin: 2,
         textAlign: 'center',
         color: 'white',
@@ -128,7 +127,7 @@ const styles = StyleSheet.create({
         borderWidth: 2,
         alignSelf: 'center'
     },
-    roundScore: {
+    totalScore: {
         fontVariant: ['tabular-nums'],
         fontWeight: 'bold',
         alignSelf: 'center',
@@ -141,7 +140,7 @@ const styles = StyleSheet.create({
         alignSelf: 'center',
         color: 'white',
     },
-    roundLabel: {
+    totalLabel: {
         fontVariant: ['tabular-nums'],
         alignSelf: 'center',
         textAlign: 'center',
