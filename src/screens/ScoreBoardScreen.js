@@ -13,7 +13,7 @@ export default function ScoreBoardScreen({ navigation }) {
     const [grid, setGrid] = useState({ rows: 0, cols: 0 });
     const players = useSelector(state => state.currentGame.players);
 
-    const desiredAspectRatio = 1.0;
+    const desiredAspectRatio = 0.8;
 
     const onLayout = (e) => {
         var { x, y, width, height } = e.nativeEvent.layout;
@@ -50,7 +50,7 @@ export default function ScoreBoardScreen({ navigation }) {
                             key={index}
                             playerIndex={index}
                             color={'#' + palette[index % palette.length]}
-                            fontColor={getContrastRatio('#' + palette[index % palette.length], '#000').number > 7 ? "black" : "white"}
+                            fontColor={getContrastRatio('#' + palette[index % palette.length], '#000').number > 7 ? "#000000" : "#FFFFFF"}
                             cols={(grid.rows != 0 && grid.cols != 0) ? grid.cols : 0}
                             rows={(grid.rows != 0 && grid.cols != 0) ? grid.rows : 0}
                         />

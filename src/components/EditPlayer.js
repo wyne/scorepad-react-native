@@ -23,6 +23,7 @@ const EditPlayer = ({ player, index, promptColor, setPlayerWasAdded, playerWasAd
     return (
         <View style={styles.playerContainer} key={player.uuid}>
             <Text style={{
+                fontVariant: ['tabular-nums'],
                 fontSize: 35,
                 padding: 5,
                 fontWeight: "bold",

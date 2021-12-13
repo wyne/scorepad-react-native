@@ -45,9 +45,9 @@ function Rounds({ navigation }) {
         <SafeAreaView edges={['right', 'left']} style={{ flexDirection: 'row', backgroundColor: 'black', paddingBottom: 10 }}>
 
             <View style={{ padding: 10, color: 'white' }}>
-                <Text style={{ color: 'white', fontSize: 25 }}> &nbsp; </Text>
+                <Text style={{ color: 'white', fontSize: 20 }}> &nbsp; </Text>
                 {players.map((player, index) => (
-                    <Text key={index} style={{ color: 'white', maxWidth: 100, fontSize: 25, }}
+                    <Text key={index} style={{ color: 'white', maxWidth: 100, fontSize: 20, }}
                         numberOfLines={1}
                     >{player.name}</Text>
                 ))}
@@ -80,7 +80,7 @@ function Rounds({ navigation }) {
                             color: currentRound == round ? 'red' : 'yellow',
                             fontWeight: 'bold',
                             textAlign: 'center',
-                            fontSize: 25,
+                            fontSize: 20,
                         }}>
                             {round + 1}
                         </Text>
@@ -126,7 +126,7 @@ const styles = StyleSheet.create({
         color: 'blue',
         fontWeight: 'bold',
         textAlign: 'center',
-        fontSize: 25,
+        fontSize: 20,
     },
     roundButton: {
         fontSize: 50,
@@ -137,7 +137,7 @@ const styles = StyleSheet.create({
         fontVariant: ['tabular-nums'],
         textAlign: 'center',
         color: 'white',
-        fontSize: 25,
+        fontSize: 20,
     }
 });
 
