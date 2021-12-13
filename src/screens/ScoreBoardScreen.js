@@ -12,6 +12,7 @@ export default function ScoreBoardScreen({ navigation }) {
 
     const [grid, setGrid] = useState({ rows: 0, cols: 0 });
     const players = useSelector(state => state.currentGame.players);
+    const expanded = useSelector(state => state.settings.home_fullscreen);
 
     const desiredAspectRatio = 0.8;
 
@@ -57,7 +58,7 @@ export default function ScoreBoardScreen({ navigation }) {
                     ))}
                 </View>
 
-                <Rounds style={styles.footerStyle} navigation={navigation} />
+                <Rounds style={styles.footerStyle} navigation={navigation} show={expanded} />
             </View>
         </SafeAreaView>
     );
