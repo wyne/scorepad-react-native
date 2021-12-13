@@ -98,7 +98,13 @@ const ConfigureScreen = () => {
                 </View>
 
                 {players.map((player, index) => (
-                    <EditPlayer player={player} index={index} promptColor={promptColor} setPlayerWasAdded={setPlayerWasAdded} playerWasAdded={playerWasAdded} />
+                    <EditPlayer
+                        player={player}
+                        index={index} promptColor={promptColor}
+                        setPlayerWasAdded={setPlayerWasAdded}
+                        playerWasAdded={playerWasAdded}
+                        key={player.uuid}
+                    />
                 ))}
 
                 <View style={{ margin: 10 }}>

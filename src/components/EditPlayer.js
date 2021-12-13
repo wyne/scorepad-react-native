@@ -38,13 +38,13 @@ const EditPlayer = ({ player, index, promptColor, setPlayerWasAdded, playerWasAd
                 padding: 5,
                 marginHorizontal: 5
             }}
-                onTouchStart={promptColor}
+                // onTouchStart={promptColor}
                 backgroundColor={"#" + palette[index]}>
-                <Icon
+                {/*<Icon
                     name="edit"
                     size={20}
                     color={getContrastRatio('#' + palette[index], '#000').number > 7 ? "black" : "white"}
-                ></Icon>
+                ></Icon> */}
             </View>
 
             <Input style={styles.input}
