@@ -67,15 +67,13 @@ const ConfigureScreen = () => {
                     resizeMethod={'scale'}
                     alignSelf={'center'}
                     style={{
-                        width: Dimensions.get('window').width * .4,
-                        height: Dimensions.get('window').width * .4,
+                        width: Math.min(Dimensions.get('window').width * .4, Dimensions.get('window').height * .4),
+                        height: Math.min(Dimensions.get('window').width * .4, Dimensions.get('window').height * .4),
                         maxWidth: '50%',
                         aspectRatio: 1,
                         margin: 20,
                     }}
                 />
-                {/* <Text flex={1} style={styles.text}>Tap the top half of a player's card to add a point. Tap the bottom half to subtract.</Text> */}
-                {/* <Text flex={1} style={styles.text}>Tip: To add or subtract faster, try tapping with two alternating fingers.</Text> */}
 
                 <View style={{ margin: 10, }}>
                     <Button
