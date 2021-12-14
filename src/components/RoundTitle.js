@@ -47,12 +47,13 @@ function RoundTitle({ navigation }) {
                     style={{ justifyContent: 'center' }}
                     onPress={prevRoundHandler} >
                     <View>
-                        <Feather name="chevron-left" style={[styles.roundButton]} />
+                        <Icon name="chevron-left" type="font-awesome-5" size={25} color="#0a84ff" style={[styles.roundButton, { opacity: currentRound == 0 ? 0 : 1 }]} />
                     </View>
                 </TouchableOpacity>
 
                 <Text style={{
-                    fontSize: 25, color: 'white',
+                    fontSize: 25,
+                    color: 'white',
                     fontVariant: ['tabular-nums'],
                     fontWeight: 'bold'
                 }}>Round {currentRound + 1}</Text>
@@ -61,13 +62,13 @@ function RoundTitle({ navigation }) {
                     style={{ justifyContent: 'center', }}
                     onPress={nextRoundHandler} >
                     <View>
-                        <Feather name="chevron-right" style={[styles.roundButton]} />
+                        <Icon name="chevron-right" type="font-awesome-5" size={25} color="#0a84ff" style={[styles.roundButton]} />
                     </View>
                 </TouchableOpacity>
 
             </View>
             <SafeAreaView edges={['right']}>
-                <Icon fontSize={25} name={expanded ? 'expand-alt' : 'compress-alt'} color="#0a84ff" type="font-awesome-5" onPress={expandHandler} ></Icon>
+                <Icon size={25} name={expanded ? 'expand-alt' : 'compress-alt'} color="#0a84ff" type="font-awesome-5" onPress={expandHandler} />
             </SafeAreaView>
         </SafeAreaView>
     );
@@ -85,12 +86,13 @@ const styles = StyleSheet.create({
     multiplier: {
         color: '#0a84ff',
         paddingHorizontal: 5,
-        fontSize: 22,
+        fontSize: 25,
         fontWeight: 'bold',
         fontVariant: ['tabular-nums'],
     },
     roundButton: {
-        fontSize: 35,
+        fontSize: 25,
+        paddingHorizontal: 10,
         fontWeight: 'bold',
         color: '#0a84ff',
     },
