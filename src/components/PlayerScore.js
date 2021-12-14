@@ -9,6 +9,7 @@ const PlayerScore = ({ playerIndex, color, fontColor, cols, rows }) => {
     const players = useSelector(state => state.currentGame.players);
     const scores = useSelector(state => state.currentGame.scores);
     const currentRound = useSelector(state => state.currentGame.currentRound);
+    const multiplier = useSelector(state => state.settings.multiplier);
     const dispatch = useDispatch();
 
     const totalScore = scores[playerIndex].reduce(
@@ -18,11 +19,11 @@ const PlayerScore = ({ playerIndex, color, fontColor, cols, rows }) => {
     const roundScore = scores[playerIndex][currentRound] || 0
 
     const incPlayerRoundScoreHandler = () => {
-        dispatch(incPlayerRoundScore(playerIndex));
+        dispatch(incPlayerRoundScore(playerIndex, multiplier));
     }
 
     const decPlayerRoundScoreHandler = () => {
-        dispatch(decPlayerRoundScore(playerIndex));
+        dispatch(decPlayerRoundScore(playerIndex, multiplier));
     }
 
     const width = (100 / cols) + '%';
