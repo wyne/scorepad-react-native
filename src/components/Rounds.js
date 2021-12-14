@@ -1,11 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Text, View, StyleSheet, TouchableOpacity, ScrollView, Platform } from 'react-native';
 import { s, vs, ms, mvs } from 'react-native-size-matters';
+import { Icon } from 'react-native-elements/dist/icons/Icon';
 
 import { useSelector, useDispatch } from 'react-redux';
 import { SafeAreaView } from 'react-native-safe-area-context';
-
-import { EvilIcons } from '@expo/vector-icons';
 
 function Rounds({ navigation, show }) {
     const palette = ["01497c", "c25858", "f5c800", "275436", "dc902c", "62516a", "755647", "925561"];
@@ -45,11 +44,11 @@ function Rounds({ navigation, show }) {
             </View>
 
             <View key={'total'} style={{ padding: 10 }}>
-                <Text style={[styles.sumHeader]}>
+                <Text style={[styles.totalHeader]}>
                     Total
                 </Text>
                 {players.map((player, playerIndex) => (
-                    <Text key={playerIndex} style={[styles.scoreEntry, { color: '#0a84ff' }]} >
+                    <Text key={playerIndex} style={[styles.scoreEntry, { color: 'white', fontWeight: 'bold' }]} >
                         {scores[playerIndex].reduce(
                             (a, b) => { return (a || 0) + (b || 0); }
                         )}
@@ -82,10 +81,11 @@ function Rounds({ navigation, show }) {
                 ))}
             </ScrollView>
 
-            <View style={{ flexDirection: 'column', justifyContent: 'space-around' }}>
+            <View style={{ flexDirection: 'column', justifyContent: 'space-around', padding: 10 }}>
                 <TouchableOpacity style={{ justifyContent: 'center' }}
                     onPress={() => { navigation.navigate("Configure") }}>
-                    <EvilIcons style={{ fontSize: ms(40, .4), color: 'white', textAlign: 'center' }} name="gear" color="black" />
+                    <Icon size={ms(30, .4)} color='#0a84ff' style={{ textAlign: 'center' }} name="cog" type="font-awesome-5" />
+                    <Text style={{ color: '#0a84ff', fontWeight: 'bold' }}>Settings</Text>
                 </TouchableOpacity>
             </View>
         </SafeAreaView >
@@ -93,8 +93,8 @@ function Rounds({ navigation, show }) {
 }
 
 const styles = StyleSheet.create({
-    sumHeader: {
-        color: '#0a84ff',
+    totalHeader: {
+        color: 'white',
         fontWeight: 'bold',
         textAlign: 'center',
         fontSize: 20,
