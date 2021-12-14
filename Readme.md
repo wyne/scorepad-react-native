@@ -13,10 +13,10 @@ https://wyne.github.io/scorepad/
 - [Web App](https://wyne.github.io/scorepad-app/)
 
 ## Screen Shots
-Device | Two Players | Four Players | Settings
---- | ------------ | ------------ | -------------
-Phone | <img src="assets-stores/pixel4xl/Screenshot_20210725-021238.png" height="150"> | <img src="assets-stores/pixel4xl/Screenshot_20210725-021323.png" height="150"> | <img src="assets-stores/pixel4xl/Screenshot_20210725-021245.png" height="150">
-Tablet | <img src="assets-stores/ipadpro12-9/Simulator Screen Shot - iPad Pro (12.9-inch) (5th generation) - 2021-07-25 at 02.40.00.png" height="150"> | <img src="assets-stores/ipadpro12-9/Simulator Screen Shot - iPad Pro (12.9-inch) (5th generation) - 2021-07-25 at 02.40.38.png" height="150"> | <img src="assets-stores/ipadpro12-9/Simulator Screen Shot - iPad Pro (12.9-inch) (5th generation) - 2021-07-25 at 02.40.04.png" height="150">
+Device | Two Players | More Players | Fullscreen | Settings
+--- | ------------ | ------------ | ------------- | -------------
+Phone | <img src="assets-stores/iphone13pro/home-2-players.png" height="150"> | <img src="assets-stores/iphone13pro/home-4-players.png" height="150"> | <img src="assets-stores/iphone13pro/home-4-players-expanded.png" height="150"> | <img src="assets-stores/iphone13pro/configure-4-players.png" height="150">
+Tablet | <img src="assets-stores/ipadpro-11/home-2-players.png" height="150"> | <img src="assets-stores/ipadpro-11/home-many-players.png" height="150"> | <img src="assets-stores/ipadpro-11/home-many-players-expanded.png" height="150"> | <img src="assets-stores/ipadpro-11/configure.png" height="150">
 
 
 ## Contributing

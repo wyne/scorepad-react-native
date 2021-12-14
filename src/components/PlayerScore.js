@@ -63,7 +63,7 @@ const PlayerScore = ({ playerIndex, color, fontColor, cols, rows }) => {
                     {roundScore != 0 &&
                         <View style={[styles.roundBox, { borderColor: fontColor + '75', padding: ms(5, .4) }]}>
                             <Text numberOfLines={1}
-                                style={[styles.roundScore, { color: fontColor + '75', fontSize: lengthScale(roundScore, 35), lineHeight: ms(25, .5) },]}>
+                                style={[styles.roundScore, { color: fontColor + '75', fontSize: lengthScale(roundScore, 35), lineHeight: lengthScale(roundScore, 35) },]}>
                                 {roundScore > 0 && "+"} {roundScore}
                             </Text>
                             <Text style={[styles.label, styles.totalLabel, { color: fontColor + '75' }]}>
