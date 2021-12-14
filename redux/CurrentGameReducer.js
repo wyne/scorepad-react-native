@@ -26,13 +26,13 @@ const currentGameReducer = (state = initialState, action) => {
         case INC_PLAYER_ROUND_SCORE:
             const incrementedPlayerScores = [...state.scores];
             incrementedPlayerScores[action.index][state.currentRound] =
-                (incrementedPlayerScores[action.index][state.currentRound] || 0) + 1;
+                (incrementedPlayerScores[action.index][state.currentRound] || 0) + (action.multiplier || 1);
             return { ...state, scores: incrementedPlayerScores };
 
         case DEC_PLAYER_ROUND_SCORE:
             const decrementedPlayerScores = [...state.scores];
             decrementedPlayerScores[action.index][state.currentRound] =
-                (decrementedPlayerScores[action.index][state.currentRound] || 0) - 1;
+                (decrementedPlayerScores[action.index][state.currentRound] || 0) - (action.multiplier || 1);
             return { ...state, scores: decrementedPlayerScores };
 
         case PREV_ROUND:

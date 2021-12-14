@@ -7,12 +7,12 @@ export const NEW_GAME = 'NEW_GAME';
 export const ADD_PLAYER = 'ADD_PLAYER';
 export const REMOVE_PLAYER = 'REMOVE_PLAYER';
 
-export const incPlayerRoundScore = (index) => {
-    return { type: INC_PLAYER_ROUND_SCORE, index: index, }
+export const incPlayerRoundScore = (index, multiplier) => {
+    return { type: INC_PLAYER_ROUND_SCORE, index: index, multiplier }
 }
 
-export const decPlayerRoundScore = (index) => {
-    return { type: DEC_PLAYER_ROUND_SCORE, index: index, }
+export const decPlayerRoundScore = (index, multiplier) => {
+    return { type: DEC_PLAYER_ROUND_SCORE, index: index, multiplier }
 }
 
 export const nextRound = (index, round) => {

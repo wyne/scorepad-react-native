@@ -33,7 +33,7 @@ const settingsPersistConfig = {
     key: 'settings',
     version: '0',
     storage: AsyncStorage,
-    whitelist: ['home_fullscreen'],
+    whitelist: ['home_fullscreen', 'multiplier'],
 };
 
 const rootReducer = combineReducers({

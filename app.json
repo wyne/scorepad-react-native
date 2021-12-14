@@ -14,7 +14,7 @@
     "backgroundColor": "#000000",
     "ios": {
       "bundleIdentifier": "com.wyne.scorepad",
-      "buildNumber": "15",
+      "buildNumber": "17",
       "supportsTablet": true,
       "requireFullScreen": false
     },
@@ -25,7 +25,7 @@
         "backgroundImage": "./assets/adaptive-icon-bg.png"
       },
       "package": "com.wyne.scorepad",
-      "versionCode": 15,
+      "versionCode": 17,
       "permissions": []
     },
     "userInterfaceStyle": "dark",
