@@ -13,29 +13,30 @@ const PlayerScore = ({ playerName, totalScore, roundScore, fontColor, maxWidth, 
         setH(height);
         setW(width);
     }
+
     useEffect(() => {
-        const s = maxWidth / w;
-        if (s > 0 && s < 100) {
-            setScale(s);
+        const hs = maxWidth / w;
+        const vs = maxHeight / h;
+        if (hs > 0 && hs < 2) {
+            setScale(Math.min(.7 * hs, .7 * vs));
         }
     })
-
 
     return (
         <View style={{ padding: 10, transform: [{ scale: scale }] }} onLayout={layoutHandler}>
             <View style={{ justifyContent: 'center', alignItems: 'center' }}>
-                <Text numberOfLines={1} style={[styles.name, { color: fontColor }]}>
+                <Text numberOfLines={1} adjustsFontSizeToFit style={[styles.name, { color: fontColor }]}>
                     {playerName}
                 </Text>
             </View>
             <View>
                 {roundScore != 0 &&
-                    <Text numberOfLines={1}
+                    <Text numberOfLines={1} adjustsFontSizeToFit
                         style={[styles.roundScore, { color: fontColor + '75', fontSize: 35 },]}>
                         {roundScore > 0 && "+"} {roundScore}
                     </Text>
                 }
-                <Text style={[styles.totalScore, { fontSize: 55, lineHeight: 55, color: fontColor }]}>
+                <Text adjustsFontSizeToFit numberOfLines={1} style={[styles.totalScore, { fontSize: 55, lineHeight: 55, color: fontColor }]}>
                     {roundScore != 0 && <Text style={[styles.label, styles.totalLabel, { color: fontColor + '75' }]}>=</Text>}
                     {totalScore}
                 </Text>
