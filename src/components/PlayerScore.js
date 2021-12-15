@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Text, View, StyleSheet, TouchableHighlight } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { s, vs, ms, mvs } from 'react-native-size-matters';
+import AdditionTile from './PlayerTiles/AdditionTile';
 
 import { incPlayerRoundScore, decPlayerRoundScore } from '../../redux/CurrentGameActions';
 
@@ -12,8 +13,14 @@ const PlayerScore = ({ playerIndex, color, fontColor, cols, rows }) => {
     const multiplier = useSelector(state => state.settings.multiplier);
     const dispatch = useDispatch();
 
+    const [width, setWidth] = useState(0);
+    const [height, setHeight] = useState(0);
+
     const totalScore = scores[playerIndex].reduce(
-        (a, b) => { return (a || 0) + (b || 0); }
+        (sum, current, round) => {
+            if (round > currentRound) { return sum; }
+            return (sum || 0) + (current || 0);
+        }
     );
 
     const roundScore = scores[playerIndex][currentRound] || 0
@@ -26,63 +33,51 @@ const PlayerScore = ({ playerIndex, color, fontColor, cols, rows }) => {
         dispatch(decPlayerRoundScore(playerIndex, multiplier));
     }
 
-    const width = (100 / cols) + '%';
-    const height = (100 / rows) + '%';
+    const widthPerc = (100 / cols) + '%';
+    const heightPerc = (100 / rows) + '%';
 
-    const lengthScale = (lengthOf, size) => {
-        return ms(size - (lengthOf).toString().length * 4, .5) - players.length;
-    }
+    const layoutHandler = (e) => {
+        var { x, y, width, height } = e.nativeEvent.layout;
 
-    const nameLengthScale = () => {
-        const lengthOf = players[playerIndex].name.toString().length
-        const baseSize = 30
-        if (lengthOf > 5) {
-            return ms(baseSize - (lengthOf).toString().length * 5, .5);
-        } else {
-            return ms(baseSize, .5)
-        }
+        setWidth(width);
+        setHeight(height);
     }
 
     return (
-        <View style={[styles.playerCard,
-        { backgroundColor: color },
-        { width: width },
-        { height: height },
-        ]}>
+        <View
+            style={[
+                styles.playerCard,
+                { backgroundColor: color },
+                { width: widthPerc },
+                { height: heightPerc },
+            ]}
+            onLayout={layoutHandler}
+        >
 
-            <View style={{ padding: 10 }}>
-                <View style={{ justifyContent: 'center', alignItems: 'center' }}>
-                    <Text numberOfLines={1} style={[styles.name, { fontSize: nameLengthScale(), lineHeight: s(30), color: fontColor }]}>
-                        {players[playerIndex].name}
-                    </Text>
-                </View>
-                <View>
-                    <Text style={[styles.totalScore, { fontSize: lengthScale(totalScore, 55), lineHeight: ms(55, .5), color: fontColor }]}>
-                        {totalScore}
-                    </Text>
-                    {roundScore != 0 &&
-                        <View style={[styles.roundBox, { borderColor: fontColor + '75', padding: ms(5, .4) }]}>
-                            <Text numberOfLines={1}
-                                style={[styles.roundScore, { color: fontColor + '75', fontSize: lengthScale(roundScore, 35), lineHeight: lengthScale(roundScore, 35) },]}>
-                                {roundScore > 0 && "+"} {roundScore}
-                            </Text>
-                            <Text style={[styles.label, styles.totalLabel, { color: fontColor + '75' }]}>
-                                this round
-                            </Text>
-                        </View>
-                    }
-                </View>
-            </View>
+            <AdditionTile
+                totalScore={totalScore}
+                roundScore={roundScore}
+                fontColor={fontColor}
+                playerName={players[playerIndex].name}
+                maxWidth={width}
+                maxHeight={height}
+            />
 
-            <TouchableHighlight style={[styles.surface, styles.surfaceAdd]}
+            <TouchableHighlight
+                style={[styles.surface, styles.surfaceAdd]}
                 underlayColor={fontColor + '30'}
                 activeOpacity={1}
-                onPress={incPlayerRoundScoreHandler}><></></TouchableHighlight>
+                onPress={incPlayerRoundScoreHandler}>
+                <></>
+            </TouchableHighlight>
 
-            <TouchableHighlight style={[styles.surface, styles.surfaceSubtract]}
+            <TouchableHighlight
+                style={[styles.surface, styles.surfaceSubtract]}
                 underlayColor={fontColor + '30'}
                 activeOpacity={1}
-                onPress={decPlayerRoundScoreHandler}><></></TouchableHighlight>
+                onPress={decPlayerRoundScoreHandler}>
+                <></>
+            </TouchableHighlight>
         </View>
     );
 }
@@ -116,7 +111,7 @@ const styles = StyleSheet.create({
         alignSelf: 'center',
     },
     roundScore: {
-        margin: 2,
+        marginTop: 10,
         textAlign: 'center',
         color: 'white',
         fontVariant: ['tabular-nums'],

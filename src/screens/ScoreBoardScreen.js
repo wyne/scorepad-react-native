@@ -16,7 +16,7 @@ export default function ScoreBoardScreen({ navigation }) {
 
     const desiredAspectRatio = 0.8;
 
-    const onLayout = (e) => {
+    const layoutHandler = (e) => {
         var { x, y, width, height } = e.nativeEvent.layout;
 
         let closestAspectRatio = Number.MAX_SAFE_INTEGER
@@ -45,7 +45,7 @@ export default function ScoreBoardScreen({ navigation }) {
     return (
         <SafeAreaView style={{ flex: 1 }}>
             <View style={styles.appContainer}>
-                <View style={styles.contentStyle} onLayout={onLayout} >
+                <View style={styles.contentStyle} onLayout={layoutHandler} >
                     {players.map((name, index) => (
                         <PlayerScore
                             key={index}
