@@ -102,45 +102,6 @@ const styles = StyleSheet.create({
         top: '50%',
         bottom: 0,
     },
-    name: {
-        color: 'white',
-        fontSize: 50,
-        fontWeight: 'bold',
-        textAlign: 'center',
-        justifyContent: 'center',
-        alignSelf: 'center',
-    },
-    roundScore: {
-        marginTop: 10,
-        textAlign: 'center',
-        color: 'white',
-        fontVariant: ['tabular-nums'],
-    },
-    roundBox: {
-        // padding: 5,
-        padding: 10,
-        borderRadius: 5,
-        borderWidth: 2,
-        alignSelf: 'center'
-    },
-    totalScore: {
-        fontVariant: ['tabular-nums'],
-        fontWeight: 'bold',
-        alignSelf: 'center',
-        margin: 0,
-        marginTop: 0,
-        padding: 0,
-    },
-    label: {
-        textAlign: 'center',
-        alignSelf: 'center',
-        color: 'white',
-    },
-    totalLabel: {
-        fontVariant: ['tabular-nums'],
-        alignSelf: 'center',
-        textAlign: 'center',
-    },
 });
 
 export default PlayerScore;

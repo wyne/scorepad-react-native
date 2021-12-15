@@ -13,7 +13,7 @@ function RoundTitle({ navigation }) {
     const dispatch = useDispatch();
 
     const currentRound = useSelector(state => state.currentGame.currentRound);
-    const expanded = useSelector(state => state.settings.home_fullscreen);
+    const fullscreen = useSelector(state => state.settings.home_fullscreen);
     const multiplier = useSelector(state => state.settings.multiplier);
 
     const nextRoundHandler = () => {
@@ -68,7 +68,7 @@ function RoundTitle({ navigation }) {
 
             </View>
             <SafeAreaView edges={['right']}>
-                <Icon size={25} name={expanded ? 'expand-alt' : 'compress-alt'} color="#0a84ff" type="font-awesome-5" onPress={expandHandler} />
+                <Icon size={25} name={fullscreen ? 'compress-alt' : 'expand-alt'} color="#0a84ff" type="font-awesome-5" onPress={expandHandler} />
             </SafeAreaView>
         </SafeAreaView>
     );

@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Text, View, StyleSheet, TouchableHighlight } from 'react-native';
-import { useDispatch, useSelector } from 'react-redux';
-import { s, vs, ms, mvs } from 'react-native-size-matters';
+import { Text, View, StyleSheet } from 'react-native';
 
 const PlayerScore = ({ playerName, totalScore, roundScore, fontColor, maxWidth, maxHeight }) => {
     const [scale, setScale] = useState(1);
@@ -17,91 +15,98 @@ const PlayerScore = ({ playerName, totalScore, roundScore, fontColor, maxWidth, 
     useEffect(() => {
         const hs = maxWidth / w;
         const vs = maxHeight / h;
-        if (hs > 0 && hs < 2) {
-            setScale(Math.min(.7 * hs, .7 * vs));
+        if (Math.min(hs, vs) > 0 && Math.max(hs, vs) < 2) {
+            const s = Math.min(.7 * hs, .7 * vs);
+            setScale(s);
         }
     })
 
+    const PlayerNameItem = ({ children }) => {
+        return (
+            <Text
+                adjustsFontSizeToFit
+                numberOfLines={1}
+                style={[styles.name, { color: fontColor }]}
+            >
+                {children}
+            </Text>
+        )
+    }
+
+    const RoundScoreItem = ({ children, hidden = false }) => {
+        if (hidden) { return <></> };
+
+        return (
+            <Text
+                adjustsFontSizeToFit
+                numberOfLines={1}
+                style={[styles.roundScore, { color: fontColor + '75' }]}
+            >
+                {children}
+            </Text>
+        )
+    }
+
+    const EualsItem = ({ children, hidden = false }) => {
+        if (hidden) { return <></> };
+
+        return (
+            <Text style={{ color: fontColor + '75' }}>
+                {children}
+            </Text>
+        )
+    }
+
+    const TotalScoreItem = ({ children }) => {
+        return (
+            <Text
+                adjustsFontSizeToFit
+                numberOfLines={1}
+                style={[styles.totalScore, { color: fontColor }]}
+            >
+                {children}
+            </Text>
+        )
+    }
+
     return (
-        <View style={{ padding: 10, transform: [{ scale: scale }] }} onLayout={layoutHandler}>
-            <View style={{ justifyContent: 'center', alignItems: 'center' }}>
-                <Text numberOfLines={1} adjustsFontSizeToFit style={[styles.name, { color: fontColor }]}>
-                    {playerName}
-                </Text>
-            </View>
-            <View>
-                {roundScore != 0 &&
-                    <Text numberOfLines={1} adjustsFontSizeToFit
-                        style={[styles.roundScore, { color: fontColor + '75', fontSize: 35 },]}>
-                        {roundScore > 0 && "+"} {roundScore}
-                    </Text>
-                }
-                <Text adjustsFontSizeToFit numberOfLines={1} style={[styles.totalScore, { fontSize: 55, lineHeight: 55, color: fontColor }]}>
-                    {roundScore != 0 && <Text style={[styles.label, styles.totalLabel, { color: fontColor + '75' }]}>=</Text>}
-                    {totalScore}
-                </Text>
-            </View>
+        <View style={{ justifyContent: 'center', transform: [{ scale: scale }] }} onLayout={layoutHandler}>
+            <PlayerNameItem>
+                {playerName}
+            </PlayerNameItem>
+
+            <RoundScoreItem hidden={roundScore == 0}>
+                {roundScore > 0 && "+ "}
+                {roundScore < 0 && "- "}
+                {Math.abs(roundScore)}
+            </RoundScoreItem>
+
+            <TotalScoreItem>
+                <EualsItem hidden={roundScore == 0}>
+                    =
+                </EualsItem>
+                {totalScore}
+            </TotalScoreItem>
         </View>
     );
 }
 
 const styles = StyleSheet.create({
-    playerCard: {
-        flexGrow: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        overflow: 'hidden',
-    },
-    surface: {
-        position: 'absolute',
-        width: '100%',
-        borderColor: 'red',
-    },
-    surfaceAdd: {
-        top: 0,
-        bottom: '50%',
-    },
-    surfaceSubtract: {
-        top: '50%',
-        bottom: 0,
-    },
     name: {
-        color: 'white',
         fontSize: 50,
         fontWeight: 'bold',
         textAlign: 'center',
-        justifyContent: 'center',
-        alignSelf: 'center',
     },
     roundScore: {
+        fontSize: 35,
+        fontVariant: ['tabular-nums'],
         marginTop: 10,
         textAlign: 'center',
-        color: 'white',
-        fontVariant: ['tabular-nums'],
-    },
-    roundBox: {
-        // padding: 5,
-        padding: 10,
-        borderRadius: 5,
-        borderWidth: 2,
-        alignSelf: 'center'
     },
     totalScore: {
+        fontSize: 55,
         fontVariant: ['tabular-nums'],
         fontWeight: 'bold',
-        alignSelf: 'center',
-        margin: 0,
-        marginTop: 0,
-        padding: 0,
-    },
-    label: {
-        textAlign: 'center',
-        alignSelf: 'center',
-        color: 'white',
-    },
-    totalLabel: {
-        fontVariant: ['tabular-nums'],
-        alignSelf: 'center',
         textAlign: 'center',
     },
 });
