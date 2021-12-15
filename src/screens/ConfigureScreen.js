@@ -28,6 +28,7 @@ const ConfigureScreen = () => {
         setPlayerWasAdded(true)
     }
 
+    {/* 
     const sheetRef = React.useRef(null);
 
     const renderContent = () => (
@@ -46,10 +47,12 @@ const ConfigureScreen = () => {
 
     const promptColor = () => { sheetRef.current.snapTo(0) }
     const chooseColor = () => { sheetRef.current.snapTo(1) }
+            */}
 
     return (
         <KeyboardAwareScrollView style={styles.configScrollContainer} contentContainerStyle={{ alignItems: 'stretch' }}>
 
+            {/* 
             <BottomSheet
                 ref={sheetRef}
                 snapPoints={[450, 0]}
@@ -59,6 +62,7 @@ const ConfigureScreen = () => {
                 onOpenStart={() => null}
                 onCloseEnd={() => null}
             />
+            */}
 
             <View style={{ width: 350, alignSelf: 'center' }}>
                 <Image
@@ -98,7 +102,8 @@ const ConfigureScreen = () => {
                 {players.map((player, index) => (
                     <EditPlayer
                         player={player}
-                        index={index} promptColor={promptColor}
+                        index={index}
+                        // promptColor={promptColor}
                         setPlayerWasAdded={setPlayerWasAdded}
                         playerWasAdded={playerWasAdded}
                         key={player.uuid}

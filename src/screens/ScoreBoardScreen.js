@@ -12,11 +12,11 @@ export default function ScoreBoardScreen({ navigation }) {
 
     const [grid, setGrid] = useState({ rows: 0, cols: 0 });
     const players = useSelector(state => state.currentGame.players);
-    const expanded = useSelector(state => state.settings.home_fullscreen);
+    const fullscreen = useSelector(state => state.settings.home_fullscreen);
 
     const desiredAspectRatio = 0.8;
 
-    const onLayout = (e) => {
+    const layoutHandler = (e) => {
         var { x, y, width, height } = e.nativeEvent.layout;
 
         let closestAspectRatio = Number.MAX_SAFE_INTEGER
@@ -45,7 +45,7 @@ export default function ScoreBoardScreen({ navigation }) {
     return (
         <SafeAreaView style={{ flex: 1 }}>
             <View style={styles.appContainer}>
-                <View style={styles.contentStyle} onLayout={onLayout} >
+                <View style={styles.contentStyle} onLayout={layoutHandler} >
                     {players.map((name, index) => (
                         <PlayerScore
                             key={index}
@@ -58,7 +58,7 @@ export default function ScoreBoardScreen({ navigation }) {
                     ))}
                 </View>
 
-                <Rounds style={styles.footerStyle} navigation={navigation} show={expanded} />
+                <Rounds style={styles.footerStyle} navigation={navigation} show={!fullscreen} />
             </View>
         </SafeAreaView>
     );

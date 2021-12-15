@@ -82,10 +82,12 @@ function Rounds({ navigation, show }) {
             </ScrollView>
 
             <View style={{ flexDirection: 'column', justifyContent: 'space-around', padding: 10 }}>
-                <TouchableOpacity style={{ justifyContent: 'center' }}
-                    onPress={() => { navigation.navigate("Configure") }}>
-                    <Icon size={ms(30, .4)} color='#0a84ff' style={{ textAlign: 'center' }} name="cog" type="font-awesome-5" />
-                    <Text style={{ color: '#0a84ff', fontWeight: 'bold' }}>Settings</Text>
+                <TouchableOpacity
+                    style={{ justifyContent: 'center' }}
+                    onPress={() => { navigation.navigate("Configure") }}
+                >
+                    {show && <Icon size={ms(30, .4)} color='#0a84ff' style={{ textAlign: 'center' }} name="cog" type="font-awesome-5" />}
+                    {show && <Text style={{ color: '#0a84ff', fontWeight: 'bold' }}>Settings</Text>}
                 </TouchableOpacity>
             </View>
         </SafeAreaView >
