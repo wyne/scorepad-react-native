@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useSelector } from 'react-redux';
 import { getContrastRatio } from 'colorsheet';
 
-import PlayerScore from '../components/PlayerScore'
+import PlayerTile from '../components/PlayerTile'
 import Rounds from '../components/Rounds';
 
 export default function ScoreBoardScreen({ navigation }) {
@@ -47,7 +47,7 @@ export default function ScoreBoardScreen({ navigation }) {
             <View style={styles.appContainer}>
                 <View style={styles.contentStyle} onLayout={layoutHandler} >
                     {players.map((name, index) => (
-                        <PlayerScore
+                        <PlayerTile
                             key={index}
                             playerIndex={index}
                             color={'#' + palette[index % palette.length]}
