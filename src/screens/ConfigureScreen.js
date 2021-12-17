@@ -18,6 +18,8 @@ const ConfigureScreen = () => {
     const players = useSelector(state => state.currentGame.players);
     const dispatch = useDispatch();
 
+    const maxPlayers = Platform.isPad ? 12 : 8;
+
     const newGameHandler = () => {
         dispatch(newGame());
         setIsNewGame(true);
@@ -113,11 +115,11 @@ const ConfigureScreen = () => {
                 <View style={{ margin: 10 }}>
                     <Button title="Add Player"
                         icon={<Icon name="add" color="white" />}
-                        disabled={players.length >= 8}
+                        disabled={players.length >= maxPlayers}
                         onPress={addPlayerHandler} />
                 </View>
 
-                {players.length >= 8 &&
+                {players.length >= maxPlayers &&
                     <Text style={styles.text}>Max players reached.</Text>
                 }
 
