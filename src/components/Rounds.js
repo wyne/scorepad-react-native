@@ -1,10 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Text, View, StyleSheet, TouchableOpacity, ScrollView, Platform } from 'react-native';
-import { s, vs, ms, mvs } from 'react-native-size-matters';
 import { Icon } from 'react-native-elements/dist/icons/Icon';
-
-import { useSelector, useDispatch } from 'react-redux';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Text, View, StyleSheet, TouchableOpacity, ScrollView, Platform } from 'react-native';
+import { useSelector } from 'react-redux';
 
 function Rounds({ navigation, show }) {
     const palette = ["01497c", "c25858", "f5c800", "275436", "dc902c", "62516a", "755647", "925561"];
@@ -84,9 +82,9 @@ function Rounds({ navigation, show }) {
             <View style={{ flexDirection: 'column', justifyContent: 'space-around', padding: 10 }}>
                 <TouchableOpacity
                     style={{ justifyContent: 'center' }}
-                    onPress={() => { navigation.navigate("Configure") }}
+                    onPress={() => { navigation.navigate("Settings") }}
                 >
-                    {show && <Icon size={ms(30, .4)} color='#0a84ff' style={{ textAlign: 'center' }} name="cog" type="font-awesome-5" />}
+                    {show && <Icon size={30} color='#0a84ff' style={{ textAlign: 'center' }} name="cog" type="font-awesome-5" />}
                     {show && <Text style={{ color: '#0a84ff', fontWeight: 'bold' }}>Settings</Text>}
                 </TouchableOpacity>
             </View>

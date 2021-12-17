@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { Text, View, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSelector } from 'react-redux';
+import { getContrastRatio } from 'colorsheet';
 
 import PlayerScore from '../components/PlayerScore'
 import Rounds from '../components/Rounds';
-import { useSelector } from 'react-redux';
-import { getContrastRatio } from 'colorsheet';
 
 export default function ScoreBoardScreen({ navigation }) {
     const palette = ["01497c", "c25858", "f5c800", "275436", "dc902c", "62516a", "755647", "925561"]
