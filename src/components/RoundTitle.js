@@ -82,7 +82,7 @@ function RoundTitle({ navigation }) {
                 </TouchableOpacity>
             </SafeAreaView>
 
-            <View style={styles.roundContainer}>
+            <View flexDirection='row' alignItems='center'>
                 <PrevRoundButton />
 
                 <Text style={styles.title}>
@@ -120,10 +120,6 @@ const styles = StyleSheet.create({
         fontSize: 25,
         fontWeight: 'bold',
         fontVariant: ['tabular-nums'],
-    },
-    roundContainer: {
-        flexDirection: 'row',
-        alignItems: 'center'
     },
     roundButton: {
         color: systemBlue,

@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { setPlayerName, removePlayer } from '../../redux/CurrentGameActions';
 import { Icon, Input } from 'react-native-elements';
 
-import { palette } from '../constants';
+import { palette, systemBlue } from '../constants';
 
 const EditPlayer = ({ player, index, promptColor, setPlayerWasAdded, playerWasAdded }) => {
     const dispatch = useDispatch();
@@ -39,6 +39,14 @@ const EditPlayer = ({ player, index, promptColor, setPlayerWasAdded, playerWasAd
         }
     })();
 
+    const DeleteButton = ({ }) => {
+        if (index == 0) {
+            return <></>;
+        };
+
+        return <Icon name="delete" color="#ff375f" onPress={deleteHandler} />;
+    }
+
     return (
         <View style={styles.playerContainer} key={player.uuid}>
             <Text style={styles.playerNumber}>
@@ -69,36 +77,34 @@ const EditPlayer = ({ player, index, promptColor, setPlayerWasAdded, playerWasAd
                 style={styles.input}
             />
 
-            {index > 0 &&
-                <Icon name="delete" color="#ff375f" onPress={deleteHandler} />
-            }
+            <DeleteButton />
         </View>
     );
 }
 
 const styles = StyleSheet.create({
     playerContainer: {
-        margin: 10,
-        marginVertical: 5,
-        justifyContent: 'flex-start',
         alignItems: 'center',
         flexDirection: 'row',
+        justifyContent: 'flex-start',
+        margin: 10,
+        marginVertical: 5,
     },
     playerNumber: {
-        fontVariant: ['tabular-nums'],
+        color: { systemBlue },
         fontSize: 35,
-        padding: 5,
+        fontVariant: ['tabular-nums'],
         fontWeight: "bold",
-        color: "#0a84ff"
+        padding: 5,
     },
     colorBadge: {
-        width: 30,
-        height: 30,
+        borderColor: '#eee',
         borderRadius: 25,
         borderWidth: 1,
-        borderColor: '#eee',
+        height: 30,
+        marginHorizontal: 5,
         padding: 5,
-        marginHorizontal: 5
+        width: 30,
     },
     input: {
         color: '#eee',

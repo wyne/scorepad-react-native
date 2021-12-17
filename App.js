@@ -5,14 +5,14 @@ import { createStackNavigator } from "react-navigation-stack";
 import { PersistGate } from 'redux-persist/integration/react';
 import { store, persistor } from './redux/store';
 
-import ScoreBoardScreen from "./src/screens/ScoreBoardScreen";
+import GameScreen from "./src/screens/GameScreen";
 import SettingsScreen from "./src/screens/SettingsScreen";
 import RoundTitle from './src/components/RoundTitle';
 
 const navigator = createStackNavigator(
     {
-        ScoreBoard: {
-            screen: ScoreBoardScreen,
+        Game: {
+            screen: GameScreen,
             navigationOptions: ({ navigation }) => ({
                 headerShown: true,
                 header: (navigation) => {
@@ -29,7 +29,7 @@ const navigator = createStackNavigator(
         },
     },
     {
-        initialRouteName: "ScoreBoard",
+        initialRouteName: "Game",
         defaultNavigationOptions: {
             title: "",
         },
