@@ -7,7 +7,7 @@ import { useSelector } from 'react-redux';
 import { palette } from '../constants';
 
 function Rounds({ navigation, show }) {
-    const [roundScollOffsets, setRoundScrollOffsets] = useState([]);
+    const [roundScollOffset, setRoundScrollOffset] = useState(0);
 
     const players = useSelector(state => state.currentGame.players);
     const scores = useSelector(state => state.currentGame.scores);
@@ -16,16 +16,20 @@ function Rounds({ navigation, show }) {
     const roundsScrollViewEl = useRef()
 
     useEffect(() => {
-        roundsScrollViewEl.current.scrollTo({
-            x: roundScollOffsets[currentRound],
-            animated: Platform.OS == "ios" ? true : false
-        })
-    })
+        if (roundScollOffset !== undefined) {
+            roundsScrollViewEl.current.scrollTo({
+                x: roundScollOffset,
+                animated: Platform.OS == "ios" ? true : false
+            })
+        }
+    }, [roundScollOffset]);
 
     const onLayoutHandler = (event, round) => {
-        const offsets = [...roundScollOffsets];
-        offsets[round] = event.nativeEvent.layout.x;
-        setRoundScrollOffsets(offsets)
+        if (round != currentRound) {
+            return;
+        }
+        const offset = event.nativeEvent.layout.x;
+        setRoundScrollOffset(offset);
     }
 
     const PlayerNameColumn = () => {
