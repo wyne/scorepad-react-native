@@ -15,9 +15,9 @@ const AdditionTile = ({ playerName, totalScore, roundScore, fontColor, maxWidth,
     useEffect(() => {
         const hs = maxWidth / w;
         const vs = maxHeight / h;
-        if (Math.min(hs, vs) > 0 && Math.max(hs, vs) < 2) {
+        if (Math.min(hs, vs) > 0) {
             const s = Math.min(.7 * hs, .7 * vs);
-            setScale(s);
+            setScale(Math.min(s, 3));
         }
     })
 
