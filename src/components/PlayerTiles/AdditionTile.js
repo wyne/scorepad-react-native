@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Text, View, StyleSheet } from 'react-native';
 
-const PlayerScore = ({ playerName, totalScore, roundScore, fontColor, maxWidth, maxHeight }) => {
+const AdditionTile = ({ playerName, totalScore, roundScore, fontColor, maxWidth, maxHeight }) => {
     const [scale, setScale] = useState(1);
     const [w, setW] = useState(0);
     const [h, setH] = useState(0);
@@ -111,4 +111,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default PlayerScore;
+export default AdditionTile;

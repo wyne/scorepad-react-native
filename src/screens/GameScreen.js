@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { Text, View, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-
-import PlayerScore from '../components/PlayerScore'
-import Rounds from '../components/Rounds';
 import { useSelector } from 'react-redux';
 import { getContrastRatio } from 'colorsheet';
+
+import PlayerTile from '../components/PlayerTile'
+import Rounds from '../components/Rounds';
 
 export default function ScoreBoardScreen({ navigation }) {
     const palette = ["01497c", "c25858", "f5c800", "275436", "dc902c", "62516a", "755647", "925561"]
@@ -47,7 +47,7 @@ export default function ScoreBoardScreen({ navigation }) {
             <View style={styles.appContainer}>
                 <View style={styles.contentStyle} onLayout={layoutHandler} >
                     {players.map((name, index) => (
-                        <PlayerScore
+                        <PlayerTile
                             key={index}
                             playerIndex={index}
                             color={'#' + palette[index % palette.length]}

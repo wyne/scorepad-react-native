@@ -1,14 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Text, View, StyleSheet, TouchableOpacity, ScrollView, Platform } from 'react-native';
-import { s, vs, ms, mvs } from 'react-native-size-matters';
 import { Icon } from 'react-native-elements/dist/icons/Icon';
-
-import { useSelector, useDispatch } from 'react-redux';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Text, View, StyleSheet, TouchableOpacity, ScrollView, Platform } from 'react-native';
+import { useSelector } from 'react-redux';
+
+import { palette } from '../constants';
 
 function Rounds({ navigation, show }) {
-    const palette = ["01497c", "c25858", "f5c800", "275436", "dc902c", "62516a", "755647", "925561"];
-    const [roundScollOffsets, setRoundScrollOffsets] = useState([]);
+    const [roundScollOffset, setRoundScrollOffset] = useState(0);
 
     const players = useSelector(state => state.currentGame.players);
     const scores = useSelector(state => state.currentGame.scores);
@@ -17,21 +16,24 @@ function Rounds({ navigation, show }) {
     const roundsScrollViewEl = useRef()
 
     useEffect(() => {
-        roundsScrollViewEl.current.scrollTo({
-            x: roundScollOffsets[currentRound],
-            animated: Platform.OS == "ios" ? true : false
-        })
-    })
+        if (roundScollOffset !== undefined) {
+            roundsScrollViewEl.current.scrollTo({
+                x: roundScollOffset,
+                animated: Platform.OS == "ios" ? true : false
+            })
+        }
+    }, [roundScollOffset]);
 
-    const handleCurrentRoundLayout = (event, round) => {
-        const offsets = [...roundScollOffsets];
-        offsets[round] = event.nativeEvent.layout.x;
-        setRoundScrollOffsets(offsets)
+    const onLayoutHandler = (event, round) => {
+        if (round != currentRound) {
+            return;
+        }
+        const offset = event.nativeEvent.layout.x;
+        setRoundScrollOffset(offset);
     }
 
-    return (
-        <SafeAreaView edges={['right', 'left']} style={{ flexDirection: 'row', backgroundColor: 'black', paddingBottom: 10, height: show ? 'auto' : 0 }}>
-
+    const PlayerNameColumn = () => {
+        return (
             <View style={{ padding: 10, color: 'white' }}>
                 <Text style={{ color: 'white', fontSize: 20 }}> &nbsp; </Text>
                 {players.map((player, index) => (
@@ -42,7 +44,11 @@ function Rounds({ navigation, show }) {
                     </View>
                 ))}
             </View>
+        );
+    }
 
+    const TotalColumn = ({ }) => {
+        return (
             <View key={'total'} style={{ padding: 10 }}>
                 <Text style={[styles.totalHeader]}>
                     Total
@@ -55,38 +61,54 @@ function Rounds({ navigation, show }) {
                     </Text>
                 ))}
             </View>
+        )
+    }
 
-            <ScrollView horizontal={true} contentContainerStyle={{ flexDirection: 'row' }} ref={roundsScrollViewEl}>
+    const RoundColumn = ({ round }) => {
+        return (
+            <View style={{ padding: 10 }}
+                ref={currentRound == round ? currentRoundEl : null}
+                onLayout={(e) => onLayoutHandler(e, round)}
+                backgroundColor={round == currentRound ? '#111' : 'black'}>
+                <Text style={{
+                    color: currentRound == round ? 'red' : 'yellow',
+                    fontWeight: 'bold',
+                    textAlign: 'center',
+                    fontSize: 20,
+                }}>
+                    {round + 1}
+                </Text>
+                {players.map((player, playerIndex) => (
+                    <Text key={playerIndex} style={[
+                        styles.scoreEntry,
+                        { color: scores[playerIndex][round] == 0 ? '#555' : 'white' }]}>
+                        {scores[playerIndex][round]}
+                    </Text>
+                ))}
+            </View>
+        );
+    }
+
+    return (
+        <SafeAreaView edges={['right', 'left']} style={{ flexDirection: 'row', backgroundColor: 'black', paddingBottom: 10, height: show ? 'auto' : 0 }}>
+
+            <PlayerNameColumn />
+
+            <TotalColumn />
+
+            <ScrollView
+                horizontal={true}
+                contentContainerStyle={{ flexDirection: 'row' }}
+                ref={roundsScrollViewEl}
+            >
                 {scores[0].map((item, round) => (
-                    <View key={round} style={{ padding: 10 }}
-                        ref={currentRound == round ? currentRoundEl : null}
-                        onLayout={(e) => handleCurrentRoundLayout(e, round)}
-                        backgroundColor={round == currentRound ? '#111' : 'black'}>
-                        <Text style={{
-                            color: currentRound == round ? 'red' : 'yellow',
-                            fontWeight: 'bold',
-                            textAlign: 'center',
-                            fontSize: 20,
-                        }}>
-                            {round + 1}
-                        </Text>
-                        {players.map((player, playerIndex) => (
-                            <Text key={playerIndex} style={[
-                                styles.scoreEntry,
-                                { color: scores[playerIndex][round] == 0 ? '#555' : 'white' }]}>
-                                {scores[playerIndex][round]}
-                            </Text>
-                        ))}
-                    </View>
+                    <RoundColumn round={round} key={round} />
                 ))}
             </ScrollView>
 
-            <View style={{ flexDirection: 'column', justifyContent: 'space-around', padding: 10 }}>
-                <TouchableOpacity
-                    style={{ justifyContent: 'center' }}
-                    onPress={() => { navigation.navigate("Configure") }}
-                >
-                    {show && <Icon size={ms(30, .4)} color='#0a84ff' style={{ textAlign: 'center' }} name="cog" type="font-awesome-5" />}
+            <View flexDirection='column' style={{ justifyContent: 'space-around', padding: 10 }}>
+                <TouchableOpacity onPress={() => { navigation.navigate("Settings") }} >
+                    {show && <Icon size={30} color='#0a84ff' style={{ textAlign: 'center' }} name="cog" type="font-awesome-5" />}
                     {show && <Text style={{ color: '#0a84ff', fontWeight: 'bold' }}>Settings</Text>}
                 </TouchableOpacity>
             </View>

@@ -1,17 +1,15 @@
 import React, { useState } from 'react';
 import { Platform, Text, View, StyleSheet, Image, Dimensions } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
-import { newGame, addPlayer } from '../../redux/CurrentGameActions';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { Icon, Button } from 'react-native-elements'
-import Animated from 'react-native-reanimated';
-import BottomSheet from 'reanimated-bottom-sheet';
+
+import { newGame, addPlayer } from '../../redux/CurrentGameActions';
 import EditPlayer from '../components/EditPlayer';
 
 const appJson = require('../../app.json');
 
-const ConfigureScreen = () => {
-    const palette = ["01497c", "c25858", "f5c800", "275436", "dc902c", "62516a", "755647", "925561"];
+const SettingsScreen = () => {
     const [isNewGame, setIsNewGame] = useState(false)
     const [playerWasAdded, setPlayerWasAdded] = useState(false)
 
@@ -52,7 +50,10 @@ const ConfigureScreen = () => {
             */}
 
     return (
-        <KeyboardAwareScrollView style={styles.configScrollContainer} contentContainerStyle={{ alignItems: 'stretch' }}>
+        <KeyboardAwareScrollView
+            style={styles.configScrollContainer}
+            contentContainerStyle={{ alignItems: 'stretch' }}
+        >
 
             {/* 
             <BottomSheet
@@ -155,4 +156,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default ConfigureScreen;
+export default SettingsScreen;

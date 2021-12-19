@@ -1,21 +1,18 @@
 import React from 'react';
 import { Provider } from 'react-redux';
-
 import { createAppContainer } from "react-navigation";
 import { createStackNavigator } from "react-navigation-stack";
-import { DefaultTheme, DarkTheme } from "@react-navigation/native";
-import ScoreBoardScreen from "./src/screens/ScoreBoardScreen";
-import ConfigureScreen from "./src/screens/ConfigureScreen";
-import { useDispatch, useSelector } from 'react-redux';
-
 import { PersistGate } from 'redux-persist/integration/react';
 import { store, persistor } from './redux/store';
+
+import GameScreen from "./src/screens/GameScreen";
+import SettingsScreen from "./src/screens/SettingsScreen";
 import RoundTitle from './src/components/RoundTitle';
 
 const navigator = createStackNavigator(
     {
-        ScoreBoard: {
-            screen: ScoreBoardScreen,
+        Game: {
+            screen: GameScreen,
             navigationOptions: ({ navigation }) => ({
                 headerShown: true,
                 header: (navigation) => {
@@ -23,25 +20,24 @@ const navigator = createStackNavigator(
                 }
             }),
         },
-        Configure: {
-            screen: ConfigureScreen,
+        Settings: {
+            screen: SettingsScreen,
             navigationOptions: ({ navigation }) => ({
-                title: "Configure",
+                title: "Settings",
                 headerBackTitle: "Back"
             }),
         },
     },
     {
-        initialRouteName: "ScoreBoard",
+        initialRouteName: "Game",
         defaultNavigationOptions: {
-            title: "Round ",
+            title: "",
         },
     }
 );
 
 let Navigation = createAppContainer(navigator);
 
-// Render the app container component with the provider around it
 export default class App extends React.Component {
     render() {
         return (
