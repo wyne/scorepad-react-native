@@ -31,7 +31,7 @@ function RoundTitle({ navigation }) {
         dispatch(toggleMultiplier);
     }
 
-    function NextRoundButton({ }) {
+    const NextRoundButton = ({ }) => {
         return (
             <TouchableOpacity onPress={nextRoundHandler}>
                 <Icon
@@ -39,13 +39,13 @@ function RoundTitle({ navigation }) {
                     type="font-awesome-5"
                     size={25}
                     color={systemBlue}
-                    style={[styles.roundButton]}
+                    style={[styles.titleButton]}
                 />
             </TouchableOpacity>
         );
     }
 
-    function PrevRoundButton({ }) {
+    const PrevRoundButton = ({ }) => {
         return (
             <TouchableOpacity onPress={prevRoundHandler}>
                 <Icon
@@ -54,7 +54,7 @@ function RoundTitle({ navigation }) {
                     size={25}
                     color={systemBlue}
                     style={[
-                        styles.roundButton,
+                        styles.titleButton,
                         { opacity: currentRound == 0 ? 0 : 1 }
                     ]}
                 />
@@ -62,7 +62,7 @@ function RoundTitle({ navigation }) {
         );
     }
 
-    function FullscreenButton({ }) {
+    const FullscreenButton = ({ }) => {
         return (
             <Icon
                 size={25}
@@ -70,19 +70,28 @@ function RoundTitle({ navigation }) {
                 color={systemBlue}
                 type="font-awesome-5"
                 onPress={expandHandler}
+                style={[styles.titleButton]}
             />
+        )
+    }
+
+    const MultiplierButton = ({ }) => {
+        return (
+            <TouchableOpacity
+                style={[styles.titleButton]}
+                onPress={multiplierHandler}>
+                <Text style={[styles.multiplier]}>{multiplier} pt</Text>
+            </TouchableOpacity>
         )
     }
 
     return (
         <SafeAreaView edges={['top']} style={[styles.header]}>
             <SafeAreaView edges={['left']}>
-                <TouchableOpacity onPress={multiplierHandler}>
-                    <Text style={[styles.multiplier]}>{multiplier} pt</Text>
-                </TouchableOpacity>
+                <MultiplierButton />
             </SafeAreaView>
 
-            <View flexDirection='row' alignItems='center'>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 <PrevRoundButton />
 
                 <Text style={styles.title}>
@@ -105,7 +114,7 @@ const styles = StyleSheet.create({
         backgroundColor: 'black',
         flexDirection: 'row',
         justifyContent: 'space-between',
-        paddingBottom: 10,
+        paddingBottom: 0,
         textAlign: 'center',
     },
     title: {
@@ -121,11 +130,12 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         fontVariant: ['tabular-nums'],
     },
-    roundButton: {
+    titleButton: {
         color: systemBlue,
         fontSize: 25,
         fontWeight: 'bold',
-        paddingHorizontal: 10,
+        paddingHorizontal: 15,
+        paddingVertical: 10,
     },
 });
 
