@@ -48,6 +48,7 @@ export default function ScoreBoardScreen({ navigation }) {
                 <View style={styles.contentStyle} onLayout={layoutHandler} >
                     {players.map((name, index) => (
                         <PlayerTile
+                            navigation={navigation}
                             key={index}
                             playerIndex={index}
                             color={'#' + palette[index % palette.length]}

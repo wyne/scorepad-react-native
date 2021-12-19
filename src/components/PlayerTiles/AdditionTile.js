@@ -1,15 +1,26 @@
 import React, { useEffect, useState } from 'react';
-import { Text, View, StyleSheet } from 'react-native';
+import { Text, View, StyleSheet, Platform } from 'react-native';
 
-const AdditionTile = ({ playerName, totalScore, roundScore, fontColor, maxWidth, maxHeight }) => {
+const AdditionTile = ({ playerName, totalScore, roundScore, fontColor, maxWidth, maxHeight, playerIndex }) => {
     const [scale, setScale] = useState(1);
     const [w, setW] = useState(0);
     const [h, setH] = useState(0);
 
     const layoutHandler = (e) => {
         const { x, y, width, height } = e.nativeEvent.layout;
-        setH(height);
-        setW(width);
+        debounce(() => {
+            setH(height);
+            setW(width);
+        });
+    }
+
+    const [timer, setTimer] = useState();
+
+    const debounce = (fn) => {
+        clearTimeout(timer);
+        setTimer(
+            setTimeout(() => { fn(); }, 1000)
+        )
     }
 
     useEffect(() => {
@@ -19,7 +30,7 @@ const AdditionTile = ({ playerName, totalScore, roundScore, fontColor, maxWidth,
             const s = Math.min(.7 * hs, .7 * vs);
             setScale(Math.min(s, 3));
         }
-    })
+    });
 
     const PlayerNameItem = ({ children }) => {
         return (
@@ -68,6 +79,22 @@ const AdditionTile = ({ playerName, totalScore, roundScore, fontColor, maxWidth,
             </Text>
         )
     }
+
+
+
+    // const [shouldHide, setShouldHide] = React.useState(false);
+
+    // useFocusEffect(() => {
+    // 
+    //     setShouldHide(false)
+    //     return () => {
+    //         setShouldHide(true)
+    //     }
+    // });
+
+    // if (shouldHide) {
+    //     return <></>;
+    // }
 
     return (
         <View style={{ justifyContent: 'center', transform: [{ scale: scale }] }} onLayout={layoutHandler}>
