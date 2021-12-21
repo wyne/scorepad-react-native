@@ -72,8 +72,8 @@ const SettingsScreen = () => {
                     source={require('../../assets/infographic.png')}
                     resizeMode={'contain'}
                     resizeMethod={'scale'}
-                    alignSelf={'center'}
                     style={{
+                        alignSelf: 'center',
                         width: Math.min(Dimensions.get('window').width * .4, Dimensions.get('window').height * .4),
                         height: Math.min(Dimensions.get('window').width * .4, Dimensions.get('window').height * .4),
                         maxWidth: '50%',
