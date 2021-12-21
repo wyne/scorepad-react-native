@@ -53,15 +53,10 @@ const EditPlayer = ({ player, index, promptColor, setPlayerWasAdded, playerWasAd
                 {index + 1}
             </Text>
 
-            <View
-                style={styles.colorBadge}
-                // onTouchStart={promptColor}
-                backgroundColor={"#" + palette[index]}>
-                {/*<Icon
-                    name="edit"
-                    size={20}
-                    color={getContrastRatio('#' + palette[index], '#000').number > 7 ? "black" : "white"}
-                ></Icon> */}
+            <View style={[
+                styles.colorBadge,
+                { backgroundColor: "#" + palette[index % palette.length] }
+            ]} >
             </View>
 
             <Input
@@ -91,7 +86,7 @@ const styles = StyleSheet.create({
         marginVertical: 5,
     },
     playerNumber: {
-        color: { systemBlue },
+        color: systemBlue,
         fontSize: 35,
         fontVariant: ['tabular-nums'],
         fontWeight: "bold",
