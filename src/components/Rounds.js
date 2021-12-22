@@ -106,7 +106,7 @@ function Rounds({ navigation, show }) {
                 ))}
             </ScrollView>
 
-            <View flexDirection='column' style={{ justifyContent: 'space-around', padding: 10 }}>
+            <View flexDirection='column' style={{ justifyContent: 'space-around', padding: 15 }}>
                 <TouchableOpacity onPress={() => { navigation.navigate("Settings") }} >
                     {show && <Icon size={30} color='#0a84ff' style={{ textAlign: 'center' }} name="cog" type="font-awesome-5" />}
                     {show && <Text style={{ color: '#0a84ff', fontWeight: 'bold' }}>Settings</Text>}

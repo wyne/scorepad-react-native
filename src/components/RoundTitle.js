@@ -87,7 +87,7 @@ function RoundTitle({ navigation }) {
 
     return (
         <SafeAreaView edges={['top']} style={[styles.header]}>
-            <SafeAreaView edges={['left']} style={{ width: '25%' }}>
+            <SafeAreaView edges={['left']} style={{ width: '25%', alignItems: 'flex-start' }}>
                 <MultiplierButton />
             </SafeAreaView>
 
@@ -101,7 +101,7 @@ function RoundTitle({ navigation }) {
                 <NextRoundButton />
             </View>
 
-            <SafeAreaView edges={['right']} style={{ width: '25%' }}>
+            <SafeAreaView edges={['right']} style={{ width: '25%', alignItems: 'flex-end' }}>
                 <FullscreenButton />
             </SafeAreaView>
         </SafeAreaView>
