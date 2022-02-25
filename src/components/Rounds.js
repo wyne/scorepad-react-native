@@ -40,11 +40,11 @@ const Rounds = ({ navigation, show }) => {
     //     }
     // }, [roundScollOffset]);
 
-    const onLayoutHandler = (event) => {
-        const offset = event.nativeEvent.layout.x;
-        console.log("layout handler", offset)
-        setter(offset);
-    }
+    // const onLayoutHandler = (event) => {
+    //     const offset = event.nativeEvent.layout.x;
+    //     console.log("layout handler", offset)
+    //     setter(offset);
+    // }
 
     const players = useSelector(state => selectAllPlayers(state));
 
