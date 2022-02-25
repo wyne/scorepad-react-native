@@ -8,7 +8,7 @@
     "eject": "expo eject"
   },
   "dependencies": {
-    "@react-native-async-storage/async-storage": "~1.15.14",
+    "@react-native-async-storage/async-storage": "~1.16.1",
     "@react-navigation/native": "^6.0.6",
     "@react-navigation/stack": "^6.0.11",
     "colorsheet": "^1.0.5",
