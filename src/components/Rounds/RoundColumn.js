@@ -35,17 +35,21 @@ const selectCurrentRound = createSelector(
     }
 )
 
-const RoundColumn = ({ round }) => {
+const RoundColumn = ({ round, currentRoundLayoutHandler }) => {
     const players = useSelector(state => selectAllPlayers(state));
     const isCurrent = useSelector(state => selectCurrentRound(state, round));
     const roundScores = useSelector(state => selectRoundScores(state, round), (n, p) => {
         return JSON.stringify(n) == JSON.stringify(p);
     });
 
+    const onLayout = (e) => {
+        console.log("col layout", e)
+    }
+
     return (
         <View style={{ padding: 10 }}
-            // ref={currentRound == round ? currentRoundEl : null}
-            // onLayout={(e) => onLayoutHandler(e, round)}
+            // onLayout={isCurrent ? (e) => currentRoundLayoutHandler(e, round) : null}
+            onLayout={isCurrent ? onLayout : null}
             backgroundColor={isCurrent ? '#111' : 'black'}
         >
             <Text style={{
