@@ -38,8 +38,19 @@ const PlayerTile = ({ playerIndex, color, fontColor, cols, rows }) => {
     const layoutHandler = (e) => {
         var { x, y, width, height } = e.nativeEvent.layout;
 
-        setWidth(width);
-        setHeight(height);
+        debounce(() => {
+            setWidth(width);
+            setHeight(height);
+        })
+    }
+
+    const [timer, setTimer] = useState();
+
+    const debounce = (fn) => {
+        clearTimeout(timer);
+        setTimer(
+            setTimeout(() => { fn(); }, 100)
+        )
     }
 
     return (
@@ -57,6 +68,7 @@ const PlayerTile = ({ playerIndex, color, fontColor, cols, rows }) => {
                 totalScore={totalScore}
                 roundScore={roundScore}
                 fontColor={fontColor}
+                playerIndex={playerIndex}
                 playerName={players[playerIndex].name}
                 maxWidth={width}
                 maxHeight={height}
