@@ -37,7 +37,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.18.6",
-    "gh-pages": "^3.2.3"
+    "gh-pages": "^4.0.0"
   },
   "homepage": "/scorepad-app",
   "private": true
