@@ -9,7 +9,7 @@ import EditPlayer from '../components/EditPlayer';
 
 const appJson = require('../../app.json');
 
-const SettingsScreen = () => {
+const SettingsScreen = ({ navigation }) => {
     const [isNewGame, setIsNewGame] = useState(false)
     const [playerWasAdded, setPlayerWasAdded] = useState(false)
 
@@ -84,14 +84,9 @@ const SettingsScreen = () => {
 
                 <View style={{ margin: 10, }}>
                     <Button
-                        icon={<Icon name="refresh" color="white" />}
-                        title="New Game"
-                        onPress={newGameHandler} />
-                    {isNewGame &&
-                        <Text style={{ textAlign: 'center', paddingTop: 10, color: '#eee' }}>
-                            Scores have been reset!
-                        </Text>
-                    }
+                        icon={<Icon name="menu" color="white" />}
+                        title="Main Menu"
+                        onPress={() => { navigation.navigate("List") }} />
                 </View>
 
                 <View style={{ flexDirection: 'row', alignItems: 'baseline', padding: 10, justifyContent: 'space-between' }}>

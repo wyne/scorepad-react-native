@@ -7,6 +7,7 @@ import { store, persistor } from './redux/store';
 
 import GameScreen from "./src/screens/GameScreen";
 import SettingsScreen from "./src/screens/SettingsScreen";
+import ListScreen from "./src/screens/ListScreen";
 import RoundTitle from './src/components/RoundTitle';
 import * as Sentry from 'sentry-expo';
 
@@ -18,6 +19,13 @@ Sentry.init({
 
 const navigator = createStackNavigator(
     {
+        List: {
+            screen: ListScreen,
+            navigationOptions: ({ navigation }) => ({
+                title: "Games",
+                headerBackTitle: "Back"
+            })
+        },
         Game: {
             screen: GameScreen,
             navigationOptions: ({ navigation }) => ({
@@ -36,7 +44,7 @@ const navigator = createStackNavigator(
         },
     },
     {
-        initialRouteName: "Game",
+        initialRouteName: "List",
         defaultNavigationOptions: {
             title: "",
         },
