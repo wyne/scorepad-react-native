@@ -13,7 +13,7 @@
     "@react-navigation/stack": "^6.2.2",
     "colorsheet": "^1.0.5",
     "expo": "^46.0.0",
-    "expo-screen-orientation": "~4.3.0",
+    "expo-screen-orientation": "~5.0.1",
     "expo-status-bar": "~1.4.0",
     "react": "18.0.0",
     "react-dom": "18.0.0",
