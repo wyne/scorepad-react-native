@@ -49,8 +49,7 @@
           "file": "sentry-expo/upload-sourcemaps",
           "config": {
             "organization": "justin-wyne",
-            "project": "scorepad",
-            "authToken": "7a50634826e0498b904b70730a05b39c54413ab1f5d9439badb4dbffe7acfc11"
+            "project": "scorepad"
           }
         }
       ]
