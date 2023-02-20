@@ -1,22 +1,28 @@
 {
-  "builds": {
-    "android": {
-      "release": {
-        "buildType": "app-bundle"
-      },
-      "development": {
-        "buildType": "development-client",
-        "distribution": "internal"
+  "cli": {
+    "version": ">= 3.6.0"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "ios": {
+        "resourceClass": "m1-medium"
       }
     },
-    "ios": {
-      "release": {
-        "buildType": "release"
-      },
-      "development": {
-        "buildType": "development-client",
-        "distribution": "internal"
+    "preview": {
+      "distribution": "internal",
+      "ios": {
+        "resourceClass": "m1-medium"
+      }
+    },
+    "production": {
+      "ios": {
+        "resourceClass": "m1-medium"
       }
     }
+  },
+  "submit": {
+    "production": {}
   }
 }

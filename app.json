@@ -14,7 +14,7 @@
     "backgroundColor": "#000000",
     "ios": {
       "bundleIdentifier": "com.wyne.scorepad",
-      "buildNumber": "20",
+      "buildNumber": "22",
       "supportsTablet": true,
       "requireFullScreen": false
     },
@@ -25,7 +25,7 @@
         "backgroundImage": "./assets/adaptive-icon-bg.png"
       },
       "package": "com.wyne.scorepad",
-      "versionCode": 20,
+      "versionCode": 22,
       "permissions": []
     },
     "userInterfaceStyle": "dark",
@@ -33,6 +33,12 @@
       "favicon": "./assets/favicon.png"
     },
     "description": "",
-    "githubUrl": "https://github.com/wyne/scorepad"
+    "githubUrl": "https://github.com/wyne/scorepad-react-native",
+    "extra": {
+      "eas": {
+        "projectId": "fc8859ea-b320-41cd-a091-36b3ec7f9b1f"
+      }
+    },
+    "owner": "wyne"
   }
 }
