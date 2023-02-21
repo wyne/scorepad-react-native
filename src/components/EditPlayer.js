@@ -1,5 +1,5 @@
 import React from 'react';
-import { Text, View, StyleSheet } from 'react-native';
+import { Text, View, StyleSheet, TouchableOpacity } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { setPlayerName, removePlayer } from '../../redux/CurrentGameActions';
 import { Icon, Input } from 'react-native-elements';
@@ -44,7 +44,12 @@ const EditPlayer = ({ player, index, promptColor, setPlayerWasAdded, playerWasAd
             return <></>;
         };
 
-        return <Icon name="delete" color="#ff375f" onPress={deleteHandler} />;
+        return <View flexDirection='column'>
+            <TouchableOpacity onPress={deleteHandler}>
+                <Icon size={20} name="delete" color="#ff375f" />
+                <Text style={{ color: '#ff375f', fontWeight: 'bold' }}>Delete</Text>
+            </TouchableOpacity>
+        </View>
     }
 
     return (

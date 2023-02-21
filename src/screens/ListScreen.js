@@ -14,27 +14,25 @@ const ListScreen = ({ navigation }) => {
     }
 
     const games = [
-        { id: 'bd7acbea-c1b1-46c2-aed5-3ad53abb28ba', title: 'Game 1', created: '2020-01-01 12:00:00' },
-        { id: '3ac68afc-c605-48d3-a4f8-fbd91aa97f63', title: 'Game 2', created: '2020-01-01 12:00:00' },
-        { id: '58694a0f-3da1-471f-bd96-145571e29d72', title: 'Game 3', created: '2020-01-01 12:00:00' },
-        { id: '58694a0f-3da1-471f-bd96-145571e29d73', title: 'Game 4', created: '2020-01-01 12:00:00' },
-        { id: '58694a0f-3da1-471f-bd96-145571e29d74', title: 'Game 5', created: '2020-01-01 12:00:00' },
-        { id: '58694a0f-3da1-471f-bd96-145571e29d75', title: 'Game 6', created: '2020-01-01 12:00:00' },
-        { id: '58694a0f-3da1-471f-bd96-145571e29d76', title: 'Game 7', created: '2020-01-01 12:00:00' },
-        { id: '58694a0f-3da1-471f-bd96-145571e29d77', title: 'Game 8', created: '2020-01-01 12:00:00' },
-        { id: '58694a0f-3da1-471f-bd96-145571e29d78', title: 'Game 9', created: '2020-01-01 12:00:00' },
-        { id: '58694a0f-3da1-471f-bd96-145571e29d79', title: 'Game 10', created: '2020-01-01 12:00:00' },
-        { id: '58694a0f-3da1-471f-bd96-145571e29d80', title: 'Game 11', created: '2020-01-01 12:00:00' },
-        { id: '58694a0f-3da1-471f-bd96-145571e29d81', title: 'Game 12', created: '2020-01-01 12:00:00' },
         { id: '58694a0f-3da1-471f-bd96-145571e29d82', title: 'Game 13', created: '2020-01-01 12:00:00' },
+        { id: '58694a0f-3da1-471f-bd96-145571e29d81', title: 'Game 12', created: '2020-01-01 12:00:00' },
+        { id: '58694a0f-3da1-471f-bd96-145571e29d80', title: 'Game 11', created: '2020-01-01 12:00:00' },
+        { id: '58694a0f-3da1-471f-bd96-145571e29d79', title: 'Game 10', created: '2020-01-01 12:00:00' },
+        { id: '58694a0f-3da1-471f-bd96-145571e29d78', title: 'Game 9', created: '2020-01-01 12:00:00' },
+        { id: '58694a0f-3da1-471f-bd96-145571e29d77', title: 'Game 8', created: '2020-01-01 12:00:00' },
+        { id: '58694a0f-3da1-471f-bd96-145571e29d76', title: 'Game 7', created: '2020-01-01 12:00:00' },
+        { id: '58694a0f-3da1-471f-bd96-145571e29d75', title: 'Game 6', created: '2020-01-01 12:00:00' },
+        { id: '58694a0f-3da1-471f-bd96-145571e29d74', title: 'Game 5', created: '2020-01-01 12:00:00' },
+        { id: '58694a0f-3da1-471f-bd96-145571e29d73', title: 'Game 4', created: '2020-01-01 12:00:00' },
+        { id: '58694a0f-3da1-471f-bd96-145571e29d72', title: 'Game 3', created: '2020-01-01 12:00:00' },
+        { id: '3ac68afc-c605-48d3-a4f8-fbd91aa97f63', title: 'Game 2', created: '2020-01-01 12:00:00' },
+        { id: 'bd7acbea-c1b1-46c2-aed5-3ad53abb28ba', title: 'Game 1', created: '2020-01-01 12:00:00' },
     ]
 
     const GamesFooter = () => {
         return (
             <View style={{
                 paddingVertical: 20,
-                borderTopWidth: 1,
-                borderColor: "#CED0CE",
                 backgroundColor: 'white'
             }} >
             </View>
@@ -50,6 +48,7 @@ const ListScreen = ({ navigation }) => {
                             <ListItem.Content>
                                 <ListItem.Title>{game.title}</ListItem.Title>
                                 <ListItem.Subtitle style={{ color: '#999' }}>{game.created}</ListItem.Subtitle>
+                                <ListItem.Subtitle style={{ color: '#999' }}>Rick, Morty, Summer</ListItem.Subtitle>
                             </ListItem.Content>
                             <Avatar size={"small"}
                                 rounded

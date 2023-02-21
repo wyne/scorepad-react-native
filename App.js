@@ -1,5 +1,7 @@
 import React from 'react';
 import { Provider } from 'react-redux';
+import { Text } from 'react-native';
+import { Icon } from 'react-native-elements';
 import { createAppContainer } from "react-navigation";
 import { createStackNavigator } from "react-navigation-stack";
 import { PersistGate } from 'redux-persist/integration/react';
@@ -22,8 +24,14 @@ const navigator = createStackNavigator(
         List: {
             screen: ListScreen,
             navigationOptions: ({ navigation }) => ({
-                title: "Games",
-                headerBackTitle: "Back"
+                title: "ScorePad with Rounds",
+                headerStyle: { backgroundColor: "#000" },
+                headerRight: () => {
+                    return <Icon name="add" color="white" style={{ marginHorizontal: 10 }} />
+                },
+                headerLeft: () => {
+                    return <Icon name="settings" color="white" style={{ marginHorizontal: 10 }} />
+                }
             })
         },
         Game: {
@@ -46,9 +54,9 @@ const navigator = createStackNavigator(
     {
         initialRouteName: "List",
         defaultNavigationOptions: {
-            title: "",
-        },
-    }
+            title: ""
+        }
+    },
 );
 
 let Navigation = createAppContainer(navigator);
