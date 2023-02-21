@@ -8,10 +8,6 @@ import { TouchableOpacity } from 'react-native-gesture-handler';
 import { newGame, addPlayer } from '../../redux/CurrentGameActions';
 
 const ListScreen = ({ navigation }) => {
-    const layoutHandler = (e) => {
-    }
-    const [isNewGame, setIsNewGame] = useState(false)
-
     const newGameHandler = () => {
         dispatch(newGame());
         setIsNewGame(true);
@@ -23,47 +19,31 @@ const ListScreen = ({ navigation }) => {
         { id: '58694a0f-3da1-471f-bd96-145571e29d72', title: 'Game 3', created: '2020-01-01 12:00:00' },
         { id: '58694a0f-3da1-471f-bd96-145571e29d73', title: 'Game 4', created: '2020-01-01 12:00:00' },
         { id: '58694a0f-3da1-471f-bd96-145571e29d74', title: 'Game 5', created: '2020-01-01 12:00:00' },
+        { id: '58694a0f-3da1-471f-bd96-145571e29d75', title: 'Game 6', created: '2020-01-01 12:00:00' },
+        { id: '58694a0f-3da1-471f-bd96-145571e29d76', title: 'Game 7', created: '2020-01-01 12:00:00' },
+        { id: '58694a0f-3da1-471f-bd96-145571e29d77', title: 'Game 8', created: '2020-01-01 12:00:00' },
+        { id: '58694a0f-3da1-471f-bd96-145571e29d78', title: 'Game 9', created: '2020-01-01 12:00:00' },
+        { id: '58694a0f-3da1-471f-bd96-145571e29d79', title: 'Game 10', created: '2020-01-01 12:00:00' },
+        { id: '58694a0f-3da1-471f-bd96-145571e29d80', title: 'Game 11', created: '2020-01-01 12:00:00' },
+        { id: '58694a0f-3da1-471f-bd96-145571e29d81', title: 'Game 12', created: '2020-01-01 12:00:00' },
+        { id: '58694a0f-3da1-471f-bd96-145571e29d82', title: 'Game 13', created: '2020-01-01 12:00:00' },
     ]
 
-    const renderSeparator = () => {
-        return (
-            <View
-                style={{
-                    height: 1,
-                    width: "86%",
-                    backgroundColor: "#CED0CE",
-                    marginLeft: "14%"
-                }}
-            />
-        );
-    };
-
     const GamesFooter = () => {
-        // if (!this.state.loading) return null;
-
         return (
-            <View
-                style={{
-                    paddingVertical: 20,
-                    borderTopWidth: 1,
-                    borderColor: "#CED0CE"
-                }}
-            >
-                {/* <ActivityIndicator animating size="large" /> */}
+            <View style={{
+                paddingVertical: 20,
+                borderTopWidth: 1,
+                borderColor: "#CED0CE",
+                backgroundColor: 'white'
+            }} >
             </View>
         );
     };
 
-    const GamesHeader = () => {
-        return <SearchBar placeholder="Type Here..." lightTheme round />;
-    };
-
     return (
-        <SafeAreaView contentContainerStyle={{ alignItems: 'stretch' }}
-            backgroundColor="#01497C"
-        >
-            <ScrollView>
-                <GamesHeader />
+        <View>
+            <ScrollView style={[styles.gamesList, { flexShrink: 1 }]}>
                 {
                     games.map((game, i) => (
                         <ListItem key={i} bottomDivider onPress={() => { navigation.navigate("Game") }} >
@@ -75,13 +55,13 @@ const ListScreen = ({ navigation }) => {
                                 rounded
                                 title="4P"
                                 activeOpacity={0.7}
-                                titleStyle={{ color: '#01497C', fontWeight: 'bold' }}
+                                titleStyle={{ color: '#01497C' }}
                             />
                             <Avatar size={"small"}
                                 rounded
                                 title="6R"
                                 activeOpacity={0.7}
-                                titleStyle={{ color: '#01497C', fontWeight: 'bold' }}
+                                titleStyle={{ color: '#c25858' }}
                             />
                             <ListItem.Chevron />
                         </ListItem>
@@ -89,60 +69,11 @@ const ListScreen = ({ navigation }) => {
                 }
                 <GamesFooter />
             </ScrollView>
-            <View style={{ margin: 10, }}>
-                <Button
-                    icon={<Icon name="add" color="white" />}
-                    title="New Game"
-                    onPress={newGameHandler} />
-                {isNewGame &&
-                    <Text style={{ textAlign: 'center', paddingTop: 10, color: '#eee' }}>
-                        Scores have been reset!
-                    </Text>
-                }
-            </View>
-        </SafeAreaView>
+        </View>
     );
 }
 
 const styles = StyleSheet.create({
-    gamesList: {
-        backgroundColor: 'white',
-        paddingVertical: 20,
-        width: '100%',
-        alignContent: 'center',
-        alignSelf: 'center',
-    },
-    gameItem: {
-        backgroundColor: '#E6F4FF',
-        borderRadius: 20,
-        margin: 30,
-        marginVertical: 15,
-        fontSize: 20,
-        textAlign: 'center',
-        padding: 20,
-    },
-    gameTitle: {
-        textTransform: 'uppercase',
-        marginBottom: 5,
-        color: 'black',
-        fontWeight: 'bold',
-        fontSize: 25
-    },
-    gameTimestamp: {
-        color: '#01469C',
-        fontSize: 15
-    },
-    newGame: {
-        textTransform: 'uppercase',
-        marginBottom: 5,
-        backgroundColor: '#DEB673',
-        color: '#1E1E1D',
-        alignContent: 'center',
-        textAlign: 'center',
-        borderRadius: 20,
-        fontWeight: 'bold',
-        fontSize: 35
-    }
 });
 
 export default ListScreen;
