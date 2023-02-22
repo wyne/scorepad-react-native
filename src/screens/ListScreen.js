@@ -1,14 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Text, View, StyleSheet, FlatList, ScrollView, SectionList, ActivityIndicator } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useSelector } from 'react-redux';
-import { getContrastRatio } from 'colorsheet';
-import { List, ListItem, Icon, Button, SearchBar, Avatar } from 'react-native-elements';
-import { TouchableOpacity } from 'react-native-gesture-handler';
-import { newGame, addPlayer } from '../../redux/CurrentGameActions';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { STORAGE_KEY } from '../constants';
+import { Text, View, StyleSheet, ScrollView } from 'react-native';
+import { List, ListItem, Icon, Button, Avatar } from 'react-native-elements';
+import { newGame } from '../../redux/CurrentGameActions';
 import { v4 as uuidv4 } from 'uuid';
+import { storeGames, retrieveGames } from '../../asyncstorage/GamesListStorage';
 
 const ListScreen = ({ navigation }) => {
     const [gameList, setGameList] = useState([])
@@ -18,25 +13,8 @@ const ListScreen = ({ navigation }) => {
         setIsNewGame(true);
     }
 
-    const storeGames = async (value) => {
-        try {
-            await AsyncStorage.setItem(STORAGE_KEY.GAMES_LIST, JSON.stringify(value))
-        } catch (e) {
-            // saving error
-        }
-    }
-
-    const getData = async () => {
-        try {
-            const jsonValue = await AsyncStorage.getItem(STORAGE_KEY.GAMES_LIST)
-            return jsonValue != null ? JSON.parse(jsonValue) : null;
-        } catch (e) {
-            // error reading value
-        }
-    }
-
     useEffect(() => {
-        getData().then((value) => {
+        retrieveGames().then((value) => {
             if (value != null) {
                 setGameList(value);
             }
@@ -44,7 +22,7 @@ const ListScreen = ({ navigation }) => {
     }, [])
 
     const addGameHandler = () => {
-        getData().then((value) => {
+        retrieveGames().then((value) => {
             const newGame = {
                 id: uuidv4(),
                 title: 'Game ' + (value.length + 1),
@@ -67,32 +45,49 @@ const ListScreen = ({ navigation }) => {
         );
     };
 
+    const GameRow = ({ game, i }) => {
+        return <ListItem key={i} bottomDivider onPress={() => {
+            navigation.navigate("Game")
+        }} >
+            <ListItem.Content>
+                <ListItem.Title>{game.title}</ListItem.Title>
+                <ListItem.Subtitle style={{ color: '#999' }}>
+                    {game.created}
+                </ListItem.Subtitle>
+                <ListItem.Subtitle style={{ color: '#999' }}>
+                    Rick, Morty, Summer
+                </ListItem.Subtitle>
+            </ListItem.Content>
+            <Avatar size={"small"}
+                rounded
+                title="4P"
+                activeOpacity={0.7}
+                titleStyle={{ color: '#01497C' }}
+            />
+            <Avatar size={"small"}
+                rounded
+                title="6R"
+                activeOpacity={0.7}
+                titleStyle={{ color: '#c25858' }}
+            />
+            <ListItem.Chevron />
+        </ListItem>
+    }
+
     return (
-        <View>
+        <View style={{
+            flex: 1,
+            top: 0,
+            left: 0,
+            bottom: 0,
+            right: 0,
+            position: 'absolute'
+        }}>
             <Button title="New Game" onPress={addGameHandler} />
-            <ScrollView style={[styles.gamesList, { flexShrink: 1 }]}>
+            <ScrollView style={{ backgroundColor: 'white', flex: 1 }}>
                 {
                     gameList.map((game, i) => (
-                        <ListItem key={i} bottomDivider onPress={() => { navigation.navigate("Game") }} >
-                            <ListItem.Content>
-                                <ListItem.Title>{game.title}</ListItem.Title>
-                                <ListItem.Subtitle style={{ color: '#999' }}>{game.created}</ListItem.Subtitle>
-                                <ListItem.Subtitle style={{ color: '#999' }}>Rick, Morty, Summer</ListItem.Subtitle>
-                            </ListItem.Content>
-                            <Avatar size={"small"}
-                                rounded
-                                title="4P"
-                                activeOpacity={0.7}
-                                titleStyle={{ color: '#01497C' }}
-                            />
-                            <Avatar size={"small"}
-                                rounded
-                                title="6R"
-                                activeOpacity={0.7}
-                                titleStyle={{ color: '#c25858' }}
-                            />
-                            <ListItem.Chevron />
-                        </ListItem>
+                        <GameRow game={game} index={i} />
                     ))
                 }
                 <GamesFooter />
