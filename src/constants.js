@@ -9,3 +9,6 @@ export const palette = [
     "755647",
     "925561"
 ];
+export const STORAGE_KEY = {
+    GAMES_LIST: '@games_list',
+}
