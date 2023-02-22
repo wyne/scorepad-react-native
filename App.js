@@ -47,14 +47,14 @@ const navigator = createStackNavigator(
             screen: SettingsScreen,
             navigationOptions: ({ navigation }) => ({
                 title: "Settings",
-                headerBackTitle: "Back"
+                headerBackTitle: "Back",
+                headerStyle: { backgroundColor: "#000" },
             }),
         },
     },
     {
         initialRouteName: "List",
         defaultNavigationOptions: {
-            title: ""
         }
     },
 );

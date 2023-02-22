@@ -10,18 +10,12 @@ import EditPlayer from '../components/EditPlayer';
 const appJson = require('../../app.json');
 
 const SettingsScreen = ({ navigation }) => {
-    const [isNewGame, setIsNewGame] = useState(false)
     const [playerWasAdded, setPlayerWasAdded] = useState(false)
 
     const players = useSelector(state => state.currentGame.players);
     const dispatch = useDispatch();
 
     const maxPlayers = Platform.isPad ? 12 : 8;
-
-    const newGameHandler = () => {
-        dispatch(newGame());
-        setIsNewGame(true);
-    }
 
     const addPlayerHandler = () => {
         dispatch(addPlayer('Player ' + (players.length + 1)));
