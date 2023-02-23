@@ -16,10 +16,7 @@
       "bundleIdentifier": "com.wyne.scorepad",
       "buildNumber": "27",
       "supportsTablet": true,
-      "requireFullScreen": false,
-      "infoPlist": {
-        "RCTAsyncStorageExcludeFromBackup": false,
-      }
+      "requireFullScreen": false
     },
     "android": {
       "icon": "./assets/adaptive-icon.png",

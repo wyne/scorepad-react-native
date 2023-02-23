@@ -4,6 +4,7 @@ import { List, ListItem, Icon, Button, Avatar } from 'react-native-elements';
 import { newGame } from '../../redux/CurrentGameActions';
 import { v4 as uuidv4 } from 'uuid';
 import { storeGames, retrieveGames } from '../../asyncstorage/GamesListStorage';
+import { FlatList } from 'react-native-gesture-handler';
 
 const ListScreen = ({ navigation }) => {
     const [gameList, setGameList] = useState([])
@@ -46,15 +47,15 @@ const ListScreen = ({ navigation }) => {
     };
 
     const GameRow = ({ game, i }) => {
-        return <ListItem key={i} bottomDivider onPress={() => {
+        return <ListItem key={game.id} bottomDivider onPress={() => {
             navigation.navigate("Game")
         }} >
             <ListItem.Content>
                 <ListItem.Title>{game.title}</ListItem.Title>
-                <ListItem.Subtitle style={{ color: '#999' }}>
+                <ListItem.Subtitle style={styles.gameSubtitle}>
                     {game.created}
                 </ListItem.Subtitle>
-                <ListItem.Subtitle style={{ color: '#999' }}>
+                <ListItem.Subtitle style={styles.gameSubtitle}>
                     Rick, Morty, Summer
                 </ListItem.Subtitle>
             </ListItem.Content>
@@ -75,28 +76,29 @@ const ListScreen = ({ navigation }) => {
     }
 
     return (
-        <View style={{
-            flex: 1,
-            top: 0,
-            left: 0,
-            bottom: 0,
-            right: 0,
-            position: 'absolute'
-        }}>
+        <View style={{ flex: 1 }}>
             <Button title="New Game" onPress={addGameHandler} />
-            <ScrollView style={{ backgroundColor: 'white', flex: 1 }}>
-                {
-                    gameList.map((game, i) => (
-                        <GameRow game={game} index={i} />
-                    ))
+            <FlatList
+                style={styles.list}
+                data={gameList}
+                renderItem={({ item }) =>
+                    <GameRow game={item} />
                 }
-                <GamesFooter />
-            </ScrollView>
+                keyExtractor={item => item.id}
+                ListFooterComponent={GamesFooter}>
+            </FlatList>
         </View>
     );
 }
 
 const styles = StyleSheet.create({
+    list: {
+        backgroundColor: 'white',
+        flex: 1,
+    },
+    gameSubtitle: {
+        color: '#999',
+    }
 });
 
 export default ListScreen;
