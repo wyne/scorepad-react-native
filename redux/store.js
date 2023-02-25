@@ -1,6 +1,6 @@
-import { createStore, combineReducers } from 'redux';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { persistStore, persistReducer } from 'redux-persist';
+import { configureStore } from "@reduxjs/toolkit";
 
 import currentGameReducer from './CurrentGameReducer';
 import settingsReducer from './SettingsReducer';
@@ -36,10 +36,11 @@ const settingsPersistConfig = {
     whitelist: ['home_fullscreen', 'multiplier'],
 };
 
-const rootReducer = combineReducers({
-    currentGame: persistReducer(currentGamePersistConfig, currentGameReducer),
-    settings: persistReducer(settingsPersistConfig, settingsReducer),
+export const store = configureStore({
+    reducer: {
+        currentGame: persistReducer(currentGamePersistConfig, currentGameReducer),
+        settings: persistReducer(settingsPersistConfig, settingsReducer),
+    }
 })
 
-export const store = createStore(rootReducer);
 export const persistor = persistStore(store);
