@@ -3,10 +3,9 @@ import { persistStore, persistReducer } from 'redux-persist';
 import { configureStore } from "@reduxjs/toolkit";
 
 import currentGameReducer from './CurrentGameReducer';
-import settingsReducer from './SettingsReducer';
+import settingsReducer from './SettingsSlice';
 import createMigrate from 'redux-persist/es/createMigrate';
 import 'react-native-get-random-values';
-import { v4 as uuidv4 } from 'uuid';
 
 const migrations = {
     // 0: (state) => {

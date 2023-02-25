@@ -5,7 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { nextRound, prevRound } from '../../redux/CurrentGameActions';
-import { toggleHomeFullscreen, toggleMultiplier } from '../../redux/SettingsActions';
+import { toggleHomeFullscreen, toggleMultiplier } from '../../redux/SettingsSlice';
 import { systemBlue } from '../constants';
 
 function RoundTitle({ navigation }) {
@@ -24,11 +24,11 @@ function RoundTitle({ navigation }) {
     }
 
     const expandHandler = () => {
-        dispatch(toggleHomeFullscreen);
+        dispatch(toggleHomeFullscreen());
     }
 
     const multiplierHandler = () => {
-        dispatch(toggleMultiplier);
+        dispatch(toggleMultiplier());
     }
 
     const NextRoundButton = ({ }) => {
