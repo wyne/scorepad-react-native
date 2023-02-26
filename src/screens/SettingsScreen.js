@@ -13,6 +13,7 @@ const SettingsScreen = ({ navigation }) => {
     const [playerWasAdded, setPlayerWasAdded] = useState(false)
 
     const players = useSelector(state => state.currentGame.players);
+    const currentGameId = useSelector(state => state.currentGame.uuid);
     const dispatch = useDispatch();
 
     const maxPlayers = Platform.isPad ? 12 : 8;
@@ -130,6 +131,7 @@ const SettingsScreen = ({ navigation }) => {
                     {Platform.OS == 'android' &&
                         <Text style={styles.text}>{Platform.OS} build {appJson.expo.android.versionCode}</Text>
                     }
+                    <Text>{currentGameId}</Text>
                 </View>
             </View>
 

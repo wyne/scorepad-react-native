@@ -109,6 +109,7 @@ const currentGameSlice = createSlice({
                     state.scores[index] = [0]
                 })
                 state.currentRound = 0;
+                state.dateCreated = Date.now();
             },
             prepare(payload: string) {
                 const uuid = uuidv4();
