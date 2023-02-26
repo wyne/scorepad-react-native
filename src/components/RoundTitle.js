@@ -4,8 +4,8 @@ import { Icon } from 'react-native-elements/dist/icons/Icon';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { nextRound, prevRound } from '../../redux/CurrentGameActions';
-import { toggleHomeFullscreen, toggleMultiplier } from '../../redux/SettingsActions';
+import { roundNext, roundPrevious } from '../../redux/CurrentGameSlice';
+import { toggleHomeFullscreen, toggleMultiplier } from '../../redux/SettingsSlice';
 import { systemBlue } from '../constants';
 
 function RoundTitle({ navigation }) {
@@ -16,19 +16,19 @@ function RoundTitle({ navigation }) {
     const multiplier = useSelector(state => state.settings.multiplier);
 
     const nextRoundHandler = () => {
-        dispatch(nextRound());
+        dispatch(roundNext());
     }
 
     const prevRoundHandler = () => {
-        dispatch(prevRound());
+        dispatch(roundPrevious());
     }
 
     const expandHandler = () => {
-        dispatch(toggleHomeFullscreen);
+        dispatch(toggleHomeFullscreen());
     }
 
     const multiplierHandler = () => {
-        dispatch(toggleMultiplier);
+        dispatch(toggleMultiplier());
     }
 
     const NextRoundButton = ({ }) => {

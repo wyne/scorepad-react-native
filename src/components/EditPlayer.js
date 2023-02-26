@@ -1,7 +1,7 @@
 import React from 'react';
 import { Text, View, StyleSheet } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
-import { setPlayerName, removePlayer } from '../../redux/CurrentGameActions';
+import { playerNameSet, playerRemove } from '../../redux/CurrentGameSlice';
 import { Icon, Input } from 'react-native-elements';
 
 import { palette, systemBlue } from '../constants';
@@ -11,12 +11,12 @@ const EditPlayer = ({ player, index, promptColor, setPlayerWasAdded, playerWasAd
     const players = useSelector(state => state.currentGame.players);
 
     const setPlayerNameHandler = (index, name) => {
-        dispatch(setPlayerName(index, name));
+        dispatch(playerNameSet(index, name));
         setPlayerWasAdded(false)
     }
 
     const removePlayerHandler = (index) => {
-        dispatch(removePlayer(index));
+        dispatch(playerRemove(index));
     }
 
     const onEndEditingHandler = (e) => {
