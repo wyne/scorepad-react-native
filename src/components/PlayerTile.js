@@ -3,7 +3,7 @@ import { Text, View, StyleSheet, TouchableHighlight } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 
 import AdditionTile from './PlayerTiles/AdditionTile';
-import { incPlayerRoundScore, decPlayerRoundScore } from '../../redux/CurrentGameActions';
+import { playerRoundScoreIncrement, playerRoundScoreDecrement } from '../../redux/CurrentGameSlice';
 
 const PlayerTile = ({ playerIndex, color, fontColor, cols, rows }) => {
     const players = useSelector(state => state.currentGame.players);
@@ -15,21 +15,33 @@ const PlayerTile = ({ playerIndex, color, fontColor, cols, rows }) => {
     const [width, setWidth] = useState(0);
     const [height, setHeight] = useState(0);
 
-    const totalScore = scores[playerIndex].reduce(
-        (sum, current, round) => {
-            if (round > currentRound) { return sum; }
-            return (sum || 0) + (current || 0);
+    const totalScore = (() => {
+        try {
+            return scores[playerIndex].reduce(
+                (sum, current, round) => {
+                    if (round > currentRound) { return sum; }
+                    return (sum || 0) + (current || 0);
+                }
+            );
+        } catch (e) {
+            return 0;
         }
-    );
+    })();
 
-    const roundScore = scores[playerIndex][currentRound] || 0
+    const roundScore = (() => {
+        try {
+            return scores[playerIndex][currentRound] || 0
+        } catch (e) {
+            return 0;
+        }
+    })();
 
     const incPlayerRoundScoreHandler = () => {
-        dispatch(incPlayerRoundScore(playerIndex, multiplier));
+        dispatch(playerRoundScoreIncrement(playerIndex, multiplier));
     }
 
     const decPlayerRoundScoreHandler = () => {
-        dispatch(decPlayerRoundScore(playerIndex, multiplier));
+        dispatch(playerRoundScoreDecrement(playerIndex, multiplier));
     }
 
     const widthPerc = (100 / cols) + '%';

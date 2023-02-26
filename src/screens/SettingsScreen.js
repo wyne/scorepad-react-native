@@ -4,7 +4,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { Icon, Button } from 'react-native-elements'
 
-import { newGame, addPlayer } from '../../redux/CurrentGameActions';
+import { playerAdd, gameNew } from '../../redux/CurrentGameSlice';
 import EditPlayer from '../components/EditPlayer';
 
 const appJson = require('../../app.json');
@@ -17,8 +17,13 @@ const SettingsScreen = ({ navigation }) => {
 
     const maxPlayers = Platform.isPad ? 12 : 8;
 
+    const newGameHandler = () => {
+        dispatch(gameNew());
+        setIsNewGame(true);
+    }
+
     const addPlayerHandler = () => {
-        dispatch(addPlayer('Player ' + (players.length + 1)));
+        dispatch(playerAdd('Player ' + (players.length + 1)));
         setPlayerWasAdded(true)
     }
 

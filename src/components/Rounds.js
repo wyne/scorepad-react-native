@@ -47,6 +47,25 @@ function Rounds({ navigation, show }) {
         );
     }
 
+    const calculatePlayerTotal = (playerIndex) => {
+        if (scores[playerIndex] == undefined) {
+            return 0;
+        }
+        const v = scores[playerIndex].reduce(
+            (a, b) => { return (a || 0) + (b || 0); }
+        );
+
+        return v;
+    }
+
+    const getPlayerScoreForRound = (playerIndex, round) => {
+        if (scores[playerIndex] == undefined) {
+            return 0;
+        }
+
+        return scores[playerIndex][round];
+    }
+
     const TotalColumn = ({ }) => {
         return (
             <View key={'total'} style={{ padding: 10 }}>
@@ -55,9 +74,7 @@ function Rounds({ navigation, show }) {
                 </Text>
                 {players.map((player, playerIndex) => (
                     <Text key={playerIndex} style={[styles.scoreEntry, { color: 'white', fontWeight: 'bold' }]} >
-                        {scores[playerIndex].reduce(
-                            (a, b) => { return (a || 0) + (b || 0); }
-                        )}
+                        {calculatePlayerTotal(playerIndex)}
                     </Text>
                 ))}
             </View>
@@ -81,8 +98,8 @@ function Rounds({ navigation, show }) {
                 {players.map((player, playerIndex) => (
                     <Text key={playerIndex} style={[
                         styles.scoreEntry,
-                        { color: scores[playerIndex][round] == 0 ? '#555' : 'white' }]}>
-                        {scores[playerIndex][round]}
+                        { color: getPlayerScoreForRound(playerIndex, round) == 0 ? '#555' : 'white' }]}>
+                        {getPlayerScoreForRound(playerIndex, round)}
                     </Text>
                 ))}
             </View>

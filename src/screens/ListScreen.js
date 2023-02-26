@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Text, View, StyleSheet, ScrollView } from 'react-native';
 import { List, ListItem, Icon, Button, Avatar } from 'react-native-elements';
-import { newGame } from '../../redux/CurrentGameActions';
+import { gameNew } from '../../redux/CurrentGameSlice';
 import { v4 as uuidv4 } from 'uuid';
 import { storeGames, retrieveGames } from '../../asyncstorage/GamesListStorage';
 import { FlatList } from 'react-native-gesture-handler';
@@ -10,7 +10,7 @@ const ListScreen = ({ navigation }) => {
     const [gameList, setGameList] = useState([])
 
     const newGameHandler = () => {
-        dispatch(newGame());
+        dispatch(gameNew());
         setIsNewGame(true);
     }
 
