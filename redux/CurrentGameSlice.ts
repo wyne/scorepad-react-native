@@ -2,7 +2,8 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import 'react-native-get-random-values'
 import { v4 as uuidv4 } from 'uuid'
 
-interface CurrentGameState {
+export interface GameState {
+    uuid: string;
     players: { name: string; uuid: string }[];
     scores: number[][];
     currentRound: number;
@@ -10,7 +11,8 @@ interface CurrentGameState {
 
 type PlayerIndex = number;
 
-const initialState: CurrentGameState = {
+const initialState: GameState = {
+    uuid: uuidv4(),
     players: [
         { name: 'Player 1', uuid: uuidv4() },
         { name: 'Player 2', uuid: uuidv4() },
@@ -79,15 +81,20 @@ const currentGameSlice = createSlice({
                 return { payload, meta: { name } };
             }
         },
-        playerAdd(state, action) {
-            state.players.push({
-                name: action.payload,
-                uuid: uuidv4()
-            });
-
-            state.scores.push(
-                Array<number>(state.scores[0].length).fill(0)
-            );
+        playerAdd: {
+            reducer(state, action: PayloadAction<string, string, { uuid: string }>) {
+                state.players.push({
+                    name: action.payload,
+                    uuid: action.meta.uuid,
+                });
+                state.scores.push(
+                    Array<number>(state.scores[0].length).fill(0)
+                )
+            },
+            prepare(payload: string) {
+                const uuid = uuidv4();
+                return { payload, meta: { uuid } };
+            }
         },
         playerRemove(state, action) {
             state.players.splice(action.payload, 1)

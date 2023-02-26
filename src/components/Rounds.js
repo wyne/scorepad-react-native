@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Text, View, StyleSheet, TouchableOpacity, ScrollView, Platform } from 'react-native';
 import { useSelector } from 'react-redux';
 
+import { selectScoreByPlayerAndRound, selectScoreTotalByPlayer } from '../../redux/ScoreSelectors';
 import { palette } from '../constants';
 
 function Rounds({ navigation, show }) {
@@ -47,25 +48,6 @@ function Rounds({ navigation, show }) {
         );
     }
 
-    const calculatePlayerTotal = (playerIndex) => {
-        if (scores[playerIndex] == undefined) {
-            return 0;
-        }
-        const v = scores[playerIndex].reduce(
-            (a, b) => { return (a || 0) + (b || 0); }
-        );
-
-        return v;
-    }
-
-    const getPlayerScoreForRound = (playerIndex, round) => {
-        if (scores[playerIndex] == undefined) {
-            return 0;
-        }
-
-        return scores[playerIndex][round];
-    }
-
     const TotalColumn = ({ }) => {
         return (
             <View key={'total'} style={{ padding: 10 }}>
@@ -73,11 +55,21 @@ function Rounds({ navigation, show }) {
                     Total
                 </Text>
                 {players.map((player, playerIndex) => (
-                    <Text key={playerIndex} style={[styles.scoreEntry, { color: 'white', fontWeight: 'bold' }]} >
-                        {calculatePlayerTotal(playerIndex)}
-                    </Text>
+                    <PlayerTotal key={playerIndex} playerIndex={playerIndex} />
                 ))}
             </View>
+        )
+    }
+
+    const PlayerTotal = ({ playerIndex }) => {
+        const scoreTotal = useSelector(state =>
+            selectScoreTotalByPlayer(state, playerIndex)
+        );
+
+        return (
+            <Text key={playerIndex} style={[styles.scoreEntry, { color: 'white', fontWeight: 'bold' }]} >
+                {scoreTotal}
+            </Text>
         )
     }
 
@@ -96,14 +88,24 @@ function Rounds({ navigation, show }) {
                     {round + 1}
                 </Text>
                 {players.map((player, playerIndex) => (
-                    <Text key={playerIndex} style={[
-                        styles.scoreEntry,
-                        { color: getPlayerScoreForRound(playerIndex, round) == 0 ? '#555' : 'white' }]}>
-                        {getPlayerScoreForRound(playerIndex, round)}
-                    </Text>
+                    <PlayerRoundCell playerIndex={playerIndex} round={round} key={playerIndex} />
                 ))}
             </View>
         );
+    }
+
+    const PlayerRoundCell = ({ playerIndex, round }) => {
+        const scoreRound = useSelector(state =>
+            selectScoreByPlayerAndRound(state, playerIndex, round)
+        );
+
+        return (
+            <Text key={playerIndex} style={[
+                styles.scoreEntry,
+                { color: scoreRound == 0 ? '#555' : 'white' }]}>
+                {scoreRound}
+            </Text>
+        )
     }
 
     return (

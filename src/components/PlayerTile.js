@@ -4,42 +4,27 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import AdditionTile from './PlayerTiles/AdditionTile';
 import { playerRoundScoreIncrement, playerRoundScoreDecrement } from '../../redux/CurrentGameSlice';
+import { selectScoreTotalByPlayer, selectScoreByPlayerAndRound } from '../../redux/ScoreSelectors';
+import { createSelector } from '@reduxjs/toolkit';
 
 const PlayerTile = ({ playerIndex, color, fontColor, cols, rows }) => {
-    const players = useSelector(state => state.currentGame.players);
-    const scores = useSelector(state => state.currentGame.scores);
-    const currentRound = useSelector(state => state.currentGame.currentRound);
-    const multiplier = useSelector(state => state.settings.multiplier);
-    const dispatch = useDispatch();
-
     const [width, setWidth] = useState(0);
     const [height, setHeight] = useState(0);
 
-    const totalScore = (() => {
-        try {
-            return scores[playerIndex].reduce(
-                (sum, current, round) => {
-                    if (round > currentRound) { return sum; }
-                    return (sum || 0) + (current || 0);
-                }
-            );
-        } catch (e) {
-            return 0;
-        }
-    })();
+    const dispatch = useDispatch();
 
-    const roundScore = (() => {
-        try {
-            return scores[playerIndex][currentRound] || 0
-        } catch (e) {
-            return 0;
-        }
-    })();
-
+    const players = useSelector(state => state.currentGame.players);
+    const currentRound = useSelector(state => state.currentGame.currentRound);
+    const multiplier = useSelector(state => state.settings.multiplier);
+    const scoreTotal = useSelector(state =>
+        selectScoreTotalByPlayer(state, playerIndex)
+    );
+    const scoreRound = useSelector(state =>
+        selectScoreByPlayerAndRound(state, playerIndex, currentRound)
+    );
     const incPlayerRoundScoreHandler = () => {
         dispatch(playerRoundScoreIncrement(playerIndex, multiplier));
     }
-
     const decPlayerRoundScoreHandler = () => {
         dispatch(playerRoundScoreDecrement(playerIndex, multiplier));
     }
@@ -64,10 +49,9 @@ const PlayerTile = ({ playerIndex, color, fontColor, cols, rows }) => {
             ]}
             onLayout={layoutHandler}
         >
-
             <AdditionTile
-                totalScore={totalScore}
-                roundScore={roundScore}
+                totalScore={scoreTotal}
+                roundScore={scoreRound}
                 fontColor={fontColor}
                 playerName={players[playerIndex].name}
                 maxWidth={width}

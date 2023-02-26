@@ -4,28 +4,26 @@ import { configureStore } from "@reduxjs/toolkit";
 
 import currentGameReducer from './CurrentGameSlice';
 import settingsReducer from './SettingsSlice';
+import gameHistoryReducer from './GameHistorySlice';
 import createMigrate from 'redux-persist/es/createMigrate';
 import 'react-native-get-random-values';
+import { v4 as uuidv4 } from 'uuid';
 
 const migrations = {
-    // 0: (state) => {
-    // const players = state.players
-    // return {
-    //     ...state,
-    //     players: [
-    //         { name: 'player 1', uuid: uuidv4() },
-    //         { name: 'player 2', uuid: uuidv4() },
-    //     ],
-    // }
-    // }
+    1: (state) => {
+        return {
+            ...state,
+            uuid: uuidv4(),
+        }
+    },
 }
 
 const currentGamePersistConfig = {
     key: 'root',
-    version: 0,
+    version: 1,
     storage: AsyncStorage,
-    whitelist: ['players', 'scores', 'currentRound',],
-    migrate: createMigrate(migrations, { debug: true }),
+    whitelist: ['uuid', 'players', 'scores', 'currentRound',],
+    migrate: createMigrate(migrations, { debug: false }),
 };
 
 const settingsPersistConfig = {
@@ -35,10 +33,18 @@ const settingsPersistConfig = {
     whitelist: ['home_fullscreen', 'multiplier'],
 };
 
+const gameHistoryPersistConfig = {
+    key: 'gameHistory',
+    version: 0,
+    storage: AsyncStorage,
+    whitelist: ['games'],
+};
+
 export const store = configureStore({
     reducer: {
         currentGame: persistReducer(currentGamePersistConfig, currentGameReducer),
         settings: persistReducer(settingsPersistConfig, settingsReducer),
+        gameHistory: persistReducer(gameHistoryPersistConfig, gameHistoryReducer),
     }
 })
 
