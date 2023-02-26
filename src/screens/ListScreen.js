@@ -7,7 +7,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { useDispatch } from 'react-redux';
 import Moment from 'react-moment';
 
-import { gameNew } from '../../redux/CurrentGameSlice';
+import { gameNew, gameRestore } from '../../redux/CurrentGameSlice';
 import { gameSave, selectGameById } from '../../redux/GameListSlice';
 import { selectGameIds, selectAllGames } from '../../redux/GameListSlice';
 
@@ -20,6 +20,7 @@ const ListScreen = ({ navigation }) => {
     const addGameHandler = () => {
         dispatch(gameSave(selectCurrentGame));
         dispatch(gameNew());
+        navigation.navigate("Game")
     }
 
     const GamesFooter = () => {
@@ -37,10 +38,15 @@ const ListScreen = ({ navigation }) => {
         const scores = useSelector(state => selectGameById(state, game.uuid).scores);
         const rounds = scores[0].length;
         const playerNames = players.map(player => player.name).join(', ');
+        const aGame = useSelector(state => selectGameById(state, game.uuid));
 
-        return <ListItem key={game.uuid} bottomDivider onPress={() => {
+        const chooseGameHandler = () => {
+            dispatch(gameSave(selectCurrentGame));
+            dispatch(gameRestore(aGame));
             navigation.navigate("Game")
-        }} >
+        }
+
+        return <ListItem key={game.uuid} bottomDivider onPress={chooseGameHandler} >
             <ListItem.Content>
                 <ListItem.Title>{game.uuid}</ListItem.Title>
                 <ListItem.Subtitle style={styles.gameSubtitle}>

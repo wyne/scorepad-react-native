@@ -116,6 +116,13 @@ const currentGameSlice = createSlice({
                 return { payload, meta: { uuid } };
             }
         },
+        gameRestore(state, action: PayloadAction<GameState>) {
+            state.uuid = action.payload.uuid;
+            state.players = action.payload.players;
+            state.scores = action.payload.scores;
+            state.currentRound = action.payload.currentRound;
+            state.dateCreated = action.payload.dateCreated;
+        }
     }
 })
 
@@ -128,6 +135,7 @@ export const {
     playerAdd,
     playerRemove,
     gameNew,
+    gameRestore,
 } = currentGameSlice.actions
 
 export default currentGameSlice.reducer
