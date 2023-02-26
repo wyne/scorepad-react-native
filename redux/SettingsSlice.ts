@@ -18,7 +18,14 @@ const settingsSlice = createSlice({
             state.home_fullscreen = !state.home_fullscreen;
         },
         toggleMultiplier(state, action) {
-            state.multiplier = state.multiplier == 1 ? 5 : 1;
+            var multipliers = [1, 5, 10, 20, 50];
+            var index = multipliers.indexOf(state.multiplier);
+            if (index == multipliers.length - 1) {
+                index = 0;
+            } else {
+                index++;
+            }
+            state.multiplier = multipliers[index];
         }
     }
 })
