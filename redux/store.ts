@@ -4,7 +4,7 @@ import { configureStore } from "@reduxjs/toolkit";
 
 import currentGameReducer from './CurrentGameSlice';
 import settingsReducer from './SettingsSlice';
-import gameHistoryReducer from './GameHistorySlice';
+import gameListReducer from './GameListSlice';
 import createMigrate from 'redux-persist/es/createMigrate';
 import 'react-native-get-random-values';
 import { v4 as uuidv4 } from 'uuid';
@@ -14,6 +14,7 @@ const migrations = {
         return {
             ...state,
             uuid: uuidv4(),
+            dateCreated: Date.now(),
         }
     },
 }
@@ -33,18 +34,18 @@ const settingsPersistConfig = {
     whitelist: ['home_fullscreen', 'multiplier'],
 };
 
-const gameHistoryPersistConfig = {
-    key: 'gameHistory',
+const gameListPersistConfig = {
+    key: 'games',
     version: 0,
     storage: AsyncStorage,
-    whitelist: ['games'],
+    whitelist: ['entities', 'ids'],
 };
 
 export const store = configureStore({
     reducer: {
         currentGame: persistReducer(currentGamePersistConfig, currentGameReducer),
         settings: persistReducer(settingsPersistConfig, settingsReducer),
-        gameHistory: persistReducer(gameHistoryPersistConfig, gameHistoryReducer),
+        games: persistReducer(gameListPersistConfig, gameListReducer),
     }
 })
 

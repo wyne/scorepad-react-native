@@ -1,39 +1,25 @@
 import React, { useEffect, useState } from 'react';
 import { Text, View, StyleSheet, ScrollView } from 'react-native';
 import { List, ListItem, Icon, Button, Avatar } from 'react-native-elements';
-import { gameNew } from '../../redux/CurrentGameSlice';
-import { v4 as uuidv4 } from 'uuid';
-import { storeGames, retrieveGames } from '../../asyncstorage/GamesListStorage';
 import { FlatList } from 'react-native-gesture-handler';
+import { useSelector } from 'react-redux';
+import { v4 as uuidv4 } from 'uuid';
+import { useDispatch } from 'react-redux';
+
+import { gameNew } from '../../redux/CurrentGameSlice';
+import { gameSave } from '../../redux/GameListSlice';
+import { storeGames, retrieveGames } from '../../asyncstorage/GamesListStorage';
+import { selectGameIds, selectAllGames } from '../../redux/GameListSlice';
 
 const ListScreen = ({ navigation }) => {
-    const [gameList, setGameList] = useState([])
+    const dispatch = useDispatch();
 
-    const newGameHandler = () => {
-        dispatch(gameNew());
-        setIsNewGame(true);
-    }
-
-    useEffect(() => {
-        retrieveGames().then((value) => {
-            if (value != null) {
-                setGameList(value);
-            }
-        })
-    }, [])
+    const selectCurrentGame = useSelector(state => state.currentGame);
+    const gameList = useSelector(state => selectAllGames(state));
 
     const addGameHandler = () => {
-        retrieveGames().then((value) => {
-            const newGame = {
-                id: uuidv4(),
-                title: 'Game ' + (value.length + 1),
-                created: '2020-01-01 12:00:00',
-            }
-            const newGamesList = [newGame].concat(value);
-
-            setGameList(newGamesList);
-            storeGames(newGamesList);
-        })
+        dispatch(gameSave(selectCurrentGame));
+        dispatch(gameNew());
     }
 
     const GamesFooter = () => {
@@ -47,7 +33,7 @@ const ListScreen = ({ navigation }) => {
     };
 
     const GameRow = ({ game, i }) => {
-        return <ListItem key={game.id} bottomDivider onPress={() => {
+        return <ListItem key={game.uuid} bottomDivider onPress={() => {
             navigation.navigate("Game")
         }} >
             <ListItem.Content>
@@ -84,7 +70,7 @@ const ListScreen = ({ navigation }) => {
                 renderItem={({ item }) =>
                     <GameRow game={item} />
                 }
-                keyExtractor={item => item.id}
+                keyExtractor={item => item.uuid}
                 ListFooterComponent={GamesFooter}>
             </FlatList>
         </View>

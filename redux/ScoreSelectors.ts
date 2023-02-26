@@ -8,9 +8,9 @@ export const selectScoreTotalByPlayer = createSelector(
         (state, playerIndex) => playerIndex
     ],
     // Selector
-    (scores, playerIndex) => {
+    (scores: number[][], playerIndex: number) => {
         return scores[playerIndex].reduce(
-            (sum, current, round) => {
+            (sum: number, current: number, round: number) => {
                 if (round > round) { return sum; }
                 return (sum || 0) + (current || 0);
             }
@@ -22,11 +22,11 @@ export const selectScoreByPlayerAndRound = createSelector(
     // Build params
     [
         state => state.currentGame.scores,
-        (state, playerIndex) => playerIndex,
-        (state, playerIndex, round) => round,
+        (state, playerIndex: number) => playerIndex,
+        (state, playerIndex, round: number) => round,
     ],
     // Selector
-    (scores, playerIndex, round) => {
+    (scores: number[][], playerIndex: number, round: number) => {
         return scores[playerIndex][round] || 0;
     }
 );

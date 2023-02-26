@@ -7,12 +7,14 @@ export interface GameState {
     players: { name: string; uuid: string }[];
     scores: number[][];
     currentRound: number;
+    dateCreated: number;
 }
 
 type PlayerIndex = number;
 
 const initialState: GameState = {
     uuid: uuidv4(),
+    dateCreated: Date.now(),
     players: [
         { name: 'Player 1', uuid: uuidv4() },
         { name: 'Player 2', uuid: uuidv4() },
@@ -100,12 +102,18 @@ const currentGameSlice = createSlice({
             state.players.splice(action.payload, 1)
             state.scores.splice(action.payload, 1)
         },
-        gameNew(state, action) {
-            state.players.forEach((name, index) => {
-                state.scores[index] = [0]
-            })
-
-            state.currentRound = 0;
+        gameNew: {
+            reducer(state, action: PayloadAction<string, string, { uuid: string }>) {
+                state.uuid = action.meta.uuid;
+                state.players.forEach((name, index) => {
+                    state.scores[index] = [0]
+                })
+                state.currentRound = 0;
+            },
+            prepare(payload: string) {
+                const uuid = uuidv4();
+                return { payload, meta: { uuid } };
+            }
         },
     }
 })
