@@ -122,6 +122,13 @@ const currentGameSlice = createSlice({
             state.scores = action.payload.scores;
             state.currentRound = action.payload.currentRound;
             state.dateCreated = action.payload.dateCreated;
+        },
+        gameUnset(state) {
+            state.uuid = '';
+            state.players = [];
+            state.scores = [];
+            state.currentRound = 0;
+            state.dateCreated = 0;
         }
     }
 })
@@ -136,6 +143,7 @@ export const {
     playerRemove,
     gameNew,
     gameRestore,
+    gameUnset,
 } = currentGameSlice.actions
 
 export default currentGameSlice.reducer

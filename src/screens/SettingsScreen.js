@@ -6,6 +6,7 @@ import { Icon, Button } from 'react-native-elements'
 
 import { playerAdd, gameNew } from '../../redux/CurrentGameSlice';
 import EditPlayer from '../components/EditPlayer';
+import { gameSave } from '../../redux/GameListSlice';
 
 const appJson = require('../../app.json');
 
@@ -14,18 +15,20 @@ const SettingsScreen = ({ navigation }) => {
 
     const players = useSelector(state => state.currentGame.players);
     const currentGameId = useSelector(state => state.currentGame.uuid);
+    const selectCurrentGame = useSelector(state => state.currentGame);
     const dispatch = useDispatch();
 
     const maxPlayers = Platform.isPad ? 12 : 8;
 
-    const newGameHandler = () => {
-        dispatch(gameNew());
-        setIsNewGame(true);
-    }
-
     const addPlayerHandler = () => {
         dispatch(playerAdd('Player ' + (players.length + 1)));
         setPlayerWasAdded(true)
+    }
+
+    const mainMenuHandler = () => {
+        dispatch(gameSave(selectCurrentGame));
+        dispatch(gameSave)
+        navigation.navigate("List")
     }
 
     {/* 
@@ -54,19 +57,6 @@ const SettingsScreen = ({ navigation }) => {
             style={styles.configScrollContainer}
             contentContainerStyle={{ alignItems: 'stretch' }}
         >
-
-            {/* 
-            <BottomSheet
-                ref={sheetRef}
-                snapPoints={[450, 0]}
-                initialSnap={1}
-                borderRadius={20}
-                renderContent={renderContent}
-                onOpenStart={() => null}
-                onCloseEnd={() => null}
-            />
-            */}
-
             <View style={{ width: 350, alignSelf: 'center' }}>
                 <Image
                     source={require('../../assets/infographic.png')}
@@ -85,8 +75,8 @@ const SettingsScreen = ({ navigation }) => {
                 <View style={{ margin: 10, }}>
                     <Button
                         icon={<Icon name="menu" color="white" />}
-                        title="Main Menu"
-                        onPress={() => { navigation.navigate("List") }} />
+                        title="Back to Main Menu"
+                        onPress={mainMenuHandler} />
                 </View>
 
                 <View style={{ flexDirection: 'row', alignItems: 'baseline', padding: 10, justifyContent: 'space-between' }}>

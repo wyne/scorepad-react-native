@@ -34,7 +34,7 @@ const settingsPersistConfig = {
     whitelist: ['home_fullscreen', 'multiplier'],
 };
 
-const gameListPersistConfig = {
+const gamesPersistConfig = {
     key: 'games',
     version: 0,
     storage: AsyncStorage,
@@ -45,7 +45,7 @@ export const store = configureStore({
     reducer: {
         currentGame: persistReducer(currentGamePersistConfig, currentGameReducer),
         settings: persistReducer(settingsPersistConfig, settingsReducer),
-        games: persistReducer(gameListPersistConfig, gameListReducer),
+        games: persistReducer(gamesPersistConfig, gameListReducer),
     }
 })
 
