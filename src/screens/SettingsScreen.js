@@ -4,7 +4,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { Icon, Button } from 'react-native-elements'
 
-import { playerAdd, gameNew } from '../../redux/CurrentGameSlice';
+import { playerAdd } from '../../redux/CurrentGameSlice';
 import EditPlayer from '../components/EditPlayer';
 import { gameSave } from '../../redux/GameListSlice';
 
@@ -27,7 +27,6 @@ const SettingsScreen = ({ navigation }) => {
 
     const mainMenuHandler = () => {
         dispatch(gameSave(selectCurrentGame));
-        dispatch(gameSave)
         navigation.navigate("List")
     }
 

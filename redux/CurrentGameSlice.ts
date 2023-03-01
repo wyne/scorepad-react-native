@@ -3,17 +3,22 @@ import 'react-native-get-random-values'
 import { v4 as uuidv4 } from 'uuid'
 
 export interface GameState {
+    loaded: boolean;
     uuid: string;
+    title: string;
     players: { name: string; uuid: string }[];
     scores: number[][];
-    currentRound: number;
     dateCreated: number;
+    currentRound: number;
+    totalRounds: number;
 }
 
 type PlayerIndex = number;
 
 const initialState: GameState = {
+    loaded: true,
     uuid: uuidv4(),
+    title: 'Untitled',
     dateCreated: Date.now(),
     players: [
         { name: 'Player 1', uuid: uuidv4() },
@@ -24,6 +29,7 @@ const initialState: GameState = {
         [0],
     ],
     currentRound: 0,
+    totalRounds: 1,
 }
 
 const currentGameSlice = createSlice({
@@ -64,7 +70,8 @@ const currentGameSlice = createSlice({
             state.currentRound++;
 
             // TODO: clean up
-            if (state.scores[0][state.currentRound] === undefined) {
+            if (state.currentRound >= state.totalRounds) {
+                state.totalRounds++;
                 state.players.forEach((name, index) => {
                     state.scores[index][state.currentRound] = 0;
                 })
@@ -122,13 +129,10 @@ const currentGameSlice = createSlice({
             state.scores = action.payload.scores;
             state.currentRound = action.payload.currentRound;
             state.dateCreated = action.payload.dateCreated;
+            state.loaded = true;
         },
         gameUnset(state) {
-            state.uuid = '';
-            state.players = [];
-            state.scores = [];
-            state.currentRound = 0;
-            state.dateCreated = 0;
+            state.loaded = false;
         }
     }
 })

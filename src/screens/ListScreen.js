@@ -23,8 +23,11 @@ const ListScreen = ({ navigation }) => {
     const gameList = useSelector(state => selectAllGames(state));
 
     const addGameHandler = () => {
+        if (selectCurrentGame.loaded) {
+            dispatch(gameSave(selectCurrentGame));
+        }
+        dispatch(gameNew("Untitled Game"));
         dispatch(gameSave(selectCurrentGame));
-        dispatch(gameNew());
         navigation.navigate("Game")
     }
 
@@ -47,12 +50,10 @@ const ListScreen = ({ navigation }) => {
 
         // Tap
         const chooseGameHandler = () => {
-            if (selectCurrentGame.uuid !== game.uuid) {
-                if (selectCurrentGame.uuid !== "") {
-                    dispatch(gameSave(selectCurrentGame));
-                }
-                dispatch(gameRestore(chosenGame));
+            if (selectCurrentGame.loaded) {
+                dispatch(gameSave(selectCurrentGame));
             }
+            dispatch(gameRestore(chosenGame));
             navigation.navigate("Game")
         }
 
@@ -83,7 +84,7 @@ const ListScreen = ({ navigation }) => {
             onPress={chooseGameHandler}
             onLongPress={deleteGameHandler}>
             <ListItem.Content>
-                <ListItem.Title>{game.uuid}</ListItem.Title>
+                <ListItem.Title>{game.title}</ListItem.Title>
                 <ListItem.Subtitle style={styles.gameSubtitle}>
                     <Text><Moment element={Text} fromNow>{game.dateCreated}</Moment></Text>
                 </ListItem.Subtitle>

@@ -13,6 +13,7 @@ function Rounds({ navigation, show }) {
     const players = useSelector(state => state.currentGame.players);
     const scores = useSelector(state => state.currentGame.scores);
     const currentRound = useSelector(state => state.currentGame.currentRound);
+    const totalRounds = useSelector(state => state.currentGame.totalRounds);
     const currentRoundEl = useRef()
     const roundsScrollViewEl = useRef()
 
