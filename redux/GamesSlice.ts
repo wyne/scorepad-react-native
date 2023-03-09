@@ -2,6 +2,7 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { createEntityAdapter } from '@reduxjs/toolkit'
 
 interface GameState {
+    id: string;
     title: string;
     dateCreated: number;
     roundCurrent: number;
@@ -22,6 +23,23 @@ const gamesSlice = createSlice({
     initialState,
     reducers: {
         updateGame: gamesAdapter.updateOne,
+        roundNext(state, action: PayloadAction<GameState>) {
+            gamesAdapter.updateOne(state, {
+                id: action.payload.id,
+                changes: {
+                    roundCurrent: action.payload.roundCurrent + 1,
+                    roundTotal: Math.max(action.payload.roundTotal, action.payload.roundCurrent + 1)
+                }
+            })
+        },
+        roundPrevious(state, action: PayloadAction<GameState>) {
+            gamesAdapter.updateOne(state, {
+                id: action.payload.id,
+                changes: {
+                    roundCurrent: Math.max(0, action.payload.roundCurrent - 1),
+                }
+            })
+        },
         gameSave(state, action: PayloadAction<GameState>) {
             gamesAdapter.upsertOne(state, action.payload);
         },
@@ -37,6 +55,8 @@ interface GamesSlice {
 
 export const {
     updateGame,
+    roundNext,
+    roundPrevious,
     gameSave,
     gameDelete
 } = gamesSlice.actions

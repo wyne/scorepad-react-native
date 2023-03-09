@@ -4,7 +4,7 @@ import { Icon } from 'react-native-elements/dist/icons/Icon';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { roundNext, roundPrevious } from '../../redux/CurrentGameSlice';
+import { roundNext, roundPrevious } from '../../redux/GamesSlice';
 import { selectGameById, updateGame } from '../../redux/GamesSlice';
 import { toggleHomeFullscreen, toggleMultiplier } from '../../redux/SettingsSlice';
 import { systemBlue } from '../constants';
@@ -17,28 +17,16 @@ function RoundTitle({ navigation }) {
     const multiplier = useSelector(state => state.settings.multiplier);
 
     const currentGameId = useSelector(state => state.currentGame.uuid);
+    const currentGame = useSelector(state => selectGameById(state, currentGameId));
     const roundCurrent = useSelector(state => selectGameById(state, currentGameId).roundCurrent);
     const roundTotal = useSelector(state => selectGameById(state, currentGameId).roundTotal);
 
     const nextRoundHandler = () => {
-        dispatch(updateGame({
-            id: currentGameId,
-            changes: {
-                roundCurrent: roundCurrent + 1,
-                roundTotal: Math.max(roundTotal, roundCurrent + 1)
-            }
-        }))
-        // dispatch(roundNext());
+        dispatch(roundNext(currentGame));
     }
 
     const prevRoundHandler = () => {
-        dispatch(updateGame({
-            id: currentGameId,
-            changes: {
-                roundCurrent: Math.max(0, roundCurrent - 1),
-            }
-        }))
-        // dispatch(roundPrevious());
+        dispatch(roundPrevious(currentGame));
     }
 
     const expandHandler = () => {
