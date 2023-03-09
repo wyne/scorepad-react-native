@@ -15,7 +15,7 @@ import {
     selectGameIds,
     selectAllGames
 } from '../../redux/GamesSlice';
-import { scoreAdd, selectPlayerById } from '../../redux/PlayersSlice';
+import { playerAdd, selectPlayerById } from '../../redux/PlayersSlice';
 import { selectPlayersByIds } from '../../redux/ScoreSelectors';
 import { setCurrentGameId } from '../../redux/SettingsSlice';
 
@@ -29,12 +29,12 @@ const ListScreen = ({ navigation }) => {
         const player2Id = uuidv4();
         const newGameId = uuidv4();
 
-        dispatch(scoreAdd({
+        dispatch(playerAdd({
             id: player1Id,
             playerName: "Player 1",
             scores: [0],
         }));
-        dispatch(scoreAdd({
+        dispatch(playerAdd({
             id: player2Id,
             playerName: "Player 2",
             scores: [0],

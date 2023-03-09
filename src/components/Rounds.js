@@ -19,7 +19,6 @@ function Rounds({ navigation, show }) {
     const roundTotal = useSelector(state => selectGameById(state, currentGameId).roundTotal);
 
     const players = useSelector(state => selectPlayersByIds(state, currentGame.playerIds));
-    const scores = useSelector(state => state.currentGame.scores);
 
     const currentRoundEl = useRef()
     const roundsScrollViewEl = useRef()

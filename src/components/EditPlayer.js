@@ -5,10 +5,13 @@ import { playerNameSet, playerRemove } from '../../redux/CurrentGameSlice';
 import { Icon, Input } from 'react-native-elements';
 
 import { palette, systemBlue } from '../constants';
+import { selectGameById } from '../../redux/GamesSlice';
+import { selectPlayersByIds } from '../../redux/ScoreSelectors';
 
 const EditPlayer = ({ player, index, promptColor, setPlayerWasAdded, playerWasAdded }) => {
     const dispatch = useDispatch();
-    const players = useSelector(state => state.currentGame.players);
+    const currentGame = useSelector(state => selectGameById(state, state.settings.currentGameId));
+    const players = useSelector(state => selectPlayersByIds(state, currentGame.playerIds));
 
     const setPlayerNameHandler = (index, name) => {
         dispatch(playerNameSet(index, name));
@@ -35,7 +38,7 @@ const EditPlayer = ({ player, index, promptColor, setPlayerWasAdded, playerWasAd
         if (index == players.length - 1 && playerWasAdded) {
             return null
         } else {
-            return player.name;
+            return player.playerName;
         }
     })();
 

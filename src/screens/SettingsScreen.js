@@ -4,24 +4,40 @@ import { useSelector, useDispatch } from 'react-redux';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { Icon, Button } from 'react-native-elements'
 
-import { playerAdd } from '../../redux/CurrentGameSlice';
+import { playerAdd } from '../../redux/PlayersSlice';
 import EditPlayer from '../components/EditPlayer';
-import { gameSave } from '../../redux/GamesSlice';
+import { selectGameById, updateGame, } from '../../redux/GamesSlice';
+import { selectPlayersByIds } from '../../redux/ScoreSelectors';
+import { v4 as uuidv4 } from 'uuid';
 
 const appJson = require('../../app.json');
 
 const SettingsScreen = ({ navigation }) => {
+    const dispatch = useDispatch();
     const [playerWasAdded, setPlayerWasAdded] = useState(false)
 
-    const players = useSelector(state => state.currentGame.players);
-    const currentGameId = useSelector(state => state.currentGame.uuid);
-    const selectCurrentGame = useSelector(state => state.currentGame);
-    const dispatch = useDispatch();
+    const currentGame = useSelector(state => selectGameById(state, state.settings.currentGameId));
+    const players = useSelector(state => selectPlayersByIds(state, currentGame.playerIds));
 
     const maxPlayers = Platform.isPad ? 12 : 8;
 
     const addPlayerHandler = () => {
-        dispatch(playerAdd('Player ' + (players.length + 1)));
+        const newPlayerId = uuidv4();
+
+        dispatch(playerAdd({
+            id: newPlayerId,
+            playerName: `Player ${players.length + 1}`,
+            scores: [0],
+        }));
+
+        dispatch(updateGame({
+            id: currentGame.id,
+            changes: {
+                playerIds: [...currentGame.playerIds, newPlayerId],
+            }
+        }));
+
+        // TODO: Add player to game
         setPlayerWasAdded(true)
     }
 
@@ -93,7 +109,7 @@ const SettingsScreen = ({ navigation }) => {
                         // promptColor={promptColor}
                         setPlayerWasAdded={setPlayerWasAdded}
                         playerWasAdded={playerWasAdded}
-                        key={player.uuid}
+                        key={player.id}
                     />
                 ))}
 
@@ -120,7 +136,7 @@ const SettingsScreen = ({ navigation }) => {
                     {Platform.OS == 'android' &&
                         <Text style={styles.text}>{Platform.OS} build {appJson.expo.android.versionCode}</Text>
                     }
-                    <Text>{currentGameId}</Text>
+                    <Text>{currentGame.id}</Text>
                 </View>
             </View>
 
