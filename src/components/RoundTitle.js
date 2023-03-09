@@ -5,6 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { roundNext, roundPrevious } from '../../redux/CurrentGameSlice';
+import { selectGameById, updateGame } from '../../redux/GamesSlice';
 import { toggleHomeFullscreen, toggleMultiplier } from '../../redux/SettingsSlice';
 import { systemBlue } from '../constants';
 
@@ -15,12 +16,29 @@ function RoundTitle({ navigation }) {
     const fullscreen = useSelector(state => state.settings.home_fullscreen);
     const multiplier = useSelector(state => state.settings.multiplier);
 
+    const currentGameId = useSelector(state => state.currentGame.uuid);
+    const roundCurrent = useSelector(state => selectGameById(state, currentGameId).roundCurrent);
+    const roundTotal = useSelector(state => selectGameById(state, currentGameId).roundTotal);
+
     const nextRoundHandler = () => {
-        dispatch(roundNext());
+        dispatch(updateGame({
+            id: currentGameId,
+            changes: {
+                roundCurrent: roundCurrent + 1,
+                roundTotal: Math.max(roundTotal, roundCurrent + 1)
+            }
+        }))
+        // dispatch(roundNext());
     }
 
     const prevRoundHandler = () => {
-        dispatch(roundPrevious());
+        dispatch(updateGame({
+            id: currentGameId,
+            changes: {
+                roundCurrent: Math.max(0, roundCurrent - 1),
+            }
+        }))
+        // dispatch(roundPrevious());
     }
 
     const expandHandler = () => {
@@ -55,7 +73,7 @@ function RoundTitle({ navigation }) {
                     color={systemBlue}
                     style={[
                         styles.titleButton,
-                        { opacity: currentRound == 0 ? 0 : 1 }
+                        { opacity: roundCurrent == 0 ? 0 : 1 }
                     ]}
                 />
             </TouchableOpacity>
@@ -95,7 +113,7 @@ function RoundTitle({ navigation }) {
                 <PrevRoundButton />
 
                 <Text style={styles.title}>
-                    Round {currentRound + 1}
+                    Round {roundCurrent + 1}
                 </Text>
 
                 <NextRoundButton />

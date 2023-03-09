@@ -1,20 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, memo } from 'react';
 import { Text, View, StyleSheet, TouchableHighlight } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 
 import AdditionTile from './PlayerTiles/AdditionTile';
-import { playerRoundScoreIncrement, playerRoundScoreDecrement, scoreAdd } from '../../redux/PlayersSlice';
-import { selectScoreTotalByPlayer, selectScoreByPlayerAndRound } from '../../redux/ScoreSelectors';
-import { createSelector, current } from '@reduxjs/toolkit';
+import { playerRoundScoreIncrement, playerRoundScoreDecrement, scoreAdd, updatePlayer } from '../../redux/PlayersSlice';
 import { selectPlayerById } from '../../redux/PlayersSlice';
 
-const PlayerTile = ({ playerIndex, color, fontColor, cols, rows, playerId }) => {
+const PlayerTile = ({ color, fontColor, cols, rows, playerId }) => {
     const [width, setWidth] = useState(0);
     const [height, setHeight] = useState(0);
 
     const dispatch = useDispatch();
 
-    const players = useSelector(state => state.currentGame.players);
     const currentRound = useSelector(state => state.currentGame.currentRound);
     const multiplier = useSelector(state => state.settings.multiplier);
 
@@ -105,4 +102,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default PlayerTile;
+export default memo(PlayerTile);

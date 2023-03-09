@@ -4,7 +4,7 @@ import { createEntityAdapter } from '@reduxjs/toolkit'
 interface GameState {
     title: string;
     dateCreated: number;
-    roundCurent: number;
+    roundCurrent: number;
     roundTotal: number;
     scoreIds: string[];
 }
@@ -21,6 +21,7 @@ const gamesSlice = createSlice({
     name: 'games',
     initialState,
     reducers: {
+        updateGame: gamesAdapter.updateOne,
         gameSave(state, action: PayloadAction<GameState>) {
             gamesAdapter.upsertOne(state, action.payload);
         },
@@ -34,7 +35,11 @@ interface GamesSlice {
     games: typeof initialState
 }
 
-export const { gameSave, gameDelete } = gamesSlice.actions
+export const {
+    updateGame,
+    gameSave,
+    gameDelete
+} = gamesSlice.actions
 
 export default gamesSlice.reducer
 

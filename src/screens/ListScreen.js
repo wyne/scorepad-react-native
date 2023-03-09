@@ -24,10 +24,6 @@ const ListScreen = ({ navigation }) => {
     const selectCurrentGame = useSelector(state => state.currentGame);
     const gameList = useSelector(state => selectAllGames(state)).filter(game => typeof game !== 'undefined');
 
-    console.log("GameList");
-    console.log(gameList);
-
-
     const addGameHandler = () => {
         const player1Id = uuidv4();
         const player2Id = uuidv4();
@@ -47,7 +43,7 @@ const ListScreen = ({ navigation }) => {
             id: newGameId,
             title: 'Untitled',
             dateCreated: Date.now(),
-            roundCurent: 0,
+            roundCurrent: 0,
             roundTotal: 1,
             scoreIds: [player1Id, player2Id],
         }));

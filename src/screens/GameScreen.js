@@ -12,7 +12,6 @@ export default function ScoreBoardScreen({ navigation }) {
     const palette = ["01497c", "c25858", "f5c800", "275436", "dc902c", "62516a", "755647", "925561"]
 
     const [grid, setGrid] = useState({ rows: 0, cols: 0 });
-    const players = useSelector(state => state.currentGame.players);
     const fullscreen = useSelector(state => state.settings.home_fullscreen);
 
     // New
@@ -27,10 +26,10 @@ export default function ScoreBoardScreen({ navigation }) {
         let closestAspectRatio = Number.MAX_SAFE_INTEGER
         let bestRowCount = 1;
 
-        for (let rows = 1; rows <= players.length; rows++) {
-            const cols = Math.ceil(players.length / rows);
+        for (let rows = 1; rows <= playerIds.length; rows++) {
+            const cols = Math.ceil(playerIds.length / rows);
 
-            if (players.length % rows > 0 && rows - players.length % rows > 1) {
+            if (playerIds.length % rows > 0 && rows - playerIds.length % rows > 1) {
                 continue;
             }
 
@@ -44,18 +43,17 @@ export default function ScoreBoardScreen({ navigation }) {
             }
         }
 
-        setGrid({ rows: bestRowCount, cols: Math.ceil(players.length / bestRowCount) })
+        setGrid({ rows: bestRowCount, cols: Math.ceil(playerIds.length / bestRowCount) })
     }
 
     return (
         <SafeAreaView style={{ flex: 1 }}>
             <View style={styles.appContainer}>
                 <View style={styles.contentStyle} onLayout={layoutHandler} >
-                    {players.map((name, index) => (
+                    {playerIds.map((id, index) => (
                         <PlayerTile
-                            key={index}
-                            playerIndex={index}
-                            playerId={playerIds[index]}
+                            key={id}
+                            playerId={id}
                             color={'#' + palette[index % palette.length]}
                             fontColor={getContrastRatio('#' + palette[index % palette.length], '#000').number > 7 ? "#000000" : "#FFFFFF"}
                             cols={(grid.rows != 0 && grid.cols != 0) ? grid.cols : 0}

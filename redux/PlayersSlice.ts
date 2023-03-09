@@ -24,6 +24,7 @@ const scoresSlice = createSlice({
     name: 'players',
     initialState,
     reducers: {
+        updatePlayer: playersAdapter.updateOne,
         scoreAdd(state, action: PayloadAction<ScoreState>) {
             playersAdapter.upsertOne(state, action.payload);
         },
@@ -67,6 +68,7 @@ const scoresSlice = createSlice({
 })
 
 export const {
+    updatePlayer,
     scoreAdd,
     playerRoundScoreIncrement,
     playerRoundScoreDecrement,
