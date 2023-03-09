@@ -26,7 +26,7 @@ const SettingsScreen = ({ navigation }) => {
     }
 
     const mainMenuHandler = () => {
-        dispatch(gameSave(selectCurrentGame));
+        // dispatch(gameSave(selectCurrentGame));
         navigation.navigate("List")
     }
 

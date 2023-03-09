@@ -7,7 +7,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { useDispatch } from 'react-redux';
 import Moment from 'react-moment';
 
-import { gameNew, gameRestore, gameUnset } from '../../redux/CurrentGameSlice';
+import { gameNew, gameRestore, gameUnset, setCurrentGame } from '../../redux/CurrentGameSlice';
 import {
     gameSave,
     selectGameById,
@@ -29,14 +29,10 @@ const ListScreen = ({ navigation }) => {
 
 
     const addGameHandler = () => {
-        if (selectCurrentGame.loaded) {
-            // dispatch(gameSave(selectCurrentGame));
-        }
-        // dispatch(gameNew("Untitled Game"));
-        // dispatch(gameSave(selectCurrentGame));
-
         const player1Id = uuidv4();
         const player2Id = uuidv4();
+        const newGameId = uuidv4();
+
         dispatch(scoreAdd({
             id: player1Id,
             playerName: "Player 1",
@@ -48,13 +44,16 @@ const ListScreen = ({ navigation }) => {
             scores: [0],
         }));
         dispatch(gameSave({
-            id: uuidv4(),
+            id: newGameId,
+            title: 'Untitled',
             dateCreated: Date.now(),
             roundCurent: 0,
             roundTotal: 1,
             scoreIds: [player1Id, player2Id],
         }));
-        // navigation.navigate("Game")
+
+        dispatch(setCurrentGame(newGameId));
+        navigation.navigate("Game")
     }
 
     const GamesFooter = () => {
@@ -68,10 +67,6 @@ const ListScreen = ({ navigation }) => {
     };
 
     const GameRow = ({ game, i }) => {
-        // const players = useSelector(state => selectGameById(state, game.id).players);
-        // const scores = useSelector(state => selectGameById(state, game.id).scores);
-        // const rounds = scores[0].length;
-        // const playerNames = players.map(player => player.name).join(', ');
         const chosenGame = useSelector(state => selectGameById(state, game.id));
         const players = useSelector(state => selectScoreByIds(state, game.scoreIds));
         const playerNames = players.map(player => player.playerName).join(', ');
@@ -79,10 +74,7 @@ const ListScreen = ({ navigation }) => {
 
         // Tap
         const chooseGameHandler = () => {
-            if (selectCurrentGame.loaded) {
-                // dispatch(gameSave(selectCurrentGame));
-            }
-            // dispatch(gameRestore(chosenGame));
+            dispatch(setCurrentGame(game.id));
             navigation.navigate("Game")
         }
 

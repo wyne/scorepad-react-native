@@ -42,7 +42,6 @@ export const selectScoreByIds = createSelector(
         if (typeof scoreIds === 'undefined') {
             return [];
         }
-        console.log('selectScoreByIds', scores, scoreIds);
         return scoreIds.map((i) => {
             return scores[i];
         });

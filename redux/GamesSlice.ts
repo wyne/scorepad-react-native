@@ -2,6 +2,7 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { createEntityAdapter } from '@reduxjs/toolkit'
 
 interface GameState {
+    title: string;
     dateCreated: number;
     roundCurent: number;
     roundTotal: number;

@@ -17,7 +17,7 @@ export interface GameStateLegacy {
 
 const initialState: GameStateLegacy = {
     loaded: false,
-    uuid: uuidv4(),
+    uuid: undefined,
     title: 'Untitled',
     dateCreated: Date.now(),
     currentRound: 0,
@@ -136,7 +136,11 @@ const currentGameSlice = createSlice({
         },
         gameUnset(state) {
             state.loaded = false;
+        },
+        setCurrentGame(state, action: PayloadAction<string>) {
+            state.uuid = action.payload
         }
+
     }
 })
 
@@ -151,6 +155,7 @@ export const {
     gameNew,
     gameRestore,
     gameUnset,
+    setCurrentGame,
 } = currentGameSlice.actions
 
 export default currentGameSlice.reducer

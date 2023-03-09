@@ -6,8 +6,9 @@ import AdditionTile from './PlayerTiles/AdditionTile';
 import { playerRoundScoreIncrement, playerRoundScoreDecrement } from '../../redux/CurrentGameSlice';
 import { selectScoreTotalByPlayer, selectScoreByPlayerAndRound } from '../../redux/ScoreSelectors';
 import { createSelector } from '@reduxjs/toolkit';
+import { selectScoreById } from '../../redux/ScoresSlice';
 
-const PlayerTile = ({ playerIndex, color, fontColor, cols, rows }) => {
+const PlayerTile = ({ playerIndex, color, fontColor, cols, rows, playerId }) => {
     const [width, setWidth] = useState(0);
     const [height, setHeight] = useState(0);
 
@@ -28,6 +29,11 @@ const PlayerTile = ({ playerIndex, color, fontColor, cols, rows }) => {
     const decPlayerRoundScoreHandler = () => {
         dispatch(playerRoundScoreDecrement(playerIndex, multiplier));
     }
+
+
+    // New
+    const player = useSelector(state => selectScoreById(state, playerId))
+    const playerName = player.playerName;
 
     const widthPerc = (100 / cols) + '%';
     const heightPerc = (100 / rows) + '%';
@@ -53,7 +59,7 @@ const PlayerTile = ({ playerIndex, color, fontColor, cols, rows }) => {
                 totalScore={scoreTotal}
                 roundScore={scoreRound}
                 fontColor={fontColor}
-                playerName={players[playerIndex].name}
+                playerName={`${playerId.substr(0, 4)} ${playerName}`}
                 maxWidth={width}
                 maxHeight={height}
             />
