@@ -5,15 +5,22 @@ import { Text, View, StyleSheet, TouchableOpacity, ScrollView, Platform } from '
 import { useSelector } from 'react-redux';
 
 import { selectScoreByPlayerAndRound, selectScoreTotalByPlayer } from '../../redux/ScoreSelectors';
+import { selectGameById } from '../../redux/GamesSlice';
+import { selectPlayersByIds } from '../../redux/ScoreSelectors';
 import { palette } from '../constants';
+import { selectPlayerById } from '../../redux/PlayersSlice';
 
 function Rounds({ navigation, show }) {
     const [roundScollOffset, setRoundScrollOffset] = useState(0);
 
-    const players = useSelector(state => state.currentGame.players);
+    const currentGameId = useSelector(state => state.settings.currentGameId);
+    const currentGame = useSelector(state => selectGameById(state, currentGameId));
+    const roundCurrent = useSelector(state => selectGameById(state, currentGameId).roundCurrent);
+    const roundTotal = useSelector(state => selectGameById(state, currentGameId).roundTotal);
+
+    const players = useSelector(state => selectPlayersByIds(state, currentGame.playerIds));
     const scores = useSelector(state => state.currentGame.scores);
-    const currentRound = useSelector(state => state.currentGame.currentRound);
-    const totalRounds = useSelector(state => state.currentGame.totalRounds);
+
     const currentRoundEl = useRef()
     const roundsScrollViewEl = useRef()
 
@@ -27,7 +34,7 @@ function Rounds({ navigation, show }) {
     }, [roundScollOffset]);
 
     const onLayoutHandler = (event, round) => {
-        if (round != currentRound) {
+        if (round != roundCurrent) {
             return;
         }
         const offset = event.nativeEvent.layout.x;
@@ -42,7 +49,7 @@ function Rounds({ navigation, show }) {
                     <View key={index} style={{ paddingLeft: 2, borderLeftWidth: 5, borderColor: "#" + palette[index] }}>
                         <Text key={index} style={{ color: 'white', maxWidth: 100, fontSize: 20, }}
                             numberOfLines={1}
-                        >{player.name}</Text>
+                        >{player.playerName}</Text>
                     </View>
                 ))}
             </View>
@@ -56,19 +63,26 @@ function Rounds({ navigation, show }) {
                     Total
                 </Text>
                 {players.map((player, playerIndex) => (
-                    <PlayerTotal key={playerIndex} playerIndex={playerIndex} />
+                    <PlayerTotal key={player.id} playerId={player.id} />
                 ))}
             </View>
         )
     }
 
-    const PlayerTotal = ({ playerIndex }) => {
-        const scoreTotal = useSelector(state =>
-            selectScoreTotalByPlayer(state, playerIndex)
+    const PlayerTotal = ({ playerId }) => {
+        const scores = useSelector(state =>
+            selectPlayerById(state, playerId).scores
         );
 
+        const scoreTotal = scores.reduce(
+            (sum, current, round) => {
+                if (round > round) { return sum; }
+                return (sum || 0) + (current || 0);
+            }
+        )
+
         return (
-            <Text key={playerIndex} style={[styles.scoreEntry, { color: 'white', fontWeight: 'bold' }]} >
+            <Text key={playerId} style={[styles.scoreEntry, { color: 'white', fontWeight: 'bold' }]} >
                 {scoreTotal}
             </Text>
         )
@@ -77,11 +91,11 @@ function Rounds({ navigation, show }) {
     const RoundColumn = ({ round }) => {
         return (
             <View style={{ padding: 10 }}
-                ref={currentRound == round ? currentRoundEl : null}
+                ref={roundCurrent == round ? currentRoundEl : null}
                 onLayout={(e) => onLayoutHandler(e, round)}
-                backgroundColor={round == currentRound ? '#111' : 'black'}>
+                backgroundColor={round == roundCurrent ? '#111' : 'black'}>
                 <Text style={{
-                    color: currentRound == round ? 'red' : 'yellow',
+                    color: roundCurrent == round ? 'red' : 'yellow',
                     fontWeight: 'bold',
                     textAlign: 'center',
                     fontSize: 20,
@@ -89,16 +103,18 @@ function Rounds({ navigation, show }) {
                     {round + 1}
                 </Text>
                 {players.map((player, playerIndex) => (
-                    <PlayerRoundCell playerIndex={playerIndex} round={round} key={playerIndex} />
+                    <PlayerRoundCell playerId={player.id} round={round} key={player.id} index={playerIndex} />
                 ))}
             </View>
         );
     }
 
-    const PlayerRoundCell = ({ playerIndex, round }) => {
-        const scoreRound = useSelector(state =>
-            selectScoreByPlayerAndRound(state, playerIndex, round)
+    const PlayerRoundCell = ({ playerId, round, playerIndex }) => {
+        const scores = useSelector(state =>
+            selectPlayerById(state, playerId).scores
         );
+
+        const scoreRound = scores[round] || 0;
 
         return (
             <Text key={playerIndex} style={[
@@ -108,6 +124,8 @@ function Rounds({ navigation, show }) {
             </Text>
         )
     }
+
+    const roundsIterator = [...Array(roundTotal + 1).keys()];
 
     return (
         <SafeAreaView edges={['right', 'left']} style={{ flexDirection: 'row', backgroundColor: 'black', paddingBottom: 10, height: show ? 'auto' : 0 }}>
@@ -121,7 +139,7 @@ function Rounds({ navigation, show }) {
                 contentContainerStyle={{ flexDirection: 'row' }}
                 ref={roundsScrollViewEl}
             >
-                {scores[0].map((item, round) => (
+                {roundsIterator.map((item, round) => (
                     <RoundColumn round={round} key={round} />
                 ))}
             </ScrollView>
