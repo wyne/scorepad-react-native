@@ -7,7 +7,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { useDispatch } from 'react-redux';
 import Moment from 'react-moment';
 
-import { gameNew, gameRestore, gameUnset, setCurrentGame } from '../../redux/CurrentGameSlice';
+import { gameUnset, } from '../../redux/CurrentGameSlice';
 import {
     gameSave,
     selectGameById,
@@ -17,6 +17,7 @@ import {
 } from '../../redux/GamesSlice';
 import { scoreAdd, selectPlayerById } from '../../redux/PlayersSlice';
 import { selectScoreByIds } from '../../redux/ScoreSelectors';
+import { setCurrentGameId } from '../../redux/SettingsSlice';
 
 const ListScreen = ({ navigation }) => {
     const dispatch = useDispatch();
@@ -48,7 +49,7 @@ const ListScreen = ({ navigation }) => {
             scoreIds: [player1Id, player2Id],
         }));
 
-        dispatch(setCurrentGame(newGameId));
+        dispatch(setCurrentGameId(newGameId));
         navigation.navigate("Game")
     }
 
@@ -70,7 +71,7 @@ const ListScreen = ({ navigation }) => {
 
         // Tap
         const chooseGameHandler = () => {
-            dispatch(setCurrentGame(game.id));
+            dispatch(setCurrentGameId(game.id));
             navigation.navigate("Game")
         }
 

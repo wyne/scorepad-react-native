@@ -3,17 +3,22 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 interface SettingsState {
     home_fullscreen: boolean;
     multiplier: number;
+    currentGameId: string;
 }
 
 const initialState: SettingsState = {
     home_fullscreen: false,
     multiplier: 1,
+    currentGameId: undefined,
 }
 
 const settingsSlice = createSlice({
     name: 'settings',
     initialState,
     reducers: {
+        setCurrentGameId(state, action: PayloadAction<string>) {
+            state.currentGameId = action.payload;
+        },
         toggleHomeFullscreen(state, action) {
             state.home_fullscreen = !state.home_fullscreen;
         },
@@ -30,6 +35,10 @@ const settingsSlice = createSlice({
     }
 })
 
-export const { toggleHomeFullscreen, toggleMultiplier } = settingsSlice.actions
+export const {
+    setCurrentGameId,
+    toggleHomeFullscreen,
+    toggleMultiplier
+} = settingsSlice.actions
 
 export default settingsSlice.reducer

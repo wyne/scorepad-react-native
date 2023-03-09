@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import AdditionTile from './PlayerTiles/AdditionTile';
 import { playerRoundScoreIncrement, playerRoundScoreDecrement, scoreAdd, updatePlayer } from '../../redux/PlayersSlice';
+import { selectGameById } from '../../redux/GamesSlice';
 import { selectPlayerById } from '../../redux/PlayersSlice';
 
 const PlayerTile = ({ color, fontColor, cols, rows, playerId }) => {
@@ -12,24 +13,26 @@ const PlayerTile = ({ color, fontColor, cols, rows, playerId }) => {
 
     const dispatch = useDispatch();
 
-    const currentRound = useSelector(state => state.currentGame.currentRound);
     const multiplier = useSelector(state => state.settings.multiplier);
+    const currentGameId = useSelector(state => state.settings.currentGameId);
+    const roundCurrent = useSelector(state => selectGameById(state, currentGameId).roundCurrent);
 
     // New
     const player = useSelector(state => selectPlayerById(state, playerId))
     const playerName = player.playerName;
     const scoreTotal = player.scores.reduce(
         (sum, current, round) => {
-            if (round > round) { return sum; }
+            if (round > roundCurrent) { return sum; }
             return (sum || 0) + (current || 0);
         }
     )
-    const scoreRound = player.scores[currentRound];
+    const scoreRound = player.scores[roundCurrent] || 0;
+
     const incPlayerRoundScoreHandler = () => {
-        dispatch(playerRoundScoreIncrement(playerId, currentRound, multiplier));
+        dispatch(playerRoundScoreIncrement(playerId, roundCurrent, multiplier));
     }
     const decPlayerRoundScoreHandler = () => {
-        dispatch(playerRoundScoreDecrement(playerId, currentRound, multiplier));
+        dispatch(playerRoundScoreIncrement(playerId, roundCurrent, -multiplier));
     }
 
     const widthPerc = (100 / cols) + '%';

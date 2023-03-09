@@ -34,22 +34,14 @@ const scoresSlice = createSlice({
                 action: PayloadAction<string, string, { round: RoundIndex, multiplier: number }>
             ) {
                 try {
-                    state.entities[action.payload].scores[action.meta.round] += action.meta.multiplier;
-                } catch (error) {
-                    Sentry.React.captureException(error);
-                }
-            },
-            prepare(payload: string, round: RoundIndex, multiplier: number) {
-                return { payload, meta: { round, multiplier } };
-            },
-        },
-        playerRoundScoreDecrement: {
-            reducer(
-                state,
-                action: PayloadAction<string, string, { round: RoundIndex, multiplier: number }>
-            ) {
-                try {
-                    state.entities[action.payload].scores[action.meta.round] -= action.meta.multiplier;
+                    const scores = state.entities[action.payload].scores;
+                    const round = action.meta.round;
+                    const multiplier = action.meta.multiplier;
+
+                    if (typeof scores[round] !== 'number') {
+                        scores[round] = 0;
+                    }
+                    scores[round] += multiplier;
                 } catch (error) {
                     Sentry.React.captureException(error);
                 }

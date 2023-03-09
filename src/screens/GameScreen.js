@@ -15,7 +15,7 @@ export default function ScoreBoardScreen({ navigation }) {
     const fullscreen = useSelector(state => state.settings.home_fullscreen);
 
     // New
-    const currentGame = useSelector(state => selectGameById(state, state.currentGame.uuid));
+    const currentGame = useSelector(state => selectGameById(state, state.settings.currentGameId));
     const playerIds = currentGame.scoreIds;
 
     const desiredAspectRatio = 0.8;

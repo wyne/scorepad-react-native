@@ -32,7 +32,7 @@ const settingsPersistConfig = {
     key: 'settings',
     version: 0,
     storage: AsyncStorage,
-    whitelist: ['home_fullscreen', 'multiplier'],
+    whitelist: ['home_fullscreen', 'multiplier', 'currentGameId'],
 };
 
 const gamesPersistConfig = {

@@ -5,21 +5,19 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { roundNext, roundPrevious } from '../../redux/GamesSlice';
-import { selectGameById, updateGame } from '../../redux/GamesSlice';
+import { selectGameById } from '../../redux/GamesSlice';
 import { toggleHomeFullscreen, toggleMultiplier } from '../../redux/SettingsSlice';
 import { systemBlue } from '../constants';
 
 function RoundTitle({ navigation }) {
     const dispatch = useDispatch();
 
-    const currentRound = useSelector(state => state.currentGame.currentRound);
     const fullscreen = useSelector(state => state.settings.home_fullscreen);
     const multiplier = useSelector(state => state.settings.multiplier);
 
-    const currentGameId = useSelector(state => state.currentGame.uuid);
+    const currentGameId = useSelector(state => state.settings.currentGameId);
     const currentGame = useSelector(state => selectGameById(state, currentGameId));
     const roundCurrent = useSelector(state => selectGameById(state, currentGameId).roundCurrent);
-    const roundTotal = useSelector(state => selectGameById(state, currentGameId).roundTotal);
 
     const nextRoundHandler = () => {
         dispatch(roundNext(currentGame));
