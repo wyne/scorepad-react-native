@@ -2,7 +2,9 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import 'react-native-get-random-values'
 import { v4 as uuidv4 } from 'uuid'
 
-export interface GameState {
+type PlayerIndex = number;
+
+export interface GameStateLegacy {
     loaded: boolean;
     uuid: string;
     title: string;
@@ -13,23 +15,24 @@ export interface GameState {
     totalRounds: number;
 }
 
-type PlayerIndex = number;
-
-const initialState: GameState = {
-    loaded: true,
+const initialState: GameStateLegacy = {
+    loaded: false,
     uuid: uuidv4(),
     title: 'Untitled',
     dateCreated: Date.now(),
-    players: [
-        { name: 'Player 1', uuid: uuidv4() },
-        { name: 'Player 2', uuid: uuidv4() },
-    ],
-    scores: [
-        [0],
-        [0],
-    ],
     currentRound: 0,
     totalRounds: 1,
+    players: [
+        {
+            uuid: 'player1',
+            name: 'Player 1',
+        },
+        {
+            uuid: 'player2',
+            name: 'Player 2',
+        },
+    ],
+    scores: [[0], [0]],
 }
 
 const currentGameSlice = createSlice({
@@ -123,7 +126,7 @@ const currentGameSlice = createSlice({
                 return { payload, meta: { uuid } };
             }
         },
-        gameRestore(state, action: PayloadAction<GameState>) {
+        gameRestore(state, action: PayloadAction<GameStateLegacy>) {
             state.uuid = action.payload.uuid;
             state.players = action.payload.players;
             state.scores = action.payload.scores;

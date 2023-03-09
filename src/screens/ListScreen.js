@@ -14,21 +14,47 @@ import {
     gameDelete,
     selectGameIds,
     selectAllGames
-} from '../../redux/GameListSlice';
+} from '../../redux/GamesSlice';
+import { scoreAdd, selectScoreById } from '../../redux/ScoresSlice';
+import { selectScoreByIds } from '../../redux/ScoreSelectors';
 
 const ListScreen = ({ navigation }) => {
     const dispatch = useDispatch();
 
     const selectCurrentGame = useSelector(state => state.currentGame);
-    const gameList = useSelector(state => selectAllGames(state));
+    const gameList = useSelector(state => selectAllGames(state)).filter(game => typeof game !== 'undefined');
+
+    console.log("GameList");
+    console.log(gameList);
+
 
     const addGameHandler = () => {
         if (selectCurrentGame.loaded) {
-            dispatch(gameSave(selectCurrentGame));
+            // dispatch(gameSave(selectCurrentGame));
         }
-        dispatch(gameNew("Untitled Game"));
-        dispatch(gameSave(selectCurrentGame));
-        navigation.navigate("Game")
+        // dispatch(gameNew("Untitled Game"));
+        // dispatch(gameSave(selectCurrentGame));
+
+        const player1Id = uuidv4();
+        const player2Id = uuidv4();
+        dispatch(scoreAdd({
+            id: player1Id,
+            playerName: "Player 1",
+            scores: [0],
+        }));
+        dispatch(scoreAdd({
+            id: player2Id,
+            playerName: "Player 2",
+            scores: [0],
+        }));
+        dispatch(gameSave({
+            id: uuidv4(),
+            dateCreated: Date.now(),
+            roundCurent: 0,
+            roundTotal: 1,
+            scoreIds: [player1Id, player2Id],
+        }));
+        // navigation.navigate("Game")
     }
 
     const GamesFooter = () => {
@@ -42,18 +68,21 @@ const ListScreen = ({ navigation }) => {
     };
 
     const GameRow = ({ game, i }) => {
-        const players = useSelector(state => selectGameById(state, game.uuid).players);
-        const scores = useSelector(state => selectGameById(state, game.uuid).scores);
-        const rounds = scores[0].length;
-        const playerNames = players.map(player => player.name).join(', ');
-        const chosenGame = useSelector(state => selectGameById(state, game.uuid));
+        // const players = useSelector(state => selectGameById(state, game.id).players);
+        // const scores = useSelector(state => selectGameById(state, game.id).scores);
+        // const rounds = scores[0].length;
+        // const playerNames = players.map(player => player.name).join(', ');
+        const chosenGame = useSelector(state => selectGameById(state, game.id));
+        const players = useSelector(state => selectScoreByIds(state, game.scoreIds));
+        const playerNames = players.map(player => player.playerName).join(', ');
+        const rounds = chosenGame.roundTotal;
 
         // Tap
         const chooseGameHandler = () => {
             if (selectCurrentGame.loaded) {
-                dispatch(gameSave(selectCurrentGame));
+                // dispatch(gameSave(selectCurrentGame));
             }
-            dispatch(gameRestore(chosenGame));
+            // dispatch(gameRestore(chosenGame));
             navigation.navigate("Game")
         }
 
@@ -61,7 +90,7 @@ const ListScreen = ({ navigation }) => {
         const deleteGameHandler = () => {
             Alert.alert(
                 'Delete Game',
-                `Are you sure you want to delete ${game.uuid}?`,
+                `Are you sure you want to delete ${game.id}?`,
                 [
                     {
                         text: 'Cancel',
@@ -72,7 +101,7 @@ const ListScreen = ({ navigation }) => {
                         text: 'OK',
                         onPress: () => {
                             dispatch(gameUnset());
-                            dispatch(gameDelete(game.uuid));
+                            dispatch(gameDelete(game.id));
                         }
                     },
                 ],
@@ -80,7 +109,7 @@ const ListScreen = ({ navigation }) => {
             );
         }
 
-        return <ListItem key={game.uuid} bottomDivider
+        return <ListItem key={game.id} bottomDivider
             onPress={chooseGameHandler}
             onLongPress={deleteGameHandler}>
             <ListItem.Content>
@@ -117,7 +146,7 @@ const ListScreen = ({ navigation }) => {
                 renderItem={({ item }) =>
                     <GameRow game={item} />
                 }
-                keyExtractor={item => item.uuid}
+                keyExtractor={item => item.id}
                 ListFooterComponent={GamesFooter}>
             </FlatList>
         </View>

@@ -30,3 +30,21 @@ export const selectScoreByPlayerAndRound = createSelector(
         return scores[playerIndex][round] || 0;
     }
 );
+
+export const selectScoreByIds = createSelector(
+    // Build params
+    [
+        state => state.scores.entities,
+        (state, scoreIds: string[]) => scoreIds,
+    ],
+    // Selector
+    (scores, scoreIds: string[]) => {
+        if (typeof scoreIds === 'undefined') {
+            return [];
+        }
+        console.log('selectScoreByIds', scores, scoreIds);
+        return scoreIds.map((i) => {
+            return scores[i];
+        });
+    }
+)

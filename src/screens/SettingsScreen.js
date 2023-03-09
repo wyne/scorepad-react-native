@@ -6,7 +6,7 @@ import { Icon, Button } from 'react-native-elements'
 
 import { playerAdd } from '../../redux/CurrentGameSlice';
 import EditPlayer from '../components/EditPlayer';
-import { gameSave } from '../../redux/GameListSlice';
+import { gameSave } from '../../redux/GamesSlice';
 
 const appJson = require('../../app.json');
 
