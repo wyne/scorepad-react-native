@@ -5,7 +5,7 @@ import { configureStore } from "@reduxjs/toolkit";
 import currentGameReducer from './CurrentGameSlice';
 import settingsReducer from './SettingsSlice';
 import gamesReducer from './GamesSlice';
-import scoresReducer from './ScoresSlice';
+import scoresReducer from './PlayersSlice';
 import createMigrate from 'redux-persist/es/createMigrate';
 import 'react-native-get-random-values';
 import { v4 as uuidv4 } from 'uuid';
@@ -42,8 +42,8 @@ const gamesPersistConfig = {
     whitelist: ['entities', 'ids'],
 };
 
-const scoresPersistConfig = {
-    key: 'scores',
+const playersPersistConfig = {
+    key: 'players',
     version: 0,
     storage: AsyncStorage,
     whitelist: ['entities', 'ids'],
@@ -54,7 +54,7 @@ export const store = configureStore({
         currentGame: persistReducer(currentGamePersistConfig, currentGameReducer),
         settings: persistReducer(settingsPersistConfig, settingsReducer),
         games: persistReducer(gamesPersistConfig, gamesReducer),
-        scores: persistReducer(scoresPersistConfig, scoresReducer),
+        players: persistReducer(playersPersistConfig, scoresReducer),
         /* currentGame: currentGameReducer, */
         /* settings: settingsReducer, */
         /* games: gamesReducer, */

@@ -31,10 +31,12 @@ export const selectScoreByPlayerAndRound = createSelector(
     }
 );
 
+// New
+
 export const selectScoreByIds = createSelector(
     // Build params
     [
-        state => state.scores.entities,
+        state => state.players.entities,
         (state, scoreIds: string[]) => scoreIds,
     ],
     // Selector
@@ -46,4 +48,4 @@ export const selectScoreByIds = createSelector(
             return scores[i];
         });
     }
-)
+);

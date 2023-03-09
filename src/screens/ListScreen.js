@@ -15,7 +15,7 @@ import {
     selectGameIds,
     selectAllGames
 } from '../../redux/GamesSlice';
-import { scoreAdd, selectScoreById } from '../../redux/ScoresSlice';
+import { scoreAdd, selectPlayerById } from '../../redux/PlayersSlice';
 import { selectScoreByIds } from '../../redux/ScoreSelectors';
 
 const ListScreen = ({ navigation }) => {

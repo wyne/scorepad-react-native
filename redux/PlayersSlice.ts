@@ -11,21 +11,21 @@ interface ScoreState {
     scores: number[];
 }
 
-const scoresAdapter = createEntityAdapter({
+const playersAdapter = createEntityAdapter({
     // selectId: (score: ScoreState) => score.uuid,
     sortComparer: (a: ScoreState, b: ScoreState) => (
         a.scores.reduce((a, b) => a + b, 0)) < b.scores.reduce((a, b) => a + b, 0) ? 1 : -1,
 })
 
-const initialState = scoresAdapter.getInitialState({
+const initialState = playersAdapter.getInitialState({
 })
 
 const scoresSlice = createSlice({
-    name: 'scores',
+    name: 'players',
     initialState,
     reducers: {
         scoreAdd(state, action: PayloadAction<ScoreState>) {
-            scoresAdapter.upsertOne(state, action.payload);
+            playersAdapter.upsertOne(state, action.payload);
         },
         playerRoundScoreIncrement: {
             reducer(
@@ -76,8 +76,8 @@ export const {
 export default scoresSlice.reducer
 
 export const {
-    selectAll: selectAllScores,
-    selectById: selectScoreById,
-    selectIds: selectScoreIds
+    selectAll: selectAllPlayers,
+    selectById: selectPlayerById,
+    selectIds: selectPlayerIds
     // Pass in a selector that returns the posts slice of state 
-} = scoresAdapter.getSelectors(state => state.scores)
+} = playersAdapter.getSelectors(state => state.players)
