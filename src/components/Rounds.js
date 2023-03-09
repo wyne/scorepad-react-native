@@ -4,7 +4,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Text, View, StyleSheet, TouchableOpacity, ScrollView, Platform } from 'react-native';
 import { useSelector } from 'react-redux';
 
-import { selectScoreByPlayerAndRound, selectScoreTotalByPlayer } from '../../redux/ScoreSelectors';
 import { selectGameById } from '../../redux/GamesSlice';
 import { selectPlayersByIds } from '../../redux/ScoreSelectors';
 import { palette } from '../constants';

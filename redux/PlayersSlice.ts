@@ -25,6 +25,7 @@ const scoresSlice = createSlice({
     initialState,
     reducers: {
         updatePlayer: playersAdapter.updateOne,
+        removePlayer: playersAdapter.removeOne,
         playerAdd(state, action: PayloadAction<ScoreState>) {
             playersAdapter.upsertOne(state, action.payload);
         },
@@ -53,9 +54,6 @@ const scoresSlice = createSlice({
         roundNext(state, action) {
             state.entities.players[action.payload] = 0;
         },
-        playerNameSet(state, action) {
-            state.entities.playerName = action.payload;
-        },
     }
 })
 
@@ -65,6 +63,7 @@ interface PlayersSlice {
 
 export const {
     updatePlayer,
+    removePlayer,
     playerAdd,
     playerRoundScoreIncrement,
     roundNext,
@@ -75,6 +74,6 @@ export default scoresSlice.reducer
 export const {
     selectAll: selectAllPlayers,
     selectById: selectPlayerById,
-    selectIds: selectPlayerIds
+    selectIds: selectPlayerIds,
     // Pass in a selector that returns the posts slice of state 
 } = playersAdapter.getSelectors((state: PlayersSlice) => state.players)

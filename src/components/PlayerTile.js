@@ -59,7 +59,7 @@ const PlayerTile = ({ color, fontColor, cols, rows, playerId }) => {
                 totalScore={scoreTotal}
                 roundScore={scoreRound}
                 fontColor={fontColor}
-                playerName={`${playerId.substr(0, 4)} ${playerName}`}
+                playerName={playerName}
                 maxWidth={width}
                 maxHeight={height}
             />

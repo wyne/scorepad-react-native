@@ -1,12 +1,12 @@
 import React from 'react';
 import { Text, View, StyleSheet, TouchableOpacity } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
-import { playerNameSet, playerRemove } from '../../redux/CurrentGameSlice';
 import { Icon, Input } from 'react-native-elements';
 
 import { palette, systemBlue } from '../constants';
-import { selectGameById } from '../../redux/GamesSlice';
+import { selectGameById, updateGame } from '../../redux/GamesSlice';
 import { selectPlayersByIds } from '../../redux/ScoreSelectors';
+import { removePlayer, updatePlayer } from '../../redux/PlayersSlice';
 
 const EditPlayer = ({ player, index, promptColor, setPlayerWasAdded, playerWasAdded }) => {
     const dispatch = useDispatch();
@@ -14,12 +14,25 @@ const EditPlayer = ({ player, index, promptColor, setPlayerWasAdded, playerWasAd
     const players = useSelector(state => selectPlayersByIds(state, currentGame.playerIds));
 
     const setPlayerNameHandler = (index, name) => {
-        dispatch(playerNameSet(index, name));
+        dispatch(updatePlayer({
+            id: player.id,
+            changes: {
+                playerName: name,
+            }
+        }));
+        // dispatch(playerNameSet(index, name));
         setPlayerWasAdded(false)
     }
 
     const removePlayerHandler = (index) => {
-        dispatch(playerRemove(index));
+        // dispatch(playerRemove(index));
+        dispatch(updateGame({
+            id: currentGame.id,
+            changes: {
+                playerIds: currentGame.playerIds.filter((id) => id != player.id),
+            }
+        }));
+        dispatch(removePlayer(player.id));
     }
 
     const onEndEditingHandler = (e) => {

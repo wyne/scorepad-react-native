@@ -2,7 +2,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { persistStore, persistReducer } from 'redux-persist';
 import { configureStore } from "@reduxjs/toolkit";
 
-import currentGameReducer from './CurrentGameSlice';
 import settingsReducer from './SettingsSlice';
 import gamesReducer from './GamesSlice';
 import scoresReducer from './PlayersSlice';
@@ -19,14 +18,6 @@ const migrations = {
         }
     },
 }
-
-const currentGamePersistConfig = {
-    key: 'root',
-    version: 0,
-    storage: AsyncStorage,
-    whitelist: ['uuid', 'players', 'scores', 'currentRound',],
-    migrate: createMigrate(migrations, { debug: false }),
-};
 
 const settingsPersistConfig = {
     key: 'settings',
@@ -51,14 +42,9 @@ const playersPersistConfig = {
 
 export const store = configureStore({
     reducer: {
-        currentGame: persistReducer(currentGamePersistConfig, currentGameReducer),
         settings: persistReducer(settingsPersistConfig, settingsReducer),
         games: persistReducer(gamesPersistConfig, gamesReducer),
         players: persistReducer(playersPersistConfig, scoresReducer),
-        /* currentGame: currentGameReducer, */
-        /* settings: settingsReducer, */
-        /* games: gamesReducer, */
-        /* scores: scoresReducer, */
     }
 })
 
