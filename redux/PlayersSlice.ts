@@ -59,11 +59,14 @@ const scoresSlice = createSlice({
     }
 })
 
+interface PlayersSlice {
+    players: typeof initialState
+}
+
 export const {
     updatePlayer,
     scoreAdd,
     playerRoundScoreIncrement,
-    playerRoundScoreDecrement,
     roundNext,
 } = scoresSlice.actions
 
@@ -74,4 +77,4 @@ export const {
     selectById: selectPlayerById,
     selectIds: selectPlayerIds
     // Pass in a selector that returns the posts slice of state 
-} = playersAdapter.getSelectors(state => state.players)
+} = playersAdapter.getSelectors((state: PlayersSlice) => state.players)

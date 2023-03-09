@@ -7,7 +7,7 @@ interface GameState {
     dateCreated: number;
     roundCurrent: number;
     roundTotal: number;
-    scoreIds: string[];
+    playerIds: string[];
 }
 
 const gamesAdapter = createEntityAdapter({

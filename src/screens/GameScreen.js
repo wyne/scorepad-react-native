@@ -16,7 +16,7 @@ export default function ScoreBoardScreen({ navigation }) {
 
     // New
     const currentGame = useSelector(state => selectGameById(state, state.settings.currentGameId));
-    const playerIds = currentGame.scoreIds;
+    const playerIds = currentGame.playerIds;
 
     const desiredAspectRatio = 0.8;
 

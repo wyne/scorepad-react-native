@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { Text, View, StyleSheet, ScrollView, Alert } from 'react-native';
 import { List, ListItem, Icon, Button, Avatar } from 'react-native-elements';
 import { FlatList } from 'react-native-gesture-handler';
@@ -16,13 +16,12 @@ import {
     selectAllGames
 } from '../../redux/GamesSlice';
 import { scoreAdd, selectPlayerById } from '../../redux/PlayersSlice';
-import { selectScoreByIds } from '../../redux/ScoreSelectors';
+import { selectPlayersByIds } from '../../redux/ScoreSelectors';
 import { setCurrentGameId } from '../../redux/SettingsSlice';
 
 const ListScreen = ({ navigation }) => {
     const dispatch = useDispatch();
 
-    const selectCurrentGame = useSelector(state => state.currentGame);
     const gameList = useSelector(state => selectAllGames(state)).filter(game => typeof game !== 'undefined');
 
     const addGameHandler = () => {
@@ -45,8 +44,8 @@ const ListScreen = ({ navigation }) => {
             title: 'Untitled',
             dateCreated: Date.now(),
             roundCurrent: 0,
-            roundTotal: 1,
-            scoreIds: [player1Id, player2Id],
+            roundTotal: 0,
+            playerIds: [player1Id, player2Id],
         }));
 
         dispatch(setCurrentGameId(newGameId));
@@ -65,7 +64,7 @@ const ListScreen = ({ navigation }) => {
 
     const GameRow = ({ game, i }) => {
         const chosenGame = useSelector(state => selectGameById(state, game.id));
-        const players = useSelector(state => selectScoreByIds(state, game.scoreIds));
+        const players = useSelector(state => selectPlayersByIds(state, game.playerIds));
         const playerNames = players.map(player => player.playerName).join(', ');
         const rounds = chosenGame.roundTotal;
 
@@ -118,7 +117,7 @@ const ListScreen = ({ navigation }) => {
             />
             <Avatar size={"small"}
                 rounded
-                title={`${rounds}R`}
+                title={`${rounds + 1}R`}
                 activeOpacity={0.7}
                 titleStyle={{ color: '#c25858' }}
             />
@@ -152,4 +151,4 @@ const styles = StyleSheet.create({
     }
 });
 
-export default ListScreen;
+export default memo(ListScreen);

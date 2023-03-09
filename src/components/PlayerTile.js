@@ -105,4 +105,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default memo(PlayerTile);
+export default PlayerTile;
