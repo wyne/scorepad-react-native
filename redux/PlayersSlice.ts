@@ -30,35 +30,35 @@ const scoresSlice = createSlice({
         playerRoundScoreIncrement: {
             reducer(
                 state,
-                action: PayloadAction<RoundIndex, string, { multiplier: number }>
+                action: PayloadAction<string, string, { round: RoundIndex, multiplier: number }>
             ) {
                 try {
-                    state.entities.scores[action.payload] += action.meta.multiplier;
+                    state.entities[action.payload].scores[action.meta.round] += action.meta.multiplier;
                 } catch (error) {
                     Sentry.React.captureException(error);
                 }
             },
-            prepare(payload: RoundIndex, multiplier: number) {
-                return { payload, meta: { multiplier } };
+            prepare(payload: string, round: RoundIndex, multiplier: number) {
+                return { payload, meta: { round, multiplier } };
             },
         },
         playerRoundScoreDecrement: {
             reducer(
                 state,
-                action: PayloadAction<RoundIndex, string, { multiplier: number }>
+                action: PayloadAction<string, string, { round: RoundIndex, multiplier: number }>
             ) {
                 try {
-                    state.entities.scores[action.payload] += action.meta.multiplier;
+                    state.entities[action.payload].scores[action.meta.round] -= action.meta.multiplier;
                 } catch (error) {
                     Sentry.React.captureException(error);
                 }
             },
-            prepare(payload: RoundIndex, multiplier: number) {
-                return { payload, meta: { multiplier } };
+            prepare(payload: string, round: RoundIndex, multiplier: number) {
+                return { payload, meta: { round, multiplier } };
             },
         },
         roundNext(state, action) {
-            state.entities.scores[action.payload] = 0;
+            state.entities.players[action.payload] = 0;
         },
         playerNameSet(state, action) {
             state.entities.playerName = action.payload;
