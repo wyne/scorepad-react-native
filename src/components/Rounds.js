@@ -53,8 +53,8 @@ function Rounds({ navigation, show }) {
                     <RoundScoreColumn
                         round={round}
                         key={round}
-                    // currentRoundEl={currentRoundEl}
-                    // onLayoutHandler={onLayoutHandler}
+                        currentRoundEl={currentRoundEl}
+                        onLayoutHandler={onLayoutHandler.bind(this)}
                     />
                 ))}
             </ScrollView>

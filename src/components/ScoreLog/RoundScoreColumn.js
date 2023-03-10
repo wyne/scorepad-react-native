@@ -17,6 +17,8 @@ const RoundScoreColumn = ({
 
     return (
         <View style={{ padding: 10 }}
+            ref={roundCurrent == round ? currentRoundEl : null}
+            onLayout={(e) => onLayoutHandler(e, round)}
             backgroundColor={round == roundCurrent ? '#111' : 'black'}>
             <Text style={{
                 color: roundCurrent == round ? 'red' : 'yellow',
