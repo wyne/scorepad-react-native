@@ -1,10 +1,7 @@
-import React, { useEffect, useRef, useState, memo } from 'react';
-import { Text, View, StyleSheet, TouchableOpacity, ScrollView, Platform } from 'react-native';
+import React, { memo } from 'react';
+import { Text, StyleSheet } from 'react-native';
 import { useSelector } from 'react-redux';
 
-import { selectGameById } from '../../../redux/GamesSlice';
-import { selectPlayersByIds } from '../../../redux/ScoreSelectors';
-import { palette } from '../../constants';
 import { selectPlayerById } from '../../../redux/PlayersSlice';
 
 const RoundScoreCell = ({ playerId, round, playerIndex }) => {

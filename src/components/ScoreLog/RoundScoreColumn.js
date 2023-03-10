@@ -1,24 +1,18 @@
-import React, { memo } from 'react';
+import React, { memo, useCallback } from 'react';
 import { Text, View } from 'react-native';
 import { useSelector } from 'react-redux';
 
 import { selectGameById } from '../../../redux/GamesSlice';
-import { selectPlayersByIds } from '../../../redux/ScoreSelectors';
 import RoundScoreCell from './RoundScoreCell';
 
-const RoundScoreColumn = ({
-    round,
-    currentRoundEl,
-    onLayoutHandler
-}) => {
+const RoundScoreColumn = ({ round }) => {
     const currentGameId = useSelector(state => state.settings.currentGameId);
     const currentGame = useSelector(state => selectGameById(state, currentGameId));
     const roundCurrent = useSelector(state => selectGameById(state, currentGameId).roundCurrent);
 
     return (
-        <View style={{ padding: 10 }}
-            ref={roundCurrent == round ? currentRoundEl : null}
-            onLayout={(e) => onLayoutHandler(e, round)}
+        <View
+            style={{ padding: 10 }}
             backgroundColor={round == roundCurrent ? '#111' : 'black'}>
             <Text style={{
                 color: roundCurrent == round ? 'red' : 'yellow',
@@ -35,4 +29,4 @@ const RoundScoreColumn = ({
     );
 }
 
-export default RoundScoreColumn;
+export default memo(RoundScoreColumn);
