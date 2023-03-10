@@ -87,7 +87,6 @@ const ListScreen = ({ navigation }) => {
                     {
                         text: 'OK',
                         onPress: () => {
-                            dispatch(gameUnset());
                             dispatch(gameDelete(game.id));
                         }
                     },
