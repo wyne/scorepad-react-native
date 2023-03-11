@@ -21,19 +21,19 @@ function RoundTitle({ navigation }) {
 
     const nextRoundHandler = () => {
         dispatch(roundNext(currentGame));
-    }
+    };
 
     const prevRoundHandler = () => {
         dispatch(roundPrevious(currentGame));
-    }
+    };
 
     const expandHandler = () => {
         dispatch(toggleHomeFullscreen());
-    }
+    };
 
     const multiplierHandler = () => {
         dispatch(toggleMultiplier());
-    }
+    };
 
     const NextRoundButton = ({ }) => {
         return (
@@ -43,11 +43,11 @@ function RoundTitle({ navigation }) {
                     type="font-awesome-5"
                     size={25}
                     color={systemBlue}
-                    style={[styles.titleButton]}
+                    style={[styles.roundButton]}
                 />
             </TouchableOpacity>
         );
-    }
+    };
 
     const PrevRoundButton = ({ }) => {
         return (
@@ -58,13 +58,13 @@ function RoundTitle({ navigation }) {
                     size={25}
                     color={systemBlue}
                     style={[
-                        styles.titleButton,
+                        styles.roundButton,
                         { opacity: roundCurrent == 0 ? 0 : 1 }
                     ]}
                 />
             </TouchableOpacity>
         );
-    }
+    };
 
     const FullscreenButton = ({ }) => {
         return (
@@ -74,28 +74,28 @@ function RoundTitle({ navigation }) {
                 color={systemBlue}
                 type="font-awesome-5"
                 onPress={expandHandler}
-                style={[styles.titleButton]}
+                style={[styles.roundButton]}
             />
-        )
-    }
+        );
+    };
 
     const MultiplierButton = ({ }) => {
         return (
             <TouchableOpacity
-                style={[styles.titleButton]}
+                style={[styles.roundButton]}
                 onPress={multiplierHandler}>
                 <Text style={[styles.multiplier]}>{multiplier} pt</Text>
             </TouchableOpacity>
-        )
-    }
+        );
+    };
 
     return (
         <SafeAreaView edges={['top']} style={[styles.header]}>
-            <SafeAreaView edges={['left']} style={{ width: '25%', alignItems: 'flex-start' }}>
+            <SafeAreaView edges={['left']} style={{ width: '28%', alignItems: 'flex-start' }}>
                 <MultiplierButton />
             </SafeAreaView>
 
-            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', width: '50%' }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', width: '44%' }}>
                 <PrevRoundButton />
 
                 <Text style={styles.title}>
@@ -105,7 +105,7 @@ function RoundTitle({ navigation }) {
                 <NextRoundButton />
             </View>
 
-            <SafeAreaView edges={['right']} style={{ width: '25%', alignItems: 'flex-end' }}>
+            <SafeAreaView edges={['right']} style={{ width: '28%', alignItems: 'flex-end' }}>
                 <FullscreenButton />
             </SafeAreaView>
         </SafeAreaView>
@@ -129,16 +129,16 @@ const styles = StyleSheet.create({
     },
     multiplier: {
         color: systemBlue,
-        paddingHorizontal: 5,
+        paddingRight: 5,
         fontSize: 25,
         fontWeight: 'bold',
         fontVariant: ['tabular-nums'],
     },
-    titleButton: {
+    roundButton: {
         color: systemBlue,
         fontSize: 25,
         fontWeight: 'bold',
-        paddingHorizontal: 15,
+        paddingHorizontal: 10,
         paddingVertical: 10,
     },
 });
