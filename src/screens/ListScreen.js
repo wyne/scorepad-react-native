@@ -1,0 +1,152 @@
+import React, { memo } from 'react';
+import { Text, View, StyleSheet, ScrollView, Alert } from 'react-native';
+import { List, ListItem, Icon, Button, Avatar } from 'react-native-elements';
+import { FlatList } from 'react-native-gesture-handler';
+import { useSelector } from 'react-redux';
+import { v4 as uuidv4 } from 'uuid';
+import { useDispatch } from 'react-redux';
+import Moment from 'react-moment';
+
+import {
+    gameSave,
+    selectGameById,
+    gameDelete,
+    selectGameIds,
+    selectAllGames
+} from '../../redux/GamesSlice';
+import { playerAdd, selectPlayerById } from '../../redux/PlayersSlice';
+import { selectPlayersByIds } from '../../redux/ScoreSelectors';
+import { setCurrentGameId } from '../../redux/SettingsSlice';
+
+const ListScreen = ({ navigation }) => {
+    const dispatch = useDispatch();
+
+    const gameList = useSelector(state => selectAllGames(state));
+
+    const addGameHandler = () => {
+        const player1Id = uuidv4();
+        const player2Id = uuidv4();
+        const newGameId = uuidv4();
+
+        dispatch(playerAdd({
+            id: player1Id,
+            playerName: "Player 1",
+            scores: [0],
+        }));
+        dispatch(playerAdd({
+            id: player2Id,
+            playerName: "Player 2",
+            scores: [0],
+        }));
+        dispatch(gameSave({
+            id: newGameId,
+            title: `Game ${gameList.length + 1}`,
+            dateCreated: Date.now(),
+            roundCurrent: 0,
+            roundTotal: 0,
+            playerIds: [player1Id, player2Id],
+        }));
+
+        dispatch(setCurrentGameId(newGameId));
+        navigation.navigate("Game");
+    };
+
+    const GamesFooter = () => {
+        return (
+            <View style={{
+                paddingVertical: 20,
+                backgroundColor: 'white'
+            }} >
+            </View>
+        );
+    };
+
+    const GameRow = ({ game, i }) => {
+        const chosenGame = useSelector(state => selectGameById(state, game.id));
+        const players = useSelector(state => selectPlayersByIds(state, game.playerIds));
+        const playerNames = players.map(player => player.playerName).join(', ');
+        const rounds = chosenGame.roundTotal;
+
+        // Tap
+        const chooseGameHandler = () => {
+            dispatch(setCurrentGameId(game.id));
+            navigation.navigate("Game");
+        };
+
+        // Long Press
+        const deleteGameHandler = () => {
+            Alert.alert(
+                'Delete Game',
+                `Are you sure you want to delete ${game.id}?`,
+                [
+                    {
+                        text: 'Cancel',
+                        onPress: () => { },
+                        style: 'cancel',
+                    },
+                    {
+                        text: 'OK',
+                        onPress: () => {
+                            dispatch(gameDelete(game.id));
+                        }
+                    },
+                ],
+                { cancelable: false },
+            );
+        };
+
+        return <ListItem key={game.id} bottomDivider
+            onPress={chooseGameHandler}
+            onLongPress={deleteGameHandler}>
+            <ListItem.Content>
+                <ListItem.Title>{game.title}</ListItem.Title>
+                <ListItem.Subtitle style={styles.gameSubtitle}>
+                    <Text><Moment element={Text} fromNow>{game.dateCreated}</Moment></Text>
+                </ListItem.Subtitle>
+                <ListItem.Subtitle style={styles.gameSubtitle}>
+                    <Text>{playerNames}</Text>
+                </ListItem.Subtitle>
+            </ListItem.Content>
+            <Avatar size={"small"}
+                rounded
+                title={`${players.length}P`}
+                activeOpacity={0.7}
+                titleStyle={{ color: '#01497C' }}
+            />
+            <Avatar size={"small"}
+                rounded
+                title={`${rounds + 1}R`}
+                activeOpacity={0.7}
+                titleStyle={{ color: '#c25858' }}
+            />
+            <ListItem.Chevron />
+        </ListItem>;
+    };
+
+    return (
+        <View style={{ flex: 1 }}>
+            <Button title="New Game" onPress={addGameHandler} />
+            <FlatList
+                style={styles.list}
+                data={gameList}
+                renderItem={({ item }) =>
+                    <GameRow game={item} />
+                }
+                keyExtractor={item => item.id}
+                ListFooterComponent={GamesFooter}>
+            </FlatList>
+        </View>
+    );
+};
+
+const styles = StyleSheet.create({
+    list: {
+        backgroundColor: 'white',
+        flex: 1,
+    },
+    gameSubtitle: {
+        color: '#999',
+    }
+});
+
+export default memo(ListScreen);

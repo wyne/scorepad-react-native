@@ -1,22 +1,38 @@
 import React from 'react';
-import { Text, View, StyleSheet } from 'react-native';
+import { Text, View, StyleSheet, TouchableOpacity } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
-import { playerNameSet, playerRemove } from '../../redux/CurrentGameSlice';
 import { Icon, Input } from 'react-native-elements';
 
 import { palette, systemBlue } from '../constants';
+import { selectGameById, updateGame } from '../../redux/GamesSlice';
+import { selectPlayersByIds } from '../../redux/ScoreSelectors';
+import { removePlayer, updatePlayer } from '../../redux/PlayersSlice';
 
 const EditPlayer = ({ player, index, promptColor, setPlayerWasAdded, playerWasAdded }) => {
     const dispatch = useDispatch();
-    const players = useSelector(state => state.currentGame.players);
+    const currentGame = useSelector(state => selectGameById(state, state.settings.currentGameId));
+    const players = useSelector(state => selectPlayersByIds(state, currentGame.playerIds));
 
     const setPlayerNameHandler = (index, name) => {
-        dispatch(playerNameSet(index, name));
+        dispatch(updatePlayer({
+            id: player.id,
+            changes: {
+                playerName: name,
+            }
+        }));
+        // dispatch(playerNameSet(index, name));
         setPlayerWasAdded(false)
     }
 
     const removePlayerHandler = (index) => {
-        dispatch(playerRemove(index));
+        // dispatch(playerRemove(index));
+        dispatch(updateGame({
+            id: currentGame.id,
+            changes: {
+                playerIds: currentGame.playerIds.filter((id) => id != player.id),
+            }
+        }));
+        dispatch(removePlayer(player.id));
     }
 
     const onEndEditingHandler = (e) => {
@@ -35,7 +51,7 @@ const EditPlayer = ({ player, index, promptColor, setPlayerWasAdded, playerWasAd
         if (index == players.length - 1 && playerWasAdded) {
             return null
         } else {
-            return player.name;
+            return player.playerName;
         }
     })();
 
@@ -44,7 +60,12 @@ const EditPlayer = ({ player, index, promptColor, setPlayerWasAdded, playerWasAd
             return <></>;
         };
 
-        return <Icon name="delete" color="#ff375f" onPress={deleteHandler} />;
+        return <View flexDirection='column'>
+            <TouchableOpacity onPress={deleteHandler}>
+                <Icon size={20} name="delete" color="#ff375f" />
+                <Text style={{ color: '#ff375f', fontWeight: 'bold' }}>Delete</Text>
+            </TouchableOpacity>
+        </View>
     }
 
     return (

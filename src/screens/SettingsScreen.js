@@ -4,28 +4,46 @@ import { useSelector, useDispatch } from 'react-redux';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { Icon, Button } from 'react-native-elements'
 
-import { playerAdd, gameNew } from '../../redux/CurrentGameSlice';
+import { playerAdd } from '../../redux/PlayersSlice';
 import EditPlayer from '../components/EditPlayer';
+import { selectGameById, updateGame, } from '../../redux/GamesSlice';
+import { selectPlayersByIds } from '../../redux/ScoreSelectors';
+import { v4 as uuidv4 } from 'uuid';
 
 const appJson = require('../../app.json');
 
-const SettingsScreen = () => {
-    const [isNewGame, setIsNewGame] = useState(false)
+const SettingsScreen = ({ navigation }) => {
+    const dispatch = useDispatch();
     const [playerWasAdded, setPlayerWasAdded] = useState(false)
 
-    const players = useSelector(state => state.currentGame.players);
-    const dispatch = useDispatch();
+    const currentGame = useSelector(state => selectGameById(state, state.settings.currentGameId));
+    const players = useSelector(state => selectPlayersByIds(state, currentGame.playerIds));
 
     const maxPlayers = Platform.isPad ? 12 : 8;
 
-    const newGameHandler = () => {
-        dispatch(gameNew());
-        setIsNewGame(true);
+    const addPlayerHandler = () => {
+        const newPlayerId = uuidv4();
+
+        dispatch(playerAdd({
+            id: newPlayerId,
+            playerName: `Player ${players.length + 1}`,
+            scores: [0],
+        }));
+
+        dispatch(updateGame({
+            id: currentGame.id,
+            changes: {
+                playerIds: [...currentGame.playerIds, newPlayerId],
+            }
+        }));
+
+        // TODO: Add player to game
+        setPlayerWasAdded(true)
     }
 
-    const addPlayerHandler = () => {
-        dispatch(playerAdd('Player ' + (players.length + 1)));
-        setPlayerWasAdded(true)
+    const mainMenuHandler = () => {
+        // dispatch(gameSave(selectCurrentGame));
+        navigation.navigate("List")
     }
 
     {/* 
@@ -54,19 +72,6 @@ const SettingsScreen = () => {
             style={styles.configScrollContainer}
             contentContainerStyle={{ alignItems: 'stretch' }}
         >
-
-            {/* 
-            <BottomSheet
-                ref={sheetRef}
-                snapPoints={[450, 0]}
-                initialSnap={1}
-                borderRadius={20}
-                renderContent={renderContent}
-                onOpenStart={() => null}
-                onCloseEnd={() => null}
-            />
-            */}
-
             <View style={{ width: 350, alignSelf: 'center' }}>
                 <Image
                     source={require('../../assets/infographic.png')}
@@ -84,14 +89,9 @@ const SettingsScreen = () => {
 
                 <View style={{ margin: 10, }}>
                     <Button
-                        icon={<Icon name="refresh" color="white" />}
-                        title="New Game"
-                        onPress={newGameHandler} />
-                    {isNewGame &&
-                        <Text style={{ textAlign: 'center', paddingTop: 10, color: '#eee' }}>
-                            Scores have been reset!
-                        </Text>
-                    }
+                        icon={<Icon name="menu" color="white" />}
+                        title="Back to Main Menu"
+                        onPress={mainMenuHandler} />
                 </View>
 
                 <View style={{ flexDirection: 'row', alignItems: 'baseline', padding: 10, justifyContent: 'space-between' }}>
@@ -109,7 +109,7 @@ const SettingsScreen = () => {
                         // promptColor={promptColor}
                         setPlayerWasAdded={setPlayerWasAdded}
                         playerWasAdded={playerWasAdded}
-                        key={player.uuid}
+                        key={player.id}
                     />
                 ))}
 
@@ -136,6 +136,7 @@ const SettingsScreen = () => {
                     {Platform.OS == 'android' &&
                         <Text style={styles.text}>{Platform.OS} build {appJson.expo.android.versionCode}</Text>
                     }
+                    <Text>{currentGame.id}</Text>
                 </View>
             </View>
 

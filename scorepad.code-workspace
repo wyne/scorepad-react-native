@@ -4,10 +4,10 @@
 			"path": "."
 		},
 		{
-			"path": "../scorepad-landing"
+			"path": "../scorepad-app"
 		},
 		{
-			"path": "../scorepad-app"
+			"path": "../scorepad"
 		}
 	],
 	"settings": {}

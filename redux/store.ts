@@ -2,43 +2,49 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { persistStore, persistReducer } from 'redux-persist';
 import { configureStore } from "@reduxjs/toolkit";
 
-import currentGameReducer from './CurrentGameSlice';
 import settingsReducer from './SettingsSlice';
+import gamesReducer from './GamesSlice';
+import scoresReducer from './PlayersSlice';
 import createMigrate from 'redux-persist/es/createMigrate';
 import 'react-native-get-random-values';
+import { v4 as uuidv4 } from 'uuid';
 
 const migrations = {
-    // 0: (state) => {
-    // const players = state.players
-    // return {
-    //     ...state,
-    //     players: [
-    //         { name: 'player 1', uuid: uuidv4() },
-    //         { name: 'player 2', uuid: uuidv4() },
-    //     ],
-    // }
-    // }
+    1: (state) => {
+        return {
+            ...state,
+            uuid: uuidv4(),
+            dateCreated: Date.now(),
+        }
+    },
 }
-
-const currentGamePersistConfig = {
-    key: 'root',
-    version: 0,
-    storage: AsyncStorage,
-    whitelist: ['players', 'scores', 'currentRound',],
-    migrate: createMigrate(migrations, { debug: true }),
-};
 
 const settingsPersistConfig = {
     key: 'settings',
     version: 0,
     storage: AsyncStorage,
-    whitelist: ['home_fullscreen', 'multiplier'],
+    whitelist: ['home_fullscreen', 'multiplier', 'currentGameId'],
+};
+
+const gamesPersistConfig = {
+    key: 'games',
+    version: 0,
+    storage: AsyncStorage,
+    whitelist: ['entities', 'ids'],
+};
+
+const playersPersistConfig = {
+    key: 'players',
+    version: 0,
+    storage: AsyncStorage,
+    whitelist: ['entities', 'ids'],
 };
 
 export const store = configureStore({
     reducer: {
-        currentGame: persistReducer(currentGamePersistConfig, currentGameReducer),
         settings: persistReducer(settingsPersistConfig, settingsReducer),
+        games: persistReducer(gamesPersistConfig, gamesReducer),
+        players: persistReducer(playersPersistConfig, scoresReducer),
     }
 })
 

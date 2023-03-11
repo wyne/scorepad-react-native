@@ -1,5 +1,6 @@
 import React from 'react';
 import { Provider } from 'react-redux';
+import { Icon } from 'react-native-elements';
 import { createAppContainer } from "react-navigation";
 import { createStackNavigator } from "react-navigation-stack";
 import { PersistGate } from 'redux-persist/integration/react';
@@ -7,6 +8,7 @@ import { store, persistor } from './redux/store';
 
 import GameScreen from "./src/screens/GameScreen";
 import SettingsScreen from "./src/screens/SettingsScreen";
+import ListScreen from "./src/screens/ListScreen";
 import RoundTitle from './src/components/RoundTitle';
 import * as Sentry from 'sentry-expo';
 
@@ -18,6 +20,13 @@ Sentry.init({
 
 const navigator = createStackNavigator(
     {
+        List: {
+            screen: ListScreen,
+            navigationOptions: ({ navigation }) => ({
+                title: "ScorePad with Rounds",
+                headerStyle: { backgroundColor: "#000" }
+            })
+        },
         Game: {
             screen: GameScreen,
             navigationOptions: ({ navigation }) => ({
@@ -31,16 +40,16 @@ const navigator = createStackNavigator(
             screen: SettingsScreen,
             navigationOptions: ({ navigation }) => ({
                 title: "Settings",
-                headerBackTitle: "Back"
+                headerBackTitle: "Back",
+                headerStyle: { backgroundColor: "#000" },
             }),
         },
     },
     {
-        initialRouteName: "Game",
+        initialRouteName: "List",
         defaultNavigationOptions: {
-            title: "",
-        },
-    }
+        }
+    },
 );
 
 let Navigation = createAppContainer(navigator);

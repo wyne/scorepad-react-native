@@ -1,47 +1,38 @@
-import React, { useState } from 'react';
+import React, { useState, memo } from 'react';
 import { Text, View, StyleSheet, TouchableHighlight } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 
 import AdditionTile from './PlayerTiles/AdditionTile';
-import { playerRoundScoreIncrement, playerRoundScoreDecrement } from '../../redux/CurrentGameSlice';
+import { playerRoundScoreIncrement, playerRoundScoreDecrement, playerAdd, updatePlayer } from '../../redux/PlayersSlice';
+import { selectGameById } from '../../redux/GamesSlice';
+import { selectPlayerById } from '../../redux/PlayersSlice';
 
-const PlayerTile = ({ playerIndex, color, fontColor, cols, rows }) => {
-    const players = useSelector(state => state.currentGame.players);
-    const scores = useSelector(state => state.currentGame.scores);
-    const currentRound = useSelector(state => state.currentGame.currentRound);
-    const multiplier = useSelector(state => state.settings.multiplier);
-    const dispatch = useDispatch();
-
+const PlayerTile = ({ color, fontColor, cols, rows, playerId }) => {
     const [width, setWidth] = useState(0);
     const [height, setHeight] = useState(0);
 
-    const totalScore = (() => {
-        try {
-            return scores[playerIndex].reduce(
-                (sum, current, round) => {
-                    if (round > currentRound) { return sum; }
-                    return (sum || 0) + (current || 0);
-                }
-            );
-        } catch (e) {
-            return 0;
-        }
-    })();
+    const dispatch = useDispatch();
 
-    const roundScore = (() => {
-        try {
-            return scores[playerIndex][currentRound] || 0
-        } catch (e) {
-            return 0;
+    const multiplier = useSelector(state => state.settings.multiplier);
+    const currentGameId = useSelector(state => state.settings.currentGameId);
+    const roundCurrent = useSelector(state => selectGameById(state, currentGameId).roundCurrent);
+
+    // New
+    const player = useSelector(state => selectPlayerById(state, playerId))
+    const playerName = player.playerName;
+    const scoreTotal = player.scores.reduce(
+        (sum, current, round) => {
+            if (round > roundCurrent) { return sum; }
+            return (sum || 0) + (current || 0);
         }
-    })();
+    )
+    const scoreRound = player.scores[roundCurrent] || 0;
 
     const incPlayerRoundScoreHandler = () => {
-        dispatch(playerRoundScoreIncrement(playerIndex, multiplier));
+        dispatch(playerRoundScoreIncrement(playerId, roundCurrent, multiplier));
     }
-
     const decPlayerRoundScoreHandler = () => {
-        dispatch(playerRoundScoreDecrement(playerIndex, multiplier));
+        dispatch(playerRoundScoreIncrement(playerId, roundCurrent, -multiplier));
     }
 
     const widthPerc = (100 / cols) + '%';
@@ -64,12 +55,11 @@ const PlayerTile = ({ playerIndex, color, fontColor, cols, rows }) => {
             ]}
             onLayout={layoutHandler}
         >
-
             <AdditionTile
-                totalScore={totalScore}
-                roundScore={roundScore}
+                totalScore={scoreTotal}
+                roundScore={scoreRound}
                 fontColor={fontColor}
-                playerName={players[playerIndex].name}
+                playerName={playerName}
                 maxWidth={width}
                 maxHeight={height}
             />
