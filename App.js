@@ -18,23 +18,13 @@ Sentry.init({
     debug: false, // If `true`, Sentry will try to print out useful debugging information if something goes wrong with sending the event. Set it to `false` in production
 });
 
-const newGameButton = () => {
-    return <Icon name="add" color="white" style={{ marginHorizontal: 10 }} />
-}
-
-const settingsButton = () => {
-    return <Icon name="settings" color="white" style={{ marginHorizontal: 10 }} />
-}
-
 const navigator = createStackNavigator(
     {
         List: {
             screen: ListScreen,
             navigationOptions: ({ navigation }) => ({
                 title: "ScorePad with Rounds",
-                headerStyle: { backgroundColor: "#000" },
-                headerRight: newGameButton,
-                headerLeft: settingsButton,
+                headerStyle: { backgroundColor: "#000" }
             })
         },
         Game: {
