@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { Icon } from 'react-native-elements';
 import {
     createDrawerNavigator,
@@ -39,8 +39,7 @@ function CustomDrawerContent(props) {
 
 const Drawer = createDrawerNavigator();
 
-function DrawerLeft() {
-
+const DrawerLeft = () => {
     const currentGame = useSelector(state => selectGameById(state, state.settings.currentGameId));
     const loaded = typeof currentGame !== 'undefined';
 
@@ -65,7 +64,7 @@ function DrawerLeft() {
                 <>
                     <Drawer.Screen name="Game" component={GameScreen}
                         options={{
-                            title: `Game${currentGame}`,
+                            title: `Current Game`,
                             header: ({ navigation }) => {
                                 return <RoundTitle navigation={navigation} />;
                             },
@@ -96,6 +95,6 @@ function DrawerLeft() {
             }
         </Drawer.Navigator>
     );
-}
+};
 
 export default DrawerLeft;

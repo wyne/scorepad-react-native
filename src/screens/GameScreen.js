@@ -9,8 +9,10 @@ import Rounds from '../components/Rounds';
 import { selectGameById } from '../../redux/GamesSlice';
 
 export default function ScoreBoardScreen({ navigation }) {
-    const palette = ["01497c", "c25858", "f5c800", "275436", "dc902c", "62516a", "755647", "925561"];
+    const currentGameId = useSelector(state => state.settings.currentGameId);
+    if (typeof currentGameId == 'undefined') return null;
 
+    const palette = ["01497c", "c25858", "f5c800", "275436", "dc902c", "62516a", "755647", "925561"];
     const [grid, setGrid] = useState({ rows: 0, cols: 0 });
     const fullscreen = useSelector(state => state.settings.home_fullscreen);
     const currentGame = useSelector(state => selectGameById(state, state.settings.currentGameId));

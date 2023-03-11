@@ -9,6 +9,7 @@ import { roundNext, roundPrevious } from '../../redux/GamesSlice';
 import { selectGameById } from '../../redux/GamesSlice';
 import { toggleHomeFullscreen, toggleMultiplier } from '../../redux/SettingsSlice';
 import { systemBlue } from '../constants';
+import { Button } from 'react-native-elements';
 
 function RoundTitle({ navigation }) {
     const dispatch = useDispatch();
@@ -17,6 +18,12 @@ function RoundTitle({ navigation }) {
     const multiplier = useSelector(state => state.settings.multiplier);
 
     const currentGameId = useSelector(state => state.settings.currentGameId);
+    if (typeof currentGameId == 'undefined') return (
+        <Button
+            title="No game selected"
+            onPress={() => navigation.navigate('Home')}
+        ></Button>
+    );
     const currentGame = useSelector(state => selectGameById(state, currentGameId));
     const roundCurrent = useSelector(state => selectGameById(state, currentGameId).roundCurrent);
 

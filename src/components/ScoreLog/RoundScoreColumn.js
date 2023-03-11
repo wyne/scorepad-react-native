@@ -5,17 +5,16 @@ import { useSelector } from 'react-redux';
 import { selectGameById } from '../../../redux/GamesSlice';
 import RoundScoreCell from './RoundScoreCell';
 
-const RoundScoreColumn = ({ round }) => {
+const RoundScoreColumn = ({ round, isCurrentRound }) => {
     const currentGameId = useSelector(state => state.settings.currentGameId);
     const currentGame = useSelector(state => selectGameById(state, currentGameId));
-    const roundCurrent = useSelector(state => selectGameById(state, currentGameId).roundCurrent);
 
     return (
         <View
             style={{ padding: 10 }}
-            backgroundColor={round == roundCurrent ? '#111' : 'black'}>
+            backgroundColor={isCurrentRound ? '#111' : 'black'}>
             <Text style={{
-                color: roundCurrent == round ? 'red' : 'yellow',
+                color: isCurrentRound ? 'red' : 'yellow',
                 fontWeight: 'bold',
                 textAlign: 'center',
                 fontSize: 20,
@@ -27,6 +26,6 @@ const RoundScoreColumn = ({ round }) => {
             ))}
         </View>
     );
-}
+};
 
 export default memo(RoundScoreColumn);

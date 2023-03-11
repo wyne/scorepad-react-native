@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { Icon } from 'react-native-elements/dist/icons/Icon';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Text, View, StyleSheet, ScrollView, Platform } from 'react-native';
@@ -21,17 +21,15 @@ function Rounds({ navigation, show }) {
 
     const roundsScrollViewEl = useRef();
 
-    const fullscreen = useSelector(state => state.settings.home_fullscreen);
-
     // Remember the round offset when the round changes
-    const onLayoutHandler = (event, round) => {
+    const onLayoutHandler = useCallback((event, round) => {
         const offset = event.nativeEvent.layout.x;
 
         setRoundScrollOffset({
             ...roundScollOffset,
             [round]: offset
         });
-    };
+    });
 
     // Scroll to the current round
     useEffect(() => {
