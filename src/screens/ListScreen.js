@@ -21,7 +21,7 @@ import { setCurrentGameId } from '../../redux/SettingsSlice';
 const ListScreen = ({ navigation }) => {
     const dispatch = useDispatch();
 
-    const gameList = useSelector(state => selectAllGames(state)).filter(game => typeof game !== 'undefined');
+    const gameList = useSelector(state => selectAllGames(state));
 
     const addGameHandler = () => {
         const player1Id = uuidv4();
@@ -40,7 +40,7 @@ const ListScreen = ({ navigation }) => {
         }));
         dispatch(gameSave({
             id: newGameId,
-            title: 'Untitled',
+            title: `Game ${gameList.length + 1}`,
             dateCreated: Date.now(),
             roundCurrent: 0,
             roundTotal: 0,
@@ -48,8 +48,8 @@ const ListScreen = ({ navigation }) => {
         }));
 
         dispatch(setCurrentGameId(newGameId));
-        navigation.navigate("Game")
-    }
+        navigation.navigate("Game");
+    };
 
     const GamesFooter = () => {
         return (
@@ -70,8 +70,8 @@ const ListScreen = ({ navigation }) => {
         // Tap
         const chooseGameHandler = () => {
             dispatch(setCurrentGameId(game.id));
-            navigation.navigate("Game")
-        }
+            navigation.navigate("Game");
+        };
 
         // Long Press
         const deleteGameHandler = () => {
@@ -93,7 +93,7 @@ const ListScreen = ({ navigation }) => {
                 ],
                 { cancelable: false },
             );
-        }
+        };
 
         return <ListItem key={game.id} bottomDivider
             onPress={chooseGameHandler}
@@ -120,8 +120,8 @@ const ListScreen = ({ navigation }) => {
                 titleStyle={{ color: '#c25858' }}
             />
             <ListItem.Chevron />
-        </ListItem>
-    }
+        </ListItem>;
+    };
 
     return (
         <View style={{ flex: 1 }}>
@@ -137,7 +137,7 @@ const ListScreen = ({ navigation }) => {
             </FlatList>
         </View>
     );
-}
+};
 
 const styles = StyleSheet.create({
     list: {
