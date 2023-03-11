@@ -1,22 +1,27 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Icon } from 'react-native-elements/dist/icons/Icon';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Text, View, TouchableOpacity, ScrollView, Platform } from 'react-native';
-import { useSelector } from 'react-redux';
+import { Text, View, StyleSheet, ScrollView, Platform } from 'react-native';
+import { useDispatch, useSelector } from 'react-redux';
+
 
 import { selectGameById } from '../../redux/GamesSlice';
 import RoundScoreColumn from './ScoreLog/RoundScoreColumn';
 import TotalScoreColumn from './ScoreLog/TotalScoreColumn';
 import PlayerNameColumn from './ScoreLog/PlayerNameColumn';
+import { systemBlue } from '../constants';
 
 function Rounds({ navigation, show }) {
+    const dispatch = useDispatch();
     const [roundScollOffset, setRoundScrollOffset] = useState({});
 
     const currentGameId = useSelector(state => state.settings.currentGameId);
     const roundCurrent = useSelector(state => selectGameById(state, currentGameId).roundCurrent);
     const roundTotal = useSelector(state => selectGameById(state, currentGameId).roundTotal);
 
-    const roundsScrollViewEl = useRef()
+    const roundsScrollViewEl = useRef();
+
+    const fullscreen = useSelector(state => state.settings.home_fullscreen);
 
     // Remember the round offset when the round changes
     const onLayoutHandler = (event, round) => {
@@ -26,7 +31,7 @@ function Rounds({ navigation, show }) {
             ...roundScollOffset,
             [round]: offset
         });
-    }
+    };
 
     // Scroll to the current round
     useEffect(() => {
@@ -34,10 +39,14 @@ function Rounds({ navigation, show }) {
         roundsScrollViewEl.current.scrollTo({
             x: offset,
             animated: Platform.OS == "ios" ? true : false
-        })
+        });
     }, [roundCurrent, roundScollOffset]);
 
     const roundsIterator = [...Array(roundTotal + 1).keys()];
+
+    const expandHandler = () => {
+        dispatch(toggleHomeFullscreen());
+    };
 
     return (
         <SafeAreaView edges={['right', 'left']} style={{ flexDirection: 'row', backgroundColor: 'black', paddingBottom: 10, height: show ? 'auto' : 0 }}>
@@ -60,15 +69,39 @@ function Rounds({ navigation, show }) {
                     </View>
                 ))}
             </ScrollView>
-
-            <View flexDirection='column' style={{ justifyContent: 'space-around', padding: 15 }}>
-                <TouchableOpacity onPress={() => { navigation.navigate("Settings") }} >
-                    {show && <Icon size={30} color='#0a84ff' style={{ textAlign: 'center' }} name="people" />}
-                    {show && <Text style={{ color: '#0a84ff', fontWeight: 'bold' }}>Setup</Text>}
-                </TouchableOpacity>
-            </View>
         </SafeAreaView >
     );
 }
+
+const styles = StyleSheet.create({
+    header: {
+        alignItems: 'baseline',
+        backgroundColor: 'black',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        paddingBottom: 0,
+        textAlign: 'center',
+    },
+    title: {
+        color: 'white',
+        fontSize: 25,
+        fontVariant: ['tabular-nums'],
+        fontWeight: 'bold'
+    },
+    multiplier: {
+        color: systemBlue,
+        paddingRight: 5,
+        fontSize: 25,
+        fontWeight: 'bold',
+        fontVariant: ['tabular-nums'],
+    },
+    roundButton: {
+        color: systemBlue,
+        fontSize: 25,
+        fontWeight: 'bold',
+        paddingHorizontal: 10,
+        paddingVertical: 10,
+    },
+});
 
 export default Rounds;

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Platform, Text, View, StyleSheet, Image, Dimensions } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-import { Icon, Button } from 'react-native-elements'
+import { Icon, Button } from 'react-native-elements';
 
 import { playerAdd } from '../../redux/PlayersSlice';
 import EditPlayer from '../components/EditPlayer';
@@ -14,7 +14,7 @@ const appJson = require('../../app.json');
 
 const SettingsScreen = ({ navigation }) => {
     const dispatch = useDispatch();
-    const [playerWasAdded, setPlayerWasAdded] = useState(false)
+    const [playerWasAdded, setPlayerWasAdded] = useState(false);
 
     const currentGame = useSelector(state => selectGameById(state, state.settings.currentGameId));
     const players = useSelector(state => selectPlayersByIds(state, currentGame.playerIds));
@@ -37,14 +37,13 @@ const SettingsScreen = ({ navigation }) => {
             }
         }));
 
-        // TODO: Add player to game
-        setPlayerWasAdded(true)
-    }
+        setPlayerWasAdded(true);
+    };
 
     const mainMenuHandler = () => {
         // dispatch(gameSave(selectCurrentGame));
-        navigation.navigate("List")
-    }
+        navigation.navigate("List");
+    };
 
     {/* 
     const sheetRef = React.useRef(null);
@@ -73,27 +72,6 @@ const SettingsScreen = ({ navigation }) => {
             contentContainerStyle={{ alignItems: 'stretch' }}
         >
             <View style={{ width: 350, alignSelf: 'center' }}>
-                <Image
-                    source={require('../../assets/infographic.png')}
-                    resizeMode={'contain'}
-                    resizeMethod={'scale'}
-                    style={{
-                        alignSelf: 'center',
-                        width: Math.min(Dimensions.get('window').width * .4, Dimensions.get('window').height * .4),
-                        height: Math.min(Dimensions.get('window').width * .4, Dimensions.get('window').height * .4),
-                        maxWidth: '50%',
-                        aspectRatio: 1,
-                        margin: 20,
-                    }}
-                />
-
-                <View style={{ margin: 10, }}>
-                    <Button
-                        icon={<Icon name="menu" color="white" />}
-                        title="Back to Main Menu"
-                        onPress={mainMenuHandler} />
-                </View>
-
                 <View style={{ flexDirection: 'row', alignItems: 'baseline', padding: 10, justifyContent: 'space-between' }}>
                     <Text style={{ fontSize: 30, color: '#eee', marginTop: 20 }}>
                         Players
@@ -142,7 +120,7 @@ const SettingsScreen = ({ navigation }) => {
 
         </KeyboardAwareScrollView>
     );
-}
+};
 
 const styles = StyleSheet.create({
     configScrollContainer: {

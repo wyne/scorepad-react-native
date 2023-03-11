@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Icon } from 'react-native-elements/dist/icons/Icon';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useDispatch, useSelector } from 'react-redux';
+import { DrawerActions } from '@react-navigation/native';
 
 import { roundNext, roundPrevious } from '../../redux/GamesSlice';
 import { selectGameById } from '../../redux/GamesSlice';
@@ -91,14 +92,22 @@ function RoundTitle({ navigation }) {
 
     return (
         <SafeAreaView edges={['top']} style={[styles.header]}>
-            <SafeAreaView edges={['left']} style={{ width: '28%', alignItems: 'flex-start' }}>
-                <MultiplierButton />
+            <SafeAreaView edges={['left']} style={{ width: '28%', alignItems: 'flex-start', flexDirection: 'row' }}>
+                <Icon
+                    name="bars"
+                    type="font-awesome-5"
+                    size={25}
+                    color={systemBlue}
+                    onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
+                    style={[styles.roundButton]}
+                />
+                <FullscreenButton />
             </SafeAreaView>
 
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', width: '44%' }}>
                 <PrevRoundButton />
 
-                <Text style={styles.title}>
+                <Text style={styles.title} onPress={expandHandler}>
                     Round {roundCurrent + 1}
                 </Text>
 
@@ -106,7 +115,7 @@ function RoundTitle({ navigation }) {
             </View>
 
             <SafeAreaView edges={['right']} style={{ width: '28%', alignItems: 'flex-end' }}>
-                <FullscreenButton />
+                <MultiplierButton />
             </SafeAreaView>
         </SafeAreaView>
     );
