@@ -16,6 +16,9 @@ const SettingsScreen = ({ navigation }) => {
     const dispatch = useDispatch();
     const [playerWasAdded, setPlayerWasAdded] = useState(false);
 
+    const currentGameId = useSelector(state => state.settings.currentGameId);
+    if (typeof currentGameId == 'undefined') return null;
+
     const currentGame = useSelector(state => selectGameById(state, state.settings.currentGameId));
     const players = useSelector(state => selectPlayersByIds(state, currentGame.playerIds));
 

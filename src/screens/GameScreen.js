@@ -4,18 +4,17 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useSelector } from 'react-redux';
 import { getContrastRatio } from 'colorsheet';
 
-import PlayerTile from '../components/PlayerTile'
+import PlayerTile from '../components/PlayerTile';
 import Rounds from '../components/Rounds';
 import { selectGameById } from '../../redux/GamesSlice';
 
 export default function ScoreBoardScreen({ navigation }) {
-    const palette = ["01497c", "c25858", "f5c800", "275436", "dc902c", "62516a", "755647", "925561"]
+    const palette = ["01497c", "c25858", "f5c800", "275436", "dc902c", "62516a", "755647", "925561"];
 
     const [grid, setGrid] = useState({ rows: 0, cols: 0 });
     const fullscreen = useSelector(state => state.settings.home_fullscreen);
-
-    // New
     const currentGame = useSelector(state => selectGameById(state, state.settings.currentGameId));
+
     const playerIds = currentGame.playerIds;
 
     const desiredAspectRatio = 0.8;
@@ -23,7 +22,7 @@ export default function ScoreBoardScreen({ navigation }) {
     const layoutHandler = (e) => {
         var { x, y, width, height } = e.nativeEvent.layout;
 
-        let closestAspectRatio = Number.MAX_SAFE_INTEGER
+        let closestAspectRatio = Number.MAX_SAFE_INTEGER;
         let bestRowCount = 1;
 
         for (let rows = 1; rows <= playerIds.length; rows++) {
@@ -43,8 +42,8 @@ export default function ScoreBoardScreen({ navigation }) {
             }
         }
 
-        setGrid({ rows: bestRowCount, cols: Math.ceil(playerIds.length / bestRowCount) })
-    }
+        setGrid({ rows: bestRowCount, cols: Math.ceil(playerIds.length / bestRowCount) });
+    };
 
     return (
         <SafeAreaView style={{ flex: 1 }}>

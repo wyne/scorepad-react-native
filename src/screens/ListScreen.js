@@ -23,7 +23,7 @@ const ListScreen = ({ navigation }) => {
 
     const gameList = useSelector(state => selectAllGames(state));
 
-    const addGameHandler = () => {
+    const asyncCreateGame = (dispatch) => new Promise((resolve, reject) => {
         const player1Id = uuidv4();
         const player2Id = uuidv4();
         const newGameId = uuidv4();
@@ -48,7 +48,13 @@ const ListScreen = ({ navigation }) => {
         }));
 
         dispatch(setCurrentGameId(newGameId));
-        navigation.navigate("Game");
+        resolve();
+    });
+
+    const addGameHandler = () => {
+        asyncCreateGame(dispatch).then(() => {
+            navigation.navigate("Game");
+        });
     };
 
     const GamesFooter = () => {

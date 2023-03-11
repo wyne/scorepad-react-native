@@ -44,7 +44,6 @@
     "react-navigation": "^4.4.4",
     "react-navigation-stack": "^2.10.4",
     "react-redux": "^8.0.2",
-    "reanimated-bottom-sheet": "*",
     "redux-persist": "^6.0.0",
     "sentry-expo": "~6.0.0",
     "typescript": "^4.6.3",
