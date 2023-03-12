@@ -10,8 +10,6 @@ import { selectGameById, updateGame, } from '../../redux/GamesSlice';
 import { selectPlayersByIds } from '../../redux/ScoreSelectors';
 import { v4 as uuidv4 } from 'uuid';
 
-const appJson = require('../../app.json');
-
 const SettingsScreen = ({ navigation }) => {
     const dispatch = useDispatch();
     const [playerWasAdded, setPlayerWasAdded] = useState(false);

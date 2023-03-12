@@ -1,13 +1,6 @@
 import React, { memo } from 'react';
 import { Icon } from 'react-native-elements';
-import {
-    createDrawerNavigator,
-    DrawerContentScrollView,
-    DrawerItemList,
-    DrawerItem,
-} from '@react-navigation/drawer';
-import { View } from 'react-native';
-import { Image } from 'react-native';
+import { createDrawerNavigator } from '@react-navigation/drawer';
 import { useSelector } from 'react-redux';
 
 import GameScreen from "../screens/GameScreen";

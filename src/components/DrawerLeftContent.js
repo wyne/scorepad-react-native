@@ -1,15 +1,11 @@
 import React, { memo } from 'react';
-import { Icon } from 'react-native-elements';
 import {
     DrawerContentScrollView,
     DrawerItemList,
     DrawerItem,
 } from '@react-navigation/drawer';
-import { View, Image, Text, StyleSheet, Alert } from 'react-native';
+import { View, Image, Alert } from 'react-native';
 import { Platform } from 'react-native';
-import { useSelector } from 'react-redux';
-
-import { selectGameById } from '../../redux/GamesSlice';
 
 const appJson = require('../../app.json');
 
