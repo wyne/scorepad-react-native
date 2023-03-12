@@ -21,14 +21,7 @@ const DrawerLeft = () => {
     return (
         <Drawer.Navigator
             initialRouteName="Home"
-            drawerContent={props => <DrawerLeftContent {...props} />}
-            options={{
-                backgroundColor: 'green',
-                sceneContainerStyle: {
-                    backgroundColor: 'green',
-                },
-            }}
-        >
+            drawerContent={props => <DrawerLeftContent {...props} />} >
             <Drawer.Screen name="Home" component={ListScreen}
                 options={{
                     title: 'Home',

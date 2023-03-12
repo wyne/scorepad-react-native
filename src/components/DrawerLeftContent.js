@@ -15,7 +15,7 @@ function DrawerLeftContent(props) {
     const appVersion = appJson.expo.version;
 
     return (
-        <DrawerContentScrollView {...props} >
+        <DrawerContentScrollView {...props} contentContainerStyle={{ paddingTop: 0 }}>
             <View>
                 <Image
                     source={require('../../assets/adaptive-icon.png')}
@@ -23,7 +23,7 @@ function DrawerLeftContent(props) {
                     resizeMethod={'resize'}
                     style={{
                         alignSelf: 'center',
-                        height: 150,
+                        height: 175,
                         width: '100%',
                     }}
                 />
