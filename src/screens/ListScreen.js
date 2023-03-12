@@ -130,8 +130,8 @@ const ListScreen = ({ navigation }) => {
     };
 
     return (
-        <View style={{ flex: 1 }}>
-            <Button title="New Game" onPress={addGameHandler} />
+        <View style={{ flex: 1 }} backgroundColor={'white'}>
+            <Button title="New Game" onPress={addGameHandler} style={styles.newGame} />
             <FlatList
                 style={styles.list}
                 data={gameList}
@@ -147,11 +147,18 @@ const ListScreen = ({ navigation }) => {
 
 const styles = StyleSheet.create({
     list: {
+        borderTopWidth: 1,
+        borderColor: '#eee',
         backgroundColor: 'white',
         flex: 1,
     },
     gameSubtitle: {
         color: '#999',
+    },
+    newGame: {
+        margin: 20,
+        width: 200,
+        alignSelf: 'center',
     }
 });
 

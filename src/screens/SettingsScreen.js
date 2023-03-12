@@ -75,14 +75,6 @@ const SettingsScreen = ({ navigation }) => {
             contentContainerStyle={{ alignItems: 'stretch' }}
         >
             <View style={{ width: 350, alignSelf: 'center' }}>
-                <View style={{ flexDirection: 'row', alignItems: 'baseline', padding: 10, justifyContent: 'space-between' }}>
-                    <Text style={{ fontSize: 30, color: '#eee', marginTop: 20 }}>
-                        Players
-                    </Text>
-
-                    {/* <Text style={{ fontSize: 18, color: '#0a84ff', marginTop: 20, textAlign: 'right' }}>Edit</Text> */}
-                </View>
-
                 {players.map((player, index) => (
                     <EditPlayer
                         player={player}
@@ -104,21 +96,6 @@ const SettingsScreen = ({ navigation }) => {
                 {players.length >= maxPlayers &&
                     <Text style={styles.text}>Max players reached.</Text>
                 }
-
-                <View style={{ margin: 50 }}><Text>&nbsp; </Text></View>
-
-                <View style={{ marginVertical: 30 }}>
-                    <Text style={styles.text}>
-                        Version {appJson.expo.version}
-                    </Text>
-                    {Platform.OS == 'ios' &&
-                        <Text style={styles.text}>{Platform.OS} build {appJson.expo.ios.buildNumber}</Text>
-                    }
-                    {Platform.OS == 'android' &&
-                        <Text style={styles.text}>{Platform.OS} build {appJson.expo.android.versionCode}</Text>
-                    }
-                    <Text>{currentGame.id}</Text>
-                </View>
             </View>
 
         </KeyboardAwareScrollView>

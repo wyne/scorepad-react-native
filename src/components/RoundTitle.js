@@ -98,32 +98,33 @@ function RoundTitle({ navigation }) {
     };
 
     return (
-        <SafeAreaView edges={['top']} style={[styles.header]}>
-            <SafeAreaView edges={['left']} style={{ width: '28%', alignItems: 'flex-start', flexDirection: 'row' }}>
-                <Icon
-                    name="bars"
-                    type="font-awesome-5"
-                    size={25}
-                    color={systemBlue}
-                    onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
-                    style={[styles.roundButton]}
-                />
-                <FullscreenButton />
-            </SafeAreaView>
+        <SafeAreaView edges={['top']}>
+            <View style={[styles.header]}>
+                <SafeAreaView edges={['left']} style={{ width: '28%', alignItems: 'flex-start', flexDirection: 'row' }}>
+                    <Icon
+                        name="bars"
+                        type="font-awesome-5"
+                        size={25}
+                        color={systemBlue}
+                        onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
+                        style={[styles.roundButton]}
+                    />
+                    <FullscreenButton />
+                </SafeAreaView>
+                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', width: '44%' }}>
+                    <PrevRoundButton />
 
-            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', width: '44%' }}>
-                <PrevRoundButton />
+                    <Text style={styles.title} onPress={expandHandler}>
+                        Round {roundCurrent + 1}
+                    </Text>
 
-                <Text style={styles.title} onPress={expandHandler}>
-                    Round {roundCurrent + 1}
-                </Text>
+                    <NextRoundButton />
+                </View>
 
-                <NextRoundButton />
+                <SafeAreaView edges={['right']} style={{ width: '28%', alignItems: 'flex-end' }}>
+                    <MultiplierButton />
+                </SafeAreaView>
             </View>
-
-            <SafeAreaView edges={['right']} style={{ width: '28%', alignItems: 'flex-end' }}>
-                <MultiplierButton />
-            </SafeAreaView>
         </SafeAreaView>
     );
 }
