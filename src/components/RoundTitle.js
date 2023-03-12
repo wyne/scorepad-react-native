@@ -114,7 +114,7 @@ function RoundTitle({ navigation }) {
                 <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', width: '44%' }}>
                     <PrevRoundButton />
 
-                    <Text style={styles.title} onPress={expandHandler}>
+                    <Text style={styles.title}>
                         Round {roundCurrent + 1}
                     </Text>
 

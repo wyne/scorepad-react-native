@@ -17,6 +17,7 @@ import RoundTitle from './RoundTitle';
 import { selectGameById } from '../../redux/GamesSlice';
 import DrawerLeftContent from './DrawerLeftContent';
 import SettingsHeader from './SettingsHeader';
+import HomeHeader from './HomeHeader';
 
 const Drawer = createDrawerNavigator();
 
@@ -27,20 +28,25 @@ const DrawerLeft = () => {
     return (
         <Drawer.Navigator
             initialRouteName="Home"
-            backgroundColor="green"
+            drawerContent={props => <DrawerLeftContent {...props} />}
             options={{
-                headerBackgroundContainerStyle: { backgroundColor: 'green' },
                 backgroundColor: 'green',
+                sceneContainerStyle: {
+                    backgroundColor: 'green',
+                },
             }}
-            drawerContent={props => <DrawerLeftContent {...props} />
-            } >
+        >
             <Drawer.Screen name="Home" component={ListScreen}
                 options={{
-                    options: {
-                        backgroundColor: 'red',
-                    },
-                    title: 'Game List',
+                    title: 'Home',
                     headerTitle: 'ScorePad with Rounds',
+                    backgroundColor: '#000',
+                    sceneContainerStyle: {
+                        backgroundColor: '#000',
+                    },
+                    header: ({ navigation }) => {
+                        return <HomeHeader navigation={navigation} />;
+                    },
                     drawerIcon: ({ tintColor }) => (
                         <Icon name="home"
                             type="font-awesome"
@@ -54,6 +60,10 @@ const DrawerLeft = () => {
                     <Drawer.Screen name="Game" component={GameScreen}
                         options={{
                             title: "Current Game",
+                            backgroundColor: '#000',
+                            sceneContainerStyle: {
+                                backgroundColor: '#000',
+                            },
                             header: ({ navigation }) => {
                                 return <RoundTitle navigation={navigation} />;
                             },
@@ -68,7 +78,6 @@ const DrawerLeft = () => {
                     < Drawer.Screen name="Settings" component={SettingsScreen}
                         options={{
                             title: "Players",
-                            headerBackgroundContainerStyle: { backgroundColor: 'white' },
                             backgroundColor: '#000',
                             sceneContainerStyle: {
                                 backgroundColor: '#000',

@@ -14,9 +14,8 @@ import { selectGameById } from '../../redux/GamesSlice';
 const appJson = require('../../app.json');
 
 function DrawerLeftContent(props) {
-    const currentGame = useSelector(state => selectGameById(state, state.settings.currentGameId));
-
-    const buildNumber = Platform.OS == 'ios' ? appJson.expo.ios.buildNumber : appJson.expo.android.versionCode;
+    const buildNumber = Platform.OS == 'ios' ?
+        appJson.expo.ios.buildNumber : appJson.expo.android.versionCode;
     const appVersion = appJson.expo.version;
 
     return (
@@ -46,19 +45,5 @@ function DrawerLeftContent(props) {
         </DrawerContentScrollView>
     );
 }
-
-const styles = StyleSheet.create({
-    configScrollContainer: {
-        flex: 1,
-        padding: 10,
-        paddingBottom: 50,
-    },
-    text: {
-        fontSize: 18,
-        margin: 15,
-        color: '#eee',
-    },
-});
-
 
 export default DrawerLeftContent;

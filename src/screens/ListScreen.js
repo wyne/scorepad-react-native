@@ -57,6 +57,13 @@ const ListScreen = ({ navigation }) => {
         });
     };
 
+    if (gameList.length == 0) {
+        asyncCreateGame(dispatch).then(() => {
+            navigation.navigate("Game");
+        });
+    }
+
+
     const GamesFooter = () => {
         return (
             <View style={{
