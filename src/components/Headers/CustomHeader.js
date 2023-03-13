@@ -3,7 +3,6 @@ import { View, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 function CustomHeader({ navigation, headerLeft, headerCenter, headerRight }) {
-
     return (
         <SafeAreaView edges={['top']} style={[styles.headerContainer]}>
             <SafeAreaView edges={['left']} style={styles.headerLeft}>
@@ -25,8 +24,9 @@ const styles = StyleSheet.create({
         backgroundColor: 'black',
         flexDirection: 'row',
         justifyContent: 'space-between',
-        paddingBottom: 0,
         textAlign: 'center',
+        // borderWidth: 1,
+        // borderColor: 'red',
     },
     headerLeft: {
         flexDirection: 'row',

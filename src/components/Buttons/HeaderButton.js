@@ -13,7 +13,7 @@ const styles = StyleSheet.create({
     headerButton: {
         fontSize: 20,
         padding: 10,
-        paddingHorizontal: 12,
+        paddingHorizontal: 15,
         // borderWidth: 1,
         // borderColor: 'red',
     },

@@ -1,21 +1,14 @@
 import React, { memo } from 'react';
-import { Text, View, StyleSheet, Alert } from 'react-native';
-import { ListItem, Button, Avatar } from 'react-native-elements';
+import { View, StyleSheet } from 'react-native';
+import { Button } from 'react-native-elements';
 import { FlatList } from 'react-native-gesture-handler';
-import { useSelector } from 'react-redux';
 import { v4 as uuidv4 } from 'uuid';
-import { useDispatch } from 'react-redux';
-import Moment from 'react-moment';
+import { useDispatch, useSelector } from 'react-redux';
 
-import {
-    gameSave,
-    selectGameById,
-    gameDelete,
-    selectAllGames
-} from '../../redux/GamesSlice';
+import { gameSave, selectAllGames } from '../../redux/GamesSlice';
 import { playerAdd } from '../../redux/PlayersSlice';
-import { selectPlayersByIds } from '../../redux/ScoreSelectors';
 import { setCurrentGameId } from '../../redux/SettingsSlice';
+import GameListItem from '../components/GameListItem';
 
 const ListScreen = ({ navigation }) => {
     const dispatch = useDispatch();
@@ -62,7 +55,6 @@ const ListScreen = ({ navigation }) => {
         });
     }
 
-
     const GamesFooter = () => {
         return (
             <View style={{
@@ -73,68 +65,6 @@ const ListScreen = ({ navigation }) => {
         );
     };
 
-    const GameRow = ({ game, i }) => {
-        const chosenGame = useSelector(state => selectGameById(state, game.id));
-        const players = useSelector(state => selectPlayersByIds(state, game.playerIds));
-        const playerNames = players.map(player => player.playerName).join(', ');
-        const rounds = chosenGame.roundTotal;
-
-        // Tap
-        const chooseGameHandler = () => {
-            dispatch(setCurrentGameId(game.id));
-            navigation.navigate("Game");
-        };
-
-        // Long Press
-        const deleteGameHandler = () => {
-            Alert.alert(
-                'Delete Game',
-                `Are you sure you want to delete ${game.title}?`,
-                [
-                    {
-                        text: 'Cancel',
-                        onPress: () => { },
-                        style: 'cancel',
-                    },
-                    {
-                        text: 'OK',
-                        onPress: () => {
-                            dispatch(gameDelete(game.id));
-                        }
-                    },
-                ],
-                { cancelable: false },
-            );
-        };
-
-        return <ListItem key={game.id} bottomDivider
-            onPress={chooseGameHandler}
-            onLongPress={deleteGameHandler}>
-            <ListItem.Content>
-                <ListItem.Title>{game.title}</ListItem.Title>
-                <ListItem.Subtitle style={styles.gameSubtitle}>
-                    <Text><Moment element={Text} fromNow>{game.dateCreated}</Moment></Text>
-                </ListItem.Subtitle>
-                <ListItem.Subtitle style={styles.gameSubtitle}>
-                    <Text>{playerNames}</Text>
-                </ListItem.Subtitle>
-            </ListItem.Content>
-            <Avatar size={"small"}
-                rounded
-                title={`${players.length}P`}
-                activeOpacity={0.7}
-                titleStyle={{ color: '#01497C' }}
-            />
-            <Avatar size={"small"}
-                rounded
-                title={`${rounds + 1}R`}
-                activeOpacity={0.7}
-                titleStyle={{ color: '#c25858' }}
-            />
-            <ListItem.Chevron />
-        </ListItem>;
-    };
-
     return (
         <View style={{ flex: 1 }} backgroundColor={'white'}>
             <Button title="New Game" onPress={addGameHandler} style={styles.newGame} />
@@ -142,7 +72,7 @@ const ListScreen = ({ navigation }) => {
                 style={styles.list}
                 data={gameList}
                 renderItem={({ item }) =>
-                    <GameRow game={item} />
+                    <GameListItem navigation={navigation} game={item} />
                 }
                 keyExtractor={item => item.id}
                 ListFooterComponent={GamesFooter}>
