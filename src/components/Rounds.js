@@ -7,10 +7,8 @@ import { selectGameById } from '../../redux/GamesSlice';
 import RoundScoreColumn from './ScoreLog/RoundScoreColumn';
 import TotalScoreColumn from './ScoreLog/TotalScoreColumn';
 import PlayerNameColumn from './ScoreLog/PlayerNameColumn';
-import { systemBlue } from '../constants';
 
 function Rounds({ navigation, show }) {
-    const dispatch = useDispatch();
     const [roundScollOffset, setRoundScrollOffset] = useState({});
 
     const currentGameId = useSelector(state => state.settings.currentGameId);
