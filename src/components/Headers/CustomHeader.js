@@ -20,7 +20,6 @@ function CustomHeader({ navigation, headerLeft, headerCenter, headerRight }) {
 
 const styles = StyleSheet.create({
     headerContainer: {
-        alignItems: 'baseline',
         backgroundColor: 'black',
         flexDirection: 'row',
         justifyContent: 'space-between',
