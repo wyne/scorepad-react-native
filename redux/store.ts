@@ -6,18 +6,15 @@ import settingsReducer from './SettingsSlice';
 import gamesReducer from './GamesSlice';
 import scoresReducer from './PlayersSlice';
 import createMigrate from 'redux-persist/es/createMigrate';
-import 'react-native-get-random-values';
-import { v4 as uuidv4 } from 'uuid';
 
 const migrations = {
     1: (state) => {
         return {
             ...state,
-            uuid: uuidv4(),
             dateCreated: Date.now(),
-        }
+        };
     },
-}
+};
 
 const settingsPersistConfig = {
     key: 'settings',
@@ -45,12 +42,17 @@ export const store = configureStore({
         settings: persistReducer(settingsPersistConfig, settingsReducer),
         games: persistReducer(gamesPersistConfig, gamesReducer),
         players: persistReducer(playersPersistConfig, scoresReducer),
-    }
-})
+    },
+    middleware: getDefaultMiddleware => getDefaultMiddleware({
+        serializableCheck: {
+            ignoreActions: true
+        },
+    }),
+});
 
 // Infer the `RootState` and `AppDispatch` types from the store itself
-export type RootState = ReturnType<typeof store.getState>
+export type RootState = ReturnType<typeof store.getState>;
 // Inferred type: {posts: PostsState, comments: CommentsState, users: UsersState}
-export type AppDispatch = typeof store.dispatch
+export type AppDispatch = typeof store.dispatch;
 
 export const persistor = persistStore(store);

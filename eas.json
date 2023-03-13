@@ -23,6 +23,10 @@
     }
   },
   "submit": {
-    "production": {}
+    "production": {
+      "android": {
+        "changesNotSentForReview": true
+      }
+    }
   }
 }

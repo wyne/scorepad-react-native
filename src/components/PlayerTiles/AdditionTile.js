@@ -10,7 +10,7 @@ const AdditionTile = ({ playerName, totalScore, roundScore, fontColor, maxWidth,
         const { x, y, width, height } = e.nativeEvent.layout;
         setH(height);
         setW(width);
-    }
+    };
 
     useEffect(() => {
         const hs = maxWidth / w;
@@ -19,7 +19,7 @@ const AdditionTile = ({ playerName, totalScore, roundScore, fontColor, maxWidth,
             const s = Math.min(.7 * hs, .7 * vs);
             setScale(Math.min(s, 3));
         }
-    })
+    });
 
     const PlayerNameItem = ({ children }) => {
         return (
@@ -30,11 +30,11 @@ const AdditionTile = ({ playerName, totalScore, roundScore, fontColor, maxWidth,
             >
                 {children}
             </Text>
-        )
-    }
+        );
+    };
 
     const RoundScoreItem = ({ children, hidden = false }) => {
-        if (hidden) { return <></> };
+        if (hidden) { return <></>; };
 
         return (
             <Text
@@ -44,18 +44,18 @@ const AdditionTile = ({ playerName, totalScore, roundScore, fontColor, maxWidth,
             >
                 {children}
             </Text>
-        )
-    }
+        );
+    };
 
     const EualsItem = ({ children, hidden = false }) => {
-        if (hidden) { return <></> };
+        if (hidden) { return <></>; };
 
         return (
             <Text style={{ color: fontColor + '75' }}>
                 {children}
             </Text>
-        )
-    }
+        );
+    };
 
     const TotalScoreItem = ({ children }) => {
         return (
@@ -66,8 +66,8 @@ const AdditionTile = ({ playerName, totalScore, roundScore, fontColor, maxWidth,
             >
                 {children}
             </Text>
-        )
-    }
+        );
+    };
 
     return (
         <View style={{ justifyContent: 'center', transform: [{ scale: scale }] }} onLayout={layoutHandler}>
@@ -89,7 +89,7 @@ const AdditionTile = ({ playerName, totalScore, roundScore, fontColor, maxWidth,
             </TotalScoreItem>
         </View>
     );
-}
+};
 
 const styles = StyleSheet.create({
     name: {
