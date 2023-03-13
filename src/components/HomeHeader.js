@@ -12,21 +12,18 @@ function HomeHeader({ navigation }) {
         <SafeAreaView edges={['top']}>
             <View style={[styles.header]}>
                 <SafeAreaView edges={['left']} style={{ width: '28%', alignItems: 'flex-start', flexDirection: 'row' }}>
-                    <Icon
-                        name="bars"
+                    <Icon name="bars"
                         type="font-awesome-5"
                         size={20}
                         color={systemBlue}
                         onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
-                        style={[styles.headerButton]}
-                    />
+                        style={[styles.headerButton]} />
                 </SafeAreaView>
                 <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', width: '44%' }}>
                     <Text style={styles.title}>
                         ScorePad
                     </Text>
                 </View>
-
                 <SafeAreaView edges={['right']} style={{ width: '28%', alignItems: 'flex-end' }}>
                 </SafeAreaView>
             </View>

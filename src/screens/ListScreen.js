@@ -1,6 +1,6 @@
 import React, { memo } from 'react';
-import { Text, View, StyleSheet, ScrollView, Alert } from 'react-native';
-import { List, ListItem, Icon, Button, Avatar } from 'react-native-elements';
+import { Text, View, StyleSheet, Alert } from 'react-native';
+import { ListItem, Button, Avatar } from 'react-native-elements';
 import { FlatList } from 'react-native-gesture-handler';
 import { useSelector } from 'react-redux';
 import { v4 as uuidv4 } from 'uuid';
@@ -11,10 +11,9 @@ import {
     gameSave,
     selectGameById,
     gameDelete,
-    selectGameIds,
     selectAllGames
 } from '../../redux/GamesSlice';
-import { playerAdd, selectPlayerById } from '../../redux/PlayersSlice';
+import { playerAdd } from '../../redux/PlayersSlice';
 import { selectPlayersByIds } from '../../redux/ScoreSelectors';
 import { setCurrentGameId } from '../../redux/SettingsSlice';
 

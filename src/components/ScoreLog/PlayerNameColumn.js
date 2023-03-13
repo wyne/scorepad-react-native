@@ -1,10 +1,11 @@
 import React from 'react';
 import { Text, View, StyleSheet } from 'react-native';
-import { palette, systemBlue } from '../../constants';
 import { useSelector } from 'react-redux';
+import { TouchableOpacity } from 'react-native-gesture-handler';
+
+import { palette, systemBlue } from '../../constants';
 import { selectGameById } from '../../../redux/GamesSlice';
 import { selectPlayersByIds } from '../../../redux/ScoreSelectors';
-import { TouchableOpacity } from 'react-native-gesture-handler';
 
 const PlayerNameColumn = ({ navigation }) => {
     const currentGameId = useSelector(state => state.settings.currentGameId);
