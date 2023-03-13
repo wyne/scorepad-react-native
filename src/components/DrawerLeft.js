@@ -63,7 +63,7 @@ const DrawerLeft = () => {
                     />
                     < Drawer.Screen name="Settings" component={SettingsScreen}
                         options={{
-                            title: "Players",
+                            title: "Current Players",
                             backgroundColor: '#000',
                             sceneContainerStyle: {
                                 backgroundColor: '#000',
