@@ -19,10 +19,8 @@ function GameHeader({ navigation }) {
 
     const currentGameId = useSelector(state => state.settings.currentGameId);
     if (typeof currentGameId == 'undefined') return (
-        <Button
-            title="No game selected"
-            onPress={() => navigation.navigate('Home')}
-        ></Button>
+        <Button title="No game selected"
+            onPress={() => navigation.navigate('Home')} />
     );
     const currentGame = useSelector(state => selectGameById(state, currentGameId));
     const roundCurrent = useSelector(state => selectGameById(state, currentGameId).roundCurrent);
@@ -45,28 +43,25 @@ function GameHeader({ navigation }) {
 
     const NextRoundButton = ({ }) => {
         return (
-            <TouchableOpacity onPress={nextRoundHandler}>
-                <Icon
-                    name="chevron-right"
+            <TouchableOpacity style={[styles.headerButton]}
+                onPress={nextRoundHandler}>
+                <Icon name="chevron-right"
                     type="font-awesome-5"
                     size={20}
-                    color={systemBlue}
-                    style={[styles.headerButton]}
-                />
+                    color={systemBlue} />
             </TouchableOpacity>
         );
     };
 
     const PrevRoundButton = ({ }) => {
         return (
-            <TouchableOpacity onPress={prevRoundHandler}>
-                <Icon
-                    name="chevron-left"
+            <TouchableOpacity style={[styles.headerButton]}
+                onPress={prevRoundHandler}>
+                <Icon name="chevron-left"
                     type="font-awesome-5"
                     size={20}
                     color={systemBlue}
                     style={[
-                        styles.headerButton,
                         { opacity: roundCurrent == 0 ? 0 : 1 }
                     ]}
                 />
@@ -76,14 +71,13 @@ function GameHeader({ navigation }) {
 
     const FullscreenButton = ({ }) => {
         return (
-            <Icon
-                size={20}
-                name={fullscreen ? 'compress-alt' : 'expand-alt'}
-                color={systemBlue}
-                type="font-awesome-5"
-                onPress={expandHandler}
-                style={[styles.headerButton]}
-            />
+            <TouchableOpacity style={[styles.headerButton]}
+                onPress={expandHandler}>
+                <Icon name={fullscreen ? 'compress-alt' : 'expand-alt'}
+                    type="font-awesome-5"
+                    size={20}
+                    color={systemBlue} />
+            </TouchableOpacity>
         );
     };
 
@@ -96,30 +90,31 @@ function GameHeader({ navigation }) {
         );
     };
 
+    const MenuButton = ({ }) => {
+        return (
+            <TouchableOpacity style={[styles.headerButton]}
+                onPress={() => navigation.dispatch(DrawerActions.openDrawer())}>
+                <Icon name="bars"
+                    type="font-awesome-5"
+                    size={20}
+                    color={systemBlue} />
+            </TouchableOpacity>
+        );
+    };
+
     return (
         <SafeAreaView edges={['top']}>
-            <View style={[styles.header]}>
-                <SafeAreaView edges={['left']} style={{ width: '28%', alignItems: 'flex-start', flexDirection: 'row' }}>
-                    <Icon name="bars"
-                        type="font-awesome-5"
-                        size={20}
-                        color={systemBlue}
-                        onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
-                        style={[styles.headerButton]}
-                    />
+            <View style={[styles.headerContainer]}>
+                <SafeAreaView edges={['left']} style={styles.headerLeft}>
+                    <MenuButton />
                     <FullscreenButton />
                 </SafeAreaView>
-                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', width: '44%' }}>
+                <View style={styles.headerCenter}>
                     <PrevRoundButton />
-
-                    <Text style={styles.title}>
-                        Round {roundCurrent + 1}
-                    </Text>
-
+                    <Text style={styles.title}>Round {roundCurrent + 1}</Text>
                     <NextRoundButton />
                 </View>
-
-                <SafeAreaView edges={['right']} style={{ width: '28%', alignItems: 'flex-end' }}>
+                <SafeAreaView edges={['right']} style={styles.headerRight}>
                     <MultiplierButton />
                 </SafeAreaView>
             </View>
@@ -128,14 +123,25 @@ function GameHeader({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-    header: {
+    headerContainer: {
+        alignItems: 'baseline',
         backgroundColor: 'black',
         flexDirection: 'row',
         justifyContent: 'space-between',
         paddingBottom: 0,
         textAlign: 'center',
-        // borderColor: 'red',
-        // borderWidth: 1,
+    },
+    headerLeft: {
+        flexDirection: 'row',
+        alignItems: 'flex-start',
+    },
+    headerCenter: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    headerRight: {
+        alignItems: 'flex-end',
     },
     title: {
         color: 'white',
@@ -146,8 +152,6 @@ const styles = StyleSheet.create({
         fontSize: 20,
         padding: 10,
         paddingHorizontal: 12,
-        // borderColor: 'red',
-        // borderWidth: 1,
     },
     multiplierButton: {
         color: systemBlue,
