@@ -15,10 +15,10 @@ function HomeHeader({ navigation }) {
                     <Icon
                         name="bars"
                         type="font-awesome-5"
-                        size={25}
+                        size={20}
                         color={systemBlue}
                         onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
-                        style={[styles.roundButton]}
+                        style={[styles.headerButton]}
                     />
                 </SafeAreaView>
                 <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', width: '44%' }}>
@@ -45,18 +45,10 @@ const styles = StyleSheet.create({
     },
     title: {
         color: 'white',
-        fontSize: 25,
-        fontVariant: ['tabular-nums'],
-        fontWeight: 'bold'
-    },
-    multiplier: {
-        color: systemBlue,
-        paddingRight: 5,
-        fontSize: 25,
-        fontWeight: 'bold',
+        fontSize: 20,
         fontVariant: ['tabular-nums'],
     },
-    roundButton: {
+    headerButton: {
         color: systemBlue,
         fontSize: 25,
         fontWeight: 'bold',

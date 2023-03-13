@@ -6,7 +6,7 @@ import { useSelector } from 'react-redux';
 import GameScreen from "../screens/GameScreen";
 import SettingsScreen from "../screens/SettingsScreen";
 import ListScreen from "../screens/ListScreen";
-import RoundTitle from './RoundTitle';
+import GameHeader from './GameHeader';
 import { selectGameById } from '../../redux/GamesSlice';
 import DrawerLeftContent from './DrawerLeftContent';
 import SettingsHeader from './SettingsHeader';
@@ -51,7 +51,7 @@ const DrawerLeft = () => {
                                 backgroundColor: '#000',
                             },
                             header: ({ navigation }) => {
-                                return <RoundTitle navigation={navigation} />;
+                                return <GameHeader navigation={navigation} />;
                             },
                             drawerIcon: ({ tintColor }) => (
                                 <Icon name="gamepad"

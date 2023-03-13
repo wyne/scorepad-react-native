@@ -23,7 +23,7 @@ function DrawerLeftContent(props) {
                     resizeMethod={'resize'}
                     style={{
                         alignSelf: 'center',
-                        height: 175,
+                        height: 200,
                         width: '100%',
                     }}
                 />

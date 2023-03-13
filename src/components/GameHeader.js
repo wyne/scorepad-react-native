@@ -11,7 +11,7 @@ import { toggleHomeFullscreen, toggleMultiplier } from '../../redux/SettingsSlic
 import { systemBlue } from '../constants';
 import { Button } from 'react-native-elements';
 
-function RoundTitle({ navigation }) {
+function GameHeader({ navigation }) {
     const dispatch = useDispatch();
 
     const fullscreen = useSelector(state => state.settings.home_fullscreen);
@@ -49,9 +49,9 @@ function RoundTitle({ navigation }) {
                 <Icon
                     name="chevron-right"
                     type="font-awesome-5"
-                    size={25}
+                    size={20}
                     color={systemBlue}
-                    style={[styles.roundButton]}
+                    style={[styles.headerButton]}
                 />
             </TouchableOpacity>
         );
@@ -63,10 +63,10 @@ function RoundTitle({ navigation }) {
                 <Icon
                     name="chevron-left"
                     type="font-awesome-5"
-                    size={25}
+                    size={20}
                     color={systemBlue}
                     style={[
-                        styles.roundButton,
+                        styles.headerButton,
                         { opacity: roundCurrent == 0 ? 0 : 1 }
                     ]}
                 />
@@ -77,22 +77,21 @@ function RoundTitle({ navigation }) {
     const FullscreenButton = ({ }) => {
         return (
             <Icon
-                size={25}
+                size={20}
                 name={fullscreen ? 'compress-alt' : 'expand-alt'}
                 color={systemBlue}
                 type="font-awesome-5"
                 onPress={expandHandler}
-                style={[styles.roundButton]}
+                style={[styles.headerButton]}
             />
         );
     };
 
     const MultiplierButton = ({ }) => {
         return (
-            <TouchableOpacity
-                style={[styles.roundButton]}
+            <TouchableOpacity style={[styles.headerButton]}
                 onPress={multiplierHandler}>
-                <Text style={[styles.multiplier]}>{multiplier} pt</Text>
+                <Text style={styles.multiplierButton}>{multiplier} pt</Text>
             </TouchableOpacity>
         );
     };
@@ -101,13 +100,12 @@ function RoundTitle({ navigation }) {
         <SafeAreaView edges={['top']}>
             <View style={[styles.header]}>
                 <SafeAreaView edges={['left']} style={{ width: '28%', alignItems: 'flex-start', flexDirection: 'row' }}>
-                    <Icon
-                        name="bars"
+                    <Icon name="bars"
                         type="font-awesome-5"
-                        size={25}
+                        size={20}
                         color={systemBlue}
                         onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
-                        style={[styles.roundButton]}
+                        style={[styles.headerButton]}
                     />
                     <FullscreenButton />
                 </SafeAreaView>
@@ -131,33 +129,31 @@ function RoundTitle({ navigation }) {
 
 const styles = StyleSheet.create({
     header: {
-        alignItems: 'baseline',
         backgroundColor: 'black',
         flexDirection: 'row',
         justifyContent: 'space-between',
         paddingBottom: 0,
         textAlign: 'center',
+        // borderColor: 'red',
+        // borderWidth: 1,
     },
     title: {
         color: 'white',
-        fontSize: 25,
-        fontVariant: ['tabular-nums'],
-        fontWeight: 'bold'
-    },
-    multiplier: {
-        color: systemBlue,
-        paddingRight: 5,
-        fontSize: 25,
-        fontWeight: 'bold',
+        fontSize: 20,
         fontVariant: ['tabular-nums'],
     },
-    roundButton: {
+    headerButton: {
+        fontSize: 20,
+        padding: 10,
+        paddingHorizontal: 12,
+        // borderColor: 'red',
+        // borderWidth: 1,
+    },
+    multiplierButton: {
         color: systemBlue,
-        fontSize: 25,
-        fontWeight: 'bold',
-        paddingHorizontal: 10,
-        paddingVertical: 10,
+        fontSize: 20,
+        fontVariant: ['tabular-nums'],
     },
 });
 
-export default RoundTitle;
+export default GameHeader;
