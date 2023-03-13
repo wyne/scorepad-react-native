@@ -1,9 +1,7 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { Icon } from 'react-native-elements/dist/icons/Icon';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Text, View, StyleSheet, ScrollView, Platform } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
-
 
 import { selectGameById } from '../../redux/GamesSlice';
 import RoundScoreColumn from './ScoreLog/RoundScoreColumn';
@@ -42,64 +40,35 @@ function Rounds({ navigation, show }) {
 
     const roundsIterator = [...Array(roundTotal + 1).keys()];
 
-    const expandHandler = () => {
-        dispatch(toggleHomeFullscreen());
-    };
-
     return (
-        <SafeAreaView edges={['right', 'left']} style={{ flexDirection: 'row', backgroundColor: 'black', paddingBottom: 10, height: show ? 'auto' : 0 }}>
-            <PlayerNameColumn />
+        <SafeAreaView edges={['right', 'left']}
+            style={[styles.scoreTableContainer, { height: show ? 'auto' : 0, }]}>
+            <PlayerNameColumn navigation={navigation} />
             <TotalScoreColumn />
-            <ScrollView
-                horizontal={true}
+            <ScrollView horizontal={true}
                 contentContainerStyle={{ flexDirection: 'row' }}
-                ref={roundsScrollViewEl}
-            >
+                ref={roundsScrollViewEl} >
                 {roundsIterator.map((item, round) => (
                     <View key={round}
-                        onLayout={e => onLayoutHandler(e, round)} >
+                        onLayout={e => onLayoutHandler(e, round)}>
                         <RoundScoreColumn
                             collapsable={false}
                             round={round}
                             key={round}
-                            isCurrentRound={round == roundCurrent}
-                        />
+                            isCurrentRound={round == roundCurrent} />
                     </View>
                 ))}
             </ScrollView>
-        </SafeAreaView >
+        </SafeAreaView>
     );
 }
 
 const styles = StyleSheet.create({
-    header: {
-        alignItems: 'baseline',
-        backgroundColor: 'black',
+    scoreTableContainer: {
         flexDirection: 'row',
-        justifyContent: 'space-between',
-        paddingBottom: 0,
-        textAlign: 'center',
-    },
-    title: {
-        color: 'white',
-        fontSize: 25,
-        fontVariant: ['tabular-nums'],
-        fontWeight: 'bold'
-    },
-    multiplier: {
-        color: systemBlue,
-        paddingRight: 5,
-        fontSize: 25,
-        fontWeight: 'bold',
-        fontVariant: ['tabular-nums'],
-    },
-    roundButton: {
-        color: systemBlue,
-        fontSize: 25,
-        fontWeight: 'bold',
-        paddingHorizontal: 10,
-        paddingVertical: 10,
-    },
+        backgroundColor: 'black',
+        paddingBottom: 10,
+    }
 });
 
 export default Rounds;

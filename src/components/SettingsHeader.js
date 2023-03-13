@@ -26,7 +26,7 @@ function SettingsHeader({ navigation }) {
                 </View>
                 <SafeAreaView edges={['right']} style={styles.headerRight}>
                     <Icon name="check"
-                        type="font-awesome"
+                        type="font-awesome-5"
                         color={systemBlue}
                         onPress={() => navigation.navigate('Game')}
                     />

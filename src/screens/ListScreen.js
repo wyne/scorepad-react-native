@@ -90,7 +90,7 @@ const ListScreen = ({ navigation }) => {
         const deleteGameHandler = () => {
             Alert.alert(
                 'Delete Game',
-                `Are you sure you want to delete ${game.id}?`,
+                `Are you sure you want to delete ${game.title}?`,
                 [
                     {
                         text: 'Cancel',

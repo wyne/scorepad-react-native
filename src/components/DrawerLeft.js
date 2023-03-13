@@ -35,7 +35,7 @@ const DrawerLeft = () => {
                     },
                     drawerIcon: ({ tintColor }) => (
                         <Icon name="home"
-                            type="font-awesome"
+                            type="font-awesome-5"
                             tintColor={tintColor}
                             size={24} />
                     ),
@@ -55,7 +55,7 @@ const DrawerLeft = () => {
                             },
                             drawerIcon: ({ tintColor }) => (
                                 <Icon name="gamepad"
-                                    type="font-awesome"
+                                    type="font-awesome-5"
                                     tintColor={tintColor}
                                     size={24} />
                             ),
@@ -70,7 +70,7 @@ const DrawerLeft = () => {
                             },
                             drawerIcon: ({ tintColor }) => (
                                 <Icon name="users"
-                                    type="font-awesome"
+                                    type="font-awesome-5"
                                     tintColor={tintColor}
                                     size={24} />
                             ),
