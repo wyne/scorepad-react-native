@@ -3,19 +3,17 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Icon } from 'react-native-elements/dist/icons/Icon';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useDispatch, useSelector } from 'react-redux';
-import { DrawerActions } from '@react-navigation/native';
 
-import { roundNext, roundPrevious } from '../../redux/GamesSlice';
-import { selectGameById } from '../../redux/GamesSlice';
-import { toggleHomeFullscreen, toggleMultiplier } from '../../redux/SettingsSlice';
-import { systemBlue } from '../constants';
+import { roundNext, roundPrevious } from '../../../redux/GamesSlice';
+import { selectGameById } from '../../../redux/GamesSlice';
+import { systemBlue } from '../../constants';
 import { Button } from 'react-native-elements';
+import MenuButton from '../Buttons/MenuButton';
+import FullscreenButton from '../Buttons/FullscreenButton';
+import MultiplierButton from '../Buttons/MultiplierButton';
 
 function GameHeader({ navigation }) {
     const dispatch = useDispatch();
-
-    const fullscreen = useSelector(state => state.settings.home_fullscreen);
-    const multiplier = useSelector(state => state.settings.multiplier);
 
     const currentGameId = useSelector(state => state.settings.currentGameId);
     if (typeof currentGameId == 'undefined') return (
@@ -31,14 +29,6 @@ function GameHeader({ navigation }) {
 
     const prevRoundHandler = () => {
         dispatch(roundPrevious(currentGame));
-    };
-
-    const expandHandler = () => {
-        dispatch(toggleHomeFullscreen());
-    };
-
-    const multiplierHandler = () => {
-        dispatch(toggleMultiplier());
     };
 
     const NextRoundButton = ({ }) => {
@@ -69,44 +59,11 @@ function GameHeader({ navigation }) {
         );
     };
 
-    const FullscreenButton = ({ }) => {
-        return (
-            <TouchableOpacity style={[styles.headerButton]}
-                onPress={expandHandler}>
-                <Icon name={fullscreen ? 'compress-alt' : 'expand-alt'}
-                    type="font-awesome-5"
-                    size={20}
-                    color={systemBlue} />
-            </TouchableOpacity>
-        );
-    };
-
-    const MultiplierButton = ({ }) => {
-        return (
-            <TouchableOpacity style={[styles.headerButton]}
-                onPress={multiplierHandler}>
-                <Text style={styles.multiplierButton}>{multiplier} pt</Text>
-            </TouchableOpacity>
-        );
-    };
-
-    const MenuButton = ({ }) => {
-        return (
-            <TouchableOpacity style={[styles.headerButton]}
-                onPress={() => navigation.dispatch(DrawerActions.openDrawer())}>
-                <Icon name="bars"
-                    type="font-awesome-5"
-                    size={20}
-                    color={systemBlue} />
-            </TouchableOpacity>
-        );
-    };
-
     return (
         <SafeAreaView edges={['top']}>
             <View style={[styles.headerContainer]}>
                 <SafeAreaView edges={['left']} style={styles.headerLeft}>
-                    <MenuButton />
+                    <MenuButton navigation={navigation} />
                     <FullscreenButton />
                 </SafeAreaView>
                 <View style={styles.headerCenter}>
@@ -152,11 +109,6 @@ const styles = StyleSheet.create({
         fontSize: 20,
         padding: 10,
         paddingHorizontal: 12,
-    },
-    multiplierButton: {
-        color: systemBlue,
-        fontSize: 20,
-        fontVariant: ['tabular-nums'],
     },
 });
 

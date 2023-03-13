@@ -1,10 +1,9 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { Icon } from 'react-native-elements/dist/icons/Icon';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { DrawerActions } from '@react-navigation/native';
 
-import { systemBlue } from '../constants';
+import CheckButton from '../Buttons/CheckButton';
+import MenuButton from '../Buttons/MenuButton';
 
 function SettingsHeader({ navigation }) {
 
@@ -12,24 +11,13 @@ function SettingsHeader({ navigation }) {
         <SafeAreaView edges={['top']}>
             <View style={[styles.headerContainer]}>
                 <SafeAreaView edges={['left']} style={styles.headerLeft}>
-                    <Icon name="bars"
-                        type="font-awesome-5"
-                        color={systemBlue}
-                        onPress={() =>
-                            navigation.dispatch(DrawerActions.openDrawer())
-                        }
-                        style={[styles.headerButton]}
-                    />
+                    <MenuButton navigation={navigation} />
                 </SafeAreaView>
                 <View style={styles.headerCenter}>
                     <Text style={styles.title}>Players</Text>
                 </View>
                 <SafeAreaView edges={['right']} style={styles.headerRight}>
-                    <Icon name="check"
-                        type="font-awesome-5"
-                        color={systemBlue}
-                        onPress={() => navigation.navigate('Game')}
-                    />
+                    <CheckButton navigation={navigation} />
                 </SafeAreaView>
             </View>
         </SafeAreaView>
@@ -61,11 +49,6 @@ const styles = StyleSheet.create({
         color: 'white',
         fontSize: 20,
         fontVariant: ['tabular-nums'],
-    },
-    headerButton: {
-        fontSize: 20,
-        paddingHorizontal: 10,
-        paddingVertical: 10,
     },
 });
 

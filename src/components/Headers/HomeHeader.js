@@ -4,7 +4,8 @@ import { Icon } from 'react-native-elements/dist/icons/Icon';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { DrawerActions } from '@react-navigation/native';
 
-import { systemBlue } from '../constants';
+import { systemBlue } from '../../constants';
+import MenuButton from '../Buttons/MenuButton';
 
 function HomeHeader({ navigation }) {
 
@@ -12,12 +13,7 @@ function HomeHeader({ navigation }) {
         <SafeAreaView edges={['top']}>
             <View style={[styles.header]}>
                 <SafeAreaView edges={['left']} style={{ width: '28%', alignItems: 'flex-start', flexDirection: 'row' }}>
-                    <Icon name="bars"
-                        type="font-awesome-5"
-                        size={20}
-                        color={systemBlue}
-                        onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
-                        style={[styles.headerButton]} />
+                    <MenuButton navigation={navigation} />
                 </SafeAreaView>
                 <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', width: '44%' }}>
                     <Text style={styles.title}>

@@ -6,11 +6,11 @@ import { useSelector } from 'react-redux';
 import GameScreen from "../screens/GameScreen";
 import SettingsScreen from "../screens/SettingsScreen";
 import ListScreen from "../screens/ListScreen";
-import GameHeader from './GameHeader';
+import GameHeader from './Headers/GameHeader';
 import { selectGameById } from '../../redux/GamesSlice';
 import DrawerLeftContent from './DrawerLeftContent';
-import SettingsHeader from './SettingsHeader';
-import HomeHeader from './HomeHeader';
+import SettingsHeader from './Headers/SettingsHeader';
+import HomeHeader from './Headers/HomeHeader';
 
 const Drawer = createDrawerNavigator();
 
