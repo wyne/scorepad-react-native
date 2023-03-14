@@ -3,12 +3,12 @@ import { Platform, Text, View, StyleSheet, Image, Dimensions } from 'react-nativ
 import { useSelector, useDispatch } from 'react-redux';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { Icon, Button } from 'react-native-elements';
+import * as Crypto from 'expo-crypto';
 
 import { playerAdd } from '../../redux/PlayersSlice';
 import EditPlayer from '../components/EditPlayer';
 import { selectGameById, updateGame, } from '../../redux/GamesSlice';
 import { selectPlayersByIds } from '../../redux/ScoreSelectors';
-import { v4 as uuidv4 } from 'uuid';
 
 const SettingsScreen = ({ navigation }) => {
     const dispatch = useDispatch();
@@ -23,7 +23,7 @@ const SettingsScreen = ({ navigation }) => {
     const maxPlayers = Platform.isPad ? 12 : 8;
 
     const addPlayerHandler = () => {
-        const newPlayerId = uuidv4();
+        const newPlayerId = Crypto.randomUUID();
 
         dispatch(playerAdd({
             id: newPlayerId,

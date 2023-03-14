@@ -1,7 +1,5 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-import 'react-native-get-random-values'
-import { v4 as uuidv4 } from 'uuid'
-import { createEntityAdapter } from '@reduxjs/toolkit'
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createEntityAdapter } from '@reduxjs/toolkit';
 import Sentry from 'sentry-expo';
 
 type RoundIndex = number;
@@ -12,13 +10,12 @@ interface ScoreState {
 }
 
 const playersAdapter = createEntityAdapter({
-    // selectId: (score: ScoreState) => score.uuid,
     sortComparer: (a: ScoreState, b: ScoreState) => (
         a.scores.reduce((a, b) => a + b, 0)) < b.scores.reduce((a, b) => a + b, 0) ? 1 : -1,
-})
+});
 
 const initialState = playersAdapter.getInitialState({
-})
+});
 
 const scoresSlice = createSlice({
     name: 'players',
@@ -32,7 +29,7 @@ const scoresSlice = createSlice({
         playerRoundScoreIncrement: {
             reducer(
                 state,
-                action: PayloadAction<string, string, { round: RoundIndex, multiplier: number }>
+                action: PayloadAction<string, string, { round: RoundIndex, multiplier: number; }>
             ) {
                 try {
                     const scores = state.entities[action.payload].scores;
@@ -55,10 +52,10 @@ const scoresSlice = createSlice({
             state.entities.players[action.payload] = 0;
         },
     }
-})
+});
 
 interface PlayersSlice {
-    players: typeof initialState
+    players: typeof initialState;
 }
 
 export const {
@@ -67,13 +64,13 @@ export const {
     playerAdd,
     playerRoundScoreIncrement,
     roundNext,
-} = scoresSlice.actions
+} = scoresSlice.actions;
 
-export default scoresSlice.reducer
+export default scoresSlice.reducer;
 
 export const {
     selectAll: selectAllPlayers,
     selectById: selectPlayerById,
     selectIds: selectPlayerIds,
     // Pass in a selector that returns the posts slice of state 
-} = playersAdapter.getSelectors((state: PlayersSlice) => state.players)
+} = playersAdapter.getSelectors((state: PlayersSlice) => state.players);

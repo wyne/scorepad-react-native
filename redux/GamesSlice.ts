@@ -1,5 +1,5 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { createEntityAdapter } from '@reduxjs/toolkit'
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createEntityAdapter } from '@reduxjs/toolkit';
 
 interface GameState {
     id: string;
@@ -11,12 +11,11 @@ interface GameState {
 }
 
 const gamesAdapter = createEntityAdapter({
-    // selectId: (game: GameState) => game.uuid,
     sortComparer: (a: GameState, b: GameState) => (a.dateCreated < b.dateCreated) ? 1 : -1,
-})
+});
 
 const initialState = gamesAdapter.getInitialState({
-})
+});
 
 const gamesSlice = createSlice({
     name: 'games',
@@ -30,7 +29,7 @@ const gamesSlice = createSlice({
                     roundCurrent: action.payload.roundCurrent + 1,
                     roundTotal: Math.max(action.payload.roundTotal, action.payload.roundCurrent + 1)
                 }
-            })
+            });
         },
         roundPrevious(state, action: PayloadAction<GameState>) {
             gamesAdapter.updateOne(state, {
@@ -38,7 +37,7 @@ const gamesSlice = createSlice({
                 changes: {
                     roundCurrent: Math.max(0, action.payload.roundCurrent - 1),
                 }
-            })
+            });
         },
         gameSave(state, action: PayloadAction<GameState>) {
             gamesAdapter.upsertOne(state, action.payload);
@@ -47,10 +46,10 @@ const gamesSlice = createSlice({
             gamesAdapter.removeOne(state, action.payload);
         }
     }
-})
+});
 
 interface GamesSlice {
-    games: typeof initialState
+    games: typeof initialState;
 }
 
 export const {
@@ -59,9 +58,9 @@ export const {
     roundPrevious,
     gameSave,
     gameDelete
-} = gamesSlice.actions
+} = gamesSlice.actions;
 
-export default gamesSlice.reducer
+export default gamesSlice.reducer;
 
 // Export the customized selectors for this adapter using `getSelectors`
 export const {
@@ -69,4 +68,4 @@ export const {
     selectById: selectGameById,
     selectIds: selectGameIds
     // Pass in a selector that returns the posts slice of state
-} = gamesAdapter.getSelectors((state: GamesSlice) => state.games)
+} = gamesAdapter.getSelectors((state: GamesSlice) => state.games);
