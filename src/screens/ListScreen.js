@@ -2,7 +2,7 @@ import React, { memo } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Button } from 'react-native-elements';
 import { FlatList } from 'react-native-gesture-handler';
-import { v4 as uuidv4 } from 'uuid';
+import * as Crypto from 'expo-crypto';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { gameSave, selectAllGames } from '../../redux/GamesSlice';
@@ -16,9 +16,9 @@ const ListScreen = ({ navigation }) => {
     const gameList = useSelector(state => selectAllGames(state));
 
     const asyncCreateGame = (dispatch) => new Promise((resolve, reject) => {
-        const player1Id = uuidv4();
-        const player2Id = uuidv4();
-        const newGameId = uuidv4();
+        const player1Id = Crypto.randomUUID();
+        const player2Id = Crypto.randomUUID();
+        const newGameId = Crypto.randomUUID();
 
         dispatch(playerAdd({
             id: player1Id,
