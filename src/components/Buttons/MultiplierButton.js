@@ -1,8 +1,7 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Text, StyleSheet } from 'react-native';
+import { TouchableOpacity, Text, StyleSheet } from 'react-native';
 
-import HeaderButton from './HeaderButton';
 import { systemBlue } from '../../constants';
 import { toggleMultiplier } from '../../../redux/SettingsSlice';
 
@@ -15,9 +14,9 @@ const MultiplierButton = (props) => {
     };
 
     return (
-        <HeaderButton onPress={multiplierHandler}>
+        <TouchableOpacity style={[styles.headerButton]} onPress={multiplierHandler}>
             <Text style={styles.multiplierButton}>{multiplier} pt</Text>
-        </HeaderButton>
+        </TouchableOpacity>
     );
 };
 
@@ -26,6 +25,11 @@ const styles = StyleSheet.create({
         color: systemBlue,
         fontSize: 20,
         fontVariant: ['tabular-nums'],
+    },
+    headerButton: {
+        fontSize: 20,
+        padding: 8,
+        paddingHorizontal: 15,
     },
 });
 
