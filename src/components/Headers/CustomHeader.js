@@ -29,7 +29,8 @@ const styles = StyleSheet.create({
     },
     headerLeft: {
         flexDirection: 'row',
-        alignItems: 'flex-start',
+        alignItems: 'center',
+        justifyContent: 'flex-start',
         width: '26%',
     },
     headerCenter: {
@@ -39,7 +40,9 @@ const styles = StyleSheet.create({
         width: '42%',
     },
     headerRight: {
-        alignItems: 'flex-end',
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'flex-end',
         width: '26%',
     },
 });
