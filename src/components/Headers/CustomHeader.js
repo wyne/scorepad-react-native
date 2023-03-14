@@ -30,17 +30,17 @@ const styles = StyleSheet.create({
     headerLeft: {
         flexDirection: 'row',
         alignItems: 'flex-start',
-        width: '33%',
+        width: '26%',
     },
     headerCenter: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        width: '33%',
+        width: '42%',
     },
     headerRight: {
         alignItems: 'flex-end',
-        width: '33%',
+        width: '26%',
     },
 });
 
