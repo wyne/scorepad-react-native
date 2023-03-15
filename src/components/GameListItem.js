@@ -18,10 +18,16 @@ const GameListItem = ({ navigation, game, index }) => {
     const playerNames = players.map(player => player.playerName).join(', ');
     const rounds = chosenGame.roundTotal;
 
+    const asyncSetCurrentGame = (dispatch) => new Promise((resolve, reject) => {
+        dispatch(setCurrentGameId(game.id));
+        resolve();
+    });
+
     // Tap
     const chooseGameHandler = () => {
-        dispatch(setCurrentGameId(game.id));
-        navigation.navigate("Game");
+        asyncSetCurrentGame(dispatch).then(() => {
+            navigation.navigate("Game");
+        });
     };
 
     // Long Press
@@ -48,7 +54,9 @@ const GameListItem = ({ navigation, game, index }) => {
 
     return (
         <Animated.View entering={FadeInLeft.delay(index * 100)}
-            exiting={SlideOutLeft.duration(200)}>
+            exiting={SlideOutLeft.duration(200)}
+            backgroundColor="red"
+        >
             <Swipeable renderRightActions={() =>  // Swipe Right
                 <TouchableOpacity onPress={deleteGameHandler}>
                     <View style={{ backgroundColor: 'red', flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 20 }}>
