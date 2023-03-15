@@ -5,6 +5,7 @@ import Animated, { Layout, Easing } from 'react-native-reanimated';
 
 import { selectAllGames } from '../../redux/GamesSlice';
 import GameListItem from '../components/GameListItem';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const ListScreen = ({ navigation }) => {
     const gameList = useSelector(state => selectAllGames(state));
@@ -20,7 +21,7 @@ const ListScreen = ({ navigation }) => {
     };
 
     return (
-        <View style={{ flex: 1 }} backgroundColor={'white'}>
+        <SafeAreaView flex={1} edges={['bottom']} style={{ backgroundColor: 'white' }}>
             <Animated.FlatList
                 itemLayoutAnimation={Layout.easing(Easing.ease).delay(200)}
                 style={styles.list}
@@ -29,19 +30,15 @@ const ListScreen = ({ navigation }) => {
                     <GameListItem navigation={navigation} game={item} index={index} />
                 }
                 keyExtractor={item => item.id}
-            // ListFooterComponent={GamesFooter}
             >
             </Animated.FlatList>
-        </View>
+        </SafeAreaView>
     );
 };
 
 const styles = StyleSheet.create({
     list: {
-        borderTopWidth: 1,
-        borderColor: '#eee',
         backgroundColor: 'white',
-        flex: 1,
     },
     gameSubtitle: {
         color: '#999',
