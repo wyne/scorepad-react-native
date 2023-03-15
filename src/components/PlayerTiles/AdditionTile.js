@@ -1,10 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import { Text, View, StyleSheet } from 'react-native';
+import Animated from 'react-native-reanimated';
+import { useSharedValue, useAnimatedStyle, withTiming, withSpring } from 'react-native-reanimated';
 
 const AdditionTile = ({ playerName, totalScore, roundScore, fontColor, maxWidth, maxHeight }) => {
     const [scale, setScale] = useState(1);
     const [w, setW] = useState(0);
     const [h, setH] = useState(0);
+
+    const sharedScale = useSharedValue(1);
+
+    const animatedStyles = useAnimatedStyle(() => {
+        return {
+            transform: [{ scale: sharedScale.value }],
+        };
+    });
 
     const layoutHandler = (e) => {
         const { x, y, width, height } = e.nativeEvent.layout;
@@ -18,6 +28,7 @@ const AdditionTile = ({ playerName, totalScore, roundScore, fontColor, maxWidth,
         if (Math.min(hs, vs) > 0) {
             const s = Math.min(.7 * hs, .7 * vs);
             setScale(Math.min(s, 3));
+            sharedScale.value = withSpring(Math.min(s, 3));
         }
     });
 
@@ -70,7 +81,7 @@ const AdditionTile = ({ playerName, totalScore, roundScore, fontColor, maxWidth,
     };
 
     return (
-        <View style={{ justifyContent: 'center', transform: [{ scale: scale }] }} onLayout={layoutHandler}>
+        <Animated.View style={[animatedStyles, { justifyContent: 'center' }]} onLayout={layoutHandler}>
             <PlayerNameItem>
                 {playerName}
             </PlayerNameItem>
@@ -87,7 +98,7 @@ const AdditionTile = ({ playerName, totalScore, roundScore, fontColor, maxWidth,
                 </EualsItem>
                 {totalScore}
             </TotalScoreItem>
-        </View>
+        </Animated.View>
     );
 };
 
