@@ -46,11 +46,11 @@ const GameListItem = ({ navigation, game, i }) => {
     };
 
     return (
-        <Swipeable renderRightActions={() =>
-            <TouchableOpacity onPress={deleteGameHandler}
-                style={{ padding: 10, justifyContent: 'center' }} >
-                <Icon alignSelf="center" color="red" name="trash"
-                    type="font-awesome-5" />
+        <Swipeable renderRightActions={() =>  // Swipe Right
+            <TouchableOpacity onPress={deleteGameHandler}>
+                <View style={{ backgroundColor: 'red', flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 20 }}>
+                    <Icon name="trash" type="font-awesome-5" color="white" />
+                </View>
             </TouchableOpacity>
         }>
             <ListItem key={game.id} bottomDivider
