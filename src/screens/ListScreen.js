@@ -1,10 +1,9 @@
-import React, { memo } from 'react';
+import React, { memo, useEffect } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Button } from 'react-native-elements';
-import { FlatList } from 'react-native-gesture-handler';
 import * as Crypto from 'expo-crypto';
 import { useDispatch, useSelector } from 'react-redux';
-import Animated, { FadeInLeft, FadeOutLeft, Layout, Easing } from 'react-native-reanimated';
+import Animated, { Layout, Easing } from 'react-native-reanimated';
 
 import { gameSave, selectAllGames } from '../../redux/GamesSlice';
 import { playerAdd } from '../../redux/PlayersSlice';
@@ -47,14 +46,17 @@ const ListScreen = ({ navigation }) => {
     const addGameHandler = () => {
         asyncCreateGame(dispatch).then(() => {
             setTimeout(() => {
-                // navigation.navigate("Game");
-            }, 1000);
+                navigation.navigate("Game");
+            }, 500);
         });
     };
 
-    if (gameList.length == 0) {
-        addGameHandler();
-    }
+    useEffect(() => {
+        if (gameList.length == 0) {
+            addGameHandler();
+
+        }
+    }, [gameList.length]);
 
     const GamesFooter = () => {
         return (
