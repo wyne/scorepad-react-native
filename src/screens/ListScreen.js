@@ -4,6 +4,7 @@ import { Button } from 'react-native-elements';
 import { FlatList } from 'react-native-gesture-handler';
 import * as Crypto from 'expo-crypto';
 import { useDispatch, useSelector } from 'react-redux';
+import Animated, { FadeInLeft, FadeOutLeft, Layout, Easing } from 'react-native-reanimated';
 
 import { gameSave, selectAllGames } from '../../redux/GamesSlice';
 import { playerAdd } from '../../redux/PlayersSlice';
@@ -46,7 +47,7 @@ const ListScreen = ({ navigation }) => {
     const addGameHandler = () => {
         asyncCreateGame(dispatch).then(() => {
             setTimeout(() => {
-                navigation.navigate("Game");
+                // navigation.navigate("Game");
             }, 1000);
         });
     };
@@ -60,7 +61,7 @@ const ListScreen = ({ navigation }) => {
             <View style={{
                 paddingVertical: 20,
                 backgroundColor: 'white'
-            }} >
+            }}>
             </View>
         );
     };
@@ -68,15 +69,17 @@ const ListScreen = ({ navigation }) => {
     return (
         <View style={{ flex: 1 }} backgroundColor={'white'}>
             <Button title="New Game" onPress={addGameHandler} style={styles.newGame} />
-            <FlatList
+            <Animated.FlatList
+                itemLayoutAnimation={Layout.easing(Easing.ease).delay(200)}
                 style={styles.list}
                 data={gameList}
                 renderItem={({ item, index }) =>
                     <GameListItem navigation={navigation} game={item} index={index} />
                 }
                 keyExtractor={item => item.id}
-                ListFooterComponent={GamesFooter}>
-            </FlatList>
+            // ListFooterComponent={GamesFooter}
+            >
+            </Animated.FlatList>
         </View>
     );
 };
