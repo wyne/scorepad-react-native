@@ -5,7 +5,7 @@ import { ListItem, Avatar } from 'react-native-elements';
 import { Swipeable } from 'react-native-gesture-handler';
 import Moment from 'react-moment';
 import { Icon } from 'react-native-elements';
-import Animated, { FadeInLeft, FadeOutLeft, Layout, Easing, SlideOutLeft } from 'react-native-reanimated';
+import Animated, { FadeInLeft, SlideOutLeft } from 'react-native-reanimated';
 
 import { selectGameById, gameDelete } from '../../redux/GamesSlice';
 import { selectPlayersByIds } from '../../redux/ScoreSelectors';
@@ -52,7 +52,7 @@ const GameListItem = ({ navigation, game, index }) => {
             <Swipeable renderRightActions={() =>  // Swipe Right
                 <TouchableOpacity onPress={deleteGameHandler}>
                     <View style={{ backgroundColor: 'red', flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 20 }}>
-                        <Icon size="20" name="trash" type="font-awesome-5" color="white" />
+                        <Icon size={20} name="trash" type="font-awesome-5" color="white" />
                     </View>
                 </TouchableOpacity>
             }>
