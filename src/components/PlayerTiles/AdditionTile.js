@@ -6,16 +6,29 @@ import { useSharedValue, useAnimatedStyle, withTiming, withSpring } from 'react-
 
 const LineZero = ({ roundScore, totalScore, fontColor }) => {
     const d = totalScore - roundScore;
+    const fontSize = useSharedValue(55);
+    const animatedStyles = useAnimatedStyle(() => {
+        return {
+            fontSize: fontSize.value,
+            fontWeight: roundScore == 0 ? 'bold' : 'normal',
+        };
+    });
+
+    useEffect(() => {
+        fontSize.value = withTiming(roundScore == 0 ? 55 : 35, { duration: 100 });
+    }, [roundScore]);
 
     return (
         <Animated.View entering={ZoomIn.delay(0).duration(100)} layout={Layout.easing(Easing.ease).delay(0).duration(100)}>
-            <Text
+            <Animated.Text
                 adjustsFontSizeToFit
                 numberOfLines={1}
-                style={[styles.totalScore, { color: fontColor + '75' }]}
-            >
+                style={[animatedStyles, {
+                    fontVariant: ['tabular-nums'],
+                    color: fontColor + '75'
+                }]} >
                 {d}
-            </Text>
+            </Animated.Text>
         </Animated.View>
     );
 };
@@ -31,7 +44,7 @@ const LineOne = ({ roundScore, totalScore, fontColor }) => {
             <Text
                 adjustsFontSizeToFit
                 numberOfLines={1}
-                style={[(roundScore == 0 ? styles.totalScore : styles.roundScore), { color: fontColor + '75' }]}
+                style={{ fontVariant: ['tabular-nums'], color: fontColor + '75', fontSize: 35 }}
             >
                 {roundScore > 0 && " + "}
                 {d}
