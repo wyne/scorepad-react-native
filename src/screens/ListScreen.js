@@ -45,14 +45,14 @@ const ListScreen = ({ navigation }) => {
 
     const addGameHandler = () => {
         asyncCreateGame(dispatch).then(() => {
-            navigation.navigate("Game");
+            setTimeout(() => {
+                navigation.navigate("Game");
+            }, 1000);
         });
     };
 
     if (gameList.length == 0) {
-        asyncCreateGame(dispatch).then(() => {
-            navigation.navigate("Game");
-        });
+        addGameHandler();
     }
 
     const GamesFooter = () => {
@@ -71,8 +71,8 @@ const ListScreen = ({ navigation }) => {
             <FlatList
                 style={styles.list}
                 data={gameList}
-                renderItem={({ item }) =>
-                    <GameListItem navigation={navigation} game={item} />
+                renderItem={({ item, index }) =>
+                    <GameListItem navigation={navigation} game={item} index={index} />
                 }
                 keyExtractor={item => item.id}
                 ListFooterComponent={GamesFooter}>
