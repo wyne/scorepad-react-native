@@ -1,8 +1,10 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Text, StyleSheet, Alert } from 'react-native';
+import { View, Text, StyleSheet, Alert, TouchableOpacity } from 'react-native';
 import { ListItem, Avatar } from 'react-native-elements';
+import { Swipeable } from 'react-native-gesture-handler';
 import Moment from 'react-moment';
+import { Icon } from 'react-native-elements';
 
 import { selectGameById, gameDelete } from '../../redux/GamesSlice';
 import { selectPlayersByIds } from '../../redux/ScoreSelectors';
@@ -43,32 +45,42 @@ const GameListItem = ({ navigation, game, i }) => {
         );
     };
 
-    return <ListItem key={game.id} bottomDivider
-        onPress={chooseGameHandler}
-        onLongPress={deleteGameHandler}>
-        <ListItem.Content>
-            <ListItem.Title>{game.title}</ListItem.Title>
-            <ListItem.Subtitle style={styles.gameSubtitle}>
-                <Text><Moment element={Text} fromNow>{game.dateCreated}</Moment></Text>
-            </ListItem.Subtitle>
-            <ListItem.Subtitle style={styles.gameSubtitle}>
-                <Text>{playerNames}</Text>
-            </ListItem.Subtitle>
-        </ListItem.Content>
-        <Avatar size={"small"}
-            rounded
-            title={`${players.length}P`}
-            activeOpacity={0.7}
-            titleStyle={{ color: '#01497C' }}
-        />
-        <Avatar size={"small"}
-            rounded
-            title={`${rounds + 1}R`}
-            activeOpacity={0.7}
-            titleStyle={{ color: '#c25858' }}
-        />
-        <ListItem.Chevron />
-    </ListItem>;
+    return (
+        <Swipeable renderRightActions={() =>
+            <TouchableOpacity onPress={deleteGameHandler}
+                style={{ padding: 10, justifyContent: 'center' }} >
+                <Icon alignSelf="center" color="red" name="trash"
+                    type="font-awesome-5" />
+            </TouchableOpacity>
+        }>
+            <ListItem key={game.id} bottomDivider
+                onPress={chooseGameHandler}
+                onLongPress={deleteGameHandler}>
+                <ListItem.Content>
+                    <ListItem.Title>{game.title}</ListItem.Title>
+                    <ListItem.Subtitle style={styles.gameSubtitle}>
+                        <Text><Moment element={Text} fromNow>{game.dateCreated}</Moment></Text>
+                    </ListItem.Subtitle>
+                    <ListItem.Subtitle style={styles.gameSubtitle}>
+                        <Text>{playerNames}</Text>
+                    </ListItem.Subtitle>
+                </ListItem.Content>
+                <Avatar size={"small"}
+                    rounded
+                    title={`${players.length}P`}
+                    activeOpacity={0.7}
+                    titleStyle={{ color: '#01497C' }}
+                />
+                <Avatar size={"small"}
+                    rounded
+                    title={`${rounds + 1}R`}
+                    activeOpacity={0.7}
+                    titleStyle={{ color: '#c25858' }}
+                />
+                <ListItem.Chevron />
+            </ListItem>
+        </Swipeable>
+    );
 };
 
 const styles = StyleSheet.create({
