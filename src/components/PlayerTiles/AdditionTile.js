@@ -1,9 +1,65 @@
 import React, { useEffect, useState } from 'react';
 import { Text, View, StyleSheet } from 'react-native';
-import Animated from 'react-native-reanimated';
+import Animated, { FadeIn, StretchInY, withDecay, ZoomIn, ZoomOut } from 'react-native-reanimated';
+import { Layout, Easing } from 'react-native-reanimated';
 import { useSharedValue, useAnimatedStyle, withTiming, withSpring } from 'react-native-reanimated';
 
+const LineZero = ({ roundScore, totalScore, fontColor }) => {
+    const d = totalScore - roundScore;
+
+    return (
+        <Animated.View entering={ZoomIn.delay(0).duration(100)} layout={Layout.easing(Easing.ease).delay(0).duration(100)}>
+            <Text
+                adjustsFontSizeToFit
+                numberOfLines={1}
+                style={[styles.totalScore, { color: fontColor + '75' }]}
+            >
+                {d}
+            </Text>
+        </Animated.View>
+    );
+};
+
+const LineOne = ({ roundScore, totalScore, fontColor }) => {
+    if (roundScore == 0) {
+        return <></>;
+    }
+    const d = roundScore;
+
+    return (
+        <Animated.View entering={ZoomIn.delay(100).duration(100)} exiting={ZoomOut.delay(200).duration(100)} layout={Layout.easing(Easing.ease).delay(100).duration(100)}>
+            <Text
+                adjustsFontSizeToFit
+                numberOfLines={1}
+                style={[(roundScore == 0 ? styles.totalScore : styles.roundScore), { color: fontColor + '75' }]}
+            >
+                {roundScore > 0 && " + "}
+                {d}
+            </Text>
+        </Animated.View>
+    );
+};
+
+const LineTwo = ({ roundScore, totalScore, fontColor }) => {
+    if (roundScore == 0) {
+        return <></>;
+    }
+
+    return (
+        <Animated.View entering={ZoomIn.delay(300).duration(100)} exiting={ZoomOut.delay(0).duration(100)}>
+            <Text
+                adjustsFontSizeToFit
+                numberOfLines={1}
+                style={[styles.totalScore, { color: fontColor }]}
+            >
+                ={totalScore}
+            </Text>
+        </Animated.View>
+    );
+};
+
 const AdditionTile = ({ playerName, totalScore, roundScore, fontColor, maxWidth, maxHeight }) => {
+    const [delayedTotalScore, setDelayedTotalScore] = useState(totalScore);
     const [scale, setScale] = useState(1);
     const [w, setW] = useState(0);
     const [h, setH] = useState(0);
@@ -15,6 +71,12 @@ const AdditionTile = ({ playerName, totalScore, roundScore, fontColor, maxWidth,
             transform: [{ scale: sharedScale.value }],
         };
     });
+
+    useEffect(() => {
+        setTimeout(() => {
+            setDelayedTotalScore(totalScore);
+        }, 300);
+    }, [totalScore]);
 
     const layoutHandler = (e) => {
         const { x, y, width, height } = e.nativeEvent.layout;
@@ -32,72 +94,32 @@ const AdditionTile = ({ playerName, totalScore, roundScore, fontColor, maxWidth,
         }
     });
 
-    const PlayerNameItem = ({ children }) => {
-        return (
-            <Text
-                adjustsFontSizeToFit
-                numberOfLines={1}
-                style={[styles.name, { color: fontColor }]}
-            >
-                {children}
-            </Text>
-        );
-    };
-
-    const RoundScoreItem = ({ children, hidden = false }) => {
-        if (hidden) { return <></>; };
-
-        return (
-            <Text
-                adjustsFontSizeToFit
-                numberOfLines={1}
-                style={[styles.roundScore, { color: fontColor + '75' }]}
-            >
-                {children}
-            </Text>
-        );
-    };
-
     const EualsItem = ({ children, hidden = false }) => {
         if (hidden) { return <></>; };
 
         return (
-            <Text style={{ color: fontColor + '75' }}>
+            <Animated.Text entering={FadeIn.delay(2000).duration(1000)} style={{ color: fontColor + '75' }}>
                 {children}
-            </Text>
-        );
-    };
-
-    const TotalScoreItem = ({ children }) => {
-        return (
-            <Text
-                adjustsFontSizeToFit
-                numberOfLines={1}
-                style={[styles.totalScore, { color: fontColor }]}
-            >
-                {children}
-            </Text>
+            </Animated.Text>
         );
     };
 
     return (
-        <Animated.View style={[animatedStyles, { justifyContent: 'center' }]} onLayout={layoutHandler}>
-            <PlayerNameItem>
+        <Animated.View style={[animatedStyles, { justifyContent: 'center' }]} onLayout={layoutHandler} layout={Layout.easing(Easing.ease).delay(100).duration(100)}>
+            <Animated.Text
+                layout={Layout.easing(Easing.ease).delay(0).duration(100)}
+                adjustsFontSizeToFit
+                numberOfLines={1}
+                style={[styles.name, { color: fontColor }]}
+            >
                 {playerName}
-            </PlayerNameItem>
+            </Animated.Text>
 
-            <RoundScoreItem hidden={roundScore == 0}>
-                {roundScore > 0 && "+ "}
-                {roundScore < 0 && "- "}
-                {Math.abs(roundScore)}
-            </RoundScoreItem>
-
-            <TotalScoreItem>
-                <EualsItem hidden={roundScore == 0}>
-                    =
-                </EualsItem>
-                {totalScore}
-            </TotalScoreItem>
+            <Animated.View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }} >
+                <LineZero roundScore={roundScore} totalScore={totalScore} fontColor={fontColor} />
+                <LineOne roundScore={roundScore} totalScore={totalScore} fontColor={fontColor} />
+            </Animated.View>
+            <LineTwo roundScore={roundScore} totalScore={totalScore} fontColor={fontColor} />
         </Animated.View>
     );
 };
