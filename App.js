@@ -5,6 +5,7 @@ import { store, persistor } from './redux/store';
 import { NavigationContainer } from '@react-navigation/native';
 import * as Sentry from 'sentry-expo';
 import DrawerLeft from './src/components/DrawerLeft';
+import { StatusBar } from 'expo-status-bar';
 
 Sentry.init({
     dsn: 'https://88dd6d7c83b64ed8870ff21a2a9f1ba7@o1326242.ingest.sentry.io/4504710808076288',
@@ -18,6 +19,7 @@ export default class App extends React.Component {
             <Provider store={store}>
                 <PersistGate loading={null} persistor={persistor}>
                     <NavigationContainer>
+                        <StatusBar barStyle="light-content" />
                         <DrawerLeft />
                     </NavigationContainer>
                 </PersistGate>
