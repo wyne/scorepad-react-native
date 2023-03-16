@@ -1,12 +1,91 @@
 import React, { useEffect, useState } from 'react';
-import { Text, View, StyleSheet } from 'react-native';
-import Animated from 'react-native-reanimated';
-import { useSharedValue, useAnimatedStyle, withTiming, withSpring } from 'react-native-reanimated';
+import { Text, StyleSheet } from 'react-native';
+import Animated, { FadeIn, ZoomIn, ZoomOut } from 'react-native-reanimated';
+import { Layout, Easing } from 'react-native-reanimated';
+import {
+    useSharedValue,
+    useAnimatedStyle,
+    withTiming
+} from 'react-native-reanimated';
 
-const AdditionTile = ({ playerName, totalScore, roundScore, fontColor, maxWidth, maxHeight }) => {
-    const [scale, setScale] = useState(1);
-    const [w, setW] = useState(0);
-    const [h, setH] = useState(0);
+const animationDuration = 100;
+
+const ScoreBefore = ({ roundScore, totalScore, fontColor }) => {
+    const d = totalScore - roundScore;
+    const fontSize = useSharedValue(55);
+    const fontOpacity = useSharedValue(100);
+    const animatedStyles = useAnimatedStyle(() => {
+        return {
+            fontSize: fontSize.value,
+            fontWeight: roundScore == 0 ? 'bold' : 'normal',
+            opacity: fontOpacity.value / 100,
+        };
+    });
+
+    useEffect(() => {
+        fontSize.value = withTiming(
+            roundScore == 0 ? 55 : 30, { duration: animationDuration }
+        );
+        fontOpacity.value = withTiming(
+            roundScore == 0 ? 100 : 75, { duration: animationDuration }
+        );
+    }, [roundScore]);
+
+    return (
+        <Animated.View entering={ZoomIn.delay(0).duration(animationDuration)}>
+            <Animated.Text
+                adjustsFontSizeToFit
+                numberOfLines={1}
+                style={[animatedStyles, {
+                    fontVariant: ['tabular-nums'],
+                    color: fontColor,
+                }]} >
+                {d}
+            </Animated.Text>
+        </Animated.View>
+    );
+};
+
+const ScoreRound = ({ roundScore, totalScore, fontColor }) => {
+    if (roundScore == 0) {
+        return <></>;
+    }
+    const d = roundScore;
+
+    return (
+        <Animated.View entering={ZoomIn.delay(0).duration(animationDuration)}>
+            <Text adjustsFontSizeToFit numberOfLines={1}
+                style={{
+                    fontVariant: ['tabular-nums'],
+                    color: fontColor, opacity: .75, fontSize: 30
+                }} >
+                {roundScore > 0 && " + "}
+                {roundScore < 0 && " - "}
+                {Math.abs(d)}
+            </Text>
+        </Animated.View>
+    );
+};
+
+const ScoreAfter = ({ roundScore, totalScore, fontColor }) => {
+    if (roundScore == 0) {
+        return <></>;
+    }
+
+    return (
+        <Animated.View entering={ZoomIn.duration(animationDuration)}
+            exiting={ZoomOut.delay(0).duration(200)}>
+            <Text adjustsFontSizeToFit numberOfLines={1}
+                style={[styles.scoreTotal, { color: fontColor }]}>
+                {totalScore}
+            </Text>
+        </Animated.View>
+    );
+};
+
+const AdditionTile = ({ playerName, totalScore, roundScore, fontColor, maxWidth, maxHeight, index }) => {
+    const [w, setW] = useState(1);
+    const [h, setH] = useState(1);
 
     const sharedScale = useSharedValue(1);
 
@@ -27,77 +106,31 @@ const AdditionTile = ({ playerName, totalScore, roundScore, fontColor, maxWidth,
         const vs = maxHeight / h;
         if (Math.min(hs, vs) > 0) {
             const s = Math.min(.7 * hs, .7 * vs);
-            setScale(Math.min(s, 3));
-            sharedScale.value = withSpring(Math.min(s, 3));
+            sharedScale.value = withTiming(
+                Math.min(s, 3), { duration: animationDuration }
+            );
         }
     });
 
-    const PlayerNameItem = ({ children }) => {
-        return (
-            <Text
-                adjustsFontSizeToFit
-                numberOfLines={1}
-                style={[styles.name, { color: fontColor }]}
-            >
-                {children}
-            </Text>
-        );
-    };
-
-    const RoundScoreItem = ({ children, hidden = false }) => {
-        if (hidden) { return <></>; };
-
-        return (
-            <Text
-                adjustsFontSizeToFit
-                numberOfLines={1}
-                style={[styles.roundScore, { color: fontColor + '75' }]}
-            >
-                {children}
-            </Text>
-        );
-    };
-
-    const EualsItem = ({ children, hidden = false }) => {
-        if (hidden) { return <></>; };
-
-        return (
-            <Text style={{ color: fontColor + '75' }}>
-                {children}
-            </Text>
-        );
-    };
-
-    const TotalScoreItem = ({ children }) => {
-        return (
-            <Text
-                adjustsFontSizeToFit
-                numberOfLines={1}
-                style={[styles.totalScore, { color: fontColor }]}
-            >
-                {children}
-            </Text>
-        );
-    };
-
     return (
-        <Animated.View style={[animatedStyles, { justifyContent: 'center' }]} onLayout={layoutHandler}>
-            <PlayerNameItem>
+        <Animated.View style={[animatedStyles, { justifyContent: 'center' }]}
+            entering={FadeIn.duration(1000).delay(500 + index * animationDuration)}
+            layout={Layout.easing(Easing.ease).duration(animationDuration)}
+            onLayout={layoutHandler} >
+            <Animated.Text style={[styles.name, { color: fontColor }]}
+                adjustsFontSizeToFit numberOfLines={1}
+                layout={Layout.easing(Easing.ease).duration(animationDuration)}>
                 {playerName}
-            </PlayerNameItem>
+            </Animated.Text>
 
-            <RoundScoreItem hidden={roundScore == 0}>
-                {roundScore > 0 && "+ "}
-                {roundScore < 0 && "- "}
-                {Math.abs(roundScore)}
-            </RoundScoreItem>
-
-            <TotalScoreItem>
-                <EualsItem hidden={roundScore == 0}>
-                    =
-                </EualsItem>
-                {totalScore}
-            </TotalScoreItem>
+            <Animated.View style={styles.scoreLineOne} >
+                <ScoreBefore roundScore={roundScore} totalScore={totalScore}
+                    fontColor={fontColor} />
+                <ScoreRound roundScore={roundScore} totalScore={totalScore}
+                    fontColor={fontColor} />
+            </Animated.View>
+            <ScoreAfter roundScore={roundScore} totalScore={totalScore}
+                fontColor={fontColor} />
         </Animated.View>
     );
 };
@@ -108,13 +141,12 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         textAlign: 'center',
     },
-    roundScore: {
-        fontSize: 35,
-        fontVariant: ['tabular-nums'],
-        marginTop: 10,
-        textAlign: 'center',
+    scoreLineOne: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
     },
-    totalScore: {
+    scoreTotal: {
         fontSize: 55,
         fontVariant: ['tabular-nums'],
         fontWeight: 'bold',

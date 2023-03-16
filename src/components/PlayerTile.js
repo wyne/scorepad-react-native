@@ -7,7 +7,7 @@ import { playerRoundScoreIncrement, playerRoundScoreDecrement, playerAdd, update
 import { selectGameById } from '../../redux/GamesSlice';
 import { selectPlayerById } from '../../redux/PlayersSlice';
 
-const PlayerTile = ({ color, fontColor, cols, rows, playerId }) => {
+const PlayerTile = ({ color, fontColor, cols, rows, playerId, index }) => {
     const [width, setWidth] = useState(0);
     const [height, setHeight] = useState(0);
 
@@ -18,22 +18,22 @@ const PlayerTile = ({ color, fontColor, cols, rows, playerId }) => {
     const roundCurrent = useSelector(state => selectGameById(state, currentGameId).roundCurrent);
 
     // New
-    const player = useSelector(state => selectPlayerById(state, playerId))
+    const player = useSelector(state => selectPlayerById(state, playerId));
     const playerName = player.playerName;
     const scoreTotal = player.scores.reduce(
         (sum, current, round) => {
             if (round > roundCurrent) { return sum; }
             return (sum || 0) + (current || 0);
         }
-    )
+    );
     const scoreRound = player.scores[roundCurrent] || 0;
 
     const incPlayerRoundScoreHandler = () => {
         dispatch(playerRoundScoreIncrement(playerId, roundCurrent, multiplier));
-    }
+    };
     const decPlayerRoundScoreHandler = () => {
         dispatch(playerRoundScoreIncrement(playerId, roundCurrent, -multiplier));
-    }
+    };
 
     const widthPerc = (100 / cols) + '%';
     const heightPerc = (100 / rows) + '%';
@@ -43,7 +43,7 @@ const PlayerTile = ({ color, fontColor, cols, rows, playerId }) => {
 
         setWidth(width);
         setHeight(height);
-    }
+    };
 
     return (
         <View
@@ -62,6 +62,7 @@ const PlayerTile = ({ color, fontColor, cols, rows, playerId }) => {
                 playerName={playerName}
                 maxWidth={width}
                 maxHeight={height}
+                index={index}
             />
 
             <TouchableHighlight
@@ -81,7 +82,7 @@ const PlayerTile = ({ color, fontColor, cols, rows, playerId }) => {
             </TouchableHighlight>
         </View>
     );
-}
+};
 
 const styles = StyleSheet.create({
     playerCard: {
