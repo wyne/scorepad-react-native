@@ -13,6 +13,7 @@
     "@react-navigation/drawer": "^6.6.2",
     "@react-navigation/native": "^6.1.4",
     "@react-navigation/stack": "^6.2.2",
+    "@react-navigation/native-stack": "^6.9.12",
     "@reduxjs/toolkit": "^1.9.3",
     "@sentry/react-native": "4.13.0",
     "colorsheet": "^1.0.5",

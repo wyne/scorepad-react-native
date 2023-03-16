@@ -9,7 +9,6 @@ function HomeHeader({ navigation }) {
 
     return (
         <CustomHeader navigation={navigation}
-            headerLeft={<MenuButton navigation={navigation} />}
             headerCenter={<Text style={styles.title}>ScorePad</Text>}
             headerRight={<NewGameButton navigation={navigation} />}
         />

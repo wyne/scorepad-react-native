@@ -10,16 +10,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 const ListScreen = ({ navigation }) => {
     const gameList = useSelector(state => selectAllGames(state));
 
-    const GamesFooter = () => {
-        return (
-            <View style={{
-                paddingVertical: 20,
-                backgroundColor: 'white'
-            }}>
-            </View>
-        );
-    };
-
     return (
         <SafeAreaView flex={1} edges={['bottom']} style={{ backgroundColor: 'white' }}>
             <Animated.FlatList
