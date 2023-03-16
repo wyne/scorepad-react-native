@@ -34,7 +34,6 @@ const ScoreBefore = ({ roundScore, totalScore, fontColor }) => {
     return (
         <Animated.View entering={ZoomIn.delay(0).duration(animationDuration)}>
             <Animated.Text
-                adjustsFontSizeToFit
                 numberOfLines={1}
                 style={[animatedStyles, {
                     fontVariant: ['tabular-nums'],
@@ -54,7 +53,7 @@ const ScoreRound = ({ roundScore, totalScore, fontColor }) => {
 
     return (
         <Animated.View entering={ZoomIn.delay(0).duration(animationDuration)}>
-            <Text adjustsFontSizeToFit numberOfLines={1}
+            <Text numberOfLines={1}
                 style={{
                     fontVariant: ['tabular-nums'],
                     color: fontColor, opacity: .75, fontSize: 30
@@ -75,7 +74,7 @@ const ScoreAfter = ({ roundScore, totalScore, fontColor }) => {
     return (
         <Animated.View entering={ZoomIn.duration(animationDuration)}
             exiting={ZoomOut.delay(0).duration(200)}>
-            <Text adjustsFontSizeToFit numberOfLines={1}
+            <Text numberOfLines={1}
                 style={[styles.scoreTotal, { color: fontColor }]}>
                 {totalScore}
             </Text>
@@ -118,7 +117,7 @@ const AdditionTile = ({ playerName, totalScore, roundScore, fontColor, maxWidth,
             layout={Layout.easing(Easing.ease).duration(animationDuration)}
             onLayout={layoutHandler} >
             <Animated.Text style={[styles.name, { color: fontColor }]}
-                adjustsFontSizeToFit numberOfLines={1}
+                numberOfLines={1}
                 layout={Layout.easing(Easing.ease).duration(animationDuration)}>
                 {playerName}
             </Animated.Text>
@@ -137,7 +136,7 @@ const AdditionTile = ({ playerName, totalScore, roundScore, fontColor, maxWidth,
 
 const styles = StyleSheet.create({
     name: {
-        fontSize: 50,
+        fontSize: 30,
         fontWeight: 'bold',
         textAlign: 'center',
     },
