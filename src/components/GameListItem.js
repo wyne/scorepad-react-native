@@ -1,7 +1,7 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { View, Text, StyleSheet, Alert, TouchableOpacity } from 'react-native';
-import { ListItem, Avatar } from 'react-native-elements';
+import { ListItem } from 'react-native-elements';
 import { Swipeable } from 'react-native-gesture-handler';
 import Moment from 'react-moment';
 import { Icon } from 'react-native-elements';
@@ -68,18 +68,12 @@ const GameListItem = ({ navigation, game, index }) => {
                         <Text>{playerNames}</Text>
                     </ListItem.Subtitle>
                 </ListItem.Content>
-                <Avatar size={"small"}
-                    rounded
-                    title={`${players.length}P`}
-                    activeOpacity={0.7}
-                    titleStyle={{ color: '#01497C' }}
-                />
-                <Avatar size={"small"}
-                    rounded
-                    title={`${rounds + 1}R`}
-                    activeOpacity={0.7}
-                    titleStyle={{ color: '#c25858' }}
-                />
+                <Text style={styles.badgePlayers}>
+                    {players.length} <Icon color={'#01497C'} name="users" type="font-awesome-5" size={16} />
+                </Text>
+                <Text style={styles.badgeRounds}>
+                    {rounds + 1} <Icon color={'#c25858'} name="redo" type="font-awesome-5" size={16} />
+                </Text>
                 <ListItem.Chevron />
             </ListItem>
         </Animated.View>
@@ -100,6 +94,16 @@ const styles = StyleSheet.create({
         margin: 20,
         width: 200,
         alignSelf: 'center',
+    },
+    badgePlayers: {
+        color: '#01497C',
+        alignItems: 'center',
+        fontSize: 20,
+    },
+    badgeRounds: {
+        color: '#c25858',
+        alignItems: 'center',
+        fontSize: 20,
     }
 });
 
