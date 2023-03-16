@@ -114,7 +114,7 @@ const AdditionTile = ({ playerName, totalScore, roundScore, fontColor, maxWidth,
 
     return (
         <Animated.View style={[animatedStyles, { justifyContent: 'center' }]}
-            entering={FadeIn.duration(1000).delay(500 + index * animationDuration)}
+            entering={FadeIn.duration(500).delay(500 + index * animationDuration)}
             layout={Layout.easing(Easing.ease).duration(animationDuration)}
             onLayout={layoutHandler} >
             <Animated.Text style={[styles.name, { color: fontColor }]}
