@@ -59,6 +59,7 @@ export default function ScoreBoardScreen({ navigation }) {
                             fontColor={getContrastRatio('#' + palette[index % palette.length], '#000').number > 7 ? "#000000" : "#FFFFFF"}
                             cols={(grid.rows != 0 && grid.cols != 0) ? grid.cols : 0}
                             rows={(grid.rows != 0 && grid.cols != 0) ? grid.rows : 0}
+                            index={index}
                         />
                     ))}
                 </View>
