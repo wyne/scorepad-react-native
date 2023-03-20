@@ -72,7 +72,7 @@ const GameListItem = ({ navigation, game, index }) => {
                     {players.length} <Icon color={'#01497C'} name="users" type="font-awesome-5" size={16} />
                 </Text>
                 <Text style={styles.badgeRounds}>
-                    {rounds + 1} <Icon color={'#c25858'} name="redo" type="font-awesome-5" size={16} />
+                    {rounds + 1} <Icon color={'#c25858'} name="circle-notch" type="font-awesome-5" size={16} />
                 </Text>
                 <ListItem.Chevron />
             </ListItem>
