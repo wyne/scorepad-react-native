@@ -8,8 +8,8 @@ import {
     withTiming
 } from 'react-native-reanimated';
 
-const animationDuration = 200;
-const animationEnabled = false;
+const animationDuration = 100;
+const animationEnabled = true;
 const enteringAnimation = animationEnabled ? ZoomIn.duration(animationDuration) : null;
 const exitingAnimation = animationEnabled ? ZoomOut.duration(animationDuration) : null;
 const layoutAnimation = animationEnabled ? Layout.easing(Easing.ease).duration(animationDuration) : null;
@@ -56,8 +56,8 @@ const ScoreRound = ({ roundScore, totalScore, fontColor }) => {
     const d = roundScore;
 
     return (
-        <Animated.View>
-            <Text numberOfLines={1}
+        <Animated.View entering={enteringAnimation}>
+            <Text adjustsFontSizeToFit numberOfLines={1}
                 style={{
                     fontVariant: ['tabular-nums'],
                     color: fontColor, opacity: .75, fontSize: 30
@@ -86,7 +86,15 @@ const ScoreAfter = ({ roundScore, totalScore, fontColor }) => {
     );
 };
 
-const AdditionTile = ({ playerName, totalScore, roundScore, fontColor, maxWidth, maxHeight, index }) => {
+const AdditionTile = ({
+    playerName,
+    totalScore,
+    roundScore,
+    fontColor,
+    maxWidth,
+    maxHeight,
+    index
+}) => {
     const [w, setW] = useState(1);
     const [h, setH] = useState(1);
 

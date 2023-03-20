@@ -12,6 +12,34 @@ import FullscreenButton from '../Buttons/FullscreenButton';
 import MultiplierButton from '../Buttons/MultiplierButton';
 import CustomHeader from './CustomHeader';
 
+const PrevRoundButton = ({ prevRoundHandler, roundCurrent }) => {
+    return (
+        <TouchableOpacity style={[styles.headerButton]}
+            onPress={prevRoundHandler}>
+            <Icon name="chevron-left"
+                type="font-awesome-5"
+                size={20}
+                color={systemBlue}
+                style={[
+                    { opacity: roundCurrent == 0 ? 0 : 1 }
+                ]}
+            />
+        </TouchableOpacity>
+    );
+};
+
+const NextRoundButton = ({ nextRoundHandler }) => {
+    return (
+        <TouchableOpacity style={[styles.headerButton]}
+            onPress={nextRoundHandler}>
+            <Icon name="chevron-right"
+                type="font-awesome-5"
+                size={20}
+                color={systemBlue} />
+        </TouchableOpacity>
+    );
+};
+
 function GameHeader({ navigation }) {
     const dispatch = useDispatch();
 
@@ -31,34 +59,6 @@ function GameHeader({ navigation }) {
         dispatch(roundPrevious(currentGame));
     };
 
-    const NextRoundButton = ({ }) => {
-        return (
-            <TouchableOpacity style={[styles.headerButton]}
-                onPress={nextRoundHandler}>
-                <Icon name="chevron-right"
-                    type="font-awesome-5"
-                    size={20}
-                    color={systemBlue} />
-            </TouchableOpacity>
-        );
-    };
-
-    const PrevRoundButton = ({ }) => {
-        return (
-            <TouchableOpacity style={[styles.headerButton]}
-                onPress={prevRoundHandler}>
-                <Icon name="chevron-left"
-                    type="font-awesome-5"
-                    size={20}
-                    color={systemBlue}
-                    style={[
-                        { opacity: roundCurrent == 0 ? 0 : 1 }
-                    ]}
-                />
-            </TouchableOpacity>
-        );
-    };
-
     return (
         <CustomHeader navigation={navigation}
             headerLeft={<>
@@ -66,9 +66,9 @@ function GameHeader({ navigation }) {
                 <FullscreenButton />
             </>}
             headerCenter={<>
-                <PrevRoundButton />
+                <PrevRoundButton prevRoundHandler={prevRoundHandler} roundCurrent={roundCurrent} />
                 <Text style={styles.title}>Round {roundCurrent + 1}</Text>
-                <NextRoundButton />
+                <NextRoundButton nextRoundHandler={nextRoundHandler} />
             </>}
             headerRight={<MultiplierButton />}
         />
