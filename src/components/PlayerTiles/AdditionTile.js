@@ -9,6 +9,7 @@ import {
 } from 'react-native-reanimated';
 
 const animationDuration = 100;
+const enteringAnimation = ZoomIn.duration(animationDuration);
 
 const ScoreBefore = ({ roundScore, totalScore, fontColor }) => {
     const d = totalScore - roundScore;
@@ -32,7 +33,7 @@ const ScoreBefore = ({ roundScore, totalScore, fontColor }) => {
     }, [roundScore]);
 
     return (
-        <Animated.View entering={ZoomIn.delay(0).duration(animationDuration)}>
+        <Animated.View entering={enteringAnimation}>
             <Animated.Text
                 adjustsFontSizeToFit
                 numberOfLines={1}
@@ -53,7 +54,7 @@ const ScoreRound = ({ roundScore, totalScore, fontColor }) => {
     const d = roundScore;
 
     return (
-        <Animated.View entering={ZoomIn.delay(0).duration(animationDuration)}>
+        <Animated.View entering={enteringAnimation}>
             <Text adjustsFontSizeToFit numberOfLines={1}
                 style={{
                     fontVariant: ['tabular-nums'],
@@ -73,8 +74,7 @@ const ScoreAfter = ({ roundScore, totalScore, fontColor }) => {
     }
 
     return (
-        <Animated.View entering={ZoomIn.duration(animationDuration)}
-            exiting={ZoomOut.delay(0).duration(200)}>
+        <Animated.View entering={enteringAnimation}>
             <Text adjustsFontSizeToFit numberOfLines={1}
                 style={[styles.scoreTotal, { color: fontColor }]}>
                 {totalScore}
@@ -83,7 +83,15 @@ const ScoreAfter = ({ roundScore, totalScore, fontColor }) => {
     );
 };
 
-const AdditionTile = ({ playerName, totalScore, roundScore, fontColor, maxWidth, maxHeight, index }) => {
+const AdditionTile = ({
+    playerName,
+    totalScore,
+    roundScore,
+    fontColor,
+    maxWidth,
+    maxHeight,
+    index
+}) => {
     const [w, setW] = useState(1);
     const [h, setH] = useState(1);
 
