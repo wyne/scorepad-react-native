@@ -1,6 +1,6 @@
 import React, { memo, useCallback } from 'react';
 import { Text, View } from 'react-native';
-import { TouchableWithoutFeedback } from 'react-native-gesture-handler';
+import { TouchableWithoutFeedback } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 
 import { selectGameById, updateGame } from '../../../redux/GamesSlice';
