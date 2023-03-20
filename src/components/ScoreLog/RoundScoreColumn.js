@@ -12,7 +12,7 @@ const RoundScoreColumn = ({ round, isCurrentRound }) => {
     const currentGameId = useSelector(state => state.settings.currentGameId);
     const currentGame = useSelector(state => selectGameById(state, currentGameId));
 
-    const onLongPressHandler = useCallback(() => {
+    const onPressHandler = useCallback(() => {
         dispatch(updateGame({
             id: currentGameId,
             changes: {
@@ -23,7 +23,7 @@ const RoundScoreColumn = ({ round, isCurrentRound }) => {
     });
 
     return (
-        <TouchableWithoutFeedback onPress={onLongPressHandler}>
+        <TouchableWithoutFeedback onPress={onPressHandler}>
             <View
                 style={{ padding: 10 }}
                 backgroundColor={isCurrentRound ? '#111' : 'black'}>

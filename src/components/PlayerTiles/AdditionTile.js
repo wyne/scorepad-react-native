@@ -14,7 +14,7 @@ const enteringAnimation = animationEnabled ? ZoomIn.duration(animationDuration) 
 const exitingAnimation = animationEnabled ? ZoomOut.duration(animationDuration) : null;
 const layoutAnimation = animationEnabled ? Layout.easing(Easing.ease).duration(animationDuration) : null;
 
-const calcFontSize = (length) => {
+const calcPlayerFontSize = (length) => {
     if (length <= 3) {
         return 50;
     } else if (length <= 4) {
@@ -34,18 +34,37 @@ const calcFontSize = (length) => {
     }
 };
 
-const calcScoreLengthRatio = (length) => {
+const calcFontSize = (length) => {
     if (length <= 3) {
-        return .8;
+        return 50 * calcScoreLengthRatio(length);
     } else if (length <= 4) {
-        return .6;
+        return 40 * calcScoreLengthRatio(length);
     } else if (length <= 5) {
-        return .5;
+        return 40 * calcScoreLengthRatio(length);
+    } else if (length <= 6) {
+        return 46 * calcScoreLengthRatio(length);
+    } else if (length <= 7) {
+        return 43 * calcScoreLengthRatio(length);
+    } else if (length <= 8) {
+        return 40 * calcScoreLengthRatio(length);
+    } else if (length <= 8) {
+        return 37 * calcScoreLengthRatio(length);
     } else {
-        return .3;
+        return 34 * calcScoreLengthRatio(length);
     }
 };
 
+const calcScoreLengthRatio = (length) => {
+    if (length <= 3) {
+        return .9;
+    } else if (length <= 4) {
+        return .8;
+    } else if (length <= 5) {
+        return .7;
+    } else {
+        return .6;
+    }
+};
 
 const ScoreBefore = ({ roundScore, totalScore, fontColor }) => {
     const firstRowLength = (roundScore == 0 ? 0 : roundScore.toString().length + 3) + totalScore.toString().length;
@@ -189,7 +208,7 @@ const AdditionTile = ({
         }
     });
 
-    const playerNameFontSize = calcFontSize(playerName.length) * .8;
+    const playerNameFontSize = calcPlayerFontSize(playerName.length) * .8;
 
     return (
         <Animated.View style={[animatedStyles, { justifyContent: 'center' }]}
