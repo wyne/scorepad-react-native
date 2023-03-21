@@ -5,7 +5,8 @@ import { Layout, Easing } from 'react-native-reanimated';
 import {
     useSharedValue,
     useAnimatedStyle,
-    withTiming
+    withTiming,
+    withDelay,
 } from 'react-native-reanimated';
 
 const animationDuration = 200;
@@ -219,9 +220,9 @@ const AdditionTile = ({
 
         if (Math.min(hs, vs) > 0) {
             const s = Math.min(widthRatio * scoreLengthRatio * hs, widthRatio * scoreLengthRatio * vs);
-            sharedScale.value = withTiming(
+            sharedScale.value = withDelay(animationDuration, withTiming(
                 Math.min(s, 3), { duration: animationDuration }
-            );
+            ));
         }
     });
 
