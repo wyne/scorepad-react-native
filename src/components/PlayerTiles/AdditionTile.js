@@ -8,11 +8,27 @@ import {
     withTiming
 } from 'react-native-reanimated';
 
-const animationDuration = 100;
+const animationDuration = 200;
 const animationEnabled = true;
 const enteringAnimation = animationEnabled ? ZoomIn.duration(animationDuration) : null;
 const exitingAnimation = animationEnabled ? ZoomOut.duration(animationDuration) : null;
 const layoutAnimation = animationEnabled ? Layout.easing(Easing.ease).duration(animationDuration) : null;
+
+const ZoomOutFadeOut = (values) => {
+    'worklet';
+    const animations = {
+        transform: [{ scale: withTiming(0, { duration: animationDuration }) }],
+        opacity: withTiming(0, { duration: animationDuration }),
+    };
+    const initialValues = {
+        transform: [{ scale: 1 }],
+        opacity: 1,
+    };
+    return {
+        initialValues,
+        animations,
+    };
+};
 
 const calcPlayerFontSize = (length) => {
     if (length <= 3) {
@@ -125,7 +141,7 @@ const ScoreRound = ({ roundScore, totalScore, fontColor }) => {
     }
 
     return (
-        <Animated.View entering={enteringAnimation}>
+        <Animated.View>
             <Animated.Text numberOfLines={1}
                 style={[animatedStyles, {
                     fontVariant: ['tabular-nums'],
@@ -140,26 +156,27 @@ const ScoreRound = ({ roundScore, totalScore, fontColor }) => {
 };
 
 const ScoreAfter = ({ roundScore, totalScore, fontColor }) => {
-    if (roundScore == 0) {
-        return <></>;
-    }
-
     const fontSize = useSharedValue(calcFontSize(totalScore.toString().length));
+    const opacity = useSharedValue(1);
 
     const animatedStyles = useAnimatedStyle(() => {
         return {
             fontSize: fontSize.value,
+            opacity: opacity.value,
         };
     });
 
     useEffect(() => {
         fontSize.value = withTiming(
-            calcFontSize(totalScore.toString().length), { duration: animationDuration }
+            roundScore == 0 ? 1 : calcFontSize(totalScore.toString().length), { duration: animationDuration },
+        );
+        opacity.value = withTiming(
+            roundScore == 0 ? 0 : 1, { duration: animationDuration },
         );
     }, [roundScore]);
 
     return (
-        <Animated.View entering={enteringAnimation} exiting={exitingAnimation}>
+        <Animated.View entering={enteringAnimation} exiting={ZoomOutFadeOut}>
             <Animated.Text
                 style={[animatedStyles, styles.scoreTotal, { color: fontColor }]}>
                 {totalScore}
@@ -213,12 +230,11 @@ const AdditionTile = ({
     return (
         <Animated.View style={[animatedStyles, { justifyContent: 'center' }]}
             entering={FadeIn.duration(500).delay(100 + index * animationDuration)}
-            layout={layoutAnimation}
+            /* layout={layoutAnimation} */
             onLayout={layoutHandler} >
             <Animated.Text style={[styles.name, { fontSize: playerNameFontSize, color: fontColor }]}
-                numberOfLines={1}
-                layout={layoutAnimation}
-            >
+                /* layout={layoutAnimation} */
+                numberOfLines={1} >
                 {playerName}
             </Animated.Text>
             <Animated.View style={styles.scoreLineOne} >

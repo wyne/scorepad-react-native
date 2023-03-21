@@ -14,7 +14,7 @@ const PlayerNameColumn = ({ navigation }) => {
     const players = useSelector(state => selectPlayersByIds(state, currentGame.playerIds));
 
     return (
-        <TouchableOpacity style={{ padding: 10, borderWidth: 1, border: 'pink' }} onPress={() => {
+        <TouchableOpacity style={{ padding: 10 }} onPress={() => {
             navigation.navigate("Settings");
         }}>
             <Text style={styles.editRow}>
