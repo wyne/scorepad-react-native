@@ -11,7 +11,7 @@ const ListScreen = ({ navigation }) => {
     const gameList = useSelector(state => selectAllGames(state));
 
     return (
-        <SafeAreaView flex={1} edges={['bottom']} style={{ backgroundColor: 'white' }}>
+        <SafeAreaView flex={1} edges={['bottom', 'left', 'right']} style={{ backgroundColor: 'white' }}>
             <Animated.FlatList
                 itemLayoutAnimation={Layout.easing(Easing.ease).delay(200)}
                 style={styles.list}
