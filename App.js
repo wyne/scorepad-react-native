@@ -40,6 +40,7 @@ export default class App extends React.Component {
                         <Stack.Navigator>
                             <Stack.Screen name="List" component={ListScreen}
                                 options={{
+                                    orientation: 'any',
                                     title: 'Home',
                                     headerTitle: 'ScorePad with Rounds',
                                     header: ({ navigation }) => {
@@ -49,6 +50,7 @@ export default class App extends React.Component {
                             />
                             <Stack.Screen name="Game" component={GameScreen}
                                 options={{
+                                    orientation: 'any',
                                     title: "Current Game",
                                     header: ({ navigation }) => {
                                         return <GameHeader navigation={navigation} />;
@@ -57,6 +59,7 @@ export default class App extends React.Component {
                             />
                             <Stack.Screen name="Settings" component={SettingsScreen}
                                 options={{
+                                    orientation: 'any',
                                     title: "Settings",
                                     header: ({ navigation }) => {
                                         return <SettingsHeader navigation={navigation} />;

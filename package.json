@@ -48,7 +48,9 @@
     "react-redux": "^8.0.2",
     "redux-persist": "^6.0.0",
     "sentry-expo": "~6.1.0",
-    "typescript": "^4.6.3"
+    "typescript": "^4.6.3",
+    "expo-sensors": "~12.1.1",
+    "expo-system-ui": "~2.2.1"
   },
   "devDependencies": {
     "@babel/core": "^7.19.3",

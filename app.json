@@ -41,7 +41,13 @@
     },
     "owner": "wyne",
     "plugins": [
-      "sentry-expo"
+      "sentry-expo",
+      [
+        "expo-screen-orientation",
+        {
+          "initialOrientation": "DEFAULT"
+        }
+      ]
     ],
     "hooks": {
       "postPublish": [
