@@ -73,9 +73,9 @@ const calcFontSize = (length) => {
 
 const calcScoreLengthRatio = (length) => {
     if (length <= 3) {
-        return .9;
-    } else if (length <= 4) {
         return .8;
+    } else if (length <= 4) {
+        return .75;
     } else if (length <= 5) {
         return .7;
     } else {
@@ -91,7 +91,7 @@ const ScoreBefore = ({ roundScore, totalScore, fontColor }) => {
     const fontOpacity = useSharedValue(100);
     const animatedStyles = useAnimatedStyle(() => {
         return {
-            fontSize: fontSize.value,
+            fontSize: roundScore == 0 ? fontSize.value : fontSize.value * .8,
             fontWeight: roundScore == 0 ? 'bold' : 'normal',
             opacity: fontOpacity.value / 100,
         };
@@ -133,7 +133,7 @@ const ScoreRound = ({ roundScore, totalScore, fontColor }) => {
 
     useEffect(() => {
         fontSizeRound.value = withTiming(
-            calcFontSize(firstRowLength), { duration: animationDuration }
+            calcFontSize(firstRowLength) * .8, { duration: animationDuration }
         );
     }, [roundScore]);
 
