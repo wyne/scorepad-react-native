@@ -1,11 +1,11 @@
 import React, { memo } from 'react';
-import { Text, View, Button, StyleSheet, Alert, ScrollView } from 'react-native';
+import { Text, View, Button, StyleSheet, Alert, ScrollView, TouchableOpacity, TouchableWithoutFeedback } from 'react-native';
 import { Video, AVPlaybackStatus } from 'expo-av';
 import { Platform } from 'react-native';
 import { Image } from 'expo-image';
 
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Icon } from 'react-native-elements';
+import Animated, { FlipInEasyX, useAnimatedStyle, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
 
 const appJson = require('../../app.json');
 
@@ -17,22 +17,39 @@ const AppInfoScreen = ({ navigation }) => {
         appJson.expo.ios.buildNumber : appJson.expo.android.versionCode;
     const appVersion = appJson.expo.version;
 
+    const rotation = useSharedValue(0);
+    const rotationCount = useSharedValue(0);
+    const animatedStyles = useAnimatedStyle(() => {
+        return {
+            transform: [
+                { rotate: rotation.value + 'deg' },
+            ],
+        };
+    });
+
     return (
         <SafeAreaView flex={1} edges={['left', 'right']} style={{ backgroundColor: 'white' }}>
             <ScrollView>
                 <View style={{ alignItems: 'center' }}>
-                    <Image source={require('../../assets/icon.png')}
-                        resizeMode={'contain'}
-                        resizeMethod={'resize'}
-                        style={{
-                            alignSelf: 'center',
-                            height: 100,
-                            width: 100,
-                            margin: 10,
-                            borderRadius: 20,
-                        }}
-                    />
-                    <Text style={{ padding: 20, color: '#999' }} onPress={() => {
+                    <TouchableWithoutFeedback onPress={() => {
+                        rotationCount.value = rotationCount.value + 1;
+                        rotation.value = withTiming((rotationCount.value * 90), { duration: 1000 });
+                    }}>
+                        <Animated.View style={[animatedStyles]} entering={FlipInEasyX.delay(0).duration(1000)}>
+                            <Image source={require('../../assets/icon.png')}
+                                resizeMode={'contain'}
+                                resizeMethod={'resize'}
+                                style={{
+                                    alignSelf: 'center',
+                                    height: 100,
+                                    width: 100,
+                                    margin: 10,
+                                    borderRadius: 20,
+                                }}
+                            />
+                        </Animated.View>
+                    </TouchableWithoutFeedback>
+                    <Text style={{ padding: 10, color: '#999' }} onPress={() => {
                         Alert.alert(`ScorePad with Rounds\n` +
                             `v${appVersion} (${buildNumber})\n` +
                             `${Platform.OS} ${Platform.Version}`
