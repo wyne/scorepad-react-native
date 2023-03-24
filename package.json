@@ -18,7 +18,7 @@
     "@sentry/react-native": "4.13.0",
     "colorsheet": "^1.0.5",
     "dotenv": "^16.0.3",
-    "expo": "^48.0.6",
+    "expo": "^48.0.9",
     "expo-application": "~5.1.1",
     "expo-constants": "~14.2.1",
     "expo-crypto": "~12.2.1",
