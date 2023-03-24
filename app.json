@@ -6,7 +6,8 @@
     "orientation": "default",
     "icon": "./assets/icon.png",
     "updates": {
-      "fallbackToCacheTimeout": 0
+      "fallbackToCacheTimeout": 0,
+      "url": "https://u.expo.dev/fc8859ea-b320-41cd-a091-36b3ec7f9b1f"
     },
     "assetBundlePatterns": [
       "assets/*"
@@ -60,6 +61,9 @@
           }
         }
       ]
+    },
+    "runtimeVersion": {
+      "policy": "sdkVersion"
     }
   }
 }
