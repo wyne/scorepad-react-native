@@ -10,9 +10,11 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import ListScreen from "./src/screens/ListScreen";
 import GameScreen from "./src/screens/GameScreen";
 import SettingsScreen from "./src/screens/SettingsScreen";
+import AppInfoScreen from "./src/screens/AppInfoScreen";
 import HomeHeader from './src/components/Headers/HomeHeader';
 import GameHeader from './src/components/Headers/GameHeader';
 import SettingsHeader from './src/components/Headers/SettingsHeader';
+import AppInfoHeader from './src/components/Headers/AppInfoHeader';
 
 Sentry.init({
     dsn: 'https://88dd6d7c83b64ed8870ff21a2a9f1ba7@o1326242.ingest.sentry.io/4504710808076288',
@@ -63,6 +65,15 @@ export default class App extends React.Component {
                                     title: "Settings",
                                     header: ({ navigation }) => {
                                         return <SettingsHeader navigation={navigation} />;
+                                    },
+                                }}
+                            />
+                            <Stack.Screen name="AppInfo" component={AppInfoScreen}
+                                options={{
+                                    orientation: 'any',
+                                    title: "Info",
+                                    header: ({ navigation }) => {
+                                        return <AppInfoHeader navigation={navigation} />;
                                     },
                                 }}
                             />

@@ -1,18 +1,15 @@
 import React from 'react';
 import { Text, StyleSheet } from 'react-native';
-import AppInfoButton from '../Buttons/AppInfoButton';
 
 import MenuButton from '../Buttons/MenuButton';
-import NewGameButton from '../Buttons/NewGameButton';
 import CustomHeader from './CustomHeader';
 
-function HomeHeader({ navigation }) {
+function AppInfoHeader({ navigation }) {
 
     return (
         <CustomHeader navigation={navigation}
-            headerLeft={<AppInfoButton navigation={navigation} />}
-            headerCenter={<Text style={styles.title}>ScorePad</Text>}
-            headerRight={<NewGameButton navigation={navigation} />}
+            headerLeft={<MenuButton navigation={navigation} />}
+            headerCenter={<Text style={styles.title}>Info</Text>}
         />
     );
 }
@@ -25,4 +22,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default HomeHeader;
+export default AppInfoHeader;
