@@ -2,7 +2,7 @@
   "expo": {
     "name": "ScorePad with Rounds",
     "slug": "scorepad",
-    "version": "2.1.4",
+    "version": "2.1.5",
     "orientation": "default",
     "icon": "./assets/icon.png",
     "updates": {
@@ -15,7 +15,7 @@
     "backgroundColor": "#000000",
     "ios": {
       "bundleIdentifier": "com.wyne.scorepad",
-      "buildNumber": "40",
+      "buildNumber": "41",
       "supportsTablet": true,
       "requireFullScreen": false
     },
@@ -26,7 +26,7 @@
         "backgroundImage": "./assets/adaptive-icon-bg.png"
       },
       "package": "com.wyne.scorepad",
-      "versionCode": 40,
+      "versionCode": 41,
       "permissions": []
     },
     "userInterfaceStyle": "dark",
