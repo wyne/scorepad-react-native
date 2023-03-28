@@ -44,6 +44,12 @@ Prerequisite: `SENTRY_AUTH_TOKEN` in `.env`
 npx expo run:ios
 ```
 
+Buid .ipa
+
+```
+npx eas build --platform ios --profile development --local
+```
+
 ### Remote Build
 
 ```

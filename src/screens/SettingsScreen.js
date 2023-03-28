@@ -9,6 +9,7 @@ import { playerAdd } from '../../redux/PlayersSlice';
 import EditPlayer from '../components/EditPlayer';
 import { selectGameById, updateGame, } from '../../redux/GamesSlice';
 import { selectPlayersByIds } from '../../redux/ScoreSelectors';
+import EditGame from '../components/EditGame';
 
 const SettingsScreen = ({ navigation }) => {
     const dispatch = useDispatch();
@@ -45,6 +46,10 @@ const SettingsScreen = ({ navigation }) => {
         <KeyboardAwareScrollView style={styles.configScrollContainer}
             contentContainerStyle={{ alignItems: 'stretch' }}>
             <View style={{ width: 350, alignSelf: 'center' }}>
+                <Text style={styles.heading}>Game Title</Text>
+                <EditGame />
+
+                <Text style={styles.heading}>Players</Text>
                 {players.map((player, index) => (
                     <EditPlayer
                         player={player}
@@ -79,6 +84,12 @@ const styles = StyleSheet.create({
         margin: 15,
         color: '#eee',
     },
+    heading: {
+        fontSize: 20,
+        marginTop: 20,
+        marginBottom: 0,
+        color: '#eee',
+    }
 });
 
 export default SettingsScreen;

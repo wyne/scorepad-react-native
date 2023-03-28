@@ -14,5 +14,11 @@ export default {
     eas: {
       projectId: 'fc8859ea-b320-41cd-a091-36b3ec7f9b1f'
     }
+  },
+  updates: {
+    url: "https://u.expo.dev/fc8859ea-b320-41cd-a091-36b3ec7f9b1f"
+  },
+  runtimeVersion: {
+    policy: "sdkVersion"
   }
 };
