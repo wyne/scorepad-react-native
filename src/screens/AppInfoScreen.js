@@ -78,9 +78,11 @@ const AppInfoScreen = ({ navigation }) => {
                     <View style={styles.buttons}>
                         <Button
                             title={status.isPlaying ? 'Pause' : 'Watch video tutorial'}
-                            onPress={() =>
-                                status.isPlaying ? video.current.pauseAsync() : video.current.playAsync()
-                            }
+                            onPress={() => {
+                                video.current.presentFullscreenPlayer();
+                                video.current.replayAsync();
+                                // status.isPlaying ? video.current.pauseAsync() : video.current.playAsync()
+                            }}
                         />
                     </View>
                     <Video
@@ -91,7 +93,12 @@ const AppInfoScreen = ({ navigation }) => {
                         }
                         useNativeControls
                         resizeMode="contain"
-                        onPlaybackStatusUpdate={status => setStatus(() => status)}
+                        onPlaybackStatusUpdate={status => {
+                            setStatus(() => status);
+                            if (status.didJustFinish) {
+                                video.current.dismissFullscreenPlayer();
+                            }
+                        }}
                     />
                 </View>
 
@@ -113,8 +120,8 @@ const styles = StyleSheet.create({
     },
     video: {
         alignSelf: 'center',
-        width: 140,
-        height: 300,
+        width: 0,
+        height: 0,
     }
 });
 
