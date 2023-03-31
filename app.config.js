@@ -1,6 +1,7 @@
 const IS_DEV = process.env.APP_VARIANT === 'development';
 
-export default {
+export default ({ config }) => ({
+  ...config,
   name: IS_DEV ? 'ScorePad with Rounds (dev)' : 'ScorePad with Rounds',
   slug: 'scorepad',
   ios: {
@@ -21,4 +22,4 @@ export default {
   runtimeVersion: {
     policy: "sdkVersion"
   }
-};
+});
