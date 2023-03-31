@@ -1,15 +1,35 @@
 const IS_DEV = process.env.APP_VARIANT === 'development';
 
-export default ({ config }) => ({
-  ...config,
+export default ({config}) => ({
   name: IS_DEV ? 'ScorePad with Rounds (dev)' : 'ScorePad with Rounds',
   slug: 'scorepad',
+  version: "2.1.6",
+  orientation: "default",
+  icon: IS_DEV ? './assets/icon-dev.png' : './assets/icon.png',
+  assetBundlePatterns: [
+    "assets/*"
+  ],
+  backgroundColor: "#000000",
   ios: {
     bundleIdentifier: IS_DEV ? 'com.wyne.scorepad.dev' : 'com.wyne.scorepad',
-    icon: './assets/icon-dev.png',
+    supportsTablet: true,
+    requireFullScreen: false,
+    infoPlist: {
+      RCTAsyncStorageExcludeFromBackup: false
+    }
   },
   android: {
-    package: IS_DEV ? 'com.wyne.scorepad.dev' : 'com.wyne.scorepad'
+    icon: "./assets/adaptive-icon.png",
+    adaptiveIcon: {
+      "foregroundImage": "./assets/adaptive-icon-fg.png",
+      "backgroundImage": "./assets/adaptive-icon-bg.png"
+    },
+    package: IS_DEV ? 'com.wyne.scorepad.dev' : 'com.wyne.scorepad',
+    permissions: []
+  },
+  userInterfaceStyle: "dark",
+  web: {
+    "favicon": "./assets/favicon.png"
   },
   extra: {
     eas: {
@@ -17,9 +37,34 @@ export default ({ config }) => ({
     }
   },
   updates: {
+    fallbackToCacheTimeout: 0,
     url: "https://u.expo.dev/fc8859ea-b320-41cd-a091-36b3ec7f9b1f"
   },
   runtimeVersion: {
-    policy: "sdkVersion"
+    policy: "appVersion"
+  },
+  description: "",
+  githubUrl: "https://github.com/wyne/scorepad-react-native",
+  owner: "wyne",
+  plugins: [
+    "sentry-expo",
+    [
+      "expo-screen-orientation",
+      {
+        "initialOrientation": "DEFAULT"
+      }
+    ]
+  ],
+  hooks: {
+    "postPublish": [
+      {
+        "file": "sentry-expo/upload-sourcemaps",
+        "config": {
+          "organization": "justin-wyne",
+          "project": "scorepad",
+          "authToken": false
+        }
+      }
+    ]
   }
 });
