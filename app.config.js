@@ -1,6 +1,6 @@
 const IS_DEV = process.env.APP_VARIANT === 'development';
 
-export default ({config}) => ({
+export default {
   name: IS_DEV ? 'ScorePad with Rounds (dev)' : 'ScorePad with Rounds',
   slug: 'scorepad',
   version: "2.1.6",
@@ -13,10 +13,7 @@ export default ({config}) => ({
   ios: {
     bundleIdentifier: IS_DEV ? 'com.wyne.scorepad.dev' : 'com.wyne.scorepad',
     supportsTablet: true,
-    requireFullScreen: false,
-    infoPlist: {
-      RCTAsyncStorageExcludeFromBackup: false
-    }
+    requireFullScreen: false
   },
   android: {
     icon: "./assets/adaptive-icon.png",
@@ -67,4 +64,4 @@ export default ({config}) => ({
       }
     ]
   }
-});
+};
