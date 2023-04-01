@@ -3,19 +3,17 @@ import { Text, View, Button, StyleSheet, Alert, ScrollView, TouchableOpacity, To
 import { Video, AVPlaybackStatus } from 'expo-av';
 import { Platform } from 'react-native';
 import { Image } from 'expo-image';
+import * as Application from 'expo-application';
 
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, { FlipInEasyX, useAnimatedStyle, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
-
-const appJson = require('../../app.json');
 
 const AppInfoScreen = ({ navigation }) => {
     const video = React.useRef(null);
     const [status, setStatus] = React.useState({});
 
-    const buildNumber = Platform.OS == 'ios' ?
-        appJson.expo.ios.buildNumber : appJson.expo.android.versionCode;
-    const appVersion = appJson.expo.version;
+    const buildNumber = Application.nativeBuildVersion;
+    const appVersion = Application.nativeAppVersion;
 
     const rotation = useSharedValue(0);
     const rotationCount = useSharedValue(0);

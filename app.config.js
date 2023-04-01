@@ -41,7 +41,7 @@ export default ({config}) => ({
     url: "https://u.expo.dev/fc8859ea-b320-41cd-a091-36b3ec7f9b1f"
   },
   runtimeVersion: {
-    policy: "appVersion"
+    policy: "sdkVersion"
   },
   description: "",
   githubUrl: "https://github.com/wyne/scorepad-react-native",
