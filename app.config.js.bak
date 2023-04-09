@@ -13,7 +13,8 @@ export default {
   ios: {
     bundleIdentifier: IS_DEV ? 'com.wyne.scorepad.dev' : 'com.wyne.scorepad',
     supportsTablet: true,
-    requireFullScreen: false
+    requireFullScreen: false,
+    buildVersion: "46",
   },
   android: {
     icon: "./assets/adaptive-icon.png",
@@ -22,7 +23,8 @@ export default {
       "backgroundImage": "./assets/adaptive-icon-bg.png"
     },
     package: IS_DEV ? 'com.wyne.scorepad.dev' : 'com.wyne.scorepad',
-    permissions: []
+    permissions: [],
+    versionCode: 46,
   },
   userInterfaceStyle: "dark",
   web: {
@@ -38,7 +40,7 @@ export default {
     url: "https://u.expo.dev/fc8859ea-b320-41cd-a091-36b3ec7f9b1f"
   },
   runtimeVersion: {
-    policy: "sdkVersion"
+    policy: "appVersion",
   },
   description: "",
   githubUrl: "https://github.com/wyne/scorepad-react-native",

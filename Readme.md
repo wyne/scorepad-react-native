@@ -44,6 +44,12 @@ Prerequisite: `SENTRY_AUTH_TOKEN` in `.env`
 npx expo run:ios
 ```
 
+Check eas config settings
+
+```
+npx eas config --platform=ios --profile=development
+```
+
 Buid .ipa
 
 ```
