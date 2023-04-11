@@ -1,72 +1,72 @@
 {
-    "expo": {
-        "name": "ScorePad with Rounds",
-        "slug": "scorepad",
-        "version": "2.1.6",
-        "orientation": "default",
-        "icon": "./assets/icon.png",
-        "updates": {
-            "fallbackToCacheTimeout": 0,
-            "url": "https://u.expo.dev/fc8859ea-b320-41cd-a091-36b3ec7f9b1f"
-        },
-        "assetBundlePatterns": [
-            "assets/*"
-        ],
-        "backgroundColor": "#000000",
-        "ios": {
-            "bundleIdentifier": "com.wyne.scorepad",
-            "buildNumber": "46",
-            "supportsTablet": true,
-            "requireFullScreen": false,
-            "infoPlist": {
-                "RCTAsyncStorageExcludeFromBackup": false
-            }
-        },
-        "android": {
-            "icon": "./assets/adaptive-icon.png",
-            "adaptiveIcon": {
-                "foregroundImage": "./assets/adaptive-icon-fg.png",
-                "backgroundImage": "./assets/adaptive-icon-bg.png"
-            },
-            "package": "com.wyne.scorepad",
-            "versionCode": 46,
-            "permissions": []
-        },
-        "userInterfaceStyle": "dark",
-        "web": {
-            "favicon": "./assets/favicon.png"
-        },
-        "description": "",
-        "githubUrl": "https://github.com/wyne/scorepad-react-native",
-        "extra": {
-            "eas": {
-                "projectId": "fc8859ea-b320-41cd-a091-36b3ec7f9b1f"
-            }
-        },
-        "owner": "wyne",
-        "plugins": [
-            "sentry-expo",
-            [
-                "expo-screen-orientation",
-                {
-                    "initialOrientation": "DEFAULT"
-                }
-            ]
-        ],
-        "hooks": {
-            "postPublish": [
-                {
-                    "file": "sentry-expo/upload-sourcemaps",
-                    "config": {
-                        "organization": "justin-wyne",
-                        "project": "scorepad",
-                        "authToken": false
-                    }
-                }
-            ]
-        },
-        "runtimeVersion": {
-            "policy": "sdkVersion"
+  "expo": {
+    "name": "ScorePad with Rounds",
+    "slug": "scorepad",
+    "version": "2.1.6",
+    "orientation": "default",
+    "icon": "./assets/icon.png",
+    "updates": {
+      "fallbackToCacheTimeout": 0,
+      "url": "https://u.expo.dev/fc8859ea-b320-41cd-a091-36b3ec7f9b1f"
+    },
+    "assetBundlePatterns": [
+      "assets/*"
+    ],
+    "backgroundColor": "#000000",
+    "ios": {
+      "bundleIdentifier": "com.wyne.scorepad",
+      "buildNumber": "47",
+      "supportsTablet": true,
+      "requireFullScreen": false,
+      "infoPlist": {
+        "RCTAsyncStorageExcludeFromBackup": false
+      }
+    },
+    "android": {
+      "icon": "./assets/adaptive-icon.png",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon-fg.png",
+        "backgroundImage": "./assets/adaptive-icon-bg.png"
+      },
+      "package": "com.wyne.scorepad",
+      "versionCode": 46,
+      "permissions": []
+    },
+    "userInterfaceStyle": "dark",
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "description": "",
+    "githubUrl": "https://github.com/wyne/scorepad-react-native",
+    "extra": {
+      "eas": {
+        "projectId": "fc8859ea-b320-41cd-a091-36b3ec7f9b1f"
+      }
+    },
+    "owner": "wyne",
+    "plugins": [
+      "sentry-expo",
+      [
+        "expo-screen-orientation",
+        {
+          "initialOrientation": "DEFAULT"
         }
+      ]
+    ],
+    "hooks": {
+      "postPublish": [
+        {
+          "file": "sentry-expo/upload-sourcemaps",
+          "config": {
+            "organization": "justin-wyne",
+            "project": "scorepad",
+            "authToken": false
+          }
+        }
+      ]
+    },
+    "runtimeVersion": {
+      "policy": "sdkVersion"
     }
+  }
 }

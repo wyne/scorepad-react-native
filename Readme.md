@@ -47,19 +47,19 @@ npx expo run:ios
 Check eas config settings
 
 ```
-npx eas config --platform=ios --profile=development
+eas config --platform=ios --profile=development
 ```
 
-Buid .ipa
+Buid .ipa. Be sure to load .env first.
 
 ```
-npx eas build --platform ios --profile development --local
+eas build --platform ios --profile development --local
 ```
 
 ### Remote Build
 
 ```
-npx eas build --platform ios
+eas build --platform ios
 ```
 
 ### Publish
