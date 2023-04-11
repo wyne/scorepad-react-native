@@ -13,7 +13,7 @@ const AppInfoScreen = ({ navigation }) => {
     const [status, setStatus] = React.useState({});
 
     const buildNumber = Application.nativeBuildVersion;
-    const appVersion = Application.nativeAppVersion;
+    const appVersion = Application.nativeApplicationVersion;
 
     const rotation = useSharedValue(0);
     const rotationCount = useSharedValue(0);

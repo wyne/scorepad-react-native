@@ -23,7 +23,9 @@ https://wyne.github.io/scorepad/
 
 ### Run
 
-`expo start`
+```
+npx expo start
+```
 
 Then use the expo UI to run on iOS, Android, or web.
 
