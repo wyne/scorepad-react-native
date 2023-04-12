@@ -67,7 +67,7 @@ eas build --platform ios
 ### Publish
 
 ```
-npx eas submit --platform ios --non-interactive
+eas submit --platform ios --non-interactive
 ```
 
 Android
