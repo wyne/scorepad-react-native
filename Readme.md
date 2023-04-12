@@ -23,7 +23,9 @@ https://wyne.github.io/scorepad/
 
 ### Run
 
-`expo start`
+```
+npx expo start
+```
 
 Then use the expo UI to run on iOS, Android, or web.
 
@@ -44,22 +46,28 @@ Prerequisite: `SENTRY_AUTH_TOKEN` in `.env`
 npx expo run:ios
 ```
 
-Buid .ipa
+Check eas config settings
 
 ```
-npx eas build --platform ios --profile development --local
+eas config --platform=ios --profile=development
+```
+
+Buid .ipa. Be sure to load .env first.
+
+```
+eas build --platform ios --profile development --local
 ```
 
 ### Remote Build
 
 ```
-npx eas build --platform ios
+eas build --platform ios
 ```
 
 ### Publish
 
 ```
-npx eas submit --platform ios --non-interactive
+eas submit --platform ios --non-interactive
 ```
 
 Android
