@@ -57,7 +57,7 @@ const EditGame = ({ }) => {
 
 const styles = StyleSheet.create({
     container: {
-        alignItems: 'left',
+        alignItems: 'flex-start',
         flexDirection: 'column',
         justifyContent: 'flex-start',
         margin: 10,
