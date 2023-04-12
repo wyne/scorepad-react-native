@@ -1,133 +1,71 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Icon } from 'react-native-elements/dist/icons/Icon';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Text, View, StyleSheet, TouchableOpacity, ScrollView, Platform } from 'react-native';
-import { useSelector } from 'react-redux';
+import { Text, View, StyleSheet, ScrollView, Platform } from 'react-native';
+import { useDispatch, useSelector } from 'react-redux';
 
-import { palette } from '../constants';
+import { selectGameById } from '../../redux/GamesSlice';
+import RoundScoreColumn from './ScoreLog/RoundScoreColumn';
+import TotalScoreColumn from './ScoreLog/TotalScoreColumn';
+import PlayerNameColumn from './ScoreLog/PlayerNameColumn';
 
 function Rounds({ navigation, show }) {
-    const [roundScollOffset, setRoundScrollOffset] = useState(0);
+    const [roundScollOffset, setRoundScrollOffset] = useState({});
 
-    const players = useSelector(state => state.currentGame.players);
-    const scores = useSelector(state => state.currentGame.scores);
-    const currentRound = useSelector(state => state.currentGame.currentRound);
-    const currentRoundEl = useRef()
-    const roundsScrollViewEl = useRef()
+    const currentGameId = useSelector(state => state.settings.currentGameId);
+    const roundCurrent = useSelector(state => selectGameById(state, currentGameId).roundCurrent);
+    const roundTotal = useSelector(state => selectGameById(state, currentGameId).roundTotal);
 
-    useEffect(() => {
-        if (roundScollOffset !== undefined) {
-            roundsScrollViewEl.current.scrollTo({
-                x: roundScollOffset,
-                animated: Platform.OS == "ios" ? true : false
-            })
-        }
-    }, [roundScollOffset]);
+    const roundsScrollViewEl = useRef();
 
-    const onLayoutHandler = (event, round) => {
-        if (round != currentRound) {
-            return;
-        }
+    // Remember the round offset when the round changes
+    const onLayoutHandler = useCallback((event, round) => {
         const offset = event.nativeEvent.layout.x;
-        setRoundScrollOffset(offset);
-    }
 
-    const PlayerNameColumn = () => {
-        return (
-            <View style={{ padding: 10, color: 'white' }}>
-                <Text style={{ color: 'white', fontSize: 20 }}> &nbsp; </Text>
-                {players.map((player, index) => (
-                    <View key={index} style={{ paddingLeft: 2, borderLeftWidth: 5, borderColor: "#" + palette[index] }}>
-                        <Text key={index} style={{ color: 'white', maxWidth: 100, fontSize: 20, }}
-                            numberOfLines={1}
-                        >{player.name}</Text>
-                    </View>
-                ))}
-            </View>
-        );
-    }
+        setRoundScrollOffset({
+            ...roundScollOffset,
+            [round]: offset
+        });
+    });
 
-    const TotalColumn = ({ }) => {
-        return (
-            <View key={'total'} style={{ padding: 10 }}>
-                <Text style={[styles.totalHeader]}>
-                    Total
-                </Text>
-                {players.map((player, playerIndex) => (
-                    <Text key={playerIndex} style={[styles.scoreEntry, { color: 'white', fontWeight: 'bold' }]} >
-                        {scores[playerIndex].reduce(
-                            (a, b) => { return (a || 0) + (b || 0); }
-                        )}
-                    </Text>
-                ))}
-            </View>
-        )
-    }
+    // Scroll to the current round
+    useEffect(() => {
+        const offset = roundScollOffset[roundCurrent];
+        roundsScrollViewEl.current.scrollTo({
+            x: offset,
+            animated: Platform.OS == "ios" ? true : false
+        });
+    }, [roundCurrent, roundScollOffset]);
 
-    const RoundColumn = ({ round }) => {
-        return (
-            <View style={{ padding: 10 }}
-                ref={currentRound == round ? currentRoundEl : null}
-                onLayout={(e) => onLayoutHandler(e, round)}
-                backgroundColor={round == currentRound ? '#111' : 'black'}>
-                <Text style={{
-                    color: currentRound == round ? 'red' : 'yellow',
-                    fontWeight: 'bold',
-                    textAlign: 'center',
-                    fontSize: 20,
-                }}>
-                    {round + 1}
-                </Text>
-                {players.map((player, playerIndex) => (
-                    <Text key={playerIndex} style={[
-                        styles.scoreEntry,
-                        { color: scores[playerIndex][round] == 0 ? '#555' : 'white' }]}>
-                        {scores[playerIndex][round]}
-                    </Text>
-                ))}
-            </View>
-        );
-    }
+    const roundsIterator = [...Array(roundTotal + 1).keys()];
 
     return (
-        <SafeAreaView edges={['right', 'left']} style={{ flexDirection: 'row', backgroundColor: 'black', paddingBottom: 10, height: show ? 'auto' : 0 }}>
-
-            <PlayerNameColumn />
-
-            <TotalColumn />
-
-            <ScrollView
-                horizontal={true}
+        <SafeAreaView edges={['right', 'left']}
+            style={[styles.scoreTableContainer, { height: show ? 'auto' : 0, }]}>
+            <PlayerNameColumn navigation={navigation} />
+            <TotalScoreColumn />
+            <ScrollView horizontal={true}
                 contentContainerStyle={{ flexDirection: 'row' }}
-                ref={roundsScrollViewEl}
-            >
-                {scores[0].map((item, round) => (
-                    <RoundColumn round={round} key={round} />
+                ref={roundsScrollViewEl} >
+                {roundsIterator.map((item, round) => (
+                    <View key={round}
+                        onLayout={e => onLayoutHandler(e, round)}>
+                        <RoundScoreColumn
+                            collapsable={false}
+                            round={round}
+                            key={round}
+                            isCurrentRound={round == roundCurrent} />
+                    </View>
                 ))}
             </ScrollView>
-
-            <View flexDirection='column' style={{ justifyContent: 'space-around', padding: 15 }}>
-                <TouchableOpacity onPress={() => { navigation.navigate("Settings") }} >
-                    {show && <Icon size={30} color='#0a84ff' style={{ textAlign: 'center' }} name="people" />}
-                    {show && <Text style={{ color: '#0a84ff', fontWeight: 'bold' }}>Setup</Text>}
-                </TouchableOpacity>
-            </View>
-        </SafeAreaView >
+        </SafeAreaView>
     );
 }
 
 const styles = StyleSheet.create({
-    totalHeader: {
-        color: 'white',
-        fontWeight: 'bold',
-        textAlign: 'center',
-        fontSize: 20,
-    },
-    scoreEntry: {
-        fontVariant: ['tabular-nums'],
-        textAlign: 'center',
-        color: 'white',
-        fontSize: 20,
+    scoreTableContainer: {
+        flexDirection: 'row',
+        backgroundColor: 'black',
+        paddingBottom: 10,
     }
 });
 

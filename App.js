@@ -1,17 +1,20 @@
 import React from 'react';
 import { Provider } from 'react-redux';
-import { Text } from 'react-native';
-import { Icon } from 'react-native-elements';
-import { createAppContainer } from "react-navigation";
-import { createStackNavigator } from "react-navigation-stack";
 import { PersistGate } from 'redux-persist/integration/react';
 import { store, persistor } from './redux/store';
+import * as Sentry from 'sentry-expo';
+import { StatusBar } from 'expo-status-bar';
+import { DarkTheme, DefaultTheme, NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
+import ListScreen from "./src/screens/ListScreen";
 import GameScreen from "./src/screens/GameScreen";
 import SettingsScreen from "./src/screens/SettingsScreen";
-import ListScreen from "./src/screens/ListScreen";
-import RoundTitle from './src/components/RoundTitle';
-import * as Sentry from 'sentry-expo';
+import AppInfoScreen from "./src/screens/AppInfoScreen";
+import HomeHeader from './src/components/Headers/HomeHeader';
+import GameHeader from './src/components/Headers/GameHeader';
+import SettingsHeader from './src/components/Headers/SettingsHeader';
+import AppInfoHeader from './src/components/Headers/AppInfoHeader';
 
 Sentry.init({
     dsn: 'https://88dd6d7c83b64ed8870ff21a2a9f1ba7@o1326242.ingest.sentry.io/4504710808076288',
@@ -19,54 +22,63 @@ Sentry.init({
     debug: false, // If `true`, Sentry will try to print out useful debugging information if something goes wrong with sending the event. Set it to `false` in production
 });
 
-const navigator = createStackNavigator(
-    {
-        List: {
-            screen: ListScreen,
-            navigationOptions: ({ navigation }) => ({
-                title: "ScorePad with Rounds",
-                headerStyle: { backgroundColor: "#000" },
-                headerRight: () => {
-                    return <Icon name="add" color="white" style={{ marginHorizontal: 10 }} />
-                },
-                headerLeft: () => {
-                    return <Icon name="settings" color="white" style={{ marginHorizontal: 10 }} />
-                }
-            })
-        },
-        Game: {
-            screen: GameScreen,
-            navigationOptions: ({ navigation }) => ({
-                headerShown: true,
-                header: (navigation) => {
-                    return <RoundTitle />;
-                }
-            }),
-        },
-        Settings: {
-            screen: SettingsScreen,
-            navigationOptions: ({ navigation }) => ({
-                title: "Settings",
-                headerBackTitle: "Back",
-                headerStyle: { backgroundColor: "#000" },
-            }),
-        },
-    },
-    {
-        initialRouteName: "List",
-        defaultNavigationOptions: {
-        }
-    },
-);
+const Stack = createNativeStackNavigator();
 
-let Navigation = createAppContainer(navigator);
+const MyTheme = {
+    ...DarkTheme,
+    colors: {
+        ...DarkTheme.colors,
+        background: 'black',
+    },
+};
 
 export default class App extends React.Component {
     render() {
         return (
             <Provider store={store}>
                 <PersistGate loading={null} persistor={persistor}>
-                    <Navigation theme="dark" />
+                    <StatusBar barStyle="light-content" />
+                    <NavigationContainer theme={MyTheme}>
+                        <Stack.Navigator>
+                            <Stack.Screen name="List" component={ListScreen}
+                                options={{
+                                    orientation: 'any',
+                                    title: 'Home',
+                                    headerTitle: 'ScorePad with Rounds',
+                                    header: ({ navigation }) => {
+                                        return <HomeHeader navigation={navigation} />;
+                                    },
+                                }}
+                            />
+                            <Stack.Screen name="Game" component={GameScreen}
+                                options={{
+                                    orientation: 'any',
+                                    title: "Current Game",
+                                    header: ({ navigation }) => {
+                                        return <GameHeader navigation={navigation} />;
+                                    },
+                                }}
+                            />
+                            <Stack.Screen name="Settings" component={SettingsScreen}
+                                options={{
+                                    orientation: 'any',
+                                    title: "Settings",
+                                    header: ({ navigation }) => {
+                                        return <SettingsHeader navigation={navigation} />;
+                                    },
+                                }}
+                            />
+                            <Stack.Screen name="AppInfo" component={AppInfoScreen}
+                                options={{
+                                    orientation: 'any',
+                                    title: "Info",
+                                    header: ({ navigation }) => {
+                                        return <AppInfoHeader navigation={navigation} />;
+                                    },
+                                }}
+                            />
+                        </Stack.Navigator>
+                    </NavigationContainer>
                 </PersistGate>
             </Provider>
         );

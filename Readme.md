@@ -13,17 +13,19 @@ https://wyne.github.io/scorepad/
 - [Web App](https://wyne.github.io/scorepad-app/)
 
 ## Screen Shots
-Device | Two Players | More Players | Fullscreen | Settings
---- | ------------ | ------------ | ------------- | -------------
-Phone | <img src="assets-stores/iphone13pro/home-2-players.png" height="150"> | <img src="assets-stores/iphone13pro/home-4-players.png" height="150"> | <img src="assets-stores/iphone13pro/home-4-players-expanded.png" height="150"> | <img src="assets-stores/iphone13pro/configure-4-players.png" height="150">
-Tablet | <img src="assets-stores/ipadpro-11/home-2-players.png" height="150"> | <img src="assets-stores/ipadpro-11/home-many-players.png" height="150"> | <img src="assets-stores/ipadpro-11/home-many-players-expanded.png" height="150"> | <img src="assets-stores/ipadpro-11/configure.png" height="150">
+| Device | Two Players                                                           | More Players                                                            | Fullscreen                                                                       | Settings                                                                   |
+| ------ | --------------------------------------------------------------------- | ----------------------------------------------------------------------- | -------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| Phone  | <img src="assets-stores/iphone13pro/home-2-players.png" height="150"> | <img src="assets-stores/iphone13pro/home-4-players.png" height="150">   | <img src="assets-stores/iphone13pro/home-4-players-expanded.png" height="150">   | <img src="assets-stores/iphone13pro/configure-4-players.png" height="150"> |
+| Tablet | <img src="assets-stores/ipadpro-11/home-2-players.png" height="150">  | <img src="assets-stores/ipadpro-11/home-many-players.png" height="150"> | <img src="assets-stores/ipadpro-11/home-many-players-expanded.png" height="150"> | <img src="assets-stores/ipadpro-11/configure.png" height="150">            |
 
 
 ## Contributing
 
 ### Run
 
-`expo start`
+```
+npx expo start
+```
 
 Then use the expo UI to run on iOS, Android, or web.
 
@@ -36,10 +38,38 @@ Beta Workflow
 3. Github action will publish to `beta` channel.
 4. Clients built with `beta` channel will receive the udpate.
 
-### Build
+### Local Build
 
 Prerequisite: `SENTRY_AUTH_TOKEN` in `.env`
 
 ```
 npx expo run:ios
 ```
+
+Check eas config settings
+
+```
+eas config --platform=ios --profile=development
+```
+
+Buid .ipa. Be sure to load .env first.
+
+```
+eas build --platform ios --profile development --local
+```
+
+### Remote Build
+
+```
+eas build --platform ios
+```
+
+### Publish
+
+```
+eas submit --platform ios --non-interactive
+```
+
+Android
+
+```npx eas submit -p android --changes-not-sent-for-review```
