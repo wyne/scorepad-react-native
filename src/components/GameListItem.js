@@ -6,6 +6,7 @@ import { Swipeable } from 'react-native-gesture-handler';
 import Moment from 'react-moment';
 import { Icon } from 'react-native-elements';
 import Animated, { FadeInLeft, SlideOutLeft } from 'react-native-reanimated';
+import analytics from '@react-native-firebase/analytics';
 
 import { selectGameById, gameDelete } from '../../redux/GamesSlice';
 import { selectPlayersByIds } from '../../redux/ScoreSelectors';
@@ -25,6 +26,12 @@ const GameListItem = ({ navigation, game, index }) => {
 
     // Tap
     const chooseGameHandler = () => {
+        analytics().logEvent('game', {
+            id: game.id,
+            playerCount: players.count,
+            roundCount: rounds + 1,
+            dateCreated: game.dateCreated,
+        });
         asyncSetCurrentGame(dispatch).then(() => {
             navigation.navigate("Game");
         });

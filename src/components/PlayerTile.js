@@ -1,6 +1,7 @@
 import React, { useState, memo } from 'react';
 import { Text, View, StyleSheet, TouchableHighlight } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
+import analytics from '@react-native-firebase/analytics';
 
 import AdditionTile from './PlayerTiles/AdditionTile';
 import { playerRoundScoreIncrement, playerRoundScoreDecrement, playerAdd, updatePlayer } from '../../redux/PlayersSlice';
@@ -29,9 +30,23 @@ const PlayerTile = ({ color, fontColor, cols, rows, playerId, index }) => {
     const scoreRound = player.scores[roundCurrent] || 0;
 
     const incPlayerRoundScoreHandler = () => {
+        analytics().logEvent('scoreChange', {
+            playerId: playerId,
+            gameId: currentGameId,
+            multiplier: multiplier,
+            round: roundCurrent,
+            type: 'increment'
+        });
         dispatch(playerRoundScoreIncrement(playerId, roundCurrent, multiplier));
     };
     const decPlayerRoundScoreHandler = () => {
+        analytics().logEvent('scoreChange', {
+            playerId: playerId,
+            gameId: currentGameId,
+            multiplier: multiplier,
+            round: roundCurrent,
+            type: 'decrement'
+        });
         dispatch(playerRoundScoreIncrement(playerId, roundCurrent, -multiplier));
     };
 

@@ -2,6 +2,7 @@ import React, { memo, useCallback } from 'react';
 import { Text, View } from 'react-native';
 import { TouchableWithoutFeedback } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
+import analytics from '@react-native-firebase/analytics';
 
 import { selectGameById, updateGame } from '../../../redux/GamesSlice';
 import RoundScoreCell from './RoundScoreCell';
@@ -13,6 +14,10 @@ const RoundScoreColumn = ({ round, isCurrentRound }) => {
     const currentGame = useSelector(state => selectGameById(state, currentGameId));
 
     const onPressHandler = useCallback(() => {
+        analytics().logEvent('round', {
+            gameId: currentGameId,
+            type: 'select',
+        });
         dispatch(updateGame({
             id: currentGameId,
             changes: {
