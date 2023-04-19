@@ -3,7 +3,7 @@ const IS_DEV = process.env.APP_VARIANT === 'development';
 export default {
   name: IS_DEV ? 'ScorePad with Rounds (dev)' : 'ScorePad with Rounds',
   slug: 'scorepad',
-  version: "2.1.6",
+  version: "2.1.7",
   orientation: "default",
   icon: IS_DEV ? './assets/icon-dev.png' : './assets/icon.png',
   assetBundlePatterns: [
@@ -14,10 +14,11 @@ export default {
     bundleIdentifier: IS_DEV ? 'com.wyne.scorepad.dev' : 'com.wyne.scorepad',
     supportsTablet: true,
     requireFullScreen: false,
-    buildNumber: "46",
+    buildNumber: "47",
     infoPlist: {
       RCTAsyncStorageExcludeFromBackup: false
     },
+    googleServicesFile: "./GoogleService-Info.plist",
   },
   android: {
     icon: "./assets/adaptive-icon.png",
@@ -27,7 +28,8 @@ export default {
     },
     package: IS_DEV ? 'com.wyne.scorepad.dev' : 'com.wyne.scorepad',
     permissions: [],
-    versionCode: 46,
+    versionCode: 47,
+    googleServicesFile: "./GoogleService-Info.plist",
   },
   userInterfaceStyle: "dark",
   web: {
@@ -57,7 +59,14 @@ export default {
       }
     ],
     "@react-native-firebase/app",
-    './plugins/firebase-mods'
+    [
+      "expo-build-properties",
+      {
+        "ios": {
+          "useFrameworks": "static"
+        }
+      }
+    ]
   ],
   hooks: {
     "postPublish": [
