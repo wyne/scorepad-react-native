@@ -55,7 +55,9 @@ export default {
       {
         "initialOrientation": "DEFAULT"
       }
-    ]
+    ],
+    "@react-native-firebase/app",
+    './plugins/firebase-mods'
   ],
   hooks: {
     "postPublish": [

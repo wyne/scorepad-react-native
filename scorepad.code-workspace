@@ -10,5 +10,7 @@
 			"path": "../scorepad"
 		}
 	],
-	"settings": {}
+	"settings": {
+		"atlascode.jira.enabled": true
+	}
 }
