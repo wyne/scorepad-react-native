@@ -41,6 +41,12 @@ eas build:run -p ios # select expo build from above
 npx expo start --dev-client
 ```
 
+Debug Firebase events by running simulator with `FIRAnalyticsDebugEnabled` flag:
+
+```
+xcrun simctl launch "iPhone 8" com.your.package -FIRAnalyticsDebugEnabled
+```
+
 ### Local development build for iOS Device
 
 Prerequisite: `SENTRY_AUTH_TOKEN` in `.env` and be sure it's loaded
