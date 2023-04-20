@@ -7,7 +7,7 @@ import { getAnalytics } from "firebase/analytics";
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-    apiKey: process.env.FIREBASE_API_KEY,
+    apiKey: "AIzaSyA1N635-zWY_JlgP4w7n6NM8Q7pDYMcKRY",
     authDomain: "scorepad-with-rounds.firebaseapp.com",
     databaseURL: "https://scorepad-with-rounds-default-rtdb.firebaseio.com",
     projectId: "scorepad-with-rounds",
