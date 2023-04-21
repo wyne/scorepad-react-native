@@ -32,9 +32,8 @@ const GameListItem = ({ navigation, game, index }) => {
         await analytics().logEvent('select_game', {
             index: index,
             game_id: game.id,
-            player_count: players.count,
+            player_count: players.length,
             round_count: rounds + 1,
-            date_created: game.dateCreated,
         });
     };
 
@@ -62,7 +61,7 @@ const GameListItem = ({ navigation, game, index }) => {
         await analytics().logEvent('delete_game', {
             index: index,
             round_count: rounds + 1,
-            player_count: players.count,
+            player_count: players.length,
         });
     };
 
