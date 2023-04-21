@@ -7,6 +7,7 @@ import { palette, systemBlue } from '../constants';
 import { selectGameById, updateGame } from '../../redux/GamesSlice';
 import { selectPlayersByIds } from '../../redux/ScoreSelectors';
 import { removePlayer, updatePlayer } from '../../redux/PlayersSlice';
+import analytics from '@react-native-firebase/analytics';
 
 const EditPlayer = ({ player, index, promptColor, setPlayerWasAdded, playerWasAdded }) => {
     const dispatch = useDispatch();
@@ -21,8 +22,8 @@ const EditPlayer = ({ player, index, promptColor, setPlayerWasAdded, playerWasAd
             }
         }));
         // dispatch(playerNameSet(index, name));
-        setPlayerWasAdded(false)
-    }
+        setPlayerWasAdded(false);
+    };
 
     const removePlayerHandler = (index) => {
         // dispatch(playerRemove(index));
@@ -33,23 +34,30 @@ const EditPlayer = ({ player, index, promptColor, setPlayerWasAdded, playerWasAd
             }
         }));
         dispatch(removePlayer(player.id));
-    }
+    };
 
     const onEndEditingHandler = (e) => {
         if (e.nativeEvent.text == "") {
             setPlayerNameHandler(index, 'Player ' + (index + 1));
         }
-    }
+    };
 
     const onChangeTextHandler = (text) => {
-        setPlayerNameHandler(index, text)
-    }
+        setPlayerNameHandler(index, text);
+    };
 
-    const deleteHandler = () => removePlayerHandler(index)
+    const deleteHandler = async () => {
+        removePlayerHandler(index);
+        await analytics().logEvent('remove_player', {
+            game_id: currentGame.id,
+            player_count: players.length,
+            player_index: index,
+        });
+    };
 
     const defaultPlayerName = (() => {
         if (index == players.length - 1 && playerWasAdded) {
-            return null
+            return null;
         } else {
             return player.playerName;
         }
@@ -65,8 +73,8 @@ const EditPlayer = ({ player, index, promptColor, setPlayerWasAdded, playerWasAd
                 <Icon size={20} name="delete" color="#ff375f" />
                 <Text style={{ color: '#ff375f', fontWeight: 'bold' }}>Delete</Text>
             </TouchableOpacity>
-        </View>
-    }
+        </View>;
+    };
 
     return (
         <View style={styles.playerContainer} key={player.uuid}>
@@ -96,7 +104,7 @@ const EditPlayer = ({ player, index, promptColor, setPlayerWasAdded, playerWasAd
             <DeleteButton />
         </View>
     );
-}
+};
 
 const styles = StyleSheet.create({
     playerContainer: {

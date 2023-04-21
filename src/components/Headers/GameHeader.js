@@ -2,6 +2,7 @@ import React from 'react';
 import { Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Icon } from 'react-native-elements/dist/icons/Icon';
 import { useDispatch, useSelector } from 'react-redux';
+import analytics from '@react-native-firebase/analytics';
 
 import { roundNext, roundPrevious } from '../../../redux/GamesSlice';
 import { selectGameById } from '../../../redux/GamesSlice';
@@ -51,12 +52,20 @@ function GameHeader({ navigation }) {
     const currentGame = useSelector(state => selectGameById(state, currentGameId));
     const roundCurrent = useSelector(state => selectGameById(state, currentGameId).roundCurrent);
 
-    const nextRoundHandler = () => {
+    const nextRoundHandler = async () => {
         dispatch(roundNext(currentGame));
+        await analytics().logEvent('round_change', {
+            game_id: currentGameId,
+            source: 'next button',
+        });
     };
 
-    const prevRoundHandler = () => {
+    const prevRoundHandler = async () => {
         dispatch(roundPrevious(currentGame));
+        await analytics().logEvent('round_change', {
+            game_id: currentGameId,
+            source: 'previous button',
+        });
     };
 
     return (

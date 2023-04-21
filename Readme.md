@@ -21,7 +21,7 @@ https://wyne.github.io/scorepad/
 
 ## Contributing
 
-### Run
+### Run with Expo Go
 
 ```
 npx expo start
@@ -29,47 +29,55 @@ npx expo start
 
 Then use the expo UI to run on iOS, Android, or web.
 
-### Workflows
-
-Beta Workflow
-
-1. Increment `expo.version` number in `app.json`.
-2. Commit and merge to `beta` branch.
-3. Github action will publish to `beta` channel.
-4. Clients built with `beta` channel will receive the udpate.
-
-### Local Build
+### Development build for iOS Simulator
 
 Prerequisite: `SENTRY_AUTH_TOKEN` in `.env`
 
 ```
-npx expo run:ios
+npx react-native-clean-project
+npx expo prebuild
+eas build --profile development-simulator --platform
+eas build:run -p ios # select expo build from above
+npx expo start --dev-client
 ```
 
-Check eas config settings
+Debug Firebase events by running simulator with `FIRAnalyticsDebugEnabled` flag:
 
 ```
-eas config --platform=ios --profile=development
+xcrun simctl launch "iPhone 8" com.your.package -FIRAnalyticsDebugEnabled
 ```
 
-Buid .ipa. Be sure to load .env first.
+### Local development build for iOS Device
+
+Prerequisite: `SENTRY_AUTH_TOKEN` in `.env` and be sure it's loaded
 
 ```
+npx expo prebuild -p ios
 eas build --platform ios --profile development --local
 ```
+
+Debug eas config settings: `eas config --platform=ios --profile=development`
 
 ### Remote Build
 
 ```
 eas build --platform ios
+eas build --platform android
 ```
 
-### Publish
+### Submit to App Stores
+
+Apple
 
 ```
-eas submit --platform ios --non-interactive
+eas submit -p ios
 ```
+
+Or: `eas submit -p ios --non-interactive`
+
 
 Android
 
-```npx eas submit -p android --changes-not-sent-for-review```
+```
+eas submit -p android --changes-not-sent-for-review
+```

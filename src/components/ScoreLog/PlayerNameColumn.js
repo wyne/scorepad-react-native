@@ -2,6 +2,7 @@ import React from 'react';
 import { Text, View, StyleSheet } from 'react-native';
 import { useSelector } from 'react-redux';
 import { TouchableOpacity } from 'react-native';
+import analytics from '@react-native-firebase/analytics';
 
 import { palette, systemBlue } from '../../constants';
 import { selectGameById } from '../../../redux/GamesSlice';
@@ -14,7 +15,10 @@ const PlayerNameColumn = ({ navigation }) => {
     const players = useSelector(state => selectPlayersByIds(state, currentGame.playerIds));
 
     return (
-        <TouchableOpacity style={{ padding: 10 }} onPress={() => {
+        <TouchableOpacity style={{ padding: 10 }} onPress={async () => {
+            await analytics().logEvent('edit_game', {
+                game_id: currentGameId
+            });
             navigation.navigate("Settings");
         }}>
             <Text style={styles.editRow}>

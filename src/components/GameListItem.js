@@ -6,6 +6,7 @@ import { Swipeable } from 'react-native-gesture-handler';
 import Moment from 'react-moment';
 import { Icon } from 'react-native-elements';
 import Animated, { FadeInLeft, SlideOutLeft } from 'react-native-reanimated';
+import analytics from '@react-native-firebase/analytics';
 
 import { selectGameById, gameDelete } from '../../redux/GamesSlice';
 import { selectPlayersByIds } from '../../redux/ScoreSelectors';
@@ -24,14 +25,20 @@ const GameListItem = ({ navigation, game, index }) => {
     });
 
     // Tap
-    const chooseGameHandler = () => {
+    const chooseGameHandler = async () => {
         asyncSetCurrentGame(dispatch).then(() => {
             navigation.navigate("Game");
+        });
+        await analytics().logEvent('select_game', {
+            index: index,
+            game_id: game.id,
+            player_count: players.length,
+            round_count: rounds + 1,
         });
     };
 
     // Long Press
-    const deleteGameHandler = () => {
+    const deleteGameHandler = async () => {
         Alert.alert(
             'Delete Game',
             `Are you sure you want to delete ${game.title}?`,
@@ -50,6 +57,12 @@ const GameListItem = ({ navigation, game, index }) => {
             ],
             { cancelable: false },
         );
+
+        await analytics().logEvent('delete_game', {
+            index: index,
+            round_count: rounds + 1,
+            player_count: players.length,
+        });
     };
 
     return (

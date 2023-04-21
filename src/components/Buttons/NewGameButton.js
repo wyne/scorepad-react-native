@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { StyleSheet } from 'react-native';
 import { Icon } from 'react-native-elements';
 import * as Crypto from 'expo-crypto';
+import analytics from '@react-native-firebase/analytics';
 
 import { systemBlue } from '../../constants';
 import HeaderButton from './HeaderButton';
@@ -43,11 +44,14 @@ const NewGameButton = ({ navigation }) => {
         resolve();
     });
 
-    const addGameHandler = () => {
+    const addGameHandler = async () => {
         asyncCreateGame(dispatch).then(() => {
             setTimeout(() => {
                 navigation.navigate("Game");
             }, 500);
+        });
+        await analytics().logEvent('new_game', {
+            index: gameList.length,
         });
     };
 

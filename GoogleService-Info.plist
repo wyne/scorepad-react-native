@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>774305501031-4p2p095nnknm4b2vh41q36l5inespraj.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.774305501031-4p2p095nnknm4b2vh41q36l5inespraj</string>
+	<key>API_KEY</key>
+	<string>AIzaSyAwKOPijqBuePjkRFm3vVrgRXnMLgRlUms</string>
+	<key>GCM_SENDER_ID</key>
+	<string>774305501031</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.wyne.scorepad</string>
+	<key>PROJECT_ID</key>
+	<string>scorepad-with-rounds</string>
+	<key>STORAGE_BUCKET</key>
+	<string>scorepad-with-rounds.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:774305501031:ios:920db91be9724c6bf7e9c2</string>
+	<key>DATABASE_URL</key>
+	<string>https://scorepad-with-rounds-default-rtdb.firebaseio.com</string>
+</dict>
+</plist>
