@@ -13,18 +13,17 @@ const RoundScoreColumn = ({ round, isCurrentRound }) => {
     const currentGameId = useSelector(state => state.settings.currentGameId);
     const currentGame = useSelector(state => selectGameById(state, currentGameId));
 
-    const onPressHandler = useCallback(() => {
-        analytics().logEvent('round', {
-            gameId: currentGameId,
-            type: 'select',
-        });
+    const onPressHandler = useCallback(async () => {
         dispatch(updateGame({
             id: currentGameId,
             changes: {
                 roundCurrent: round,
             }
-        })
-        );
+        }));
+        await analytics().logEvent('round_change', {
+            game_id: currentGameId,
+            source: 'direct select',
+        });
     });
 
     return (

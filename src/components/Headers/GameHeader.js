@@ -52,20 +52,20 @@ function GameHeader({ navigation }) {
     const currentGame = useSelector(state => selectGameById(state, currentGameId));
     const roundCurrent = useSelector(state => selectGameById(state, currentGameId).roundCurrent);
 
-    const nextRoundHandler = () => {
-        analytics().logEvent('round', {
-            gameId: currentGameId,
-            type: 'next',
-        });
+    const nextRoundHandler = async () => {
         dispatch(roundNext(currentGame));
+        await analytics().logEvent('round_change', {
+            game_id: currentGameId,
+            source: 'next button',
+        });
     };
 
-    const prevRoundHandler = () => {
-        analytics().logEvent('round', {
-            gameId: currentGameId,
-            type: 'previous',
-        });
+    const prevRoundHandler = async () => {
         dispatch(roundPrevious(currentGame));
+        await analytics().logEvent('round_change', {
+            game_id: currentGameId,
+            source: 'previous button',
+        });
     };
 
     return (

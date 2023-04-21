@@ -4,6 +4,7 @@ import { Video, AVPlaybackStatus } from 'expo-av';
 import { Platform } from 'react-native';
 import { Image } from 'expo-image';
 import * as Application from 'expo-application';
+import analytics from '@react-native-firebase/analytics';
 
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, { FlipInEasyX, useAnimatedStyle, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
@@ -29,14 +30,16 @@ const AppInfoScreen = ({ navigation }) => {
         <SafeAreaView flex={1} edges={['left', 'right']} style={{ backgroundColor: 'white' }}>
             <ScrollView>
                 <View style={{ alignItems: 'center' }}>
-                    <TouchableWithoutFeedback onPress={() => {
+                    <TouchableWithoutFeedback onPress={async () => {
                         rotationCount.value = rotationCount.value + 1;
                         rotation.value = withTiming((rotationCount.value * 90), { duration: 1000 });
+
+                        await analytics().logEvent('app_icon');
                     }}>
                         <Animated.View style={[animatedStyles]} entering={FlipInEasyX.delay(0).duration(1000)}>
                             <Image source={require('../../assets/icon.png')}
-                                resizeMode={'contain'}
-                                resizeMethod={'resize'}
+                                contentFit='contain'
+                                resizeMethod='resize'
                                 style={{
                                     alignSelf: 'center',
                                     height: 100,
@@ -47,11 +50,12 @@ const AppInfoScreen = ({ navigation }) => {
                             />
                         </Animated.View>
                     </TouchableWithoutFeedback>
-                    <Text style={{ padding: 10, color: '#999' }} onPress={() => {
+                    <Text style={{ padding: 10, color: '#999' }} onPress={async () => {
                         Alert.alert(`ScorePad with Rounds\n` +
                             `v${appVersion} (${buildNumber})\n` +
                             `${Platform.OS} ${Platform.Version}`
                         );
+                        await analytics().logEvent('view_version');
                     }}>
                         ScorePad with Rounds v{appVersion}
                     </Text>
@@ -76,10 +80,11 @@ const AppInfoScreen = ({ navigation }) => {
                     <View style={styles.buttons}>
                         <Button
                             title={status.isPlaying ? 'Pause' : 'Watch video tutorial'}
-                            onPress={() => {
+                            onPress={async () => {
                                 video.current.presentFullscreenPlayer();
                                 video.current.replayAsync();
-                                // status.isPlaying ? video.current.pauseAsync() : video.current.playAsync()
+
+                                await analytics().logEvent('watch_tutorial');
                             }}
                         />
                     </View>

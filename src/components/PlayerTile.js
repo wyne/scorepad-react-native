@@ -30,9 +30,9 @@ const PlayerTile = ({ color, fontColor, cols, rows, playerId, index }) => {
     const scoreRound = player.scores[roundCurrent] || 0;
 
     const incPlayerRoundScoreHandler = () => {
-        analytics().logEvent('scoreChange', {
-            playerId: playerId,
-            gameId: currentGameId,
+        analytics().logEvent('score_change', {
+            player_index: index,
+            game_id: currentGameId,
             multiplier: multiplier,
             round: roundCurrent,
             type: 'increment'
@@ -40,9 +40,9 @@ const PlayerTile = ({ color, fontColor, cols, rows, playerId, index }) => {
         dispatch(playerRoundScoreIncrement(playerId, roundCurrent, multiplier));
     };
     const decPlayerRoundScoreHandler = () => {
-        analytics().logEvent('scoreChange', {
-            playerId: playerId,
-            gameId: currentGameId,
+        analytics().logEvent('score_change', {
+            player_index: index,
+            game_id: currentGameId,
             multiplier: multiplier,
             round: roundCurrent,
             type: 'decrement'

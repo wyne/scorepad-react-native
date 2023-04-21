@@ -11,12 +11,12 @@ const MultiplierButton = (props) => {
     const multiplier = useSelector(state => state.settings.multiplier);
     const currentGameId = useSelector(state => state.settings.currentGameId);
 
-    const multiplierHandler = () => {
-        analytics().logEvent('multiplier', {
-            multiplier: multiplier,
-            gameId: currentGameId,
-        });
+    const multiplierHandler = async () => {
         dispatch(toggleMultiplier());
+        await analytics().logEvent('multiplier_change', {
+            multiplier: multiplier,
+            game_id: currentGameId,
+        });
     };
 
     return (

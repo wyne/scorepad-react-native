@@ -4,6 +4,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { Icon, Button } from 'react-native-elements';
 import * as Crypto from 'expo-crypto';
+import analytics from '@react-native-firebase/analytics';
 
 import { playerAdd } from '../../redux/PlayersSlice';
 import EditPlayer from '../components/EditPlayer';
@@ -23,7 +24,7 @@ const SettingsScreen = ({ navigation }) => {
 
     const maxPlayers = Platform.isPad ? 12 : 8;
 
-    const addPlayerHandler = () => {
+    const addPlayerHandler = async () => {
         const newPlayerId = Crypto.randomUUID();
 
         dispatch(playerAdd({
@@ -40,6 +41,11 @@ const SettingsScreen = ({ navigation }) => {
         }));
 
         setPlayerWasAdded(true);
+
+        await analytics().logEvent('add_player', {
+            game_id: currentGameId,
+            player_count: players.length + 1,
+        });
     };
 
     return (

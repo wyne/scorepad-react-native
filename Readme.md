@@ -52,7 +52,7 @@ xcrun simctl launch "iPhone 8" com.your.package -FIRAnalyticsDebugEnabled
 Prerequisite: `SENTRY_AUTH_TOKEN` in `.env` and be sure it's loaded
 
 ```
-eas prebuild
+npx expo prebuild -p ios
 eas build --platform ios --profile development --local
 ```
 

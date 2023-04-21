@@ -25,20 +25,21 @@ const GameListItem = ({ navigation, game, index }) => {
     });
 
     // Tap
-    const chooseGameHandler = () => {
-        analytics().logEvent('game', {
-            id: game.id,
-            playerCount: players.count,
-            roundCount: rounds + 1,
-            dateCreated: game.dateCreated,
-        });
+    const chooseGameHandler = async () => {
         asyncSetCurrentGame(dispatch).then(() => {
             navigation.navigate("Game");
+        });
+        await analytics().logEvent('select_game', {
+            index: index,
+            game_id: game.id,
+            player_count: players.count,
+            round_count: rounds + 1,
+            date_created: game.dateCreated,
         });
     };
 
     // Long Press
-    const deleteGameHandler = () => {
+    const deleteGameHandler = async () => {
         Alert.alert(
             'Delete Game',
             `Are you sure you want to delete ${game.title}?`,
@@ -57,6 +58,12 @@ const GameListItem = ({ navigation, game, index }) => {
             ],
             { cancelable: false },
         );
+
+        await analytics().logEvent('delete_game', {
+            index: index,
+            round_count: rounds + 1,
+            player_count: players.count,
+        });
     };
 
     return (

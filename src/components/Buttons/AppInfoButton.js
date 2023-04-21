@@ -8,10 +8,8 @@ import { systemBlue } from '../../constants';
 const AppInfoButton = ({ navigation }) => {
     return (
         <HeaderButton onPress={async () => {
-            await analytics().logEvent('button', {
-                name: 'app info',
-            });
             navigation.navigate('AppInfo');
+            await analytics().logEvent('app_info');
         }}>
             <Icon name="info-circle"
                 type="font-awesome-5"

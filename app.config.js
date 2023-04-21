@@ -3,7 +3,7 @@ const IS_DEV = process.env.APP_VARIANT === 'development';
 export default {
   name: IS_DEV ? 'ScorePad with Rounds (dev)' : 'ScorePad with Rounds',
   slug: 'scorepad',
-  version: "2.1.7",
+  version: "2.1.8",
   orientation: "default",
   icon: IS_DEV ? './assets/icon-dev.png' : './assets/icon.png',
   assetBundlePatterns: [
@@ -14,7 +14,7 @@ export default {
     bundleIdentifier: IS_DEV ? 'com.wyne.scorepad.dev' : 'com.wyne.scorepad',
     supportsTablet: true,
     requireFullScreen: false,
-    buildNumber: "47",
+    buildNumber: "48",
     infoPlist: {
       RCTAsyncStorageExcludeFromBackup: false
     },
@@ -28,7 +28,7 @@ export default {
     },
     package: IS_DEV ? 'com.wyne.scorepad.dev' : 'com.wyne.scorepad',
     permissions: [],
-    versionCode: 47,
+    versionCode: 48,
     googleServicesFile: "./GoogleService-Info.plist",
   },
   userInterfaceStyle: "dark",
