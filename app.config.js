@@ -29,7 +29,7 @@ export default {
     package: IS_DEV ? 'com.wyne.scorepad.dev' : 'com.wyne.scorepad',
     permissions: [],
     versionCode: 48,
-    googleServicesFile: "./GoogleService-Info.plist",
+    googleServicesFile: "./google-services.json",
   },
   userInterfaceStyle: "dark",
   web: {
