@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "774305501031",
+    "firebase_url": "https://scorepad-with-rounds-default-rtdb.firebaseio.com",
+    "project_id": "scorepad-with-rounds",
+    "storage_bucket": "scorepad-with-rounds.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:774305501031:android:9ee1125f9d0bb4f5f7e9c2",
+        "android_client_info": {
+          "package_name": "com.wyne.scorepad"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "774305501031-c5ceh2ekgjqc4n9o0at9j2e83d162mpb.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBi8wD4wlmaEiDh57iLFqQcqPlUl6nZjrw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "774305501031-c5ceh2ekgjqc4n9o0at9j2e83d162mpb.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "774305501031-4p2p095nnknm4b2vh41q36l5inespraj.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.wyne.scorepad"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
