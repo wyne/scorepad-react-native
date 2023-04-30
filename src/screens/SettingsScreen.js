@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Platform, Text, View, StyleSheet, Image, Dimensions } from 'react-native';
+import { Platform, Text, View, StyleSheet, Image, Dimensions, Alert } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { Icon, Button } from 'react-native-elements';
@@ -11,6 +11,7 @@ import EditPlayer from '../components/EditPlayer';
 import { selectGameById, updateGame, } from '../../redux/GamesSlice';
 import { selectPlayersByIds } from '../../redux/ScoreSelectors';
 import EditGame from '../components/EditGame';
+import { updatePlayer } from '../../redux/PlayersSlice';
 
 const SettingsScreen = ({ navigation }) => {
     const dispatch = useDispatch();
@@ -48,12 +49,57 @@ const SettingsScreen = ({ navigation }) => {
         });
     };
 
+    const resetGameHandler = () => {
+        Alert.alert(
+            "Reset Game",
+            "Are you sure you want to reset this game? This will reset all scores and rounds.",
+            [
+                {
+                    text: "Cancel",
+                    style: "cancel"
+                },
+                {
+                    text: "Reset",
+                    onPress: () => {
+                        players.forEach((player) => {
+                            dispatch(updatePlayer({
+                                id: player.id,
+                                changes: {
+                                    scores: [0],
+                                }
+                            }
+                            ));
+                        });
+                        dispatch(updateGame({
+                            id: currentGame.id,
+                            changes: {
+                                roundCurrent: 0,
+                                roundTotal: 0,
+                            }
+                        }));
+                        navigation.navigate("Game");
+                    }
+                }
+            ]
+        );
+    };
+
     return (
         <KeyboardAwareScrollView style={styles.configScrollContainer}
             contentContainerStyle={{ alignItems: 'stretch' }}>
             <View style={{ width: 350, alignSelf: 'center' }}>
                 <Text style={styles.heading}>Game Title</Text>
+
                 <EditGame />
+
+                <Button
+                    title="Reset Game"
+                    onPress={resetGameHandler}
+                    type="clear"
+                    titleStyle={{
+                        color: '#ff375f'
+                    }}
+                />
 
                 <Text style={styles.heading}>Players</Text>
                 {players.map((player, index) => (
