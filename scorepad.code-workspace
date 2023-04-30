@@ -11,6 +11,9 @@
 		}
 	],
 	"settings": {
-		"atlascode.jira.enabled": true
+		"atlascode.jira.enabled": true,
+		"githubPullRequests.ignoredPullRequestBranches": [
+			"main"
+		]
 	}
 }
