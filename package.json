@@ -61,7 +61,7 @@
     "expo-build-properties": "~0.6.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.19.3",
+    "@babel/core": "^7.21.5",
     "gh-pages": "^4.0.0"
   },
   "overrides": {
