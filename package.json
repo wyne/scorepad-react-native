@@ -19,7 +19,7 @@
     "@react-navigation/native-stack": "^6.9.12",
     "@react-navigation/stack": "^6.2.2",
     "@reduxjs/toolkit": "^1.9.3",
-    "@sentry/react-native": "4.13.0",
+    "@sentry/react-native": "5.4.0",
     "colorsheet": "^1.0.5",
     "dotenv": "^16.0.3",
     "expo": "~48.0.11",
