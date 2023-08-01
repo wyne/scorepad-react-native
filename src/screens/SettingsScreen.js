@@ -24,7 +24,7 @@ const SettingsScreen = ({ navigation }) => {
     const currentGame = useSelector(state => selectGameById(state, state.settings.currentGameId));
     const players = useAppSelector(state => selectAllPlayers(state)
         .filter(player => currentGame.playerIds.includes(player.id))
-    );
+    ).sort((a, b) => currentGame.playerIds.indexOf(a.id) - currentGame.playerIds.indexOf(b.id));
 
     const maxPlayers = Platform.isPad ? 12 : 8;
 

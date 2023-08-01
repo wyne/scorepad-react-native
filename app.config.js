@@ -14,7 +14,7 @@ export default {
     bundleIdentifier: IS_DEV ? 'com.wyne.scorepad.dev' : 'com.wyne.scorepad',
     supportsTablet: true,
     requireFullScreen: false,
-    buildNumber: "50",
+    buildNumber: "51",
     infoPlist: {
       RCTAsyncStorageExcludeFromBackup: false
     },
@@ -28,7 +28,7 @@ export default {
     },
     package: IS_DEV ? 'com.wyne.scorepad.dev' : 'com.wyne.scorepad',
     permissions: [],
-    versionCode: 50,
+    versionCode: 51,
     googleServicesFile: "./google-services.json",
   },
   userInterfaceStyle: "dark",
