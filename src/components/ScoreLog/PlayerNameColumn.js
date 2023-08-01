@@ -4,15 +4,18 @@ import { useSelector } from 'react-redux';
 import { TouchableOpacity } from 'react-native';
 import analytics from '@react-native-firebase/analytics';
 
+import { useAppSelector } from '../../../redux/hooks';
 import { palette, systemBlue } from '../../constants';
 import { selectGameById } from '../../../redux/GamesSlice';
-import { selectPlayersByIds } from '../../../redux/ScoreSelectors';
+import { selectAllPlayers } from '../../../redux/PlayersSlice';
 import { Icon } from 'react-native-elements/dist/icons/Icon';
 
 const PlayerNameColumn = ({ navigation }) => {
     const currentGameId = useSelector(state => state.settings.currentGameId);
     const currentGame = useSelector(state => selectGameById(state, currentGameId));
-    const players = useSelector(state => selectPlayersByIds(state, currentGame.playerIds));
+    const players = useAppSelector(state => selectAllPlayers(state)
+        .filter(player => currentGame.playerIds.includes(player.id))
+    );
 
     return (
         <TouchableOpacity style={{ padding: 10 }} onPress={async () => {

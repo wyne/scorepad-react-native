@@ -27,7 +27,7 @@ const playersPersistConfig = {
     whitelist: ['entities', 'ids'],
 };
 
-const store = configureStore({
+export const store = configureStore({
     reducer: {
         settings: persistReducer(settingsPersistConfig, settingsReducer),
         games: persistReducer(gamesPersistConfig, gamesReducer),
@@ -39,8 +39,6 @@ const store = configureStore({
         },
     }),
 });
-
-export default store;
 
 // Infer the `RootState` and `AppDispatch` types from the store itself
 export type RootState = ReturnType<typeof store.getState>;

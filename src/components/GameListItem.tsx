@@ -7,13 +7,13 @@ import Animated, { FadeInLeft, SlideOutLeft } from 'react-native-reanimated';
 import analytics from '@react-native-firebase/analytics';
 
 import { selectGameById, gameDelete } from '../../redux/GamesSlice';
-import { selectPlayerById } from '../../redux/PlayersSlice';
 import { setCurrentGameId } from '../../redux/SettingsSlice';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ParamListBase } from '@react-navigation/native';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { GameState } from '../../redux/GamesSlice';
 import { AnyAction, ThunkDispatch } from '@reduxjs/toolkit';
+import { selectAllPlayers } from '../../redux/PlayersSlice';
 
 export type Props = {
     navigation: NativeStackNavigationProp<ParamListBase, string, undefined>;
@@ -24,10 +24,11 @@ export type Props = {
 const GameListItem: React.FunctionComponent<Props> = ({ navigation, game, index }) => {
     const dispatch = useAppDispatch();
     const chosenGame = useAppSelector(state => selectGameById(state, game.id));
-    const playerNames = game.playerIds.map(playerId => {
-        const player = useAppSelector(state => selectPlayerById(state, playerId));
-        return player?.playerName;
-    }).join(', ');
+    const playerNames = useAppSelector(state => selectAllPlayers(state)
+        .filter(player => game.playerIds.includes(player.id))
+        .map(player => player.playerName).join(', ')
+    );
+
     const rounds: number = chosenGame?.roundTotal || 1;
 
     const asyncSetCurrentGame = (dispatch: ThunkDispatch<any, undefined, AnyAction>) => new Promise<void>((resolve, reject) => {

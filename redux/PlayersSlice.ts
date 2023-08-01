@@ -5,6 +5,7 @@ import Sentry from 'sentry-expo';
 type RoundIndex = number;
 
 interface ScoreState {
+    id: string;
     playerName: string;
     scores: number[];
 }
