@@ -36,7 +36,7 @@ Prerequisite: `SENTRY_AUTH_TOKEN` in `.env`
 ```
 npx react-native-clean-project
 npx expo prebuild
-eas build --profile development-simulator --platform
+eas build --profile development-simulator --platform ios
 eas build:run -p ios # select expo build from above
 npx expo start --dev-client
 ```

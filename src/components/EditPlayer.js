@@ -5,14 +5,14 @@ import { Icon, Input } from 'react-native-elements';
 
 import { palette, systemBlue } from '../constants';
 import { selectGameById, updateGame } from '../../redux/GamesSlice';
-import { selectPlayersByIds } from '../../redux/ScoreSelectors';
+import { selectPlayerIds } from '../../redux/PlayersSlice';
 import { removePlayer, updatePlayer } from '../../redux/PlayersSlice';
 import analytics from '@react-native-firebase/analytics';
 
 const EditPlayer = ({ player, index, promptColor, setPlayerWasAdded, playerWasAdded }) => {
     const dispatch = useDispatch();
     const currentGame = useSelector(state => selectGameById(state, state.settings.currentGameId));
-    const players = useSelector(state => selectPlayersByIds(state, currentGame.playerIds));
+    const playerIds = currentGame.playerIds;
 
     const setPlayerNameHandler = (index, name) => {
         dispatch(updatePlayer({
@@ -50,13 +50,13 @@ const EditPlayer = ({ player, index, promptColor, setPlayerWasAdded, playerWasAd
         removePlayerHandler(index);
         await analytics().logEvent('remove_player', {
             game_id: currentGame.id,
-            player_count: players.length,
+            player_count: playerIds.length,
             player_index: index,
         });
     };
 
     const defaultPlayerName = (() => {
-        if (index == players.length - 1 && playerWasAdded) {
+        if (index == playerIds.length - 1 && playerWasAdded) {
             return null;
         } else {
             return player.playerName;
@@ -89,7 +89,7 @@ const EditPlayer = ({ player, index, promptColor, setPlayerWasAdded, playerWasAd
             </View>
 
             <Input
-                autoFocus={index == players.length - 1 && playerWasAdded}
+                autoFocus={index == playerIds.length - 1 && playerWasAdded}
                 containerStyle={{ flex: 1 }}
                 defaultValue={defaultPlayerName}
                 maxLength={15}

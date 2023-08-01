@@ -6,10 +6,11 @@ import { Icon, Button } from 'react-native-elements';
 import * as Crypto from 'expo-crypto';
 import analytics from '@react-native-firebase/analytics';
 
+import { useAppSelector } from '../../redux/hooks';
 import { playerAdd } from '../../redux/PlayersSlice';
 import EditPlayer from '../components/EditPlayer';
 import { selectGameById, updateGame, } from '../../redux/GamesSlice';
-import { selectPlayersByIds } from '../../redux/ScoreSelectors';
+import { selectAllPlayers } from '../../redux/PlayersSlice';
 import EditGame from '../components/EditGame';
 import { updatePlayer } from '../../redux/PlayersSlice';
 
@@ -21,7 +22,9 @@ const SettingsScreen = ({ navigation }) => {
     if (typeof currentGameId == 'undefined') return null;
 
     const currentGame = useSelector(state => selectGameById(state, state.settings.currentGameId));
-    const players = useSelector(state => selectPlayersByIds(state, currentGame.playerIds));
+    const players = useAppSelector(state => selectAllPlayers(state)
+        .filter(player => currentGame.playerIds.includes(player.id))
+    );
 
     const maxPlayers = Platform.isPad ? 12 : 8;
 

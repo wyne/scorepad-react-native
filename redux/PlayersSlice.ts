@@ -5,6 +5,7 @@ import Sentry from 'sentry-expo';
 type RoundIndex = number;
 
 interface ScoreState {
+    id: string;
     playerName: string;
     scores: number[];
 }
@@ -32,7 +33,7 @@ const scoresSlice = createSlice({
                 action: PayloadAction<string, string, { round: RoundIndex, multiplier: number; }>
             ) {
                 try {
-                    const scores = state.entities[action.payload].scores;
+                    const scores = state?.entities[action.payload]?.scores || [];
                     const round = action.meta.round;
                     const multiplier = action.meta.multiplier;
 
@@ -47,10 +48,7 @@ const scoresSlice = createSlice({
             prepare(payload: string, round: RoundIndex, multiplier: number) {
                 return { payload, meta: { round, multiplier } };
             },
-        },
-        roundNext(state, action) {
-            state.entities.players[action.payload] = 0;
-        },
+        }
     }
 });
 
@@ -63,7 +61,6 @@ export const {
     removePlayer,
     playerAdd,
     playerRoundScoreIncrement,
-    roundNext,
 } = scoresSlice.actions;
 
 export default scoresSlice.reducer;

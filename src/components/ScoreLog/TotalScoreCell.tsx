@@ -3,9 +3,13 @@ import { Text } from 'react-native';
 import { useSelector } from 'react-redux';
 import { selectPlayerById } from '../../../redux/PlayersSlice';
 import { StyleSheet } from 'react-native';
+import { useAppSelector } from '../../../redux/hooks';
 
-const TotalScoreCell = ({ playerId }) => {
-    const scores = useSelector(state => selectPlayerById(state, playerId).scores);
+export type Props = {
+    playerId: string;
+}
+const TotalScoreCell: React.FunctionComponent<Props> = ({ playerId }) => {
+    const scores: number[] = useAppSelector(state => (selectPlayerById(state, playerId) || { scores: [] }).scores);
     const scoreTotal = scores.reduce((sum, current, round) => {
         if (round > round) {
             return sum;
