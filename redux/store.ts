@@ -5,16 +5,6 @@ import { configureStore } from "@reduxjs/toolkit";
 import settingsReducer from './SettingsSlice';
 import gamesReducer from './GamesSlice';
 import scoresReducer from './PlayersSlice';
-import createMigrate from 'redux-persist/es/createMigrate';
-
-const migrations = {
-    1: (state) => {
-        return {
-            ...state,
-            dateCreated: Date.now(),
-        };
-    },
-};
 
 const settingsPersistConfig = {
     key: 'settings',
@@ -37,7 +27,7 @@ const playersPersistConfig = {
     whitelist: ['entities', 'ids'],
 };
 
-export const store = configureStore({
+const store = configureStore({
     reducer: {
         settings: persistReducer(settingsPersistConfig, settingsReducer),
         games: persistReducer(gamesPersistConfig, gamesReducer),
@@ -49,6 +39,8 @@ export const store = configureStore({
         },
     }),
 });
+
+export default store;
 
 // Infer the `RootState` and `AppDispatch` types from the store itself
 export type RootState = ReturnType<typeof store.getState>;

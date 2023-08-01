@@ -3,7 +3,7 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 interface SettingsState {
     home_fullscreen: boolean;
     multiplier: number;
-    currentGameId: string;
+    currentGameId: string | undefined;
 }
 
 const initialState: SettingsState = {

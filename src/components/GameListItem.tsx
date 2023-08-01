@@ -1,25 +1,36 @@
 import React from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { View, Text, StyleSheet, Alert, TouchableOpacity } from 'react-native';
+import { Text, StyleSheet, Alert } from 'react-native';
 import { ListItem } from 'react-native-elements';
-import { Swipeable } from 'react-native-gesture-handler';
 import Moment from 'react-moment';
 import { Icon } from 'react-native-elements';
 import Animated, { FadeInLeft, SlideOutLeft } from 'react-native-reanimated';
 import analytics from '@react-native-firebase/analytics';
 
 import { selectGameById, gameDelete } from '../../redux/GamesSlice';
-import { selectPlayersByIds } from '../../redux/ScoreSelectors';
+import { selectPlayerById } from '../../redux/PlayersSlice';
 import { setCurrentGameId } from '../../redux/SettingsSlice';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { ParamListBase } from '@react-navigation/native';
+import { useAppDispatch, useAppSelector } from '../../redux/hooks';
+import { GameState } from '../../redux/GamesSlice';
+import { AnyAction, ThunkDispatch } from '@reduxjs/toolkit';
 
-const GameListItem = ({ navigation, game, index }) => {
-    const dispatch = useDispatch();
-    const chosenGame = useSelector(state => selectGameById(state, game.id));
-    const players = useSelector(state => selectPlayersByIds(state, game.playerIds));
-    const playerNames = players.map(player => player.playerName).join(', ');
-    const rounds = chosenGame.roundTotal;
+export type Props = {
+    navigation: NativeStackNavigationProp<ParamListBase, string, undefined>;
+    game: GameState;
+    index: number;
+}
 
-    const asyncSetCurrentGame = (dispatch) => new Promise((resolve, reject) => {
+const GameListItem: React.FunctionComponent<Props> = ({ navigation, game, index }) => {
+    const dispatch = useAppDispatch();
+    const chosenGame = useAppSelector(state => selectGameById(state, game.id));
+    const playerNames = game.playerIds.map(playerId => {
+        const player = useAppSelector(state => selectPlayerById(state, playerId));
+        return player?.playerName;
+    }).join(', ');
+    const rounds: number = chosenGame?.roundTotal || 1;
+
+    const asyncSetCurrentGame = (dispatch: ThunkDispatch<any, undefined, AnyAction>) => new Promise<void>((resolve, reject) => {
         dispatch(setCurrentGameId(game.id));
         resolve();
     });
@@ -32,7 +43,7 @@ const GameListItem = ({ navigation, game, index }) => {
         await analytics().logEvent('select_game', {
             index: index,
             game_id: game.id,
-            player_count: players.length,
+            player_count: playerNames.length,
             round_count: rounds + 1,
         });
     };
@@ -61,14 +72,13 @@ const GameListItem = ({ navigation, game, index }) => {
         await analytics().logEvent('delete_game', {
             index: index,
             round_count: rounds + 1,
-            player_count: players.length,
+            player_count: playerNames.length,
         });
     };
 
     return (
         <Animated.View entering={FadeInLeft.delay(index * 100)}
-            exiting={SlideOutLeft.duration(200)}
-            backgroundColor="red">
+            exiting={SlideOutLeft.duration(200)}>
             <ListItem key={game.id} bottomDivider
                 onPress={chooseGameHandler}
                 onLongPress={deleteGameHandler}>
@@ -82,7 +92,7 @@ const GameListItem = ({ navigation, game, index }) => {
                     </ListItem.Subtitle>
                 </ListItem.Content>
                 <Text style={styles.badgePlayers}>
-                    {players.length} <Icon color={'#01497C'} name="users" type="font-awesome-5" size={16} />
+                    {playerNames.length} <Icon color={'#01497C'} name="users" type="font-awesome-5" size={16} />
                 </Text>
                 <Text style={styles.badgeRounds}>
                     {rounds + 1} <Icon color={'#c25858'} name="circle-notch" type="font-awesome-5" size={16} />

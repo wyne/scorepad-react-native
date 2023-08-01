@@ -6,9 +6,10 @@ import Animated, { Layout, Easing } from 'react-native-reanimated';
 import { selectAllGames } from '../../redux/GamesSlice';
 import GameListItem from '../components/GameListItem';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useAppSelector } from '../../redux/hooks';
 
 const ListScreen = ({ navigation }) => {
-    const gameList = useSelector(state => selectAllGames(state));
+    const gameList = useAppSelector(state => selectAllGames(state));
 
     return (
         <SafeAreaView flex={1} edges={['bottom', 'left', 'right']} style={{ backgroundColor: 'white' }}>
