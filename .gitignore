@@ -67,3 +67,7 @@ web-build/
 dist/
 
 # @end expo-cli
+
+# Ignore iOS and Android builds
+ios/
+android/

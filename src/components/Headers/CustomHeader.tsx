@@ -1,8 +1,17 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { ParamListBase } from '@react-navigation/native';
 
-function CustomHeader({ navigation, headerLeft, headerCenter, headerRight }) {
+interface Props {
+    navigation: NativeStackNavigationProp<ParamListBase, string, undefined>;
+    headerLeft: React.ReactNode;
+    headerCenter: React.ReactNode;
+    headerRight?: React.ReactNode;
+}
+
+const CustomHeader: React.FunctionComponent<Props> = ({ navigation, headerLeft, headerCenter, headerRight }) => {
     return (
         <SafeAreaView edges={['top']} style={[styles.headerContainer]}>
             <SafeAreaView edges={['left']} style={styles.headerLeft}>
@@ -24,8 +33,6 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         textAlign: 'center',
-        // borderWidth: 1,
-        // borderColor: 'red',
     },
     headerLeft: {
         flexDirection: 'row',

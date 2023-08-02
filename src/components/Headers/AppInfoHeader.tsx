@@ -3,8 +3,14 @@ import { Text, StyleSheet } from 'react-native';
 
 import MenuButton from '../Buttons/MenuButton';
 import CustomHeader from './CustomHeader';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { ParamListBase } from '@react-navigation/native';
 
-function AppInfoHeader({ navigation }) {
+interface Props {
+    navigation: NativeStackNavigationProp<ParamListBase, string, undefined>;
+}
+
+const AppInfoHeader: React.FunctionComponent<Props> = ({ navigation }: Props) => {
 
     return (
         <CustomHeader navigation={navigation}

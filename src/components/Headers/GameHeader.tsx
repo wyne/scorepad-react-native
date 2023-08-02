@@ -1,8 +1,10 @@
 import React from 'react';
 import { Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Icon } from 'react-native-elements/dist/icons/Icon';
-import { useDispatch, useSelector } from 'react-redux';
+import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
 import analytics from '@react-native-firebase/analytics';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { ParamListBase } from '@react-navigation/native';
 
 import { roundNext, roundPrevious } from '../../../redux/GamesSlice';
 import { selectGameById } from '../../../redux/GamesSlice';
@@ -13,7 +15,12 @@ import FullscreenButton from '../Buttons/FullscreenButton';
 import MultiplierButton from '../Buttons/MultiplierButton';
 import CustomHeader from './CustomHeader';
 
-const PrevRoundButton = ({ prevRoundHandler, roundCurrent }) => {
+interface PrevRoundButtonProps {
+    prevRoundHandler: () => void;
+    roundCurrent: number;
+}
+
+const PrevRoundButton: React.FunctionComponent<PrevRoundButtonProps> = ({ prevRoundHandler, roundCurrent }) => {
     return (
         <TouchableOpacity style={[styles.headerButton]}
             onPress={prevRoundHandler}>
@@ -21,15 +28,17 @@ const PrevRoundButton = ({ prevRoundHandler, roundCurrent }) => {
                 type="font-awesome-5"
                 size={20}
                 color={systemBlue}
-                style={[
-                    { opacity: roundCurrent == 0 ? 0 : 1 }
-                ]}
+                style={{ opacity: roundCurrent == 0 ? 0 : 1 }}
             />
         </TouchableOpacity>
     );
 };
 
-const NextRoundButton = ({ nextRoundHandler }) => {
+interface NextRoundButtonProps {
+    nextRoundHandler: () => void;
+}
+
+const NextRoundButton: React.FunctionComponent<NextRoundButtonProps> = ({ nextRoundHandler }) => {
     return (
         <TouchableOpacity style={[styles.headerButton]}
             onPress={nextRoundHandler}>
@@ -41,16 +50,27 @@ const NextRoundButton = ({ nextRoundHandler }) => {
     );
 };
 
-function GameHeader({ navigation }) {
-    const dispatch = useDispatch();
+interface Props {
+    navigation: NativeStackNavigationProp<ParamListBase, string, undefined>;
+}
 
-    const currentGameId = useSelector(state => state.settings.currentGameId);
+const GameHeader: React.FunctionComponent<Props> = ({ navigation }) => {
+    const dispatch = useAppDispatch();
+
+    const currentGameId = useAppSelector(state => state.settings.currentGameId);
     if (typeof currentGameId == 'undefined') return (
         <Button title="No game selected"
             onPress={() => navigation.navigate('Home')} />
     );
-    const currentGame = useSelector(state => selectGameById(state, currentGameId));
-    const roundCurrent = useSelector(state => selectGameById(state, currentGameId).roundCurrent);
+    const currentGame = useAppSelector(state => selectGameById(state, currentGameId));
+    const roundCurrent = useAppSelector(state => selectGameById(state, currentGameId)?.roundCurrent || 0);
+
+    if (currentGame == null) {
+        return <CustomHeader navigation={navigation}
+            headerLeft={<MenuButton navigation={navigation} />}
+            headerCenter={<Text style={styles.title}>Error</Text>}
+        />
+    }
 
     const nextRoundHandler = async () => {
         dispatch(roundNext(currentGame));
