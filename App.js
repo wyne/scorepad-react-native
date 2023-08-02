@@ -20,6 +20,7 @@ Sentry.init({
     dsn: 'https://88dd6d7c83b64ed8870ff21a2a9f1ba7@o1326242.ingest.sentry.io/4504710808076288',
     enableInExpoDevelopment: true,
     debug: false, // If `true`, Sentry will try to print out useful debugging information if something goes wrong with sending the event. Set it to `false` in production
+    environment: process.env.APP_VARIANT === 'development' ? 'development' : 'production',
 });
 
 const Stack = createNativeStackNavigator();

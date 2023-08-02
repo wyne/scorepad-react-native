@@ -61,6 +61,8 @@ Debug eas config settings: `eas config --platform=ios --profile=development`
 ### Remote Build
 
 ```
+npx expo-doctor
+npx expo prebuild
 eas build --platform ios
 eas build --platform android
 ```

@@ -1,12 +1,17 @@
 import React from 'react';
 import { Text, StyleSheet } from 'react-native';
 import AppInfoButton from '../Buttons/AppInfoButton';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { ParamListBase } from '@react-navigation/native';
 
-import MenuButton from '../Buttons/MenuButton';
 import NewGameButton from '../Buttons/NewGameButton';
 import CustomHeader from './CustomHeader';
 
-function HomeHeader({ navigation }) {
+interface Props {
+    navigation: NativeStackNavigationProp<ParamListBase, string, undefined>;
+}
+
+const HomeHeader: React.FunctionComponent<Props> = ({ navigation }) => {
 
     return (
         <CustomHeader navigation={navigation}

@@ -15,7 +15,7 @@ const PlayerNameColumn = ({ navigation }) => {
     const currentGame = useSelector(state => selectGameById(state, currentGameId));
     const players = useAppSelector(state => selectAllPlayers(state)
         .filter(player => currentGame.playerIds.includes(player.id))
-    );
+    ).sort((a, b) => currentGame.playerIds.indexOf(a.id) - currentGame.playerIds.indexOf(b.id));
 
     return (
         <TouchableOpacity style={{ padding: 10 }} onPress={async () => {
