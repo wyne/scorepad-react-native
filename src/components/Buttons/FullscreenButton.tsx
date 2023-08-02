@@ -2,17 +2,18 @@ import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import analytics from '@react-native-firebase/analytics';
 
+import { useAppSelector } from '../../../redux/hooks';
 import HeaderButton from './HeaderButton';
 import { Icon } from 'react-native-elements/dist/icons/Icon';
 import { systemBlue } from '../../constants';
 import { toggleHomeFullscreen } from '../../../redux/SettingsSlice';
 
-const FullscreenButton = (props) => {
+const FullscreenButton: React.FunctionComponent = ({ }) => {
     const dispatch = useDispatch();
-    const fullscreen = useSelector(state => state.settings.home_fullscreen);
+    const fullscreen = useAppSelector(state => state.settings.home_fullscreen);
 
     const expandHandler = async () => {
-        dispatch(toggleHomeFullscreen());
+        dispatch(toggleHomeFullscreen);
         await analytics().logEvent('fullscreen');
     };
 

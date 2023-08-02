@@ -1,22 +1,29 @@
 import React, { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
 import { StyleSheet } from 'react-native';
 import { Icon } from 'react-native-elements';
 import * as Crypto from 'expo-crypto';
 import analytics from '@react-native-firebase/analytics';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { ParamListBase } from '@react-navigation/native';
 
+import { useAppSelector, useAppDispatch } from '../../../redux/hooks';
 import { systemBlue } from '../../constants';
 import HeaderButton from './HeaderButton';
 import { gameSave, selectAllGames } from '../../../redux/GamesSlice';
 import { playerAdd } from '../../../redux/PlayersSlice';
 import { setCurrentGameId } from '../../../redux/SettingsSlice';
+import { AnyAction, ThunkDispatch } from '@reduxjs/toolkit';
 
-const NewGameButton = ({ navigation }) => {
-    const dispatch = useDispatch();
+interface Props {
+    navigation: NativeStackNavigationProp<ParamListBase, string, undefined>
+}
 
-    const gameList = useSelector(state => selectAllGames(state));
+const NewGameButton: React.FunctionComponent<Props> = ({ navigation }) => {
+    const dispatch = useAppDispatch();
 
-    const asyncCreateGame = (dispatch) => new Promise((resolve, reject) => {
+    const gameList = useAppSelector(state => selectAllGames(state));
+
+    const asyncCreateGame = (dispatch: ThunkDispatch<any, undefined, AnyAction>) => new Promise<void>((resolve, reject) => {
         const player1Id = Crypto.randomUUID();
         const player2Id = Crypto.randomUUID();
         const newGameId = Crypto.randomUUID();
