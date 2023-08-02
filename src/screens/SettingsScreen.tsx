@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
-import { Platform, Text, View, StyleSheet, Image, Dimensions, Alert } from 'react-native';
-import { useSelector, useDispatch } from 'react-redux';
+import { Platform, PlatformIOSStatic, Text, View, StyleSheet, Alert } from 'react-native';
+import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { Icon, Button } from 'react-native-elements';
 import * as Crypto from 'expo-crypto';
 import analytics from '@react-native-firebase/analytics';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { ParamListBase } from '@react-navigation/native';
 
-import { useAppSelector } from '../../redux/hooks';
 import { playerAdd } from '../../redux/PlayersSlice';
 import EditPlayer from '../components/EditPlayer';
 import { selectGameById, updateGame, } from '../../redux/GamesSlice';
@@ -14,21 +15,36 @@ import { selectAllPlayers } from '../../redux/PlayersSlice';
 import EditGame from '../components/EditGame';
 import { updatePlayer } from '../../redux/PlayersSlice';
 
-const SettingsScreen = ({ navigation }) => {
-    const dispatch = useDispatch();
+interface Props {
+    navigation: NativeStackNavigationProp<ParamListBase, string, undefined>;
+}
+
+const SettingsScreen: React.FunctionComponent<Props> = ({ navigation }) => {
+    const dispatch = useAppDispatch();
     const [playerWasAdded, setPlayerWasAdded] = useState(false);
 
-    const currentGameId = useSelector(state => state.settings.currentGameId);
+    const currentGameId = useAppSelector(state => state.settings.currentGameId);
     if (typeof currentGameId == 'undefined') return null;
 
-    const currentGame = useSelector(state => selectGameById(state, state.settings.currentGameId));
+    const currentGame = useAppSelector(state => selectGameById(state, state.settings.currentGameId));
     const players = useAppSelector(state => selectAllPlayers(state)
-        .filter(player => currentGame.playerIds.includes(player.id))
-    ).sort((a, b) => currentGame.playerIds.indexOf(a.id) - currentGame.playerIds.indexOf(b.id));
+        .filter(player => currentGame?.playerIds.includes(player.id))
+    ).sort((a, b) => {
+        if (currentGame?.playerIds == undefined) return 0;
+        return currentGame.playerIds.indexOf(a.id) - currentGame.playerIds.indexOf(b.id);
+    });
 
-    const maxPlayers = Platform.isPad ? 12 : 8;
+    const maxPlayers = (() => {
+        if (Platform.OS === 'ios') {
+            const platformIOS = Platform as PlatformIOSStatic
+            return platformIOS.isPad ? 12 : 8;
+        }
+        return 8;
+    })();
 
     const addPlayerHandler = async () => {
+        if (currentGame == undefined) return;
+
         const newPlayerId = Crypto.randomUUID();
 
         dispatch(playerAdd({
@@ -64,6 +80,8 @@ const SettingsScreen = ({ navigation }) => {
                 {
                     text: "Reset",
                     onPress: () => {
+                        if (currentGame == undefined) return;
+
                         players.forEach((player) => {
                             dispatch(updatePlayer({
                                 id: player.id,

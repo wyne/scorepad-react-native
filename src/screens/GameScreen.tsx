@@ -1,27 +1,36 @@
 import React, { useState } from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, LayoutChangeEvent } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useSelector } from 'react-redux';
 import { getContrastRatio } from 'colorsheet';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { ParamListBase } from '@react-navigation/native';
 
+import { useAppSelector } from '../../redux/hooks';
 import PlayerTile from '../components/PlayerTile';
 import Rounds from '../components/Rounds';
 import { selectGameById } from '../../redux/GamesSlice';
 
-export default function ScoreBoardScreen({ navigation }) {
-    const currentGameId = useSelector(state => state.settings.currentGameId);
+interface Props {
+    navigation: NativeStackNavigationProp<ParamListBase, string, undefined>;
+}
+
+const ScoreBoardScreen: React.FunctionComponent<Props> = ({ navigation }) => {
+    const currentGameId = useAppSelector(state => state.settings.currentGameId);
     if (typeof currentGameId == 'undefined') return null;
 
     const palette = ["01497c", "c25858", "f5c800", "275436", "dc902c", "62516a", "755647", "925561"];
     const [grid, setGrid] = useState({ rows: 0, cols: 0 });
-    const fullscreen = useSelector(state => state.settings.home_fullscreen);
-    const currentGame = useSelector(state => selectGameById(state, state.settings.currentGameId));
+    const fullscreen = useAppSelector(state => state.settings.home_fullscreen);
+    const currentGame = useAppSelector(state => selectGameById(state, state.settings.currentGameId));
+
+    if (currentGame == undefined) return null;
 
     const playerIds = currentGame.playerIds;
 
     const desiredAspectRatio = 0.8;
 
-    const layoutHandler = (e) => {
+    const layoutHandler = (e: LayoutChangeEvent) => {
         var { x, y, width, height } = e.nativeEvent.layout;
 
         let closestAspectRatio = Number.MAX_SAFE_INTEGER;
@@ -64,7 +73,7 @@ export default function ScoreBoardScreen({ navigation }) {
                     ))}
                 </View>
 
-                <Rounds style={styles.footerStyle} navigation={navigation} show={!fullscreen} />
+                <Rounds navigation={navigation} show={!fullscreen} />
             </View>
         </SafeAreaView>
     );
@@ -86,9 +95,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         maxWidth: '100%',
         backgroundColor: '#000000'
-    },
-    footerStyle: {
-        flex: 1,
     }
 });
 
+export default ScoreBoardScreen;

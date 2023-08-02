@@ -1,13 +1,21 @@
 import React, { memo } from 'react';
 import { Text, StyleSheet } from 'react-native';
-import { useSelector } from 'react-redux';
+import { useAppSelector } from '../../../redux/hooks';
 
 import { selectPlayerById } from '../../../redux/PlayersSlice';
 
-const RoundScoreCell = ({ playerId, round, playerIndex }) => {
-    const scores = useSelector(state =>
-        selectPlayerById(state, playerId).scores
+interface Props {
+    playerId: string;
+    round: number;
+    playerIndex: number;
+}
+
+const RoundScoreCell: React.FunctionComponent<Props> = ({ playerId, round, playerIndex }) => {
+    const scores = useAppSelector(state =>
+        selectPlayerById(state, playerId)?.scores
     );
+
+    if (typeof scores == 'undefined') return null;
 
     const scoreRound = scores[round] || 0;
 

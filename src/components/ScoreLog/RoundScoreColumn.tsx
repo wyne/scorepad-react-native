@@ -1,17 +1,24 @@
 import React, { memo, useCallback } from 'react';
 import { Text, View } from 'react-native';
 import { TouchableWithoutFeedback } from 'react-native';
-import { useSelector, useDispatch } from 'react-redux';
 import analytics from '@react-native-firebase/analytics';
+import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
 
 import { selectGameById, updateGame } from '../../../redux/GamesSlice';
 import RoundScoreCell from './RoundScoreCell';
 
-const RoundScoreColumn = ({ round, isCurrentRound }) => {
-    const dispatch = useDispatch();
+interface Props {
+    round: number;
+    isCurrentRound: boolean;
+}
 
-    const currentGameId = useSelector(state => state.settings.currentGameId);
-    const currentGame = useSelector(state => selectGameById(state, currentGameId));
+const RoundScoreColumn: React.FunctionComponent<Props> = ({ round, isCurrentRound }) => {
+    const dispatch = useAppDispatch();
+
+    const currentGameId = useAppSelector(state => state.settings.currentGameId);
+    const currentGame = useAppSelector(state => selectGameById(state, currentGameId));
+
+    if (typeof currentGame == 'undefined') return null;
 
     const onPressHandler = useCallback(async () => {
         dispatch(updateGame({
@@ -24,13 +31,14 @@ const RoundScoreColumn = ({ round, isCurrentRound }) => {
             game_id: currentGameId,
             source: 'direct select',
         });
-    });
+    }, []);
 
     return (
         <TouchableWithoutFeedback onPress={onPressHandler}>
-            <View
-                style={{ padding: 10 }}
-                backgroundColor={isCurrentRound ? '#111' : 'black'}>
+            <View style={{
+                padding: 10,
+                backgroundColor: isCurrentRound ? '#111' : 'black'
+            }}>
                 <Text style={{
                     color: isCurrentRound ? 'red' : 'yellow',
                     fontWeight: 'bold',
@@ -40,7 +48,7 @@ const RoundScoreColumn = ({ round, isCurrentRound }) => {
                     {round + 1}
                 </Text>
                 {currentGame.playerIds.map((playerId, playerIndex) => (
-                    <RoundScoreCell playerId={playerId} round={round} key={playerId} index={playerIndex} />
+                    <RoundScoreCell playerId={playerId} round={round} key={playerId} playerIndex={playerIndex} />
                 ))}
             </View>
         </TouchableWithoutFeedback>

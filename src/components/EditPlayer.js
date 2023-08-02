@@ -9,7 +9,7 @@ import { selectPlayerIds } from '../../redux/PlayersSlice';
 import { removePlayer, updatePlayer } from '../../redux/PlayersSlice';
 import analytics from '@react-native-firebase/analytics';
 
-const EditPlayer = ({ player, index, promptColor, setPlayerWasAdded, playerWasAdded }) => {
+const EditPlayer = ({ player, index, setPlayerWasAdded, playerWasAdded }) => {
     const dispatch = useDispatch();
     const currentGame = useSelector(state => selectGameById(state, state.settings.currentGameId));
     const playerIds = currentGame.playerIds;
