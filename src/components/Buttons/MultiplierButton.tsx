@@ -1,18 +1,17 @@
 import React from 'react';
-import { useDispatch, useSelector } from 'react-redux';
 import { TouchableOpacity, Text, StyleSheet } from 'react-native';
 import analytics from '@react-native-firebase/analytics';
 
+import { useAppSelector, useAppDispatch } from '../../../redux/hooks';
 import { systemBlue } from '../../constants';
 import { toggleMultiplier } from '../../../redux/SettingsSlice';
 
-const MultiplierButton = (props) => {
-    const dispatch = useDispatch();
-    const multiplier = useSelector(state => state.settings.multiplier);
-    const currentGameId = useSelector(state => state.settings.currentGameId);
-
+const MultiplierButton: React.FunctionComponent = ({ }) => {
+    const dispatch = useAppDispatch();
+    const multiplier = useAppSelector(state => state.settings.multiplier);
+    const currentGameId = useAppSelector(state => state.settings.currentGameId);
     const multiplierHandler = async () => {
-        dispatch(toggleMultiplier());
+        dispatch(toggleMultiplier);
         await analytics().logEvent('multiplier_change', {
             multiplier: multiplier,
             game_id: currentGameId,

@@ -1,7 +1,12 @@
 import React from 'react';
 import { TouchableOpacity, StyleSheet } from 'react-native';
 
-const HeaderButton = (props) => {
+interface Props {
+    children: React.ReactNode;
+    onPress: () => void;
+}
+
+const HeaderButton: React.FunctionComponent<Props> = (props) => {
     return (
         <TouchableOpacity {...props} style={[styles.headerButton]}>
             {props.children}
@@ -14,8 +19,6 @@ const styles = StyleSheet.create({
         fontSize: 20,
         padding: 10,
         paddingHorizontal: 15,
-        // borderWidth: 1,
-        // borderColor: 'red',
     },
 });
 
