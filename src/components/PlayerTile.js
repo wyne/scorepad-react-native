@@ -3,7 +3,7 @@ import { Text, View, StyleSheet, TouchableHighlight } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import analytics from '@react-native-firebase/analytics';
 
-import AdditionTile from './PlayerTiles/AdditionTile';
+import AdditionTile from './PlayerTiles/AdditionTile/AdditionTile';
 import { playerRoundScoreIncrement, playerRoundScoreDecrement, playerAdd, updatePlayer } from '../../redux/PlayersSlice';
 import { selectGameById } from '../../redux/GamesSlice';
 import { selectPlayerById } from '../../redux/PlayersSlice';
