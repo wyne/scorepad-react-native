@@ -28,7 +28,7 @@ const GameListItem: React.FunctionComponent<Props> = ({ navigation, game, index 
         selectAllPlayers(state).filter(player => game.playerIds.includes(player.id))
     )
         .sort((a, b) => game.playerIds.indexOf(a.id) - game.playerIds.indexOf(b.id))
-        .map(player => player.playerName).join(', ');
+        .map(player => player.playerName);
 
     const rounds: number = chosenGame?.roundTotal || 1;
 
@@ -90,7 +90,7 @@ const GameListItem: React.FunctionComponent<Props> = ({ navigation, game, index 
                         <Text><Moment element={Text} fromNow>{game.dateCreated}</Moment></Text>
                     </ListItem.Subtitle>
                     <ListItem.Subtitle style={styles.gameSubtitle}>
-                        <Text>{playerNames}</Text>
+                        <Text>{playerNames.join(', ')}</Text>
                     </ListItem.Subtitle>
                 </ListItem.Content>
                 <Text style={styles.badgePlayers}>
