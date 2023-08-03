@@ -125,7 +125,7 @@ const SettingsScreen: React.FunctionComponent<Props> = ({ navigation }) => {
                 <Text style={styles.heading}>Players</Text>
                 {players.map((player, index) => (
                     <EditPlayer
-                        player={player}
+                        playerId={player.id}
                         index={index}
                         setPlayerWasAdded={setPlayerWasAdded}
                         playerWasAdded={playerWasAdded}

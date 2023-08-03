@@ -1,25 +1,41 @@
-import React, { useState, memo } from 'react';
-import { Text, View, StyleSheet, TouchableHighlight } from 'react-native';
-import { useDispatch, useSelector } from 'react-redux';
+import React, { useState } from 'react';
+import { View, StyleSheet, TouchableHighlight, LayoutChangeEvent } from 'react-native';
+import { useDispatch } from 'react-redux';
 import analytics from '@react-native-firebase/analytics';
 
 import AdditionTile from './PlayerTiles/AdditionTile/AdditionTile';
-import { playerRoundScoreIncrement, playerRoundScoreDecrement, playerAdd, updatePlayer } from '../../redux/PlayersSlice';
+import { playerRoundScoreIncrement } from '../../redux/PlayersSlice';
 import { selectGameById } from '../../redux/GamesSlice';
 import { selectPlayerById } from '../../redux/PlayersSlice';
+import { useAppSelector } from '../../redux/hooks';
 
-const PlayerTile = ({ color, fontColor, cols, rows, playerId, index }) => {
+interface Props {
+    color: string;
+    fontColor: string;
+    cols: number;
+    rows: number;
+    playerId: string;
+    index: number;
+}
+
+const PlayerTile: React.FunctionComponent<Props> = ({ color, fontColor, cols, rows, playerId, index }) => {
     const [width, setWidth] = useState(0);
     const [height, setHeight] = useState(0);
 
     const dispatch = useDispatch();
 
-    const multiplier = useSelector(state => state.settings.multiplier);
-    const currentGameId = useSelector(state => state.settings.currentGameId);
-    const roundCurrent = useSelector(state => selectGameById(state, currentGameId).roundCurrent);
+    const multiplier = useAppSelector(state => state.settings.multiplier);
+    const currentGameId = useAppSelector(state => state.settings.currentGameId);
+    const currentGame = useAppSelector(state => selectGameById(state, currentGameId));
+    if (typeof currentGame == 'undefined') return null;
+
+    const roundCurrent = currentGame.roundCurrent;
 
     // New
-    const player = useSelector(state => selectPlayerById(state, playerId));
+    const player = useAppSelector(state => selectPlayerById(state, playerId));
+
+    if (typeof player == 'undefined') return null;
+
     const playerName = player.playerName;
     const scoreTotal = player.scores.reduce(
         (sum, current, round) => {
@@ -53,7 +69,7 @@ const PlayerTile = ({ color, fontColor, cols, rows, playerId, index }) => {
     const widthPerc = (100 / cols) + '%';
     const heightPerc = (100 / rows) + '%';
 
-    const layoutHandler = (e) => {
+    const layoutHandler = (e: LayoutChangeEvent) => {
         var { x, y, width, height } = e.nativeEvent.layout;
 
         setWidth(width);
