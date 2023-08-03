@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Text, View, StyleSheet } from 'react-native';
-import { useDispatch, useSelector } from 'react-redux';
+import { Text, View, StyleSheet, NativeSyntheticEvent, TextInputEndEditingEventData } from 'react-native';
+import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { Input } from 'react-native-elements';
 
 import { selectGameById, updateGame } from '../../redux/GamesSlice';
@@ -8,11 +8,14 @@ import { selectGameById, updateGame } from '../../redux/GamesSlice';
 const UNTITLED = "Untitled";
 
 const EditGame = ({ }) => {
-    const dispatch = useDispatch();
-    const currentGame = useSelector(state => selectGameById(state, state.settings.currentGameId));
+    const dispatch = useAppDispatch();
+    const currentGame = useAppSelector(state => selectGameById(state, state.settings.currentGameId));
+
+    if (typeof currentGame == 'undefined') return null;
+
     const [localTitle, setLocalTitle] = useState(currentGame.title);
 
-    const setGameTitleHandler = (title) => {
+    const setGameTitleHandler = (title: string) => {
         setLocalTitle(title);
 
         dispatch(updateGame({
@@ -23,13 +26,13 @@ const EditGame = ({ }) => {
         }));
     };
 
-    const onEndEditingHandler = (e) => {
+    const onEndEditingHandler = (e: NativeSyntheticEvent<TextInputEndEditingEventData>) => {
         if (e.nativeEvent.text == "") {
             setGameTitleHandler(UNTITLED);
         }
     };
 
-    const onChangeTextHandler = (text) => {
+    const onChangeTextHandler = (text: string) => {
         setGameTitleHandler(text);
     };
 

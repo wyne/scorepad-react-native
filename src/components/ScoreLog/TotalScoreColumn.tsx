@@ -4,10 +4,14 @@ import { useSelector } from 'react-redux';
 
 import { selectGameById } from '../../../redux/GamesSlice';
 import TotalScoreCell from './TotalScoreCell';
+import { useAppSelector } from '../../../redux/hooks';
 
 const TotalScoreColumn = ({ }) => {
-    const currentGameId = useSelector(state => state.settings.currentGameId);
-    const currentGame = useSelector(state => selectGameById(state, currentGameId));
+    const currentGameId = useAppSelector(state => state.settings.currentGameId);
+    const currentGame = useAppSelector(state => selectGameById(state, currentGameId));
+
+    if (typeof currentGame == 'undefined') return null;
+
     const playerIds = currentGame.playerIds;
 
     return (

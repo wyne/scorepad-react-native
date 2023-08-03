@@ -1,22 +1,34 @@
 import React from 'react';
-import { Text, View, StyleSheet, TouchableOpacity } from 'react-native';
-import { useDispatch, useSelector } from 'react-redux';
+import { Text, View, StyleSheet, TouchableOpacity, NativeSyntheticEvent, TextInputEndEditingEventData } from 'react-native';
+import { useDispatch } from 'react-redux';
 import { Icon, Input } from 'react-native-elements';
 
 import { palette, systemBlue } from '../constants';
 import { selectGameById, updateGame } from '../../redux/GamesSlice';
-import { selectPlayerIds } from '../../redux/PlayersSlice';
+import { selectPlayerById, selectPlayerIds } from '../../redux/PlayersSlice';
 import { removePlayer, updatePlayer } from '../../redux/PlayersSlice';
 import analytics from '@react-native-firebase/analytics';
+import { useAppSelector } from '../../redux/hooks';
 
-const EditPlayer = ({ player, index, promptColor, setPlayerWasAdded, playerWasAdded }) => {
+interface Props {
+    playerId: string;
+    index: number;
+    setPlayerWasAdded: any;
+    playerWasAdded: boolean;
+}
+
+const EditPlayer: React.FunctionComponent<Props> = ({ playerId, index, setPlayerWasAdded, playerWasAdded }) => {
     const dispatch = useDispatch();
-    const currentGame = useSelector(state => selectGameById(state, state.settings.currentGameId));
+    const currentGame = useAppSelector(state => selectGameById(state, state.settings.currentGameId));
+    const player = useAppSelector(state => selectPlayerById(state, playerId));
+
+    if (typeof currentGame == 'undefined') return null;
+
     const playerIds = currentGame.playerIds;
 
-    const setPlayerNameHandler = (index, name) => {
+    const setPlayerNameHandler = (index: number, name: string) => {
         dispatch(updatePlayer({
-            id: player.id,
+            id: playerId,
             changes: {
                 playerName: name,
             }
@@ -25,24 +37,23 @@ const EditPlayer = ({ player, index, promptColor, setPlayerWasAdded, playerWasAd
         setPlayerWasAdded(false);
     };
 
-    const removePlayerHandler = (index) => {
-        // dispatch(playerRemove(index));
+    const removePlayerHandler = (index: number) => {
         dispatch(updateGame({
             id: currentGame.id,
             changes: {
-                playerIds: currentGame.playerIds.filter((id) => id != player.id),
+                playerIds: currentGame.playerIds.filter((id) => id != playerId),
             }
         }));
-        dispatch(removePlayer(player.id));
+        dispatch(removePlayer(playerId));
     };
 
-    const onEndEditingHandler = (e) => {
+    const onEndEditingHandler = (e: NativeSyntheticEvent<TextInputEndEditingEventData>) => {
         if (e.nativeEvent.text == "") {
             setPlayerNameHandler(index, 'Player ' + (index + 1));
         }
     };
 
-    const onChangeTextHandler = (text) => {
+    const onChangeTextHandler = (text: string) => {
         setPlayerNameHandler(index, text);
     };
 
@@ -57,9 +68,9 @@ const EditPlayer = ({ player, index, promptColor, setPlayerWasAdded, playerWasAd
 
     const defaultPlayerName = (() => {
         if (index == playerIds.length - 1 && playerWasAdded) {
-            return null;
+            return undefined;
         } else {
-            return player.playerName;
+            return player?.playerName;
         }
     })();
 
@@ -68,7 +79,7 @@ const EditPlayer = ({ player, index, promptColor, setPlayerWasAdded, playerWasAd
             return <></>;
         };
 
-        return <View flexDirection='column'>
+        return <View style={{ flexDirection: 'column' }} >
             <TouchableOpacity onPress={deleteHandler}>
                 <Icon size={20} name="delete" color="#ff375f" />
                 <Text style={{ color: '#ff375f', fontWeight: 'bold' }}>Delete</Text>
@@ -77,7 +88,7 @@ const EditPlayer = ({ player, index, promptColor, setPlayerWasAdded, playerWasAd
     };
 
     return (
-        <View style={styles.playerContainer} key={player.uuid}>
+        <View style={styles.playerContainer} key={player?.id}>
             <Text style={styles.playerNumber}>
                 {index + 1}
             </Text>

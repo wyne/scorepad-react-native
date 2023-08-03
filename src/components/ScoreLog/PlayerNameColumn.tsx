@@ -3,6 +3,8 @@ import { Text, View, StyleSheet } from 'react-native';
 import { useSelector } from 'react-redux';
 import { TouchableOpacity } from 'react-native';
 import analytics from '@react-native-firebase/analytics';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { ParamListBase } from '@react-navigation/native';
 
 import { useAppSelector } from '../../../redux/hooks';
 import { palette, systemBlue } from '../../constants';
@@ -10,9 +12,16 @@ import { selectGameById } from '../../../redux/GamesSlice';
 import { selectAllPlayers } from '../../../redux/PlayersSlice';
 import { Icon } from 'react-native-elements/dist/icons/Icon';
 
-const PlayerNameColumn = ({ navigation }) => {
-    const currentGameId = useSelector(state => state.settings.currentGameId);
-    const currentGame = useSelector(state => selectGameById(state, currentGameId));
+interface Props {
+    navigation: NativeStackNavigationProp<ParamListBase, string, undefined>;
+}
+
+const PlayerNameColumn: React.FunctionComponent<Props> = ({ navigation }) => {
+    const currentGameId = useAppSelector(state => state.settings.currentGameId);
+    const currentGame = useAppSelector(state => selectGameById(state, currentGameId));
+
+    if (currentGame == undefined) return null;
+
     const players = useAppSelector(state => selectAllPlayers(state)
         .filter(player => currentGame.playerIds.includes(player.id))
     ).sort((a, b) => currentGame.playerIds.indexOf(a.id) - currentGame.playerIds.indexOf(b.id));

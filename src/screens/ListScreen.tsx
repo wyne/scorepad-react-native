@@ -1,20 +1,26 @@
 import React, { memo } from 'react';
-import { View, StyleSheet } from 'react-native';
-import { useSelector } from 'react-redux';
+import { StyleSheet } from 'react-native';
 import Animated, { Layout, Easing } from 'react-native-reanimated';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { ParamListBase } from '@react-navigation/native';
 
 import { selectAllGames } from '../../redux/GamesSlice';
 import GameListItem from '../components/GameListItem';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAppSelector } from '../../redux/hooks';
 
-const ListScreen = ({ navigation }) => {
+interface Props {
+    navigation: NativeStackNavigationProp<ParamListBase, string, undefined>;
+}
+
+const ListScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     const gameList = useAppSelector(state => selectAllGames(state));
 
     return (
-        <SafeAreaView flex={1} edges={['bottom', 'left', 'right']} style={{ backgroundColor: 'white' }}>
+        <SafeAreaView edges={['bottom', 'left', 'right']} style={{ backgroundColor: 'white', flex: 1 }}>
             <Animated.FlatList
                 itemLayoutAnimation={Layout.easing(Easing.ease).delay(200)}
+                // https://github.com/software-mansion/react-native-reanimated/pull/4074
                 style={styles.list}
                 data={gameList}
                 renderItem={({ item, index }) =>
