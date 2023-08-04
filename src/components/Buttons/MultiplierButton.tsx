@@ -11,7 +11,7 @@ const MultiplierButton: React.FunctionComponent = ({ }) => {
     const multiplier = useAppSelector(state => state.settings.multiplier);
     const currentGameId = useAppSelector(state => state.settings.currentGameId);
     const multiplierHandler = async () => {
-        dispatch(toggleMultiplier);
+        dispatch(toggleMultiplier());
         await analytics().logEvent('multiplier_change', {
             multiplier: multiplier,
             game_id: currentGameId,

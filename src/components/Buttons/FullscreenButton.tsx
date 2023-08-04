@@ -13,7 +13,7 @@ const FullscreenButton: React.FunctionComponent = ({ }) => {
     const fullscreen = useAppSelector(state => state.settings.home_fullscreen);
 
     const expandHandler = async () => {
-        dispatch(toggleHomeFullscreen);
+        dispatch(toggleHomeFullscreen());
         await analytics().logEvent('fullscreen');
     };
 
