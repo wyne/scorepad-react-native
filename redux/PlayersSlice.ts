@@ -1,6 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { createEntityAdapter } from '@reduxjs/toolkit';
-import Sentry from 'sentry-expo';
 
 type RoundIndex = number;
 
@@ -42,7 +41,7 @@ const scoresSlice = createSlice({
                     }
                     scores[round] += multiplier;
                 } catch (error) {
-                    Sentry.React.captureException(error);
+                    // Sentry.React.captureException(error);
                 }
             },
             prepare(payload: string, round: RoundIndex, multiplier: number) {

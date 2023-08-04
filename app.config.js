@@ -51,13 +51,6 @@ export default {
   githubUrl: "https://github.com/wyne/scorepad-react-native",
   owner: "wyne",
   plugins: [
-    "sentry-expo",
-    [
-      "expo-screen-orientation",
-      {
-        "initialOrientation": "DEFAULT"
-      }
-    ],
     "@react-native-firebase/app",
     [
       "expo-build-properties",
@@ -69,15 +62,5 @@ export default {
     ]
   ],
   hooks: {
-    "postPublish": [
-      {
-        "file": "sentry-expo/upload-sourcemaps",
-        "config": {
-          "organization": "justin-wyne",
-          "project": "scorepad",
-          "authToken": false
-        }
-      }
-    ]
   }
 };
