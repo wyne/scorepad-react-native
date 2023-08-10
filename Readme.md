@@ -33,7 +33,7 @@ Then use the expo UI to run on iOS, Android, or web.
 
 Prerequisite: `SENTRY_AUTH_TOKEN` in `.env`
 
-```
+```zsh
 npx react-native-clean-project
 npx expo prebuild
 eas build --profile development-simulator --platform ios
@@ -43,15 +43,21 @@ npx expo start --dev-client
 
 Debug Firebase events by running simulator with `FIRAnalyticsDebugEnabled` flag:
 
+```zsh
+xcrun simctl launch "iPhone 8" com.wyne.scorepad.dev -FIRAnalyticsDebugEnabled
 ```
-xcrun simctl launch "iPhone 8" com.your.package -FIRAnalyticsDebugEnabled
+
+Debug Firebase Crashlytics by running simulator with `FIRDebugEnabled` flag:
+
+```zsh
+xcrun simctl launch "iPhone 14 Pro Max" com.wyne.scorepad.dev -FIRDebugEnabled
 ```
 
 ### Local development build for iOS Device
 
 Prerequisite: `SENTRY_AUTH_TOKEN` in `.env` and be sure it's loaded
 
-```
+```zsh
 npx expo prebuild -p ios
 eas build --platform ios --profile development --local
 ```
@@ -60,7 +66,7 @@ Debug eas config settings: `eas config --platform=ios --profile=development`
 
 ### Remote Build
 
-```
+```zsh
 npx expo-doctor
 npx expo prebuild
 eas build --platform ios
@@ -71,7 +77,7 @@ eas build --platform android
 
 Apple
 
-```
+```zsh
 eas submit -p ios
 ```
 
@@ -80,6 +86,6 @@ Or: `eas submit -p ios --non-interactive`
 
 Android
 
-```
+```zsh
 eas submit -p android --changes-not-sent-for-review
 ```

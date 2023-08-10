@@ -52,6 +52,7 @@ export default {
   owner: "wyne",
   plugins: [
     "@react-native-firebase/app",
+    "@react-native-firebase/crashlytics",
     [
       "expo-build-properties",
       {
