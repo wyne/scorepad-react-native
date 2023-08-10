@@ -5,8 +5,6 @@ import { store, persistor } from './redux/store';
 import { StatusBar } from 'expo-status-bar';
 import { DarkTheme, DefaultTheme, NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { useEffect } from 'react';
-import crashlytics from '@react-native-firebase/crashlytics';
 
 import ListScreen from "./src/screens/ListScreen";
 import GameScreen from "./src/screens/GameScreen";
@@ -28,11 +26,6 @@ const MyTheme = {
 };
 
 export default function App() {
-    useEffect(() => {
-        crashlytics().log('App mounted.');
-        crashlytics().recordError(new Error('Test Error'));
-    }, []);
-
     return (
         <Provider store={store}>
             <PersistGate loading={null} persistor={persistor}>

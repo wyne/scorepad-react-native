@@ -1,5 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { createEntityAdapter } from '@reduxjs/toolkit';
+import crashlytics from '@react-native-firebase/crashlytics';
 
 type RoundIndex = number;
 
@@ -41,7 +42,8 @@ const scoresSlice = createSlice({
                     }
                     scores[round] += multiplier;
                 } catch (error) {
-                    // Sentry.React.captureException(error);
+                    const err = error as Error;
+                    crashlytics().recordError(err);
                 }
             },
             prepare(payload: string, round: RoundIndex, multiplier: number) {
