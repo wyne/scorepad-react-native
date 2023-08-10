@@ -19,10 +19,10 @@ const settingsSlice = createSlice({
         setCurrentGameId(state, action: PayloadAction<string>) {
             state.currentGameId = action.payload;
         },
-        toggleHomeFullscreen(state, action) {
+        toggleHomeFullscreen(state) {
             state.home_fullscreen = !state.home_fullscreen;
         },
-        toggleMultiplier(state, action) {
+        toggleMultiplier(state) {
             var multipliers = [1, 5, 10, 20, 50];
             var index = multipliers.indexOf(state.multiplier);
             if (index == multipliers.length - 1) {
