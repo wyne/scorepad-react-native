@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Dimensions, LayoutChangeEvent } from 'react-native';
 import Animated, {
-    Layout,
-    Easing,
     useSharedValue,
     useAnimatedStyle,
     withTiming,
