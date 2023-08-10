@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Dimensions, LayoutChangeEvent } from 'react-native';
-import Animated, { FadeIn } from 'react-native-reanimated';
-import {
+import Animated, {
+    Layout,
+    Easing,
     useSharedValue,
     useAnimatedStyle,
     withTiming,
@@ -12,6 +13,7 @@ import { animationDuration, calcPlayerFontSize, calcScoreLengthRatio } from './H
 import ScoreBefore from './ScoreBefore';
 import ScoreAfter from './ScoreAfter';
 import ScoreRound from './ScoreRound';
+const layoutAnimation = Layout.easing(Easing.ease).duration(animationDuration);
 
 interface Props {
     playerName: string;
@@ -36,10 +38,12 @@ const AdditionTile: React.FunctionComponent<Props> = ({
     const [h, setH] = useState(1);
 
     const sharedScale = useSharedValue(1);
+    const sharedOpacity = useSharedValue(0);
 
     const animatedStyles = useAnimatedStyle(() => {
         return {
             transform: [{ scale: sharedScale.value }],
+            opacity: sharedOpacity.value,
         };
     });
 
@@ -61,21 +65,23 @@ const AdditionTile: React.FunctionComponent<Props> = ({
                 Math.min(s, 3), { duration: animationDuration }
             ));
         }
+
+        sharedOpacity.value = withDelay(100 + index * animationDuration / 2, withTiming(
+            1, { duration: animationDuration * 2 }
+        ));
     });
 
     const playerNameFontSize = calcPlayerFontSize(playerName.length) * .8;
 
     return (
         <Animated.View style={[animatedStyles, { justifyContent: 'center' }]}
-            entering={FadeIn.duration(500).delay(100 + index * animationDuration)}
-            /* layout={layoutAnimation} */
-            onLayout={layoutHandler} >
+            onLayout={layoutHandler}>
             <Animated.Text style={[styles.name, { fontSize: playerNameFontSize, color: fontColor }]}
-                /* layout={layoutAnimation} */
                 numberOfLines={1} >
                 {playerName}
             </Animated.Text>
-            <Animated.View style={styles.scoreLineOne} >
+            <Animated.View
+                style={styles.scoreLineOne} >
                 <ScoreBefore roundScore={roundScore} totalScore={totalScore}
                     fontColor={fontColor} />
                 <ScoreRound roundScore={roundScore} totalScore={totalScore}
