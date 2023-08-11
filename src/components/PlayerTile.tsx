@@ -66,8 +66,9 @@ const PlayerTile: React.FunctionComponent<Props> = ({ color, fontColor, cols, ro
         dispatch(playerRoundScoreIncrement(playerId, roundCurrent, -multiplier));
     };
 
-    const widthPerc = (100 / cols) + '%';
-    const heightPerc = (100 / rows) + '%';
+    type Percent = `${number}%`;
+    const widthPerc: Percent = `${(100 / cols)}%`;
+    const heightPerc: Percent = `${(100 / rows)}%`;
 
     const layoutHandler = (e: LayoutChangeEvent) => {
         var { x, y, width, height } = e.nativeEvent.layout;
@@ -77,13 +78,12 @@ const PlayerTile: React.FunctionComponent<Props> = ({ color, fontColor, cols, ro
     };
 
     return (
-        <View
-            style={[
-                styles.playerCard,
-                { backgroundColor: color },
-                { width: widthPerc },
-                { height: heightPerc },
-            ]}
+        <View style={[
+            styles.playerCard,
+            { backgroundColor: color },
+            { width: widthPerc },
+            { height: heightPerc },
+        ]}
             onLayout={layoutHandler}
         >
             <AdditionTile

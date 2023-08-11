@@ -3,7 +3,7 @@ const IS_DEV = process.env.APP_VARIANT === 'development';
 export default {
   name: IS_DEV ? 'ScorePad with Rounds (dev)' : 'ScorePad with Rounds',
   slug: 'scorepad',
-  version: "2.1.10",
+  version: "2.1.12",
   orientation: "default",
   icon: IS_DEV ? './assets/icon-dev.png' : './assets/icon.png',
   assetBundlePatterns: [
@@ -14,7 +14,7 @@ export default {
     bundleIdentifier: IS_DEV ? 'com.wyne.scorepad.dev' : 'com.wyne.scorepad',
     supportsTablet: true,
     requireFullScreen: false,
-    buildNumber: "51",
+    buildNumber: "54",
     infoPlist: {
       RCTAsyncStorageExcludeFromBackup: false
     },
@@ -28,7 +28,7 @@ export default {
     },
     package: IS_DEV ? 'com.wyne.scorepad.dev' : 'com.wyne.scorepad',
     permissions: [],
-    versionCode: 51,
+    versionCode: 54,
     googleServicesFile: "./google-services.json",
   },
   userInterfaceStyle: "dark",
@@ -51,14 +51,8 @@ export default {
   githubUrl: "https://github.com/wyne/scorepad-react-native",
   owner: "wyne",
   plugins: [
-    "sentry-expo",
-    [
-      "expo-screen-orientation",
-      {
-        "initialOrientation": "DEFAULT"
-      }
-    ],
     "@react-native-firebase/app",
+    "@react-native-firebase/crashlytics",
     [
       "expo-build-properties",
       {
@@ -69,15 +63,5 @@ export default {
     ]
   ],
   hooks: {
-    "postPublish": [
-      {
-        "file": "sentry-expo/upload-sourcemaps",
-        "config": {
-          "organization": "justin-wyne",
-          "project": "scorepad",
-          "authToken": false
-        }
-      }
-    ]
   }
 };

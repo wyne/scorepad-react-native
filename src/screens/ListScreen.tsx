@@ -20,7 +20,6 @@ const ListScreen: React.FunctionComponent<Props> = ({ navigation }) => {
         <SafeAreaView edges={['bottom', 'left', 'right']} style={{ backgroundColor: 'white', flex: 1 }}>
             <Animated.FlatList
                 itemLayoutAnimation={Layout.easing(Easing.ease).delay(200)}
-                // https://github.com/software-mansion/react-native-reanimated/pull/4074
                 style={styles.list}
                 data={gameList}
                 renderItem={({ item, index }) =>
