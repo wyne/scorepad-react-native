@@ -13,7 +13,7 @@ interface Props {
 
 const CheckButton: React.FunctionComponent<Props> = ({ navigation }) => {
     return (
-        <HeaderButton onPress={async () => {
+        <HeaderButton accessibilityLabel='Save Game' onPress={async () => {
             navigation.navigate('Game');
             await analytics().logEvent('save_game');
         }}>
@@ -24,5 +24,6 @@ const CheckButton: React.FunctionComponent<Props> = ({ navigation }) => {
         </HeaderButton>
     );
 };
+
 
 export default CheckButton;

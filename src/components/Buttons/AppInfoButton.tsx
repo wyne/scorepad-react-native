@@ -13,7 +13,7 @@ interface Props {
 
 const AppInfoButton: React.FunctionComponent<Props> = ({ navigation }) => {
     return (
-        <HeaderButton onPress={async () => {
+        <HeaderButton accessibilityLabel='App Info' onPress={async () => {
             navigation.navigate('AppInfo');
             await analytics().logEvent('app_info');
         }}>
