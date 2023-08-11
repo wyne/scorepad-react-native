@@ -44,7 +44,7 @@
     "react-native": "0.72.3",
     "react-native-elements": "^3.4.2",
     "react-native-gesture-handler": "~2.12.0",
-    "react-native-get-random-values": "~1.8.0",
+    "react-native-get-random-values": "~1.9.0",
     "react-native-keyboard-aware-scroll-view": "^0.9.4",
     "react-native-picker-select": "^8.0.4",
     "react-native-reanimated": "~3.3.0",
@@ -62,10 +62,7 @@
     "@babel/core": "^7.19.3",
     "gh-pages": "^4.0.0"
   },
-  "overrides": {
-    "@expo/config-plugins": "~6.0.0",
-    "@expo/prebuild-config": "~6.0.0"
-  },
+  "overrides": {},
   "homepage": "/scorepad-app",
   "private": true,
   "name": "scorepad",
