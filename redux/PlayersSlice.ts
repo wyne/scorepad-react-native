@@ -1,10 +1,11 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { createEntityAdapter } from '@reduxjs/toolkit';
-import Sentry from 'sentry-expo';
+import crashlytics from '@react-native-firebase/crashlytics';
 
 type RoundIndex = number;
 
 interface ScoreState {
+    id: string;
     playerName: string;
     scores: number[];
 }
@@ -32,7 +33,7 @@ const scoresSlice = createSlice({
                 action: PayloadAction<string, string, { round: RoundIndex, multiplier: number; }>
             ) {
                 try {
-                    const scores = state.entities[action.payload].scores;
+                    const scores = state?.entities[action.payload]?.scores || [];
                     const round = action.meta.round;
                     const multiplier = action.meta.multiplier;
 
@@ -41,16 +42,14 @@ const scoresSlice = createSlice({
                     }
                     scores[round] += multiplier;
                 } catch (error) {
-                    Sentry.React.captureException(error);
+                    const err = error as Error;
+                    crashlytics().recordError(err);
                 }
             },
             prepare(payload: string, round: RoundIndex, multiplier: number) {
                 return { payload, meta: { round, multiplier } };
             },
-        },
-        roundNext(state, action) {
-            state.entities.players[action.payload] = 0;
-        },
+        }
     }
 });
 
@@ -63,7 +62,6 @@ export const {
     removePlayer,
     playerAdd,
     playerRoundScoreIncrement,
-    roundNext,
 } = scoresSlice.actions;
 
 export default scoresSlice.reducer;

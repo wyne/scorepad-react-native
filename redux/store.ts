@@ -5,16 +5,6 @@ import { configureStore } from "@reduxjs/toolkit";
 import settingsReducer from './SettingsSlice';
 import gamesReducer from './GamesSlice';
 import scoresReducer from './PlayersSlice';
-import createMigrate from 'redux-persist/es/createMigrate';
-
-const migrations = {
-    1: (state) => {
-        return {
-            ...state,
-            dateCreated: Date.now(),
-        };
-    },
-};
 
 const settingsPersistConfig = {
     key: 'settings',

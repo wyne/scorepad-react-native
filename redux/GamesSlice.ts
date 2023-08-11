@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { createEntityAdapter } from '@reduxjs/toolkit';
 
-interface GameState {
+export interface GameState {
     id: string;
     title: string;
     dateCreated: number;
