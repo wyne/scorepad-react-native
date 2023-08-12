@@ -3,7 +3,7 @@ import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
 import { store, persistor } from './redux/store';
 import { StatusBar } from 'expo-status-bar';
-import { DarkTheme, DefaultTheme, NavigationContainer } from '@react-navigation/native';
+import { DarkTheme, NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import ListScreen from "./src/screens/ListScreen";
@@ -29,12 +29,12 @@ export default function App() {
     return (
         <Provider store={store}>
             <PersistGate loading={null} persistor={persistor}>
-                <StatusBar barStyle="light-content" />
+                <StatusBar />
                 <NavigationContainer theme={MyTheme}>
                     <Stack.Navigator>
                         <Stack.Screen name="List" component={ListScreen}
                             options={{
-                                orientation: 'any',
+                                orientation: 'all',
                                 title: 'Home',
                                 headerTitle: 'ScorePad with Rounds',
                                 header: ({ navigation }) => {
@@ -44,7 +44,7 @@ export default function App() {
                         />
                         <Stack.Screen name="Game" component={GameScreen}
                             options={{
-                                orientation: 'any',
+                                orientation: 'all',
                                 title: "Current Game",
                                 header: ({ navigation }) => {
                                     return <GameHeader navigation={navigation} />;
@@ -53,7 +53,7 @@ export default function App() {
                         />
                         <Stack.Screen name="Settings" component={SettingsScreen}
                             options={{
-                                orientation: 'any',
+                                orientation: 'all',
                                 title: "Settings",
                                 header: ({ navigation }) => {
                                     return <SettingsHeader navigation={navigation} />;
@@ -62,7 +62,7 @@ export default function App() {
                         />
                         <Stack.Screen name="AppInfo" component={AppInfoScreen}
                             options={{
-                                orientation: 'any',
+                                orientation: 'all',
                                 title: "Info",
                                 header: ({ navigation }) => {
                                     return <AppInfoHeader navigation={navigation} />;

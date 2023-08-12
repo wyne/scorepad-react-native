@@ -11,7 +11,7 @@ interface Props {
     headerRight?: React.ReactNode;
 }
 
-const CustomHeader: React.FunctionComponent<Props> = ({ navigation, headerLeft, headerCenter, headerRight }) => {
+const CustomHeader: React.FunctionComponent<Props> = ({ headerLeft, headerCenter, headerRight }) => {
     return (
         <SafeAreaView edges={['top']} style={[styles.headerContainer]}>
             <SafeAreaView edges={['left']} style={styles.headerLeft}>

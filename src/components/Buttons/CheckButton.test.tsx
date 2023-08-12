@@ -16,7 +16,7 @@ jest.mock('@react-navigation/native-stack', () => ({
 }));
 
 
-type NativeStackNavigationPropAlias = NativeStackNavigationProp<{}>;
+type NativeStackNavigationPropAlias = NativeStackNavigationProp<NonNullable<unknown>>;
 
 describe('CheckButton', () => {
     let navigation: Partial<NativeStackNavigationPropAlias>;
@@ -33,7 +33,7 @@ describe('CheckButton', () => {
         expect(navigation.navigate).toHaveBeenCalledWith('Game');
     });
 
-    xit('should log an analytics event when pressed', async () => {
+    it.skip('should log an analytics event when pressed', async () => {
         const { getByRole } = render(<CheckButton navigation={navigation as NativeStackNavigationPropAlias} />);
         const button = getByRole('button');
         fireEvent.press(button);

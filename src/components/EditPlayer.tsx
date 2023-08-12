@@ -5,7 +5,7 @@ import { Icon, Input } from 'react-native-elements';
 
 import { palette, systemBlue } from '../constants';
 import { selectGameById, updateGame } from '../../redux/GamesSlice';
-import { selectPlayerById, selectPlayerIds } from '../../redux/PlayersSlice';
+import { selectPlayerById } from '../../redux/PlayersSlice';
 import { removePlayer, updatePlayer } from '../../redux/PlayersSlice';
 import analytics from '@react-native-firebase/analytics';
 import { useAppSelector } from '../../redux/hooks';
@@ -13,7 +13,7 @@ import { useAppSelector } from '../../redux/hooks';
 interface Props {
     playerId: string;
     index: number;
-    setPlayerWasAdded: any;
+    setPlayerWasAdded: React.Dispatch<React.SetStateAction<boolean>>;
     playerWasAdded: boolean;
 }
 
@@ -37,7 +37,7 @@ const EditPlayer: React.FunctionComponent<Props> = ({ playerId, index, setPlayer
         setPlayerWasAdded(false);
     };
 
-    const removePlayerHandler = (index: number) => {
+    const removePlayerHandler = () => {
         dispatch(updateGame({
             id: currentGame.id,
             changes: {
@@ -58,7 +58,7 @@ const EditPlayer: React.FunctionComponent<Props> = ({ playerId, index, setPlayer
     };
 
     const deleteHandler = async () => {
-        removePlayerHandler(index);
+        removePlayerHandler();
         await analytics().logEvent('remove_player', {
             game_id: currentGame.id,
             player_count: playerIds.length,

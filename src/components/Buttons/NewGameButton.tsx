@@ -1,5 +1,4 @@
 import React, { useEffect } from 'react';
-import { StyleSheet } from 'react-native';
 import { Icon } from 'react-native-elements';
 import * as Crypto from 'expo-crypto';
 import analytics from '@react-native-firebase/analytics';
@@ -23,7 +22,7 @@ const NewGameButton: React.FunctionComponent<Props> = ({ navigation }) => {
 
     const gameList = useAppSelector(state => selectAllGames(state));
 
-    const asyncCreateGame = (dispatch: ThunkDispatch<any, undefined, AnyAction>) => new Promise<void>((resolve, reject) => {
+    const asyncCreateGame = (dispatch: ThunkDispatch<unknown, undefined, AnyAction>) => new Promise<void>((resolve) => {
         const player1Id = Crypto.randomUUID();
         const player2Id = Crypto.randomUUID();
         const newGameId = Crypto.randomUUID();
@@ -69,7 +68,7 @@ const NewGameButton: React.FunctionComponent<Props> = ({ navigation }) => {
     }, [gameList.length]);
 
     return (
-        <HeaderButton onPress={addGameHandler}>
+        <HeaderButton accessibilityLabel='Add Game' onPress={addGameHandler}>
             <Icon name="plus"
                 type="font-awesome-5"
                 size={20}
@@ -77,18 +76,5 @@ const NewGameButton: React.FunctionComponent<Props> = ({ navigation }) => {
         </HeaderButton>
     );
 };
-
-const styles = StyleSheet.create({
-    multiplierButton: {
-        color: systemBlue,
-        fontSize: 20,
-        fontVariant: ['tabular-nums'],
-    },
-    headerButton: {
-        fontSize: 20,
-        padding: 8,
-        paddingHorizontal: 15,
-    },
-});
 
 export default NewGameButton;

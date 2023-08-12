@@ -1,5 +1,5 @@
 import React from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import analytics from '@react-native-firebase/analytics';
 
 import { useAppSelector } from '../../../redux/hooks';
@@ -18,7 +18,7 @@ const FullscreenButton: React.FunctionComponent = ({ }) => {
     };
 
     return (
-        <HeaderButton onPress={expandHandler}>
+        <HeaderButton accessibilityLabel='Toggle Full Screen' onPress={expandHandler}>
             <Icon name={fullscreen ? 'compress-alt' : 'expand-alt'}
                 type="font-awesome-5"
                 size={20}

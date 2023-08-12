@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Text, View, StyleSheet, ScrollView, Platform, LayoutChangeEvent } from 'react-native';
+import { View, StyleSheet, ScrollView, Platform, LayoutChangeEvent } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ParamListBase } from '@react-navigation/native';
 
