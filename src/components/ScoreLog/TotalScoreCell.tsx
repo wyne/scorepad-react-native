@@ -1,6 +1,5 @@
 import React, { memo } from 'react';
 import { Text } from 'react-native';
-import { useSelector } from 'react-redux';
 import { selectPlayerById } from '../../../redux/PlayersSlice';
 import { StyleSheet } from 'react-native';
 import { useAppSelector } from '../../../redux/hooks';

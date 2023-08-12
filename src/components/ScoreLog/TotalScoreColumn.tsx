@@ -1,6 +1,5 @@
 import React from 'react';
 import { Text, View, StyleSheet } from 'react-native';
-import { useSelector } from 'react-redux';
 
 import { selectGameById } from '../../../redux/GamesSlice';
 import TotalScoreCell from './TotalScoreCell';

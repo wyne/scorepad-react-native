@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, LayoutChangeEvent } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useSelector } from 'react-redux';
 import { getContrastRatio } from 'colorsheet';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ParamListBase } from '@react-navigation/native';
@@ -31,7 +30,7 @@ const ScoreBoardScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     const desiredAspectRatio = 0.8;
 
     const layoutHandler = (e: LayoutChangeEvent) => {
-        var { x, y, width, height } = e.nativeEvent.layout;
+        const { width, height } = e.nativeEvent.layout;
 
         let closestAspectRatio = Number.MAX_SAFE_INTEGER;
         let bestRowCount = 1;

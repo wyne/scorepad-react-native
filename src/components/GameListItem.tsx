@@ -32,7 +32,7 @@ const GameListItem: React.FunctionComponent<Props> = ({ navigation, game, index 
 
     const rounds: number = chosenGame?.roundTotal || 1;
 
-    const asyncSetCurrentGame = (dispatch: ThunkDispatch<any, undefined, AnyAction>) => new Promise<void>((resolve, reject) => {
+    const asyncSetCurrentGame = (dispatch: ThunkDispatch<unknown, undefined, AnyAction>) => new Promise<void>((resolve) => {
         dispatch(setCurrentGameId(game.id));
         resolve();
     });

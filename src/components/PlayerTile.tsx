@@ -71,7 +71,7 @@ const PlayerTile: React.FunctionComponent<Props> = ({ color, fontColor, cols, ro
     const heightPerc: Percent = `${(100 / rows)}%`;
 
     const layoutHandler = (e: LayoutChangeEvent) => {
-        var { x, y, width, height } = e.nativeEvent.layout;
+        const { width, height } = e.nativeEvent.layout;
 
         setWidth(width);
         setHeight(height);

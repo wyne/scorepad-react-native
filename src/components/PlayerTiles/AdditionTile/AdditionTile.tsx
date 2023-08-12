@@ -45,7 +45,7 @@ const AdditionTile: React.FunctionComponent<Props> = ({
     });
 
     const layoutHandler = (e: LayoutChangeEvent) => {
-        const { x, y, width, height } = e.nativeEvent.layout;
+        const { width, height } = e.nativeEvent.layout;
         setH(height);
         setW(width);
     };

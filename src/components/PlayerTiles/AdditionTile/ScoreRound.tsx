@@ -6,7 +6,7 @@ import {
     withTiming
 } from 'react-native-reanimated';
 
-import { calcFontSize, animationDuration, enteringAnimation, ZoomOutFadeOut } from './Helpers';
+import { calcFontSize, animationDuration } from './Helpers';
 
 interface Props {
     roundScore: number;

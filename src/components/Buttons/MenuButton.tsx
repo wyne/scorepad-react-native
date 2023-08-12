@@ -13,7 +13,7 @@ interface Props {
 
 const MenuButton: React.FunctionComponent<Props> = ({ navigation }) => {
     return (
-        <HeaderButton onPress={async () => {
+        <HeaderButton accessibilityLabel='Home' onPress={async () => {
             navigation.navigate('List');
             await analytics().logEvent('menu');
         }}>
