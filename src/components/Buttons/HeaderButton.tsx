@@ -3,12 +3,13 @@ import { TouchableOpacity, StyleSheet } from 'react-native';
 
 interface Props {
     children: React.ReactNode;
+    accessibilityLabel: string;
     onPress: () => void;
 }
 
 const HeaderButton: React.FunctionComponent<Props> = (props) => {
     return (
-        <TouchableOpacity {...props} style={[styles.headerButton]}>
+        <TouchableOpacity accessibilityRole='button'  {...props} style={[styles.headerButton]}>
             {props.children}
         </TouchableOpacity>
     );
