@@ -3,12 +3,19 @@ import { Text, View, StyleSheet, Alert, ScrollView } from 'react-native';
 import { Platform } from 'react-native';
 import * as Application from 'expo-application';
 import analytics from '@react-native-firebase/analytics';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { ParamListBase } from '@react-navigation/routers';
 
 import { SafeAreaView } from 'react-native-safe-area-context';
 import RotatingIcon from '../components/AppInfo/RotatingIcon';
 import VideoTutorial from '../components/AppInfo/VideoTutorial';
+import { Button } from 'react-native-elements';
 
-const AppInfoScreen = ({ }) => {
+interface Props {
+    navigation: NativeStackNavigationProp<ParamListBase, string, undefined>;
+}
+
+const AppInfoScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     const buildNumber = Application.nativeBuildVersion;
     const appVersion = Application.nativeApplicationVersion;
 
@@ -26,8 +33,12 @@ const AppInfoScreen = ({ }) => {
                     }}>
                         ScorePad with Rounds v{appVersion}
                     </Text>
-
                 </View>
+
+                <Button title="Onboarding" onPress={() => {
+                    navigation.navigate('Onboarding');
+                }
+                } />
                 <View style={styles.container}>
                     <Text style={{ fontWeight: 'bold', fontSize: 20, margin: 10 }}>Instructions</Text>
                     <Text style={styles.text}>

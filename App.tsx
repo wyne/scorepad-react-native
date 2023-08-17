@@ -10,6 +10,7 @@ import ListScreen from "./src/screens/ListScreen";
 import GameScreen from "./src/screens/GameScreen";
 import SettingsScreen from "./src/screens/SettingsScreen";
 import AppInfoScreen from "./src/screens/AppInfoScreen";
+import OnboardingScreen from './src/screens/OnboardingScreen';
 import HomeHeader from './src/components/Headers/HomeHeader';
 import GameHeader from './src/components/Headers/GameHeader';
 import SettingsHeader from './src/components/Headers/SettingsHeader';
@@ -67,6 +68,12 @@ export default function App() {
                                 header: ({ navigation }) => {
                                     return <AppInfoHeader navigation={navigation} />;
                                 },
+                            }}
+                        />
+                        <Stack.Screen name="Onboarding" component={OnboardingScreen}
+                            options={{
+                                orientation: 'portrait',
+                                title: "Onboarding",
                             }}
                         />
                     </Stack.Navigator>
