@@ -19,8 +19,6 @@ https://wyne.github.io/scorepad/
 | Tablet | <img src="assets-stores/ipadpro-11/home-2-players.png" height="150">  | <img src="assets-stores/ipadpro-11/home-many-players.png" height="150"> | <img src="assets-stores/ipadpro-11/home-many-players-expanded.png" height="150"> | <img src="assets-stores/ipadpro-11/configure.png" height="150">            |
 
 
-## Contributing
-
 ### Run with Expo Go
 
 ```

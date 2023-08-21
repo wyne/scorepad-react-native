@@ -3,73 +3,136 @@ import {
     View, StyleSheet,
     Dimensions,
     Animated,
-    TouchableOpacity,
     Text,
     StatusBar,
+    TouchableOpacity,
 } from 'react-native';
 import { ExpandingDot } from "react-native-animated-pagination-dots";
 
 const { width } = Dimensions.get('screen');
 
-const data = [
+type OnboardingScreenItem = {
+    title: string;
+    image: string;
+    description: string;
+    backgroundColor: string;
+};
+
+type OnboardingScreenItemProps = {
+    item: OnboardingScreenItem;
+};
+
+const data: OnboardingScreenItem[] = [
     {
-        image:
-            'https://cdn.dribbble.com/users/3281732/screenshots/13661330/media/1d9d3cd01504fa3f5ae5016e5ec3a313.jpg?compress=1&resize=1200x1200',
+        title: "ScorePad with Rounds",
+        image: '../../assets/icon.png',
+        description: '« Swipe left to begin «',
+        backgroundColor: '#3475B1',
+    },
+    {
+        title: "Add Points",
+        image: '../../assets/icon.png',
+        description: 'Tap the top half of a player’s tile to add points.',
         backgroundColor: '#7bcf6e',
     },
     {
-        image:
-            'https://cdn.dribbble.com/users/3281732/screenshots/11192830/media/7690704fa8f0566d572a085637dd1eee.jpg?compress=1&resize=1200x1200',
+        title: "Subtract Points",
+        image: '../../assets/icon.png',
+        description: 'Tap the bottom half of a player’s tile to subtract points.',
         backgroundColor: '#4654a7',
     },
     {
-        image:
-            'https://cdn.dribbble.com/users/3281732/screenshots/9165292/media/ccbfbce040e1941972dbc6a378c35e98.jpg?compress=1&resize=1200x1200',
+        title: "Adjust Point Values",
+        image: '../../assets/icon.png',
+        description: 'Adjust the point value by tapping on the point value selector.',
         backgroundColor: '#7370cf',
     },
     {
-        image:
-            'https://cdn.dribbble.com/users/3281732/screenshots/11205211/media/44c854b0a6e381340fbefe276e03e8e4.jpg?compress=1&resize=1200x1200',
+        title: "Change Round",
+        image: '../../assets/icon.png',
+        description: 'Use rounds to keep score history per round. Tap the > and < buttons to cycle through.',
+        backgroundColor: '#db4747',
+    },
+    {
+        title: "Edit Players",
+        image: '../../assets/icon.png',
+        description: '',
+        backgroundColor: '#db4747',
+    },
+    {
+        title: "Delete Game",
+        image: '../../assets/icon.png',
+        description: '',
+        backgroundColor: '#db4747',
+    },
+    {
+        title: "That's it!",
+        image: '../../assets/icon.png',
+        description: '',
         backgroundColor: '#db4747',
     },
 ];
 
 const OnboardingScreen = () => {
     const scrollX = React.useRef(new Animated.Value(0)).current;
-    const keyExtractor = React.useCallback((_, index) => index.toString(), []);
+    const keyExtractor = React.useCallback((_: any, index: number) => index.toString(), []);
     //Current item index of flatlist
     const [activeIndex, setActiveIndex] = React.useState(0);
-    let flatListRef = React.useRef(null);
-    const gotoNextPage = () => {
+    const flatListRef = React.useRef<Animated.FlatList>(null);
+
+    console.log(activeIndex);
+
+    const gotoNextPage = React.useCallback((activeIndex: number) => {
+        console.log(activeIndex)
         if (activeIndex + 1 < data.length) {
+            if (flatListRef.current === null) return;
+
             flatListRef.current.scrollToIndex({
                 index: activeIndex + 1,
-                animated: true,
+                animated: false,
             });
         }
-    };
-    const gotoPrevPage = () => {
+    }, [activeIndex, flatListRef.current]);
+
+    const gotoPrevPage = React.useCallback((activeIndex: number) => {
+        if (flatListRef.current === null) return;
+
         if (activeIndex !== 0) {
             flatListRef.current.scrollToIndex({
                 index: activeIndex - 1,
-                animated: true,
+                animated: false,
             });
         }
-    };
+    }, [activeIndex, flatListRef.current]);
+
     const skipToStart = () => {
+        if (flatListRef.current === null) return;
+
         flatListRef.current.scrollToIndex({
             index: data.length - 1,
             animated: true,
         });
     };
+
+    const skipToEnd = () => {
+        if (flatListRef.current === null) return;
+
+        flatListRef.current.scrollToIndex({
+            index: data.length - 1,
+            animated: true,
+        });
+    };
+
     //Flatlist props that calculates current item index
     const onViewRef = React.useRef(({ viewableItems }: any) => {
         setActiveIndex(viewableItems[0].index);
     });
     const viewConfigRef = React.useRef({ viewAreaCoveragePercentThreshold: 50 });
-    const renderItem = React.useCallback(({ item }) => {
+
+    const renderItem = React.useCallback(({ item }: OnboardingScreenItemProps) => {
         return (
             <View style={[styles.itemContainer]}>
+                <Text style={{ fontSize: 30, marginBottom: 40 }}>{item.title}</Text>
                 <Animated.Image
                     style={{
                         width: 200,
@@ -77,11 +140,20 @@ const OnboardingScreen = () => {
                         borderRadius: 20,
                         resizeMode: 'cover',
                     }}
-                    source={{ uri: item.image }}
+                    source={require('../../assets/icon.png')}
                 />
+                <Text style={{ fontSize: 25, marginTop: 40 }}>
+                    {item.description}
+                </Text>
+                <TouchableOpacity onPress={() => gotoPrevPage(activeIndex)} style={{
+                    position: 'absolute', left: '0%', width: '50%', height: '100%'
+                }} />
+                <TouchableOpacity onPress={() => gotoNextPage(activeIndex)} style={{
+                    position: 'absolute', left: '50%', width: '50%', height: '100%'
+                }} />
             </View>
         );
-    }, []);
+    }, [activeIndex]);
 
     return (
         <View style={[styles.container]}>
@@ -108,6 +180,23 @@ const OnboardingScreen = () => {
                     );
                 })}
             </View>
+
+
+
+
+            <TouchableOpacity onPress={skipToEnd}
+                style={{ alignSelf: 'flex-end', margin: 10, }}>
+                <View style={{
+                    padding: 10,
+                    borderRadius: 20,
+                    borderColor: '#fff',
+                    backgroundColor: 'rgba(255, 255, 255, .2)',
+                }}>
+                    <Text style={{ fontSize: 20, color: '#fff', }}>
+                        Skip
+                    </Text>
+                </View>
+            </TouchableOpacity>
             <Animated.FlatList
                 ref={flatListRef}
                 onViewableItemsChanged={onViewRef.current}
@@ -130,10 +219,6 @@ const OnboardingScreen = () => {
             <ExpandingDot
                 data={data}
                 scrollX={scrollX}
-                // dotSize={18}
-                // dotSpacing={6}
-                // lineDistance={7}
-                // lineHeight={4}
                 expandingDotWidth={30}
                 dotStyle={{
                     width: 10,
@@ -146,23 +231,8 @@ const OnboardingScreen = () => {
                 activeDotColor={'#fff'}
                 containerStyle={{ flex: 1 }}
             />
-            {/* <View style={[styles.buttonContainer]}>
-                <TouchableOpacity
-                    style={[styles.button]}
-                    onPress={() => gotoPrevPage()}
-                >
-                    <Text style={[styles.buttonText]}>Previous</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                    style={[styles.button]}
-                    onPress={() => gotoNextPage()}
-                >
-                    <Text style={[styles.buttonText]}>Next</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={[styles.button]} onPress={() => skipToStart()}>
-                    <Text style={[styles.buttonText]}>Skip</Text>
-                </TouchableOpacity>
-            </View> */}
+
+
         </View>
     );
 };
@@ -178,12 +248,8 @@ const styles = StyleSheet.create({
         width: width,
         justifyContent: 'center',
         alignItems: 'center',
-        // borderColor: 'blue',
-        // borderWidth: 1,
     },
     buttonContainer: {
-        // flex: 1,
-        // flexGrow: 0,
         flexBasis: 100,
         flexDirection: 'row',
         borderColor: '#fff',
