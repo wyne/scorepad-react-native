@@ -68,7 +68,7 @@ const data: OnboardingScreenItem[] = [
     {
         title: "That's it!",
         image: '../../assets/icon.png',
-        description: '',
+        description: 'Return to this tutorial anytime with the Info button in the top left.',
         backgroundColor: '#db4747',
     },
 ];
@@ -229,7 +229,6 @@ const OnboardingScreen = () => {
                 activeDotColor={'#fff'}
                 containerStyle={{ flex: 1 }}
             />
-
 
         </View>
     );
