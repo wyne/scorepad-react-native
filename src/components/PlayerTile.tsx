@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, TouchableHighlight, LayoutChangeEvent } from 'react-native';
+import { View, Text, StyleSheet, TouchableHighlight, LayoutChangeEvent, DimensionValue } from 'react-native';
 import { useDispatch } from 'react-redux';
 import analytics from '@react-native-firebase/analytics';
+import Animated, { FadeOut } from 'react-native-reanimated';
 
 import AdditionTile from './PlayerTiles/AdditionTile/AdditionTile';
 import { playerRoundScoreIncrement } from '../../redux/PlayersSlice';
@@ -21,6 +22,35 @@ interface Props {
 const PlayerTile: React.FunctionComponent<Props> = ({ color, fontColor, cols, rows, playerId, index }) => {
     const [width, setWidth] = useState(0);
     const [height, setHeight] = useState(0);
+
+    const [particles, setParticles] = useState<JSX.Element[]>([]);
+
+    const addParticle = () => {
+        const randomTop: DimensionValue = `${Math.floor(Math.random() * 30 + 0)}%`;
+        const randomLeft: DimensionValue = `${Math.floor(Math.random() * 70 + 10)}%`;
+        const randomRotation: string = `${Math.floor(Math.random() * 30) - 15}deg`;
+
+        const particle = <Animated.View style={{
+            position: 'absolute',
+            top: randomTop,
+            left: randomLeft,
+            transform: [{ rotate: randomRotation }],
+            backgroundColor: 'gold',
+            opacity: 0.7,
+            borderRadius: 100,
+            borderWidth: 2,
+            borderColor: 'black',
+            padding: 5,
+        }}
+            entering={FadeOut.delay(900).withInitialValues({ opacity: 0.9 })}
+        >
+            <Text style={{
+                color: 'black', fontSize: 40, fontWeight: 'bold'
+            }}>+1</Text>
+        </Animated.View>;
+        setParticles([...particles, particle]);
+    };
+
 
     const dispatch = useDispatch();
 
@@ -46,6 +76,8 @@ const PlayerTile: React.FunctionComponent<Props> = ({ color, fontColor, cols, ro
     const scoreRound = player.scores[roundCurrent] || 0;
 
     const incPlayerRoundScoreHandler = () => {
+        addParticle();
+
         analytics().logEvent('score_change', {
             player_index: index,
             game_id: currentGameId,
@@ -84,8 +116,7 @@ const PlayerTile: React.FunctionComponent<Props> = ({ color, fontColor, cols, ro
             { width: widthPerc },
             { height: heightPerc },
         ]}
-            onLayout={layoutHandler}
-        >
+            onLayout={layoutHandler}>
             <AdditionTile
                 totalScore={scoreTotal}
                 roundScore={scoreRound}
@@ -101,7 +132,11 @@ const PlayerTile: React.FunctionComponent<Props> = ({ color, fontColor, cols, ro
                 underlayColor={fontColor + '30'}
                 activeOpacity={1}
                 onPress={incPlayerRoundScoreHandler}>
-                <></>
+                <View style={{ height: '100%', width: '100%' }}>
+                    {particles.map((particle, index) => (
+                        <>{particle}</>
+                    ))}
+                </View>
             </TouchableHighlight>
 
             <TouchableHighlight
