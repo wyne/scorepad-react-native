@@ -80,10 +80,7 @@ const OnboardingScreen = () => {
     const [activeIndex, setActiveIndex] = React.useState(0);
     const flatListRef = React.useRef<Animated.FlatList>(null);
 
-    console.log(activeIndex);
-
     const gotoNextPage = React.useCallback((activeIndex: number) => {
-        console.log(activeIndex)
         if (activeIndex + 1 < data.length) {
             if (flatListRef.current === null) return;
 
@@ -105,24 +102,6 @@ const OnboardingScreen = () => {
         }
     }, [activeIndex, flatListRef.current]);
 
-    const skipToStart = () => {
-        if (flatListRef.current === null) return;
-
-        flatListRef.current.scrollToIndex({
-            index: data.length - 1,
-            animated: true,
-        });
-    };
-
-    const skipToEnd = () => {
-        if (flatListRef.current === null) return;
-
-        flatListRef.current.scrollToIndex({
-            index: data.length - 1,
-            animated: true,
-        });
-    };
-
     //Flatlist props that calculates current item index
     const onViewRef = React.useRef(({ viewableItems }: any) => {
         setActiveIndex(viewableItems[0].index);
@@ -132,19 +111,38 @@ const OnboardingScreen = () => {
     const renderItem = React.useCallback(({ item }: OnboardingScreenItemProps) => {
         return (
             <View style={[styles.itemContainer]}>
-                <Text style={{ fontSize: 30, marginBottom: 40 }}>{item.title}</Text>
-                <Animated.Image
-                    style={{
-                        width: 200,
-                        height: 200,
-                        borderRadius: 20,
-                        resizeMode: 'cover',
-                    }}
-                    source={require('../../assets/icon.png')}
-                />
-                <Text style={{ fontSize: 25, marginTop: 40 }}>
-                    {item.description}
-                </Text>
+                <View style={{
+                    flexBasis: '15%',
+                    justifyContent: 'flex-end',
+                    flexGrow: 0,
+                }}>
+                    <Text style={{ fontSize: 30, fontWeight: 'bold' }}>{item.title}</Text>
+                </View>
+                <View style={{
+                    flexGrow: 0,
+                    flexBasis: '50%',
+                    alignContent: 'center',
+                    justifyContent: 'center',
+                }}>
+                    <Animated.Image
+                        style={{
+                            width: 200,
+                            height: 200,
+                            borderRadius: 20,
+                            resizeMode: 'cover',
+                        }}
+                        source={require('../../assets/icon.png')}
+                    />
+                </View>
+                <View style={{
+                    flex: 1,
+                    flexGrow: 1,
+                    padding: 20
+                }}>
+                    <Text style={{ fontSize: 25, }}>
+                        {item.description}
+                    </Text>
+                </View>
                 <TouchableOpacity onPress={() => gotoPrevPage(activeIndex)} style={{
                     position: 'absolute', left: '0%', width: '50%', height: '100%'
                 }} />
@@ -181,22 +179,6 @@ const OnboardingScreen = () => {
                 })}
             </View>
 
-
-
-
-            <TouchableOpacity onPress={skipToEnd}
-                style={{ alignSelf: 'flex-end', margin: 10, }}>
-                <View style={{
-                    padding: 10,
-                    borderRadius: 20,
-                    borderColor: '#fff',
-                    backgroundColor: 'rgba(255, 255, 255, .2)',
-                }}>
-                    <Text style={{ fontSize: 20, color: '#fff', }}>
-                        Skip
-                    </Text>
-                </View>
-            </TouchableOpacity>
             <Animated.FlatList
                 ref={flatListRef}
                 onViewableItemsChanged={onViewRef.current}
@@ -216,6 +198,22 @@ const OnboardingScreen = () => {
                     }
                 )}
             />
+
+            {/* Skip Button */}
+            <TouchableOpacity onPress={() => { }}
+                style={{ position: 'absolute', top: '1%', right: '1%', margin: 10, }}>
+                <View style={{
+                    padding: 10,
+                    borderRadius: 20,
+                    borderColor: '#fff',
+                    backgroundColor: 'rgba(255, 255, 255, .2)',
+                }}>
+                    <Text style={{ fontSize: 20, color: '#fff', }}>
+                        Skip
+                    </Text>
+                </View>
+            </TouchableOpacity>
+
             <ExpandingDot
                 data={data}
                 scrollX={scrollX}
@@ -246,21 +244,13 @@ const styles = StyleSheet.create({
     itemContainer: {
         flex: 1,
         width: width,
-        justifyContent: 'center',
+        justifyContent: 'space-around',
         alignItems: 'center',
-    },
-    buttonContainer: {
-        flexBasis: 100,
-        flexDirection: 'row',
-        borderColor: '#fff',
-        borderWidth: 1,
     },
     button: {
         flex: 1,
         margin: 20,
         fontWeight: '700',
-        borderColor: 'red',
-        borderWidth: 1,
     },
     buttonText: {
         color: '#fff',
