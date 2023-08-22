@@ -74,6 +74,13 @@ export default function App() {
                             options={{
                                 orientation: 'portrait',
                                 title: "Onboarding",
+                                headerShown: false,
+                            }}
+                        />
+                        <Stack.Screen name="Tutorial" component={OnboardingScreen}
+                            options={{
+                                orientation: 'portrait',
+                                title: "Onboarding",
                             }}
                         />
                     </Stack.Navigator>

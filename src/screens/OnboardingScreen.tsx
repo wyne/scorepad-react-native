@@ -4,11 +4,13 @@ import {
     Dimensions,
     Animated as RNAnimated,
     Text,
-    StatusBar,
     TouchableOpacity,
 } from 'react-native';
-import Animated, { FadeInUp, SlideInDown } from 'react-native-reanimated';
+import Animated from 'react-native-reanimated';
 import { ExpandingDot } from "react-native-animated-pagination-dots";
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { ParamListBase } from '@react-navigation/native';
 
 const { width } = Dimensions.get('screen');
 
@@ -40,7 +42,7 @@ const data: OnboardingScreenItem[] = [
         title: "Subtract Points",
         image: require('../../assets/onboarding/subtract.jpg'),
         description: 'Tap the bottom half of a player’s tile to subtract points.',
-        backgroundColor: '#4654a7',
+        backgroundColor: '#db4747',
     },
     {
         title: "Adjust Point Values",
@@ -58,7 +60,7 @@ const data: OnboardingScreenItem[] = [
         title: "Edit Players",
         image: require('../../assets/icon.png'),
         description: '',
-        backgroundColor: '#db4747',
+        backgroundColor: '#4654a7',
     },
     {
         title: "Delete Game",
@@ -74,7 +76,11 @@ const data: OnboardingScreenItem[] = [
     },
 ];
 
-const OnboardingScreen = () => {
+interface Props {
+    navigation: NativeStackNavigationProp<ParamListBase, string, undefined>;
+}
+
+const OnboardingScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     const scrollX = React.useRef(new RNAnimated.Value(0)).current;
     const keyExtractor = React.useCallback((_: any, index: number) => index.toString(), []);
     //Current item index of flatlist
@@ -168,82 +174,90 @@ const OnboardingScreen = () => {
 
     return (
         <View style={[styles.container]}>
-            <StatusBar hidden />
-            <View style={[StyleSheet.absoluteFillObject]}>
-                {data.map((item, index) => {
-                    const inputRange = [
-                        (index - 1) * width,
-                        index * width,
-                        (index + 1) * width,
-                    ];
-                    const colorFade = scrollX.interpolate({
-                        inputRange,
-                        outputRange: [0, 1, 0],
-                    });
-                    return (
-                        <RNAnimated.View
-                            key={index}
-                            style={[
-                                StyleSheet.absoluteFillObject,
-                                { backgroundColor: item.backgroundColor, opacity: colorFade },
-                            ]}
-                        />
-                    );
-                })}
-            </View>
-
-            <RNAnimated.FlatList
-                ref={flatListRef}
-                onViewableItemsChanged={onViewRef.current}
-                viewabilityConfig={viewConfigRef.current}
-                data={data}
-                renderItem={renderItem}
-                keyExtractor={keyExtractor}
-                showsHorizontalScrollIndicator={false}
-                pagingEnabled
-                horizontal
-                decelerationRate={'normal'}
-                scrollEventThrottle={16}
-                onScroll={RNAnimated.event(
-                    [{ nativeEvent: { contentOffset: { x: scrollX } } }],
-                    {
-                        useNativeDriver: false,
-                    }
-                )}
-            />
-
-            {/* Skip Button */}
-            <TouchableOpacity onPress={() => { }}
-                style={{ position: 'absolute', top: '1%', right: '1%', margin: 10, }}>
-                <View style={{
-                    padding: 10,
-                    borderRadius: 20,
-                    borderColor: '#fff',
-                    backgroundColor: 'rgba(255, 255, 255, .2)',
-                }}>
-                    <Text style={{ fontSize: 20, color: '#fff', }}>
-                        Skip
-                    </Text>
+            <SafeAreaView edges={['top', 'bottom']}>
+                <View style={[StyleSheet.absoluteFillObject]}>
+                    {data.map((item, index) => {
+                        const inputRange = [
+                            (index - 1) * width,
+                            index * width,
+                            (index + 1) * width,
+                        ];
+                        const colorFade = scrollX.interpolate({
+                            inputRange,
+                            outputRange: [0, 1, 0],
+                        });
+                        return (
+                            <RNAnimated.View
+                                key={index}
+                                style={[
+                                    StyleSheet.absoluteFillObject,
+                                    { backgroundColor: item.backgroundColor, opacity: colorFade },
+                                ]}
+                            />
+                        );
+                    })}
                 </View>
-            </TouchableOpacity>
 
-            <ExpandingDot
-                data={data}
-                scrollX={scrollX}
-                expandingDotWidth={30}
-                dotStyle={{
-                    width: 10,
-                    height: 10,
-                    backgroundColor: '#347af0',
-                    borderRadius: 5,
-                    marginHorizontal: 5
-                }}
-                inActiveDotOpacity={0.2}
-                activeDotColor={'#fff'}
-                containerStyle={{ flex: 1 }}
-            />
+                <RNAnimated.FlatList
+                    ref={flatListRef}
+                    onViewableItemsChanged={onViewRef.current}
+                    viewabilityConfig={viewConfigRef.current}
+                    data={data}
+                    renderItem={renderItem}
+                    keyExtractor={keyExtractor}
+                    showsHorizontalScrollIndicator={false}
+                    pagingEnabled
+                    horizontal
+                    decelerationRate={'normal'}
+                    scrollEventThrottle={16}
+                    onScroll={RNAnimated.event(
+                        [{ nativeEvent: { contentOffset: { x: scrollX } } }],
+                        {
+                            useNativeDriver: false,
+                        }
+                    )}
+                />
 
-        </View>
+                <ExpandingDot
+                    data={data}
+                    scrollX={scrollX}
+                    expandingDotWidth={30}
+                    dotStyle={{
+                        width: 10,
+                        height: 10,
+                        backgroundColor: '#347af0',
+                        borderRadius: 5,
+                        marginHorizontal: 5
+                    }}
+                    inActiveDotOpacity={0.2}
+                    activeDotColor={'#fff'}
+                    containerStyle={{ flex: 1 }}
+                />
+
+            </SafeAreaView>
+            <SafeAreaView pointerEvents='box-none' edges={['top', 'bottom']}
+                style={[StyleSheet.absoluteFill]}>
+                <View pointerEvents='box-none' style={{ alignItems: 'flex-end' }}>
+                    <TouchableOpacity
+                        style={{ padding: 10 }}
+                        onPress={() => {
+                            if (navigation.canGoBack()) navigation.goBack();
+                            else navigation.navigate('List');
+                        }}>
+                        <View style={{
+                            padding: 10,
+                            borderRadius: 20,
+                            borderColor: '#fff',
+                            backgroundColor: 'rgba(255, 255, 255, .2)',
+                        }}>
+                            <Text style={{ fontSize: 20, color: '#fff', }}>
+                                Skip
+                            </Text>
+                        </View>
+                    </TouchableOpacity>
+                </View>
+            </SafeAreaView>
+        </View >
     );
 };
 

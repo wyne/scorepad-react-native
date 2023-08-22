@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import React, { memo, useEffect, useState } from 'react';
 import { StyleSheet } from 'react-native';
 import Animated, { Layout, Easing } from 'react-native-reanimated';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -15,6 +15,15 @@ interface Props {
 
 const ListScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     const gameList = useAppSelector(state => selectAllGames(state));
+    const [onbaordingComplete, setOnboardingState] = useState(false);
+
+    useEffect(() => {
+        // Todo: Conditionally show onboarding
+        if (!onbaordingComplete) {
+            setOnboardingState(true);
+            navigation.navigate('Onboarding');
+        }
+    }, [onbaordingComplete]);
 
     return (
         <SafeAreaView edges={['bottom', 'left', 'right']} style={{ backgroundColor: 'white', flex: 1 }}>

@@ -57,7 +57,7 @@ const ScoreBoardScreen: React.FunctionComponent<Props> = ({ navigation }) => {
 
     return (
         <SafeAreaView style={{ flex: 1 }}>
-            <View style={styles.appContainer}>
+            <View style={[StyleSheet.absoluteFillObject]}>
                 <View style={styles.contentStyle} onLayout={layoutHandler} >
                     {playerIds.map((id, index) => (
                         <PlayerTile
@@ -76,16 +76,9 @@ const ScoreBoardScreen: React.FunctionComponent<Props> = ({ navigation }) => {
             </View>
         </SafeAreaView>
     );
-}
+};
 
 const styles = StyleSheet.create({
-    appContainer: {
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        position: 'absolute',
-    },
     contentStyle: {
         flex: 1,
         flexGrow: 1,
