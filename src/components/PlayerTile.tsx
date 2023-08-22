@@ -19,38 +19,53 @@ interface Props {
     index: number;
 }
 
+const Particle: React.FunctionComponent = React.memo(({ id, value }) => {
+    const randomTop: DimensionValue = `${Math.floor(Math.random() * 30 + 0)}%`;
+    const randomLeft: DimensionValue = `${Math.floor(Math.random() * 70 + 10)}%`;
+    const randomRotation: string = `${Math.floor(Math.random() * 30) - 15}deg`;
+    let color = 'gold';
+    switch (value) {
+        case '+1': color = 'green'; break;
+        case '+5': color = 'blue'; break;
+        case '+10': color = 'red'; break;
+    }
+
+    return <Animated.View style={{
+        position: 'absolute',
+        top: randomTop,
+        left: randomLeft,
+        transform: [{ rotate: randomRotation }],
+        backgroundColor: color,
+        opacity: 0.7,
+        borderRadius: 100,
+        borderWidth: 2,
+        borderColor: 'black',
+        padding: 5,
+    }}
+        // entering={ZoomInEasyUp}
+        exiting={FadeOut.withInitialValues({ opacity: 0.7 })}
+    >
+        <Text style={{
+            color: 'black', fontSize: 30, fontWeight: 'bold'
+        }}>{value}</Text>
+    </Animated.View>;
+});
+
 const PlayerTile: React.FunctionComponent<Props> = ({ color, fontColor, cols, rows, playerId, index }) => {
     const [width, setWidth] = useState(0);
     const [height, setHeight] = useState(0);
 
-    const [particles, setParticles] = useState<JSX.Element[]>([]);
+    const [particles, setParticles] = useState<object[]>([]);
 
     const addParticle = () => {
-        const randomTop: DimensionValue = `${Math.floor(Math.random() * 30 + 0)}%`;
-        const randomLeft: DimensionValue = `${Math.floor(Math.random() * 70 + 10)}%`;
-        const randomRotation: string = `${Math.floor(Math.random() * 30) - 15}deg`;
+        const key = Math.random().toString(36).substring(7);
+        const value = `+${multiplier}`;
 
-        const particle = <Animated.View style={{
-            position: 'absolute',
-            top: randomTop,
-            left: randomLeft,
-            transform: [{ rotate: randomRotation }],
-            backgroundColor: 'gold',
-            opacity: 0.7,
-            borderRadius: 100,
-            borderWidth: 2,
-            borderColor: 'black',
-            padding: 5,
-        }}
-            entering={FadeOut.delay(900).withInitialValues({ opacity: 0.9 })}
-        >
-            <Text style={{
-                color: 'black', fontSize: 40, fontWeight: 'bold'
-            }}>+1</Text>
-        </Animated.View>;
-        setParticles([...particles, particle]);
+        setTimeout(() => {
+            setParticles((particles) => particles.filter((p) => p.key !== key));
+        }, 3000);
+        setParticles((particles) => [...particles, { key, value }]);
     };
-
 
     const dispatch = useDispatch();
 
@@ -131,10 +146,10 @@ const PlayerTile: React.FunctionComponent<Props> = ({ color, fontColor, cols, ro
                 style={[styles.surface, styles.surfaceAdd]}
                 underlayColor={fontColor + '30'}
                 activeOpacity={1}
-                onPress={incPlayerRoundScoreHandler}>
+                onPressIn={incPlayerRoundScoreHandler}>
                 <View style={{ height: '100%', width: '100%' }}>
-                    {particles.map((particle, index) => (
-                        <>{particle}</>
+                    {particles.map((particle) => (
+                        <Particle key={particle.key} value={particle.value} />
                     ))}
                 </View>
             </TouchableHighlight>
