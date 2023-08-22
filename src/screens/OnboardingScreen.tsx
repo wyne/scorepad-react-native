@@ -2,11 +2,12 @@ import React from 'react';
 import {
     View, StyleSheet,
     Dimensions,
-    Animated,
+    Animated as RNAnimated,
     Text,
     StatusBar,
     TouchableOpacity,
 } from 'react-native';
+import Animated, { FadeInUp, SlideInDown } from 'react-native-reanimated';
 import { ExpandingDot } from "react-native-animated-pagination-dots";
 
 const { width } = Dimensions.get('screen');
@@ -24,61 +25,61 @@ type OnboardingScreenItemProps = {
 
 const data: OnboardingScreenItem[] = [
     {
-        title: "ScorePad with Rounds",
-        image: '../../assets/icon.png',
+        title: "ScorePad\nwith Rounds",
+        image: require('../../assets/icon.png'),
         description: '« Swipe left to begin «',
         backgroundColor: '#3475B1',
     },
     {
         title: "Add Points",
-        image: '../../assets/icon.png',
+        image: require('../../assets/onboarding/add.jpg'),
         description: 'Tap the top half of a player’s tile to add points.',
         backgroundColor: '#7bcf6e',
     },
     {
         title: "Subtract Points",
-        image: '../../assets/icon.png',
+        image: require('../../assets/onboarding/subtract.jpg'),
         description: 'Tap the bottom half of a player’s tile to subtract points.',
         backgroundColor: '#4654a7',
     },
     {
         title: "Adjust Point Values",
-        image: '../../assets/icon.png',
+        image: require('../../assets/onboarding/multiplier.png'),
         description: 'Adjust the point value by tapping on the point value selector.',
         backgroundColor: '#7370cf',
     },
     {
         title: "Change Round",
-        image: '../../assets/icon.png',
+        image: require('../../assets/onboarding/rounds.png'),
         description: 'Use rounds to keep score history per round. Tap the > and < buttons to cycle through.',
         backgroundColor: '#db4747',
     },
     {
         title: "Edit Players",
-        image: '../../assets/icon.png',
+        image: require('../../assets/icon.png'),
         description: '',
         backgroundColor: '#db4747',
     },
     {
         title: "Delete Game",
-        image: '../../assets/icon.png',
+        image: require('../../assets/icon.png'),
         description: '',
         backgroundColor: '#db4747',
     },
     {
         title: "That's it!",
-        image: '../../assets/icon.png',
+        image: require('../../assets/icon.png'),
         description: 'Return to this tutorial anytime with the Info button in the top left.',
         backgroundColor: '#db4747',
     },
 ];
 
 const OnboardingScreen = () => {
-    const scrollX = React.useRef(new Animated.Value(0)).current;
+    const scrollX = React.useRef(new RNAnimated.Value(0)).current;
     const keyExtractor = React.useCallback((_: any, index: number) => index.toString(), []);
     //Current item index of flatlist
     const [activeIndex, setActiveIndex] = React.useState(0);
-    const flatListRef = React.useRef<Animated.FlatList>(null);
+    const flatListRef = React.useRef<RNAnimated.FlatList>(null);
 
     const gotoNextPage = React.useCallback((activeIndex: number) => {
         if (activeIndex + 1 < data.length) {
@@ -111,38 +112,50 @@ const OnboardingScreen = () => {
     const renderItem = React.useCallback(({ item }: OnboardingScreenItemProps) => {
         return (
             <View style={[styles.itemContainer]}>
-                <View style={{
-                    flexBasis: '15%',
-                    justifyContent: 'flex-end',
-                    flexGrow: 0,
-                }}>
-                    <Text style={{ fontSize: 30, fontWeight: 'bold' }}>{item.title}</Text>
-                </View>
-                <View style={{
-                    flexGrow: 0,
-                    flexBasis: '50%',
-                    alignContent: 'center',
-                    justifyContent: 'center',
-                }}>
-                    <Animated.Image
+                <Animated.View
+                    // entering={FadeInUp.duration(500).delay(100)}
+                    style={{
+                        flexBasis: '15%',
+                        justifyContent: 'flex-end',
+                        flexGrow: 0,
+                    }}>
+                    <Text style={{
+                        fontSize: 30,
+                        fontWeight: 'bold',
+                        textAlign: 'center',
+                    }}>{item.title}</Text>
+                </Animated.View>
+                <Animated.View
+                    // entering={FadeInUp.duration(500).delay(200)}
+                    style={{
+                        flexGrow: 0,
+                        flexBasis: '50%',
+                        // borderWidth: 1,
+                        // borderColor: '#fff',
+                        alignContent: 'center',
+                        justifyContent: 'center',
+                    }}>
+                    <RNAnimated.Image
                         style={{
-                            width: 200,
-                            height: 200,
-                            borderRadius: 20,
-                            resizeMode: 'cover',
+                            width: 350,
+                            height: 250,
+                            // borderRadius: 20,
+                            resizeMode: 'contain',
                         }}
-                        source={require('../../assets/icon.png')}
+                        source={item.image}
                     />
-                </View>
-                <View style={{
-                    flex: 1,
-                    flexGrow: 1,
-                    padding: 20
-                }}>
-                    <Text style={{ fontSize: 25, }}>
+                </Animated.View>
+                <Animated.View
+                    // entering={FadeInUp.duration(500).delay(300)}
+                    style={{
+                        flex: 1,
+                        flexGrow: 1,
+                        padding: 20
+                    }}>
+                    <Text style={{ fontSize: 25, textAlign: 'center' }}>
                         {item.description}
                     </Text>
-                </View>
+                </Animated.View>
                 <TouchableOpacity onPress={() => gotoPrevPage(activeIndex)} style={{
                     position: 'absolute', left: '0%', width: '50%', height: '100%'
                 }} />
@@ -168,7 +181,7 @@ const OnboardingScreen = () => {
                         outputRange: [0, 1, 0],
                     });
                     return (
-                        <Animated.View
+                        <RNAnimated.View
                             key={index}
                             style={[
                                 StyleSheet.absoluteFillObject,
@@ -179,7 +192,7 @@ const OnboardingScreen = () => {
                 })}
             </View>
 
-            <Animated.FlatList
+            <RNAnimated.FlatList
                 ref={flatListRef}
                 onViewableItemsChanged={onViewRef.current}
                 viewabilityConfig={viewConfigRef.current}
@@ -191,7 +204,7 @@ const OnboardingScreen = () => {
                 horizontal
                 decelerationRate={'normal'}
                 scrollEventThrottle={16}
-                onScroll={Animated.event(
+                onScroll={RNAnimated.event(
                     [{ nativeEvent: { contentOffset: { x: scrollX } } }],
                     {
                         useNativeDriver: false,
