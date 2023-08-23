@@ -10,7 +10,8 @@ import Animated from 'react-native-reanimated';
 import { ExpandingDot } from "react-native-animated-pagination-dots";
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { ParamListBase } from '@react-navigation/native';
+import { RouteProp } from '@react-navigation/native';
+import { RootStackParamList } from '../../App';
 
 const { width } = Dimensions.get('screen');
 
@@ -76,11 +77,16 @@ const data: OnboardingScreenItem[] = [
     },
 ];
 
-interface Props {
-    navigation: NativeStackNavigationProp<ParamListBase, string, undefined>;
+interface Props extends NativeStackNavigationProp<RootStackParamList, 'Onboarding'> {
+    navigation: NativeStackNavigationProp<RootStackParamList, 'Onboarding'>;
+    route: RouteProp<RootStackParamList, 'Onboarding'>;
 }
 
-const OnboardingScreen: React.FunctionComponent<Props> = ({ navigation }) => {
+const OnboardingScreen: React.FunctionComponent<Props> = ({ navigation, route }) => {
+    const { onboarding = false } = route.params;
+
+    console.log("onboarding: ", onboarding);
+
     const scrollX = React.useRef(new RNAnimated.Value(0)).current;
     const keyExtractor = React.useCallback((_: any, index: number) => index.toString(), []);
     //Current item index of flatlist
@@ -235,28 +241,30 @@ const OnboardingScreen: React.FunctionComponent<Props> = ({ navigation }) => {
                 />
 
             </SafeAreaView>
-            <SafeAreaView pointerEvents='box-none' edges={['top', 'bottom']}
-                style={[StyleSheet.absoluteFill]}>
-                <View pointerEvents='box-none' style={{ alignItems: 'flex-end' }}>
-                    <TouchableOpacity
-                        style={{ padding: 10 }}
-                        onPress={() => {
-                            if (navigation.canGoBack()) navigation.goBack();
-                            else navigation.navigate('List');
-                        }}>
-                        <View style={{
-                            padding: 10,
-                            borderRadius: 20,
-                            borderColor: '#fff',
-                            backgroundColor: 'rgba(255, 255, 255, .2)',
-                        }}>
-                            <Text style={{ fontSize: 20, color: '#fff', }}>
-                                Skip
-                            </Text>
-                        </View>
-                    </TouchableOpacity>
-                </View>
-            </SafeAreaView>
+
+            {onboarding &&
+                <SafeAreaView pointerEvents='box-none' edges={['top', 'bottom']}
+                    style={[StyleSheet.absoluteFill]}>
+                    <View pointerEvents='box-none' style={{ alignItems: 'flex-end' }}>
+                        <TouchableOpacity
+                            style={{ padding: 10 }}
+                            onPress={() => {
+                                navigation.navigate('List');
+                            }}>
+                            <View style={{
+                                padding: 10,
+                                borderRadius: 20,
+                                borderColor: '#fff',
+                                backgroundColor: 'rgba(255, 255, 255, .2)',
+                            }}>
+                                <Text style={{ fontSize: 20, color: '#fff', }}>
+                                    Skip
+                                </Text>
+                            </View>
+                        </TouchableOpacity>
+                    </View>
+                </SafeAreaView>
+            }
         </View >
     );
 };
