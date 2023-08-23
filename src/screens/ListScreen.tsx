@@ -15,12 +15,11 @@ interface Props {
 
 const ListScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     const gameList = useAppSelector(state => selectAllGames(state));
-
     const dispatch = useAppDispatch();
 
+    // If no games, create one and navigate to it
     useEffect(() => {
         if (gameList.length == 0) {
-            console.log("Creating new game");
             dispatch(asyncCreateGame(gameList.length + 1)).then(() => {
                 setTimeout(() => {
                     navigation.navigate("Game");

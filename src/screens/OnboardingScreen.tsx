@@ -5,6 +5,8 @@ import {
     Animated as RNAnimated,
     Text,
     TouchableOpacity,
+    ViewToken,
+    ImageURISource,
 } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { ExpandingDot } from "react-native-animated-pagination-dots";
@@ -17,7 +19,7 @@ const { width } = Dimensions.get('screen');
 
 type OnboardingScreenItem = {
     title: string;
-    image: string;
+    image: ImageURISource;
     description: string;
     backgroundColor: string;
 };
@@ -77,23 +79,31 @@ const data: OnboardingScreenItem[] = [
     },
 ];
 
-interface Props extends NativeStackNavigationProp<RootStackParamList, 'Onboarding'> {
-    navigation: NativeStackNavigationProp<RootStackParamList, 'Onboarding'>;
-    route: RouteProp<RootStackParamList, 'Onboarding'>;
+export interface Props {
+    navigation: NativeStackNavigationProp<RootStackParamList, 'Onboarding' | 'Tutorial'>;
+    route: RouteProp<RootStackParamList, 'Onboarding' | 'Tutorial'>;
 }
 
 const OnboardingScreen: React.FunctionComponent<Props> = ({ navigation, route }) => {
     const { onboarding = false } = route.params;
 
-    console.log("onboarding: ", onboarding);
-
     const scrollX = React.useRef(new RNAnimated.Value(0)).current;
-    const keyExtractor = React.useCallback((_: any, index: number) => index.toString(), []);
+    const keyExtractor = React.useCallback((_: OnboardingScreenItem, index: number) => index.toString(), []);
     //Current item index of flatlist
-    const [activeIndex, setActiveIndex] = React.useState(0);
+    const [activeIndex, setActiveIndex] = React.useState<number>(0);
     const flatListRef = React.useRef<RNAnimated.FlatList>(null);
 
+    const closeOnboarding = React.useCallback(() => {
+        if (onboarding) navigation.navigate('List');
+        else navigation.goBack();
+    }, []);
+
     const gotoNextPage = React.useCallback((activeIndex: number) => {
+        if (activeIndex === data.length - 1) {
+            closeOnboarding();
+            return;
+        }
+
         if (activeIndex + 1 < data.length) {
             if (flatListRef.current === null) return;
 
@@ -115,17 +125,22 @@ const OnboardingScreen: React.FunctionComponent<Props> = ({ navigation, route })
         }
     }, [activeIndex, flatListRef.current]);
 
-    //Flatlist props that calculates current item index
-    const onViewRef = React.useRef(({ viewableItems }: any) => {
+    type ViewableItemsChangedProps = {
+        viewableItems: ViewToken[];
+    };
+
+    // Flatlist props that calculates current item index
+    const onViewRef = React.useRef(({ viewableItems }: ViewableItemsChangedProps) => {
+        if (viewableItems[0].index === null) return;
         setActiveIndex(viewableItems[0].index);
     });
+
     const viewConfigRef = React.useRef({ viewAreaCoveragePercentThreshold: 50 });
 
     const renderItem = React.useCallback(({ item }: OnboardingScreenItemProps) => {
         return (
             <View style={[styles.itemContainer]}>
                 <Animated.View
-                    // entering={FadeInUp.duration(500).delay(100)}
                     style={{
                         flexBasis: '15%',
                         justifyContent: 'flex-end',
@@ -138,12 +153,9 @@ const OnboardingScreen: React.FunctionComponent<Props> = ({ navigation, route })
                     }}>{item.title}</Text>
                 </Animated.View>
                 <Animated.View
-                    // entering={FadeInUp.duration(500).delay(200)}
                     style={{
                         flexGrow: 0,
                         flexBasis: '50%',
-                        // borderWidth: 1,
-                        // borderColor: '#fff',
                         alignContent: 'center',
                         justifyContent: 'center',
                     }}>
@@ -158,7 +170,6 @@ const OnboardingScreen: React.FunctionComponent<Props> = ({ navigation, route })
                     />
                 </Animated.View>
                 <Animated.View
-                    // entering={FadeInUp.duration(500).delay(300)}
                     style={{
                         flex: 1,
                         flexGrow: 1,
@@ -180,7 +191,7 @@ const OnboardingScreen: React.FunctionComponent<Props> = ({ navigation, route })
 
     return (
         <View style={[styles.container]}>
-            <SafeAreaView edges={['top', 'bottom']}>
+            <SafeAreaView edges={(onboarding ? ['top', 'bottom'] : [])}>
                 <View style={[StyleSheet.absoluteFillObject]}>
                     {data.map((item, index) => {
                         const inputRange = [
@@ -248,9 +259,7 @@ const OnboardingScreen: React.FunctionComponent<Props> = ({ navigation, route })
                     <View pointerEvents='box-none' style={{ alignItems: 'flex-end' }}>
                         <TouchableOpacity
                             style={{ padding: 10 }}
-                            onPress={() => {
-                                navigation.navigate('List');
-                            }}>
+                            onPress={closeOnboarding}>
                             <View style={{
                                 padding: 10,
                                 borderRadius: 20,
