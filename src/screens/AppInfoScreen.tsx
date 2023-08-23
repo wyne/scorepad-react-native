@@ -35,8 +35,8 @@ const AppInfoScreen: React.FunctionComponent<Props> = ({ navigation }) => {
                     </Text>
                 </View>
 
-                <Button title="Onboarding" onPress={() => {
-                    navigation.navigate('Onboarding');
+                <Button title="View Tutorial" onPress={() => {
+                    navigation.navigate('Tutorial');
                 }
                 } />
                 <View style={styles.container}>

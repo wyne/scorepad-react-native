@@ -1,5 +1,11 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { createEntityAdapter } from '@reduxjs/toolkit';
+import { createAsyncThunk } from '@reduxjs/toolkit';
+import * as Crypto from 'expo-crypto';
+
+import analytics from '@react-native-firebase/analytics';
+import { playerAdd } from './PlayersSlice';
+import { setCurrentGameId } from './SettingsSlice';
 
 export interface GameState {
     id: string;
@@ -51,6 +57,44 @@ const gamesSlice = createSlice({
 interface GamesSlice {
     games: typeof initialState;
 }
+
+export const asyncCreateGame = createAsyncThunk(
+    'games/create',
+    async (gameCount: number, { dispatch }) => {
+        const player1Id = Crypto.randomUUID();
+        const player2Id = Crypto.randomUUID();
+        const newGameId = Crypto.randomUUID();
+
+        dispatch(playerAdd({
+            id: player1Id,
+            playerName: "Player 1",
+            scores: [0],
+        }));
+
+        dispatch(playerAdd({
+            id: player2Id,
+            playerName: "Player 2",
+            scores: [0],
+        }));
+
+        dispatch(gameSave({
+            id: newGameId,
+            title: `Game ${gameCount}`,
+            dateCreated: Date.now(),
+            roundCurrent: 0,
+            roundTotal: 0,
+            playerIds: [player1Id, player2Id],
+        }));
+
+        dispatch(setCurrentGameId(newGameId));
+
+        await analytics().logEvent('new_game', {
+            index: gameCount,
+        });
+
+        return newGameId;
+    }
+);
 
 export const {
     updateGame,

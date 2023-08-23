@@ -1,13 +1,13 @@
-import React, { memo } from 'react';
+import React, { memo, useEffect } from 'react';
 import { StyleSheet } from 'react-native';
 import Animated, { Layout, Easing } from 'react-native-reanimated';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ParamListBase } from '@react-navigation/native';
+import { useAppSelector, useAppDispatch } from '../../redux/hooks';
 
-import { selectAllGames } from '../../redux/GamesSlice';
+import { asyncCreateGame, selectAllGames } from '../../redux/GamesSlice';
 import GameListItem from '../components/GameListItem';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useAppSelector } from '../../redux/hooks';
 
 interface Props {
     navigation: NativeStackNavigationProp<ParamListBase, string, undefined>;
@@ -15,6 +15,18 @@ interface Props {
 
 const ListScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     const gameList = useAppSelector(state => selectAllGames(state));
+    const dispatch = useAppDispatch();
+
+    // If no games, create one and navigate to it
+    useEffect(() => {
+        if (gameList.length == 0) {
+            dispatch(asyncCreateGame(gameList.length + 1)).then(() => {
+                setTimeout(() => {
+                    navigation.navigate("Game");
+                }, 500);
+            });
+        }
+    }, [gameList.length]);
 
     return (
         <SafeAreaView edges={['bottom', 'left', 'right']} style={{ backgroundColor: 'white', flex: 1 }}>
