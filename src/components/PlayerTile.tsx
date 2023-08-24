@@ -9,6 +9,7 @@ import { playerRoundScoreIncrement } from '../../redux/PlayersSlice';
 import { selectGameById } from '../../redux/GamesSlice';
 import { selectPlayerById } from '../../redux/PlayersSlice';
 import { useAppSelector } from '../../redux/hooks';
+import { ScoreParticle } from './PlayerTiles/ScoreParticle';
 
 interface Props {
     color: string;
@@ -18,38 +19,6 @@ interface Props {
     playerId: string;
     index: number;
 }
-
-const Particle: React.FunctionComponent = React.memo(({ id, value }) => {
-    const randomTop: DimensionValue = `${Math.floor(Math.random() * 30 + 0)}%`;
-    const randomLeft: DimensionValue = `${Math.floor(Math.random() * 70 + 10)}%`;
-    const randomRotation: string = `${Math.floor(Math.random() * 30) - 15}deg`;
-    let color = 'gold';
-    switch (value) {
-        case '+1': color = 'green'; break;
-        case '+5': color = 'blue'; break;
-        case '+10': color = 'red'; break;
-    }
-
-    return <Animated.View style={{
-        position: 'absolute',
-        top: randomTop,
-        left: randomLeft,
-        transform: [{ rotate: randomRotation }],
-        backgroundColor: color,
-        opacity: 0.7,
-        borderRadius: 100,
-        borderWidth: 2,
-        borderColor: 'black',
-        padding: 5,
-    }}
-        // entering={ZoomInEasyUp}
-        exiting={FadeOut.withInitialValues({ opacity: 0.7 })}
-    >
-        <Text style={{
-            color: 'black', fontSize: 30, fontWeight: 'bold'
-        }}>{value}</Text>
-    </Animated.View>;
-});
 
 const PlayerTile: React.FunctionComponent<Props> = ({ color, fontColor, cols, rows, playerId, index }) => {
     const [width, setWidth] = useState(0);
@@ -149,7 +118,7 @@ const PlayerTile: React.FunctionComponent<Props> = ({ color, fontColor, cols, ro
                 onPressIn={incPlayerRoundScoreHandler}>
                 <View style={{ height: '100%', width: '100%' }}>
                     {particles.map((particle) => (
-                        <Particle key={particle.key} value={particle.value} />
+                        <ScoreParticle key={particle.key} value={particle.value} />
                     ))}
                 </View>
             </TouchableHighlight>
