@@ -15,11 +15,11 @@
       }
     },
     "development": {
+      "developmentClient": true,
       "distribution": "internal",
       "ios": {
         "resourceClass": "m-medium"
       },
-      "channel": "development",
       "env": {
         "APP_VARIANT": "development"
       }
