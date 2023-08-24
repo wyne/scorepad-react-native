@@ -1,17 +1,56 @@
-const IS_DEV = process.env.APP_VARIANT === 'development';
+const variant = process.env.APP_VARIANT;
+
+let packageName;
+switch (variant) {
+  case 'development':
+    packageName = 'com.wyne.scorepad.dev';
+    break;
+  case 'preview':
+    packageName = 'com.wyne.scorepad.preview';
+    break;
+  default:
+    packageName = 'com.wyne.scorepad';
+    break;
+}
+
+let name;
+switch (variant) {
+  case 'development':
+    name = 'ScorePad with Rounds (dev)';
+    break;
+  case 'preview':
+    name = 'ScorePad with Rounds (preview)';
+    break;
+  default:
+    name = 'ScorePad with Rounds';
+    break;
+}
+
+let icon;
+switch (variant) {
+  case 'development':
+    icon = './assets/icon-dev.png';
+    break;
+  case 'preview':
+    icon = './assets/icon-preview.png';
+    break;
+  default:
+    icon = './assets/icon.png';
+    break;
+}
 
 export default {
-  name: IS_DEV ? 'ScorePad with Rounds (dev)' : 'ScorePad with Rounds',
+  name: name,
   slug: 'scorepad',
   version: "2.1.12",
   orientation: "default",
-  icon: IS_DEV ? './assets/icon-dev.png' : './assets/icon.png',
+  icon: icon,
   assetBundlePatterns: [
     "assets/*"
   ],
   backgroundColor: "#000000",
   ios: {
-    bundleIdentifier: IS_DEV ? 'com.wyne.scorepad.dev' : 'com.wyne.scorepad',
+    bundleIdentifier: packageName,
     supportsTablet: true,
     requireFullScreen: false,
     buildNumber: "54",
@@ -26,7 +65,7 @@ export default {
       "foregroundImage": "./assets/adaptive-icon-fg.png",
       "backgroundImage": "./assets/adaptive-icon-bg.png"
     },
-    package: IS_DEV ? 'com.wyne.scorepad.dev' : 'com.wyne.scorepad',
+    package: packageName,
     permissions: [],
     versionCode: 54,
     googleServicesFile: "./google-services.json",
