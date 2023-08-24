@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableHighlight, LayoutChangeEvent, DimensionValue } from 'react-native';
+import { View, StyleSheet, TouchableHighlight, LayoutChangeEvent, DimensionValue } from 'react-native';
 import { useDispatch } from 'react-redux';
 import analytics from '@react-native-firebase/analytics';
-import Animated, { FadeOut } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 
 import AdditionTile from './PlayerTiles/AdditionTile/AdditionTile';
@@ -22,22 +21,11 @@ interface Props {
 }
 
 const PlayerTile: React.FunctionComponent<Props> = ({ color, fontColor, cols, rows, playerId, index }) => {
+    const dispatch = useDispatch();
+
     const [width, setWidth] = useState(0);
     const [height, setHeight] = useState(0);
-
     const [particles, setParticles] = useState<object[]>([]);
-
-    const addParticle = () => {
-        const key = Math.random().toString(36).substring(7);
-        const value = `+${multiplier}`;
-
-        setTimeout(() => {
-            setParticles((particles) => particles.filter((p) => p.key !== key));
-        }, 3000);
-        setParticles((particles) => [...particles, { key, value }]);
-    };
-
-    const dispatch = useDispatch();
 
     const multiplier = useAppSelector(state => state.settings.multiplier);
     const currentGameId = useAppSelector(state => state.settings.currentGameId);
@@ -46,11 +34,8 @@ const PlayerTile: React.FunctionComponent<Props> = ({ color, fontColor, cols, ro
 
     const roundCurrent = currentGame.roundCurrent;
 
-    // New
     const player = useAppSelector(state => selectPlayerById(state, playerId));
-
     if (typeof player == 'undefined') return null;
-
     const playerName = player.playerName;
     const scoreTotal = player.scores.reduce(
         (sum, current, round) => {
@@ -59,6 +44,16 @@ const PlayerTile: React.FunctionComponent<Props> = ({ color, fontColor, cols, ro
         }
     );
     const scoreRound = player.scores[roundCurrent] || 0;
+
+    const addParticle = () => {
+        const key = Math.random().toString(36).substring(7);
+        const value = `+${multiplier}`;
+
+        setTimeout(() => {
+            setParticles((particles) => particles.filter((p) => p.key !== key));
+        }, 800);
+        setParticles((particles) => [...particles, { key, value }]);
+    };
 
     const incPlayerRoundScoreHandler = () => {
         addParticle();
@@ -72,6 +67,7 @@ const PlayerTile: React.FunctionComponent<Props> = ({ color, fontColor, cols, ro
         });
         dispatch(playerRoundScoreIncrement(playerId, roundCurrent, multiplier));
     };
+
     const decPlayerRoundScoreHandler = () => {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
         analytics().logEvent('score_change', {
@@ -84,9 +80,8 @@ const PlayerTile: React.FunctionComponent<Props> = ({ color, fontColor, cols, ro
         dispatch(playerRoundScoreIncrement(playerId, roundCurrent, -multiplier));
     };
 
-    type Percent = `${number}%`;
-    const widthPerc: Percent = `${(100 / cols)}%`;
-    const heightPerc: Percent = `${(100 / rows)}%`;
+    const widthPerc: DimensionValue = `${(100 / cols)}%`;
+    const heightPerc: DimensionValue = `${(100 / rows)}%`;
 
     const layoutHandler = (e: LayoutChangeEvent) => {
         const { width, height } = e.nativeEvent.layout;
@@ -118,7 +113,7 @@ const PlayerTile: React.FunctionComponent<Props> = ({ color, fontColor, cols, ro
                 underlayColor={fontColor + '30'}
                 activeOpacity={1}
                 onPressIn={incPlayerRoundScoreHandler}>
-                <View style={{ height: '100%', width: '100%' }}>
+                <View style={StyleSheet.absoluteFill}>
                     {particles.map((particle) => (
                         <ScoreParticle key={particle.key} value={particle.value} />
                     ))}
