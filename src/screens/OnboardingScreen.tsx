@@ -37,13 +37,13 @@ const data: OnboardingScreenItem[] = [
     },
     {
         title: "Add Points",
-        image: require('../../assets/onboarding/add.jpg'),
+        image: require('../../assets/onboarding/add.png'),
         description: 'Tap the top half of a player’s tile to add points.',
         backgroundColor: '#7bcf6e',
     },
     {
         title: "Subtract Points",
-        image: require('../../assets/onboarding/subtract.jpg'),
+        image: require('../../assets/onboarding/subtract.png'),
         description: 'Tap the bottom half of a player’s tile to subtract points.',
         backgroundColor: '#db4747',
     },
@@ -57,18 +57,6 @@ const data: OnboardingScreenItem[] = [
         title: "Change Round",
         image: require('../../assets/onboarding/rounds.png'),
         description: 'Use rounds to keep score history per round. Tap the > and < buttons to cycle through.',
-        backgroundColor: '#db4747',
-    },
-    {
-        title: "Edit Players",
-        image: require('../../assets/icon.png'),
-        description: '',
-        backgroundColor: '#4654a7',
-    },
-    {
-        title: "Delete Game",
-        image: require('../../assets/icon.png'),
-        description: '',
         backgroundColor: '#db4747',
     },
     {

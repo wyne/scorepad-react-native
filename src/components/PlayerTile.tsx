@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableHighlight, LayoutChangeEvent, Dimensio
 import { useDispatch } from 'react-redux';
 import analytics from '@react-native-firebase/analytics';
 import Animated, { FadeOut } from 'react-native-reanimated';
+import * as Haptics from 'expo-haptics';
 
 import AdditionTile from './PlayerTiles/AdditionTile/AdditionTile';
 import { playerRoundScoreIncrement } from '../../redux/PlayersSlice';
@@ -61,7 +62,7 @@ const PlayerTile: React.FunctionComponent<Props> = ({ color, fontColor, cols, ro
 
     const incPlayerRoundScoreHandler = () => {
         addParticle();
-
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
         analytics().logEvent('score_change', {
             player_index: index,
             game_id: currentGameId,
@@ -72,6 +73,7 @@ const PlayerTile: React.FunctionComponent<Props> = ({ color, fontColor, cols, ro
         dispatch(playerRoundScoreIncrement(playerId, roundCurrent, multiplier));
     };
     const decPlayerRoundScoreHandler = () => {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
         analytics().logEvent('score_change', {
             player_index: index,
             game_id: currentGameId,
@@ -94,13 +96,13 @@ const PlayerTile: React.FunctionComponent<Props> = ({ color, fontColor, cols, ro
     };
 
     return (
-        <View style={[
-            styles.playerCard,
-            { backgroundColor: color },
-            { width: widthPerc },
-            { height: heightPerc },
-        ]}
-            onLayout={layoutHandler}>
+        <View onLayout={layoutHandler}
+            style={[
+                styles.playerCard,
+                { backgroundColor: color },
+                { width: widthPerc },
+                { height: heightPerc },
+            ]}>
             <AdditionTile
                 totalScore={scoreTotal}
                 roundScore={scoreRound}

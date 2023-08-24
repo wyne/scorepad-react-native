@@ -35,12 +35,12 @@ const RotatingIcon: React.FunctionComponent = ({ }) => {
                     alignSelf: 'center',
                     height: 100,
                     width: 100,
-                    margin: 10,
+                    margin: 20,
                     borderRadius: 20,
                 }}
             />
         </Animated.View>
-    </TouchableWithoutFeedback>
-}
+    </TouchableWithoutFeedback>;
+};
 
 export default RotatingIcon;
