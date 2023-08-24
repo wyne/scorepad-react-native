@@ -1,40 +1,56 @@
 import React from 'react';
-import { TouchableOpacity, Text, StyleSheet } from 'react-native';
+import { Text, View, StyleSheet } from 'react-native';
 import analytics from '@react-native-firebase/analytics';
 
 import { useAppSelector, useAppDispatch } from '../../../redux/hooks';
 import { systemBlue } from '../../constants';
-import { toggleMultiplier } from '../../../redux/SettingsSlice';
+import { setMultiplier } from '../../../redux/SettingsSlice';
+import { MenuView, MenuAction } from '@react-native-menu/menu';
 
 const MultiplierButton: React.FunctionComponent = ({ }) => {
     const dispatch = useAppDispatch();
     const multiplier = useAppSelector(state => state.settings.multiplier);
     const currentGameId = useAppSelector(state => state.settings.currentGameId);
-    const multiplierHandler = async () => {
-        dispatch(toggleMultiplier());
-        await analytics().logEvent('multiplier_change', {
-            multiplier: multiplier,
-            game_id: currentGameId,
-        });
-    };
+
+    const addends = [1, 5, 10, 20, 50];
+
+    const actions: MenuAction[] = addends.map(addend => {
+        return {
+            id: addend.toString(),
+            title: `${addend} point${addend === 1 ? '' : 's'} per tap`,
+            state: multiplier === addend ? 'on' : 'off',
+        };
+    });
 
     return (
-        <TouchableOpacity style={[styles.headerButton]} onPress={multiplierHandler}>
-            <Text style={styles.multiplierButton}>{multiplier} pt</Text>
-        </TouchableOpacity>
+        <MenuView
+            onPressAction={async ({ nativeEvent }) => {
+                dispatch(setMultiplier(parseInt(nativeEvent.event)));
+                await analytics().logEvent('multiplier_change', {
+                    multiplier: multiplier,
+                    game_id: currentGameId,
+                });
+            }}
+            actions={actions}>
+            <View style={styles.button}>
+                <Text style={styles.buttonText}>{multiplier} pt</Text>
+            </View>
+        </MenuView>
     );
 };
 
 const styles = StyleSheet.create({
-    multiplierButton: {
-        color: systemBlue,
-        fontSize: 20,
-        fontVariant: ['tabular-nums'],
+    button: {
+        padding: 10,
+        paddingVertical: 5,
+        wdith: 50,
+        alignSelf: 'center',
     },
-    headerButton: {
+    buttonText: {
         fontSize: 20,
-        padding: 8,
-        paddingHorizontal: 15,
+        textAlign: 'center',
+        fontVariant: ['tabular-nums'],
+        color: systemBlue,
     },
 });
 
