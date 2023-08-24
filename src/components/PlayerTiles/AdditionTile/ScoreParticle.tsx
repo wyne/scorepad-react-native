@@ -9,15 +9,21 @@ type Props = {
 };
 
 export const ScoreParticle: React.FunctionComponent<Props> = React.memo(({ id, value }) => {
-    const randomTop: DimensionValue = `${Math.floor(Math.random() * 10)}%`;
-    const randomLeft: number = Math.floor(Math.random() * 100);
     const randomRotation: string = `${Math.floor(Math.random() * 30) - 15}deg`;
+    const randomTop = Math.floor(Math.random() * 10);
+    const randomLeft = Math.floor(Math.random() * 100);
 
     let left: DimensionValue | undefined, right: DimensionValue | undefined;
+    let top: DimensionValue | undefined, bottom: DimensionValue | undefined;
+
+    if (value.indexOf('-') > -1) {
+        bottom = `${randomTop}%`;
+    } else {
+        top = `${randomTop}%`;
+    }
 
     if (randomLeft > 50) {
         right = `${100 - randomLeft}%`;
-        console.log(right);
     } else {
         left = `${randomLeft}%`;
     }
@@ -26,7 +32,8 @@ export const ScoreParticle: React.FunctionComponent<Props> = React.memo(({ id, v
         key={id}
         style={{
             position: 'absolute',
-            top: randomTop,
+            top: top,
+            bottom: bottom,
             left: left,
             right: right,
             transform: [{ rotate: randomRotation }],
@@ -35,11 +42,15 @@ export const ScoreParticle: React.FunctionComponent<Props> = React.memo(({ id, v
             borderRadius: 100,
             borderWidth: 2,
             borderColor: 'black',
-            padding: 5,
+            padding: 8,
         }}
     >
         <Text style={{
-            color: 'black', fontSize: 25, fontWeight: 'bold'
+            color: 'black',
+            fontSize: 20,
+            fontWeight: 'bold',
+            textAlign: 'center',
+            fontVariant: ['tabular-nums'],
         }}>{value}</Text>
     </Animated.View>;
 });

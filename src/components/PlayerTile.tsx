@@ -1,15 +1,11 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, TouchableHighlight, LayoutChangeEvent, DimensionValue } from 'react-native';
-import { useDispatch } from 'react-redux';
-import analytics from '@react-native-firebase/analytics';
-import * as Haptics from 'expo-haptics';
+import { View, StyleSheet, LayoutChangeEvent, DimensionValue } from 'react-native';
 
 import AdditionTile from './PlayerTiles/AdditionTile/AdditionTile';
-import { playerRoundScoreIncrement } from '../../redux/PlayersSlice';
 import { selectGameById } from '../../redux/GamesSlice';
 import { selectPlayerById } from '../../redux/PlayersSlice';
 import { useAppSelector } from '../../redux/hooks';
-import { ScoreParticle } from './PlayerTiles/ScoreParticle';
+import { TouchSurface } from './PlayerTiles/AdditionTile/TouchSurface';
 
 interface Props {
     color: string;
@@ -21,13 +17,9 @@ interface Props {
 }
 
 const PlayerTile: React.FunctionComponent<Props> = ({ color, fontColor, cols, rows, playerId, index }) => {
-    const dispatch = useDispatch();
-
     const [width, setWidth] = useState(0);
     const [height, setHeight] = useState(0);
-    const [particles, setParticles] = useState<object[]>([]);
 
-    const multiplier = useAppSelector(state => state.settings.multiplier);
     const currentGameId = useAppSelector(state => state.settings.currentGameId);
     const currentGame = useAppSelector(state => selectGameById(state, currentGameId));
     if (typeof currentGame == 'undefined') return null;
@@ -44,41 +36,6 @@ const PlayerTile: React.FunctionComponent<Props> = ({ color, fontColor, cols, ro
         }
     );
     const scoreRound = player.scores[roundCurrent] || 0;
-
-    const addParticle = () => {
-        const key = Math.random().toString(36).substring(7);
-        const value = `+${multiplier}`;
-
-        setTimeout(() => {
-            setParticles((particles) => particles.filter((p) => p.key !== key));
-        }, 800);
-        setParticles((particles) => [...particles, { key, value }]);
-    };
-
-    const incPlayerRoundScoreHandler = () => {
-        addParticle();
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-        analytics().logEvent('score_change', {
-            player_index: index,
-            game_id: currentGameId,
-            multiplier: multiplier,
-            round: roundCurrent,
-            type: 'increment'
-        });
-        dispatch(playerRoundScoreIncrement(playerId, roundCurrent, multiplier));
-    };
-
-    const decPlayerRoundScoreHandler = () => {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-        analytics().logEvent('score_change', {
-            player_index: index,
-            game_id: currentGameId,
-            multiplier: multiplier,
-            round: roundCurrent,
-            type: 'decrement'
-        });
-        dispatch(playerRoundScoreIncrement(playerId, roundCurrent, -multiplier));
-    };
 
     const widthPerc: DimensionValue = `${(100 / cols)}%`;
     const heightPerc: DimensionValue = `${(100 / rows)}%`;
@@ -108,25 +65,17 @@ const PlayerTile: React.FunctionComponent<Props> = ({ color, fontColor, cols, ro
                 index={index}
             />
 
-            <TouchableHighlight
-                style={[styles.surface, styles.surfaceAdd]}
-                underlayColor={fontColor + '30'}
-                activeOpacity={1}
-                onPressIn={incPlayerRoundScoreHandler}>
-                <View style={StyleSheet.absoluteFill}>
-                    {particles.map((particle) => (
-                        <ScoreParticle key={particle.key} value={particle.value} />
-                    ))}
-                </View>
-            </TouchableHighlight>
+            <TouchSurface
+                scoreType='increment'
+                fontColor={fontColor}
+                playerId={playerId}
+                playerIndex={index} />
 
-            <TouchableHighlight
-                style={[styles.surface, styles.surfaceSubtract]}
-                underlayColor={fontColor + '30'}
-                activeOpacity={1}
-                onPress={decPlayerRoundScoreHandler}>
-                <></>
-            </TouchableHighlight>
+            <TouchSurface
+                scoreType='decrement'
+                fontColor={fontColor}
+                playerId={playerId}
+                playerIndex={index} />
         </View>
     );
 };
