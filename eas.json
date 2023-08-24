@@ -25,10 +25,14 @@
       }
     },
     "preview": {
+      "distribution": "internal",
       "ios": {
         "resourceClass": "m-medium"
       },
-      "channel": "preview"
+      "channel": "preview",
+      "env": {
+        "APP_VARIANT": "preview"
+      }
     },
     "production": {
       "ios": {
