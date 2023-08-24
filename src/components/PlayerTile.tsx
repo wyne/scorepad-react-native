@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, StyleSheet, TouchableHighlight, LayoutChangeEvent } from 'react-native';
 import { useDispatch } from 'react-redux';
 import analytics from '@react-native-firebase/analytics';
+import * as Haptics from 'expo-haptics';
 
 import AdditionTile from './PlayerTiles/AdditionTile/AdditionTile';
 import { playerRoundScoreIncrement } from '../../redux/PlayersSlice';
@@ -46,6 +47,7 @@ const PlayerTile: React.FunctionComponent<Props> = ({ color, fontColor, cols, ro
     const scoreRound = player.scores[roundCurrent] || 0;
 
     const incPlayerRoundScoreHandler = () => {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
         analytics().logEvent('score_change', {
             player_index: index,
             game_id: currentGameId,
@@ -56,6 +58,7 @@ const PlayerTile: React.FunctionComponent<Props> = ({ color, fontColor, cols, ro
         dispatch(playerRoundScoreIncrement(playerId, roundCurrent, multiplier));
     };
     const decPlayerRoundScoreHandler = () => {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
         analytics().logEvent('score_change', {
             player_index: index,
             game_id: currentGameId,
@@ -78,14 +81,13 @@ const PlayerTile: React.FunctionComponent<Props> = ({ color, fontColor, cols, ro
     };
 
     return (
-        <View style={[
-            styles.playerCard,
-            { backgroundColor: color },
-            { width: widthPerc },
-            { height: heightPerc },
-        ]}
-            onLayout={layoutHandler}
-        >
+        <View onLayout={layoutHandler}
+            style={[
+                styles.playerCard,
+                { backgroundColor: color },
+                { width: widthPerc },
+                { height: heightPerc },
+            ]}>
             <AdditionTile
                 totalScore={scoreTotal}
                 roundScore={scoreRound}
