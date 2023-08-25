@@ -1,14 +1,11 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, TouchableHighlight, LayoutChangeEvent } from 'react-native';
-import { useDispatch } from 'react-redux';
-import analytics from '@react-native-firebase/analytics';
-import * as Haptics from 'expo-haptics';
+import { View, StyleSheet, LayoutChangeEvent, DimensionValue } from 'react-native';
 
 import AdditionTile from './PlayerTiles/AdditionTile/AdditionTile';
-import { playerRoundScoreIncrement } from '../../redux/PlayersSlice';
 import { selectGameById } from '../../redux/GamesSlice';
 import { selectPlayerById } from '../../redux/PlayersSlice';
 import { useAppSelector } from '../../redux/hooks';
+import { TouchSurface } from './PlayerTiles/AdditionTile/TouchSurface';
 
 interface Props {
     color: string;
@@ -23,20 +20,14 @@ const PlayerTile: React.FunctionComponent<Props> = ({ color, fontColor, cols, ro
     const [width, setWidth] = useState(0);
     const [height, setHeight] = useState(0);
 
-    const dispatch = useDispatch();
-
-    const multiplier = useAppSelector(state => state.settings.multiplier);
     const currentGameId = useAppSelector(state => state.settings.currentGameId);
     const currentGame = useAppSelector(state => selectGameById(state, currentGameId));
     if (typeof currentGame == 'undefined') return null;
 
     const roundCurrent = currentGame.roundCurrent;
 
-    // New
     const player = useAppSelector(state => selectPlayerById(state, playerId));
-
     if (typeof player == 'undefined') return null;
-
     const playerName = player.playerName;
     const scoreTotal = player.scores.reduce(
         (sum, current, round) => {
@@ -46,32 +37,8 @@ const PlayerTile: React.FunctionComponent<Props> = ({ color, fontColor, cols, ro
     );
     const scoreRound = player.scores[roundCurrent] || 0;
 
-    const incPlayerRoundScoreHandler = () => {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
-        analytics().logEvent('score_change', {
-            player_index: index,
-            game_id: currentGameId,
-            multiplier: multiplier,
-            round: roundCurrent,
-            type: 'increment'
-        });
-        dispatch(playerRoundScoreIncrement(playerId, roundCurrent, multiplier));
-    };
-    const decPlayerRoundScoreHandler = () => {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
-        analytics().logEvent('score_change', {
-            player_index: index,
-            game_id: currentGameId,
-            multiplier: multiplier,
-            round: roundCurrent,
-            type: 'decrement'
-        });
-        dispatch(playerRoundScoreIncrement(playerId, roundCurrent, -multiplier));
-    };
-
-    type Percent = `${number}%`;
-    const widthPerc: Percent = `${(100 / cols)}%`;
-    const heightPerc: Percent = `${(100 / rows)}%`;
+    const widthPerc: DimensionValue = `${(100 / cols)}%`;
+    const heightPerc: DimensionValue = `${(100 / rows)}%`;
 
     const layoutHandler = (e: LayoutChangeEvent) => {
         const { width, height } = e.nativeEvent.layout;
@@ -98,21 +65,17 @@ const PlayerTile: React.FunctionComponent<Props> = ({ color, fontColor, cols, ro
                 index={index}
             />
 
-            <TouchableHighlight
-                style={[styles.surface, styles.surfaceAdd]}
-                underlayColor={fontColor + '30'}
-                activeOpacity={1}
-                onPress={incPlayerRoundScoreHandler}>
-                <></>
-            </TouchableHighlight>
+            <TouchSurface
+                scoreType='increment'
+                fontColor={fontColor}
+                playerId={playerId}
+                playerIndex={index} />
 
-            <TouchableHighlight
-                style={[styles.surface, styles.surfaceSubtract]}
-                underlayColor={fontColor + '30'}
-                activeOpacity={1}
-                onPress={decPlayerRoundScoreHandler}>
-                <></>
-            </TouchableHighlight>
+            <TouchSurface
+                scoreType='decrement'
+                fontColor={fontColor}
+                playerId={playerId}
+                playerIndex={index} />
         </View>
     );
 };
