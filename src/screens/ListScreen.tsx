@@ -34,7 +34,7 @@ const ListScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     return (
         <SafeAreaView edges={['bottom', 'left', 'right']} style={{ backgroundColor: 'white', flex: 1 }}>
             <Animated.FlatList
-                itemLayoutAnimation={Layout.easing(Easing.ease).delay(200)}
+                itemLayoutAnimation={Layout.easing(Easing.ease)}
                 style={styles.list}
                 data={gameList}
                 renderItem={({ item, index }) =>
