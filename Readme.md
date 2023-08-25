@@ -62,6 +62,13 @@ eas build --platform ios --profile development --local
 
 Debug eas config settings: `eas config --platform=ios --profile=development`
 
+### Preview Build (Standalone)
+
+```zsh
+npx expo prebuild -p ios
+npx eas-cli build --platform ios --profile preview --local
+```
+
 ### Remote Build
 
 ```zsh

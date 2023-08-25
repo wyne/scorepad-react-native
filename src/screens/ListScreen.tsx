@@ -8,6 +8,7 @@ import { useAppSelector, useAppDispatch } from '../../redux/hooks';
 import { asyncCreateGame, selectAllGames } from '../../redux/GamesSlice';
 import GameListItem from '../components/GameListItem';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { setOnboardedVersion } from '../../redux/SettingsSlice';
 
 interface Props {
     navigation: NativeStackNavigationProp<ParamListBase, string, undefined>;
@@ -19,6 +20,8 @@ const ListScreen: React.FunctionComponent<Props> = ({ navigation }) => {
 
     // If no games, create one and navigate to it
     useEffect(() => {
+        dispatch(setOnboardedVersion());
+
         if (gameList.length == 0) {
             dispatch(asyncCreateGame(gameList.length + 1)).then(() => {
                 setTimeout(() => {
