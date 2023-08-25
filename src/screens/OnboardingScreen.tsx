@@ -8,12 +8,12 @@ import {
     ViewToken,
     ImageURISource,
 } from 'react-native';
-import Animated from 'react-native-reanimated';
+import Animated, { FadeIn } from 'react-native-reanimated';
 import { ExpandingDot } from "react-native-animated-pagination-dots";
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RouteProp } from '@react-navigation/native';
-import { RootStackParamList } from '../../App';
+import { RootStackParamList } from '../Navigation';
 
 const { width } = Dimensions.get('screen');
 
@@ -178,7 +178,7 @@ const OnboardingScreen: React.FunctionComponent<Props> = ({ navigation, route })
     }, [activeIndex]);
 
     return (
-        <View style={[styles.container]}>
+        <Animated.View style={[styles.container]} entering={FadeIn}>
             <SafeAreaView edges={(onboarding ? ['top', 'bottom'] : [])}>
                 <View style={[StyleSheet.absoluteFillObject]}>
                     {data.map((item, index) => {
@@ -262,7 +262,7 @@ const OnboardingScreen: React.FunctionComponent<Props> = ({ navigation, route })
                     </View>
                 </SafeAreaView>
             }
-        </View >
+        </Animated.View >
     );
 };
 

@@ -42,7 +42,7 @@ switch (variant) {
 export default {
   name: name,
   slug: 'scorepad',
-  version: "2.1.12",
+  version: "2.2.0",
   orientation: "default",
   icon: icon,
   assetBundlePatterns: [

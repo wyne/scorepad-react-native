@@ -3,29 +3,33 @@ import { View, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ParamListBase } from '@react-navigation/native';
+import Animated, { Easing, FadeInUp } from 'react-native-reanimated';
 
 interface Props {
     navigation: NativeStackNavigationProp<ParamListBase, string, undefined>;
     headerLeft: React.ReactNode;
     headerCenter: React.ReactNode;
     headerRight?: React.ReactNode;
+    animated?: boolean;
 }
 
-const CustomHeader: React.FunctionComponent<Props> = ({ headerLeft, headerCenter, headerRight }) => {
+const CustomHeader: React.FunctionComponent<Props> = ({ headerLeft, headerCenter, headerRight, animated = false }) => {
     return (
-        <SafeAreaView edges={['top']} style={[styles.headerContainer]}>
-            <SafeAreaView edges={['left']} style={styles.headerLeft}>
-                {headerLeft}
+        <Animated.View entering={animated ? FadeInUp.duration(500).easing(Easing.out(Easing.ease)) : undefined}>
+            <SafeAreaView edges={['top']} style={[styles.headerContainer]}>
+                <SafeAreaView edges={['left']} style={styles.headerLeft}>
+                    {headerLeft}
+                </SafeAreaView>
+                <View style={styles.headerCenter}>
+                    {headerCenter}
+                </View>
+                <SafeAreaView edges={['right']} style={styles.headerRight}>
+                    {headerRight}
+                </SafeAreaView>
             </SafeAreaView>
-            <View style={styles.headerCenter}>
-                {headerCenter}
-            </View>
-            <SafeAreaView edges={['right']} style={styles.headerRight}>
-                {headerRight}
-            </SafeAreaView>
-        </SafeAreaView>
+        </Animated.View>
     );
-}
+};
 
 const styles = StyleSheet.create({
     headerContainer: {
