@@ -4,7 +4,8 @@ import { Image } from 'expo-image';
 import analytics from '@react-native-firebase/analytics';
 
 import Animated, {
-    FlipInEasyX,
+    Easing,
+    PinwheelIn,
     useAnimatedStyle,
     useSharedValue,
     withTiming
@@ -23,23 +24,23 @@ const RotatingIcon: React.FunctionComponent = ({ }) => {
 
     return <TouchableWithoutFeedback onPress={async () => {
         rotationCount.value = rotationCount.value + 1;
-        rotation.value = withTiming((rotationCount.value * 90), { duration: 1000 });
+        rotation.value = withTiming((rotationCount.value * 90), { duration: 1000, easing: Easing.elastic(1) });
 
         await analytics().logEvent('app_icon');
     }}>
-        <Animated.View style={[animatedStyles]} entering={FlipInEasyX.delay(0).duration(1000)}>
+        <Animated.View style={[animatedStyles]} entering={PinwheelIn.delay(0).duration(2000).easing(Easing.elastic(1))}>
             <Image source={require('../../../assets/icon.png')}
                 contentFit='contain'
                 style={{
                     alignSelf: 'center',
                     height: 100,
                     width: 100,
-                    margin: 10,
+                    margin: 20,
                     borderRadius: 20,
                 }}
             />
         </Animated.View>
-    </TouchableWithoutFeedback>
-}
+    </TouchableWithoutFeedback>;
+};
 
 export default RotatingIcon;

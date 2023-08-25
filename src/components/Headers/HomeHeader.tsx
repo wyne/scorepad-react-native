@@ -1,5 +1,5 @@
 import React from 'react';
-import { Text, StyleSheet } from 'react-native';
+import { Text, StyleSheet, View } from 'react-native';
 import AppInfoButton from '../Buttons/AppInfoButton';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ParamListBase } from '@react-navigation/native';
@@ -12,15 +12,17 @@ interface Props {
 }
 
 const HomeHeader: React.FunctionComponent<Props> = ({ navigation }) => {
-
     return (
-        <CustomHeader navigation={navigation}
-            headerLeft={<AppInfoButton navigation={navigation} />}
-            headerCenter={<Text style={styles.title}>ScorePad</Text>}
-            headerRight={<NewGameButton navigation={navigation} />}
-        />
+        <View style={{ backgroundColor: 'white' }}>
+            <CustomHeader navigation={navigation}
+                headerLeft={<AppInfoButton navigation={navigation} />}
+                headerCenter={<Text style={styles.title}>ScorePad</Text>}
+                headerRight={<NewGameButton navigation={navigation} />}
+                animated={true}
+            />
+        </View>
     );
-}
+};
 
 const styles = StyleSheet.create({
     title: {

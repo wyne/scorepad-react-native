@@ -3,7 +3,7 @@ import { Text, StyleSheet, Alert } from 'react-native';
 import { ListItem } from 'react-native-elements';
 import Moment from 'react-moment';
 import { Icon } from 'react-native-elements';
-import Animated, { FadeInLeft, SlideOutLeft } from 'react-native-reanimated';
+import Animated, { FadeInUp, SlideOutLeft } from 'react-native-reanimated';
 import analytics from '@react-native-firebase/analytics';
 
 import { selectGameById, gameDelete } from '../../redux/GamesSlice';
@@ -19,7 +19,7 @@ export type Props = {
     navigation: NativeStackNavigationProp<ParamListBase, string, undefined>;
     game: GameState;
     index: number;
-}
+};
 
 const GameListItem: React.FunctionComponent<Props> = ({ navigation, game, index }) => {
     const dispatch = useAppDispatch();
@@ -79,7 +79,7 @@ const GameListItem: React.FunctionComponent<Props> = ({ navigation, game, index 
     };
 
     return (
-        <Animated.View entering={FadeInLeft.delay(index * 100)}
+        <Animated.View entering={FadeInUp.duration(500).delay(100 + index * 100)}
             exiting={SlideOutLeft.duration(200)}>
             <ListItem key={game.id} bottomDivider
                 onPress={chooseGameHandler}
