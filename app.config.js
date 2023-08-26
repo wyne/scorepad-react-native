@@ -53,7 +53,7 @@ export default {
     bundleIdentifier: packageName,
     supportsTablet: true,
     requireFullScreen: false,
-    buildNumber: "54",
+    buildNumber: "55",
     infoPlist: {
       RCTAsyncStorageExcludeFromBackup: false
     },
@@ -67,7 +67,7 @@ export default {
     },
     package: packageName,
     permissions: [],
-    versionCode: 54,
+    versionCode: 55,
     googleServicesFile: "./google-services.json",
   },
   userInterfaceStyle: "dark",
