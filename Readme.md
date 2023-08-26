@@ -11,7 +11,7 @@ An open-source, multi-platform score keeping app with per-round score history.
 
 ## Demo
 
-https://github.com/wyne/scorepad-react-native/assets/1986068/e9553864-53f6-4dd2-9a89-51ce66f16112
+https://github.com/wyne/scorepad-react-native/assets/1986068/05bde405-3025-4156-8c52-477d4b1f5912
 
 ## Website
 
