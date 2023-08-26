@@ -5,7 +5,7 @@ An open-source, multi-platform score keeping app with per-round score history.
 
 ## Demo
 
-![Demo](./assets-stores/iphone14/demo.mp4)
+https://github.com/wyne/scorepad-react-native/assets/1986068/e9553864-53f6-4dd2-9a89-51ce66f16112
 
 ## Website
 
