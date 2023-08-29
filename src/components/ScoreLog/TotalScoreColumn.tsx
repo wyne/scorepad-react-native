@@ -23,7 +23,7 @@ const TotalScoreColumn = ({ }) => {
             ))}
         </View>
     );
-}
+};
 
 const styles = StyleSheet.create({
     totalHeader: {

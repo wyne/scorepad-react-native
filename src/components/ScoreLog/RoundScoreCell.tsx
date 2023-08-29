@@ -25,8 +25,8 @@ const RoundScoreCell: React.FunctionComponent<Props> = ({ playerId, round, playe
             { color: scoreRound == 0 ? '#555' : 'white' }]}>
             {scoreRound}
         </Text>
-    )
-}
+    );
+};
 
 const styles = StyleSheet.create({
     totalHeader: {

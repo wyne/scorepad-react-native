@@ -74,7 +74,7 @@ const Rounds: React.FunctionComponent<Props> = ({ navigation, show }) => {
             </ScrollView>
         </SafeAreaView>
     );
-}
+};
 
 const styles = StyleSheet.create({
     scoreTableContainer: {

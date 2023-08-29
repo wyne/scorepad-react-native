@@ -45,8 +45,8 @@ const VideoTutorial = () => {
             useNativeControls
             onPlaybackStatusUpdate={handlePlaybackStatusUpdate}
         />
-    </View>
-}
+    </View>;
+};
 
 const styles = StyleSheet.create({
     video: {

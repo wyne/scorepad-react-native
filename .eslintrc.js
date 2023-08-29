@@ -14,6 +14,8 @@ module.exports = {
     rules: {
         '@typescript-eslint/no-var-requires': 0,
         'jest/no-disabled-tests': 0,
+        'semi': ['error', 'always'],
+        'eol-last': ['error', 'always'],
     },
     ignorePatterns: ['web-build', '__mocks__'],
 };

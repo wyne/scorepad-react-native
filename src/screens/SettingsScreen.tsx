@@ -36,7 +36,7 @@ const SettingsScreen: React.FunctionComponent<Props> = ({ navigation }) => {
 
     const maxPlayers = (() => {
         if (Platform.OS === 'ios') {
-            const platformIOS = Platform as PlatformIOSStatic
+            const platformIOS = Platform as PlatformIOSStatic;
             return platformIOS.isPad ? 12 : 8;
         }
         return 8;

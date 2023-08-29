@@ -11,4 +11,4 @@ export const palette = [
 ];
 export const STORAGE_KEY = {
     GAMES_LIST: '@games_list',
-}
+};
