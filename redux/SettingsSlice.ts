@@ -2,7 +2,7 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { SemVer, valid } from 'semver';
 import * as Application from 'expo-application';
 
-interface SettingsState {
+export interface SettingsState {
     home_fullscreen: boolean;
     multiplier: number;
     currentGameId: string | undefined;

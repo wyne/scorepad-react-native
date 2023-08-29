@@ -1,14 +1,7 @@
-import { render, fireEvent } from '@testing-library/react-native';
+import { render, fireEvent, waitFor } from '@testing-library/react-native';
 import analytics from '@react-native-firebase/analytics';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import AppInfoButton from './AppInfoButton';
-
-jest.mock('@react-native-firebase/analytics', () => ({
-    __esModule: true,
-    default: jest.fn(() => ({
-        logEvent: jest.fn(),
-    })),
-}));
 
 jest.mock('@react-navigation/native-stack', () => ({
     __esModule: true,
@@ -23,7 +16,7 @@ describe('AppInfoButton', () => {
     beforeEach(() => {
         navigation = {
             navigate: jest.fn()
-        }
+        };
     });
 
     it('should navigate to AppInfo screen when pressed', () => {
@@ -33,10 +26,14 @@ describe('AppInfoButton', () => {
         expect(navigation.navigate).toHaveBeenCalledWith('AppInfo');
     });
 
-    it.skip('should log an analytics event when pressed', async () => {
+    it('should log an analytics event when pressed', async () => {
         const { getByRole } = render(<AppInfoButton navigation={navigation as NativeStackNavigationPropAlias} />);
         const button = getByRole('button');
+
         fireEvent.press(button);
-        expect(analytics().logEvent).toHaveBeenCalledWith('app_info');
+
+        await waitFor(() => {
+            expect(analytics().logEvent).toHaveBeenCalledWith('app_info');
+        });
     });
 });
