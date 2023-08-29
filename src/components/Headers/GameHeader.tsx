@@ -69,11 +69,11 @@ const GameHeader: React.FunctionComponent<Props> = ({ navigation }) => {
         return <CustomHeader navigation={navigation}
             headerLeft={<MenuButton navigation={navigation} />}
             headerCenter={<Text style={styles.title}>Error</Text>}
-        />
+        />;
     }
 
     const nextRoundHandler = async () => {
-        dispatch(roundNext(currentGame));
+        dispatch(roundNext(currentGame.id));
         await analytics().logEvent('round_change', {
             game_id: currentGameId,
             source: 'next button',
@@ -81,7 +81,7 @@ const GameHeader: React.FunctionComponent<Props> = ({ navigation }) => {
     };
 
     const prevRoundHandler = async () => {
-        dispatch(roundPrevious(currentGame));
+        dispatch(roundPrevious(currentGame.id));
         await analytics().logEvent('round_change', {
             game_id: currentGameId,
             source: 'previous button',
@@ -102,7 +102,7 @@ const GameHeader: React.FunctionComponent<Props> = ({ navigation }) => {
             headerRight={<MultiplierButton />}
         />
     );
-}
+};
 
 const styles = StyleSheet.create({
     title: {

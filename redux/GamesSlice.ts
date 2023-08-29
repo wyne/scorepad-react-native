@@ -28,20 +28,24 @@ const gamesSlice = createSlice({
     initialState,
     reducers: {
         updateGame: gamesAdapter.updateOne,
-        roundNext(state, action: PayloadAction<GameState>) {
+        roundNext(state, action: PayloadAction<string>) {
+            const game = state.entities[action.payload];
+            if (!game) { return; }
             gamesAdapter.updateOne(state, {
-                id: action.payload.id,
+                id: action.payload,
                 changes: {
-                    roundCurrent: action.payload.roundCurrent + 1,
-                    roundTotal: Math.max(action.payload.roundTotal, action.payload.roundCurrent + 1)
+                    roundCurrent: game.roundCurrent + 1,
+                    roundTotal: Math.max(game.roundTotal, game.roundCurrent + 1)
                 }
             });
         },
-        roundPrevious(state, action: PayloadAction<GameState>) {
+        roundPrevious(state, action: PayloadAction<string>) {
+            const game = state.entities[action.payload];
+            if (!game) { return; }
             gamesAdapter.updateOne(state, {
-                id: action.payload.id,
+                id: action.payload,
                 changes: {
-                    roundCurrent: Math.max(0, action.payload.roundCurrent - 1),
+                    roundCurrent: Math.max(0, game.roundCurrent - 1),
                 }
             });
         },
