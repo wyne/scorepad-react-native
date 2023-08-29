@@ -1,6 +1,6 @@
 {
     "$schema": "./node_modules/@react-native-firebase/app/firebase-schema.json",
     "react-native": {
-        "crashlytics_debug_enabled": true
+        "crashlytics_debug_enabled": false
     }
 }
