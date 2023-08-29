@@ -23,7 +23,7 @@ const SettingsHeader: React.FunctionComponent<Props> = ({ navigation }) => {
             headerRight={<CheckButton navigation={navigation} />}
         />
     );
-}
+};
 
 const styles = StyleSheet.create({
     title: {

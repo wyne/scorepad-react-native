@@ -18,7 +18,7 @@ const AppInfoHeader: React.FunctionComponent<Props> = ({ navigation }: Props) =>
             headerCenter={<Text style={styles.title}>Info</Text>}
         />
     );
-}
+};
 
 const styles = StyleSheet.create({
     title: {
