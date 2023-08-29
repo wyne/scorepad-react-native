@@ -1,3 +1,5 @@
+const mockedLogEvent = jest.fn();
 export default () => ({
-    logEvent: jest.fn(),
+    __esModule: true,
+    logEvent: mockedLogEvent
 });
