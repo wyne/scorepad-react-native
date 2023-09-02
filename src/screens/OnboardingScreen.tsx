@@ -4,7 +4,6 @@ import {
     Dimensions,
     Animated as RNAnimated,
     Text,
-    TouchableOpacity,
     ViewToken,
     ImageURISource,
 } from 'react-native';
@@ -14,24 +13,31 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../Navigation';
+import { Button } from 'react-native-elements';
+import SkipButton from '../components/Onboarding/SkipButton';
 
 const { width } = Dimensions.get('screen');
 
 type OnboardingScreenItem = {
     title: string;
     image: ImageURISource;
+    imageHeight?: number;
+    imageWidth?: number;
     description: string;
     backgroundColor: string;
 };
 
 type OnboardingScreenItemProps = {
     item: OnboardingScreenItem;
+    index: number;
 };
 
 const data: OnboardingScreenItem[] = [
     {
         title: "ScorePad\nwith Rounds",
         image: require('../../assets/icon.png'),
+        imageHeight: 150,
+        imageWidth: 150,
         description: '« Swipe left to begin «',
         backgroundColor: '#3475B1',
     },
@@ -56,14 +62,17 @@ const data: OnboardingScreenItem[] = [
     {
         title: "Change Round",
         image: require('../../assets/onboarding/rounds.png'),
-        description: 'Use rounds to keep score history per round. Tap the > and < buttons to cycle through.',
-        backgroundColor: '#db4747',
+        description: 'Use rounds for score history. \nTap the < and > buttons to cycle rounds.',
+        //yellow
+        backgroundColor: '#f0c330',
     },
     {
         title: "That's it!",
         image: require('../../assets/icon.png'),
-        description: 'Return to this tutorial anytime with the Info button in the top left.',
-        backgroundColor: '#db4747',
+        imageHeight: 150,
+        imageWidth: 150,
+        description: 'Return to this tutorial \n at any time.',
+        backgroundColor: '#3475B1',
     },
 ];
 
@@ -75,6 +84,7 @@ export interface Props {
 const OnboardingScreen: React.FunctionComponent<Props> = ({ navigation, route }) => {
     const { onboarding = false } = route.params;
 
+
     const scrollX = React.useRef(new RNAnimated.Value(0)).current;
     const keyExtractor = React.useCallback((_: OnboardingScreenItem, index: number) => index.toString(), []);
     //Current item index of flatlist
@@ -85,33 +95,6 @@ const OnboardingScreen: React.FunctionComponent<Props> = ({ navigation, route })
         if (onboarding) navigation.navigate('List');
         else navigation.goBack();
     }, []);
-
-    const gotoNextPage = React.useCallback((activeIndex: number) => {
-        if (activeIndex === data.length - 1) {
-            closeOnboarding();
-            return;
-        }
-
-        if (activeIndex + 1 < data.length) {
-            if (flatListRef.current === null) return;
-
-            flatListRef.current.scrollToIndex({
-                index: activeIndex + 1,
-                animated: false,
-            });
-        }
-    }, [activeIndex, flatListRef.current]);
-
-    const gotoPrevPage = React.useCallback((activeIndex: number) => {
-        if (flatListRef.current === null) return;
-
-        if (activeIndex !== 0) {
-            flatListRef.current.scrollToIndex({
-                index: activeIndex - 1,
-                animated: false,
-            });
-        }
-    }, [activeIndex, flatListRef.current]);
 
     type ViewableItemsChangedProps = {
         viewableItems: ViewToken[];
@@ -125,61 +108,48 @@ const OnboardingScreen: React.FunctionComponent<Props> = ({ navigation, route })
 
     const viewConfigRef = React.useRef({ viewAreaCoveragePercentThreshold: 50 });
 
-    const renderItem = React.useCallback(({ item }: OnboardingScreenItemProps) => {
+    const renderItem = React.useCallback(({ item, index }: OnboardingScreenItemProps) => {
         return (
             <View style={[styles.itemContainer]}>
-                <Animated.View
-                    style={{
-                        flexBasis: '15%',
-                        justifyContent: 'flex-end',
-                        flexGrow: 0,
-                    }}>
-                    <Text style={{
-                        fontSize: 30,
-                        fontWeight: 'bold',
-                        textAlign: 'center',
-                    }}>{item.title}</Text>
+                <Animated.View style={[styles.titleContainer]}>
+                    <Text style={[styles.title]}>{item.title}</Text>
                 </Animated.View>
-                <Animated.View
-                    style={{
-                        flexGrow: 0,
-                        flexBasis: '50%',
-                        alignContent: 'center',
-                        justifyContent: 'center',
-                    }}>
-                    <RNAnimated.Image
+
+                <Animated.View style={[styles.imageContainer]}>
+                    <RNAnimated.Image source={item.image}
                         style={{
-                            width: 350,
-                            height: 250,
-                            // borderRadius: 20,
+                            width: item.imageWidth || '100%',
+                            height: item.imageHeight || '100%',
+                            borderRadius: (
+                                index == 0 || index == data.length - 1
+                            ) ? 40 : 0,
                             resizeMode: 'contain',
-                        }}
-                        source={item.image}
-                    />
+                        }} />
                 </Animated.View>
-                <Animated.View
-                    style={{
-                        flex: 1,
-                        flexGrow: 1,
-                        padding: 20
-                    }}>
-                    <Text style={{ fontSize: 25, textAlign: 'center' }}>
+
+                <Animated.View style={[styles.descriptionContainer]}>
+                    <Text style={[styles.description]}>
                         {item.description}
                     </Text>
+                    <View style={{ alignContent: 'center' }}>
+                        {index === data.length - 1 &&
+                            <Button
+                                title="Get Started"
+                                titleStyle={{ color: 'black' }}
+                                onPress={closeOnboarding}
+                                buttonStyle={[styles.finishButton]}
+                                type='outline'
+                            />
+                        }
+                    </View>
                 </Animated.View>
-                <TouchableOpacity onPress={() => gotoPrevPage(activeIndex)} style={{
-                    position: 'absolute', left: '0%', width: '50%', height: '100%'
-                }} />
-                <TouchableOpacity onPress={() => gotoNextPage(activeIndex)} style={{
-                    position: 'absolute', left: '50%', width: '50%', height: '100%'
-                }} />
             </View>
         );
     }, [activeIndex]);
 
     return (
         <Animated.View style={[styles.container]} entering={FadeIn}>
-            <SafeAreaView edges={(onboarding ? ['top', 'bottom'] : [])}>
+            <SafeAreaView edges={(['top', 'bottom'])} style={onboarding ? { paddingTop: 40 } : {}}>
                 <View style={[StyleSheet.absoluteFillObject]}>
                     {data.map((item, index) => {
                         const inputRange = [
@@ -192,11 +162,13 @@ const OnboardingScreen: React.FunctionComponent<Props> = ({ navigation, route })
                             outputRange: [0, 1, 0],
                         });
                         return (
-                            <RNAnimated.View
-                                key={index}
+                            <RNAnimated.View key={index}
                                 style={[
                                     StyleSheet.absoluteFillObject,
-                                    { backgroundColor: item.backgroundColor, opacity: colorFade },
+                                    {
+                                        backgroundColor: item.backgroundColor,
+                                        opacity: colorFade
+                                    },
                                 ]}
                             />
                         );
@@ -242,29 +214,16 @@ const OnboardingScreen: React.FunctionComponent<Props> = ({ navigation, route })
             </SafeAreaView>
 
             {onboarding &&
-                <SafeAreaView pointerEvents='box-none' edges={['top', 'bottom']}
-                    style={[StyleSheet.absoluteFill]}>
-                    <View pointerEvents='box-none' style={{ alignItems: 'flex-end' }}>
-                        <TouchableOpacity
-                            style={{ padding: 10 }}
-                            onPress={closeOnboarding}>
-                            <View style={{
-                                padding: 10,
-                                borderRadius: 20,
-                                borderColor: '#fff',
-                                backgroundColor: 'rgba(255, 255, 255, .2)',
-                            }}>
-                                <Text style={{ fontSize: 20, color: '#fff', }}>
-                                    Skip
-                                </Text>
-                            </View>
-                        </TouchableOpacity>
-                    </View>
-                </SafeAreaView>
+                <SkipButton
+                    visible={activeIndex !== data.length - 1}
+                    onPress={closeOnboarding}
+                />
             }
         </Animated.View >
     );
 };
+
+const borders = false;
 
 const styles = StyleSheet.create({
     container: {
@@ -275,16 +234,42 @@ const styles = StyleSheet.create({
     itemContainer: {
         flex: 1,
         width: width,
-        justifyContent: 'space-around',
         alignItems: 'center',
+        justifyContent: 'space-around',
     },
-    button: {
-        flex: 1,
-        margin: 20,
-        fontWeight: '700',
+    titleContainer: {
+        height: '15%',
+        justifyContent: 'flex-end',
+        borderWidth: borders ? 1 : 0,
     },
-    buttonText: {
-        color: '#fff',
+    title: {
+        fontSize: 30,
+        fontWeight: 'bold',
+        textAlign: 'center',
+    },
+    imageContainer: {
+        height: '40%',
+        justifyContent: 'center',
+        alignItems: 'center',
+        width: '80%',
+        padding: 20,
+        borderWidth: borders ? 1 : 0,
+    },
+    descriptionContainer: {
+        height: '25%',
+        justifyContent: 'flex-start',
+        padding: 20,
+        borderWidth: borders ? 1 : 0,
+    },
+    description: {
+        fontSize: 25,
+        textAlign: 'center',
+    },
+    finishButton: {
+        borderColor: 'black',
+        borderRadius: 20,
+        padding: 10,
+        margin: 15,
     },
 });
 

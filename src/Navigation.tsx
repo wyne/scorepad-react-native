@@ -67,7 +67,7 @@ export const Navigation = () => {
                 }
                 <Stack.Screen name="List" component={ListScreen}
                     options={{
-                        orientation: 'all',
+                        orientation: 'portrait',
                         title: 'Home',
                         headerTitle: 'ScorePad with Rounds',
                         header: ({ navigation }) => {
@@ -77,7 +77,7 @@ export const Navigation = () => {
                 />
                 <Stack.Screen name="AppInfo" component={AppInfoScreen}
                     options={{
-                        orientation: 'all',
+                        orientation: 'portrait',
                         title: "Info",
                         header: ({ navigation }) => {
                             return <AppInfoHeader navigation={navigation} />;
