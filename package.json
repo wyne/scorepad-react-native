@@ -89,7 +89,8 @@
     "jest": "^29.5.0",
     "prettier": "^3.0.1",
     "react-test-renderer": "^18.2.0",
-    "redux-mock-store": "^1.5.4"
+    "redux-mock-store": "^1.5.4",
+    "ts-node": "^10.9.1"
   },
   "overrides": {},
   "homepage": "/scorepad-app",
