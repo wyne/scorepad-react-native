@@ -43,6 +43,8 @@ npx eas-cli build --platform android --profile preview --local
 
 ### Production Build
 
+Remember to bump `versionCode` and `buildNumber` in `app.config.js`.
+
 ```zsh
 npx expo-doctor
 npx expo prebuild
