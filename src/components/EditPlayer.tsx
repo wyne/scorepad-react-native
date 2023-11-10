@@ -1,6 +1,5 @@
 import React from 'react';
 import { Text, View, StyleSheet, TouchableOpacity, NativeSyntheticEvent, TextInputEndEditingEventData } from 'react-native';
-import { useDispatch } from 'react-redux';
 import { Icon, Input } from 'react-native-elements';
 
 import { palette, systemBlue } from '../constants';
@@ -8,7 +7,7 @@ import { selectGameById, updateGame } from '../../redux/GamesSlice';
 import { selectPlayerById } from '../../redux/PlayersSlice';
 import { removePlayer, updatePlayer } from '../../redux/PlayersSlice';
 import analytics from '@react-native-firebase/analytics';
-import { useAppSelector } from '../../redux/hooks';
+import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 
 interface Props {
     playerId: string;
@@ -18,7 +17,7 @@ interface Props {
 }
 
 const EditPlayer: React.FunctionComponent<Props> = ({ playerId, index, setPlayerWasAdded, playerWasAdded }) => {
-    const dispatch = useDispatch();
+    const dispatch = useAppDispatch();
     const currentGame = useAppSelector(state => selectGameById(state, state.settings.currentGameId));
     const player = useAppSelector(state => selectPlayerById(state, playerId));
 

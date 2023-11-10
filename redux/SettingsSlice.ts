@@ -7,6 +7,7 @@ export interface SettingsState {
     multiplier: number;
     currentGameId: string | undefined;
     onboarded: string | undefined;
+    showPointParticles: boolean;
 };
 
 const initialState: SettingsState = {
@@ -14,6 +15,7 @@ const initialState: SettingsState = {
     multiplier: 1,
     currentGameId: undefined,
     onboarded: undefined,
+    showPointParticles: false,
 };
 
 const settingsSlice = createSlice({
@@ -25,6 +27,9 @@ const settingsSlice = createSlice({
         },
         toggleHomeFullscreen(state) {
             state.home_fullscreen = !state.home_fullscreen;
+        },
+        toggleshowPointParticles(state) {
+            state.showPointParticles = !state.showPointParticles;
         },
         setMultiplier(state, action: PayloadAction<number>) {
             state.multiplier = action.payload;
@@ -42,6 +47,7 @@ export const {
     toggleHomeFullscreen,
     setMultiplier,
     setOnboardedVersion,
+    toggleshowPointParticles,
 } = settingsSlice.actions;
 
 export default settingsSlice.reducer;
