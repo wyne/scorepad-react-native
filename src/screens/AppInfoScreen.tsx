@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Text, View, StyleSheet, Alert, ScrollView, SectionList } from 'react-native';
+import React from 'react';
+import { Text, View, StyleSheet, Alert, ScrollView } from 'react-native';
 import { Platform, Switch } from 'react-native';
 import * as Application from 'expo-application';
 import analytics from '@react-native-firebase/analytics';

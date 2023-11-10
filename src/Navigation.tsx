@@ -48,7 +48,7 @@ export const Navigation = () => {
 
     let onboarded = true;
 
-    if (onboardedSemVer == null || onboardedSemVer?.compare(new SemVer(appVersion)) == -1) {
+    if (onboardedSemVer == null || onboardedSemVer?.compare(new SemVer('2.2.2')) == -1) {
         onboarded = false;
     }
 
