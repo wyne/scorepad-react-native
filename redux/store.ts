@@ -10,7 +10,13 @@ const settingsPersistConfig = {
     key: 'settings',
     version: 0,
     storage: AsyncStorage,
-    whitelist: ['home_fullscreen', 'multiplier', 'currentGameId', 'onboarded'],
+    whitelist: [
+        'home_fullscreen',
+        'multiplier',
+        'currentGameId',
+        'onboarded',
+        'showPointParticles'
+    ],
 };
 
 const gamesPersistConfig = {

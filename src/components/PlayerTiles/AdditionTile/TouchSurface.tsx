@@ -2,9 +2,8 @@ import React from 'react';
 import { StyleSheet, TouchableHighlight, View } from 'react-native';
 import { ScoreParticle } from './ScoreParticle';
 import { useState } from 'react';
-import { useDispatch } from 'react-redux';
 import { playerRoundScoreIncrement } from '../../../../redux/PlayersSlice';
-import { useAppSelector } from '../../../../redux/hooks';
+import { useAppDispatch, useAppSelector } from '../../../../redux/hooks';
 import { selectGameById } from '../../../../redux/GamesSlice';
 import * as Haptics from 'expo-haptics';
 import analytics from '@react-native-firebase/analytics';
@@ -23,7 +22,10 @@ type Props = {
 
 export const TouchSurface: React.FunctionComponent<Props> = (
     { playerIndex, fontColor, playerId, scoreType }: Props) => {
-    const dispatch = useDispatch();
+
+    const showPointParticles = useAppSelector(state => state.settings.showPointParticles);
+    const dispatch = useAppDispatch();
+
     const [particles, setParticles] = useState<ScoreParticleProps[]>([]);
 
     const multiplier = useAppSelector(state => state.settings.multiplier);
@@ -44,7 +46,9 @@ export const TouchSurface: React.FunctionComponent<Props> = (
     };
 
     const scoreChangeHandler = () => {
-        addParticle();
+        if (showPointParticles) {
+            addParticle();
+        }
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
         analytics().logEvent('score_change', {
             player_index: playerIndex,
