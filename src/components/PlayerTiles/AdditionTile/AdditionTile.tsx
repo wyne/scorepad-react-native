@@ -70,7 +70,7 @@ const AdditionTile: React.FunctionComponent<Props> = ({
         sharedScale.value
     ]);
 
-    const containerWidth = Math.min(maxWidth, maxHeight);
+    const containerShortEdge = Math.min(maxWidth, maxHeight);
 
     const playerNameFontSize = calculateFontSize(maxWidth);
 
@@ -84,14 +84,15 @@ const AdditionTile: React.FunctionComponent<Props> = ({
             <Animated.Text style={[styles.name, dynamicPlayerStyles]} numberOfLines={1}>
                 {playerName}
             </Animated.Text>
-            <Animated.View
-                style={styles.scoreLineOne} >
-                <ScoreBefore containerWidth={containerWidth} roundScore={roundScore} totalScore={totalScore}
+
+            <Animated.View style={styles.scoreLineOne}>
+                <ScoreBefore containerWidth={containerShortEdge} roundScore={roundScore} totalScore={totalScore}
                     fontColor={fontColor} />
-                <ScoreRound containerWidth={containerWidth} roundScore={roundScore}
+                <ScoreRound containerWidth={containerShortEdge} roundScore={roundScore}
                     fontColor={fontColor} />
             </Animated.View>
-            <ScoreAfter containerWidth={containerWidth} roundScore={roundScore} totalScore={totalScore}
+
+            <ScoreAfter containerWidth={containerShortEdge} roundScore={roundScore} totalScore={totalScore}
                 fontColor={fontColor} />
         </Animated.View>
     );

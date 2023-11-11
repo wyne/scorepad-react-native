@@ -63,40 +63,17 @@ const ScoreBoardScreen: React.FunctionComponent<Props> = ({ navigation }) => {
         setCols(Math.ceil(playerIds.length / bestRowCount));
     };
 
-    type DimensionValue = (index: number, total: number, rows: number, cols: number) => {
+    type DimensionValue = (rows: number, cols: number) => {
         width: number;
         height: number;
     }
 
-    // TODO: In 7 person game portrait, last two are wrong when it should be last one is bigger.
-
-    const calculateDimensions: DimensionValue = (index: number, total: number, rows: number, cols: number) => {
+    const calculateDimensions: DimensionValue = (rows: number, cols: number) => {
         if (width == null || height == null) return { width: 0, height: 0 };
-        const h = height / rows;
-        //
-        // Calculate width based on number of rows
-        // but if the index is in the last row, use the remainder
-        let w;
-
-        /**
-         * If the last row has fewer columns than the rest
-         **/
-        const offsetLastRow = total % rows > 0;
-
-        /**
-         * First index of last row
-         **/
-        const firstOffsetIndex = total - total % cols;
-
-        if (offsetLastRow && index >= firstOffsetIndex) {
-            w = width / (total % cols);
-        } else {
-            w = width / cols;
-        }
 
         return {
-            width: Math.round(w),
-            height: Math.round(h)
+            width: Math.round(width / cols),
+            height: Math.round(height / rows)
         };
     };
 
@@ -113,8 +90,8 @@ const ScoreBoardScreen: React.FunctionComponent<Props> = ({ navigation }) => {
                             fontColor={getContrastRatio('#' + palette[index % palette.length], '#000').number > 7 ? "#000000" : "#FFFFFF"}
                             cols={(rows != 0 && cols != 0) ? cols : 0}
                             rows={(rows != 0 && cols != 0) ? rows : 0}
-                            width={calculateDimensions(index, playerIds.length, rows, cols).width}
-                            height={calculateDimensions(index, playerIds.length, rows, cols).height}
+                            width={calculateDimensions(rows, cols).width}
+                            height={calculateDimensions(rows, cols).height}
                             index={index}
                         />
                     ))}
