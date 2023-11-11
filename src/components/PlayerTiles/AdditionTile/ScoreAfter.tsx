@@ -17,7 +17,7 @@ interface Props {
 }
 
 const ScoreAfter: React.FunctionComponent<Props> = ({ containerWidth, roundScore, totalScore, fontColor }) => {
-    const fontSize = useSharedValue(calculateFontSize(containerWidth, totalScore.toString().length));
+    const fontSize = useSharedValue(calculateFontSize(containerWidth));
     const opacity = useSharedValue(1);
 
     const animatedStyles = useAnimatedStyle(() => {
@@ -29,10 +29,12 @@ const ScoreAfter: React.FunctionComponent<Props> = ({ containerWidth, roundScore
 
     useEffect(() => {
         fontSize.value = withTiming(
-            roundScore == 0 ? 1 : calculateFontSize(containerWidth, totalScore.toString().length), { duration: animationDuration },
+            roundScore == 0 ? 1 : calculateFontSize(containerWidth) * 1.1,
+            { duration: animationDuration },
         );
         opacity.value = withTiming(
-            roundScore == 0 ? 0 : 1, { duration: animationDuration },
+            roundScore == 0 ? 0 : 1,
+            { duration: animationDuration },
         );
     }, [roundScore, containerWidth]);
 

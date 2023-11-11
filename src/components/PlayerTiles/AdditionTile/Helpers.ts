@@ -22,20 +22,23 @@ export const exitingAnimation = ZoomOut.duration(animationDuration);
  */
 export const layoutAnimation = Layout.easing(Easing.ease).duration(animationDuration);
 
+export const singleLineScoreSizeMultiplier = 1.2;
+
+export const multiLineScoreSizeMultiplier = 0.7;
+
+export const baseScoreFontSize = 40;
+
+export const scoreMathOpacity = 0.75;
+
 /**
- * Calculates the font size based on the maximum width and length of the text.
+ * Calculates the font size based on the maximum width.
  * @param containerWidth The maximum width of the text.
- * @param stringLength The number of characters in the text.
  * @returns The calculated font size.
  */
-export const calculateFontSize = (containerWidth: number, stringLength: number) => {
-    const baseScale: number = Math.min(1 / stringLength * 200, 100);
-
+export const calculateFontSize = (containerWidth: number) => {
     let widthFactor: number = containerWidth / 200;
-
     if (Number.isNaN(widthFactor)) { widthFactor = 1; }
-
-    return baseScale * widthFactor;
+    return baseScoreFontSize * widthFactor;
 };
 
 /**

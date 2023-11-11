@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { StyleSheet, LayoutChangeEvent } from 'react-native';
+import React, { useEffect } from 'react';
+import { StyleSheet } from 'react-native';
 import Animated, {
     useSharedValue,
     useAnimatedStyle,
@@ -17,8 +17,8 @@ interface Props {
     totalScore: number;
     roundScore: number;
     fontColor: string;
-    maxWidth: number;
-    maxHeight: number;
+    maxWidth: number | null;
+    maxHeight: number | null;
     index: number;
 }
 
@@ -31,58 +31,27 @@ const AdditionTile: React.FunctionComponent<Props> = ({
     maxHeight,
     index
 }) => {
-    // Tile width and height
-    const [tileWidth, setTileWidth] = useState(1);
-    const [tileHeight, setTileHeight] = useState(1);
+
+    if (maxWidth == null || maxHeight == null) return null;
 
     // Animation values
     const sharedScale = useSharedValue(1);
     const sharedOpacity = useSharedValue(0);
 
-    // Animation styles for resizing due to text changes
+    /**
+     * Animation styles for resizing due to text changes
+     */
     const animatedStyles = useAnimatedStyle(() => {
         return {
-            transform: [{ scale: sharedScale.value }],
             opacity: sharedOpacity.value,
         };
     });
 
 
-    // Update tile width and height on layout change
-    const layoutHandler = (e: LayoutChangeEvent) => {
-        const { width, height } = e.nativeEvent.layout;
-        setTileHeight(height);
-        setTileWidth(width);
-    };
-
     useEffect(() => {
-        /*
-         * Calculate ratio of tile content to max width/height
-         * determined by the parent container
-         */
-        const horizontalScaleRatio = maxWidth / tileWidth;
-        const verticalScaleRatio = maxHeight / tileHeight;
-
-        // Allow for padding by not scaling to full width/height
-        const maxTileCoverage = 0.8; // 80%
-
-        const minimumScale = Math.min(
-            horizontalScaleRatio * maxTileCoverage,
-            verticalScaleRatio * maxTileCoverage
-        );
-
-        if (minimumScale > 0) {
-            sharedScale.value = withDelay(
-                animationDuration,
-                withTiming(
-                    minimumScale, { duration: animationDuration }
-                )
-            );
-        }
-
         // Delay opacity animation to allow for scale animation to finish
         // and to allow for the previous tile to finish animating for effect
-        const animationDelay = index * animationDuration / 2;
+        const animationDelay = (index + 1) * animationDuration / 2;
 
         sharedOpacity.value = withDelay(
             animationDelay,
@@ -91,11 +60,19 @@ const AdditionTile: React.FunctionComponent<Props> = ({
                 { duration: animationDuration * 2 }
             )
         );
-    });
+        return;
+    }, [
+        playerName,
+        totalScore,
+        roundScore,
+        maxWidth,
+        maxHeight,
+        sharedScale.value
+    ]);
 
-    const playerNameFontSize = calculateFontSize(maxWidth, playerName.length);
+    const containerShortEdge = Math.min(maxWidth, maxHeight);
 
-    const containerWidth = Math.min(maxWidth, maxHeight);
+    const playerNameFontSize = calculateFontSize(maxWidth);
 
     const dynamicPlayerStyles = {
         fontSize: playerNameFontSize,
@@ -103,18 +80,19 @@ const AdditionTile: React.FunctionComponent<Props> = ({
     };
 
     return (
-        <Animated.View style={[animatedStyles, { justifyContent: 'center' }]} onLayout={layoutHandler}>
+        <Animated.View style={[animatedStyles, { justifyContent: 'center' }]}>
             <Animated.Text style={[styles.name, dynamicPlayerStyles]} numberOfLines={1}>
                 {playerName}
             </Animated.Text>
-            <Animated.View
-                style={styles.scoreLineOne} >
-                <ScoreBefore containerWidth={containerWidth} roundScore={roundScore} totalScore={totalScore}
+
+            <Animated.View style={styles.scoreLineOne}>
+                <ScoreBefore containerWidth={containerShortEdge} roundScore={roundScore} totalScore={totalScore}
                     fontColor={fontColor} />
-                <ScoreRound containerWidth={containerWidth} roundScore={roundScore} totalScore={totalScore}
+                <ScoreRound containerWidth={containerShortEdge} roundScore={roundScore}
                     fontColor={fontColor} />
             </Animated.View>
-            <ScoreAfter containerWidth={containerWidth} roundScore={roundScore} totalScore={totalScore}
+
+            <ScoreAfter containerWidth={containerShortEdge} roundScore={roundScore} totalScore={totalScore}
                 fontColor={fontColor} />
         </Animated.View>
     );

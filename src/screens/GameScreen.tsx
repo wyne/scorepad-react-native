@@ -19,9 +19,13 @@ const ScoreBoardScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     if (typeof currentGameId == 'undefined') return null;
 
     const palette = ["01497c", "c25858", "f5c800", "275436", "dc902c", "62516a", "755647", "925561"];
-    const [grid, setGrid] = useState({ rows: 0, cols: 0 });
+    const [rows, setRows] = useState<number>(1);
+    const [cols, setCols] = useState<number>(1);
     const fullscreen = useAppSelector(state => state.settings.home_fullscreen);
     const currentGame = useAppSelector(state => selectGameById(state, state.settings.currentGameId));
+
+    const [width, setWidth] = useState<number | null>(null);
+    const [height, setHeight] = useState<number | null>(null);
 
     if (currentGame == undefined) return null;
 
@@ -31,6 +35,9 @@ const ScoreBoardScreen: React.FunctionComponent<Props> = ({ navigation }) => {
 
     const layoutHandler = (e: LayoutChangeEvent) => {
         const { width, height } = e.nativeEvent.layout;
+
+        setWidth(Math.round(width));
+        setHeight(Math.round(height));
 
         let closestAspectRatio = Number.MAX_SAFE_INTEGER;
         let bestRowCount = 1;
@@ -52,7 +59,22 @@ const ScoreBoardScreen: React.FunctionComponent<Props> = ({ navigation }) => {
             }
         }
 
-        setGrid({ rows: bestRowCount, cols: Math.ceil(playerIds.length / bestRowCount) });
+        setRows(bestRowCount);
+        setCols(Math.ceil(playerIds.length / bestRowCount));
+    };
+
+    type DimensionValue = (rows: number, cols: number) => {
+        width: number;
+        height: number;
+    }
+
+    const calculateDimensions: DimensionValue = (rows: number, cols: number) => {
+        if (width == null || height == null) return { width: 0, height: 0 };
+
+        return {
+            width: Math.round(width / cols),
+            height: Math.round(height / rows)
+        };
     };
 
     return (
@@ -60,13 +82,16 @@ const ScoreBoardScreen: React.FunctionComponent<Props> = ({ navigation }) => {
             <View style={[StyleSheet.absoluteFillObject]}>
                 <View style={styles.contentStyle} onLayout={layoutHandler} >
                     {playerIds.map((id, index) => (
+                        width != null && height != null &&
                         <PlayerTile
                             key={id}
                             playerId={id}
                             color={'#' + palette[index % palette.length]}
                             fontColor={getContrastRatio('#' + palette[index % palette.length], '#000').number > 7 ? "#000000" : "#FFFFFF"}
-                            cols={(grid.rows != 0 && grid.cols != 0) ? grid.cols : 0}
-                            rows={(grid.rows != 0 && grid.cols != 0) ? grid.rows : 0}
+                            cols={(rows != 0 && cols != 0) ? cols : 0}
+                            rows={(rows != 0 && cols != 0) ? rows : 0}
+                            width={calculateDimensions(rows, cols).width}
+                            height={calculateDimensions(rows, cols).height}
                             index={index}
                         />
                     ))}

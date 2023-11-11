@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, StyleSheet, LayoutChangeEvent, DimensionValue } from 'react-native';
+import React from 'react';
+import { View, StyleSheet, DimensionValue } from 'react-native';
 
 import AdditionTile from './PlayerTiles/AdditionTile/AdditionTile';
 import { selectGameById } from '../../redux/GamesSlice';
@@ -8,17 +8,28 @@ import { useAppSelector } from '../../redux/hooks';
 import { TouchSurface } from './PlayerTiles/AdditionTile/TouchSurface';
 
 interface Props {
+    index: number;
+    playerId: string;
     color: string;
     fontColor: string;
     cols: number;
     rows: number;
-    playerId: string;
-    index: number;
+    width: number;
+    height: number;
 }
 
-const PlayerTile: React.FunctionComponent<Props> = ({ color, fontColor, cols, rows, playerId, index }) => {
-    const [width, setWidth] = useState(0);
-    const [height, setHeight] = useState(0);
+const PlayerTile: React.FunctionComponent<Props> = ({
+    index,
+    color,
+    fontColor,
+    width,
+    height,
+    cols,
+    rows,
+    playerId
+}) => {
+    // Short circuit if width or height is not yet defined
+    if (!(width > 0 && height > 0)) return null;
 
     const currentGameId = useAppSelector(state => state.settings.currentGameId);
     const currentGame = useAppSelector(state => selectGameById(state, currentGameId));
@@ -40,21 +51,14 @@ const PlayerTile: React.FunctionComponent<Props> = ({ color, fontColor, cols, ro
     const widthPerc: DimensionValue = `${(100 / cols)}%`;
     const heightPerc: DimensionValue = `${(100 / rows)}%`;
 
-    const layoutHandler = (e: LayoutChangeEvent) => {
-        const { width, height } = e.nativeEvent.layout;
-
-        setWidth(width);
-        setHeight(height);
-    };
+    if (Number.isNaN(width) || Number.isNaN(height)) return null;
 
     return (
-        <View onLayout={layoutHandler}
-            style={[
-                styles.playerCard,
-                { backgroundColor: color },
-                { width: widthPerc },
-                { height: heightPerc },
-            ]}>
+        <View style={[
+            styles.playerCard,
+            { backgroundColor: color },
+            { width: widthPerc },
+            { height: heightPerc },]}>
             <AdditionTile
                 totalScore={scoreTotal}
                 roundScore={scoreRound}
@@ -62,8 +66,7 @@ const PlayerTile: React.FunctionComponent<Props> = ({ color, fontColor, cols, ro
                 playerName={playerName}
                 maxWidth={width}
                 maxHeight={height}
-                index={index}
-            />
+                index={index} />
 
             <TouchSurface
                 scoreType='increment'

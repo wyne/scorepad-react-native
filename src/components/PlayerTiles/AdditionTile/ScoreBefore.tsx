@@ -6,7 +6,7 @@ import {
     withTiming
 } from 'react-native-reanimated';
 
-import { calculateFontSize, animationDuration, enteringAnimation } from './Helpers';
+import { calculateFontSize, animationDuration, enteringAnimation, multiLineScoreSizeMultiplier, singleLineScoreSizeMultiplier, scoreMathOpacity } from './Helpers';
 
 interface Props {
     roundScore: number;
@@ -21,14 +21,9 @@ const ScoreBefore: React.FunctionComponent<Props> = ({
     totalScore,
     fontColor
 }) => {
-    // Determine the length of the first row of the score
-    const firstRowLength = (
-        roundScore == 0 ? 0 : roundScore.toString().length + 3
-    ) + totalScore.toString().length;
-
     const scoreBefore = totalScore - roundScore;
 
-    const fontSize = useSharedValue(calculateFontSize(containerWidth, firstRowLength));
+    const fontSize = useSharedValue(calculateFontSize(containerWidth));
     const fontOpacity = useSharedValue(100);
 
     const animatedStyles = useAnimatedStyle(() => {
@@ -39,14 +34,16 @@ const ScoreBefore: React.FunctionComponent<Props> = ({
         };
     });
 
+    const scaleFactor = roundScore == 0 ? singleLineScoreSizeMultiplier : multiLineScoreSizeMultiplier;
+
     useEffect(() => {
         fontSize.value = withTiming(
-            calculateFontSize(containerWidth, firstRowLength),
+            calculateFontSize(containerWidth) * scaleFactor,
             { duration: animationDuration }
         );
 
         fontOpacity.value = withTiming(
-            roundScore == 0 ? 100 : 75,
+            roundScore == 0 ? 100 : scoreMathOpacity * 100,
             { duration: animationDuration }
         );
     }, [roundScore, containerWidth]);
