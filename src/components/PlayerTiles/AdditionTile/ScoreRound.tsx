@@ -6,7 +6,7 @@ import {
     withTiming
 } from 'react-native-reanimated';
 
-import { calculateFontSize, animationDuration } from './Helpers';
+import { calculateFontSize, animationDuration, multiLineScoreSizeMultiplier, scoreMathOpacity } from './Helpers';
 
 interface Props {
     roundScore: number;
@@ -15,21 +15,19 @@ interface Props {
 }
 
 const ScoreRound: React.FunctionComponent<Props> = ({ containerWidth, roundScore, fontColor }) => {
-    const fontSizeRound = useSharedValue(calculateFontSize(containerWidth));
+    const fontSize = useSharedValue(calculateFontSize(containerWidth));
+
     const animatedStyles = useAnimatedStyle(() => {
         return {
-            fontSize: fontSizeRound.value,
+            fontSize: fontSize.value,
         };
     });
 
     const d = roundScore;
 
-
     useEffect(() => {
-        const scaleFactor = .7;
-
-        fontSizeRound.value = withTiming(
-            calculateFontSize(containerWidth) * scaleFactor,
+        fontSize.value = withTiming(
+            calculateFontSize(containerWidth) * multiLineScoreSizeMultiplier,
             { duration: animationDuration }
         );
 
@@ -44,7 +42,8 @@ const ScoreRound: React.FunctionComponent<Props> = ({ containerWidth, roundScore
             <Animated.Text numberOfLines={1}
                 style={[animatedStyles, {
                     fontVariant: ['tabular-nums'],
-                    color: fontColor, opacity: .75
+                    color: fontColor,
+                    opacity: scoreMathOpacity
                 }]}>
                 {roundScore > 0 && " + "}
                 {roundScore < 0 && " - "}

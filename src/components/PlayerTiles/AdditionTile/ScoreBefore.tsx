@@ -6,7 +6,7 @@ import {
     withTiming
 } from 'react-native-reanimated';
 
-import { calculateFontSize, animationDuration, enteringAnimation } from './Helpers';
+import { calculateFontSize, animationDuration, enteringAnimation, multiLineScoreSizeMultiplier, singleLineScoreSizeMultiplier, scoreMathOpacity } from './Helpers';
 
 interface Props {
     roundScore: number;
@@ -34,7 +34,7 @@ const ScoreBefore: React.FunctionComponent<Props> = ({
         };
     });
 
-    const scaleFactor = roundScore == 0 ? 1.2 : .7;
+    const scaleFactor = roundScore == 0 ? singleLineScoreSizeMultiplier : multiLineScoreSizeMultiplier;
 
     useEffect(() => {
         fontSize.value = withTiming(
@@ -43,7 +43,7 @@ const ScoreBefore: React.FunctionComponent<Props> = ({
         );
 
         fontOpacity.value = withTiming(
-            roundScore == 0 ? 100 : 75,
+            roundScore == 0 ? 100 : scoreMathOpacity * 100,
             { duration: animationDuration }
         );
     }, [roundScore, containerWidth]);

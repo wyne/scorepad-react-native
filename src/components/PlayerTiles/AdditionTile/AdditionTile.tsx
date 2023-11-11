@@ -38,7 +38,9 @@ const AdditionTile: React.FunctionComponent<Props> = ({
     const sharedScale = useSharedValue(1);
     const sharedOpacity = useSharedValue(0);
 
-    // Animation styles for resizing due to text changes
+    /**
+     * Animation styles for resizing due to text changes
+     */
     const animatedStyles = useAnimatedStyle(() => {
         return {
             opacity: sharedOpacity.value,
