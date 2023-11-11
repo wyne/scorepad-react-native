@@ -15,9 +15,8 @@ interface Props {
     containerWidth: number;
 }
 
-const ScoreRound: React.FunctionComponent<Props> = ({ containerWidth, roundScore, totalScore, fontColor }) => {
-    const firstRowLength = (roundScore == 0 ? 0 : roundScore.toString().length + 3) + totalScore.toString().length;
-    const fontSizeRound = useSharedValue(calculateFontSize(containerWidth, firstRowLength));
+const ScoreRound: React.FunctionComponent<Props> = ({ containerWidth, roundScore, fontColor }) => {
+    const fontSizeRound = useSharedValue(calculateFontSize(containerWidth));
     const animatedStyles = useAnimatedStyle(() => {
         return {
             fontSize: fontSizeRound.value,
@@ -28,7 +27,7 @@ const ScoreRound: React.FunctionComponent<Props> = ({ containerWidth, roundScore
 
     useEffect(() => {
         fontSizeRound.value = withTiming(
-            calculateFontSize(containerWidth, firstRowLength), { duration: animationDuration }
+            calculateFontSize(containerWidth) * .8, { duration: animationDuration }
         );
 
     }, [roundScore, containerWidth]);

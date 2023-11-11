@@ -21,14 +21,9 @@ const ScoreBefore: React.FunctionComponent<Props> = ({
     totalScore,
     fontColor
 }) => {
-    // Determine the length of the first row of the score
-    const firstRowLength = (
-        roundScore == 0 ? 0 : roundScore.toString().length + 3
-    ) + totalScore.toString().length;
-
     const scoreBefore = totalScore - roundScore;
 
-    const fontSize = useSharedValue(calculateFontSize(containerWidth, firstRowLength));
+    const fontSize = useSharedValue(calculateFontSize(containerWidth));
     const fontOpacity = useSharedValue(100);
 
     const animatedStyles = useAnimatedStyle(() => {
@@ -39,9 +34,11 @@ const ScoreBefore: React.FunctionComponent<Props> = ({
         };
     });
 
+    const scaleFactor = roundScore == 0 ? 1 : .8;
+
     useEffect(() => {
         fontSize.value = withTiming(
-            calculateFontSize(containerWidth, firstRowLength),
+            calculateFontSize(containerWidth) * scaleFactor,
             { duration: animationDuration }
         );
 

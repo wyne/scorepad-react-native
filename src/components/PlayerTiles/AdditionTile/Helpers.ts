@@ -23,13 +23,13 @@ export const exitingAnimation = ZoomOut.duration(animationDuration);
 export const layoutAnimation = Layout.easing(Easing.ease).duration(animationDuration);
 
 /**
- * Calculates the font size based on the maximum width and length of the text.
+ * Calculates the font size based on the maximum width.
  * @param containerWidth The maximum width of the text.
- * @param stringLength The number of characters in the text.
  * @returns The calculated font size.
  */
-export const calculateFontSize = (containerWidth: number, stringLength: number) => {
-    const baseScale: number = Math.min(1 / stringLength * 200, 100);
+export const calculateFontSize = (containerWidth: number) => {
+    // const baseScale: number = Math.min(1 / stringLength * 200, 100);
+    const baseScale = 40;
 
     let widthFactor: number = containerWidth / 200;
 
