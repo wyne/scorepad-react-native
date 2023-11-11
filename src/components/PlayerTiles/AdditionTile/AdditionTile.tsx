@@ -78,8 +78,7 @@ const AdditionTile: React.FunctionComponent<Props> = ({
     };
 
     return (
-        <Animated.View style={[animatedStyles, { justifyContent: 'center' }]} //onLayout={layoutHandler}
-        >
+        <Animated.View style={[animatedStyles, { justifyContent: 'center' }]}>
             <Animated.Text style={[styles.name, dynamicPlayerStyles]} numberOfLines={1}>
                 {playerName}
             </Animated.Text>
@@ -87,7 +86,7 @@ const AdditionTile: React.FunctionComponent<Props> = ({
                 style={styles.scoreLineOne} >
                 <ScoreBefore containerWidth={containerWidth} roundScore={roundScore} totalScore={totalScore}
                     fontColor={fontColor} />
-                <ScoreRound containerWidth={containerWidth} roundScore={roundScore} totalScore={totalScore}
+                <ScoreRound containerWidth={containerWidth} roundScore={roundScore}
                     fontColor={fontColor} />
             </Animated.View>
             <ScoreAfter containerWidth={containerWidth} roundScore={roundScore} totalScore={totalScore}

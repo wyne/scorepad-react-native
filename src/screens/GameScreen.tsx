@@ -33,41 +33,34 @@ const ScoreBoardScreen: React.FunctionComponent<Props> = ({ navigation }) => {
 
     const desiredAspectRatio = 0.8;
 
-    let timeoutId: NodeJS.Timeout | null = null;
-
     const layoutHandler = (e: LayoutChangeEvent) => {
         const { width, height } = e.nativeEvent.layout;
-        if (timeoutId) {
-            clearTimeout(timeoutId);
-        }
 
-        timeoutId = setTimeout(() => {
-            setWidth(Math.round(width));
-            setHeight(Math.round(height));
+        setWidth(Math.round(width));
+        setHeight(Math.round(height));
 
-            let closestAspectRatio = Number.MAX_SAFE_INTEGER;
-            let bestRowCount = 1;
+        let closestAspectRatio = Number.MAX_SAFE_INTEGER;
+        let bestRowCount = 1;
 
-            for (let rows = 1; rows <= playerIds.length; rows++) {
-                const cols = Math.ceil(playerIds.length / rows);
+        for (let rows = 1; rows <= playerIds.length; rows++) {
+            const cols = Math.ceil(playerIds.length / rows);
 
-                if (playerIds.length % rows > 0 && rows - playerIds.length % rows > 1) {
-                    continue;
-                }
-
-                const w = width / cols;
-                const h = height / rows;
-                const ratio = w / h;
-
-                if (Math.abs(desiredAspectRatio - ratio) < Math.abs(desiredAspectRatio - closestAspectRatio)) {
-                    closestAspectRatio = ratio;
-                    bestRowCount = rows;
-                }
+            if (playerIds.length % rows > 0 && rows - playerIds.length % rows > 1) {
+                continue;
             }
 
-            setRows(bestRowCount);
-            setCols(Math.ceil(playerIds.length / bestRowCount));
-        }, 10);
+            const w = width / cols;
+            const h = height / rows;
+            const ratio = w / h;
+
+            if (Math.abs(desiredAspectRatio - ratio) < Math.abs(desiredAspectRatio - closestAspectRatio)) {
+                closestAspectRatio = ratio;
+                bestRowCount = rows;
+            }
+        }
+
+        setRows(bestRowCount);
+        setCols(Math.ceil(playerIds.length / bestRowCount));
     };
 
     type DimensionValue = (index: number, total: number, rows: number, cols: number) => {

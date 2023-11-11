@@ -10,7 +10,6 @@ import { calculateFontSize, animationDuration } from './Helpers';
 
 interface Props {
     roundScore: number;
-    totalScore: number;
     fontColor: string;
     containerWidth: number;
 }
@@ -27,10 +26,12 @@ const ScoreRound: React.FunctionComponent<Props> = ({ containerWidth, roundScore
 
     useEffect(() => {
         fontSizeRound.value = withTiming(
-            calculateFontSize(containerWidth) * .8, { duration: animationDuration }
+            calculateFontSize(containerWidth) * scaleFactor, { duration: animationDuration }
         );
 
     }, [roundScore, containerWidth]);
+
+    const scaleFactor = roundScore == 0 ? 1 : .7;
 
     if (roundScore == 0) {
         return <></>;

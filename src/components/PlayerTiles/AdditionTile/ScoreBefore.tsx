@@ -34,7 +34,7 @@ const ScoreBefore: React.FunctionComponent<Props> = ({
         };
     });
 
-    const scaleFactor = roundScore == 0 ? 1 : .8;
+    const scaleFactor = roundScore == 0 ? 1 : .7;
 
     useEffect(() => {
         fontSize.value = withTiming(
