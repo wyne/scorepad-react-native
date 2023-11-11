@@ -34,7 +34,7 @@ const ScoreBefore: React.FunctionComponent<Props> = ({ maxWidth, roundScore, tot
         fontSize.value = withTiming(
             calcFontSize(maxWidth, firstRowLength), { duration: animationDuration }
         );
-        console.log("before fontSize (", totalScore, ")", fontSize.value, " [maxWidth=", maxWidth, "]");
+
         fontOpacity.value = withTiming(
             roundScore == 0 ? 100 : 75, { duration: animationDuration }
         );

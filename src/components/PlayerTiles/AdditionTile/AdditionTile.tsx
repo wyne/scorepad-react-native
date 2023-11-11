@@ -7,7 +7,7 @@ import Animated, {
     withDelay,
 } from 'react-native-reanimated';
 
-import { animationDuration, calcPlayerFontSize, calcScoreLengthRatio } from './Helpers';
+import { animationDuration, calcFontSize } from './Helpers';
 import ScoreBefore from './ScoreBefore';
 import ScoreAfter from './ScoreAfter';
 import ScoreRound from './ScoreRound';
@@ -31,49 +31,25 @@ const AdditionTile: React.FunctionComponent<Props> = ({
     maxHeight,
     index
 }) => {
-    const [w, setW] = useState(1);
-    const [h, setH] = useState(1);
 
-    const sharedScale = useSharedValue(1);
     const sharedOpacity = useSharedValue(0);
 
     const animatedStyles = useAnimatedStyle(() => {
         return {
-            // transform: [{ scale: sharedScale.value }],
             opacity: sharedOpacity.value,
         };
     });
 
-    const layoutHandler = (e: LayoutChangeEvent) => {
-        const { width, height } = e.nativeEvent.layout;
-        setH(height);
-        setW(width);
-    };
-
     useEffect(() => {
-        const hs = maxWidth / w;
-        const vs = maxHeight / h;
-        const scoreLengthRatio = calcScoreLengthRatio(totalScore.toString().length);
-        const widthRatio = (900 + maxWidth) / (900 + Dimensions.get("window").width);
-
-        if (Math.min(hs, vs) > 0) {
-            const s = Math.min(widthRatio * scoreLengthRatio * hs, widthRatio * scoreLengthRatio * vs);
-            sharedScale.value = withDelay(animationDuration, withTiming(
-                Math.min(s, 3), { duration: animationDuration }
-            ));
-        }
-
         sharedOpacity.value = withDelay(100 + index * animationDuration / 2, withTiming(
             1, { duration: animationDuration * 2 }
         ));
     });
 
-    console.log("AdditionTile maxWidth=", maxWidth);
-    const playerNameFontSize = calcPlayerFontSize(maxWidth, playerName.length) * .8;
+    const playerNameFontSize = calcFontSize(maxWidth, playerName.length) * .8;
 
     return (
-        <Animated.View style={[animatedStyles, { justifyContent: 'center' }]}
-            onLayout={layoutHandler}>
+        <Animated.View style={[animatedStyles, { justifyContent: 'center' }]}>
             <Animated.Text style={[styles.name, { textTransform: 'uppercase', fontSize: playerNameFontSize, color: fontColor }]}
                 numberOfLines={1} >
                 {playerName}

@@ -30,7 +30,7 @@ const ScoreRound: React.FunctionComponent<Props> = ({ maxWidth, roundScore, tota
         fontSizeRound.value = withTiming(
             calcFontSize(maxWidth, firstRowLength), { duration: animationDuration }
         );
-        console.log("round fontSize (", totalScore, ")", fontSizeRound.value, " [maxWidth=", maxWidth, "]");
+
     }, [roundScore, maxWidth]);
 
     if (roundScore == 0) {
