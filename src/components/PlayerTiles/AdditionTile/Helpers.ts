@@ -1,65 +1,47 @@
 import { ZoomIn, ZoomOut } from 'react-native-reanimated';
 import { Layout, Easing } from 'react-native-reanimated';
-
-export const animationDuration = 200;
-export const enteringAnimation = ZoomIn.duration(animationDuration);
-export const exitingAnimation = ZoomOut.duration(animationDuration);
-export const layoutAnimation = Layout.easing(Easing.ease).duration(animationDuration);
-
 import { withTiming } from 'react-native-reanimated';
 
-export const calcPlayerFontSize = (length: number) => {
-    if (length <= 3) {
-        return 50;
-    } else if (length <= 4) {
-        return 40;
-    } else if (length <= 5) {
-        return 40;
-    } else if (length <= 6) {
-        return 46;
-    } else if (length <= 7) {
-        return 43;
-    } else if (length <= 8) {
-        return 40;
-    } else if (length <= 8) {
-        return 37;
-    } else {
-        return 34;
-    }
+/**
+ * The duration of the animation in milliseconds.
+ */
+export const animationDuration = 200;
+
+/**
+ * The duration of the entering animation in milliseconds.
+ */
+export const enteringAnimation = ZoomIn.duration(animationDuration);
+
+/**
+ * The duration of the exiting animation in milliseconds.
+ */
+export const exitingAnimation = ZoomOut.duration(animationDuration);
+
+/**
+ * The easing and duration of the layout animation.
+ */
+export const layoutAnimation = Layout.easing(Easing.ease).duration(animationDuration);
+
+/**
+ * Calculates the font size based on the maximum width and length of the text.
+ * @param containerWidth The maximum width of the text.
+ * @param stringLength The number of characters in the text.
+ * @returns The calculated font size.
+ */
+export const calculateFontSize = (containerWidth: number, stringLength: number) => {
+    const baseScale: number = Math.min(1 / stringLength * 200, 100);
+
+    let widthFactor: number = containerWidth / 200;
+
+    if (Number.isNaN(widthFactor)) { widthFactor = 1; }
+
+    return baseScale * widthFactor;
 };
 
-export const calcFontSize = (length: number) => {
-    if (length <= 3) {
-        return 50 * calcScoreLengthRatio(length);
-    } else if (length <= 4) {
-        return 40 * calcScoreLengthRatio(length);
-    } else if (length <= 5) {
-        return 40 * calcScoreLengthRatio(length);
-    } else if (length <= 6) {
-        return 46 * calcScoreLengthRatio(length);
-    } else if (length <= 7) {
-        return 43 * calcScoreLengthRatio(length);
-    } else if (length <= 8) {
-        return 40 * calcScoreLengthRatio(length);
-    } else if (length <= 8) {
-        return 37 * calcScoreLengthRatio(length);
-    } else {
-        return 34 * calcScoreLengthRatio(length);
-    }
-};
-
-export const calcScoreLengthRatio = (length: number) => {
-    if (length <= 3) {
-        return .8;
-    } else if (length <= 4) {
-        return .75;
-    } else if (length <= 5) {
-        return .7;
-    } else {
-        return .6;
-    }
-};
-
+/**
+ * The ZoomOutFadeOut animation.
+ * @returns The initial values and animations for the ZoomOutFadeOut animation.
+ */
 export const ZoomOutFadeOut = () => {
     'worklet';
     const animations = {

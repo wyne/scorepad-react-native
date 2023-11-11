@@ -7,16 +7,17 @@ import {
 } from 'react-native-reanimated';
 import { StyleSheet } from 'react-native';
 
-import { calcFontSize, animationDuration, enteringAnimation, ZoomOutFadeOut } from './Helpers';
+import { calculateFontSize, animationDuration, enteringAnimation, ZoomOutFadeOut } from './Helpers';
 
 interface Props {
     roundScore: number;
     totalScore: number;
     fontColor: string;
+    containerWidth: number;
 }
 
-const ScoreAfter: React.FunctionComponent<Props> = ({ roundScore, totalScore, fontColor }) => {
-    const fontSize = useSharedValue(calcFontSize(totalScore.toString().length));
+const ScoreAfter: React.FunctionComponent<Props> = ({ containerWidth, roundScore, totalScore, fontColor }) => {
+    const fontSize = useSharedValue(calculateFontSize(containerWidth, totalScore.toString().length));
     const opacity = useSharedValue(1);
 
     const animatedStyles = useAnimatedStyle(() => {
@@ -28,12 +29,12 @@ const ScoreAfter: React.FunctionComponent<Props> = ({ roundScore, totalScore, fo
 
     useEffect(() => {
         fontSize.value = withTiming(
-            roundScore == 0 ? 1 : calcFontSize(totalScore.toString().length), { duration: animationDuration },
+            roundScore == 0 ? 1 : calculateFontSize(containerWidth, totalScore.toString().length), { duration: animationDuration },
         );
         opacity.value = withTiming(
             roundScore == 0 ? 0 : 1, { duration: animationDuration },
         );
-    }, [roundScore]);
+    }, [roundScore, containerWidth]);
 
     return (
         <Animated.View entering={enteringAnimation} exiting={ZoomOutFadeOut}>

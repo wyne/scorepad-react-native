@@ -6,17 +6,18 @@ import {
     withTiming
 } from 'react-native-reanimated';
 
-import { calcFontSize, animationDuration } from './Helpers';
+import { calculateFontSize, animationDuration } from './Helpers';
 
 interface Props {
     roundScore: number;
     totalScore: number;
     fontColor: string;
+    containerWidth: number;
 }
 
-const ScoreRound: React.FunctionComponent<Props> = ({ roundScore, totalScore, fontColor }) => {
+const ScoreRound: React.FunctionComponent<Props> = ({ containerWidth, roundScore, totalScore, fontColor }) => {
     const firstRowLength = (roundScore == 0 ? 0 : roundScore.toString().length + 3) + totalScore.toString().length;
-    const fontSizeRound = useSharedValue(calcFontSize(firstRowLength));
+    const fontSizeRound = useSharedValue(calculateFontSize(containerWidth, firstRowLength));
     const animatedStyles = useAnimatedStyle(() => {
         return {
             fontSize: fontSizeRound.value,
@@ -27,9 +28,10 @@ const ScoreRound: React.FunctionComponent<Props> = ({ roundScore, totalScore, fo
 
     useEffect(() => {
         fontSizeRound.value = withTiming(
-            calcFontSize(firstRowLength) * .8, { duration: animationDuration }
+            calculateFontSize(containerWidth, firstRowLength), { duration: animationDuration }
         );
-    }, [roundScore]);
+
+    }, [roundScore, containerWidth]);
 
     if (roundScore == 0) {
         return <></>;
