@@ -6,18 +6,18 @@ import {
     withTiming
 } from 'react-native-reanimated';
 
-import { calcFontSize, animationDuration } from './Helpers';
+import { calculateFontSize, animationDuration } from './Helpers';
 
 interface Props {
     roundScore: number;
     totalScore: number;
     fontColor: string;
-    maxWidth: number;
+    containerWidth: number;
 }
 
-const ScoreRound: React.FunctionComponent<Props> = ({ maxWidth, roundScore, totalScore, fontColor }) => {
+const ScoreRound: React.FunctionComponent<Props> = ({ containerWidth, roundScore, totalScore, fontColor }) => {
     const firstRowLength = (roundScore == 0 ? 0 : roundScore.toString().length + 3) + totalScore.toString().length;
-    const fontSizeRound = useSharedValue(calcFontSize(maxWidth, firstRowLength));
+    const fontSizeRound = useSharedValue(calculateFontSize(containerWidth, firstRowLength));
     const animatedStyles = useAnimatedStyle(() => {
         return {
             fontSize: fontSizeRound.value,
@@ -28,10 +28,10 @@ const ScoreRound: React.FunctionComponent<Props> = ({ maxWidth, roundScore, tota
 
     useEffect(() => {
         fontSizeRound.value = withTiming(
-            calcFontSize(maxWidth, firstRowLength), { duration: animationDuration }
+            calculateFontSize(containerWidth, firstRowLength), { duration: animationDuration }
         );
-        console.log("round fontSize (", totalScore, ")", fontSizeRound.value, " [maxWidth=", maxWidth, "]");
-    }, [roundScore, maxWidth]);
+
+    }, [roundScore, containerWidth]);
 
     if (roundScore == 0) {
         return <></>;

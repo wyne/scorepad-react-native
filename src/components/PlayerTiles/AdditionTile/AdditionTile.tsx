@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, Dimensions, LayoutChangeEvent } from 'react-native';
+import { StyleSheet, LayoutChangeEvent } from 'react-native';
 import Animated, {
     useSharedValue,
     useAnimatedStyle,
@@ -7,7 +7,7 @@ import Animated, {
     withDelay,
 } from 'react-native-reanimated';
 
-import { animationDuration, calcPlayerFontSize, calcScoreLengthRatio } from './Helpers';
+import { animationDuration, calculateFontSize } from './Helpers';
 import ScoreBefore from './ScoreBefore';
 import ScoreAfter from './ScoreAfter';
 import ScoreRound from './ScoreRound';
@@ -31,61 +31,90 @@ const AdditionTile: React.FunctionComponent<Props> = ({
     maxHeight,
     index
 }) => {
-    const [w, setW] = useState(1);
-    const [h, setH] = useState(1);
+    // Tile width and height
+    const [tileWidth, setTileWidth] = useState(1);
+    const [tileHeight, setTileHeight] = useState(1);
 
+    // Animation values
     const sharedScale = useSharedValue(1);
     const sharedOpacity = useSharedValue(0);
 
+    // Animation styles for resizing due to text changes
     const animatedStyles = useAnimatedStyle(() => {
         return {
-            // transform: [{ scale: sharedScale.value }],
+            transform: [{ scale: sharedScale.value }],
             opacity: sharedOpacity.value,
         };
     });
 
+
+    // Update tile width and height on layout change
     const layoutHandler = (e: LayoutChangeEvent) => {
         const { width, height } = e.nativeEvent.layout;
-        setH(height);
-        setW(width);
+        setTileHeight(height);
+        setTileWidth(width);
     };
 
     useEffect(() => {
-        const hs = maxWidth / w;
-        const vs = maxHeight / h;
-        const scoreLengthRatio = calcScoreLengthRatio(totalScore.toString().length);
-        const widthRatio = (900 + maxWidth) / (900 + Dimensions.get("window").width);
+        /*
+         * Calculate ratio of tile content to max width/height
+         * determined by the parent container
+         */
+        const horizontalScaleRatio = maxWidth / tileWidth;
+        const verticalScaleRatio = maxHeight / tileHeight;
 
-        if (Math.min(hs, vs) > 0) {
-            const s = Math.min(widthRatio * scoreLengthRatio * hs, widthRatio * scoreLengthRatio * vs);
-            sharedScale.value = withDelay(animationDuration, withTiming(
-                Math.min(s, 3), { duration: animationDuration }
-            ));
+        // Allow for padding by not scaling to full width/height
+        const maxTileCoverage = 0.8; // 80%
+
+        const minimumScale = Math.min(
+            horizontalScaleRatio * maxTileCoverage,
+            verticalScaleRatio * maxTileCoverage
+        );
+
+        if (minimumScale > 0) {
+            sharedScale.value = withDelay(
+                animationDuration,
+                withTiming(
+                    minimumScale, { duration: animationDuration }
+                )
+            );
         }
 
-        sharedOpacity.value = withDelay(100 + index * animationDuration / 2, withTiming(
-            1, { duration: animationDuration * 2 }
-        ));
+        // Delay opacity animation to allow for scale animation to finish
+        // and to allow for the previous tile to finish animating for effect
+        const animationDelay = index * animationDuration / 2;
+
+        sharedOpacity.value = withDelay(
+            animationDelay,
+            withTiming(
+                1,
+                { duration: animationDuration * 2 }
+            )
+        );
     });
 
-    console.log("AdditionTile maxWidth=", maxWidth);
-    const playerNameFontSize = calcPlayerFontSize(maxWidth, playerName.length) * .8;
+    const playerNameFontSize = calculateFontSize(maxWidth, playerName.length);
+
+    const containerWidth = Math.min(maxWidth, maxHeight);
+
+    const dynamicPlayerStyles = {
+        fontSize: playerNameFontSize,
+        color: fontColor,
+    };
 
     return (
-        <Animated.View style={[animatedStyles, { justifyContent: 'center' }]}
-            onLayout={layoutHandler}>
-            <Animated.Text style={[styles.name, { textTransform: 'uppercase', fontSize: playerNameFontSize, color: fontColor }]}
-                numberOfLines={1} >
+        <Animated.View style={[animatedStyles, { justifyContent: 'center' }]} onLayout={layoutHandler}>
+            <Animated.Text style={[styles.name, dynamicPlayerStyles]} numberOfLines={1}>
                 {playerName}
             </Animated.Text>
             <Animated.View
                 style={styles.scoreLineOne} >
-                <ScoreBefore maxWidth={Math.min(maxWidth, maxHeight)} roundScore={roundScore} totalScore={totalScore}
+                <ScoreBefore containerWidth={containerWidth} roundScore={roundScore} totalScore={totalScore}
                     fontColor={fontColor} />
-                <ScoreRound maxWidth={Math.min(maxWidth, maxHeight)} roundScore={roundScore} totalScore={totalScore}
+                <ScoreRound containerWidth={containerWidth} roundScore={roundScore} totalScore={totalScore}
                     fontColor={fontColor} />
             </Animated.View>
-            <ScoreAfter maxWidth={Math.min(maxWidth, maxHeight)} roundScore={roundScore} totalScore={totalScore}
+            <ScoreAfter containerWidth={containerWidth} roundScore={roundScore} totalScore={totalScore}
                 fontColor={fontColor} />
         </Animated.View>
     );

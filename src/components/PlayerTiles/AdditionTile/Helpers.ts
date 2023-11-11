@@ -1,91 +1,47 @@
 import { ZoomIn, ZoomOut } from 'react-native-reanimated';
 import { Layout, Easing } from 'react-native-reanimated';
-
-export const animationDuration = 200;
-export const enteringAnimation = ZoomIn.duration(animationDuration);
-export const exitingAnimation = ZoomOut.duration(animationDuration);
-export const layoutAnimation = Layout.easing(Easing.ease).duration(animationDuration);
-
 import { withTiming } from 'react-native-reanimated';
 
-export const calcPlayerFontSize = (maxWidth: number, length: number) => {
-    // console.log("maxWidth", maxWidth);
-    // console.log("length", length);
+/**
+ * The duration of the animation in milliseconds.
+ */
+export const animationDuration = 200;
 
-    const baseScale = Math.min(1 / length * 200, 100);
-    let widthFactor: number = maxWidth / 200;
-    if (Number.isNaN(widthFactor)) {
-        widthFactor = 1;
-    }
+/**
+ * The duration of the entering animation in milliseconds.
+ */
+export const enteringAnimation = ZoomIn.duration(animationDuration);
 
-    // console.log("widthfactor", widthFactor);
+/**
+ * The duration of the exiting animation in milliseconds.
+ */
+export const exitingAnimation = ZoomOut.duration(animationDuration);
 
-    return baseScale * widthFactor;
+/**
+ * The easing and duration of the layout animation.
+ */
+export const layoutAnimation = Layout.easing(Easing.ease).duration(animationDuration);
 
-    if (length <= 3) {
-        return 200;
-    } else if (length <= 4) {
-        return 200;
-    } else if (length <= 5) {
-        return 200;
-    } else if (length <= 6) {
-        return 200;
-    } else if (length <= 7) {
-        return 200;
-    } else if (length <= 8) {
-        return 120;
-    } else if (length <= 8) {
-        return 67;
-    } else {
-        return 64;
-    }
-};
+/**
+ * Calculates the font size based on the maximum width and length of the text.
+ * @param containerWidth The maximum width of the text.
+ * @param stringLength The number of characters in the text.
+ * @returns The calculated font size.
+ */
+export const calculateFontSize = (containerWidth: number, stringLength: number) => {
+    const baseScale: number = Math.min(1 / stringLength * 200, 100);
 
-export const calcFontSize = (maxWidth: number, length: number) => {
-    const baseScale = Math.min(1 / length * 200, 100);
-    let widthFactor: number = maxWidth / 200;
+    let widthFactor: number = containerWidth / 200;
 
-    if (Number.isNaN(widthFactor)) {
-        widthFactor = 1;
-    }
-    // console.log("widthfactor", widthFactor);
+    if (Number.isNaN(widthFactor)) { widthFactor = 1; }
 
     return baseScale * widthFactor;
-
-    return Math.min(1 / length * 250, 80);
-
-    if (length <= 3) {
-        return 200 * calcScoreLengthRatio(length);
-    } else if (length <= 4) {
-        return 200 * calcScoreLengthRatio(length);
-    } else if (length <= 5) {
-        return 200 * calcScoreLengthRatio(length);
-    } else if (length <= 6) {
-        return 200 * calcScoreLengthRatio(length);
-    } else if (length <= 7) {
-        return 200 * calcScoreLengthRatio(length);
-    } else if (length <= 8) {
-        return 200 * calcScoreLengthRatio(length);
-    } else if (length <= 8) {
-        return 200 * calcScoreLengthRatio(length);
-    } else {
-        return 200 * calcScoreLengthRatio(length);
-    }
 };
 
-export const calcScoreLengthRatio = (length: number) => {
-    return 1;
-    if (length <= 3) {
-        return .8;
-    } else if (length <= 4) {
-        return .35;
-    } else if (length <= 5) {
-        return .3;
-    } else {
-        return .3;
-    }
-};
-
+/**
+ * The ZoomOutFadeOut animation.
+ * @returns The initial values and animations for the ZoomOutFadeOut animation.
+ */
 export const ZoomOutFadeOut = () => {
     'worklet';
     const animations = {
