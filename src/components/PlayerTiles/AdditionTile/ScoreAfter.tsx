@@ -29,10 +29,12 @@ const ScoreAfter: React.FunctionComponent<Props> = ({ containerWidth, roundScore
 
     useEffect(() => {
         fontSize.value = withTiming(
-            roundScore == 0 ? 1 : calculateFontSize(containerWidth), { duration: animationDuration },
+            roundScore == 0 ? 1 : calculateFontSize(containerWidth) * 1.1,
+            { duration: animationDuration },
         );
         opacity.value = withTiming(
-            roundScore == 0 ? 0 : 1, { duration: animationDuration },
+            roundScore == 0 ? 0 : 1,
+            { duration: animationDuration },
         );
     }, [roundScore, containerWidth]);
 

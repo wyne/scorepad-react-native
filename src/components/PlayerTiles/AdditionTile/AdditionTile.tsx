@@ -68,9 +68,9 @@ const AdditionTile: React.FunctionComponent<Props> = ({
         sharedScale.value
     ]);
 
-    const playerNameFontSize = calculateFontSize(maxWidth);
-
     const containerWidth = Math.min(maxWidth, maxHeight);
+
+    const playerNameFontSize = calculateFontSize(maxWidth);
 
     const dynamicPlayerStyles = {
         fontSize: playerNameFontSize,

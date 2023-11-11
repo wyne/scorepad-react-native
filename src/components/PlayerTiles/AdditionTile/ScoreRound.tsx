@@ -24,14 +24,16 @@ const ScoreRound: React.FunctionComponent<Props> = ({ containerWidth, roundScore
 
     const d = roundScore;
 
+
     useEffect(() => {
+        const scaleFactor = .7;
+
         fontSizeRound.value = withTiming(
-            calculateFontSize(containerWidth) * scaleFactor, { duration: animationDuration }
+            calculateFontSize(containerWidth) * scaleFactor,
+            { duration: animationDuration }
         );
 
     }, [roundScore, containerWidth]);
-
-    const scaleFactor = roundScore == 0 ? 1 : .7;
 
     if (roundScore == 0) {
         return <></>;

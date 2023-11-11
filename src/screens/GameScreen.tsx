@@ -68,14 +68,28 @@ const ScoreBoardScreen: React.FunctionComponent<Props> = ({ navigation }) => {
         height: number;
     }
 
+    // TODO: In 7 person game portrait, last two are wrong when it should be last one is bigger.
+
     const calculateDimensions: DimensionValue = (index: number, total: number, rows: number, cols: number) => {
         if (width == null || height == null) return { width: 0, height: 0 };
         const h = height / rows;
-        // calculate width based on number of rows
+        //
+        // Calculate width based on number of rows
         // but if the index is in the last row, use the remainder
         let w;
-        if (total % rows > 0 && index >= total - total % rows) {
-            w = width / (total % rows);
+
+        /**
+         * If the last row has fewer columns than the rest
+         **/
+        const offsetLastRow = total % rows > 0;
+
+        /**
+         * First index of last row
+         **/
+        const firstOffsetIndex = total - total % cols;
+
+        if (offsetLastRow && index >= firstOffsetIndex) {
+            w = width / (total % cols);
         } else {
             w = width / cols;
         }
