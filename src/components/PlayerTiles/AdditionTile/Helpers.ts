@@ -8,55 +8,81 @@ export const layoutAnimation = Layout.easing(Easing.ease).duration(animationDura
 
 import { withTiming } from 'react-native-reanimated';
 
-export const calcPlayerFontSize = (length: number) => {
+export const calcPlayerFontSize = (maxWidth: number, length: number) => {
+    // console.log("maxWidth", maxWidth);
+    // console.log("length", length);
+
+    const baseScale = Math.min(1 / length * 200, 100);
+    let widthFactor: number = maxWidth / 200;
+    if (Number.isNaN(widthFactor)) {
+        widthFactor = 1;
+    }
+
+    // console.log("widthfactor", widthFactor);
+
+    return baseScale * widthFactor;
+
     if (length <= 3) {
-        return 50;
+        return 200;
     } else if (length <= 4) {
-        return 40;
+        return 200;
     } else if (length <= 5) {
-        return 40;
+        return 200;
     } else if (length <= 6) {
-        return 46;
+        return 200;
     } else if (length <= 7) {
-        return 43;
+        return 200;
     } else if (length <= 8) {
-        return 40;
+        return 120;
     } else if (length <= 8) {
-        return 37;
+        return 67;
     } else {
-        return 34;
+        return 64;
     }
 };
 
-export const calcFontSize = (length: number) => {
+export const calcFontSize = (maxWidth: number, length: number) => {
+    const baseScale = Math.min(1 / length * 200, 100);
+    let widthFactor: number = maxWidth / 200;
+
+    if (Number.isNaN(widthFactor)) {
+        widthFactor = 1;
+    }
+    // console.log("widthfactor", widthFactor);
+
+    return baseScale * widthFactor;
+
+    return Math.min(1 / length * 250, 80);
+
     if (length <= 3) {
-        return 50 * calcScoreLengthRatio(length);
+        return 200 * calcScoreLengthRatio(length);
     } else if (length <= 4) {
-        return 40 * calcScoreLengthRatio(length);
+        return 200 * calcScoreLengthRatio(length);
     } else if (length <= 5) {
-        return 40 * calcScoreLengthRatio(length);
+        return 200 * calcScoreLengthRatio(length);
     } else if (length <= 6) {
-        return 46 * calcScoreLengthRatio(length);
+        return 200 * calcScoreLengthRatio(length);
     } else if (length <= 7) {
-        return 43 * calcScoreLengthRatio(length);
+        return 200 * calcScoreLengthRatio(length);
     } else if (length <= 8) {
-        return 40 * calcScoreLengthRatio(length);
+        return 200 * calcScoreLengthRatio(length);
     } else if (length <= 8) {
-        return 37 * calcScoreLengthRatio(length);
+        return 200 * calcScoreLengthRatio(length);
     } else {
-        return 34 * calcScoreLengthRatio(length);
+        return 200 * calcScoreLengthRatio(length);
     }
 };
 
 export const calcScoreLengthRatio = (length: number) => {
+    return 1;
     if (length <= 3) {
         return .8;
     } else if (length <= 4) {
-        return .75;
+        return .35;
     } else if (length <= 5) {
-        return .7;
+        return .3;
     } else {
-        return .6;
+        return .3;
     }
 };
 

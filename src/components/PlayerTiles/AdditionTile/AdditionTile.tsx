@@ -39,7 +39,7 @@ const AdditionTile: React.FunctionComponent<Props> = ({
 
     const animatedStyles = useAnimatedStyle(() => {
         return {
-            transform: [{ scale: sharedScale.value }],
+            // transform: [{ scale: sharedScale.value }],
             opacity: sharedOpacity.value,
         };
     });
@@ -68,23 +68,24 @@ const AdditionTile: React.FunctionComponent<Props> = ({
         ));
     });
 
-    const playerNameFontSize = calcPlayerFontSize(playerName.length) * .8;
+    console.log("AdditionTile maxWidth=", maxWidth);
+    const playerNameFontSize = calcPlayerFontSize(maxWidth, playerName.length) * .8;
 
     return (
         <Animated.View style={[animatedStyles, { justifyContent: 'center' }]}
             onLayout={layoutHandler}>
-            <Animated.Text style={[styles.name, { fontSize: playerNameFontSize, color: fontColor }]}
+            <Animated.Text style={[styles.name, { textTransform: 'uppercase', fontSize: playerNameFontSize, color: fontColor }]}
                 numberOfLines={1} >
                 {playerName}
             </Animated.Text>
             <Animated.View
                 style={styles.scoreLineOne} >
-                <ScoreBefore roundScore={roundScore} totalScore={totalScore}
+                <ScoreBefore maxWidth={Math.min(maxWidth, maxHeight)} roundScore={roundScore} totalScore={totalScore}
                     fontColor={fontColor} />
-                <ScoreRound roundScore={roundScore} totalScore={totalScore}
+                <ScoreRound maxWidth={Math.min(maxWidth, maxHeight)} roundScore={roundScore} totalScore={totalScore}
                     fontColor={fontColor} />
             </Animated.View>
-            <ScoreAfter roundScore={roundScore} totalScore={totalScore}
+            <ScoreAfter maxWidth={Math.min(maxWidth, maxHeight)} roundScore={roundScore} totalScore={totalScore}
                 fontColor={fontColor} />
         </Animated.View>
     );

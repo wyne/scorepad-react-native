@@ -47,6 +47,8 @@ const PlayerTile: React.FunctionComponent<Props> = ({ color, fontColor, cols, ro
         setHeight(height);
     };
 
+    console.log("PlayerTile, width=", width);
+
     return (
         <View onLayout={layoutHandler}
             style={[

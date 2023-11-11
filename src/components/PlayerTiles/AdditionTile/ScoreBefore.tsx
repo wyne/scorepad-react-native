@@ -12,17 +12,19 @@ interface Props {
     roundScore: number;
     totalScore: number;
     fontColor: string;
+    maxWidth: number;
 }
 
-const ScoreBefore: React.FunctionComponent<Props> = ({ roundScore, totalScore, fontColor }) => {
+const ScoreBefore: React.FunctionComponent<Props> = ({ maxWidth, roundScore, totalScore, fontColor }) => {
     const firstRowLength = (roundScore == 0 ? 0 : roundScore.toString().length + 3) + totalScore.toString().length;
     const d = totalScore - roundScore;
 
-    const fontSize = useSharedValue(calcFontSize(firstRowLength));
+    const fontSize = useSharedValue(calcFontSize(maxWidth, firstRowLength));
+
     const fontOpacity = useSharedValue(100);
     const animatedStyles = useAnimatedStyle(() => {
         return {
-            fontSize: roundScore == 0 ? fontSize.value : fontSize.value * .8,
+            fontSize: fontSize.value,
             fontWeight: roundScore == 0 ? 'bold' : 'normal',
             opacity: fontOpacity.value / 100,
         };
@@ -30,12 +32,13 @@ const ScoreBefore: React.FunctionComponent<Props> = ({ roundScore, totalScore, f
 
     useEffect(() => {
         fontSize.value = withTiming(
-            calcFontSize(firstRowLength), { duration: animationDuration }
+            calcFontSize(maxWidth, firstRowLength), { duration: animationDuration }
         );
+        console.log("before fontSize (", totalScore, ")", fontSize.value, " [maxWidth=", maxWidth, "]");
         fontOpacity.value = withTiming(
             roundScore == 0 ? 100 : 75, { duration: animationDuration }
         );
-    }, [roundScore]);
+    }, [roundScore, maxWidth]);
 
     return (
         <Animated.View entering={enteringAnimation}>

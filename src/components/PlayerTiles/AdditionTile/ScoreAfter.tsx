@@ -13,10 +13,11 @@ interface Props {
     roundScore: number;
     totalScore: number;
     fontColor: string;
+    maxWidth: number;
 }
 
-const ScoreAfter: React.FunctionComponent<Props> = ({ roundScore, totalScore, fontColor }) => {
-    const fontSize = useSharedValue(calcFontSize(totalScore.toString().length));
+const ScoreAfter: React.FunctionComponent<Props> = ({ maxWidth, roundScore, totalScore, fontColor }) => {
+    const fontSize = useSharedValue(calcFontSize(maxWidth, totalScore.toString().length));
     const opacity = useSharedValue(1);
 
     const animatedStyles = useAnimatedStyle(() => {
@@ -28,12 +29,12 @@ const ScoreAfter: React.FunctionComponent<Props> = ({ roundScore, totalScore, fo
 
     useEffect(() => {
         fontSize.value = withTiming(
-            roundScore == 0 ? 1 : calcFontSize(totalScore.toString().length), { duration: animationDuration },
+            roundScore == 0 ? 1 : calcFontSize(maxWidth, totalScore.toString().length), { duration: animationDuration },
         );
         opacity.value = withTiming(
             roundScore == 0 ? 0 : 1, { duration: animationDuration },
         );
-    }, [roundScore]);
+    }, [roundScore, maxWidth]);
 
     return (
         <Animated.View entering={enteringAnimation} exiting={ZoomOutFadeOut}>

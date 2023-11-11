@@ -12,11 +12,12 @@ interface Props {
     roundScore: number;
     totalScore: number;
     fontColor: string;
+    maxWidth: number;
 }
 
-const ScoreRound: React.FunctionComponent<Props> = ({ roundScore, totalScore, fontColor }) => {
+const ScoreRound: React.FunctionComponent<Props> = ({ maxWidth, roundScore, totalScore, fontColor }) => {
     const firstRowLength = (roundScore == 0 ? 0 : roundScore.toString().length + 3) + totalScore.toString().length;
-    const fontSizeRound = useSharedValue(calcFontSize(firstRowLength));
+    const fontSizeRound = useSharedValue(calcFontSize(maxWidth, firstRowLength));
     const animatedStyles = useAnimatedStyle(() => {
         return {
             fontSize: fontSizeRound.value,
@@ -27,9 +28,10 @@ const ScoreRound: React.FunctionComponent<Props> = ({ roundScore, totalScore, fo
 
     useEffect(() => {
         fontSizeRound.value = withTiming(
-            calcFontSize(firstRowLength) * .8, { duration: animationDuration }
+            calcFontSize(maxWidth, firstRowLength), { duration: animationDuration }
         );
-    }, [roundScore]);
+        console.log("round fontSize (", totalScore, ")", fontSizeRound.value, " [maxWidth=", maxWidth, "]");
+    }, [roundScore, maxWidth]);
 
     if (roundScore == 0) {
         return <></>;
