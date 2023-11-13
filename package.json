@@ -67,7 +67,8 @@
     "redux-persist": "^6.0.0",
     "semver": "^7.5.4",
     "typescript": "^5.1.6",
-    "expo-sharing": "~11.5.0"
+    "expo-sharing": "~11.5.0",
+    "expo-blur": "~12.4.1"
   },
   "devDependencies": {
     "@babel/core": "^7.19.3",

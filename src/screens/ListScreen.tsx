@@ -1,9 +1,10 @@
 import React, { memo, useEffect } from 'react';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import Animated, { Layout, Easing } from 'react-native-reanimated';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ParamListBase } from '@react-navigation/native';
 import { useAppSelector, useAppDispatch } from '../../redux/hooks';
+import { BlurView } from 'expo-blur';
 
 import { asyncCreateGame, selectAllGames } from '../../redux/GamesSlice';
 import GameListItem from '../components/GameListItem';
@@ -34,6 +35,7 @@ const ListScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     return (
         <SafeAreaView edges={['bottom', 'left', 'right']} style={{ backgroundColor: 'white', flex: 1 }}>
             <Animated.FlatList
+                ListFooterComponent={<View style={{ paddingBottom: 25 }}></View>}
                 itemLayoutAnimation={Layout.easing(Easing.ease)}
                 style={styles.list}
                 data={gameList}
@@ -43,6 +45,13 @@ const ListScreen: React.FunctionComponent<Props> = ({ navigation }) => {
                 keyExtractor={item => item.id}
             >
             </Animated.FlatList>
+            <BlurView intensity={20} style={{
+                position: 'absolute', bottom: 0, left: 0, right: 0, height: 60,
+                justifyContent: 'flex-start', alignItems: 'center',
+                borderTopWidth: 1, borderColor: '#ccc',
+            }}>
+                <Text style={{ paddingTop: 10, color: '#555', fontSize: 12 }}>Long press for more options.</Text>
+            </BlurView>
         </SafeAreaView>
     );
 };
