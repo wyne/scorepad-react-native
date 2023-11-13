@@ -8,12 +8,14 @@ import GameScreen from "../src/screens/GameScreen";
 import SettingsScreen from "../src/screens/SettingsScreen";
 import AppInfoScreen from "../src/screens/AppInfoScreen";
 import OnboardingScreen from '../src/screens/OnboardingScreen';
+import ShareScreen from './screens/ShareScreen';
 import HomeHeader from '../src/components/Headers/HomeHeader';
 import GameHeader from '../src/components/Headers/GameHeader';
 import SettingsHeader from '../src/components/Headers/SettingsHeader';
 import AppInfoHeader from '../src/components/Headers/AppInfoHeader';
 import { useAppSelector } from '../redux/hooks';
 import { SemVer, parse } from 'semver';
+import ShareHeader from './components/Headers/ShareHeader';
 
 export type OnboardingScreenParamList = {
     onboarding: boolean;
@@ -24,6 +26,7 @@ export type RootStackParamList = {
     Game: undefined;
     Settings: undefined;
     AppInfo: undefined;
+    Share: undefined;
     Onboarding: OnboardingScreenParamList;
     Tutorial: OnboardingScreenParamList;
 };
@@ -99,6 +102,15 @@ export const Navigation = () => {
                         title: "Settings",
                         header: ({ navigation }) => {
                             return <SettingsHeader navigation={navigation} />;
+                        },
+                    }}
+                />
+                <Stack.Screen name="Share" component={ShareScreen}
+                    options={{
+                        orientation: 'all',
+                        title: "Share",
+                        header: ({ navigation }) => {
+                            return <ShareHeader navigation={navigation} />;
                         },
                     }}
                 />

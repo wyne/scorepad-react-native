@@ -1,10 +1,11 @@
 import React from 'react';
-import { Text, StyleSheet, Alert } from 'react-native';
+import { Text, StyleSheet, Alert, Platform } from 'react-native';
 import { ListItem } from 'react-native-elements';
 import Moment from 'react-moment';
 import { Icon } from 'react-native-elements';
 import Animated, { FadeInUp, SlideOutLeft } from 'react-native-reanimated';
 import analytics from '@react-native-firebase/analytics';
+import { MenuView, MenuAction, NativeActionEvent } from '@react-native-menu/menu';
 
 import { selectGameById, gameDelete } from '../../redux/GamesSlice';
 import { setCurrentGameId } from '../../redux/SettingsSlice';
@@ -37,7 +38,9 @@ const GameListItem: React.FunctionComponent<Props> = ({ navigation, game, index 
         resolve();
     });
 
-    // Tap
+    /**
+     * Choose Game and navigate to GameScreen
+     */
     const chooseGameHandler = async () => {
         asyncSetCurrentGame(dispatch).then(() => {
             navigation.navigate("Game");
@@ -50,7 +53,37 @@ const GameListItem: React.FunctionComponent<Props> = ({ navigation, game, index 
         });
     };
 
-    // Long Press
+    /**
+     * Share Game
+     */
+    const shareGameHandler = async () => {
+        asyncSetCurrentGame(dispatch).then(() => {
+            navigation.navigate("Share");
+        });
+
+        await analytics().logEvent('menu_share', {
+            round_count: rounds + 1,
+            player_count: playerNames.length,
+        });
+    };
+
+    /**
+     * Edit Game
+     */
+    const editGameHandler = async () => {
+        asyncSetCurrentGame(dispatch).then(() => {
+            navigation.navigate("Settings");
+        });
+
+        await analytics().logEvent('menu_edit', {
+            round_count: rounds + 1,
+            player_count: playerNames.length,
+        });
+    };
+
+    /**
+     * Delete Game
+     */
     const deleteGameHandler = async () => {
         Alert.alert(
             'Delete Game',
@@ -78,29 +111,87 @@ const GameListItem: React.FunctionComponent<Props> = ({ navigation, game, index 
         });
     };
 
+    /**
+     * Menu Actions for long press
+     */
+    const actions: MenuAction[] = [
+        {
+            id: 'edit',
+            title: 'Edit',
+            image: Platform.select({
+                ios: 'pencil',
+                android: 'ic_menu_edit',
+            }),
+        },
+        {
+            id: 'share',
+            title: 'Share',
+            image: Platform.select({
+                ios: 'square.and.arrow.up',
+                android: 'ic_menu_share',
+            }),
+        },
+        {
+            id: 'delete',
+            title: `Delete`,
+            attributes: {
+                destructive: true,
+            },
+            image: Platform.select({
+                ios: 'trash',
+                android: 'ic_menu_delete',
+            }),
+        },
+    ];
+
+    type MenuActionHandler = (eativeEvent: NativeActionEvent) => void;
+
+    /**
+     * Menu Action Handler - handles long press actions for games
+     * @param nativeEvent
+     * @returns void
+     */
+    const menuActionHandler: MenuActionHandler = async ({ nativeEvent }) => {
+        switch (nativeEvent.event) {
+            case 'edit':
+                editGameHandler();
+                break;
+            case 'share':
+                shareGameHandler();
+                break;
+            case 'delete':
+                deleteGameHandler();
+                break;
+        }
+    };
+
     return (
         <Animated.View entering={FadeInUp.duration(500).delay(100 + index * 100)}
             exiting={SlideOutLeft.duration(200)}>
-            <ListItem key={game.id} bottomDivider
-                onPress={chooseGameHandler}
-                onLongPress={deleteGameHandler}>
-                <ListItem.Content>
-                    <ListItem.Title>{game.title}</ListItem.Title>
-                    <ListItem.Subtitle style={styles.gameSubtitle}>
-                        <Text><Moment element={Text} fromNow>{game.dateCreated}</Moment></Text>
-                    </ListItem.Subtitle>
-                    <ListItem.Subtitle style={styles.gameSubtitle}>
-                        <Text>{playerNames.join(', ')}</Text>
-                    </ListItem.Subtitle>
-                </ListItem.Content>
-                <Text style={styles.badgePlayers}>
-                    {playerNames.length} <Icon color={'#01497C'} name="users" type="font-awesome-5" size={16} />
-                </Text>
-                <Text style={styles.badgeRounds}>
-                    {rounds + 1} <Icon color={'#c25858'} name="circle-notch" type="font-awesome-5" size={16} />
-                </Text>
-                <ListItem.Chevron />
-            </ListItem>
+            <MenuView
+                title={game.title}
+                shouldOpenOnLongPress={true}
+                onPressAction={menuActionHandler}
+                actions={actions}>
+                <ListItem key={game.id} bottomDivider onPress={chooseGameHandler}>
+                    <ListItem.Content>
+                        <ListItem.Title>{game.title}</ListItem.Title>
+                        <ListItem.Subtitle style={styles.gameSubtitle}>
+                            <Text><Moment element={Text} fromNow>{game.dateCreated}</Moment></Text>
+                        </ListItem.Subtitle>
+                        <ListItem.Subtitle style={styles.gameSubtitle}>
+                            <Text>{playerNames.join(', ')}</Text>
+                        </ListItem.Subtitle>
+                    </ListItem.Content>
+                    <Text style={styles.badgePlayers}>
+                        {playerNames.length} <Icon color={'#01497C'} name="users" type="font-awesome-5" size={16} />
+                    </Text>
+                    <Text style={styles.badgeRounds}>
+                        {rounds + 1} <Icon color={'#c25858'} name="circle-notch" type="font-awesome-5" size={16} />
+                    </Text>
+                    <ListItem.Chevron />
+                </ListItem>
+            </MenuView>
         </Animated.View>
     );
 };

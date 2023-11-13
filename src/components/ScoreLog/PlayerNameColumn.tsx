@@ -13,9 +13,10 @@ import { Icon } from 'react-native-elements/dist/icons/Icon';
 
 interface Props {
     navigation: NativeStackNavigationProp<ParamListBase, string, undefined>;
+    disabled?: boolean;
 }
 
-const PlayerNameColumn: React.FunctionComponent<Props> = ({ navigation }) => {
+const PlayerNameColumn: React.FunctionComponent<Props> = ({ navigation, disabled = false }) => {
     const currentGameId = useAppSelector(state => state.settings.currentGameId);
     const currentGame = useAppSelector(state => selectGameById(state, currentGameId));
 
@@ -27,6 +28,8 @@ const PlayerNameColumn: React.FunctionComponent<Props> = ({ navigation }) => {
 
     return (
         <TouchableOpacity style={{ padding: 10 }} onPress={async () => {
+            if (disabled) return;
+
             await analytics().logEvent('edit_game', {
                 game_id: currentGameId
             });
@@ -37,7 +40,7 @@ const PlayerNameColumn: React.FunctionComponent<Props> = ({ navigation }) => {
                 <Icon name="users"
                     type="font-awesome-5"
                     size={20}
-                    color={systemBlue} />
+                    color={disabled ? 'white' : systemBlue} />
             </Text>
             {players.map((player, index) => (
                 <View key={index} style={{ paddingLeft: 2, borderLeftWidth: 5, borderColor: "#" + palette[index] }}>

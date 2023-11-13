@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Platform, PlatformIOSStatic, Text, View, StyleSheet, Alert } from 'react-native';
+import { Text, View, StyleSheet, Alert } from 'react-native';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { Icon, Button } from 'react-native-elements';
@@ -34,13 +34,7 @@ const SettingsScreen: React.FunctionComponent<Props> = ({ navigation }) => {
         return currentGame.playerIds.indexOf(a.id) - currentGame.playerIds.indexOf(b.id);
     });
 
-    const maxPlayers = (() => {
-        if (Platform.OS === 'ios') {
-            const platformIOS = Platform as PlatformIOSStatic;
-            return platformIOS.isPad ? 12 : 8;
-        }
-        return 8;
-    })();
+    const maxPlayers = 12;
 
     const addPlayerHandler = async () => {
         if (currentGame == undefined) return;
