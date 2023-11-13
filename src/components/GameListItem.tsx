@@ -60,6 +60,11 @@ const GameListItem: React.FunctionComponent<Props> = ({ navigation, game, index 
         asyncSetCurrentGame(dispatch).then(() => {
             navigation.navigate("Share");
         });
+
+        await analytics().logEvent('menu_share', {
+            round_count: rounds + 1,
+            player_count: playerNames.length,
+        });
     };
 
     /**
@@ -68,6 +73,11 @@ const GameListItem: React.FunctionComponent<Props> = ({ navigation, game, index 
     const editGameHandler = async () => {
         asyncSetCurrentGame(dispatch).then(() => {
             navigation.navigate("Settings");
+        });
+
+        await analytics().logEvent('menu_edit', {
+            round_count: rounds + 1,
+            player_count: playerNames.length,
         });
     };
 

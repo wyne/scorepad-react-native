@@ -4,6 +4,7 @@ import { View, StyleSheet, ScrollView, Text } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ParamListBase } from '@react-navigation/native';
 import { captureRef } from "react-native-view-shot";
+import analytics from '@react-native-firebase/analytics';
 import * as Sharing from 'expo-sharing';
 
 import { selectGameById } from '../../redux/GamesSlice';
@@ -20,20 +21,17 @@ interface Props {
 
 const ShareScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     const currentGameId = useAppSelector(state => state.settings.currentGameId);
-
     if (typeof currentGameId == 'undefined') return null;
 
     const roundTotal = useAppSelector(state => selectGameById(state, currentGameId)?.roundTotal || 0);
-
     const currentGame = useAppSelector(state => selectGameById(state, state.settings.currentGameId));
     if (typeof currentGame == 'undefined') return null;
-
 
     const roundsScrollViewEl = useRef<ScrollView>(null);
 
     const roundsIterator = [...Array(roundTotal + 1).keys()];
 
-    const exportImage = () => {
+    const exportImage = async () => {
         if (roundsScrollViewEl.current == null) return;
 
         captureRef(roundsScrollViewEl, {
@@ -49,6 +47,8 @@ const ShareScreen: React.FunctionComponent<Props> = ({ navigation }) => {
                 UTI: 'image/png',
             });
         });
+
+        await analytics().logEvent('share_image');
     };
 
     return (
