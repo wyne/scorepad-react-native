@@ -11,7 +11,8 @@ import RoundScoreColumn from '../components/ScoreLog/RoundScoreColumn';
 import TotalScoreColumn from '../components/ScoreLog/TotalScoreColumn';
 import PlayerNameColumn from '../components/ScoreLog/PlayerNameColumn';
 import { useAppSelector } from '../../redux/hooks';
-import { Button } from 'react-native-elements';
+import { Button, Icon } from 'react-native-elements';
+import { systemBlue } from '../constants';
 
 interface Props {
     navigation: NativeStackNavigationProp<ParamListBase, string, undefined>;
@@ -22,7 +23,6 @@ const ExportScreen: React.FunctionComponent<Props> = ({ navigation }) => {
 
     if (typeof currentGameId == 'undefined') return null;
 
-    const roundCurrent = useAppSelector(state => selectGameById(state, currentGameId)?.roundCurrent || 0);
     const roundTotal = useAppSelector(state => selectGameById(state, currentGameId)?.roundTotal || 0);
 
     const currentGame = useAppSelector(state => selectGameById(state, state.settings.currentGameId));
@@ -54,43 +54,67 @@ const ExportScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     return (
         <SafeAreaView edges={['right', 'left']}
             style={[styles.scoreTableContainer, { height: 'auto' }]}>
-            <View style={{
-                flexDirection: 'row',
-                borderWidth: 2,
-                borderColor: 'white',
-                borderStyle: 'solid',
-            }}>
-                <ScrollView horizontal={true}
-                    contentContainerStyle={{
-                        backgroundColor: 'black',
-                        flexDirection: 'column',
-                        padding: 10,
-                    }}
-                    ref={roundsScrollViewEl}>
-                    <View style={{ flexDirection: 'column' }}>
-                        <Text style={{ color: 'white', fontSize: 20, fontWeight: 'bold' }}>
-                            {currentGame?.title}
-                        </Text>
-                        <Text style={{ color: 'white', paddingVertical: 5 }}>
-                            Created: {new Date(currentGame.dateCreated).toLocaleDateString()}
-                            &nbsp; {new Date(currentGame.dateCreated).toLocaleTimeString()}
-                        </Text>
-                    </View>
-                    <View style={{ flexDirection: 'row' }}>
-                        <PlayerNameColumn navigation={navigation} />
-                        <TotalScoreColumn />
-                        {roundsIterator.map((item, round) => (
-                            <View key={round}>
-                                <RoundScoreColumn
-                                    round={round}
-                                    key={round}
-                                    isCurrentRound={round == roundCurrent} />
-                            </View>
-                        ))}
-                    </View>
-                </ScrollView>
-            </View>
-            <Button style={{ padding: 20 }} title="Export" onPress={exportImage} />
+            <ScrollView>
+
+                <Text style={{ color: 'white', paddingVertical: 20 }}>
+                    You can edit the game title or player names before sharing.
+                    Note that edits will affect the game and be permanent.
+                </Text>
+
+                <Button title={' Edit before sharing'} type='clear'
+                    icon={<Icon name='edit' color={systemBlue} />}
+                    style={{ padding: 10 }}
+                    onPress={async () => {
+                        navigation.navigate("Settings");
+                    }} />
+
+                <View style={{
+                    flexDirection: 'row',
+                    borderWidth: 2,
+                    borderColor: 'white',
+                    borderStyle: 'solid',
+                }}>
+                    <ScrollView horizontal={true}
+                        contentContainerStyle={{
+                            backgroundColor: 'black',
+                            flexDirection: 'column',
+                            padding: 10,
+                        }}
+                        ref={roundsScrollViewEl}>
+                        <View style={{ flexDirection: 'column' }}>
+                            <Text style={{ color: 'white', fontSize: 20, fontWeight: 'bold', padding: 10 }}>
+                                {currentGame?.title}
+                            </Text>
+                            <Text style={{ color: 'white', paddingHorizontal: 10 }}>
+                                Created: {new Date(currentGame.dateCreated).toLocaleDateString()}
+                                &nbsp; {new Date(currentGame.dateCreated).toLocaleTimeString()}
+                            </Text>
+                        </View>
+                        <View style={{ flexDirection: 'row' }}>
+                            <PlayerNameColumn navigation={navigation} disabled={true} />
+                            <TotalScoreColumn />
+                            {roundsIterator.map((item, round) => (
+                                <View key={round}>
+                                    <RoundScoreColumn
+                                        round={round}
+                                        key={round}
+                                        isCurrentRound={false}
+                                        disabled={true}
+                                    />
+                                </View>
+                            ))}
+                        </View>
+                        <View>
+                            <Text>
+                                Created with ScorePad
+                            </Text>
+                        </View>
+                    </ScrollView>
+                </View>
+                <Button style={{ padding: 20 }} type='clear'
+                    icon={<Icon type='evilicon' name='image' color={systemBlue} />}
+                    title=" Share as image..." onPress={exportImage} />
+            </ScrollView>
         </SafeAreaView>
     );
 };
@@ -98,8 +122,8 @@ const ExportScreen: React.FunctionComponent<Props> = ({ navigation }) => {
 const styles = StyleSheet.create({
     scoreTableContainer: {
         backgroundColor: 'black',
+        flex: 1,
         padding: 10,
-        // flex: 1,
         alignItems: 'center',
         justifyContent: 'center',
     }

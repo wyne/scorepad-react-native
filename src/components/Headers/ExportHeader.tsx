@@ -10,12 +10,12 @@ interface Props {
     navigation: NativeStackNavigationProp<ParamListBase, string, undefined>;
 }
 
-const ExportHeader: React.FunctionComponent<Props> = ({ navigation }: Props) => {
+const ShareHeader: React.FunctionComponent<Props> = ({ navigation }: Props) => {
 
     return (
         <CustomHeader navigation={navigation}
             headerLeft={<MenuButton navigation={navigation} />}
-            headerCenter={<Text style={styles.title}>Export</Text>}
+            headerCenter={<Text style={styles.title}>Share</Text>}
         />
     );
 };
@@ -28,4 +28,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default ExportHeader;
+export default ShareHeader;

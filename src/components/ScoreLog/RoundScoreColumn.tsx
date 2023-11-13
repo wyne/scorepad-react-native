@@ -10,9 +10,10 @@ import RoundScoreCell from './RoundScoreCell';
 interface Props {
     round: number;
     isCurrentRound: boolean;
+    disabled?: boolean;
 }
 
-const RoundScoreColumn: React.FunctionComponent<Props> = ({ round, isCurrentRound }) => {
+const RoundScoreColumn: React.FunctionComponent<Props> = ({ round, isCurrentRound, disabled = false }) => {
     const dispatch = useAppDispatch();
 
     const currentGameId = useAppSelector(state => state.settings.currentGameId);
@@ -21,6 +22,8 @@ const RoundScoreColumn: React.FunctionComponent<Props> = ({ round, isCurrentRoun
     if (typeof currentGame == 'undefined') return null;
 
     const onPressHandler = useCallback(async () => {
+        if (disabled) return;
+
         dispatch(updateGame({
             id: currentGameId,
             changes: {

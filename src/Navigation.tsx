@@ -8,14 +8,14 @@ import GameScreen from "../src/screens/GameScreen";
 import SettingsScreen from "../src/screens/SettingsScreen";
 import AppInfoScreen from "../src/screens/AppInfoScreen";
 import OnboardingScreen from '../src/screens/OnboardingScreen';
-import ExportScreen from '../src/screens/ExportScreen';
+import ShareScreen from '../src/screens/ExportScreen';
 import HomeHeader from '../src/components/Headers/HomeHeader';
 import GameHeader from '../src/components/Headers/GameHeader';
 import SettingsHeader from '../src/components/Headers/SettingsHeader';
 import AppInfoHeader from '../src/components/Headers/AppInfoHeader';
 import { useAppSelector } from '../redux/hooks';
 import { SemVer, parse } from 'semver';
-import ExportHeader from './components/Headers/ExportHeader';
+import ShareHeader from './components/Headers/ExportHeader';
 
 export type OnboardingScreenParamList = {
     onboarding: boolean;
@@ -26,7 +26,7 @@ export type RootStackParamList = {
     Game: undefined;
     Settings: undefined;
     AppInfo: undefined;
-    Export: undefined;
+    Share: undefined;
     Onboarding: OnboardingScreenParamList;
     Tutorial: OnboardingScreenParamList;
 };
@@ -105,12 +105,12 @@ export const Navigation = () => {
                         },
                     }}
                 />
-                <Stack.Screen name="Export" component={ExportScreen}
+                <Stack.Screen name="Share" component={ShareScreen}
                     options={{
                         orientation: 'all',
-                        title: "Export",
+                        title: "Share",
                         header: ({ navigation }) => {
-                            return <ExportHeader navigation={navigation} />;
+                            return <ShareHeader navigation={navigation} />;
                         },
                     }}
                 />

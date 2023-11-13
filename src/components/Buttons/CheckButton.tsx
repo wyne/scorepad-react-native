@@ -14,7 +14,7 @@ interface Props {
 const CheckButton: React.FunctionComponent<Props> = ({ navigation }) => {
     return (
         <HeaderButton accessibilityLabel='Save Game' onPress={async () => {
-            navigation.navigate('Game');
+            navigation.pop();
             await analytics().logEvent('save_game');
         }}>
             <Icon name="check"

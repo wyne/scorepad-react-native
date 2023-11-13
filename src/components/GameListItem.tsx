@@ -54,11 +54,20 @@ const GameListItem: React.FunctionComponent<Props> = ({ navigation, game, index 
     };
 
     /**
-     * Export Game
+     * Share Game
      */
-    const exportGameHandler = async () => {
+    const shareGameHandler = async () => {
         asyncSetCurrentGame(dispatch).then(() => {
-            navigation.navigate("Export");
+            navigation.navigate("Share");
+        });
+    };
+
+    /**
+     * Edit Game
+     */
+    const editGameHandler = async () => {
+        asyncSetCurrentGame(dispatch).then(() => {
+            navigation.navigate("Settings");
         });
     };
 
@@ -97,8 +106,16 @@ const GameListItem: React.FunctionComponent<Props> = ({ navigation, game, index 
      */
     const actions: MenuAction[] = [
         {
-            id: 'export',
-            title: `Export`,
+            id: 'edit',
+            title: 'Edit',
+            image: Platform.select({
+                ios: 'pencil',
+                android: 'ic_menu_edit',
+            }),
+        },
+        {
+            id: 'share',
+            title: 'Share',
             image: Platform.select({
                 ios: 'square.and.arrow.up',
                 android: 'ic_menu_share',
@@ -126,8 +143,11 @@ const GameListItem: React.FunctionComponent<Props> = ({ navigation, game, index 
      */
     const menuActionHandler: MenuActionHandler = async ({ nativeEvent }) => {
         switch (nativeEvent.event) {
-            case 'export':
-                exportGameHandler();
+            case 'edit':
+                editGameHandler();
+                break;
+            case 'share':
+                shareGameHandler();
                 break;
             case 'delete':
                 deleteGameHandler();

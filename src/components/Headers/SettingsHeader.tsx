@@ -6,7 +6,6 @@ import { ParamListBase } from '@react-navigation/native';
 import { useAppSelector } from '../../../redux/hooks';
 import { selectGameById } from '../../../redux/GamesSlice';
 import CheckButton from '../Buttons/CheckButton';
-import MenuButton from '../Buttons/MenuButton';
 import CustomHeader from './CustomHeader';
 
 interface Props {
@@ -18,7 +17,7 @@ const SettingsHeader: React.FunctionComponent<Props> = ({ navigation }) => {
 
     return (
         <CustomHeader navigation={navigation}
-            headerLeft={<MenuButton navigation={navigation} />}
+            headerLeft={<></>}
             headerCenter={<Text style={styles.title}>{currentGame?.title}</Text>}
             headerRight={<CheckButton navigation={navigation} />}
         />
