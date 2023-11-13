@@ -92,7 +92,6 @@ const GameHeader: React.FunctionComponent<Props> = ({ navigation }) => {
         <CustomHeader navigation={navigation}
             headerLeft={<>
                 <MenuButton navigation={navigation} />
-                <FullscreenButton />
             </>}
             headerCenter={<>
                 <PrevRoundButton prevRoundHandler={prevRoundHandler} roundCurrent={roundCurrent} />
