@@ -8,6 +8,7 @@ import GameScreen from "../src/screens/GameScreen";
 import SettingsScreen from "../src/screens/SettingsScreen";
 import AppInfoScreen from "../src/screens/AppInfoScreen";
 import OnboardingScreen from '../src/screens/OnboardingScreen';
+import ExportScreen from '../src/screens/ExportScreen';
 import HomeHeader from '../src/components/Headers/HomeHeader';
 import GameHeader from '../src/components/Headers/GameHeader';
 import SettingsHeader from '../src/components/Headers/SettingsHeader';
@@ -24,6 +25,7 @@ export type RootStackParamList = {
     Game: undefined;
     Settings: undefined;
     AppInfo: undefined;
+    Export: undefined;
     Onboarding: OnboardingScreenParamList;
     Tutorial: OnboardingScreenParamList;
 };
@@ -99,6 +101,15 @@ export const Navigation = () => {
                         title: "Settings",
                         header: ({ navigation }) => {
                             return <SettingsHeader navigation={navigation} />;
+                        },
+                    }}
+                />
+                <Stack.Screen name="Export" component={ExportScreen}
+                    options={{
+                        orientation: 'all',
+                        title: "Export",
+                        header: ({ navigation }) => {
+                            return <AppInfoHeader navigation={navigation} />;
                         },
                     }}
                 />
