@@ -1,14 +1,16 @@
-import React, { useState } from 'react';
-import { View, StyleSheet, LayoutChangeEvent } from 'react-native';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
+import { View, StyleSheet, LayoutChangeEvent, Text } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { getContrastRatio } from 'colorsheet';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ParamListBase } from '@react-navigation/native';
+import BottomSheet from '@gorhom/bottom-sheet';
 
 import { useAppSelector } from '../../redux/hooks';
 import PlayerTile from '../components/PlayerTile';
 import Rounds from '../components/Rounds';
 import { selectGameById } from '../../redux/GamesSlice';
+import { ScrollView } from 'react-native-gesture-handler';
 
 interface Props {
     navigation: NativeStackNavigationProp<ParamListBase, string, undefined>;
@@ -77,6 +79,17 @@ const ScoreBoardScreen: React.FunctionComponent<Props> = ({ navigation }) => {
         };
     };
 
+    // ref
+    const bottomSheetRef = useRef<BottomSheet>(null);
+
+    // variables
+    const snapPoints = useMemo(() => [75, '60%', '100%'], []);
+
+    // callbacks
+    const handleSheetChanges = useCallback((index: number) => {
+        console.log('handleSheetChanges', index);
+    }, []);
+
     return (
         <SafeAreaView style={{ flex: 1 }}>
             <View style={[StyleSheet.absoluteFillObject]}>
@@ -97,7 +110,21 @@ const ScoreBoardScreen: React.FunctionComponent<Props> = ({ navigation }) => {
                     ))}
                 </View>
 
-                <Rounds navigation={navigation} show={!fullscreen} />
+                <BottomSheet
+                    ref={bottomSheetRef}
+                    index={0}
+                    snapPoints={snapPoints}
+                    onChange={handleSheetChanges}
+                    backgroundStyle={{ backgroundColor: 'rgb(30,40,50)' }}
+                    handleIndicatorStyle={{ backgroundColor: 'white' }}
+                >
+                    <View style={styles.contentContainer}>
+                        <Text style={{ color: 'white', fontSize: 20, padding: 20, paddingTop: 0, fontWeight: 'bold' }}>History</Text>
+                        <ScrollView>
+                            <Rounds navigation={navigation} show={!fullscreen} />
+                        </ScrollView>
+                    </View>
+                </BottomSheet>
             </View>
         </SafeAreaView>
     );
@@ -111,8 +138,12 @@ const styles = StyleSheet.create({
         alignContent: 'stretch',
         flexDirection: 'row',
         maxWidth: '100%',
-        backgroundColor: '#000000'
-    }
+        backgroundColor: '#000000',
+        paddingBottom: 75,
+    },
+    contentContainer: {
+        flex: 1,
+    },
 });
 
 export default ScoreBoardScreen;

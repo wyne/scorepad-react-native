@@ -79,7 +79,6 @@ const Rounds: React.FunctionComponent<Props> = ({ navigation, show }) => {
 const styles = StyleSheet.create({
     scoreTableContainer: {
         flexDirection: 'row',
-        backgroundColor: 'black',
         paddingBottom: 10,
     }
 });

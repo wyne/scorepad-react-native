@@ -40,7 +40,7 @@ const RoundScoreColumn: React.FunctionComponent<Props> = ({ round, isCurrentRoun
         <TouchableWithoutFeedback onPress={onPressHandler}>
             <View style={{
                 padding: 10,
-                backgroundColor: isCurrentRound ? '#111' : 'black'
+                // backgroundColor: isCurrentRound ? '#111' : 'black'
             }}>
                 <Text style={{
                     color: isCurrentRound ? 'red' : 'yellow',
