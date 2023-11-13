@@ -18,7 +18,7 @@ interface Props {
     navigation: NativeStackNavigationProp<ParamListBase, string, undefined>;
 }
 
-const ExportScreen: React.FunctionComponent<Props> = ({ navigation }) => {
+const ShareScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     const currentGameId = useAppSelector(state => state.settings.currentGameId);
 
     if (typeof currentGameId == 'undefined') return null;
@@ -129,4 +129,4 @@ const styles = StyleSheet.create({
     }
 });
 
-export default ExportScreen;
+export default ShareScreen;

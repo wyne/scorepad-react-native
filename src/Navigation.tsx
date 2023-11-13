@@ -8,14 +8,14 @@ import GameScreen from "../src/screens/GameScreen";
 import SettingsScreen from "../src/screens/SettingsScreen";
 import AppInfoScreen from "../src/screens/AppInfoScreen";
 import OnboardingScreen from '../src/screens/OnboardingScreen';
-import ShareScreen from '../src/screens/ExportScreen';
+import ShareScreen from './screens/ShareScreen';
 import HomeHeader from '../src/components/Headers/HomeHeader';
 import GameHeader from '../src/components/Headers/GameHeader';
 import SettingsHeader from '../src/components/Headers/SettingsHeader';
 import AppInfoHeader from '../src/components/Headers/AppInfoHeader';
 import { useAppSelector } from '../redux/hooks';
 import { SemVer, parse } from 'semver';
-import ShareHeader from './components/Headers/ExportHeader';
+import ShareHeader from './components/Headers/ShareHeader';
 
 export type OnboardingScreenParamList = {
     onboarding: boolean;
