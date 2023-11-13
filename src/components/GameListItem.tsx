@@ -53,36 +53,6 @@ const GameListItem: React.FunctionComponent<Props> = ({ navigation, game, index 
         });
     };
 
-    const actions: MenuAction[] = [
-        {
-            id: 'rename',
-            title: `Rename`,
-            image: Platform.select({
-                ios: 'pencil',
-                android: 'create',
-            }),
-        },
-        {
-            id: 'export',
-            title: `Export`,
-            image: Platform.select({
-                ios: 'square.and.arrow.up',
-                android: 'ic_menu_share',
-            }),
-        },
-        {
-            id: 'delete',
-            title: `Delete`,
-            attributes: {
-                destructive: true,
-            },
-            image: Platform.select({
-                ios: 'trash',
-                android: 'ic_menu_delete',
-            }),
-        },
-    ];
-
     /**
      * Export Game
      */
@@ -122,8 +92,38 @@ const GameListItem: React.FunctionComponent<Props> = ({ navigation, game, index 
         });
     };
 
+    /**
+     * Menu Actions for long press
+     */
+    const actions: MenuAction[] = [
+        {
+            id: 'export',
+            title: `Export`,
+            image: Platform.select({
+                ios: 'square.and.arrow.up',
+                android: 'ic_menu_share',
+            }),
+        },
+        {
+            id: 'delete',
+            title: `Delete`,
+            attributes: {
+                destructive: true,
+            },
+            image: Platform.select({
+                ios: 'trash',
+                android: 'ic_menu_delete',
+            }),
+        },
+    ];
+
     type MenuActionHandler = (eativeEvent: NativeActionEvent) => void;
 
+    /**
+     * Menu Action Handler - handles long press actions for games
+     * @param nativeEvent
+     * @returns void
+     */
     const menuActionHandler: MenuActionHandler = async ({ nativeEvent }) => {
         switch (nativeEvent.event) {
             case 'export':

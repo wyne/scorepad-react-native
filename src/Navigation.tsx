@@ -15,6 +15,7 @@ import SettingsHeader from '../src/components/Headers/SettingsHeader';
 import AppInfoHeader from '../src/components/Headers/AppInfoHeader';
 import { useAppSelector } from '../redux/hooks';
 import { SemVer, parse } from 'semver';
+import ExportHeader from './components/Headers/ExportHeader';
 
 export type OnboardingScreenParamList = {
     onboarding: boolean;
@@ -109,7 +110,7 @@ export const Navigation = () => {
                         orientation: 'all',
                         title: "Export",
                         header: ({ navigation }) => {
-                            return <AppInfoHeader navigation={navigation} />;
+                            return <ExportHeader navigation={navigation} />;
                         },
                     }}
                 />

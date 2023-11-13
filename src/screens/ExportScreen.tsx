@@ -1,9 +1,10 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useRef } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { View, StyleSheet, ScrollView, Text } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ParamListBase } from '@react-navigation/native';
 import { captureRef } from "react-native-view-shot";
+import * as Sharing from 'expo-sharing';
 
 import { selectGameById } from '../../redux/GamesSlice';
 import RoundScoreColumn from '../components/ScoreLog/RoundScoreColumn';
@@ -40,8 +41,13 @@ const ExportScreen: React.FunctionComponent<Props> = ({ navigation }) => {
             quality: 1,
             format: 'png',
             snapshotContentContainer: true,
+            fileName: `${currentGame?.title}.png`,
         }).then(uri => {
-            console.log("do something with ", uri);
+            Sharing.shareAsync(uri, {
+                mimeType: 'image/png',
+                dialogTitle: 'Share Scoreboard',
+                UTI: 'image/png',
+            });
         });
     };
 
