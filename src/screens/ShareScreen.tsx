@@ -75,6 +75,7 @@ const ShareScreen: React.FunctionComponent<Props> = ({ navigation }) => {
                     borderStyle: 'solid',
                 }}>
                     <ScrollView horizontal={true}
+                        showsHorizontalScrollIndicator={false}
                         contentContainerStyle={{
                             backgroundColor: 'black',
                             flexDirection: 'column',

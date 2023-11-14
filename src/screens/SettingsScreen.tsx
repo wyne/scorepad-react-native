@@ -136,6 +136,7 @@ const SettingsScreen: React.FunctionComponent<Props> = ({ navigation }) => {
                     <Text style={styles.text}>Max players reached.</Text>
                 }
             </View>
+            <View style={{ height: 200 }}></View>
         </KeyboardAwareScrollView>
     );
 };

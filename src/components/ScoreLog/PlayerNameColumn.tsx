@@ -43,7 +43,7 @@ const PlayerNameColumn: React.FunctionComponent<Props> = ({ navigation, disabled
                     color={disabled ? 'white' : systemBlue} />
             </Text>
             {players.map((player, index) => (
-                <View key={index} style={{ paddingLeft: 2, borderLeftWidth: 5, borderColor: "#" + palette[index] }}>
+                <View key={index} style={{ paddingLeft: 2, borderLeftWidth: 5, borderColor: "#" + palette[index % palette.length] }}>
                     <Text key={index} style={{ color: 'white', maxWidth: 100, fontSize: 20, }}
                         numberOfLines={1}
                     >{player.playerName}</Text>

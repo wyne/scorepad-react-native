@@ -1,13 +1,8 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { StyleSheet } from 'react-native';
-import Animated, {
-    useSharedValue,
-    useAnimatedStyle,
-    withTiming,
-    withDelay,
-} from 'react-native-reanimated';
+import Animated from 'react-native-reanimated';
 
-import { animationDuration, calculateFontSize } from './Helpers';
+import { calculateFontSize } from './Helpers';
 import ScoreBefore from './ScoreBefore';
 import ScoreAfter from './ScoreAfter';
 import ScoreRound from './ScoreRound';
@@ -29,46 +24,9 @@ const AdditionTile: React.FunctionComponent<Props> = ({
     fontColor,
     maxWidth,
     maxHeight,
-    index
 }) => {
 
     if (maxWidth == null || maxHeight == null) return null;
-
-    // Animation values
-    const sharedScale = useSharedValue(1);
-    const sharedOpacity = useSharedValue(0);
-
-    /**
-     * Animation styles for resizing due to text changes
-     */
-    const animatedStyles = useAnimatedStyle(() => {
-        return {
-            opacity: sharedOpacity.value,
-        };
-    });
-
-
-    useEffect(() => {
-        // Delay opacity animation to allow for scale animation to finish
-        // and to allow for the previous tile to finish animating for effect
-        const animationDelay = (index + 1) * animationDuration / 2;
-
-        sharedOpacity.value = withDelay(
-            animationDelay,
-            withTiming(
-                1,
-                { duration: animationDuration * 2 }
-            )
-        );
-        return;
-    }, [
-        playerName,
-        totalScore,
-        roundScore,
-        maxWidth,
-        maxHeight,
-        sharedScale.value
-    ]);
 
     const containerShortEdge = Math.min(maxWidth, maxHeight);
 
@@ -80,7 +38,7 @@ const AdditionTile: React.FunctionComponent<Props> = ({
     };
 
     return (
-        <Animated.View style={[animatedStyles, { justifyContent: 'center' }]}>
+        <Animated.View style={[{ justifyContent: 'center' }]}>
             <Animated.Text style={[styles.name, dynamicPlayerStyles]} numberOfLines={1}>
                 {playerName}
             </Animated.Text>

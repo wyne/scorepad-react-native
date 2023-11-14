@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { View, StyleSheet, ScrollView, Platform, LayoutChangeEvent } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ParamListBase } from '@react-navigation/native';
@@ -19,7 +18,7 @@ interface RoundScollOffset {
     [key: number]: number;
 }
 
-const Rounds: React.FunctionComponent<Props> = ({ navigation, show }) => {
+const Rounds: React.FunctionComponent<Props> = ({ navigation }) => {
     const [roundScollOffset, setRoundScrollOffset] = useState<RoundScollOffset>({});
 
     const currentGameId = useAppSelector(state => state.settings.currentGameId);
@@ -55,16 +54,14 @@ const Rounds: React.FunctionComponent<Props> = ({ navigation, show }) => {
     const roundsIterator = [...Array(roundTotal + 1).keys()];
 
     return (
-        <SafeAreaView edges={['right', 'left']}
-            style={[styles.scoreTableContainer, { height: show ? 'auto' : 0, }]}>
+        <View style={[styles.scoreTableContainer]}>
             <PlayerNameColumn navigation={navigation} />
             <TotalScoreColumn />
             <ScrollView horizontal={true}
                 contentContainerStyle={{ flexDirection: 'row' }}
-                ref={roundsScrollViewEl} >
+                ref={roundsScrollViewEl}>
                 {roundsIterator.map((item, round) => (
-                    <View key={round}
-                        onLayout={e => onLayoutHandler(e, round)}>
+                    <View key={round} onLayout={e => onLayoutHandler(e, round)}>
                         <RoundScoreColumn
                             round={round}
                             key={round}
@@ -72,14 +69,13 @@ const Rounds: React.FunctionComponent<Props> = ({ navigation, show }) => {
                     </View>
                 ))}
             </ScrollView>
-        </SafeAreaView>
+        </View>
     );
 };
 
 const styles = StyleSheet.create({
     scoreTableContainer: {
         flexDirection: 'row',
-        backgroundColor: 'black',
         paddingBottom: 10,
     }
 });

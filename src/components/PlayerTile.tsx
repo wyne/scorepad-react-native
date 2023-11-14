@@ -1,11 +1,12 @@
 import React from 'react';
-import { View, StyleSheet, DimensionValue } from 'react-native';
+import { StyleSheet, DimensionValue } from 'react-native';
 
 import AdditionTile from './PlayerTiles/AdditionTile/AdditionTile';
 import { selectGameById } from '../../redux/GamesSlice';
 import { selectPlayerById } from '../../redux/PlayersSlice';
 import { useAppSelector } from '../../redux/hooks';
 import { TouchSurface } from './PlayerTiles/AdditionTile/TouchSurface';
+import Animated, { Easing, FadeIn } from 'react-native-reanimated';
 
 interface Props {
     index: number;
@@ -54,11 +55,18 @@ const PlayerTile: React.FunctionComponent<Props> = ({
     if (Number.isNaN(width) || Number.isNaN(height)) return null;
 
     return (
-        <View style={[
-            styles.playerCard,
-            { backgroundColor: color },
-            { width: widthPerc },
-            { height: heightPerc },]}>
+        <Animated.View
+            entering={FadeIn.delay(100 * index + 200).duration(400).easing(Easing.ease)}
+            style={[
+                styles.playerCard,
+                {
+                    borderRadius: 20,
+                    borderWidth: 3,
+                    padding: 5,
+                    backgroundColor: color,
+                    width: widthPerc,
+                    height: heightPerc
+                }]}>
             <AdditionTile
                 totalScore={scoreTotal}
                 roundScore={scoreRound}
@@ -79,7 +87,7 @@ const PlayerTile: React.FunctionComponent<Props> = ({
                 fontColor={fontColor}
                 playerId={playerId}
                 playerIndex={index} />
-        </View>
+        </Animated.View>
     );
 };
 

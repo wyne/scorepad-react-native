@@ -36,9 +36,13 @@ export const scoreMathOpacity = 0.75;
  * @returns The calculated font size.
  */
 export const calculateFontSize = (containerWidth: number) => {
+    return baseScoreFontSize * widthFactor(containerWidth);
+};
+
+export const widthFactor = (containerWidth: number) => {
     let widthFactor: number = containerWidth / 200;
     if (Number.isNaN(widthFactor)) { widthFactor = 1; }
-    return baseScoreFontSize * widthFactor;
+    return widthFactor;
 };
 
 /**
