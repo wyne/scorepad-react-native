@@ -69,7 +69,7 @@ const data: OnboardingScreenItem[] = [
         title: "Score History",
         image: require('../../assets/onboarding/sheet.png'),
         description: 'Pull up the bottom sheet to view score history. \nPull down to close.',
-        backgroundColor: '#f0c330',
+        backgroundColor: '#7bcf6e',
     },
     {
         title: "That's it!",
