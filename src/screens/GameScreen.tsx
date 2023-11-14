@@ -10,7 +10,6 @@ import { useAppSelector } from '../../redux/hooks';
 import PlayerTile from '../components/PlayerTile';
 import Rounds from '../components/Rounds';
 import { selectGameById } from '../../redux/GamesSlice';
-import { Button, Icon } from 'react-native-elements';
 import { systemBlue } from '../constants';
 
 interface Props {

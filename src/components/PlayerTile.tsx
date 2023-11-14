@@ -6,7 +6,7 @@ import { selectGameById } from '../../redux/GamesSlice';
 import { selectPlayerById } from '../../redux/PlayersSlice';
 import { useAppSelector } from '../../redux/hooks';
 import { TouchSurface } from './PlayerTiles/AdditionTile/TouchSurface';
-import Animated, { Easing, FadeIn, SlideInDown } from 'react-native-reanimated';
+import Animated, { Easing, FadeIn } from 'react-native-reanimated';
 
 interface Props {
     index: number;

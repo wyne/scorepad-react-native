@@ -1,13 +1,8 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { StyleSheet } from 'react-native';
-import Animated, {
-    useSharedValue,
-    useAnimatedStyle,
-    withTiming,
-    withDelay,
-} from 'react-native-reanimated';
+import Animated from 'react-native-reanimated';
 
-import { animationDuration, calculateFontSize } from './Helpers';
+import { calculateFontSize } from './Helpers';
 import ScoreBefore from './ScoreBefore';
 import ScoreAfter from './ScoreAfter';
 import ScoreRound from './ScoreRound';

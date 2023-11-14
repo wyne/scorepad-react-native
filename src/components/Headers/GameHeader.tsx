@@ -11,7 +11,6 @@ import { selectGameById } from '../../../redux/GamesSlice';
 import { systemBlue } from '../../constants';
 import { Button } from 'react-native-elements';
 import MenuButton from '../Buttons/MenuButton';
-import FullscreenButton from '../Buttons/FullscreenButton';
 import MultiplierButton from '../Buttons/MultiplierButton';
 import CustomHeader from './CustomHeader';
 

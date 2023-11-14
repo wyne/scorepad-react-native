@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { View, StyleSheet, ScrollView, Platform, LayoutChangeEvent } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ParamListBase } from '@react-navigation/native';
@@ -19,7 +18,7 @@ interface RoundScollOffset {
     [key: number]: number;
 }
 
-const Rounds: React.FunctionComponent<Props> = ({ navigation, show }) => {
+const Rounds: React.FunctionComponent<Props> = ({ navigation }) => {
     const [roundScollOffset, setRoundScrollOffset] = useState<RoundScollOffset>({});
 
     const currentGameId = useAppSelector(state => state.settings.currentGameId);
