@@ -101,8 +101,9 @@ const SettingsScreen: React.FunctionComponent<Props> = ({ navigation }) => {
 
     return (
         <KeyboardAwareScrollView style={styles.configScrollContainer}
+            extraScrollHeight={200}
             contentContainerStyle={{ alignItems: 'stretch' }}>
-            <View style={{ width: 350, alignSelf: 'center' }}>
+            <View style={{ width: 350, alignSelf: 'center', marginBottom: 100 }}>
                 <Text style={styles.heading}>Game Title</Text>
 
                 <EditGame />
@@ -136,7 +137,6 @@ const SettingsScreen: React.FunctionComponent<Props> = ({ navigation }) => {
                     <Text style={styles.text}>Max players reached.</Text>
                 }
             </View>
-            <View style={{ height: 200 }}></View>
         </KeyboardAwareScrollView>
     );
 };
