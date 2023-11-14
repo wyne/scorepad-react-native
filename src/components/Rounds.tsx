@@ -55,16 +55,14 @@ const Rounds: React.FunctionComponent<Props> = ({ navigation, show }) => {
     const roundsIterator = [...Array(roundTotal + 1).keys()];
 
     return (
-        <SafeAreaView edges={['right', 'left']}
-            style={[styles.scoreTableContainer, { height: show ? 'auto' : 0, }]}>
+        <View style={[styles.scoreTableContainer]}>
             <PlayerNameColumn navigation={navigation} />
             <TotalScoreColumn />
             <ScrollView horizontal={true}
                 contentContainerStyle={{ flexDirection: 'row' }}
-                ref={roundsScrollViewEl} >
+                ref={roundsScrollViewEl}>
                 {roundsIterator.map((item, round) => (
-                    <View key={round}
-                        onLayout={e => onLayoutHandler(e, round)}>
+                    <View key={round} onLayout={e => onLayoutHandler(e, round)}>
                         <RoundScoreColumn
                             round={round}
                             key={round}
@@ -72,7 +70,7 @@ const Rounds: React.FunctionComponent<Props> = ({ navigation, show }) => {
                     </View>
                 ))}
             </ScrollView>
-        </SafeAreaView>
+        </View>
     );
 };
 

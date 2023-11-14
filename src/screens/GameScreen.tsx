@@ -98,7 +98,7 @@ const ScoreBoardScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     const bottomSheetRef = useRef<BottomSheet>(null);
 
     // variables
-    const snapPoints = useMemo(() => [75, '60%', '100%'], []);
+    const snapPoints = useMemo(() => [73, '60%', '100%'], []);
 
     // callbacks
     const handleSheetChanges = useCallback((index: number) => {
@@ -110,9 +110,9 @@ const ScoreBoardScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     }, []);
 
     return (
-        <SafeAreaView style={{ flex: 1 }}>
+        <View style={{ flex: 1 }}>
             <View style={[StyleSheet.absoluteFillObject]}>
-                <View style={styles.contentStyle} onLayout={layoutHandler} >
+                <SafeAreaView edges={['left', 'right']} style={styles.contentStyle} onLayout={layoutHandler} >
                     {playerIds.map((id, index) => (
                         width != null && height != null && rows != 0 && cols != 0 &&
                         <PlayerTile
@@ -127,7 +127,7 @@ const ScoreBoardScreen: React.FunctionComponent<Props> = ({ navigation }) => {
                             index={index}
                         />
                     ))}
-                </View>
+                </SafeAreaView>
 
                 <BottomSheet
                     ref={bottomSheetRef}
@@ -138,7 +138,8 @@ const ScoreBoardScreen: React.FunctionComponent<Props> = ({ navigation }) => {
                     handleIndicatorStyle={{ backgroundColor: 'white' }}
                 >
                     <BottomSheetScrollView>
-                        <View style={styles.contentContainer}>
+                        <SafeAreaView edges={['right', 'left']}>
+
                             <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                                 <Text style={{ color: 'white', fontSize: 20, padding: 20, paddingTop: 0, fontWeight: 'bold' }} onPress={() => handleSnapPress(1)}>
                                     {currentGame.title}
@@ -148,14 +149,14 @@ const ScoreBoardScreen: React.FunctionComponent<Props> = ({ navigation }) => {
                                 </Text>
                             </View>
                             <Rounds navigation={navigation} show={!fullscreen} />
-                            <Text style={{ color: 'white', paddingHorizontal: 10 }}>
+                            <Text style={{ color: 'white', padding: 10 }}>
                                 Tap on a column to set the current round.
                             </Text>
-                        </View>
+                        </SafeAreaView>
                     </BottomSheetScrollView>
                 </BottomSheet>
             </View>
-        </SafeAreaView >
+        </View>
     );
 };
 
