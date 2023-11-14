@@ -38,7 +38,7 @@ const data: OnboardingScreenItem[] = [
         image: require('../../assets/icon.png'),
         imageHeight: 150,
         imageWidth: 150,
-        description: '« Swipe left to begin «',
+        description: 'Swipe left to begin.',
         backgroundColor: '#3475B1',
     },
     {
@@ -55,15 +55,20 @@ const data: OnboardingScreenItem[] = [
     },
     {
         title: "Adjust Point Values",
-        image: require('../../assets/onboarding/multiplier.png'),
+        image: require('../../assets/onboarding/multiplier.jpeg'),
         description: 'Adjust the point value by tapping on the point value selector.',
         backgroundColor: '#7370cf',
     },
     {
         title: "Change Round",
         image: require('../../assets/onboarding/rounds.png'),
-        description: 'Use rounds for score history. \nTap the < and > buttons to cycle rounds.',
-        //yellow
+        description: 'Use rounds for score history. \nTap the arrows to cycle rounds.',
+        backgroundColor: '#f0c330',
+    },
+    {
+        title: "Score History",
+        image: require('../../assets/onboarding/sheet.png'),
+        description: 'Pull up the bottom sheet to view score history. \nPull down to close.',
         backgroundColor: '#f0c330',
     },
     {
@@ -122,7 +127,7 @@ const OnboardingScreen: React.FunctionComponent<Props> = ({ navigation, route })
                             height: item.imageHeight || '100%',
                             borderRadius: (
                                 index == 0 || index == data.length - 1
-                            ) ? 40 : 0,
+                            ) ? 20 : 0,
                             resizeMode: 'contain',
                         }} />
                 </Animated.View>
