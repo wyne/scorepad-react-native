@@ -26,7 +26,8 @@ const AppInfoScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     const alertWithVersion = async () => {
         Alert.alert(`ScorePad with Rounds\n` +
             `v${appVersion} (${buildNumber})\n` +
-            `${Platform.OS} ${Platform.Version}`
+            `${Platform.OS} ${Platform.Version}\n` +
+            (process.env.EXPO_PUBLIC_FIREBASE_ANALYTICS)
         );
         await analytics().logEvent('view_version');
     };
