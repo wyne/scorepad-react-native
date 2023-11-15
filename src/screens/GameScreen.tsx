@@ -1,16 +1,24 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { View, StyleSheet, LayoutChangeEvent, Text } from 'react-native';
+import { View, StyleSheet, LayoutChangeEvent, Text, Dimensions, useWindowDimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { getContrastRatio } from 'colorsheet';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ParamListBase } from '@react-navigation/native';
-import BottomSheet, { BottomSheetScrollView } from '@gorhom/bottom-sheet';
+import BottomSheet, { BottomSheetScrollView, useBottomSheet } from '@gorhom/bottom-sheet';
 
 import { useAppSelector } from '../../redux/hooks';
 import PlayerTile from '../components/PlayerTile';
 import Rounds from '../components/Rounds';
 import { selectGameById } from '../../redux/GamesSlice';
 import { systemBlue } from '../constants';
+import Animated, { Extrapolate, interpolate, useAnimatedStyle, useDerivedValue, useSharedValue } from 'react-native-reanimated';
+
+
+/**
+ * Height of the bottom sheet
+ */
+const bottomSheetHeight = 90;
+
 
 interface Props {
     navigation: NativeStackNavigationProp<ParamListBase, string, undefined>;
@@ -97,20 +105,68 @@ const ScoreBoardScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     const bottomSheetRef = useRef<BottomSheet>(null);
 
     // variables
-    const snapPoints = useMemo(() => [73, '60%', '100%'], []);
+    const snapPoints = useMemo(() => [bottomSheetHeight, '60%', '100%'], []);
 
     // callbacks
     const handleSheetChanges = useCallback((index: number) => {
         console.log('handleSheetChanges', index);
     }, []);
 
-    const handleSnapPress = useCallback((index: number) => {
-        bottomSheetRef.current?.snapToIndex(index);
+    // State variable for the current snap point index
+    const [snapPointIndex, setSnapPointIndex] = useState(1);
+
+    // Function to cycle through the snap points
+    const cycleSnapPoints = () => {
+        setSnapPointIndex((prevIndex) => {
+            const nextIndex = prevIndex + 1;
+            return nextIndex < snapPoints.length ? nextIndex : 0;
+        });
+    };
+
+    // Function to snap to the next point when the button is pressed
+    const handleButtonPress = () => {
+        cycleSnapPoints();
+        bottomSheetRef.current?.snapToIndex(snapPointIndex);
+    };
+
+
+    const [windowHeight, setWindowHeight] = useState<number>(0);
+
+    // useDerivedValue(() => {
+    //     const snapPoint0: number = typeof snapPoints[0] === 'string'
+    //         ? parseFloat(snapPoints[0]) / 100 * windowHeight
+    //         : windowHeight - snapPoints[0];
+
+    //     const delta = snapPoint0 - animatedPosition.value;
+    //     console.log("delta", delta);
+
+    // }, [animatedPosition, windowHeight]);
+
+    const animatedPosition = useSharedValue(0);
+
+    const newStyles = useAnimatedStyle(() => {
+        const snapPoint0: number = typeof snapPoints[0] === 'string'
+            ? parseFloat(snapPoints[0]) / 100 * windowHeight
+            : windowHeight - snapPoints[0];
+
+        const delta = snapPoint0 - animatedPosition.value;
+
+        const i = interpolate(delta, [0, 30], [0, 1], Extrapolate.CLAMP);
+        console.log("i", i);
+
+        return {
+            opacity: i
+        };
+    });
+
+    const onLayout = useCallback((event: LayoutChangeEvent) => {
+        const { height } = event.nativeEvent.layout;
+        setWindowHeight(height);
     }, []);
 
     return (
         <View style={{ flex: 1 }}>
-            <View style={[StyleSheet.absoluteFillObject]}>
+            <View style={[StyleSheet.absoluteFillObject]} onLayout={onLayout}>
                 <SafeAreaView edges={['left', 'right']} style={styles.contentStyle} onLayout={layoutHandler} >
                     {playerIds.map((id, index) => (
                         width != null && height != null && rows != 0 && cols != 0 &&
@@ -135,22 +191,25 @@ const ScoreBoardScreen: React.FunctionComponent<Props> = ({ navigation }) => {
                     onChange={handleSheetChanges}
                     backgroundStyle={{ backgroundColor: 'rgb(30,40,50)' }}
                     handleIndicatorStyle={{ backgroundColor: 'white' }}
+                    animatedPosition={animatedPosition}
                 >
-                    <BottomSheetScrollView>
+                    <BottomSheetScrollView >
                         <SafeAreaView edges={['right', 'left']}>
-
                             <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                                <Text style={{ color: 'white', fontSize: 20, padding: 20, paddingTop: 0, fontWeight: 'bold' }} onPress={() => handleSnapPress(1)}>
+                                <Text style={{ color: 'white', fontSize: 20, padding: 20, paddingTop: 0, fontWeight: 'bold' }} onPress={() => handleButtonPress()}>
                                     {currentGame.title}
                                 </Text>
                                 <Text style={{ paddingHorizontal: 20, fontSize: 20, color: systemBlue }} onPress={() => navigation.navigate('Settings')}>
                                     Edit
                                 </Text>
                             </View>
-                            <Rounds navigation={navigation} show={!fullscreen} />
-                            <Text style={{ color: 'white', padding: 10 }}>
-                                Tap on a column to set the current round.
-                            </Text>
+                            <Animated.View style={[newStyles]}>
+                                <Rounds navigation={navigation} show={!fullscreen} />
+
+                                <Text style={{ color: 'white', padding: 10 }}>
+                                    Tap on a column to set the current round.
+                                </Text>
+                            </Animated.View>
                         </SafeAreaView>
                     </BottomSheetScrollView>
                 </BottomSheet>
@@ -168,7 +227,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         maxWidth: '100%',
         backgroundColor: '#000000',
-        paddingBottom: 75,
+        paddingBottom: bottomSheetHeight + 2, // Add 2 to account for the border
     },
     contentContainer: {
         flex: 1,
