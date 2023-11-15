@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { View, StyleSheet, Text } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -10,6 +10,8 @@ import Rounds from '../components/Rounds';
 import { selectGameById } from '../../redux/GamesSlice';
 import { systemBlue } from '../constants';
 import Animated, { Extrapolate, interpolate, useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
+import { TouchableOpacity } from 'react-native-gesture-handler';
+import { Icon } from 'react-native-elements';
 
 /**
  * Height of the bottom sheet
@@ -102,6 +104,15 @@ const GameBottomSheet: React.FunctionComponent<Props> = ({ navigation, container
                         <Text style={{ color: 'white' }}>
                             Tap on a column to set the current round.
                         </Text>
+
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-around', paddingVertical: 10 }}>
+                            <TouchableOpacity onPress={() => navigation.navigate('Share')}>
+                                <View style={{ margin: 5, padding: 10, paddingHorizontal: 20, backgroundColor: 'rgba(0,0,0,.2)', borderRadius: 10, alignItems: 'center' }}>
+                                    <Icon name="share-outline" type="ionicon" size={30} color={systemBlue} />
+                                    <Text style={{ color: systemBlue, fontSize: 15, paddingTop: 5 }}>Share</Text>
+                                </View>
+                            </TouchableOpacity>
+                        </View>
                     </Animated.View>
                 </SafeAreaView>
             </BottomSheetScrollView>
