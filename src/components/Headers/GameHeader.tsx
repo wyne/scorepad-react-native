@@ -6,6 +6,7 @@ import analytics from '@react-native-firebase/analytics';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ParamListBase } from '@react-navigation/native';
 
+import FullscreenButton from '../Buttons/FullscreenButton';
 import { roundNext, roundPrevious } from '../../../redux/GamesSlice';
 import { selectGameById } from '../../../redux/GamesSlice';
 import { systemBlue } from '../../constants';
@@ -91,6 +92,7 @@ const GameHeader: React.FunctionComponent<Props> = ({ navigation }) => {
         <CustomHeader navigation={navigation}
             headerLeft={<>
                 <MenuButton navigation={navigation} />
+                <FullscreenButton />
             </>}
             headerCenter={<>
                 <PrevRoundButton prevRoundHandler={prevRoundHandler} roundCurrent={roundCurrent} />

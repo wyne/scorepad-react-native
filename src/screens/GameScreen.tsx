@@ -1,16 +1,15 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { View, StyleSheet, LayoutChangeEvent, Text } from 'react-native';
+import React, { useCallback, useEffect, useState } from 'react';
+import { View, StyleSheet, LayoutChangeEvent } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { getContrastRatio } from 'colorsheet';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ParamListBase } from '@react-navigation/native';
-import BottomSheet, { BottomSheetScrollView } from '@gorhom/bottom-sheet';
 
 import { useAppSelector } from '../../redux/hooks';
 import PlayerTile from '../components/PlayerTile';
-import Rounds from '../components/Rounds';
 import { selectGameById } from '../../redux/GamesSlice';
-import { systemBlue } from '../constants';
+import GameBottomSheet, { bottomSheetHeight } from '../components/GameBottomSheet';
+
 
 interface Props {
     navigation: NativeStackNavigationProp<ParamListBase, string, undefined>;
@@ -93,25 +92,22 @@ const ScoreBoardScreen: React.FunctionComponent<Props> = ({ navigation }) => {
         return dims;
     };
 
-    // ref
-    const bottomSheetRef = useRef<BottomSheet>(null);
+    const [windowHeight, setWindowHeight] = useState<number>(0);
 
-    // variables
-    const snapPoints = useMemo(() => [73, '60%', '100%'], []);
-
-    // callbacks
-    const handleSheetChanges = useCallback((index: number) => {
-        console.log('handleSheetChanges', index);
-    }, []);
-
-    const handleSnapPress = useCallback((index: number) => {
-        bottomSheetRef.current?.snapToIndex(index);
+    const onLayout = useCallback((event: LayoutChangeEvent) => {
+        const { height } = event.nativeEvent.layout;
+        setWindowHeight(height);
     }, []);
 
     return (
         <View style={{ flex: 1 }}>
-            <View style={[StyleSheet.absoluteFillObject]}>
-                <SafeAreaView edges={['left', 'right']} style={styles.contentStyle} onLayout={layoutHandler} >
+            <View style={[StyleSheet.absoluteFillObject]} onLayout={onLayout}>
+                <SafeAreaView edges={['left', 'right']} style={
+                    [styles.contentStyle,
+                    {
+                        paddingBottom: fullscreen ? 20 : bottomSheetHeight + 2, // Add 2 to account for the border
+                    }]
+                } onLayout={layoutHandler} >
                     {playerIds.map((id, index) => (
                         width != null && height != null && rows != 0 && cols != 0 &&
                         <PlayerTile
@@ -127,33 +123,9 @@ const ScoreBoardScreen: React.FunctionComponent<Props> = ({ navigation }) => {
                         />
                     ))}
                 </SafeAreaView>
-
-                <BottomSheet
-                    ref={bottomSheetRef}
-                    index={0}
-                    snapPoints={snapPoints}
-                    onChange={handleSheetChanges}
-                    backgroundStyle={{ backgroundColor: 'rgb(30,40,50)' }}
-                    handleIndicatorStyle={{ backgroundColor: 'white' }}
-                >
-                    <BottomSheetScrollView>
-                        <SafeAreaView edges={['right', 'left']}>
-
-                            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                                <Text style={{ color: 'white', fontSize: 20, padding: 20, paddingTop: 0, fontWeight: 'bold' }} onPress={() => handleSnapPress(1)}>
-                                    {currentGame.title}
-                                </Text>
-                                <Text style={{ paddingHorizontal: 20, fontSize: 20, color: systemBlue }} onPress={() => navigation.navigate('Settings')}>
-                                    Edit
-                                </Text>
-                            </View>
-                            <Rounds navigation={navigation} show={!fullscreen} />
-                            <Text style={{ color: 'white', padding: 10 }}>
-                                Tap on a column to set the current round.
-                            </Text>
-                        </SafeAreaView>
-                    </BottomSheetScrollView>
-                </BottomSheet>
+                {!fullscreen &&
+                    <GameBottomSheet navigation={navigation} containerHeight={windowHeight} />
+                }
             </View>
         </View>
     );
@@ -168,7 +140,6 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         maxWidth: '100%',
         backgroundColor: '#000000',
-        paddingBottom: 75,
     },
     contentContainer: {
         flex: 1,

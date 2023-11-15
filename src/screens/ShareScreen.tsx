@@ -53,7 +53,7 @@ const ShareScreen: React.FunctionComponent<Props> = ({ navigation }) => {
 
     return (
         <SafeAreaView edges={['right', 'left']}
-            style={[styles.scoreTableContainer, { height: 'auto' }]}>
+            style={[styles.contentContainer, { height: 'auto' }]}>
             <ScrollView>
 
                 <Text style={{ color: 'white', paddingVertical: 20 }}>
@@ -79,14 +79,14 @@ const ShareScreen: React.FunctionComponent<Props> = ({ navigation }) => {
                         contentContainerStyle={{
                             backgroundColor: 'black',
                             flexDirection: 'column',
-                            padding: 10,
+                            padding: 20,
                         }}
                         ref={roundsScrollViewEl}>
                         <View style={{ flexDirection: 'column' }}>
-                            <Text style={{ color: 'white', fontSize: 20, fontWeight: 'bold', padding: 10 }}>
+                            <Text style={{ color: 'white', fontSize: 20, fontWeight: 'bold', paddingBottom: 10 }}>
                                 {currentGame?.title}
                             </Text>
-                            <Text style={{ color: 'white', paddingHorizontal: 10 }}>
+                            <Text style={{ color: 'white' }}>
                                 Created: {new Date(currentGame.dateCreated).toLocaleDateString()}
                                 &nbsp; {new Date(currentGame.dateCreated).toLocaleTimeString()}
                             </Text>
@@ -105,11 +105,6 @@ const ShareScreen: React.FunctionComponent<Props> = ({ navigation }) => {
                                 </View>
                             ))}
                         </View>
-                        <View>
-                            <Text>
-                                Created with ScorePad
-                            </Text>
-                        </View>
                     </ScrollView>
                 </View>
                 <Button style={{ padding: 20 }} type='clear'
@@ -121,7 +116,7 @@ const ShareScreen: React.FunctionComponent<Props> = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-    scoreTableContainer: {
+    contentContainer: {
         backgroundColor: 'black',
         flex: 1,
         padding: 10,
