@@ -27,7 +27,7 @@ const PlayerNameColumn: React.FunctionComponent<Props> = ({ navigation, disabled
     ).sort((a, b) => currentGame.playerIds.indexOf(a.id) - currentGame.playerIds.indexOf(b.id));
 
     return (
-        <TouchableOpacity style={{ padding: 10 }} onPress={async () => {
+        <TouchableOpacity style={{ paddingVertical: 10 }} onPress={async () => {
             if (disabled) return;
 
             await analytics().logEvent('edit_game', {
@@ -39,7 +39,7 @@ const PlayerNameColumn: React.FunctionComponent<Props> = ({ navigation, disabled
                 &nbsp;
                 <Icon name="users"
                     type="font-awesome-5"
-                    size={20}
+                    size={19}
                     color={disabled ? 'white' : systemBlue} />
             </Text>
             {players.map((player, index) => (
