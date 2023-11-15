@@ -16,7 +16,7 @@ import { Icon } from 'react-native-elements';
 /**
  * Height of the bottom sheet
  */
-export const bottomSheetHeight = 90;
+export const bottomSheetHeight = 80;
 
 interface Props {
     navigation: NativeStackNavigationProp<ParamListBase, string, undefined>;
@@ -133,7 +133,7 @@ const styles = StyleSheet.create({
         fontWeight: 'bold'
     },
     sheetHeaderButton: {
-        paddingHorizontal: 20,
+        paddingHorizontal: 10,
         fontSize: 20,
         color: systemBlue,
     },

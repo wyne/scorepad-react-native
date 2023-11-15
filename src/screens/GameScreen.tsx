@@ -22,6 +22,7 @@ const ScoreBoardScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     const palette = ["01497c", "c25858", "f5c800", "275436", "dc902c", "62516a", "755647", "925561"];
     const [rows, setRows] = useState<number>(0);
     const [cols, setCols] = useState<number>(0);
+    const fullscreen = useAppSelector(state => state.settings.home_fullscreen);
     const currentGame = useAppSelector(state => selectGameById(state, state.settings.currentGameId));
 
     const [width, setWidth] = useState<number | null>(null);
@@ -101,7 +102,12 @@ const ScoreBoardScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     return (
         <View style={{ flex: 1 }}>
             <View style={[StyleSheet.absoluteFillObject]} onLayout={onLayout}>
-                <SafeAreaView edges={['left', 'right']} style={styles.contentStyle} onLayout={layoutHandler} >
+                <SafeAreaView edges={['left', 'right']} style={
+                    [styles.contentStyle,
+                    {
+                        paddingBottom: fullscreen ? 20 : bottomSheetHeight + 2, // Add 2 to account for the border
+                    }]
+                } onLayout={layoutHandler} >
                     {playerIds.map((id, index) => (
                         width != null && height != null && rows != 0 && cols != 0 &&
                         <PlayerTile
@@ -117,7 +123,9 @@ const ScoreBoardScreen: React.FunctionComponent<Props> = ({ navigation }) => {
                         />
                     ))}
                 </SafeAreaView>
-                <GameBottomSheet navigation={navigation} containerHeight={windowHeight} />
+                {!fullscreen &&
+                    <GameBottomSheet navigation={navigation} containerHeight={windowHeight} />
+                }
             </View>
         </View>
     );
@@ -132,7 +140,6 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         maxWidth: '100%',
         backgroundColor: '#000000',
-        paddingBottom: bottomSheetHeight + 2, // Add 2 to account for the border
     },
     contentContainer: {
         flex: 1,
