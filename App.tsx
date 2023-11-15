@@ -6,6 +6,11 @@ import { StatusBar } from 'expo-status-bar';
 import { Navigation } from './src/Navigation';
 import { View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import analytics from '@react-native-firebase/analytics';
+
+if (process.env.EXPO_PUBLIC_FIREBASE_ANALYTICS == "false") {
+    analytics().setAnalyticsCollectionEnabled(false);
+}
 
 export default function App() {
     return (

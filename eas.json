@@ -11,7 +11,8 @@
         "simulator": true
       },
       "env": {
-        "APP_VARIANT": "development"
+        "APP_VARIANT": "development",
+        "EXPO_PUBLIC_FIREBASE_ANALYTICS": "false"
       }
     },
     "development": {
@@ -21,7 +22,8 @@
         "resourceClass": "m-medium"
       },
       "env": {
-        "APP_VARIANT": "development"
+        "APP_VARIANT": "development",
+        "EXPO_PUBLIC_FIREBASE_ANALYTICS": "false"
       }
     },
     "preview": {
@@ -31,7 +33,8 @@
       },
       "channel": "preview",
       "env": {
-        "APP_VARIANT": "preview"
+        "APP_VARIANT": "preview",
+        "EXPO_PUBLIC_FIREBASE_ANALYTICS": "false"
       }
     },
     "production": {
