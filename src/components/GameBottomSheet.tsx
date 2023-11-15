@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { View, StyleSheet, Text } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -38,11 +38,6 @@ const GameBottomSheet: React.FunctionComponent<Props> = ({ navigation, container
     // variables
     const snapPoints = useMemo(() => [bottomSheetHeight, '60%', '100%'], []);
 
-    // callbacks
-    const handleSheetChanges = useCallback((index: number) => {
-        console.log('handleSheetChanges', index);
-    }, []);
-
     // State variable for the current snap point index
     const [snapPointIndex, setSnapPointIndex] = useState(1);
 
@@ -70,7 +65,6 @@ const GameBottomSheet: React.FunctionComponent<Props> = ({ navigation, container
         const delta = snapPoint0 - animatedPosition.value;
 
         const i = interpolate(delta, [0, 30], [0, 1], Extrapolate.CLAMP);
-        console.log("i", i);
 
         return {
             opacity: i
@@ -83,7 +77,6 @@ const GameBottomSheet: React.FunctionComponent<Props> = ({ navigation, container
             ref={bottomSheetRef}
             index={0}
             snapPoints={snapPoints}
-            onChange={handleSheetChanges}
             backgroundStyle={{ backgroundColor: 'rgb(30,40,50)' }}
             handleIndicatorStyle={{ backgroundColor: 'white' }}
             animatedPosition={animatedPosition}
