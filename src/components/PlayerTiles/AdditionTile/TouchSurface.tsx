@@ -45,7 +45,7 @@ export const TouchSurface: React.FunctionComponent<Props> = (
         setParticles((particles) => [...particles, { key, value }]);
     };
 
-    const scoreChangeHandler = () => {
+    const scoreChangeHandler = (m = 1) => {
         if (showPointParticles) {
             addParticle();
         }
@@ -53,11 +53,11 @@ export const TouchSurface: React.FunctionComponent<Props> = (
         analytics().logEvent('score_change', {
             player_index: playerIndex,
             game_id: currentGameId,
-            multiplier: multiplier,
+            multiplier: multiplier * m,
             round: roundCurrent,
             type: scoreType,
         });
-        dispatch(playerRoundScoreIncrement(playerId, roundCurrent, scoreType == 'increment' ? multiplier : -multiplier));
+        dispatch(playerRoundScoreIncrement(playerId, roundCurrent, scoreType == 'increment' ? multiplier * m : -multiplier * m));
     };
 
     return (
@@ -65,7 +65,9 @@ export const TouchSurface: React.FunctionComponent<Props> = (
             style={[styles.surface, scoreType == 'increment' ? styles.surfaceAdd : styles.surfaceSubtract]}
             underlayColor={fontColor + '30'}
             activeOpacity={1}
-            onPress={scoreChangeHandler}>
+            onPress={() => scoreChangeHandler()}
+            onLongPress={() => scoreChangeHandler(10)}
+        >
             <View style={[StyleSheet.absoluteFill]}>
                 {particles.map((particle) => (
                     <ScoreParticle key={particle.key} id={particle.key} value={particle.value} />
