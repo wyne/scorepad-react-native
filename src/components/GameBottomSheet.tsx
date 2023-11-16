@@ -5,12 +5,12 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ParamListBase } from '@react-navigation/native';
 import BottomSheet, { BottomSheetScrollView } from '@gorhom/bottom-sheet';
 
-import { useAppSelector } from '../../redux/hooks';
+import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import Rounds from '../components/Rounds';
-import { selectGameById } from '../../redux/GamesSlice';
+import { selectGameById, updateGame } from '../../redux/GamesSlice';
 import { systemBlue } from '../constants';
 import Animated, { Extrapolate, interpolate, useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
-import { TouchableOpacity } from 'react-native-gesture-handler';
+import { TouchableOpacity, TouchableWithoutFeedback } from 'react-native';
 import { Icon } from 'react-native-elements';
 
 /**
@@ -37,6 +37,20 @@ const GameBottomSheet: React.FunctionComponent<Props> = ({ navigation, container
 
     // variables
     const snapPoints = useMemo(() => [bottomSheetHeight, '60%', '100%'], []);
+
+    const dispatch = useAppDispatch();
+
+    /**
+     * Lock the game
+     */
+    const setLock = () => dispatch(
+        updateGame({
+            id: currentGame.id,
+            changes: {
+                locked: !currentGame.locked,
+            }
+        })
+    );
 
     // State variable for the current snap point index
     const [, setSnapPointIndex] = useState(0);
@@ -100,12 +114,23 @@ const GameBottomSheet: React.FunctionComponent<Props> = ({ navigation, container
             <BottomSheetScrollView >
                 <SafeAreaView edges={['right', 'left']}>
                     <View style={styles.sheetHeaderContainer}>
-                        <Text style={[styles.sheetHeader]} numberOfLines={1} onPress={() => sheetTitlePress()}>
-                            {currentGame.title}
-                        </Text>
-                        <Text style={styles.sheetHeaderButton} onPress={() => navigation.navigate('Settings')}>
-                            Edit
-                        </Text>
+                        <TouchableWithoutFeedback onPress={() => sheetTitlePress()}>
+                            <Text style={[styles.sheetTitle]} numberOfLines={1}>
+                                {currentGame.title}
+                            </Text>
+                        </TouchableWithoutFeedback>
+                        {currentGame.locked &&
+                            <Text style={{ color: 'gray', fontSize: 20, paddingHorizontal: 10 }}
+                                onPress={() => { bottomSheetRef.current?.snapToIndex(snapPoints.length - 1); }}
+                            >
+                                Locked
+                            </Text>
+                        }
+                        {!currentGame.locked &&
+                            <Text style={styles.editButton} onPress={() => navigation.navigate('Settings')}>
+                                Edit
+                            </Text>
+                        }
                     </View>
 
                     <Animated.View style={[styles.sheetContent, animatedSheetStyle]}>
@@ -115,10 +140,25 @@ const GameBottomSheet: React.FunctionComponent<Props> = ({ navigation, container
                         </Text>
 
                         <View style={{ flexDirection: 'row', justifyContent: 'space-around', paddingVertical: 10 }}>
-                            <TouchableOpacity onPress={() => navigation.navigate('Share')}>
+                            <TouchableOpacity activeOpacity={.5} onPress={() => navigation.navigate('Share')}>
                                 <View style={[styles.shareButton]}>
                                     <Icon name="share-outline" type="ionicon" size={30} color={systemBlue} />
                                     <Text style={{ color: systemBlue, fontSize: 15, paddingTop: 5 }}>Share</Text>
+                                </View>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity activeOpacity={.5} onPress={setLock}>
+                                <View style={[styles.shareButton]}>
+                                    <Icon name={currentGame.locked ? "lock-closed-outline" : "lock-open-outline"}
+                                        type="ionicon" size={30}
+                                        color={currentGame.locked ? 'red' : 'green'}
+                                    />
+                                    <Text style={{
+                                        color: currentGame.locked ? 'red' : 'green',
+                                        fontSize: 15, paddingTop: 5
+                                    }}>
+                                        {currentGame.locked ? "Unlock" : "Lock"}
+                                    </Text>
                                 </View>
                             </TouchableOpacity>
                         </View>
@@ -135,15 +175,15 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         paddingHorizontal: 10,
     },
-    sheetHeader: {
-        color: 'white',
+    sheetTitle: {
         flex: 1,
+        color: 'white',
         fontSize: 20,
         fontWeight: 'bold',
         paddingHorizontal: 10,
         paddingTop: 0,
     },
-    sheetHeaderButton: {
+    editButton: {
         color: systemBlue,
         fontSize: 20,
         paddingHorizontal: 10,
@@ -153,6 +193,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
     },
     shareButton: {
+        width: 100,
         margin: 5,
         padding: 10,
         paddingHorizontal: 20,
