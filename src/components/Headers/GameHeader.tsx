@@ -110,7 +110,7 @@ const GameHeader: React.FunctionComponent<Props> = ({ navigation }) => {
                 <Text style={styles.title}>Round {roundCurrent + 1}</Text>
                 <NextRoundButton nextRoundHandler={nextRoundHandler} visible={isLastRound && (currentGame.locked || false)} />
             </>}
-            headerRight={<MultiplierButton />}
+            headerRight={!currentGame.locked && <MultiplierButton />}
         />
     );
 };
