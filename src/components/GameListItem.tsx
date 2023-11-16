@@ -175,7 +175,10 @@ const GameListItem: React.FunctionComponent<Props> = ({ navigation, game, index 
                 actions={actions}>
                 <ListItem key={game.id} bottomDivider onPress={chooseGameHandler}>
                     <ListItem.Content>
-                        <ListItem.Title>{game.title}</ListItem.Title>
+                        <ListItem.Title style={{ alignItems: 'center' }}>
+                            {game.title}
+                            {game.locked && <Icon name="lock-closed-outline" type="ionicon" size={14} color='green' style={{ paddingHorizontal: 4 }} />}
+                        </ListItem.Title>
                         <ListItem.Subtitle style={styles.gameSubtitle}>
                             <Text><Moment element={Text} fromNow>{game.dateCreated}</Moment></Text>
                         </ListItem.Subtitle>

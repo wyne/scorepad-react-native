@@ -17,10 +17,10 @@ import CustomHeader from './CustomHeader';
 
 interface PrevRoundButtonProps {
     prevRoundHandler: () => void;
-    roundCurrent: number;
+    visible: boolean;
 }
 
-const PrevRoundButton: React.FunctionComponent<PrevRoundButtonProps> = ({ prevRoundHandler, roundCurrent }) => {
+const PrevRoundButton: React.FunctionComponent<PrevRoundButtonProps> = ({ prevRoundHandler, visible }) => {
     return (
         <TouchableOpacity style={[styles.headerButton]}
             onPress={prevRoundHandler}>
@@ -28,7 +28,7 @@ const PrevRoundButton: React.FunctionComponent<PrevRoundButtonProps> = ({ prevRo
                 type="font-awesome-5"
                 size={20}
                 color={systemBlue}
-                style={{ opacity: roundCurrent == 0 ? 0 : 1 }}
+                style={{ opacity: visible ? 0 : 1 }}
             />
         </TouchableOpacity>
     );
@@ -36,16 +36,19 @@ const PrevRoundButton: React.FunctionComponent<PrevRoundButtonProps> = ({ prevRo
 
 interface NextRoundButtonProps {
     nextRoundHandler: () => void;
+    visible: boolean;
 }
 
-const NextRoundButton: React.FunctionComponent<NextRoundButtonProps> = ({ nextRoundHandler }) => {
+const NextRoundButton: React.FunctionComponent<NextRoundButtonProps> = ({ nextRoundHandler, visible }) => {
     return (
         <TouchableOpacity style={[styles.headerButton]}
             onPress={nextRoundHandler}>
             <Icon name="chevron-right"
                 type="font-awesome-5"
                 size={20}
-                color={systemBlue} />
+                color={systemBlue}
+                style={{ opacity: visible ? 0 : 1 }}
+            />
         </TouchableOpacity>
     );
 };
@@ -64,6 +67,7 @@ const GameHeader: React.FunctionComponent<Props> = ({ navigation }) => {
     );
     const currentGame = useAppSelector(state => selectGameById(state, currentGameId));
     const roundCurrent = useAppSelector(state => selectGameById(state, currentGameId)?.roundCurrent || 0);
+    const lastRoundIndex = useAppSelector(state => selectGameById(state, currentGameId)?.roundTotal || 0);
 
     if (currentGame == null) {
         return <CustomHeader navigation={navigation}
@@ -72,7 +76,12 @@ const GameHeader: React.FunctionComponent<Props> = ({ navigation }) => {
         />;
     }
 
+    const isFirstRound = roundCurrent == 0;
+    const isLastRound = roundCurrent >= lastRoundIndex;
+
     const nextRoundHandler = async () => {
+        if (isLastRound && currentGame.locked) return;
+
         dispatch(roundNext(currentGame.id));
         await analytics().logEvent('round_change', {
             game_id: currentGameId,
@@ -81,6 +90,8 @@ const GameHeader: React.FunctionComponent<Props> = ({ navigation }) => {
     };
 
     const prevRoundHandler = async () => {
+        if (isFirstRound) return;
+
         dispatch(roundPrevious(currentGame.id));
         await analytics().logEvent('round_change', {
             game_id: currentGameId,
@@ -95,11 +106,11 @@ const GameHeader: React.FunctionComponent<Props> = ({ navigation }) => {
                 <FullscreenButton />
             </>}
             headerCenter={<>
-                <PrevRoundButton prevRoundHandler={prevRoundHandler} roundCurrent={roundCurrent} />
+                <PrevRoundButton prevRoundHandler={prevRoundHandler} visible={isFirstRound} />
                 <Text style={styles.title}>Round {roundCurrent + 1}</Text>
-                <NextRoundButton nextRoundHandler={nextRoundHandler} />
+                <NextRoundButton nextRoundHandler={nextRoundHandler} visible={isLastRound && (currentGame.locked || false)} />
             </>}
-            headerRight={<MultiplierButton />}
+            headerRight={!currentGame.locked && <MultiplierButton />}
         />
     );
 };

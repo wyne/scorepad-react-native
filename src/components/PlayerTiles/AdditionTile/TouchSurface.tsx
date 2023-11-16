@@ -46,6 +46,8 @@ export const TouchSurface: React.FunctionComponent<Props> = (
     };
 
     const scoreChangeHandler = () => {
+        if (currentGame.locked) return;
+
         if (showPointParticles) {
             addParticle();
         }
@@ -63,7 +65,7 @@ export const TouchSurface: React.FunctionComponent<Props> = (
     return (
         <TouchableHighlight
             style={[styles.surface, scoreType == 'increment' ? styles.surfaceAdd : styles.surfaceSubtract]}
-            underlayColor={fontColor + '30'}
+            underlayColor={currentGame.locked ? 'transparent' : fontColor + '30'}
             activeOpacity={1}
             onPress={scoreChangeHandler}>
             <View style={[StyleSheet.absoluteFill]}>
