@@ -5,13 +5,14 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ParamListBase } from '@react-navigation/native';
 import BottomSheet, { BottomSheetBackdrop, BottomSheetBackdropProps, BottomSheetScrollView } from '@gorhom/bottom-sheet';
 
-import { useAppDispatch, useAppSelector } from '../../redux/hooks';
-import Rounds from '../components/Rounds';
-import { selectGameById, updateGame } from '../../redux/GamesSlice';
-import { systemBlue } from '../constants';
+import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
+import Rounds from '../Rounds';
+import { selectGameById, updateGame } from '../../../redux/GamesSlice';
+import { systemBlue } from '../../constants';
 import Animated, { Extrapolate, interpolate, useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
 import { TouchableOpacity, TouchableWithoutFeedback } from 'react-native';
 import { Icon } from 'react-native-elements';
+import { useGameSheetContext } from './GameSheetContext';
 
 /**
  * Height of the bottom sheet
@@ -23,7 +24,7 @@ interface Props {
     containerHeight: number;
 }
 
-const GameBottomSheet: React.FunctionComponent<Props> = ({ navigation, containerHeight }) => {
+const GameSheet: React.FunctionComponent<Props> = ({ navigation, containerHeight }) => {
     const currentGameId = useAppSelector(state => state.settings.currentGameId);
     if (typeof currentGameId == 'undefined') return null;
 
@@ -33,7 +34,7 @@ const GameBottomSheet: React.FunctionComponent<Props> = ({ navigation, container
     if (currentGame == undefined) return null;
 
     // ref
-    const bottomSheetRef = useRef<BottomSheet>(null);
+    const gameSheetRef = useGameSheetContext();
 
     // variables
     const snapPoints = useMemo(() => [bottomSheetHeight, '60%', '100%'], []);
@@ -68,7 +69,7 @@ const GameBottomSheet: React.FunctionComponent<Props> = ({ navigation, container
     const sheetTitlePress = () => {
         setSnapPointIndex((prevIndex) => {
             const nextIndex = (prevIndex + 1) % snapPoints.length;
-            bottomSheetRef.current?.snapToIndex(nextIndex);
+            gameSheetRef?.current?.snapToIndex(nextIndex);
             return nextIndex;
         });
     };
@@ -115,7 +116,7 @@ const GameBottomSheet: React.FunctionComponent<Props> = ({ navigation, container
 
     return (
         <BottomSheet
-            ref={bottomSheetRef}
+            ref={gameSheetRef}
             index={0}
             onChange={onSheetChange}
             snapPoints={snapPoints}
@@ -137,7 +138,7 @@ const GameBottomSheet: React.FunctionComponent<Props> = ({ navigation, container
                         </TouchableWithoutFeedback>
                         {currentGame.locked &&
                             <Text style={{ color: 'gray', fontSize: 20, paddingHorizontal: 10 }}
-                                onPress={() => { bottomSheetRef.current?.snapToIndex(snapPoints.length - 1); }}
+                                onPress={() => { gameSheetRef?.current?.snapToIndex(snapPoints.length - 1); }}
                             >
                                 Locked
                             </Text>
@@ -221,4 +222,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default GameBottomSheet;
+export default GameSheet;

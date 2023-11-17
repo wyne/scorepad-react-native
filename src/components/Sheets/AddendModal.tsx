@@ -1,20 +1,21 @@
 import React, { useCallback, useMemo } from 'react';
 import { View, StyleSheet, Text } from 'react-native';
-import { useAppDispatch, useAppSelector } from '../../redux/hooks';
+import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
 import { BottomSheetBackdrop, BottomSheetBackdropProps, BottomSheetModal } from '@gorhom/bottom-sheet';
 
-import { usePointSelectModalContext } from '../contexts/PointSelectModalContext';
+import { useAddendModalContext } from './AddendModalContext';
 import { Picker } from '@react-native-picker/picker';
-import { setAddendOne, setAddendTwo, setMultiplier } from '../../redux/SettingsSlice';
+import { setAddendOne, setAddendTwo, setMultiplier } from '../../../redux/SettingsSlice';
 
 interface Props {
 }
 
-const PointSelectorBottomSheet: React.FunctionComponent<Props> = ({ }) => {
+const AddendModal: React.FunctionComponent<Props> = ({ }) => {
     const addendOne = useAppSelector(state => state.settings.addendOne);
     const addendTwo = useAppSelector(state => state.settings.addendTwo);
 
-    const addendOptions = [1, 5, 10, 20, 50];
+    // Array of 1 to 50
+    const addendOptions = Array.from({ length: 50 }, (_, i) => i + 1);
 
     const dispatch = useAppDispatch();
 
@@ -30,14 +31,14 @@ const PointSelectorBottomSheet: React.FunctionComponent<Props> = ({ }) => {
     }, []);
 
     // ref
-    const pointSelectorModalRef = usePointSelectModalContext();
+    const addendModalRef = useAddendModalContext();
 
     // variables
     const snapPoints = useMemo(() => [1, 320], []);
 
     const handleSheetChanges = useCallback((index: number) => {
-        if (index === 0 && pointSelectorModalRef != null) {
-            pointSelectorModalRef.current?.close();
+        if (index === 0) {
+            addendModalRef?.current?.close();
         }
     }, []);
 
@@ -54,7 +55,7 @@ const PointSelectorBottomSheet: React.FunctionComponent<Props> = ({ }) => {
 
     return (
         <BottomSheetModal
-            ref={pointSelectorModalRef}
+            ref={addendModalRef}
             index={1}
             enablePanDownToClose={true}
             snapPoints={snapPoints}
@@ -133,4 +134,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default PointSelectorBottomSheet;
+export default AddendModal;

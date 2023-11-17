@@ -12,8 +12,9 @@ import { selectGameById } from '../../../redux/GamesSlice';
 import { systemBlue } from '../../constants';
 import { Button } from 'react-native-elements';
 import MenuButton from '../Buttons/MenuButton';
-import MultiplierButton from '../Buttons/MultiplierButton';
+import AddendButton from '../Buttons/AddendButton';
 import CustomHeader from './CustomHeader';
+import { GameSheetContextProvider } from '../Sheets/GameSheetContext';
 
 interface PrevRoundButtonProps {
     prevRoundHandler: () => void;
@@ -110,7 +111,7 @@ const GameHeader: React.FunctionComponent<Props> = ({ navigation }) => {
                 <Text style={styles.title}>Round {roundCurrent + 1}</Text>
                 <NextRoundButton nextRoundHandler={nextRoundHandler} visible={isLastRound && (currentGame.locked || false)} />
             </>}
-            headerRight={!currentGame.locked && <MultiplierButton />}
+            headerRight={!currentGame.locked && <AddendButton />}
         />
     );
 };
