@@ -17,8 +17,8 @@ const AppInfoButton: React.FunctionComponent<Props> = ({ navigation }) => {
             navigation.navigate('AppInfo');
             await analytics().logEvent('app_info');
         }}>
-            <Icon name="info-circle"
-                type="font-awesome-5"
+            <Icon name="gear"
+                type="font-awesome"
                 size={20}
                 color={systemBlue} />
         </HeaderButton >

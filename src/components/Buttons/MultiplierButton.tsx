@@ -3,7 +3,7 @@ import { Text, View, StyleSheet, TouchableHighlight } from 'react-native';
 
 import { useAppSelector } from '../../../redux/hooks';
 import { systemBlue } from '../../constants';
-import { usePointSelectModalContext } from '../PointSelectModalContext';
+import { usePointSelectModalContext } from '../../contexts/PointSelectModalContext';
 
 const MultiplierButton: React.FunctionComponent = ({ }) => {
     const addendOne = useAppSelector(state => state.settings.addendOne);
@@ -22,7 +22,7 @@ const MultiplierButton: React.FunctionComponent = ({ }) => {
     return (
         <TouchableHighlight onPress={handlePress}>
             <View style={styles.button}>
-                <Text style={styles.buttonText}>{addendOne},{addendTwo}</Text>
+                <Text style={styles.buttonText}>{addendOne}, {addendTwo}</Text>
             </View>
         </TouchableHighlight>
     );

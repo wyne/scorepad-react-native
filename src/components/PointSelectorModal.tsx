@@ -3,7 +3,7 @@ import { View, StyleSheet, Text } from 'react-native';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { BottomSheetBackdrop, BottomSheetBackdropProps, BottomSheetModal } from '@gorhom/bottom-sheet';
 
-import { usePointSelectModalContext } from './PointSelectModalContext';
+import { usePointSelectModalContext } from '../contexts/PointSelectModalContext';
 import { Picker } from '@react-native-picker/picker';
 import { setAddendOne, setAddendTwo, setMultiplier } from '../../redux/SettingsSlice';
 
@@ -64,7 +64,7 @@ const PointSelectorBottomSheet: React.FunctionComponent<Props> = ({ }) => {
             handleIndicatorStyle={{ backgroundColor: 'white' }}
         >
             <View style={styles.modalContainer}>
-                <Text style={{ color: 'white', fontSize: 20 }}>Tap Actions</Text>
+                <Text style={{ color: 'white', fontSize: 20 }}>Point Values</Text>
 
                 <View style={{
                     flex: 1,

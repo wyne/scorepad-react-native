@@ -15,7 +15,7 @@ const AppInfoHeader: React.FunctionComponent<Props> = ({ navigation }: Props) =>
     return (
         <CustomHeader navigation={navigation}
             headerLeft={<MenuButton navigation={navigation} />}
-            headerCenter={<Text style={styles.title}>Info</Text>}
+            headerCenter={<Text style={styles.title}>Settings</Text>}
         />
     );
 };

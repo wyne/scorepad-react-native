@@ -9,9 +9,8 @@ import { useAppSelector } from '../../redux/hooks';
 import PlayerTile from '../components/PlayerTile';
 import { selectGameById } from '../../redux/GamesSlice';
 import GameBottomSheet, { bottomSheetHeight } from '../components/GameBottomSheet';
-import PointSelectorBottomSheet from '../components/PointSelectorBottomSheet';
+import PointSelectorBottomSheet from '../components/PointSelectorModal';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
-
 
 interface Props {
     navigation: NativeStackNavigationProp<ParamListBase, string, undefined>;

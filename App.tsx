@@ -7,7 +7,7 @@ import { Navigation } from './src/Navigation';
 import { View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import analytics from '@react-native-firebase/analytics';
-import { PointSelectModalContextProvider } from './src/components/PointSelectModalContext';
+import { PointSelectModalContextProvider } from './src/contexts/PointSelectModalContext';
 
 if (process.env.EXPO_PUBLIC_FIREBASE_ANALYTICS == "false") {
     analytics().setAnalyticsCollectionEnabled(false);
