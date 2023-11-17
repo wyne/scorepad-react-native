@@ -9,6 +9,8 @@ import { useAppSelector } from '../../redux/hooks';
 import PlayerTile from '../components/PlayerTile';
 import { selectGameById } from '../../redux/GamesSlice';
 import GameBottomSheet, { bottomSheetHeight } from '../components/GameBottomSheet';
+import PointSelectorBottomSheet from '../components/PointSelectorBottomSheet';
+import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 
 
 interface Props {
@@ -100,34 +102,37 @@ const ScoreBoardScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     }, []);
 
     return (
-        <View style={{ flex: 1 }}>
-            <View style={[StyleSheet.absoluteFillObject]} onLayout={onLayout}>
-                <SafeAreaView edges={['left', 'right']} style={
-                    [styles.contentStyle,
-                    {
-                        paddingBottom: fullscreen ? 20 : bottomSheetHeight + 2, // Add 2 to account for the border
-                    }]
-                } onLayout={layoutHandler} >
-                    {playerIds.map((id, index) => (
-                        width != null && height != null && rows != 0 && cols != 0 &&
-                        <PlayerTile
-                            key={id}
-                            playerId={id}
-                            color={'#' + palette[index % palette.length]}
-                            fontColor={getContrastRatio('#' + palette[index % palette.length], '#000').number > 7 ? "#000000" : "#FFFFFF"}
-                            cols={cols}
-                            rows={rows}
-                            width={calculateTileDimensions(rows, cols).width}
-                            height={calculateTileDimensions(rows, cols).height}
-                            index={index}
-                        />
-                    ))}
-                </SafeAreaView>
-                {!fullscreen &&
-                    <GameBottomSheet navigation={navigation} containerHeight={windowHeight} />
-                }
+        <BottomSheetModalProvider>
+            <View style={{ flex: 1 }}>
+                <View style={[StyleSheet.absoluteFillObject]} onLayout={onLayout}>
+                    <SafeAreaView edges={['left', 'right']} style={
+                        [styles.contentStyle,
+                        {
+                            paddingBottom: fullscreen ? 20 : bottomSheetHeight + 2, // Add 2 to account for the border
+                        }]
+                    } onLayout={layoutHandler} >
+                        {playerIds.map((id, index) => (
+                            width != null && height != null && rows != 0 && cols != 0 &&
+                            <PlayerTile
+                                key={id}
+                                playerId={id}
+                                color={'#' + palette[index % palette.length]}
+                                fontColor={getContrastRatio('#' + palette[index % palette.length], '#000').number > 7 ? "#000000" : "#FFFFFF"}
+                                cols={cols}
+                                rows={rows}
+                                width={calculateTileDimensions(rows, cols).width}
+                                height={calculateTileDimensions(rows, cols).height}
+                                index={index}
+                            />
+                        ))}
+                    </SafeAreaView>
+                    {!fullscreen &&
+                        <GameBottomSheet navigation={navigation} containerHeight={windowHeight} />
+                    }
+                    <PointSelectorBottomSheet />
+                </View>
             </View>
-        </View>
+        </BottomSheetModalProvider>
     );
 };
 

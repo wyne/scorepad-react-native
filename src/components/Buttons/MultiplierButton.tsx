@@ -1,11 +1,13 @@
-import React from 'react';
-import { Text, View, StyleSheet } from 'react-native';
+import React, { useContext, useRef } from 'react';
+import { Text, View, StyleSheet, TouchableHighlight } from 'react-native';
 import analytics from '@react-native-firebase/analytics';
 
 import { useAppSelector, useAppDispatch } from '../../../redux/hooks';
 import { systemBlue } from '../../constants';
 import { setMultiplier } from '../../../redux/SettingsSlice';
 import { MenuView, MenuAction } from '@react-native-menu/menu';
+import { BottomSheetModal } from '@gorhom/bottom-sheet';
+import { usePointSelectModalContext } from '../PointSelectModalContext';
 
 const MultiplierButton: React.FunctionComponent = ({ }) => {
     const dispatch = useAppDispatch();
@@ -22,20 +24,39 @@ const MultiplierButton: React.FunctionComponent = ({ }) => {
         };
     });
 
+
+    const pointSelectorModalRef = usePointSelectModalContext();
+
+    const handlePress = () => {
+        if (pointSelectorModalRef == null) {
+            console.log('pointSelectorModalRef is null');
+            return;
+        }
+
+        console.log('pointSelectorModalRef is not null');
+        console.log(pointSelectorModalRef);
+        pointSelectorModalRef.current?.present();
+    };
+
     return (
-        <MenuView
-            onPressAction={async ({ nativeEvent }) => {
-                dispatch(setMultiplier(parseInt(nativeEvent.event)));
-                await analytics().logEvent('multiplier_change', {
-                    multiplier: multiplier,
-                    game_id: currentGameId,
-                });
-            }}
-            actions={actions}>
-            <View style={styles.button}>
-                <Text style={styles.buttonText}>{multiplier} pt</Text>
+        // <MenuView
+        //     onPressAction={async ({ nativeEvent }) => {
+        //         dispatch(setMultiplier(parseInt(nativeEvent.event)));
+        //         await analytics().logEvent('multiplier_change', {
+        //             multiplier: multiplier,
+        //             game_id: currentGameId,
+        //         });
+        //     }}
+        //     actions={actions}>
+        //     <View style={styles.button}>
+        //         <Text style={styles.buttonText}>{multiplier} pt</Text>
+        //     </View>
+        // </MenuView>
+        <TouchableHighlight onPress={handlePress}>
+            <View>
+                <Text style={{ color: 'white' }}>points</Text>
             </View>
-        </MenuView>
+        </TouchableHighlight>
     );
 };
 

@@ -115,9 +115,11 @@ const GameBottomSheet: React.FunctionComponent<Props> = ({ navigation, container
                 <SafeAreaView edges={['right', 'left']}>
                     <View style={styles.sheetHeaderContainer}>
                         <TouchableWithoutFeedback onPress={() => sheetTitlePress()}>
-                            <Text style={[styles.sheetTitle]} numberOfLines={1}>
-                                {currentGame.title}
-                            </Text>
+                            <View style={[styles.sheetTitleView]}>
+                                <Text style={[styles.sheetTitle]} numberOfLines={1}>
+                                    {currentGame.title}
+                                </Text>
+                            </View>
                         </TouchableWithoutFeedback>
                         {currentGame.locked &&
                             <Text style={{ color: 'gray', fontSize: 20, paddingHorizontal: 10 }}
@@ -175,13 +177,15 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         paddingHorizontal: 10,
     },
-    sheetTitle: {
+    sheetTitleView: {
         flex: 1,
+        paddingHorizontal: 10,
+        paddingTop: 0,
+    },
+    sheetTitle: {
         color: 'white',
         fontSize: 20,
         fontWeight: 'bold',
-        paddingHorizontal: 10,
-        paddingTop: 0,
     },
     editButton: {
         color: systemBlue,

@@ -62,7 +62,6 @@ const PlayerTile: React.FunctionComponent<Props> = ({
                 {
                     borderRadius: 20,
                     borderWidth: 3,
-                    padding: 5,
                     backgroundColor: color,
                     width: widthPerc,
                     height: heightPerc
