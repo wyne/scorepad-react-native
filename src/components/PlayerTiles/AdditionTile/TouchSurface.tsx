@@ -28,16 +28,18 @@ export const TouchSurface: React.FunctionComponent<Props> = (
 
     const [particles, setParticles] = useState<ScoreParticleProps[]>([]);
 
-    const multiplier = useAppSelector(state => state.settings.multiplier);
+    const addendOne = useAppSelector(state => state.settings.addendOne);
+    const addendTwo = useAppSelector(state => state.settings.addendTwo);
+
     const currentGameId = useAppSelector(state => state.settings.currentGameId);
     const currentGame = useAppSelector(state => selectGameById(state, currentGameId));
     if (typeof currentGame == 'undefined') return null;
 
     const roundCurrent = currentGame.roundCurrent;
 
-    const addParticle = () => {
+    const addParticle = (addend: number) => {
         const key = Math.random().toString(36).substring(7);
-        const value = `${scoreType == 'increment' ? '+' : '-'}${multiplier}`;
+        const value = `${scoreType == 'increment' ? '+' : '-'}${addend}`;
 
         setTimeout(() => {
             setParticles((particles) => particles.filter((p) => p.key !== key));
@@ -45,21 +47,21 @@ export const TouchSurface: React.FunctionComponent<Props> = (
         setParticles((particles) => [...particles, { key, value }]);
     };
 
-    const scoreChangeHandler = () => {
+    const scoreChangeHandler = (addend: number) => {
         if (currentGame.locked) return;
 
         if (showPointParticles) {
-            addParticle();
+            addParticle(addend);
         }
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
         analytics().logEvent('score_change', {
             player_index: playerIndex,
             game_id: currentGameId,
-            multiplier: multiplier,
+            addend: addend,
             round: roundCurrent,
             type: scoreType,
         });
-        dispatch(playerRoundScoreIncrement(playerId, roundCurrent, scoreType == 'increment' ? multiplier : -multiplier));
+        dispatch(playerRoundScoreIncrement(playerId, roundCurrent, scoreType == 'increment' ? addend : -addend));
     };
 
     return (
@@ -67,7 +69,8 @@ export const TouchSurface: React.FunctionComponent<Props> = (
             style={[styles.surface, scoreType == 'increment' ? styles.surfaceAdd : styles.surfaceSubtract]}
             underlayColor={currentGame.locked ? 'transparent' : fontColor + '30'}
             activeOpacity={1}
-            onPress={scoreChangeHandler}>
+            onPress={() => scoreChangeHandler(addendOne)}
+            onLongPress={() => scoreChangeHandler(addendTwo)}>
             <View style={[StyleSheet.absoluteFill]}>
                 {particles.map((particle) => (
                     <ScoreParticle key={particle.key} id={particle.key} value={particle.value} />
