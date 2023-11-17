@@ -3,7 +3,7 @@ import { View, StyleSheet, Text } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ParamListBase } from '@react-navigation/native';
-import BottomSheet, { BottomSheetScrollView } from '@gorhom/bottom-sheet';
+import BottomSheet, { BottomSheetBackdrop, BottomSheetBackdropProps, BottomSheetScrollView } from '@gorhom/bottom-sheet';
 
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import Rounds from '../components/Rounds';
@@ -101,23 +101,39 @@ const GameBottomSheet: React.FunctionComponent<Props> = ({ navigation, container
         };
     });
 
+    const renderBackdrop = useCallback(
+        (props: BottomSheetBackdropProps) => (
+            <BottomSheetBackdrop
+                {...props}
+                disappearsOnIndex={0}
+                appearsOnIndex={1}
+                pressBehavior={0}
+            />
+        ),
+        []
+    );
+
     return (
         <BottomSheet
             ref={bottomSheetRef}
             index={0}
             onChange={onSheetChange}
             snapPoints={snapPoints}
+            backdropComponent={renderBackdrop}
             backgroundStyle={{ backgroundColor: 'rgb(30,40,50)' }}
             handleIndicatorStyle={{ backgroundColor: 'white' }}
             animatedPosition={animatedPosition}
+            enablePanDownToClose={false}
         >
             <BottomSheetScrollView >
                 <SafeAreaView edges={['right', 'left']}>
                     <View style={styles.sheetHeaderContainer}>
                         <TouchableWithoutFeedback onPress={() => sheetTitlePress()}>
-                            <Text style={[styles.sheetTitle]} numberOfLines={1}>
-                                {currentGame.title}
-                            </Text>
+                            <View style={[styles.sheetTitleView]}>
+                                <Text style={[styles.sheetTitle]} numberOfLines={1}>
+                                    {currentGame.title}
+                                </Text>
+                            </View>
                         </TouchableWithoutFeedback>
                         {currentGame.locked &&
                             <Text style={{ color: 'gray', fontSize: 20, paddingHorizontal: 10 }}
@@ -175,13 +191,15 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         paddingHorizontal: 10,
     },
-    sheetTitle: {
+    sheetTitleView: {
         flex: 1,
+        paddingHorizontal: 10,
+        paddingTop: 0,
+    },
+    sheetTitle: {
         color: 'white',
         fontSize: 20,
         fontWeight: 'bold',
-        paddingHorizontal: 10,
-        paddingTop: 0,
     },
     editButton: {
         color: systemBlue,

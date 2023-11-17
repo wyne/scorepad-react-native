@@ -5,6 +5,8 @@ import * as Application from 'expo-application';
 export interface SettingsState {
     home_fullscreen: boolean;
     multiplier: number;
+    addendOne: number;
+    addendTwo: number;
     currentGameId: string | undefined;
     onboarded: string | undefined;
     showPointParticles: boolean;
@@ -13,6 +15,8 @@ export interface SettingsState {
 const initialState: SettingsState = {
     home_fullscreen: false,
     multiplier: 1,
+    addendOne: 1,
+    addendTwo: 10,
     currentGameId: undefined,
     onboarded: undefined,
     showPointParticles: false,
@@ -34,6 +38,12 @@ const settingsSlice = createSlice({
         setMultiplier(state, action: PayloadAction<number>) {
             state.multiplier = action.payload;
         },
+        setAddendOne(state, action: PayloadAction<number>) {
+            state.addendOne = action.payload;
+        },
+        setAddendTwo(state, action: PayloadAction<number>) {
+            state.addendTwo = action.payload;
+        },
         setOnboardedVersion(state) {
             const appVersion = new SemVer(Application.nativeApplicationVersion || '0.0.0');
             console.log(`Setting Onboarded Version: ${appVersion}`);
@@ -46,6 +56,8 @@ export const {
     setCurrentGameId,
     toggleHomeFullscreen,
     setMultiplier,
+    setAddendOne,
+    setAddendTwo,
     setOnboardedVersion,
     toggleshowPointParticles,
 } = settingsSlice.actions;

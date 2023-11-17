@@ -1,41 +1,30 @@
 import React from 'react';
-import { Text, View, StyleSheet } from 'react-native';
-import analytics from '@react-native-firebase/analytics';
+import { Text, View, StyleSheet, TouchableHighlight } from 'react-native';
 
-import { useAppSelector, useAppDispatch } from '../../../redux/hooks';
+import { useAppSelector } from '../../../redux/hooks';
 import { systemBlue } from '../../constants';
-import { setMultiplier } from '../../../redux/SettingsSlice';
-import { MenuView, MenuAction } from '@react-native-menu/menu';
+import { usePointSelectModalContext } from '../../contexts/PointSelectModalContext';
 
 const MultiplierButton: React.FunctionComponent = ({ }) => {
-    const dispatch = useAppDispatch();
-    const multiplier = useAppSelector(state => state.settings.multiplier);
-    const currentGameId = useAppSelector(state => state.settings.currentGameId);
+    const addendOne = useAppSelector(state => state.settings.addendOne);
+    const addendTwo = useAppSelector(state => state.settings.addendTwo);
 
-    const addends = [1, 5, 10, 20, 50];
+    const pointSelectorModalRef = usePointSelectModalContext();
 
-    const actions: MenuAction[] = addends.map(addend => {
-        return {
-            id: addend.toString(),
-            title: `${addend} point${addend === 1 ? '' : 's'} per tap`,
-            state: multiplier === addend ? 'on' : 'off',
-        };
-    });
+    const handlePress = () => {
+        if (pointSelectorModalRef == null) {
+            return;
+        }
+
+        pointSelectorModalRef.current?.present();
+    };
 
     return (
-        <MenuView
-            onPressAction={async ({ nativeEvent }) => {
-                dispatch(setMultiplier(parseInt(nativeEvent.event)));
-                await analytics().logEvent('multiplier_change', {
-                    multiplier: multiplier,
-                    game_id: currentGameId,
-                });
-            }}
-            actions={actions}>
+        <TouchableHighlight onPress={handlePress}>
             <View style={styles.button}>
-                <Text style={styles.buttonText}>{multiplier} pt</Text>
+                <Text style={styles.buttonText}>{addendOne}, {addendTwo}</Text>
             </View>
-        </MenuView>
+        </TouchableHighlight>
     );
 };
 

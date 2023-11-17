@@ -7,6 +7,7 @@ import { Navigation } from './src/Navigation';
 import { View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import analytics from '@react-native-firebase/analytics';
+import { PointSelectModalContextProvider } from './src/contexts/PointSelectModalContext';
 
 if (process.env.EXPO_PUBLIC_FIREBASE_ANALYTICS == "false") {
     analytics().setAnalyticsCollectionEnabled(false);
@@ -16,12 +17,14 @@ export default function App() {
     return (
         <View style={{ flex: 1, backgroundColor: '#fff' }}>
             <GestureHandlerRootView style={{ flex: 1 }}>
-                <Provider store={store}>
-                    <PersistGate loading={null} persistor={persistor}>
-                        <StatusBar />
-                        <Navigation />
-                    </PersistGate>
-                </Provider>
+                <PointSelectModalContextProvider>
+                    <Provider store={store}>
+                        <PersistGate loading={null} persistor={persistor}>
+                            <StatusBar />
+                            <Navigation />
+                        </PersistGate>
+                    </Provider>
+                </PointSelectModalContextProvider>
             </GestureHandlerRootView>
         </View>
     );
