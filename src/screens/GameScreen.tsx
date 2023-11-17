@@ -10,8 +10,6 @@ import PlayerTile from '../components/PlayerTile';
 import { selectGameById } from '../../redux/GamesSlice';
 import GameSheet, { bottomSheetHeight } from '../components/Sheets/GameSheet';
 import AddendModal from '../components/Sheets/AddendModal';
-import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
-import { GameSheetContextProvider } from '../components/Sheets/GameSheetContext';
 
 interface Props {
     navigation: NativeStackNavigationProp<ParamListBase, string, undefined>;

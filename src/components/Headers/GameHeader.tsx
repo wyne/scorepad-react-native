@@ -14,7 +14,6 @@ import { Button } from 'react-native-elements';
 import MenuButton from '../Buttons/MenuButton';
 import AddendButton from '../Buttons/AddendButton';
 import CustomHeader from './CustomHeader';
-import { GameSheetContextProvider } from '../Sheets/GameSheetContext';
 
 interface PrevRoundButtonProps {
     prevRoundHandler: () => void;
