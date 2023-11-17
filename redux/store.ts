@@ -13,6 +13,8 @@ const settingsPersistConfig = {
     whitelist: [
         'home_fullscreen',
         'multiplier',
+        'addendOne',
+        'addendTwo',
         'currentGameId',
         'onboarded',
         'showPointParticles'

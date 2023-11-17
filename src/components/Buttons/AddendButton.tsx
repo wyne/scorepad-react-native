@@ -3,20 +3,23 @@ import { Text, View, StyleSheet, TouchableHighlight } from 'react-native';
 
 import { useAppSelector } from '../../../redux/hooks';
 import { systemBlue } from '../../constants';
-import { usePointSelectModalContext } from '../../contexts/PointSelectModalContext';
+import { useAddendModalContext } from '../Sheets/AddendModalContext';
+import { useGameSheetContext } from '../Sheets/GameSheetContext';
 
-const MultiplierButton: React.FunctionComponent = ({ }) => {
+const AddendButton: React.FunctionComponent = ({ }) => {
     const addendOne = useAppSelector(state => state.settings.addendOne);
     const addendTwo = useAppSelector(state => state.settings.addendTwo);
 
-    const pointSelectorModalRef = usePointSelectModalContext();
+    const adddendModalRef = useAddendModalContext();
+    const gameSheetRef = useGameSheetContext();
 
     const handlePress = () => {
-        if (pointSelectorModalRef == null) {
+        if (adddendModalRef == null) {
             return;
         }
 
-        pointSelectorModalRef.current?.present();
+        gameSheetRef?.current?.snapToIndex(0);
+        adddendModalRef.current?.present();
     };
 
     return (
@@ -43,4 +46,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default MultiplierButton;
+export default AddendButton;
