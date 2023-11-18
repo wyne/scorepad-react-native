@@ -92,7 +92,7 @@ const ShareScreen: React.FunctionComponent<Props> = ({ navigation }) => {
                             </Text>
                         </View>
                         <View style={{ flexDirection: 'row' }}>
-                            <PlayerNameColumn navigation={navigation} disabled={true} />
+                            <PlayerNameColumn />
                             <TotalScoreColumn />
                             {roundsIterator.map((item, round) => (
                                 <View key={round}>

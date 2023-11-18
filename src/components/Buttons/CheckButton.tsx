@@ -4,8 +4,8 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ParamListBase } from '@react-navigation/native';
 
 import HeaderButton from './HeaderButton';
-import { Icon } from 'react-native-elements/dist/icons/Icon';
 import { systemBlue } from '../../constants';
+import { Text } from 'react-native';
 
 interface Props {
     navigation: NativeStackNavigationProp<ParamListBase, string, undefined>;
@@ -17,10 +17,7 @@ const CheckButton: React.FunctionComponent<Props> = ({ navigation }) => {
             await analytics().logEvent('save_game');
             navigation.goBack();
         }}>
-            <Icon name="check"
-                type="font-awesome-5"
-                size={20}
-                color={systemBlue} />
+            <Text style={{ color: systemBlue, fontSize: 20 }}>Done</Text>
         </HeaderButton>
     );
 };

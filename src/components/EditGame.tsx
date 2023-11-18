@@ -37,41 +37,48 @@ const EditGame = ({ }) => {
     };
 
     return (
-        <View style={styles.container}>
-            <Input
-                containerStyle={{ flex: 1 }}
-                defaultValue={localTitle}
-                maxLength={15}
-                onChangeText={onChangeTextHandler}
-                onEndEditing={onEndEditingHandler}
-                onBlur={onEndEditingHandler}
-                placeholder={UNTITLED}
-                renderErrorMessage={false}
-                selectTextOnFocus={true}
-                style={styles.input}
-            />
-            <Text style={styles.creation}>
-                Created: {new Date(currentGame.dateCreated).toLocaleDateString()}
-                &nbsp; {new Date(currentGame.dateCreated).toLocaleTimeString()}
-            </Text>
-        </View>
+        <>
+            <View style={styles.inputContainer}>
+                <Input
+                    defaultValue={localTitle}
+                    maxLength={15}
+                    onChangeText={onChangeTextHandler}
+                    onEndEditing={onEndEditingHandler}
+                    onBlur={onEndEditingHandler}
+                    placeholder={UNTITLED}
+                    renderErrorMessage={false}
+                    selectTextOnFocus={true}
+                    style={styles.input}
+                    inputContainerStyle={{ borderBottomWidth: 0 }}
+                />
+            </View>
+            <View style={{ marginHorizontal: 20 }}>
+                <Text style={styles.creation}>
+                    Created: {new Date(currentGame.dateCreated).toLocaleDateString()}
+                    &nbsp; {new Date(currentGame.dateCreated).toLocaleTimeString()}
+                </Text>
+            </View>
+        </>
     );
 };
 
 const styles = StyleSheet.create({
-    container: {
+    inputContainer: {
         alignItems: 'flex-start',
         flexDirection: 'column',
         justifyContent: 'flex-start',
-        margin: 10,
+        backgroundColor: '#222',
+        borderRadius: 10,
+        padding: 2,
+        paddingHorizontal: 10,
         marginVertical: 5,
+        marginHorizontal: 10,
     },
     input: {
         color: '#eee',
     },
     creation: {
         color: '#eee',
-        margin: 10,
     }
 });
 

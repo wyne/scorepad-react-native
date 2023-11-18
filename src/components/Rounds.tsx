@@ -55,7 +55,7 @@ const Rounds: React.FunctionComponent<Props> = ({ navigation }) => {
 
     return (
         <View style={[styles.scoreTableContainer]}>
-            <PlayerNameColumn navigation={navigation} />
+            <PlayerNameColumn />
             <TotalScoreColumn />
             <ScrollView horizontal={true}
                 contentContainerStyle={{ flexDirection: 'row' }}

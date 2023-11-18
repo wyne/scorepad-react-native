@@ -14,6 +14,8 @@ import { selectGameById, updateGame, } from '../../redux/GamesSlice';
 import { selectAllPlayers } from '../../redux/PlayersSlice';
 import EditGame from '../components/EditGame';
 import { updatePlayer } from '../../redux/PlayersSlice';
+import { systemBlue } from '../constants';
+import Animated, { Layout } from 'react-native-reanimated';
 
 interface Props {
     navigation: NativeStackNavigationProp<ParamListBase, string, undefined>;
@@ -62,6 +64,7 @@ const SettingsScreen: React.FunctionComponent<Props> = ({ navigation }) => {
         });
     };
 
+
     const resetGameHandler = () => {
         Alert.alert(
             "Reset Game",
@@ -102,40 +105,46 @@ const SettingsScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     return (
         <KeyboardAwareScrollView style={styles.configScrollContainer}
             extraScrollHeight={200}
-            contentContainerStyle={{ alignItems: 'stretch' }}>
-            <View style={{ width: 350, alignSelf: 'center', marginBottom: 100 }}>
+            contentContainerStyle={{ flex: 1 }}>
+            <View style={{ flex: 1, marginBottom: 200 }}>
                 <Text style={styles.heading}>Game Title</Text>
 
                 <EditGame />
 
-                <Button
-                    title="Reset Game"
-                    onPress={resetGameHandler}
-                    type="clear"
-                    titleStyle={{
-                        color: '#ff375f'
-                    }}
-                />
-
-                <Text style={styles.heading}>Players</Text>
-                {players.map((player, index) => (
-                    <EditPlayer
-                        playerId={player.id}
-                        index={index}
-                        setPlayerWasAdded={setPlayerWasAdded}
-                        playerWasAdded={playerWasAdded}
-                        key={player.id}
+                <View style={{ backgroundColor: '#422', borderRadius: 10, margin: 10, marginVertical: 20 }}>
+                    <Button
+                        title="Reset Game"
+                        onPress={resetGameHandler}
+                        type="clear"
+                        titleStyle={{
+                            color: '#ff375f'
+                        }}
                     />
-                ))}
-                <View style={{ margin: 10 }}>
-                    <Button title="Add Player"
-                        icon={<Icon name="add" color="white" />}
-                        disabled={players.length >= maxPlayers}
-                        onPress={addPlayerHandler} />
                 </View>
-                {players.length >= maxPlayers &&
-                    <Text style={styles.text}>Max players reached.</Text>
-                }
+
+                <Text style={styles.heading}>Player Names</Text>
+                <Animated.View layout={Layout.duration(200)}>
+                    {players.map((player, index) => (
+                        <EditPlayer
+                            playerId={player.id}
+                            index={index}
+                            setPlayerWasAdded={setPlayerWasAdded}
+                            playerWasAdded={playerWasAdded}
+                            key={player.id}
+                        />
+                    ))}
+                </Animated.View>
+                <Animated.View style={{ margin: 10 }}>
+                    {players.length < maxPlayers &&
+                        <Button title="Add Player" type="clear"
+                            icon={<Icon name="add" color={systemBlue} />}
+                            disabled={players.length >= maxPlayers}
+                            onPress={addPlayerHandler} />
+                    }
+                    {players.length >= maxPlayers &&
+                        <Text style={styles.text}>Max players reached.</Text>
+                    }
+                </Animated.View>
             </View>
         </KeyboardAwareScrollView>
     );
@@ -144,8 +153,6 @@ const SettingsScreen: React.FunctionComponent<Props> = ({ navigation }) => {
 const styles = StyleSheet.create({
     configScrollContainer: {
         flex: 1,
-        padding: 10,
-        paddingBottom: 50,
     },
     text: {
         fontSize: 18,
@@ -153,9 +160,10 @@ const styles = StyleSheet.create({
         color: '#eee',
     },
     heading: {
-        fontSize: 20,
-        marginTop: 20,
-        marginBottom: 0,
+        fontSize: 14,
+        textTransform: 'uppercase',
+        marginHorizontal: 20,
+        marginVertical: 5,
         color: '#eee',
     }
 });

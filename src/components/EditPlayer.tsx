@@ -1,13 +1,14 @@
 import React from 'react';
-import { Text, View, StyleSheet, TouchableOpacity, NativeSyntheticEvent, TextInputEndEditingEventData } from 'react-native';
+import { Text, View, StyleSheet, TouchableOpacity, NativeSyntheticEvent, TextInputEndEditingEventData, Alert } from 'react-native';
 import { Icon, Input } from 'react-native-elements';
 
-import { palette, systemBlue } from '../constants';
+import { palette } from '../constants';
 import { selectGameById, updateGame } from '../../redux/GamesSlice';
 import { selectPlayerById } from '../../redux/PlayersSlice';
 import { removePlayer, updatePlayer } from '../../redux/PlayersSlice';
 import analytics from '@react-native-firebase/analytics';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
+import Animated from 'react-native-reanimated';
 
 interface Props {
     playerId: string;
@@ -32,7 +33,6 @@ const EditPlayer: React.FunctionComponent<Props> = ({ playerId, index, setPlayer
                 playerName: name,
             }
         }));
-        // dispatch(playerNameSet(index, name));
         setPlayerWasAdded(false);
     };
 
@@ -73,21 +73,39 @@ const EditPlayer: React.FunctionComponent<Props> = ({ playerId, index, setPlayer
         }
     })();
 
+    const deleteConfirmHandler = async () => {
+        Alert.alert(
+            "Delete Player",
+            "Are you sure you want to delete this player? This will delete all scores for this player.",
+            [
+                {
+                    text: "Cancel",
+                    style: "cancel",
+                },
+                {
+                    text: "Delete",
+                    onPress: () => {
+                        deleteHandler();
+                    }
+                }
+            ]
+        );
+    };
+
     const DeleteButton = ({ }) => {
         if (index == 0) {
             return <></>;
         };
 
         return <View style={{ flexDirection: 'column' }} >
-            <TouchableOpacity onPress={deleteHandler}>
-                <Icon size={20} name="delete" color="#ff375f" />
-                <Text style={{ color: '#ff375f', fontWeight: 'bold' }}>Delete</Text>
+            <TouchableOpacity onPress={deleteConfirmHandler}>
+                <Icon size={25} name="remove-circle" color="#ff375f" />
             </TouchableOpacity>
         </View>;
     };
 
     return (
-        <View style={styles.playerContainer} key={player?.id}>
+        <Animated.View style={styles.playerContainer} key={player?.id}>
             <Text style={styles.playerNumber}>
                 {index + 1}
             </Text>
@@ -109,10 +127,11 @@ const EditPlayer: React.FunctionComponent<Props> = ({ playerId, index, setPlayer
                 renderErrorMessage={false}
                 selectTextOnFocus={true}
                 style={styles.input}
+                inputContainerStyle={{ borderBottomWidth: 0 }}
             />
 
             <DeleteButton />
-        </View>
+        </Animated.View>
     );
 };
 
@@ -121,12 +140,16 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         flexDirection: 'row',
         justifyContent: 'flex-start',
-        margin: 10,
+        backgroundColor: '#222',
+        borderRadius: 10,
+        padding: 2,
+        paddingHorizontal: 10,
         marginVertical: 5,
+        marginHorizontal: 10,
     },
     playerNumber: {
-        color: systemBlue,
-        fontSize: 35,
+        color: '#eee',
+        fontSize: 25,
         fontVariant: ['tabular-nums'],
         fontWeight: "bold",
         padding: 5,
@@ -134,11 +157,10 @@ const styles = StyleSheet.create({
     colorBadge: {
         borderColor: '#eee',
         borderRadius: 25,
-        borderWidth: 1,
-        height: 30,
+        height: 25,
         marginHorizontal: 5,
         padding: 5,
-        width: 30,
+        width: 25,
     },
     input: {
         color: '#eee',
