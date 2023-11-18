@@ -18,7 +18,7 @@ const SettingsHeader: React.FunctionComponent<Props> = ({ navigation }) => {
     return (
         <CustomHeader navigation={navigation}
             headerLeft={<></>}
-            headerCenter={<Text style={styles.title}>{currentGame?.title}</Text>}
+            headerCenter={<Text style={styles.title}>Edit Game</Text>}
             headerRight={<CheckButton navigation={navigation} />}
         />
     );

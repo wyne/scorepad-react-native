@@ -64,44 +64,6 @@ const SettingsScreen: React.FunctionComponent<Props> = ({ navigation }) => {
         });
     };
 
-
-    const resetGameHandler = () => {
-        Alert.alert(
-            "Reset Game",
-            "Are you sure you want to reset this game? This will reset all scores and rounds.",
-            [
-                {
-                    text: "Cancel",
-                    style: "cancel"
-                },
-                {
-                    text: "Reset",
-                    onPress: () => {
-                        if (currentGame == undefined) return;
-
-                        players.forEach((player) => {
-                            dispatch(updatePlayer({
-                                id: player.id,
-                                changes: {
-                                    scores: [0],
-                                }
-                            }
-                            ));
-                        });
-                        dispatch(updateGame({
-                            id: currentGame.id,
-                            changes: {
-                                roundCurrent: 0,
-                                roundTotal: 0,
-                            }
-                        }));
-                        navigation.navigate("Game");
-                    }
-                }
-            ]
-        );
-    };
-
     return (
         <KeyboardAwareScrollView style={styles.configScrollContainer}
             extraScrollHeight={200}
@@ -110,17 +72,6 @@ const SettingsScreen: React.FunctionComponent<Props> = ({ navigation }) => {
                 <Text style={styles.heading}>Game Title</Text>
 
                 <EditGame />
-
-                <View style={{ backgroundColor: '#422', borderRadius: 10, margin: 10, marginVertical: 20 }}>
-                    <Button
-                        title="Reset Game"
-                        onPress={resetGameHandler}
-                        type="clear"
-                        titleStyle={{
-                            color: '#ff375f'
-                        }}
-                    />
-                </View>
 
                 <Text style={styles.heading}>Player Names</Text>
                 <Animated.View layout={Layout.duration(200)}>
@@ -164,6 +115,7 @@ const styles = StyleSheet.create({
         textTransform: 'uppercase',
         marginHorizontal: 20,
         marginVertical: 5,
+        marginTop: 20,
         color: '#eee',
     }
 });

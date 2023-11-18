@@ -166,7 +166,7 @@ const GameListItem: React.FunctionComponent<Props> = ({ navigation, game, index 
     };
 
     return (
-        <Animated.View entering={FadeInUp.duration(500).delay(100 + index * 100)}
+        <Animated.View entering={FadeInUp.duration(200).delay(index * 100)}
             exiting={SlideOutLeft.duration(200)}>
             <MenuView
                 title={game.title}

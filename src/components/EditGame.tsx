@@ -75,10 +75,10 @@ const styles = StyleSheet.create({
         marginHorizontal: 10,
     },
     input: {
-        color: '#eee',
+        color: '#EEE',
     },
     creation: {
-        color: '#eee',
+        color: '#999',
     }
 });
 
