@@ -11,7 +11,7 @@ import { roundNext, roundPrevious } from '../../../redux/GamesSlice';
 import { selectGameById } from '../../../redux/GamesSlice';
 import { systemBlue } from '../../constants';
 import { Button } from 'react-native-elements';
-import MenuButton from '../Buttons/MenuButton';
+import HomeButton from '../Buttons/MenuButton';
 import AddendButton from '../Buttons/AddendButton';
 import CustomHeader from './CustomHeader';
 
@@ -71,7 +71,7 @@ const GameHeader: React.FunctionComponent<Props> = ({ navigation }) => {
 
     if (currentGame == null) {
         return <CustomHeader navigation={navigation}
-            headerLeft={<MenuButton navigation={navigation} />}
+            headerLeft={<HomeButton navigation={navigation} />}
             headerCenter={<Text style={styles.title}>Error</Text>}
         />;
     }
@@ -102,7 +102,7 @@ const GameHeader: React.FunctionComponent<Props> = ({ navigation }) => {
     return (
         <CustomHeader navigation={navigation}
             headerLeft={<>
-                <MenuButton navigation={navigation} />
+                <HomeButton navigation={navigation} />
                 <FullscreenButton />
             </>}
             headerCenter={<>

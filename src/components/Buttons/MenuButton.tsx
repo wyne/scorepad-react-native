@@ -11,10 +11,10 @@ interface Props {
     navigation: NativeStackNavigationProp<ParamListBase, string, undefined>;
 }
 
-const MenuButton: React.FunctionComponent<Props> = ({ navigation }) => {
+const HomeButton: React.FunctionComponent<Props> = ({ navigation }) => {
     return (
         <HeaderButton accessibilityLabel='Home' onPress={async () => {
-            navigation.goBack();
+            navigation.navigate("List");
             await analytics().logEvent('menu');
         }}>
             <Icon name="bars"
@@ -25,4 +25,4 @@ const MenuButton: React.FunctionComponent<Props> = ({ navigation }) => {
     );
 };
 
-export default MenuButton;
+export default HomeButton;

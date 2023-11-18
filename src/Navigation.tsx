@@ -24,7 +24,9 @@ export type OnboardingScreenParamList = {
 export type RootStackParamList = {
     List: undefined;
     Game: undefined;
-    Settings: undefined;
+    Settings: {
+        reason?: string;
+    };
     AppInfo: undefined;
     Share: undefined;
     Onboarding: OnboardingScreenParamList;
@@ -97,13 +99,13 @@ export const Navigation = () => {
                     }}
                 />
                 <Stack.Screen name="Settings" component={SettingsScreen}
-                    options={{
+                    options={({ route }) => ({
                         orientation: 'all',
                         title: "Settings",
                         header: ({ navigation }) => {
-                            return <SettingsHeader navigation={navigation} />;
+                            return <SettingsHeader navigation={navigation} route={route} />;
                         },
-                    }}
+                    })}
                 />
                 <Stack.Screen name="Share" component={ShareScreen}
                     options={{

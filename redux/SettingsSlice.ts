@@ -19,7 +19,7 @@ const initialState: SettingsState = {
     addendTwo: 10,
     currentGameId: undefined,
     onboarded: undefined,
-    showPointParticles: false,
+    showPointParticles: true,
 };
 
 const settingsSlice = createSlice({

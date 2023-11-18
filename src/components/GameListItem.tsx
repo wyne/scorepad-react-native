@@ -49,7 +49,7 @@ const GameListItem: React.FunctionComponent<Props> = ({ navigation, game, index 
             index: index,
             game_id: game.id,
             player_count: playerNames.length,
-            round_count: rounds + 1,
+            round_count: rounds,
         });
     };
 
@@ -62,7 +62,7 @@ const GameListItem: React.FunctionComponent<Props> = ({ navigation, game, index 
         });
 
         await analytics().logEvent('menu_share', {
-            round_count: rounds + 1,
+            round_count: rounds,
             player_count: playerNames.length,
         });
     };
@@ -72,11 +72,11 @@ const GameListItem: React.FunctionComponent<Props> = ({ navigation, game, index 
      */
     const editGameHandler = async () => {
         asyncSetCurrentGame(dispatch).then(() => {
-            navigation.navigate("Settings");
+            navigation.navigate("Settings", { reason: 'edit_game' });
         });
 
         await analytics().logEvent('menu_edit', {
-            round_count: rounds + 1,
+            round_count: rounds,
             player_count: playerNames.length,
         });
     };
@@ -106,7 +106,7 @@ const GameListItem: React.FunctionComponent<Props> = ({ navigation, game, index 
 
         await analytics().logEvent('delete_game', {
             index: index,
-            round_count: rounds + 1,
+            round_count: rounds,
             player_count: playerNames.length,
         });
     };
@@ -190,7 +190,7 @@ const GameListItem: React.FunctionComponent<Props> = ({ navigation, game, index 
                         {playerNames.length} <Icon color={'#01497C'} name="users" type="font-awesome-5" size={16} />
                     </Text>
                     <Text style={styles.badgeRounds}>
-                        {rounds + 1} <Icon color={'#c25858'} name="circle-notch" type="font-awesome-5" size={16} />
+                        {rounds} <Icon color={'#c25858'} name="circle-notch" type="font-awesome-5" size={16} />
                     </Text>
                     <ListItem.Chevron />
                 </ListItem>

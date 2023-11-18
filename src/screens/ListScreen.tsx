@@ -24,7 +24,7 @@ const ListScreen: React.FunctionComponent<Props> = ({ navigation }) => {
         dispatch(setOnboardedVersion());
 
         if (gameList.length == 0) {
-            dispatch(asyncCreateGame(gameList.length + 1)).then(() => {
+            dispatch(asyncCreateGame({ gameCount: gameList.length + 1, playerCount: 2 })).then(() => {
                 setTimeout(() => {
                     navigation.navigate("Game");
                 }, 500);
