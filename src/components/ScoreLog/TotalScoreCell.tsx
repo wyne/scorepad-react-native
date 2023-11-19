@@ -16,7 +16,7 @@ const TotalScoreCell: React.FunctionComponent<Props> = ({ playerId }) => {
         return (sum || 0) + (current || 0);
     });
     return (
-        <Text key={playerId} style={[styles.scoreEntry, { color: 'white', fontWeight: 'bold' }]}>
+        <Text key={playerId} style={[styles.scoreEntry, { color: 'white' }]}>
             {scoreTotal}
         </Text>
     );
@@ -25,7 +25,6 @@ const TotalScoreCell: React.FunctionComponent<Props> = ({ playerId }) => {
 const styles = StyleSheet.create({
     totalHeader: {
         color: 'white',
-        fontWeight: 'bold',
         textAlign: 'center',
         fontSize: 20
     },

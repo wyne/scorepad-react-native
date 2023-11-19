@@ -36,14 +36,23 @@ const RoundScoreColumn: React.FunctionComponent<Props> = ({ round, isCurrentRoun
         });
     }, []);
 
+    let backgroundColor = 'rgba(0,0,0,0)';
+
+    if (isCurrentRound) {
+        backgroundColor = 'rgba(255,0,0,.1)';
+    } else if (round % 2 == 0) {
+        backgroundColor = 'rgba(0,0,0,.1)';
+    }
+
     return (
         <TouchableWithoutFeedback onPress={onPressHandler}>
             <View style={{
                 padding: 10,
-                // backgroundColor: isCurrentRound ? '#111' : 'black'
+                paddingBottom: 0,
+                backgroundColor: backgroundColor,
             }}>
                 <Text style={{
-                    color: isCurrentRound ? 'red' : 'yellow',
+                    color: isCurrentRound ? 'red' : '#AAA',
                     fontWeight: 'bold',
                     textAlign: 'center',
                     fontSize: 20,
