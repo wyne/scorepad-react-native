@@ -41,7 +41,7 @@ const EditGame = ({ }) => {
             <View style={styles.inputContainer}>
                 <Input
                     defaultValue={localTitle}
-                    maxLength={15}
+                    maxLength={30}
                     onChangeText={onChangeTextHandler}
                     onEndEditing={onEndEditingHandler}
                     onBlur={onEndEditingHandler}
