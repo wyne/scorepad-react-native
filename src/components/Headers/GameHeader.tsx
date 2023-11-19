@@ -77,7 +77,7 @@ const GameHeader: React.FunctionComponent<Props> = ({ navigation }) => {
     }
 
     const isFirstRound = roundCurrent == 0;
-    const isLastRound = roundCurrent >= lastRoundIndex;
+    const isLastRound = roundCurrent + 1 >= lastRoundIndex;
 
     const nextRoundHandler = async () => {
         if (isLastRound && currentGame.locked) return;
