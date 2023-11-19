@@ -1,6 +1,7 @@
 import React from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Icon } from "react-native-elements";
+import Animated, { FadeIn, FadeOut, Layout } from "react-native-reanimated";
 
 interface Props {
     onPress: () => void;
@@ -11,22 +12,24 @@ interface Props {
 
 const BigButton: React.FunctionComponent<Props> = ({ icon, text, color, onPress }) => {
     return (
-        <TouchableOpacity activeOpacity={.5} onPress={onPress}>
-            <View style={[styles.bigButton]}>
-                <Icon name={icon}
-                    type="ionicon" size={30}
-                    color={color}
-                />
-                <Text style={{
-                    color: color,
-                    fontSize: 15,
-                    paddingTop: 5,
-                    textAlign: 'center',
-                }}>
-                    {text}
-                </Text>
-            </View>
-        </TouchableOpacity>
+        <Animated.View layout={Layout.duration(400)} entering={FadeIn.delay(400)} exiting={FadeOut}>
+            <TouchableOpacity activeOpacity={.5} onPress={onPress}>
+                <View style={[styles.bigButton]}>
+                    <Icon name={icon}
+                        type="ionicon" size={30}
+                        color={color}
+                    />
+                    <Text style={{
+                        color: color,
+                        fontSize: 15,
+                        paddingTop: 5,
+                        textAlign: 'center',
+                    }}>
+                        {text}
+                    </Text>
+                </View>
+            </TouchableOpacity>
+        </Animated.View>
     );
 };
 

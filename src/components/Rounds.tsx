@@ -18,7 +18,7 @@ interface RoundScollOffset {
     [key: number]: number;
 }
 
-const Rounds: React.FunctionComponent<Props> = ({ navigation }) => {
+const Rounds: React.FunctionComponent<Props> = ({ }) => {
     const [roundScollOffset, setRoundScrollOffset] = useState<RoundScollOffset>({});
 
     const currentGameId = useAppSelector(state => state.settings.currentGameId);
@@ -26,7 +26,7 @@ const Rounds: React.FunctionComponent<Props> = ({ navigation }) => {
     if (typeof currentGameId == 'undefined') return null;
 
     const roundCurrent = useAppSelector(state => selectGameById(state, currentGameId)?.roundCurrent || 0);
-    const roundTotal = useAppSelector(state => selectGameById(state, currentGameId)?.roundTotal || 0);
+    const roundTotal = useAppSelector(state => selectGameById(state, currentGameId)?.roundTotal || 1);
 
     const roundsScrollViewEl = useRef<ScrollView>(null);
 
@@ -51,11 +51,11 @@ const Rounds: React.FunctionComponent<Props> = ({ navigation }) => {
         });
     }, [roundCurrent, roundScollOffset]);
 
-    const roundsIterator = [...Array(roundTotal + 1).keys()];
+    const roundsIterator = [...Array(roundTotal).keys()];
 
     return (
         <View style={[styles.scoreTableContainer]}>
-            <PlayerNameColumn navigation={navigation} />
+            <PlayerNameColumn />
             <TotalScoreColumn />
             <ScrollView horizontal={true}
                 contentContainerStyle={{ flexDirection: 'row' }}

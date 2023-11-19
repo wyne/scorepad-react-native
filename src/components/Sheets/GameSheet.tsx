@@ -1,18 +1,21 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { View, StyleSheet, Text } from 'react-native';
+import { View, StyleSheet, Text, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ParamListBase } from '@react-navigation/native';
 import BottomSheet, { BottomSheetBackdrop, BottomSheetBackdropProps, BottomSheetScrollView } from '@gorhom/bottom-sheet';
+import { useIsFocused } from '@react-navigation/native';
 
 import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
 import Rounds from '../Rounds';
 import { selectGameById, updateGame } from '../../../redux/GamesSlice';
 import { systemBlue } from '../../constants';
-import Animated, { Extrapolate, interpolate, useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
-import { TouchableOpacity, TouchableWithoutFeedback } from 'react-native';
-import { Icon } from 'react-native-elements';
+import Animated, { Extrapolate, FadeIn, Layout, interpolate, useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
+import { TouchableWithoutFeedback } from 'react-native';
+import { Button } from 'react-native-elements';
 import { useGameSheetContext } from './GameSheetContext';
+import BigButton from '../BigButtons/BigButton';
+import { selectAllPlayers, updatePlayer } from '../../../redux/PlayersSlice';
 
 /**
  * Height of the bottom sheet
@@ -25,6 +28,8 @@ interface Props {
 }
 
 const GameSheet: React.FunctionComponent<Props> = ({ navigation, containerHeight }) => {
+    const isFocused = useIsFocused();
+
     const currentGameId = useAppSelector(state => state.settings.currentGameId);
     if (typeof currentGameId == 'undefined') return null;
 
@@ -32,6 +37,13 @@ const GameSheet: React.FunctionComponent<Props> = ({ navigation, containerHeight
     const currentGame = useAppSelector(state => selectGameById(state, state.settings.currentGameId));
 
     if (currentGame == undefined) return null;
+
+    const players = useAppSelector(state => selectAllPlayers(state)
+        .filter(player => currentGame?.playerIds.includes(player.id))
+    ).sort((a, b) => {
+        if (currentGame?.playerIds == undefined) return 0;
+        return currentGame.playerIds.indexOf(a.id) - currentGame.playerIds.indexOf(b.id);
+    });
 
     // ref
     const gameSheetRef = useGameSheetContext();
@@ -52,6 +64,46 @@ const GameSheet: React.FunctionComponent<Props> = ({ navigation, containerHeight
             }
         })
     );
+
+    /**
+     * Reset the game, but keep the players
+     */
+    const resetGameHandler = () => {
+        Alert.alert(
+            "Reset Game",
+            "Are you sure you want to reset this game? This will reset all scores and rounds.",
+            [
+                {
+                    text: "Cancel",
+                    style: "cancel"
+                },
+                {
+                    text: "Reset",
+                    onPress: () => {
+                        if (currentGame == undefined) return;
+
+                        players.forEach((player) => {
+                            dispatch(updatePlayer({
+                                id: player.id,
+                                changes: {
+                                    scores: [0],
+                                }
+                            }
+                            ));
+                        });
+                        dispatch(updateGame({
+                            id: currentGame.id,
+                            changes: {
+                                roundCurrent: 0,
+                                roundTotal: 0,
+                            }
+                        }));
+                        navigation.navigate("Game");
+                    }
+                }
+            ]
+        );
+    };
 
     // State variable for the current snap point index
     const [, setSnapPointIndex] = useState(0);
@@ -136,6 +188,7 @@ const GameSheet: React.FunctionComponent<Props> = ({ navigation, containerHeight
                                 </Text>
                             </View>
                         </TouchableWithoutFeedback>
+
                         {currentGame.locked &&
                             <Text style={{ color: 'gray', fontSize: 20, paddingHorizontal: 10 }}
                                 onPress={() => { gameSheetRef?.current?.snapToIndex(snapPoints.length - 1); }}
@@ -143,7 +196,7 @@ const GameSheet: React.FunctionComponent<Props> = ({ navigation, containerHeight
                                 Locked
                             </Text>
                         }
-                        {!currentGame.locked &&
+                        {false &&
                             <Text style={styles.editButton} onPress={() => navigation.navigate('Settings')}>
                                 Edit
                             </Text>
@@ -152,33 +205,55 @@ const GameSheet: React.FunctionComponent<Props> = ({ navigation, containerHeight
 
                     <Animated.View style={[styles.sheetContent, animatedSheetStyle]}>
                         <Rounds navigation={navigation} show={!fullscreen} />
-                        <Text style={{ color: 'white' }}>
+                        <Text style={{ color: 'white', margin: 10, marginTop: 0 }}>
                             Tap on a column to set the current round.
                         </Text>
 
-                        <View style={{ flexDirection: 'row', justifyContent: 'space-around', paddingVertical: 10 }}>
-                            <TouchableOpacity activeOpacity={.5} onPress={() => navigation.navigate('Share')}>
-                                <View style={[styles.shareButton]}>
-                                    <Icon name="share-outline" type="ionicon" size={30} color={systemBlue} />
-                                    <Text style={{ color: systemBlue, fontSize: 15, paddingTop: 5 }}>Share</Text>
-                                </View>
-                            </TouchableOpacity>
+                        <Animated.View layout={Layout.delay(200)}>
 
-                            <TouchableOpacity activeOpacity={.5} onPress={setLock}>
-                                <View style={[styles.shareButton]}>
-                                    <Icon name={currentGame.locked ? "lock-closed-outline" : "lock-open-outline"}
-                                        type="ionicon" size={30}
-                                        color={currentGame.locked ? 'red' : 'green'}
+                            {!currentGame.locked &&
+                                <Animated.View entering={FadeIn.delay(400)}>
+                                    <Button title="Edit Title and Players"
+                                        type="clear"
+                                        style={{
+                                            margin: 5, marginTop: 15,
+                                            backgroundColor: 'rgba(0,0,0,.2)', borderRadius: 10
+                                        }}
+                                        onPress={() => navigation.navigate('Settings')}
                                     />
-                                    <Text style={{
-                                        color: currentGame.locked ? 'red' : 'green',
-                                        fontSize: 15, paddingTop: 5
-                                    }}>
-                                        {currentGame.locked ? "Unlock" : "Lock"}
-                                    </Text>
-                                </View>
-                            </TouchableOpacity>
-                        </View>
+                                </Animated.View>
+                            }
+                        </Animated.View>
+
+                        {/*
+                            isFocused + '' is a workaround for broken animations when navigating back to the game screen
+                            https://github.com/software-mansion/react-native-reanimated/issues/4816
+                            https://github.com/software-mansion/react-native-reanimated/issues/4822
+                        */}
+                        <Animated.View key={isFocused + ''} layout={Layout.delay(200)} style={{ flexDirection: 'row', justifyContent: 'space-around', paddingVertical: 10 }}>
+                            <BigButton text="Share"
+                                color={systemBlue}
+                                icon="share-outline"
+                                onPress={() => navigation.navigate('Share')}
+                            />
+
+                            <Animated.View layout={Layout.delay(200)} style={{ justifyContent: 'center', alignItems: 'center' }}>
+                                {!currentGame.locked &&
+                                    <BigButton text="Reset"
+                                        color='red'
+                                        icon="refresh-outline"
+                                        onPress={resetGameHandler}
+                                    />
+                                }
+                            </Animated.View>
+
+                            <BigButton text={currentGame.locked ? "Unlock" : "Lock"}
+                                color={currentGame.locked ? 'orange' : 'green'}
+                                icon={currentGame.locked ? "lock-closed-outline" : "lock-open-outline"}
+                                onPress={setLock}
+                            />
+
+                        </Animated.View>
                     </Animated.View>
                 </SafeAreaView>
             </BottomSheetScrollView>

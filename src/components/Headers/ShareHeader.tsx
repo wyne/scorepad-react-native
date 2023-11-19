@@ -1,7 +1,7 @@
 import React from 'react';
 import { Text, StyleSheet } from 'react-native';
 
-import MenuButton from '../Buttons/MenuButton';
+import HomeButton from '../Buttons/MenuButton';
 import CustomHeader from './CustomHeader';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ParamListBase } from '@react-navigation/native';
@@ -14,7 +14,7 @@ const ShareHeader: React.FunctionComponent<Props> = ({ navigation }: Props) => {
 
     return (
         <CustomHeader navigation={navigation}
-            headerLeft={<MenuButton navigation={navigation} />}
+            headerLeft={<HomeButton navigation={navigation} />}
             headerCenter={<Text style={styles.title}>Share</Text>}
         />
     );

@@ -24,7 +24,7 @@ const ListScreen: React.FunctionComponent<Props> = ({ navigation }) => {
         dispatch(setOnboardedVersion());
 
         if (gameList.length == 0) {
-            dispatch(asyncCreateGame(gameList.length + 1)).then(() => {
+            dispatch(asyncCreateGame({ gameCount: gameList.length + 1, playerCount: 2 })).then(() => {
                 setTimeout(() => {
                     navigation.navigate("Game");
                 }, 500);
@@ -40,7 +40,7 @@ const ListScreen: React.FunctionComponent<Props> = ({ navigation }) => {
                 style={styles.list}
                 data={gameList}
                 renderItem={({ item, index }) =>
-                    <GameListItem navigation={navigation} game={item} index={index} />
+                    <GameListItem navigation={navigation} gameId={item.id} index={index} />
                 }
                 keyExtractor={item => item.id}
             >

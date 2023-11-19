@@ -12,29 +12,29 @@ import { setCurrentGameId } from '../../redux/SettingsSlice';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ParamListBase } from '@react-navigation/native';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
-import { GameState } from '../../redux/GamesSlice';
 import { AnyAction, ThunkDispatch } from '@reduxjs/toolkit';
-import { selectAllPlayers } from '../../redux/PlayersSlice';
+import GameListItemPlayerName from './GameListItemPlayerName';
 
 export type Props = {
     navigation: NativeStackNavigationProp<ParamListBase, string, undefined>;
-    game: GameState;
+    gameId: string;
     index: number;
 };
 
-const GameListItem: React.FunctionComponent<Props> = ({ navigation, game, index }) => {
+const GameListItem: React.FunctionComponent<Props> = ({ navigation, gameId, index }) => {
     const dispatch = useAppDispatch();
-    const chosenGame = useAppSelector(state => selectGameById(state, game.id));
-    const playerNames = useAppSelector(state =>
-        selectAllPlayers(state).filter(player => game.playerIds.includes(player.id))
-    )
-        .sort((a, b) => game.playerIds.indexOf(a.id) - game.playerIds.indexOf(b.id))
-        .map(player => player.playerName);
 
-    const rounds: number = chosenGame?.roundTotal || 1;
+    if (gameId == null) { return null; }
+
+    const roundTotal = useAppSelector(state => selectGameById(state, gameId)?.roundTotal);
+    const playerIds = useAppSelector(state => selectGameById(state, gameId)?.playerIds);
+    const gameTitle = useAppSelector(state => selectGameById(state, gameId)?.title);
+    const locked = useAppSelector(state => selectGameById(state, gameId)?.locked);
+    const dateCreated = useAppSelector(state => selectGameById(state, gameId)?.dateCreated);
+    if (roundTotal == null || playerIds == null) { return null; }
 
     const asyncSetCurrentGame = (dispatch: ThunkDispatch<unknown, undefined, AnyAction>) => new Promise<void>((resolve) => {
-        dispatch(setCurrentGameId(game.id));
+        dispatch(setCurrentGameId(gameId));
         resolve();
     });
 
@@ -47,9 +47,9 @@ const GameListItem: React.FunctionComponent<Props> = ({ navigation, game, index 
         });
         await analytics().logEvent('select_game', {
             index: index,
-            game_id: game.id,
-            player_count: playerNames.length,
-            round_count: rounds + 1,
+            game_id: gameId,
+            player_count: playerIds.length,
+            round_count: roundTotal,
         });
     };
 
@@ -62,8 +62,8 @@ const GameListItem: React.FunctionComponent<Props> = ({ navigation, game, index 
         });
 
         await analytics().logEvent('menu_share', {
-            round_count: rounds + 1,
-            player_count: playerNames.length,
+            round_count: roundTotal,
+            player_count: playerIds.length,
         });
     };
 
@@ -72,12 +72,12 @@ const GameListItem: React.FunctionComponent<Props> = ({ navigation, game, index 
      */
     const editGameHandler = async () => {
         asyncSetCurrentGame(dispatch).then(() => {
-            navigation.navigate("Settings");
+            navigation.navigate("Settings", { reason: 'edit_game' });
         });
 
         await analytics().logEvent('menu_edit', {
-            round_count: rounds + 1,
-            player_count: playerNames.length,
+            round_count: roundTotal,
+            player_count: playerIds.length,
         });
     };
 
@@ -87,7 +87,7 @@ const GameListItem: React.FunctionComponent<Props> = ({ navigation, game, index 
     const deleteGameHandler = async () => {
         Alert.alert(
             'Delete Game',
-            `Are you sure you want to delete ${game.title}?`,
+            `Are you sure you want to delete ${gameTitle}?`,
             [
                 {
                     text: 'Cancel',
@@ -97,7 +97,7 @@ const GameListItem: React.FunctionComponent<Props> = ({ navigation, game, index 
                 {
                     text: 'OK',
                     onPress: () => {
-                        dispatch(gameDelete(game.id));
+                        dispatch(gameDelete(gameId));
                     }
                 },
             ],
@@ -106,8 +106,8 @@ const GameListItem: React.FunctionComponent<Props> = ({ navigation, game, index 
 
         await analytics().logEvent('delete_game', {
             index: index,
-            round_count: rounds + 1,
-            player_count: playerNames.length,
+            round_count: roundTotal,
+            player_count: playerIds.length,
         });
     };
 
@@ -166,31 +166,33 @@ const GameListItem: React.FunctionComponent<Props> = ({ navigation, game, index 
     };
 
     return (
-        <Animated.View entering={FadeInUp.duration(500).delay(100 + index * 100)}
+        <Animated.View entering={FadeInUp.duration(200).delay(100 + index * 100)}
             exiting={SlideOutLeft.duration(200)}>
             <MenuView
-                title={game.title}
+                title={gameTitle}
                 shouldOpenOnLongPress={true}
                 onPressAction={menuActionHandler}
                 actions={actions}>
-                <ListItem key={game.id} bottomDivider onPress={chooseGameHandler}>
+                <ListItem key={gameId} bottomDivider onPress={chooseGameHandler}>
                     <ListItem.Content>
                         <ListItem.Title style={{ alignItems: 'center' }}>
-                            {game.title}
-                            {game.locked && <Icon name="lock-closed-outline" type="ionicon" size={14} color='green' style={{ paddingHorizontal: 4 }} />}
+                            {gameTitle}
+                            {locked && <Icon name="lock-closed-outline" type="ionicon" size={14} color='green' style={{ paddingHorizontal: 4 }} />}
                         </ListItem.Title>
                         <ListItem.Subtitle style={styles.gameSubtitle}>
-                            <Text><Moment element={Text} fromNow>{game.dateCreated}</Moment></Text>
+                            <Text><Moment element={Text} fromNow>{dateCreated}</Moment></Text>
                         </ListItem.Subtitle>
                         <ListItem.Subtitle style={styles.gameSubtitle}>
-                            <Text>{playerNames.join(', ')}</Text>
+                            {playerIds.map((playerId, index) => (
+                                <GameListItemPlayerName key={index} playerId={playerId} last={index == playerIds.length - 1} />
+                            ))}
                         </ListItem.Subtitle>
                     </ListItem.Content>
                     <Text style={styles.badgePlayers}>
-                        {playerNames.length} <Icon color={'#01497C'} name="users" type="font-awesome-5" size={16} />
+                        {playerIds.length} <Icon color={'#01497C'} name="users" type="font-awesome-5" size={16} />
                     </Text>
                     <Text style={styles.badgeRounds}>
-                        {rounds + 1} <Icon color={'#c25858'} name="circle-notch" type="font-awesome-5" size={16} />
+                        {roundTotal} <Icon color={'#c25858'} name="circle-notch" type="font-awesome-5" size={16} />
                     </Text>
                     <ListItem.Chevron />
                 </ListItem>

@@ -36,7 +36,7 @@ const gamesSlice = createSlice({
                 id: action.payload,
                 changes: {
                     roundCurrent: game.roundCurrent + 1,
-                    roundTotal: Math.max(game.roundTotal, game.roundCurrent + 1)
+                    roundTotal: Math.max(game.roundTotal, game.roundCurrent + 2)
                 }
             });
         },
@@ -65,30 +65,32 @@ interface GamesSlice {
 
 export const asyncCreateGame = createAsyncThunk(
     'games/create',
-    async (gameCount: number, { dispatch }) => {
-        const player1Id = Crypto.randomUUID();
-        const player2Id = Crypto.randomUUID();
+    async (
+        { gameCount, playerCount }: { gameCount: number, playerCount: number },
+        { dispatch }
+    ) => {
         const newGameId = Crypto.randomUUID();
 
-        dispatch(playerAdd({
-            id: player1Id,
-            playerName: "Player 1",
-            scores: [0],
-        }));
+        const playerIds: string[] = [];
+        for (let i = 0; i < playerCount; i++) {
+            playerIds.push(Crypto.randomUUID());
+        }
 
-        dispatch(playerAdd({
-            id: player2Id,
-            playerName: "Player 2",
-            scores: [0],
-        }));
+        playerIds.forEach((playerId) => {
+            dispatch(playerAdd({
+                id: playerId,
+                playerName: `Player ${playerIds.indexOf(playerId) + 1}`,
+                scores: [0],
+            }));
+        });
 
         dispatch(gameSave({
             id: newGameId,
-            title: `Game ${gameCount}`,
+            title: `Game ${gameCount + 1}`,
             dateCreated: Date.now(),
             roundCurrent: 0,
-            roundTotal: 0,
-            playerIds: [player1Id, player2Id],
+            roundTotal: 1,
+            playerIds: playerIds,
         }));
 
         dispatch(setCurrentGameId(newGameId));

@@ -1,25 +1,28 @@
 import React from 'react';
 import { Text, StyleSheet } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { ParamListBase } from '@react-navigation/native';
+import { ParamListBase, RouteProp } from '@react-navigation/native';
 
-import { useAppSelector } from '../../../redux/hooks';
-import { selectGameById } from '../../../redux/GamesSlice';
 import CheckButton from '../Buttons/CheckButton';
 import CustomHeader from './CustomHeader';
 
+type RouteParams = {
+    Settings: {
+        reason?: string;
+    };
+};
+
 interface Props {
     navigation: NativeStackNavigationProp<ParamListBase, string, undefined>;
+    route: RouteProp<RouteParams, 'Settings'>;
 }
 
-const SettingsHeader: React.FunctionComponent<Props> = ({ navigation }) => {
-    const currentGame = useAppSelector(state => selectGameById(state, state.settings.currentGameId));
-
+const SettingsHeader: React.FunctionComponent<Props> = ({ navigation, route }) => {
     return (
         <CustomHeader navigation={navigation}
             headerLeft={<></>}
-            headerCenter={<Text style={styles.title}>{currentGame?.title}</Text>}
-            headerRight={<CheckButton navigation={navigation} />}
+            headerCenter={<Text style={styles.title}>Edit Game</Text>}
+            headerRight={<CheckButton navigation={navigation} route={route} />}
         />
     );
 };

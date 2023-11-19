@@ -20,6 +20,7 @@
     "@react-native-firebase/auth": "^18.3.0",
     "@react-native-firebase/crashlytics": "^18.3.0",
     "@react-native-menu/menu": "^0.8.0",
+    "@react-native-picker/picker": "2.4.10",
     "@react-navigation/drawer": "^6.6.2",
     "@react-navigation/native": "^6.1.4",
     "@react-navigation/native-stack": "^6.9.12",
@@ -69,8 +70,7 @@
     "react-redux": "^8.0.2",
     "redux-persist": "^6.0.0",
     "semver": "^7.5.4",
-    "typescript": "^5.1.6",
-    "@react-native-picker/picker": "2.4.10"
+    "typescript": "^5.1.6"
   },
   "devDependencies": {
     "@babel/core": "^7.19.3",
