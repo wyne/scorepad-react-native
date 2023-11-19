@@ -95,7 +95,7 @@ const GameSheet: React.FunctionComponent<Props> = ({ navigation, containerHeight
                             id: currentGame.id,
                             changes: {
                                 roundCurrent: 0,
-                                roundTotal: 0,
+                                roundTotal: 1,
                             }
                         }));
                         navigation.navigate("Game");
