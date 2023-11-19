@@ -40,7 +40,7 @@ const ListScreen: React.FunctionComponent<Props> = ({ navigation }) => {
                 style={styles.list}
                 data={gameList}
                 renderItem={({ item, index }) =>
-                    <GameListItem navigation={navigation} game={item} index={index} />
+                    <GameListItem navigation={navigation} gameId={item.id} index={index} />
                 }
                 keyExtractor={item => item.id}
             >

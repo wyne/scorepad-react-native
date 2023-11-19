@@ -4,7 +4,7 @@ import crashlytics from '@react-native-firebase/crashlytics';
 
 type RoundIndex = number;
 
-interface ScoreState {
+export interface ScoreState {
     id: string;
     playerName: string;
     scores: number[];
