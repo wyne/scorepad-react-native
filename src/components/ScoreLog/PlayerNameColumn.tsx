@@ -1,9 +1,5 @@
 import React from 'react';
 import { Text, View, StyleSheet } from 'react-native';
-import { TouchableOpacity } from 'react-native';
-import analytics from '@react-native-firebase/analytics';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { ParamListBase } from '@react-navigation/native';
 
 import { useAppSelector } from '../../../redux/hooks';
 import { palette, systemBlue } from '../../constants';

@@ -18,7 +18,7 @@ interface RoundScollOffset {
     [key: number]: number;
 }
 
-const Rounds: React.FunctionComponent<Props> = ({ navigation }) => {
+const Rounds: React.FunctionComponent<Props> = ({ }) => {
     const [roundScollOffset, setRoundScrollOffset] = useState<RoundScollOffset>({});
 
     const currentGameId = useAppSelector(state => state.settings.currentGameId);

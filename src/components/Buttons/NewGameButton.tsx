@@ -5,10 +5,8 @@ import { ParamListBase } from '@react-navigation/native';
 
 import { useAppSelector, useAppDispatch } from '../../../redux/hooks';
 import { systemBlue } from '../../constants';
-import HeaderButton from './HeaderButton';
 import { asyncCreateGame, selectAllGames } from '../../../redux/GamesSlice';
 import { MenuAction, MenuView } from '@react-native-menu/menu';
-import { Text } from 'react-native';
 
 interface Props {
     navigation: NativeStackNavigationProp<ParamListBase, string, undefined>;
