@@ -26,7 +26,7 @@ const Rounds: React.FunctionComponent<Props> = ({ }) => {
     if (typeof currentGameId == 'undefined') return null;
 
     const roundCurrent = useAppSelector(state => selectGameById(state, currentGameId)?.roundCurrent || 0);
-    const roundTotal = useAppSelector(state => selectGameById(state, currentGameId)?.roundTotal || 0);
+    const roundTotal = useAppSelector(state => selectGameById(state, currentGameId)?.roundTotal || 1);
 
     const roundsScrollViewEl = useRef<ScrollView>(null);
 
@@ -51,7 +51,7 @@ const Rounds: React.FunctionComponent<Props> = ({ }) => {
         });
     }, [roundCurrent, roundScollOffset]);
 
-    const roundsIterator = [...Array(roundTotal + 1).keys()];
+    const roundsIterator = [...Array(roundTotal).keys()];
 
     return (
         <View style={[styles.scoreTableContainer]}>

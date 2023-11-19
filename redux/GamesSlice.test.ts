@@ -39,7 +39,7 @@ describe('games reducer', () => {
             throw new Error('game1 not found');
         }
         expect(state.entities.game1.roundCurrent).toBe(1);
-        expect(state.entities.game1.roundTotal).toBe(1);
+        expect(state.entities.game1.roundTotal).toBe(2);
     });
 
     it('should handle roundPrevious', () => {
