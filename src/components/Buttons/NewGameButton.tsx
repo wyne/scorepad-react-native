@@ -22,7 +22,7 @@ const NewGameButton: React.FunctionComponent<Props> = ({ navigation }) => {
     const menuActions: MenuAction[] = playerNumberOptions.map((number) => {
         return {
             id: number.toString(),
-            title: number.toString() + " Players",
+            title: number.toString() + (number == 1 ? " Player" : " Players"),
         };
     });
 

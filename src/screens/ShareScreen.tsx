@@ -29,7 +29,7 @@ const ShareScreen: React.FunctionComponent<Props> = ({ navigation }) => {
 
     const roundsScrollViewEl = useRef<ScrollView>(null);
 
-    const roundsIterator = [...Array(roundTotal + 1).keys()];
+    const roundsIterator = [...Array(roundTotal).keys()];
 
     const exportImage = async () => {
         if (roundsScrollViewEl.current == null) return;

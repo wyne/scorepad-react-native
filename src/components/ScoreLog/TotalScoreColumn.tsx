@@ -28,7 +28,6 @@ const TotalScoreColumn = ({ }) => {
 const styles = StyleSheet.create({
     totalHeader: {
         color: 'white',
-        fontWeight: 'bold',
         textAlign: 'center',
         fontSize: 20,
     }
