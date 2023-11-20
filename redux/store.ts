@@ -41,6 +41,7 @@ export const store = configureStore({
         games: persistReducer(gamesPersistConfig, gamesReducer),
         players: persistReducer(playersPersistConfig, scoresReducer),
     },
+    // preloadedState: getPreloadedState(),
     middleware: getDefaultMiddleware => getDefaultMiddleware({
         serializableCheck: {
             ignoreActions: true
@@ -54,3 +55,5 @@ export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
 
 export const persistor = persistStore(store);
+
+// exportData();
