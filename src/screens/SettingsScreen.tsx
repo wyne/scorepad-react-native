@@ -72,9 +72,8 @@ const SettingsScreen: React.FunctionComponent<Props> = ({ }) => {
 
     return (
         <KeyboardAwareScrollView style={styles.configScrollContainer}
-            extraScrollHeight={200}
-            contentContainerStyle={{ flex: 1 }}>
-            <View style={{ flex: 1, marginBottom: 200 }}>
+            extraScrollHeight={200}>
+            <View style={{ marginBottom: 200 }}>
                 <Text style={styles.heading}>Game Title</Text>
 
                 <EditGame />
