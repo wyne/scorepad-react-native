@@ -1,11 +1,12 @@
 import React from 'react';
+
 import { Text, View, StyleSheet } from 'react-native';
 import { Icon } from 'react-native-elements/dist/icons/Icon';
 
-import { useAppSelector } from '../../../redux/hooks';
-import { palette, systemBlue } from '../../constants';
 import { selectGameById } from '../../../redux/GamesSlice';
+import { useAppSelector } from '../../../redux/hooks';
 import { selectAllPlayers } from '../../../redux/PlayersSlice';
+import { palette, systemBlue } from '../../constants';
 
 const PlayerNameColumn: React.FunctionComponent = ({ }) => {
     const currentGameId = useAppSelector(state => state.settings.currentGameId);

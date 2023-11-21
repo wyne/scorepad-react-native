@@ -1,7 +1,8 @@
 import React from 'react';
+
 import analytics from '@react-native-firebase/analytics';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ParamListBase, RouteProp } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Text } from 'react-native';
 
 import { systemBlue } from '../../constants';

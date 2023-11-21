@@ -1,7 +1,8 @@
 import React from 'react';
-import { TouchableWithoutFeedback } from 'react-native';
-import { Image } from 'expo-image';
+
 import analytics from '@react-native-firebase/analytics';
+import { Image } from 'expo-image';
+import { TouchableWithoutFeedback } from 'react-native';
 import Animated, {
     Easing,
     PinwheelIn,

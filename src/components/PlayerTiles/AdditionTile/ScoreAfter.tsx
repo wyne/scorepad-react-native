@@ -1,10 +1,11 @@
 import React, { useEffect } from 'react';
+
+import { StyleSheet } from 'react-native';
 import Animated, {
     useSharedValue,
     useAnimatedStyle,
     withTiming
 } from 'react-native-reanimated';
-import { StyleSheet } from 'react-native';
 
 import { calculateFontSize, animationDuration, enteringAnimation, ZoomOutFadeOut } from './Helpers';
 

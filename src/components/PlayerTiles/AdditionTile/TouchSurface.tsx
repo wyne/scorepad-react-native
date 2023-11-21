@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { StyleSheet, TouchableHighlight, View } from 'react-native';
-import * as Haptics from 'expo-haptics';
-import analytics from '@react-native-firebase/analytics';
 
-import { playerRoundScoreIncrement } from '../../../../redux/PlayersSlice';
-import { useAppDispatch, useAppSelector } from '../../../../redux/hooks';
+import analytics from '@react-native-firebase/analytics';
+import * as Haptics from 'expo-haptics';
+import { StyleSheet, TouchableHighlight, View } from 'react-native';
+
 import { selectGameById } from '../../../../redux/GamesSlice';
+import { useAppDispatch, useAppSelector } from '../../../../redux/hooks';
+import { playerRoundScoreIncrement } from '../../../../redux/PlayersSlice';
 
 import { ScoreParticle } from './ScoreParticle';
 

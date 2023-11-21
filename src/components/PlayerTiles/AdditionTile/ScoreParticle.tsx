@@ -1,4 +1,5 @@
 import React from 'react';
+
 import { Text , DimensionValue } from 'react-native';
 import Animated, { FadeOut } from 'react-native-reanimated';
 

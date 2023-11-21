@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { SemVer, valid } from 'semver';
 import * as Application from 'expo-application';
+import { SemVer, valid } from 'semver';
 
 export interface SettingsState {
     home_fullscreen: boolean;

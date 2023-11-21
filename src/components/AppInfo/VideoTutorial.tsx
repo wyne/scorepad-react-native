@@ -1,7 +1,8 @@
 import React, { useState, useRef, useCallback } from 'react';
-import { View, Button, StyleSheet } from 'react-native';
-import { AVPlaybackStatus, AVPlaybackStatusSuccess, Video } from 'expo-av';
+
 import analytics from '@react-native-firebase/analytics';
+import { AVPlaybackStatus, AVPlaybackStatusSuccess, Video } from 'expo-av';
+import { View, Button, StyleSheet } from 'react-native';
 
 function isAVPlaybackStatusSuccess(param: AVPlaybackStatus): param is AVPlaybackStatusSuccess {
     return (param as AVPlaybackStatusSuccess).isPlaying !== undefined;

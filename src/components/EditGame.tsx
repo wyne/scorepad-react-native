@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
+
 import { Text, View, StyleSheet, NativeSyntheticEvent, TextInputEndEditingEventData } from 'react-native';
 import { Input } from 'react-native-elements';
 
-import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { selectGameById, updateGame } from '../../redux/GamesSlice';
+import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 
 const UNTITLED = "Untitled";
 

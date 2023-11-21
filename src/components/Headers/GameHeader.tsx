@@ -1,17 +1,18 @@
 import React from 'react';
-import { Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { Icon } from 'react-native-elements/dist/icons/Icon';
-import analytics from '@react-native-firebase/analytics';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { ParamListBase } from '@react-navigation/native';
-import { Button } from 'react-native-elements';
 
-import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
-import FullscreenButton from '../Buttons/FullscreenButton';
+import analytics from '@react-native-firebase/analytics';
+import { ParamListBase } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { Button } from 'react-native-elements';
+import { Icon } from 'react-native-elements/dist/icons/Icon';
+
 import { roundNext, roundPrevious , selectGameById } from '../../../redux/GamesSlice';
+import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
 import { systemBlue } from '../../constants';
-import HomeButton from '../Buttons/HomeButton';
 import AddendButton from '../Buttons/AddendButton';
+import FullscreenButton from '../Buttons/FullscreenButton';
+import HomeButton from '../Buttons/HomeButton';
 
 import CustomHeader from './CustomHeader';
 

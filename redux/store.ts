@@ -1,10 +1,10 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { persistStore, persistReducer } from 'redux-persist';
 import { configureStore } from "@reduxjs/toolkit";
+import { persistStore, persistReducer } from 'redux-persist';
 
-import settingsReducer from './SettingsSlice';
 import gamesReducer from './GamesSlice';
 import scoresReducer from './PlayersSlice';
+import settingsReducer from './SettingsSlice';
 
 const settingsPersistConfig = {
     key: 'settings',

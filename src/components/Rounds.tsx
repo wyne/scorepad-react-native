@@ -1,14 +1,15 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { View, StyleSheet, ScrollView, Platform, LayoutChangeEvent } from 'react-native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+
 import { ParamListBase } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { View, StyleSheet, ScrollView, Platform, LayoutChangeEvent } from 'react-native';
 
 import { selectGameById } from '../../redux/GamesSlice';
 import { useAppSelector } from '../../redux/hooks';
 
+import PlayerNameColumn from './ScoreLog/PlayerNameColumn';
 import RoundScoreColumn from './ScoreLog/RoundScoreColumn';
 import TotalScoreColumn from './ScoreLog/TotalScoreColumn';
-import PlayerNameColumn from './ScoreLog/PlayerNameColumn';
 
 interface Props {
     navigation: NativeStackNavigationProp<ParamListBase, string, undefined>;

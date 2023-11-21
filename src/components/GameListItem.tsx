@@ -1,17 +1,18 @@
 import React from 'react';
-import { Text, StyleSheet, Alert, Platform } from 'react-native';
-import { ListItem , Icon } from 'react-native-elements';
-import Moment from 'react-moment';
-import Animated, { FadeInUp, SlideOutLeft } from 'react-native-reanimated';
+
 import analytics from '@react-native-firebase/analytics';
 import { MenuView, MenuAction, NativeActionEvent } from '@react-native-menu/menu';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ParamListBase } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AnyAction, ThunkDispatch } from '@reduxjs/toolkit';
+import Moment from 'react-moment';
+import { Text, StyleSheet, Alert, Platform } from 'react-native';
+import { ListItem , Icon } from 'react-native-elements';
+import Animated, { FadeInUp, SlideOutLeft } from 'react-native-reanimated';
 
 import { selectGameById, gameDelete } from '../../redux/GamesSlice';
-import { setCurrentGameId } from '../../redux/SettingsSlice';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
+import { setCurrentGameId } from '../../redux/SettingsSlice';
 
 
 import GameListItemPlayerName from './GameListItemPlayerName';

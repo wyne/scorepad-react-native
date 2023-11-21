@@ -1,10 +1,11 @@
 import React from 'react';
+
 import { StyleSheet } from 'react-native';
 import Animated from 'react-native-reanimated';
 
 import { calculateFontSize } from './Helpers';
-import ScoreBefore from './ScoreBefore';
 import ScoreAfter from './ScoreAfter';
+import ScoreBefore from './ScoreBefore';
 import ScoreRound from './ScoreRound';
 
 interface Props {

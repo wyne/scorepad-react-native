@@ -1,18 +1,19 @@
 import React, { useRef } from 'react';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { View, StyleSheet, ScrollView, Text } from 'react-native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { ParamListBase } from '@react-navigation/native';
-import { captureRef } from "react-native-view-shot";
+
 import analytics from '@react-native-firebase/analytics';
+import { ParamListBase } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import * as Sharing from 'expo-sharing';
+import { View, StyleSheet, ScrollView, Text } from 'react-native';
 import { Button, Icon } from 'react-native-elements';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { captureRef } from "react-native-view-shot";
 
 import { selectGameById } from '../../redux/GamesSlice';
+import { useAppSelector } from '../../redux/hooks';
+import PlayerNameColumn from '../components/ScoreLog/PlayerNameColumn';
 import RoundScoreColumn from '../components/ScoreLog/RoundScoreColumn';
 import TotalScoreColumn from '../components/ScoreLog/TotalScoreColumn';
-import PlayerNameColumn from '../components/ScoreLog/PlayerNameColumn';
-import { useAppSelector } from '../../redux/hooks';
 import { systemBlue } from '../constants';
 
 interface Props {

@@ -1,5 +1,5 @@
-import { Store } from 'redux';
 import { configureStore } from '@reduxjs/toolkit';
+import { Store } from 'redux';
 
 import settingsReducer, {
     setCurrentGameId,
