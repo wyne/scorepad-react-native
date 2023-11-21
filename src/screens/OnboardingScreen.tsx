@@ -1,4 +1,7 @@
 import React from 'react';
+
+import { RouteProp } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import {
     View, StyleSheet,
     Dimensions,
@@ -7,15 +10,13 @@ import {
     ViewToken,
     ImageURISource,
 } from 'react-native';
-import Animated, { FadeIn } from 'react-native-reanimated';
 import { ExpandingDot } from "react-native-animated-pagination-dots";
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RouteProp } from '@react-navigation/native';
 import { Button } from 'react-native-elements';
+import Animated, { FadeIn } from 'react-native-reanimated';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { RootStackParamList } from '../Navigation';
 import SkipButton from '../components/Onboarding/SkipButton';
+import { RootStackParamList } from '../Navigation';
 
 const { width } = Dimensions.get('screen');
 

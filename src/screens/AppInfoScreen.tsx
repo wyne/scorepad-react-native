@@ -1,15 +1,15 @@
 import React from 'react';
-import { Text, View, StyleSheet, Alert, ScrollView, Linking } from 'react-native';
-import { Platform, Switch } from 'react-native';
-import * as Application from 'expo-application';
+
 import analytics from '@react-native-firebase/analytics';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ParamListBase } from '@react-navigation/routers';
+import * as Application from 'expo-application';
+import { Text, View, StyleSheet, Alert, ScrollView, Linking , Platform, Switch } from 'react-native';
 import { Button } from 'react-native-elements';
 
-import RotatingIcon from '../components/AppInfo/RotatingIcon';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { toggleshowPointParticles } from '../../redux/SettingsSlice';
+import RotatingIcon from '../components/AppInfo/RotatingIcon';
 
 interface Props {
     navigation: NativeStackNavigationProp<ParamListBase, string, undefined>;

@@ -1,4 +1,5 @@
 import React, { memo } from 'react';
+
 import { Text, StyleSheet } from 'react-native';
 
 import { useAppSelector } from '../../../redux/hooks';

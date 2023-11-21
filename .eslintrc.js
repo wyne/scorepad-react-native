@@ -17,9 +17,22 @@ module.exports = {
         'semi': ['error', 'always'],
         'eol-last': ['error', 'always'],
         'import/order': ['error', {
+            "pathGroups": [
+                {
+                    "pattern": "react",
+                    "group": "builtin",
+                    "position": "before"
+                }
+            ],
+            "pathGroupsExcludedImportTypes": ["react"],
             'groups': ['builtin', 'external', 'internal', 'parent', 'sibling', 'index'],
+            'alphabetize': {
+                'order': 'asc',
+                'caseInsensitive': true,
+            },
             'newlines-between': 'always',
         }],
+        'import/no-duplicates': 'error',
     },
     ignorePatterns: ['web-build', '__mocks__'],
 };

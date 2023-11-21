@@ -1,5 +1,5 @@
-import { render, fireEvent, waitFor } from '@testing-library/react-native';
 import analytics from '@react-native-firebase/analytics';
+import { render, fireEvent, waitFor } from '@testing-library/react-native';
 
 import { useNavigationMock } from '../../../test/test-helpers';
 

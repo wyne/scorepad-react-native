@@ -1,9 +1,9 @@
 import React, { memo } from 'react';
-import { Text } from 'react-native';
-import { StyleSheet } from 'react-native';
 
-import { selectPlayerById } from '../../../redux/PlayersSlice';
+import { Text , StyleSheet } from 'react-native';
+
 import { useAppSelector } from '../../../redux/hooks';
+import { selectPlayerById } from '../../../redux/PlayersSlice';
 
 export type Props = {
     playerId: string;

@@ -1,4 +1,5 @@
 import React from 'react';
+
 import { Text, View, StyleSheet, TouchableHighlight } from 'react-native';
 
 import { useAppSelector } from '../../../redux/hooks';

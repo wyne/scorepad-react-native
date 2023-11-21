@@ -1,22 +1,23 @@
 import React from 'react';
+
 import { DarkTheme, NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import * as Application from 'expo-application';
 import { SemVer, parse } from 'semver';
 
-import ListScreen from "../src/screens/ListScreen";
-import GameScreen from "../src/screens/GameScreen";
-import SettingsScreen from "../src/screens/SettingsScreen";
-import AppInfoScreen from "../src/screens/AppInfoScreen";
-import OnboardingScreen from '../src/screens/OnboardingScreen';
-import HomeHeader from '../src/components/Headers/HomeHeader';
-import GameHeader from '../src/components/Headers/GameHeader';
-import SettingsHeader from '../src/components/Headers/SettingsHeader';
-import AppInfoHeader from '../src/components/Headers/AppInfoHeader';
 import { useAppSelector } from '../redux/hooks';
+import AppInfoHeader from '../src/components/Headers/AppInfoHeader';
+import GameHeader from '../src/components/Headers/GameHeader';
+import HomeHeader from '../src/components/Headers/HomeHeader';
+import SettingsHeader from '../src/components/Headers/SettingsHeader';
+import AppInfoScreen from "../src/screens/AppInfoScreen";
+import GameScreen from "../src/screens/GameScreen";
+import ListScreen from "../src/screens/ListScreen";
+import OnboardingScreen from '../src/screens/OnboardingScreen';
+import SettingsScreen from "../src/screens/SettingsScreen";
 
-import ShareScreen from './screens/ShareScreen';
 import ShareHeader from './components/Headers/ShareHeader';
+import ShareScreen from './screens/ShareScreen';
 
 export type OnboardingScreenParamList = {
     onboarding: boolean;

@@ -1,13 +1,12 @@
-import { Store } from 'redux';
 import { configureStore } from '@reduxjs/toolkit';
+import { Store } from 'redux';
 
 import settingsReducer, {
     setCurrentGameId,
     toggleHomeFullscreen,
     setMultiplier,
     setOnboardedVersion,
-} from './SettingsSlice';
-import { SettingsState } from './SettingsSlice';
+ SettingsState } from './SettingsSlice';
 
 
 describe('settings reducer', () => {

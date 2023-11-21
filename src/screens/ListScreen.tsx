@@ -1,15 +1,16 @@
 import React, { memo, useEffect } from 'react';
+
+import { ParamListBase } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { BlurView } from 'expo-blur';
 import { StyleSheet, Text, View } from 'react-native';
 import Animated, { Layout, Easing } from 'react-native-reanimated';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { ParamListBase } from '@react-navigation/native';
-import { BlurView } from 'expo-blur';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { useAppSelector, useAppDispatch } from '../../redux/hooks';
 import { asyncCreateGame, selectAllGames } from '../../redux/GamesSlice';
-import GameListItem from '../components/GameListItem';
+import { useAppSelector, useAppDispatch } from '../../redux/hooks';
 import { setOnboardedVersion } from '../../redux/SettingsSlice';
+import GameListItem from '../components/GameListItem';
 
 interface Props {
     navigation: NativeStackNavigationProp<ParamListBase, string, undefined>;

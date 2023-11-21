@@ -1,7 +1,8 @@
 import React from 'react';
-import { Text, StyleSheet, View } from 'react-native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+
 import { ParamListBase } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { Text, StyleSheet, View } from 'react-native';
 
 import AppInfoButton from '../Buttons/AppInfoButton';
 import NewGameButton from '../Buttons/NewGameButton';

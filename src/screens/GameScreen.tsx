@@ -1,15 +1,16 @@
 import React, { useCallback, useEffect, useState } from 'react';
+
+import { ParamListBase } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { getContrastRatio } from 'colorsheet';
 import { View, StyleSheet, LayoutChangeEvent } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { getContrastRatio } from 'colorsheet';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { ParamListBase } from '@react-navigation/native';
 
+import { selectGameById } from '../../redux/GamesSlice';
 import { useAppSelector } from '../../redux/hooks';
 import PlayerTile from '../components/PlayerTile';
-import { selectGameById } from '../../redux/GamesSlice';
-import GameSheet, { bottomSheetHeight } from '../components/Sheets/GameSheet';
 import AddendModal from '../components/Sheets/AddendModal';
+import GameSheet, { bottomSheetHeight } from '../components/Sheets/GameSheet';
 
 interface Props {
     navigation: NativeStackNavigationProp<ParamListBase, string, undefined>;

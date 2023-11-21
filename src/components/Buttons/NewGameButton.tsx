@@ -1,12 +1,13 @@
 import React from 'react';
-import { Icon } from 'react-native-elements';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { ParamListBase } from '@react-navigation/native';
-import { MenuAction, MenuView } from '@react-native-menu/menu';
 
+import { MenuAction, MenuView } from '@react-native-menu/menu';
+import { ParamListBase } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { Icon } from 'react-native-elements';
+
+import { asyncCreateGame, selectAllGames } from '../../../redux/GamesSlice';
 import { useAppSelector, useAppDispatch } from '../../../redux/hooks';
 import { systemBlue } from '../../constants';
-import { asyncCreateGame, selectAllGames } from '../../../redux/GamesSlice';
 
 interface Props {
     navigation: NativeStackNavigationProp<ParamListBase, string, undefined>;

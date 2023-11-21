@@ -1,14 +1,14 @@
 import React from 'react';
+
+import analytics from '@react-native-firebase/analytics';
 import { Text, View, StyleSheet, TouchableOpacity, NativeSyntheticEvent, TextInputEndEditingEventData, Alert } from 'react-native';
 import { Icon, Input } from 'react-native-elements';
-import analytics from '@react-native-firebase/analytics';
 import Animated from 'react-native-reanimated';
 
-import { palette } from '../constants';
 import { selectGameById, updateGame } from '../../redux/GamesSlice';
-import { selectPlayerById } from '../../redux/PlayersSlice';
-import { removePlayer, updatePlayer } from '../../redux/PlayersSlice';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
+import { selectPlayerById , removePlayer, updatePlayer } from '../../redux/PlayersSlice';
+import { palette } from '../constants';
 
 
 interface Props {

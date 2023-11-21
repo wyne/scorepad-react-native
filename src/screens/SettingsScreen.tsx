@@ -1,19 +1,19 @@
 import React, { useState } from 'react';
-import { Text, View, StyleSheet } from 'react-native';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-import { Icon, Button } from 'react-native-elements';
-import * as Crypto from 'expo-crypto';
+
 import analytics from '@react-native-firebase/analytics';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ParamListBase, RouteProp } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import * as Crypto from 'expo-crypto';
+import { Text, View, StyleSheet } from 'react-native';
+import { Icon, Button } from 'react-native-elements';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import Animated, { Layout } from 'react-native-reanimated';
 
-import { useAppDispatch, useAppSelector } from '../../redux/hooks';
-import { playerAdd } from '../../redux/PlayersSlice';
-import EditPlayer from '../components/EditPlayer';
 import { selectGameById, updateGame, } from '../../redux/GamesSlice';
-import { selectAllPlayers } from '../../redux/PlayersSlice';
+import { useAppDispatch, useAppSelector } from '../../redux/hooks';
+import { playerAdd , selectAllPlayers } from '../../redux/PlayersSlice';
 import EditGame from '../components/EditGame';
+import EditPlayer from '../components/EditPlayer';
 import { systemBlue } from '../constants';
 
 
