@@ -2,10 +2,11 @@ import React from 'react';
 import analytics from '@react-native-firebase/analytics';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ParamListBase, RouteProp } from '@react-navigation/native';
+import { Text } from 'react-native';
+
+import { systemBlue } from '../../constants';
 
 import HeaderButton from './HeaderButton';
-import { systemBlue } from '../../constants';
-import { Text } from 'react-native';
 
 type RouteParams = {
     Settings: {

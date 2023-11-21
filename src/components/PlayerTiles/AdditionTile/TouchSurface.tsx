@@ -1,12 +1,14 @@
 import React from 'react';
 import { StyleSheet, TouchableHighlight, View } from 'react-native';
-import { ScoreParticle } from './ScoreParticle';
 import { useState } from 'react';
+import * as Haptics from 'expo-haptics';
+import analytics from '@react-native-firebase/analytics';
+
 import { playerRoundScoreIncrement } from '../../../../redux/PlayersSlice';
 import { useAppDispatch, useAppSelector } from '../../../../redux/hooks';
 import { selectGameById } from '../../../../redux/GamesSlice';
-import * as Haptics from 'expo-haptics';
-import analytics from '@react-native-firebase/analytics';
+
+import { ScoreParticle } from './ScoreParticle';
 
 type ScoreParticleProps = {
     key: string;

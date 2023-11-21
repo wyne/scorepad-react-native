@@ -2,10 +2,11 @@ import React from 'react';
 import analytics from '@react-native-firebase/analytics';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ParamListBase } from '@react-navigation/native';
+import { Icon } from 'react-native-elements/dist/icons/Icon';
+
+import { systemBlue } from '../../constants';
 
 import HeaderButton from './HeaderButton';
-import { Icon } from 'react-native-elements/dist/icons/Icon';
-import { systemBlue } from '../../constants';
 
 interface Props {
     navigation: NativeStackNavigationProp<ParamListBase, string, undefined>;

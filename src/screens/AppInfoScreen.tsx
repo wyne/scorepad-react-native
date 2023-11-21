@@ -5,9 +5,9 @@ import * as Application from 'expo-application';
 import analytics from '@react-native-firebase/analytics';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ParamListBase } from '@react-navigation/routers';
+import { Button } from 'react-native-elements';
 
 import RotatingIcon from '../components/AppInfo/RotatingIcon';
-import { Button } from 'react-native-elements';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { toggleshowPointParticles } from '../../redux/SettingsSlice';
 

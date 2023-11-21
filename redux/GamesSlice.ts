@@ -2,8 +2,8 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { createEntityAdapter } from '@reduxjs/toolkit';
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import * as Crypto from 'expo-crypto';
-
 import analytics from '@react-native-firebase/analytics';
+
 import { playerAdd } from './PlayersSlice';
 import { setCurrentGameId } from './SettingsSlice';
 

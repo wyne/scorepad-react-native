@@ -1,11 +1,12 @@
 import React from 'react';
 import analytics from '@react-native-firebase/analytics';
+import { Icon } from 'react-native-elements/dist/icons/Icon';
 
 import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
-import HeaderButton from './HeaderButton';
-import { Icon } from 'react-native-elements/dist/icons/Icon';
 import { systemBlue } from '../../constants';
 import { toggleHomeFullscreen } from '../../../redux/SettingsSlice';
+
+import HeaderButton from './HeaderButton';
 
 const FullscreenButton: React.FunctionComponent = ({ }) => {
     const dispatch = useAppDispatch();

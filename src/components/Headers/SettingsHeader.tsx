@@ -4,6 +4,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ParamListBase, RouteProp } from '@react-navigation/native';
 
 import CheckButton from '../Buttons/CheckButton';
+
 import CustomHeader from './CustomHeader';
 
 type RouteParams = {

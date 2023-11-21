@@ -1,4 +1,7 @@
 import { configureStore } from '@reduxjs/toolkit';
+import { EntityState } from '@reduxjs/toolkit';
+import { Store } from 'redux';
+
 import gamesReducer, {
     roundNext,
     roundPrevious,
@@ -7,8 +10,6 @@ import gamesReducer, {
     selectAllGames,
 } from './GamesSlice';
 import { GameState } from './GamesSlice';
-import { EntityState } from '@reduxjs/toolkit';
-import { Store } from 'redux';
 
 describe('games reducer', () => {
     let store: Store<EntityState<GameState>>;

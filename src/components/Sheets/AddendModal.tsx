@@ -1,11 +1,12 @@
 import React, { useCallback, useMemo } from 'react';
 import { View, StyleSheet, Text } from 'react-native';
-import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
 import { BottomSheetBackdrop, BottomSheetBackdropProps, BottomSheetModal } from '@gorhom/bottom-sheet';
+import { Picker } from '@react-native-picker/picker';
+
+import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
+import { setAddendOne, setAddendTwo, setMultiplier } from '../../../redux/SettingsSlice';
 
 import { useAddendModalContext } from './AddendModalContext';
-import { Picker } from '@react-native-picker/picker';
-import { setAddendOne, setAddendTwo, setMultiplier } from '../../../redux/SettingsSlice';
 
 interface Props {
 }

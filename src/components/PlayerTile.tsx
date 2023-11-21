@@ -1,12 +1,14 @@
 import React from 'react';
 import { StyleSheet, DimensionValue } from 'react-native';
+import Animated, { Easing, FadeIn } from 'react-native-reanimated';
 
-import AdditionTile from './PlayerTiles/AdditionTile/AdditionTile';
 import { selectGameById } from '../../redux/GamesSlice';
 import { selectPlayerById } from '../../redux/PlayersSlice';
 import { useAppSelector } from '../../redux/hooks';
+
+import AdditionTile from './PlayerTiles/AdditionTile/AdditionTile';
 import { TouchSurface } from './PlayerTiles/AdditionTile/TouchSurface';
-import Animated, { Easing, FadeIn } from 'react-native-reanimated';
+
 
 interface Props {
     index: number;

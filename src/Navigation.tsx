@@ -2,19 +2,20 @@ import React from 'react';
 import { DarkTheme, NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import * as Application from 'expo-application';
+import { SemVer, parse } from 'semver';
 
 import ListScreen from "../src/screens/ListScreen";
 import GameScreen from "../src/screens/GameScreen";
 import SettingsScreen from "../src/screens/SettingsScreen";
 import AppInfoScreen from "../src/screens/AppInfoScreen";
 import OnboardingScreen from '../src/screens/OnboardingScreen';
-import ShareScreen from './screens/ShareScreen';
 import HomeHeader from '../src/components/Headers/HomeHeader';
 import GameHeader from '../src/components/Headers/GameHeader';
 import SettingsHeader from '../src/components/Headers/SettingsHeader';
 import AppInfoHeader from '../src/components/Headers/AppInfoHeader';
 import { useAppSelector } from '../redux/hooks';
-import { SemVer, parse } from 'semver';
+
+import ShareScreen from './screens/ShareScreen';
 import ShareHeader from './components/Headers/ShareHeader';
 
 export type OnboardingScreenParamList = {

@@ -1,10 +1,11 @@
 import React from 'react';
 import { Text, StyleSheet } from 'react-native';
-
-import CustomHeader from './CustomHeader';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ParamListBase } from '@react-navigation/native';
+
 import BackButton from '../Buttons/BackButton';
+
+import CustomHeader from './CustomHeader';
 
 interface Props {
     navigation: NativeStackNavigationProp<ParamListBase, string, undefined>;

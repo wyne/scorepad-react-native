@@ -12,8 +12,9 @@ import { ExpandingDot } from "react-native-animated-pagination-dots";
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RouteProp } from '@react-navigation/native';
-import { RootStackParamList } from '../Navigation';
 import { Button } from 'react-native-elements';
+
+import { RootStackParamList } from '../Navigation';
 import SkipButton from '../components/Onboarding/SkipButton';
 
 const { width } = Dimensions.get('screen');
