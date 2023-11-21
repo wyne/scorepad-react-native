@@ -8,8 +8,7 @@ import { Button } from 'react-native-elements';
 
 import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
 import FullscreenButton from '../Buttons/FullscreenButton';
-import { roundNext, roundPrevious } from '../../../redux/GamesSlice';
-import { selectGameById } from '../../../redux/GamesSlice';
+import { roundNext, roundPrevious , selectGameById } from '../../../redux/GamesSlice';
 import { systemBlue } from '../../constants';
 import HomeButton from '../Buttons/HomeButton';
 import AddendButton from '../Buttons/AddendButton';

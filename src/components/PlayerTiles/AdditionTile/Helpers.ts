@@ -1,6 +1,4 @@
-import { ZoomIn, ZoomOut } from 'react-native-reanimated';
-import { Layout, Easing } from 'react-native-reanimated';
-import { withTiming } from 'react-native-reanimated';
+import { ZoomIn, ZoomOut , Layout, Easing , withTiming } from 'react-native-reanimated';
 
 /**
  * The duration of the animation in milliseconds.

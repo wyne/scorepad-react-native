@@ -1,6 +1,5 @@
 import React from 'react';
-import { Text, View, StyleSheet, Alert, ScrollView, Linking } from 'react-native';
-import { Platform, Switch } from 'react-native';
+import { Text, View, StyleSheet, Alert, ScrollView, Linking , Platform, Switch } from 'react-native';
 import * as Application from 'expo-application';
 import analytics from '@react-native-firebase/analytics';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';

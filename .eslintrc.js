@@ -20,6 +20,7 @@ module.exports = {
             'groups': ['builtin', 'external', 'internal', 'parent', 'sibling', 'index'],
             'newlines-between': 'always',
         }],
+        'import/no-duplicates': 'error',
     },
     ignorePatterns: ['web-build', '__mocks__'],
 };

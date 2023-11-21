@@ -1,8 +1,7 @@
 import React from 'react';
 import { Text, StyleSheet, Alert, Platform } from 'react-native';
-import { ListItem } from 'react-native-elements';
+import { ListItem , Icon } from 'react-native-elements';
 import Moment from 'react-moment';
-import { Icon } from 'react-native-elements';
 import Animated, { FadeInUp, SlideOutLeft } from 'react-native-reanimated';
 import analytics from '@react-native-firebase/analytics';
 import { MenuView, MenuAction, NativeActionEvent } from '@react-native-menu/menu';

@@ -6,8 +6,7 @@ import Animated from 'react-native-reanimated';
 
 import { palette } from '../constants';
 import { selectGameById, updateGame } from '../../redux/GamesSlice';
-import { selectPlayerById } from '../../redux/PlayersSlice';
-import { removePlayer, updatePlayer } from '../../redux/PlayersSlice';
+import { selectPlayerById , removePlayer, updatePlayer } from '../../redux/PlayersSlice';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 
 

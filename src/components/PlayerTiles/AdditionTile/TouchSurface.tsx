@@ -1,6 +1,5 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { StyleSheet, TouchableHighlight, View } from 'react-native';
-import { useState } from 'react';
 import * as Haptics from 'expo-haptics';
 import analytics from '@react-native-firebase/analytics';
 

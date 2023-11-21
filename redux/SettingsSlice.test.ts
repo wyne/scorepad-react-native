@@ -6,8 +6,7 @@ import settingsReducer, {
     toggleHomeFullscreen,
     setMultiplier,
     setOnboardedVersion,
-} from './SettingsSlice';
-import { SettingsState } from './SettingsSlice';
+ SettingsState } from './SettingsSlice';
 
 
 describe('settings reducer', () => {

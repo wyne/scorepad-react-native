@@ -1,7 +1,6 @@
 import React from 'react';
-import { Text } from 'react-native';
+import { Text , DimensionValue } from 'react-native';
 import Animated, { FadeOut } from 'react-native-reanimated';
-import { DimensionValue } from 'react-native';
 
 type Props = {
     id: string;
