@@ -6,13 +6,15 @@ import { Icon } from 'react-native-elements';
 import Animated, { FadeInUp, SlideOutLeft } from 'react-native-reanimated';
 import analytics from '@react-native-firebase/analytics';
 import { MenuView, MenuAction, NativeActionEvent } from '@react-native-menu/menu';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { ParamListBase } from '@react-navigation/native';
+import { AnyAction, ThunkDispatch } from '@reduxjs/toolkit';
 
 import { selectGameById, gameDelete } from '../../redux/GamesSlice';
 import { setCurrentGameId } from '../../redux/SettingsSlice';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { ParamListBase } from '@react-navigation/native';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
-import { AnyAction, ThunkDispatch } from '@reduxjs/toolkit';
+
+
 import GameListItemPlayerName from './GameListItemPlayerName';
 
 export type Props = {

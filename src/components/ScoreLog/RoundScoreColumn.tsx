@@ -2,9 +2,10 @@ import React, { memo, useCallback } from 'react';
 import { Text, View } from 'react-native';
 import { TouchableWithoutFeedback } from 'react-native';
 import analytics from '@react-native-firebase/analytics';
-import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
 
+import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
 import { selectGameById, updateGame } from '../../../redux/GamesSlice';
+
 import RoundScoreCell from './RoundScoreCell';
 
 interface Props {

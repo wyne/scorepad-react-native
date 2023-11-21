@@ -1,20 +1,21 @@
 import React, { useState } from 'react';
 import { Text, View, StyleSheet } from 'react-native';
-import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { Icon, Button } from 'react-native-elements';
 import * as Crypto from 'expo-crypto';
 import analytics from '@react-native-firebase/analytics';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ParamListBase, RouteProp } from '@react-navigation/native';
+import Animated, { Layout } from 'react-native-reanimated';
 
+import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { playerAdd } from '../../redux/PlayersSlice';
 import EditPlayer from '../components/EditPlayer';
 import { selectGameById, updateGame, } from '../../redux/GamesSlice';
 import { selectAllPlayers } from '../../redux/PlayersSlice';
 import EditGame from '../components/EditGame';
 import { systemBlue } from '../constants';
-import Animated, { Layout } from 'react-native-reanimated';
+
 
 type RouteParams = {
     Settings: {

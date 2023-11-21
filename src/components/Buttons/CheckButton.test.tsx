@@ -1,7 +1,9 @@
 import { render, fireEvent, waitFor } from '@testing-library/react-native';
 import analytics from '@react-native-firebase/analytics';
-import CheckButton from './CheckButton';
+
 import { useNavigationMock } from '../../../test/test-helpers';
+
+import CheckButton from './CheckButton';
 
 describe('CheckButton', () => {
     const navigation = useNavigationMock();

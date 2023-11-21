@@ -4,10 +4,11 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ParamListBase } from '@react-navigation/native';
 
 import { selectGameById } from '../../redux/GamesSlice';
+import { useAppSelector } from '../../redux/hooks';
+
 import RoundScoreColumn from './ScoreLog/RoundScoreColumn';
 import TotalScoreColumn from './ScoreLog/TotalScoreColumn';
 import PlayerNameColumn from './ScoreLog/PlayerNameColumn';
-import { useAppSelector } from '../../redux/hooks';
 
 interface Props {
     navigation: NativeStackNavigationProp<ParamListBase, string, undefined>;

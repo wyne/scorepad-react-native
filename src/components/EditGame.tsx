@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Text, View, StyleSheet, NativeSyntheticEvent, TextInputEndEditingEventData } from 'react-native';
-import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { Input } from 'react-native-elements';
 
+import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { selectGameById, updateGame } from '../../redux/GamesSlice';
 
 const UNTITLED = "Untitled";

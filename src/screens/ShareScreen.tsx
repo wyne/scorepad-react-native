@@ -6,13 +6,13 @@ import { ParamListBase } from '@react-navigation/native';
 import { captureRef } from "react-native-view-shot";
 import analytics from '@react-native-firebase/analytics';
 import * as Sharing from 'expo-sharing';
+import { Button, Icon } from 'react-native-elements';
 
 import { selectGameById } from '../../redux/GamesSlice';
 import RoundScoreColumn from '../components/ScoreLog/RoundScoreColumn';
 import TotalScoreColumn from '../components/ScoreLog/TotalScoreColumn';
 import PlayerNameColumn from '../components/ScoreLog/PlayerNameColumn';
 import { useAppSelector } from '../../redux/hooks';
-import { Button, Icon } from 'react-native-elements';
 import { systemBlue } from '../constants';
 
 interface Props {

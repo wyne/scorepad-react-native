@@ -5,7 +5,7 @@ module.exports = {
         jest: true,
     },
     parser: '@typescript-eslint/parser',
-    plugins: ['@typescript-eslint'],
+    plugins: ['@typescript-eslint', 'import'],
     extends: [
         'plugin:@typescript-eslint/recommended',
         'plugin:jest/recommended',
@@ -16,6 +16,10 @@ module.exports = {
         'jest/no-disabled-tests': 0,
         'semi': ['error', 'always'],
         'eol-last': ['error', 'always'],
+        'import/order': ['error', {
+            'groups': ['builtin', 'external', 'internal', 'parent', 'sibling', 'index'],
+            'newlines-between': 'always',
+        }],
     },
     ignorePatterns: ['web-build', '__mocks__'],
 };

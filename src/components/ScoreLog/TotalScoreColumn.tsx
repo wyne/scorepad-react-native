@@ -2,8 +2,9 @@ import React from 'react';
 import { Text, View, StyleSheet } from 'react-native';
 
 import { selectGameById } from '../../../redux/GamesSlice';
-import TotalScoreCell from './TotalScoreCell';
 import { useAppSelector } from '../../../redux/hooks';
+
+import TotalScoreCell from './TotalScoreCell';
 
 const TotalScoreColumn = ({ }) => {
     const currentGameId = useAppSelector(state => state.settings.currentGameId);

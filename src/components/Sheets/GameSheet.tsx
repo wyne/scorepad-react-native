@@ -5,17 +5,18 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ParamListBase } from '@react-navigation/native';
 import BottomSheet, { BottomSheetBackdrop, BottomSheetBackdropProps, BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { useIsFocused } from '@react-navigation/native';
+import Animated, { Extrapolate, FadeIn, Layout, interpolate, useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
+import { TouchableWithoutFeedback } from 'react-native';
+import { Button } from 'react-native-elements';
 
 import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
 import Rounds from '../Rounds';
 import { selectGameById, updateGame } from '../../../redux/GamesSlice';
 import { systemBlue } from '../../constants';
-import Animated, { Extrapolate, FadeIn, Layout, interpolate, useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
-import { TouchableWithoutFeedback } from 'react-native';
-import { Button } from 'react-native-elements';
-import { useGameSheetContext } from './GameSheetContext';
 import BigButton from '../BigButtons/BigButton';
 import { selectAllPlayers, updatePlayer } from '../../../redux/PlayersSlice';
+
+import { useGameSheetContext } from './GameSheetContext';
 
 /**
  * Height of the bottom sheet
