@@ -4,7 +4,8 @@ Run any build command remotely by removing `--local` flag.
 
 ### Development - Simulator
 
-Prerequisite: `SENTRY_AUTH_TOKEN` in `.env`
+For android, use JDK 17.
+TODO: Fix app_variant for android.
 
 ```zsh
 npx react-native-clean-project
