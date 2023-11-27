@@ -12,7 +12,7 @@ jobs:
       - uses: actions/setup-node@v3.6.0
         with:
           node-version: 14.x
-      - uses: expo/expo-github-action@8.0.0
+      - uses: expo/expo-github-action@8.1.0
         with:
           expo-version: 4.x
           token: ${{ secrets.EXPO_TOKEN }}
