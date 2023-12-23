@@ -7,7 +7,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AnyAction, ThunkDispatch } from '@reduxjs/toolkit';
 import Moment from 'react-moment';
 import { Text, StyleSheet, Alert, Platform } from 'react-native';
-import { ListItem , Icon } from 'react-native-elements';
+import { ListItem, Icon } from 'react-native-elements';
 import Animated, { FadeInUp, SlideOutLeft } from 'react-native-reanimated';
 
 import { selectGameById, gameDelete } from '../../redux/GamesSlice';
@@ -145,6 +145,11 @@ const GameListItem: React.FunctionComponent<Props> = ({ navigation, gameId, inde
             }),
         },
     ];
+
+    // If platform is android, remove the action with id 'share'
+    if (Platform.OS === 'android') {
+        actions.splice(1, 1);
+    }
 
     type MenuActionHandler = (eativeEvent: NativeActionEvent) => void;
 
