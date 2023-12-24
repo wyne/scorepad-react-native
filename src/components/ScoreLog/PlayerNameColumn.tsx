@@ -3,9 +3,8 @@ import React from 'react';
 import { Text, View, StyleSheet } from 'react-native';
 import { Icon } from 'react-native-elements/dist/icons/Icon';
 
-import { selectGameById } from '../../../redux/GamesSlice';
+import { selectGameById, selectSortedPlayers } from '../../../redux/GamesSlice';
 import { useAppSelector } from '../../../redux/hooks';
-import { selectAllPlayers } from '../../../redux/PlayersSlice';
 import { palette, systemBlue } from '../../constants';
 
 const PlayerNameColumn: React.FunctionComponent = ({ }) => {
@@ -14,9 +13,7 @@ const PlayerNameColumn: React.FunctionComponent = ({ }) => {
 
     if (currentGame == undefined) return null;
 
-    const players = useAppSelector(state => selectAllPlayers(state)
-        .filter(player => currentGame.playerIds.includes(player.id))
-    ).sort((a, b) => currentGame.playerIds.indexOf(a.id) - currentGame.playerIds.indexOf(b.id));
+    const players = useAppSelector(selectSortedPlayers);
 
     return (
         <View style={{ paddingVertical: 10 }}>

@@ -8,9 +8,9 @@ import { Button } from 'react-native-elements';
 import Animated, { Extrapolate, FadeIn, Layout, interpolate, useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { selectGameById, updateGame } from '../../../redux/GamesSlice';
+import { selectGameById, selectSortedPlayers, updateGame } from '../../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
-import { selectAllPlayers, updatePlayer } from '../../../redux/PlayersSlice';
+import { updatePlayer } from '../../../redux/PlayersSlice';
 import { systemBlue } from '../../constants';
 import BigButton from '../BigButtons/BigButton';
 import Rounds from '../Rounds';
@@ -38,12 +38,7 @@ const GameSheet: React.FunctionComponent<Props> = ({ navigation, containerHeight
 
     if (currentGame == undefined) return null;
 
-    const players = useAppSelector(state => selectAllPlayers(state)
-        .filter(player => currentGame?.playerIds.includes(player.id))
-    ).sort((a, b) => {
-        if (currentGame?.playerIds == undefined) return 0;
-        return currentGame.playerIds.indexOf(a.id) - currentGame.playerIds.indexOf(b.id);
-    });
+    const players = useAppSelector(selectSortedPlayers);
 
     // ref
     const gameSheetRef = useGameSheetContext();
