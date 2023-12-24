@@ -1,5 +1,5 @@
 import crashlytics from '@react-native-firebase/crashlytics';
-import { createSlice, PayloadAction , createEntityAdapter } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction, createEntityAdapter } from '@reduxjs/toolkit';
 
 type RoundIndex = number;
 
@@ -37,9 +37,9 @@ const scoresSlice = createSlice({
                     const multiplier = action.meta.multiplier;
 
                     if (typeof scores[round] !== 'number') {
-                        scores[round] = 0;
+                        scores[round] = Number(scores[round]) || 0;
                     }
-                    scores[round] += multiplier;
+                    scores[round] += Number(multiplier);
                 } catch (error) {
                     const err = error as Error;
                     crashlytics().recordError(err);

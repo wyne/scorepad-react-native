@@ -1,16 +1,16 @@
 import React, { useCallback, useMemo, useState } from 'react';
 
 import BottomSheet, { BottomSheetBackdrop, BottomSheetBackdropProps, BottomSheetScrollView } from '@gorhom/bottom-sheet';
-import { ParamListBase , useIsFocused } from '@react-navigation/native';
+import { ParamListBase, useIsFocused } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { View, StyleSheet, Text, Alert , TouchableWithoutFeedback } from 'react-native';
+import { View, StyleSheet, Text, Alert, TouchableWithoutFeedback, Platform } from 'react-native';
 import { Button } from 'react-native-elements';
 import Animated, { Extrapolate, FadeIn, Layout, interpolate, useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { selectGameById, updateGame } from '../../../redux/GamesSlice';
+import { selectGameById, selectSortedPlayers, updateGame } from '../../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
-import { selectAllPlayers, updatePlayer } from '../../../redux/PlayersSlice';
+import { updatePlayer } from '../../../redux/PlayersSlice';
 import { systemBlue } from '../../constants';
 import BigButton from '../BigButtons/BigButton';
 import Rounds from '../Rounds';
@@ -38,12 +38,7 @@ const GameSheet: React.FunctionComponent<Props> = ({ navigation, containerHeight
 
     if (currentGame == undefined) return null;
 
-    const players = useAppSelector(state => selectAllPlayers(state)
-        .filter(player => currentGame?.playerIds.includes(player.id))
-    ).sort((a, b) => {
-        if (currentGame?.playerIds == undefined) return 0;
-        return currentGame.playerIds.indexOf(a.id) - currentGame.playerIds.indexOf(b.id);
-    });
+    const players = useAppSelector(selectSortedPlayers);
 
     // ref
     const gameSheetRef = useGameSheetContext();
@@ -231,11 +226,13 @@ const GameSheet: React.FunctionComponent<Props> = ({ navigation, containerHeight
                             https://github.com/software-mansion/react-native-reanimated/issues/4822
                         */}
                         <Animated.View key={isFocused + ''} layout={Layout.delay(200)} style={{ flexDirection: 'row', justifyContent: 'space-around', paddingVertical: 10 }}>
-                            <BigButton text="Share"
-                                color={systemBlue}
-                                icon="share-outline"
-                                onPress={() => navigation.navigate('Share')}
-                            />
+                            {Platform.OS === 'ios' &&
+                                <BigButton text="Share"
+                                    color={systemBlue}
+                                    icon="share-outline"
+                                    onPress={() => navigation.navigate('Share')}
+                                />
+                            }
 
                             <Animated.View layout={Layout.delay(200)} style={{ justifyContent: 'center', alignItems: 'center' }}>
                                 {!currentGame.locked &&

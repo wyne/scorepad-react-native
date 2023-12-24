@@ -2,7 +2,7 @@ import React, { useCallback, useMemo } from 'react';
 
 import { BottomSheetBackdrop, BottomSheetBackdropProps, BottomSheetModal } from '@gorhom/bottom-sheet';
 import { Picker } from '@react-native-picker/picker';
-import { View, StyleSheet, Text } from 'react-native';
+import { View, StyleSheet, Text, Platform } from 'react-native';
 
 import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
 import { setAddendOne, setAddendTwo, setMultiplier } from '../../../redux/SettingsSlice';
@@ -17,9 +17,11 @@ const AddendModal: React.FunctionComponent<Props> = ({ }) => {
     const addendTwo = useAppSelector(state => state.settings.addendTwo);
 
     // Array of 1 to 50
-    const addendOptions = Array.from({ length: 50 }, (_, i) => i + 1);
+    const addendOptions = Array.from({ length: 100 }, (_, i) => i + 1);
 
     const dispatch = useAppDispatch();
+
+    const isAndroid = useMemo(() => Platform.OS === 'android', []);
 
     const onTapValueChange = useCallback((itemValue: number, itemIndex: number) => {
         dispatch(setMultiplier(addendOptions[itemIndex]));
@@ -77,11 +79,11 @@ const AddendModal: React.FunctionComponent<Props> = ({ }) => {
                 }}>
                     <View>
                         <Text style={{ color: 'white', textAlign: 'center' }}>Single Tap</Text>
-                        <View style={styles.pickerContainer}>
+                        <View style={isAndroid ? styles.pickerContainerAndroid : styles.pickerContainer}>
                             <Picker
                                 selectedValue={addendOne}
                                 onValueChange={onTapValueChange}
-                                style={styles.picker}
+                                style={isAndroid ? styles.pickerAndroid : styles.picker}
                                 itemStyle={styles.pickerItem}
                             >
                                 {
@@ -95,11 +97,11 @@ const AddendModal: React.FunctionComponent<Props> = ({ }) => {
 
                     <View>
                         <Text style={{ color: 'white', textAlign: 'center' }}>Long Press</Text>
-                        <View style={styles.pickerContainer}>
+                        <View style={isAndroid ? styles.pickerContainerAndroid : styles.pickerContainer}>
                             <Picker
                                 selectedValue={addendTwo}
                                 onValueChange={onLongTapValueChange}
-                                style={styles.picker}
+                                style={isAndroid ? styles.pickerAndroid : styles.picker}
                                 itemStyle={styles.pickerItem}
                             >
                                 {
@@ -123,7 +125,10 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     picker: {
-        width: 80,
+        width: 90,
+    },
+    pickerAndroid: {
+        width: 120,
     },
     pickerItem: {
         color: 'white',
@@ -131,6 +136,11 @@ const styles = StyleSheet.create({
     },
     pickerContainer: {
         backgroundColor: 'rgb(20,30,40)',
+        borderRadius: 10,
+        margin: 10,
+    },
+    pickerContainerAndroid: {
+        backgroundColor: 'white',
         borderRadius: 10,
         margin: 10,
     },

@@ -1,9 +1,10 @@
 import analytics from '@react-native-firebase/analytics';
-import { createSlice, PayloadAction , createEntityAdapter , createAsyncThunk } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction, createEntityAdapter, createAsyncThunk, createSelector } from '@reduxjs/toolkit';
 import * as Crypto from 'expo-crypto';
 
-import { playerAdd } from './PlayersSlice';
+import { playerAdd, selectAllPlayers } from './PlayersSlice';
 import { setCurrentGameId } from './SettingsSlice';
+import { RootState } from './store';
 
 export interface GameState {
     id: string;
@@ -101,12 +102,25 @@ export const asyncCreateGame = createAsyncThunk(
     }
 );
 
+export const selectSortedPlayers = createSelector(
+    [
+        selectAllPlayers,
+        (state: RootState) => state.games.entities[state.settings.currentGameId]
+    ],
+    (players, currentGame) => players
+        .filter(player => currentGame?.playerIds.includes(player.id))
+        .sort((a, b) => {
+            if (currentGame?.playerIds == undefined) return 0;
+            return currentGame.playerIds.indexOf(a.id) - currentGame.playerIds.indexOf(b.id);
+        })
+);
+
 export const {
     updateGame,
     roundNext,
     roundPrevious,
     gameSave,
-    gameDelete
+    gameDelete,
 } = gamesSlice.actions;
 
 export default gamesSlice.reducer;
