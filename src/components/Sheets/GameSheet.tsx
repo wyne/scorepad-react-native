@@ -76,8 +76,10 @@ const GameSheet: React.FunctionComponent<Props> = ({ navigation, containerHeight
                     text: "Reset",
                     onPress: () => {
                         if (currentGame == undefined) return;
+                        console.log('reset game', currentGame.id, currentGame.playerIds, players);
 
                         players.forEach((player) => {
+                            console.log(player.id);
                             dispatch(updatePlayer({
                                 id: player.id,
                                 changes: {

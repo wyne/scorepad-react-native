@@ -103,7 +103,10 @@ export const asyncCreateGame = createAsyncThunk(
 );
 
 export const selectSortedPlayers = createSelector(
-    [selectAllPlayers, (state: RootState) => state.game?.currentGame],
+    [
+        selectAllPlayers,
+        (state: RootState) => state.games.entities[state.settings.currentGameId]
+    ],
     (players, currentGame) => players
         .filter(player => currentGame?.playerIds.includes(player.id))
         .sort((a, b) => {
