@@ -65,7 +65,7 @@ interface GamesSlice {
 export const asyncCreateGame = createAsyncThunk(
     'games/create',
     async (
-        { gameCount, playerCount }: { gameCount: number, playerCount: number; },
+        { gameCount, playerCount }: { gameCount: number, playerCount: number },
         { dispatch }
     ) => {
         const newGameId = Crypto.randomUUID();
