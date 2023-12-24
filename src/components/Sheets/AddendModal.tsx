@@ -17,7 +17,7 @@ const AddendModal: React.FunctionComponent<Props> = ({ }) => {
     const addendTwo = useAppSelector(state => state.settings.addendTwo);
 
     // Array of 1 to 50
-    const addendOptions = Array.from({ length: 50 }, (_, i) => i + 1);
+    const addendOptions = Array.from({ length: 100 }, (_, i) => i + 1);
 
     const dispatch = useAppDispatch();
 
@@ -125,7 +125,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     picker: {
-        width: 80,
+        width: 90,
     },
     pickerAndroid: {
         width: 120,
