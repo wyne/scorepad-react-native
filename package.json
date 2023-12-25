@@ -71,7 +71,9 @@
     "react-redux": "^8.0.2",
     "redux-persist": "^6.0.0",
     "semver": "^7.5.4",
-    "typescript": "^5.1.6"
+    "typescript": "^5.1.6",
+    "expo-store-review": "~6.4.0",
+    "expo-linking": "~5.0.2"
   },
   "devDependencies": {
     "@babel/core": "^7.19.3",
