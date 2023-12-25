@@ -4,18 +4,17 @@ import analytics from '@react-native-firebase/analytics';
 import { ParamListBase, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import * as Crypto from 'expo-crypto';
-import { Text, View, StyleSheet } from 'react-native';
-import { Icon, Button } from 'react-native-elements';
+import { StyleSheet, Text, View } from 'react-native';
+import { Button, Icon } from 'react-native-elements';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import Animated, { Layout } from 'react-native-reanimated';
 
-import { selectGameById, updateGame, } from '../../redux/GamesSlice';
+import { selectGameById, selectSortedPlayers, updateGame, } from '../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
-import { playerAdd , selectAllPlayers } from '../../redux/PlayersSlice';
+import { playerAdd } from '../../redux/PlayersSlice';
 import EditGame from '../components/EditGame';
 import EditPlayer from '../components/EditPlayer';
 import { systemBlue } from '../constants';
-
 
 type RouteParams = {
     Settings: {
@@ -36,12 +35,7 @@ const SettingsScreen: React.FunctionComponent<Props> = ({ }) => {
     if (typeof currentGameId == 'undefined') return null;
 
     const currentGame = useAppSelector(state => selectGameById(state, state.settings.currentGameId));
-    const players = useAppSelector(state => selectAllPlayers(state)
-        .filter(player => currentGame?.playerIds.includes(player.id))
-    ).sort((a, b) => {
-        if (currentGame?.playerIds == undefined) return 0;
-        return currentGame.playerIds.indexOf(a.id) - currentGame.playerIds.indexOf(b.id);
-    });
+    const players = useAppSelector(selectSortedPlayers);
 
     const maxPlayers = 12;
 
