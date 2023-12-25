@@ -1,21 +1,21 @@
 import React from 'react';
 
 import analytics from '@react-native-firebase/analytics';
-import { MenuView, MenuAction, NativeActionEvent } from '@react-native-menu/menu';
 import { ParamListBase } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AnyAction, ThunkDispatch } from '@reduxjs/toolkit';
 import Moment from 'react-moment';
-import { Text, StyleSheet, Alert, Platform } from 'react-native';
-import { ListItem, Icon } from 'react-native-elements';
+import { StyleSheet, Text } from 'react-native';
+import { Icon, ListItem } from 'react-native-elements';
 import Animated, { FadeInUp, SlideOutLeft } from 'react-native-reanimated';
 
-import { selectGameById, gameDelete } from '../../redux/GamesSlice';
+import { selectGameById } from '../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { setCurrentGameId } from '../../redux/SettingsSlice';
 
 
 import GameListItemPlayerName from './GameListItemPlayerName';
+import AbstractPopupMenu from './PopupMenu/AbstractPopupMenu';
 
 export type Props = {
     navigation: NativeStackNavigationProp<ParamListBase, string, undefined>;
@@ -55,132 +55,18 @@ const GameListItem: React.FunctionComponent<Props> = ({ navigation, gameId, inde
         });
     };
 
-    /**
-     * Share Game
-     */
-    const shareGameHandler = async () => {
-        asyncSetCurrentGame(dispatch).then(() => {
-            navigation.navigate("Share");
-        });
-
-        await analytics().logEvent('menu_share', {
-            round_count: roundTotal,
-            player_count: playerIds.length,
-        });
-    };
-
-    /**
-     * Edit Game
-     */
-    const editGameHandler = async () => {
-        asyncSetCurrentGame(dispatch).then(() => {
-            navigation.navigate("Settings", { reason: 'edit_game' });
-        });
-
-        await analytics().logEvent('menu_edit', {
-            round_count: roundTotal,
-            player_count: playerIds.length,
-        });
-    };
-
-    /**
-     * Delete Game
-     */
-    const deleteGameHandler = async () => {
-        Alert.alert(
-            'Delete Game',
-            `Are you sure you want to delete ${gameTitle}?`,
-            [
-                {
-                    text: 'Cancel',
-                    onPress: () => { },
-                    style: 'cancel',
-                },
-                {
-                    text: 'OK',
-                    onPress: () => {
-                        dispatch(gameDelete(gameId));
-                    }
-                },
-            ],
-            { cancelable: false },
-        );
-
-        await analytics().logEvent('delete_game', {
-            index: index,
-            round_count: roundTotal,
-            player_count: playerIds.length,
-        });
-    };
-
-    /**
-     * Menu Actions for long press
-     */
-    const actions: MenuAction[] = [
-        {
-            id: 'edit',
-            title: 'Edit',
-            image: Platform.select({
-                ios: 'pencil',
-                android: 'ic_menu_edit',
-            }),
-        },
-        {
-            id: 'share',
-            title: 'Share',
-            image: Platform.select({
-                ios: 'square.and.arrow.up',
-                android: 'ic_menu_share',
-            }),
-        },
-        {
-            id: 'delete',
-            title: `Delete`,
-            attributes: {
-                destructive: true,
-            },
-            image: Platform.select({
-                ios: 'trash',
-                android: 'ic_menu_delete',
-            }),
-        },
-    ];
-
-    // If platform is android, remove the action with id 'share'
-    if (Platform.OS === 'android') {
-        actions.splice(1, 1);
-    }
-
-    type MenuActionHandler = (eativeEvent: NativeActionEvent) => void;
-
-    /**
-     * Menu Action Handler - handles long press actions for games
-     * @param nativeEvent
-     * @returns void
-     */
-    const menuActionHandler: MenuActionHandler = async ({ nativeEvent }) => {
-        switch (nativeEvent.event) {
-            case 'edit':
-                editGameHandler();
-                break;
-            case 'share':
-                shareGameHandler();
-                break;
-            case 'delete':
-                deleteGameHandler();
-                break;
-        }
-    };
-
     return (
         <Animated.View entering={FadeInUp.duration(200).delay(100 + index * 100)}
             exiting={SlideOutLeft.duration(200)}>
-            <MenuView
-                title={gameTitle}
-                shouldOpenOnLongPress={true}
-                onPressAction={menuActionHandler}
-                actions={actions}>
-                <ListItem key={gameId} bottomDivider onPress={chooseGameHandler}>
+            <AbstractPopupMenu
+                gameId={gameId}
+                asyncSetCurrentGame={asyncSetCurrentGame}
+                chooseGameHandler={chooseGameHandler}
+                navigation={navigation}
+                index={index}
+            >
+                {/* <ListItem key={gameId} bottomDivider onPress={chooseGameHandler}> */}
+                <ListItem key={gameId} bottomDivider>
                     <ListItem.Content>
                         <ListItem.Title style={{ alignItems: 'center' }}>
                             {gameTitle}
@@ -203,7 +89,7 @@ const GameListItem: React.FunctionComponent<Props> = ({ navigation, gameId, inde
                     </Text>
                     <ListItem.Chevron />
                 </ListItem>
-            </MenuView>
+            </AbstractPopupMenu>
         </Animated.View>
     );
 };

@@ -4,10 +4,11 @@ import analytics from '@react-native-firebase/analytics';
 import { StatusBar } from 'expo-status-bar';
 import { View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { MenuProvider } from 'react-native-popup-menu';
 import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
 
-import { store, persistor } from './redux/store';
+import { persistor, store } from './redux/store';
 import { AddendModalContextProvider } from './src/components/Sheets/AddendModalContext';
 import { GameSheetContextProvider } from './src/components/Sheets/GameSheetContext';
 import { Navigation } from './src/Navigation';
@@ -21,14 +22,16 @@ export default function App() {
         <View style={{ flex: 1, backgroundColor: '#fff' }}>
             <GestureHandlerRootView style={{ flex: 1 }}>
                 <GameSheetContextProvider>
-                    <AddendModalContextProvider>
-                        <Provider store={store}>
-                            <PersistGate loading={null} persistor={persistor}>
-                                <StatusBar />
-                                <Navigation />
-                            </PersistGate>
-                        </Provider>
-                    </AddendModalContextProvider>
+                    <MenuProvider>
+                        <AddendModalContextProvider>
+                            <Provider store={store}>
+                                <PersistGate loading={null} persistor={persistor}>
+                                    <StatusBar />
+                                    <Navigation />
+                                </PersistGate>
+                            </Provider>
+                        </AddendModalContextProvider>
+                    </MenuProvider>
                 </GameSheetContextProvider>
             </GestureHandlerRootView>
         </View>
