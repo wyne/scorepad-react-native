@@ -2,7 +2,8 @@ import React, { useCallback, useMemo } from 'react';
 
 import { BottomSheetBackdrop, BottomSheetBackdropProps, BottomSheetModal } from '@gorhom/bottom-sheet';
 import { Picker } from '@react-native-picker/picker';
-import { View, StyleSheet, Text, Platform } from 'react-native';
+import { debounce } from 'lodash';
+import { Platform, StyleSheet, Text, View } from 'react-native';
 
 import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
 import { setAddendOne, setAddendTwo, setMultiplier } from '../../../redux/SettingsSlice';
@@ -16,23 +17,23 @@ const AddendModal: React.FunctionComponent<Props> = ({ }) => {
     const addendOne = useAppSelector(state => state.settings.addendOne);
     const addendTwo = useAppSelector(state => state.settings.addendTwo);
 
-    // Array of 1 to 50
+    // Array of 1 to 100
     const addendOptions = Array.from({ length: 100 }, (_, i) => i + 1);
 
     const dispatch = useAppDispatch();
 
     const isAndroid = useMemo(() => Platform.OS === 'android', []);
 
-    const onTapValueChange = useCallback((itemValue: number, itemIndex: number) => {
+    const onTapValueChange = useCallback(debounce((itemValue: number, itemIndex: number) => {
         dispatch(setMultiplier(addendOptions[itemIndex]));
         dispatch(setAddendOne(addendOptions[itemIndex]));
         // TODO: analytics
-    }, []);
+    }, 200), []);
 
-    const onLongTapValueChange = useCallback((itemValue: number) => {
+    const onLongTapValueChange = useCallback(debounce((itemValue: number) => {
         dispatch(setAddendTwo(itemValue));
         // TODO: analytics
-    }, []);
+    }, 200), []);
 
     // ref
     const addendModalRef = useAddendModalContext();
