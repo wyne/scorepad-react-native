@@ -4,7 +4,6 @@ import { MenuAction, MenuView, NativeActionEvent } from '@react-native-menu/menu
 import { Platform } from 'react-native';
 
 interface Props {
-    // Define your component's props here
     children: React.ReactNode;
     gameTitle: string | undefined;
     editGameHandler: () => void;
@@ -19,8 +18,6 @@ const IOSPopupMenu: React.FC<Props> = ({
     shareGameHandler,
     deleteGameHandler
 }) => {
-    // Implement your component logic here
-
     type MenuActionHandler = (NativeEvent: NativeActionEvent) => void;
 
     /**
@@ -76,7 +73,6 @@ const IOSPopupMenu: React.FC<Props> = ({
     };
 
     return (
-        // JSX markup goes here
         <MenuView
             title={gameTitle}
             shouldOpenOnLongPress={true}
