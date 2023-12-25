@@ -4,7 +4,7 @@ import analytics from '@react-native-firebase/analytics';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ParamListBase } from '@react-navigation/routers';
 import * as Application from 'expo-application';
-import { Text, View, StyleSheet, Alert, ScrollView, Linking , Platform, Switch } from 'react-native';
+import { Text, View, StyleSheet, Alert, ScrollView, Linking, Platform, Switch } from 'react-native';
 import { Button } from 'react-native-elements';
 
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
@@ -15,7 +15,7 @@ interface Props {
     navigation: NativeStackNavigationProp<ParamListBase, string, undefined>;
 }
 
-const Section = ({ children, title }: { children: React.ReactNode, title: string }) => (
+const Section = ({ children, title }: { children: React.ReactNode, title: string; }) => (
     <>
         <Text style={styles.sectionHeader}>{title}</Text>
         <View style={styles.section}>
@@ -23,12 +23,12 @@ const Section = ({ children, title }: { children: React.ReactNode, title: string
         </View>
     </>
 );
-const SectionItem = ({ children }: { children: React.ReactNode }) => (
+const SectionItem = ({ children }: { children: React.ReactNode; }) => (
     <View style={styles.sectionItem}>
         {children}
     </View>
 );
-const SectionItemText = ({ text }: { text: string }) => (
+const SectionItemText = ({ text }: { text: string; }) => (
     <Text style={styles.sectionItemText}>{text} </Text>
 );
 const SectionSeparator = () => (
@@ -83,8 +83,8 @@ const AppInfoScreen: React.FunctionComponent<Props> = ({ navigation }) => {
                 </SectionItem>
                 <SectionSeparator />
                 <SectionItem>
-                    <Button title="wyne.github.io/scorepad" type="clear" onPress={() => {
-                        Linking.openURL('https://wyne.github.io/scorepad');
+                    <Button title="www.scorepadapp.com" type="clear" onPress={() => {
+                        Linking.openURL('https://www.scorepadapp.com');
                     }} />
                 </SectionItem>
             </Section>
