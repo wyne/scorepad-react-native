@@ -5,7 +5,7 @@ import { ParamListBase } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AnyAction, ThunkDispatch } from '@reduxjs/toolkit';
 import Moment from 'react-moment';
-import { StyleSheet, Text } from 'react-native';
+import { Platform, StyleSheet, Text } from 'react-native';
 import { Icon, ListItem } from 'react-native-elements';
 import Animated, { FadeInUp, SlideOutLeft } from 'react-native-reanimated';
 
@@ -65,8 +65,10 @@ const GameListItem: React.FunctionComponent<Props> = ({ navigation, gameId, inde
                 navigation={navigation}
                 index={index}
             >
-                {/* <ListItem key={gameId} bottomDivider onPress={chooseGameHandler}> */}
-                <ListItem key={gameId} bottomDivider>
+                <ListItem key={gameId} bottomDivider onPress={
+                    // Only select game if iOS because Android is handled by PopupMenu
+                    Platform.OS == 'ios' ? chooseGameHandler : undefined
+                }>
                     <ListItem.Content>
                         <ListItem.Title style={{ alignItems: 'center' }}>
                             {gameTitle}

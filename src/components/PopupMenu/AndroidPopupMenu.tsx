@@ -20,9 +20,7 @@ interface Props {
 
 const AndroidPopupMenu: React.FC<Props> = (props) => {
     return (
-        <Menu
-            renderer={renderers.Popover}
-        >
+        <Menu renderer={renderers.Popover} rendererProps={{ preferredPlacement: 'bottom' }}>
             <MenuTrigger
                 triggerOnLongPress={true}
                 onAlternativeAction={props.chooseGameHandler}
