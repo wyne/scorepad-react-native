@@ -42,7 +42,7 @@ switch (variant) {
 export default {
   name: name,
   slug: 'scorepad',
-  version: "2.4.5",
+  version: "2.4.6",
   orientation: "default",
   icon: icon,
   assetBundlePatterns: [
@@ -53,7 +53,7 @@ export default {
     bundleIdentifier: packageName,
     supportsTablet: true,
     requireFullScreen: false,
-    buildNumber: "66",
+    buildNumber: "67",
     infoPlist: {
       RCTAsyncStorageExcludeFromBackup: false
     },
@@ -67,7 +67,7 @@ export default {
     },
     package: packageName,
     permissions: [],
-    versionCode: 66,
+    versionCode: 67,
     googleServicesFile: "./google-services.json",
   },
   userInterfaceStyle: "dark",
