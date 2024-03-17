@@ -3,12 +3,11 @@ import React from 'react';
 import { DimensionValue, StyleSheet } from 'react-native';
 import Animated, { Easing, FadeIn } from 'react-native-reanimated';
 
-import { selectGameById } from '../../redux/GamesSlice';
-import { useAppSelector } from '../../redux/hooks';
-
-import HalfTap from './Interactions/HalfTap/HalfTap';
-import Slide from './Interactions/Slide/Slide';
-import AdditionTile from './PlayerTiles/AdditionTile/AdditionTile';
+import { selectGameById } from '../../../redux/GamesSlice';
+import { useAppSelector } from '../../../redux/hooks';
+import HalfTap from '../Interactions/HalfTap/HalfTap';
+import Slide from '../Interactions/Slide/Slide';
+import AdditionTile from '../PlayerTiles/AdditionTile/AdditionTile';
 
 interface Props {
     index: number;
@@ -21,7 +20,7 @@ interface Props {
     height: number;
 }
 
-const PlayerTile: React.FunctionComponent<Props> = ({
+const FlexboxTile: React.FunctionComponent<Props> = ({
     index,
     color,
     fontColor,
@@ -99,4 +98,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default PlayerTile;
+export default FlexboxTile;

@@ -6,8 +6,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { selectGameById } from '../../../redux/GamesSlice';
 import { useAppSelector } from '../../../redux/hooks';
-import PlayerTile from '../../components/PlayerTile';
 import { bottomSheetHeight } from '../../components/Sheets/GameSheet';
+
+import FlexboxTile from './FlexboxTile';
 
 interface FlexboxBoardProps {
     // define your props here
@@ -98,7 +99,7 @@ const FlexboxBoard: React.FC<FlexboxBoardProps> = () => {
         } onLayout={layoutHandler} >
             {playerIds.map((id, index) => (
                 width != null && height != null && rows != 0 && cols != 0 &&
-                <PlayerTile
+                <FlexboxTile
                     key={id}
                     playerId={id}
                     color={'#' + palette[index % palette.length]}
