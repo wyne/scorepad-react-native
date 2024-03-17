@@ -5,7 +5,7 @@ import { selectGameById } from '../../../../redux/GamesSlice';
 import { useAppSelector } from '../../../../redux/hooks';
 import { selectPlayerById } from '../../../../redux/PlayersSlice';
 
-import { TouchSurface } from './TouchSurface';
+import { HalfTileTouchSurface } from './HalfTileTouchSurface';
 
 interface HalfTapProps {
     children: React.ReactNode;
@@ -31,13 +31,13 @@ const HalfTap: React.FC<HalfTapProps> = ({
         <>
             {children}
 
-            <TouchSurface
+            <HalfTileTouchSurface
                 scoreType='increment'
                 fontColor={fontColor}
                 playerId={playerId}
                 playerIndex={index} />
 
-            <TouchSurface
+            <HalfTileTouchSurface
                 scoreType='decrement'
                 fontColor={fontColor}
                 playerId={playerId}

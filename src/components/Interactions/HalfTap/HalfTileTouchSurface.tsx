@@ -21,7 +21,7 @@ type Props = {
     scoreType: 'increment' | 'decrement';
 };
 
-export const TouchSurface: React.FunctionComponent<Props> = (
+export const HalfTileTouchSurface: React.FunctionComponent<Props> = (
     { playerIndex, fontColor, playerId, scoreType }: Props) => {
 
     const showPointParticles = useAppSelector(state => state.settings.showPointParticles);
