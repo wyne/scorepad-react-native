@@ -1,14 +1,14 @@
 import React from 'react';
 
-import { StyleSheet, DimensionValue } from 'react-native';
+import { DimensionValue, StyleSheet } from 'react-native';
 import Animated, { Easing, FadeIn } from 'react-native-reanimated';
 
 import { selectGameById } from '../../redux/GamesSlice';
 import { useAppSelector } from '../../redux/hooks';
 import { selectPlayerById } from '../../redux/PlayersSlice';
 
+import HalfTap from './Interactions/HalfTap';
 import AdditionTile from './PlayerTiles/AdditionTile/AdditionTile';
-import { TouchSurface } from './PlayerTiles/AdditionTile/TouchSurface';
 
 
 interface Props {
@@ -69,26 +69,17 @@ const PlayerTile: React.FunctionComponent<Props> = ({
                     width: widthPerc,
                     height: heightPerc
                 }]}>
-            <AdditionTile
-                totalScore={scoreTotal}
-                roundScore={scoreRound}
-                fontColor={fontColor}
-                playerName={playerName}
-                maxWidth={width}
-                maxHeight={height}
-                index={index} />
 
-            <TouchSurface
-                scoreType='increment'
-                fontColor={fontColor}
-                playerId={playerId}
-                playerIndex={index} />
-
-            <TouchSurface
-                scoreType='decrement'
-                fontColor={fontColor}
-                playerId={playerId}
-                playerIndex={index} />
+            <HalfTap index={index} fontColor={fontColor} playerId={playerId}>
+                <AdditionTile
+                    totalScore={scoreTotal}
+                    roundScore={scoreRound}
+                    fontColor={fontColor}
+                    playerName={playerName}
+                    maxWidth={width}
+                    maxHeight={height}
+                    index={index} />
+            </HalfTap>
         </Animated.View>
     );
 };
