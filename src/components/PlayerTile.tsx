@@ -34,6 +34,7 @@ const PlayerTile: React.FunctionComponent<Props> = ({
 }) => {
     // Short circuit if width or height is not yet defined
     if (!(width > 0 && height > 0)) return null;
+    if (Number.isNaN(width) || Number.isNaN(height)) return null;
 
     const currentGameId = useAppSelector(state => state.settings.currentGameId);
     const currentGame = useAppSelector(state => selectGameById(state, currentGameId));
@@ -55,38 +56,15 @@ const PlayerTile: React.FunctionComponent<Props> = ({
     const widthPerc: DimensionValue = `${(100 / cols)}%`;
     const heightPerc: DimensionValue = `${(100 / rows)}%`;
 
-    if (Number.isNaN(width) || Number.isNaN(height)) return null;
-
+    // Dynamic InteractionComponent
     const interaction = 'slide' as 'slide' | 'tap';
 
-    const Tile = <AdditionTile
-        totalScore={scoreTotal}
-        roundScore={scoreRound}
-        fontColor={fontColor}
-        playerName={playerName}
-        maxWidth={width}
-        maxHeight={height}
-        index={index}
-    />;
-
-    const renderIntractionComponent = () => {
-        switch (interaction) {
-            case 'slide':
-                return (
-                    <Slide index={index} playerId={playerId}>
-                        {Tile}
-                    </Slide>
-                );
-            case 'tap':
-                return (
-                    <HalfTap index={index} fontColor={fontColor} playerId={playerId}>
-                        {Tile}
-                    </HalfTap>
-                );
-            default:
-                return null;
-        }
+    const interactionComponents = {
+        slide: Slide,
+        tap: HalfTap,
     };
+
+    const InteractionComponent = interactionComponents[interaction];
 
     return (
         <Animated.View
@@ -94,19 +72,29 @@ const PlayerTile: React.FunctionComponent<Props> = ({
             style={[
                 styles.playerCard,
                 {
-                    borderRadius: 20,
-                    borderWidth: 3,
                     backgroundColor: color,
                     width: widthPerc,
                     height: heightPerc
                 }]}>
-            {renderIntractionComponent()}
+            <InteractionComponent index={index} fontColor={fontColor} playerId={playerId}>
+                <AdditionTile
+                    totalScore={scoreTotal}
+                    roundScore={scoreRound}
+                    fontColor={fontColor}
+                    playerName={playerName}
+                    maxWidth={width}
+                    maxHeight={height}
+                    index={index}
+                />
+            </InteractionComponent>
         </Animated.View>
     );
 };
 
 const styles = StyleSheet.create({
     playerCard: {
+        borderRadius: 20,
+        borderWidth: 3,
         flexGrow: 1,
         justifyContent: 'center',
         alignItems: 'center',

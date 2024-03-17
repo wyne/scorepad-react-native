@@ -10,9 +10,10 @@ import { useAppDispatch, useAppSelector } from '../../../../redux/hooks';
 import { playerRoundScoreIncrement } from '../../../../redux/PlayersSlice';
 
 interface HalfTapProps {
+    children: React.ReactNode;
+    fontColor: string;
     index: number;
     playerId: string;
-    children: React.ReactNode;
 }
 
 const Slide: React.FC<HalfTapProps> = ({
@@ -28,7 +29,6 @@ const Slide: React.FC<HalfTapProps> = ({
     const dispatch = useAppDispatch();
 
     // Hold for addendTwo
-
     const addendOne = useAppSelector(state => state.settings.addendOne);
     const addendTwo = useAppSelector(state => state.settings.addendTwo);
 
@@ -64,7 +64,11 @@ const Slide: React.FC<HalfTapProps> = ({
 
         const a = value * (maxHoldReached ? addendTwo : addendOne);
 
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+        if (maxHoldReached) {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+        } else {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        }
 
         analytics().logEvent('score_change', {
             player_index: index,
@@ -113,7 +117,7 @@ const Slide: React.FC<HalfTapProps> = ({
                 timer = setTimeout(() => {
                     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
                     setMaxHoldReached(true);
-                }, maxHoldTime * .9);
+                }, maxHoldTime * .8);
             },
             onPanResponderMove: (e, gestureState) => {
                 // Invert the value for panning up to be positive
@@ -208,8 +212,8 @@ const styles = StyleSheet.create({
         backgroundColor: 'rgba(255,255,255,0.25)'
     },
     sliderGlow: {
-        shadowColor: "#fff",
+        shadowColor: '#fff',
         shadowOffset: { width: 0, height: 0 },
-        shadowRadius: 10,
+        shadowRadius: 2,
     },
 });
