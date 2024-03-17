@@ -215,5 +215,6 @@ const styles = StyleSheet.create({
         shadowColor: '#fff',
         shadowOffset: { width: 0, height: 0 },
         shadowRadius: 2,
+        backgroundColor: 'transparent',
     },
 });
