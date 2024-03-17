@@ -5,7 +5,6 @@ import Animated, { Easing, FadeIn } from 'react-native-reanimated';
 
 import { selectGameById } from '../../redux/GamesSlice';
 import { useAppSelector } from '../../redux/hooks';
-import { selectPlayerById } from '../../redux/PlayersSlice';
 
 import HalfTap from './Interactions/HalfTap/HalfTap';
 import Slide from './Interactions/Slide/Slide';
@@ -40,19 +39,6 @@ const PlayerTile: React.FunctionComponent<Props> = ({
     const currentGame = useAppSelector(state => selectGameById(state, currentGameId));
     if (typeof currentGame == 'undefined') return null;
 
-    const roundCurrent = currentGame.roundCurrent;
-
-    const player = useAppSelector(state => selectPlayerById(state, playerId));
-    if (typeof player == 'undefined') return null;
-    const playerName = player.playerName;
-    const scoreTotal = player.scores.reduce(
-        (sum, current, round) => {
-            if (round > roundCurrent) { return sum; }
-            return (sum || 0) + (current || 0);
-        }
-    );
-    const scoreRound = player.scores[roundCurrent] || 0;
-
     const widthPerc: DimensionValue = `${(100 / cols)}%`;
     const heightPerc: DimensionValue = `${(100 / rows)}%`;
 
@@ -78,10 +64,8 @@ const PlayerTile: React.FunctionComponent<Props> = ({
                 }]}>
             <InteractionComponent index={index} fontColor={fontColor} playerId={playerId}>
                 <AdditionTile
-                    totalScore={scoreTotal}
-                    roundScore={scoreRound}
+                    playerId={playerId}
                     fontColor={fontColor}
-                    playerName={playerName}
                     maxWidth={width}
                     maxHeight={height}
                     index={index}
