@@ -8,8 +8,8 @@ import { useAppSelector } from '../../redux/hooks';
 import { selectPlayerById } from '../../redux/PlayersSlice';
 
 import HalfTap from './Interactions/HalfTap/HalfTap';
+import Slide from './Interactions/Slide/Slide';
 import AdditionTile from './PlayerTiles/AdditionTile/AdditionTile';
-
 
 interface Props {
     index: number;
@@ -57,6 +57,8 @@ const PlayerTile: React.FunctionComponent<Props> = ({
 
     if (Number.isNaN(width) || Number.isNaN(height)) return null;
 
+    const interaction = 'slide' as 'slide' | 'tap';
+
     return (
         <Animated.View
             entering={FadeIn.delay(100 * index + 200).duration(400).easing(Easing.ease)}
@@ -70,16 +72,34 @@ const PlayerTile: React.FunctionComponent<Props> = ({
                     height: heightPerc
                 }]}>
 
-            <HalfTap index={index} fontColor={fontColor} playerId={playerId}>
-                <AdditionTile
-                    totalScore={scoreTotal}
-                    roundScore={scoreRound}
-                    fontColor={fontColor}
-                    playerName={playerName}
-                    maxWidth={width}
-                    maxHeight={height}
-                    index={index} />
-            </HalfTap>
+            {interaction === 'slide' &&
+                <Slide
+                    index={index}
+                    playerId={playerId}
+                >
+                    <AdditionTile
+                        totalScore={scoreTotal}
+                        roundScore={scoreRound}
+                        fontColor={fontColor}
+                        playerName={playerName}
+                        maxWidth={width}
+                        maxHeight={height}
+                        index={index} />
+                </Slide>
+            }
+
+            {interaction === 'tap' &&
+                <HalfTap index={index} fontColor={fontColor} playerId={playerId}>
+                    <AdditionTile
+                        totalScore={scoreTotal}
+                        roundScore={scoreRound}
+                        fontColor={fontColor}
+                        playerName={playerName}
+                        maxWidth={width}
+                        maxHeight={height}
+                        index={index} />
+                </HalfTap>
+            }
         </Animated.View>
     );
 };
