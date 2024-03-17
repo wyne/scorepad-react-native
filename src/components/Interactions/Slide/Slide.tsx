@@ -2,7 +2,7 @@ import React, { useRef } from 'react';
 
 import analytics from '@react-native-firebase/analytics';
 import * as Haptics from 'expo-haptics';
-import { Animated, PanResponder, StyleSheet, Text, View } from 'react-native';
+import { Animated, PanResponder, StyleSheet, View } from 'react-native';
 import { runOnJS, useAnimatedReaction, useSharedValue } from 'react-native-reanimated';
 
 import { selectGameById } from '../../../../redux/GamesSlice';
@@ -33,12 +33,19 @@ const Slide: React.FC<HalfTapProps> = ({
 
     const dispatch = useAppDispatch();
 
+    const holdTime = useRef(new Animated.Value(0)).current;
+
+    const scale = holdTime.interpolate({
+        inputRange: [0, 600, 800],
+        outputRange: [1, 1.1, 1.05],
+        extrapolate: 'clamp',
+    });
+
+
     const scoreChangeHandler = (value: number) => {
-        if (currentGame.locked) return;
-
-        const addend = value > 0 ? addendOne : -addendOne;
-
         if (Math.abs(value) == 0) return;
+
+        const addend = value * addendOne;
 
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
@@ -73,7 +80,14 @@ const Slide: React.FC<HalfTapProps> = ({
         PanResponder.create({
             onPanResponderStart: () => {
                 totalOffset.value = null;
+
+                Animated.timing(holdTime, {
+                    toValue: 800,
+                    duration: 800,
+                    useNativeDriver: false,
+                }).start();
             },
+            onStartShouldSetPanResponder: () => true,
             onMoveShouldSetPanResponder: () => true,
             onPanResponderMove: (e, gestureState) => {
                 totalOffset.value = -gestureState.dy;
@@ -82,28 +96,46 @@ const Slide: React.FC<HalfTapProps> = ({
                     [null, { dy: pan.y }],
                     { useNativeDriver: false }
                 )(e, gestureState);
+
+                Animated.timing(holdTime, {
+                    toValue: 0,
+                    duration: 100,
+                    useNativeDriver: false,
+                }).start();
             },
-            onPanResponderRelease: (e, gestureState) => {
+            onPanResponderRelease: () => {
                 Animated.spring(pan, {
                     toValue: { x: 0, y: 0 },
                     bounciness: 0,
                     useNativeDriver: false
                 }).start();
                 totalOffset.value = null;
+
+                Animated.timing(holdTime, {
+                    toValue: 0,
+                    duration: 200,
+                    useNativeDriver: false,
+                }).start();
             },
-        }),
+        })
     ).current;
 
     return (
         <>
-            {children}
+            <Animated.View style={{ transform: [{ scale: scale }] }}>
+
+                {children}
+            </Animated.View>
             <Animated.View
                 style={[
                     StyleSheet.absoluteFillObject,
                     {
-                        transform: [{ translateX: pan.x }, { translateY: pan.y }],
+                        transform: [
+                            { translateX: pan.x },
+                            { translateY: pan.y },
+                        ],
                     }]}
-                {...panResponder.panHandlers}>
+                {...(currentGame.locked ? {} : panResponder.panHandlers)}>
                 <View style={{ height: 900, width: '100%', backgroundColor: 'rgba(0,0,0,.25)', top: -900, left: 0, position: 'absolute' }}></View>
                 <View style={{ height: 900, width: '100%', backgroundColor: 'rgba(255,255,255,.25)', top: '100%', left: 0, position: 'absolute' }}></View>
             </Animated.View>
