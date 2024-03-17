@@ -7,7 +7,7 @@ import { selectGameById } from '../../redux/GamesSlice';
 import { useAppSelector } from '../../redux/hooks';
 import { selectPlayerById } from '../../redux/PlayersSlice';
 
-import HalfTap from './Interactions/HalfTap';
+import HalfTap from './Interactions/HalfTap/HalfTap';
 import AdditionTile from './PlayerTiles/AdditionTile/AdditionTile';
 
 

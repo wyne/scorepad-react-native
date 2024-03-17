@@ -1,10 +1,11 @@
 import React from 'react';
 
 
-import { selectGameById } from '../../../redux/GamesSlice';
-import { useAppSelector } from '../../../redux/hooks';
-import { selectPlayerById } from '../../../redux/PlayersSlice';
-import { TouchSurface } from '../PlayerTiles/AdditionTile/TouchSurface';
+import { selectGameById } from '../../../../redux/GamesSlice';
+import { useAppSelector } from '../../../../redux/hooks';
+import { selectPlayerById } from '../../../../redux/PlayersSlice';
+
+import { TouchSurface } from './TouchSurface';
 
 interface HalfTapProps {
     children: React.ReactNode;
