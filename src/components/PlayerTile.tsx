@@ -59,6 +59,35 @@ const PlayerTile: React.FunctionComponent<Props> = ({
 
     const interaction = 'slide' as 'slide' | 'tap';
 
+    const Tile = <AdditionTile
+        totalScore={scoreTotal}
+        roundScore={scoreRound}
+        fontColor={fontColor}
+        playerName={playerName}
+        maxWidth={width}
+        maxHeight={height}
+        index={index}
+    />;
+
+    const renderIntractionComponent = () => {
+        switch (interaction) {
+            case 'slide':
+                return (
+                    <Slide index={index} playerId={playerId}>
+                        {Tile}
+                    </Slide>
+                );
+            case 'tap':
+                return (
+                    <HalfTap index={index} fontColor={fontColor} playerId={playerId}>
+                        {Tile}
+                    </HalfTap>
+                );
+            default:
+                return null;
+        }
+    };
+
     return (
         <Animated.View
             entering={FadeIn.delay(100 * index + 200).duration(400).easing(Easing.ease)}
@@ -71,35 +100,7 @@ const PlayerTile: React.FunctionComponent<Props> = ({
                     width: widthPerc,
                     height: heightPerc
                 }]}>
-
-            {interaction === 'slide' &&
-                <Slide
-                    index={index}
-                    playerId={playerId}
-                >
-                    <AdditionTile
-                        totalScore={scoreTotal}
-                        roundScore={scoreRound}
-                        fontColor={fontColor}
-                        playerName={playerName}
-                        maxWidth={width}
-                        maxHeight={height}
-                        index={index} />
-                </Slide>
-            }
-
-            {interaction === 'tap' &&
-                <HalfTap index={index} fontColor={fontColor} playerId={playerId}>
-                    <AdditionTile
-                        totalScore={scoreTotal}
-                        roundScore={scoreRound}
-                        fontColor={fontColor}
-                        playerName={playerName}
-                        maxWidth={width}
-                        maxHeight={height}
-                        index={index} />
-                </HalfTap>
-            }
+            {renderIntractionComponent()}
         </Animated.View>
     );
 };

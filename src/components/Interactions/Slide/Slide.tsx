@@ -8,7 +8,6 @@ import { runOnJS, useAnimatedReaction, useSharedValue } from 'react-native-reani
 import { selectGameById } from '../../../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../../../redux/hooks';
 import { playerRoundScoreIncrement } from '../../../../redux/PlayersSlice';
-import { max } from 'lodash';
 
 interface HalfTapProps {
     index: number;
