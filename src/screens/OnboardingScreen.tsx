@@ -14,7 +14,7 @@ import { ExpandingDot } from "react-native-animated-pagination-dots";
 import { Button } from 'react-native-elements';
 import Animated, { FadeIn } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { parse } from 'semver';
+import { parse, SemVer } from 'semver';
 
 import { useAppSelector } from '../../redux/hooks';
 import { getOnboardingScreens, OnboardingScreenItem } from '../components/Onboarding/Onboarding';
@@ -39,7 +39,8 @@ const OnboardingScreen: React.FunctionComponent<Props> = ({ navigation, route })
     const onboardedStr = useAppSelector(state => state.settings.onboarded);
     const onboardedSemVer = parse(onboardedStr);
 
-    const onboardingScreens: OnboardingScreenItem[] = getOnboardingScreens(onboardedSemVer);
+    console.log(onboardedSemVer);
+    const onboardingScreens: OnboardingScreenItem[] = getOnboardingScreens(onboarding ? onboardedSemVer || new SemVer('0.0.0') : new SemVer('0.0.0'));
 
     const scrollX = React.useRef(new RNAnimated.Value(0)).current;
     const keyExtractor = React.useCallback((_: OnboardingScreenItem, index: number) => index.toString(), []);
