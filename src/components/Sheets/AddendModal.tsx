@@ -7,6 +7,7 @@ import { Platform, StyleSheet, Text, View } from 'react-native';
 import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
 import { setAddendOne, setAddendTwo, setMultiplier } from '../../../redux/SettingsSlice';
 import InteractionSelector from '../Interactions/InteractionSelector';
+import { InteractionType } from '../Interactions/InteractionType';
 
 import { useAddendModalContext } from './AddendModalContext';
 
@@ -16,6 +17,7 @@ interface Props {
 const AddendModal: React.FunctionComponent<Props> = ({ }) => {
     const addendOne = useAppSelector(state => state.settings.addendOne);
     const addendTwo = useAppSelector(state => state.settings.addendTwo);
+    const interactionType = useAppSelector(state => state.settings.interactionType);
 
     // Array of 1 to 100
     const addendOptions = Array.from({ length: 100 }, (_, i) => i + 1);
@@ -58,6 +60,24 @@ const AddendModal: React.FunctionComponent<Props> = ({ }) => {
         []
     );
 
+    const addendOneLabel = (() => {
+        switch (interactionType) {
+            case InteractionType.HalfTap:
+                return 'Single Tap';
+            case InteractionType.SlideVertical:
+                return 'Slide';
+        }
+    })();
+
+    const addendTwoLabel = (() => {
+        switch (interactionType) {
+            case InteractionType.HalfTap:
+                return 'Long Press';
+            case InteractionType.SlideVertical:
+                return 'Hold + Slide';
+        }
+    })();
+
     return (
         <BottomSheetModal
             ref={addendModalRef}
@@ -81,7 +101,7 @@ const AddendModal: React.FunctionComponent<Props> = ({ }) => {
                     padding: 10,
                 }}>
                     <View>
-                        <Text style={{ color: 'white', textAlign: 'center' }}>Single Tap</Text>
+                        <Text style={{ color: 'white', textAlign: 'center' }}>{addendOneLabel}</Text>
                         <View style={isAndroid ? styles.pickerContainerAndroid : styles.pickerContainer}>
                             <Picker
                                 selectedValue={addendOne}
@@ -99,7 +119,7 @@ const AddendModal: React.FunctionComponent<Props> = ({ }) => {
                     </View>
 
                     <View>
-                        <Text style={{ color: 'white', textAlign: 'center' }}>Long Press</Text>
+                        <Text style={{ color: 'white', textAlign: 'center' }}>{addendTwoLabel}</Text>
                         <View style={isAndroid ? styles.pickerContainerAndroid : styles.pickerContainer}>
                             <Picker
                                 selectedValue={addendTwo}

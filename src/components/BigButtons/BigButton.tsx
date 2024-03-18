@@ -6,7 +6,7 @@ import Animated, { FadeIn, FadeOut, Layout } from "react-native-reanimated";
 
 interface Props {
     onPress: () => void;
-    icon: string;
+    icon: string | JSX.Element;
     text: string;
     color: string;
 }
@@ -16,10 +16,12 @@ const BigButton: React.FunctionComponent<Props> = ({ icon, text, color, onPress 
         <Animated.View layout={Layout.duration(400)} entering={FadeIn.delay(400)} exiting={FadeOut}>
             <TouchableOpacity activeOpacity={.5} onPress={onPress}>
                 <View style={[styles.bigButton]}>
-                    <Icon name={icon}
+                    {typeof icon === 'string' ? (<Icon name={icon}
                         type="ionicon" size={30}
                         color={color}
-                    />
+                    />) : (
+                        icon
+                    )}
                     <Text style={{
                         color: color,
                         fontSize: 15,
