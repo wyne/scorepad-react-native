@@ -1,11 +1,12 @@
 import React, { useCallback, useMemo } from 'react';
 
-import { BottomSheetBackdrop, BottomSheetBackdropProps, BottomSheetModal } from '@gorhom/bottom-sheet';
+import { BottomSheetBackdrop, BottomSheetBackdropProps, BottomSheetModal, BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { Picker } from '@react-native-picker/picker';
 import { Platform, StyleSheet, Text, View } from 'react-native';
 
 import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
 import { setAddendOne, setAddendTwo, setMultiplier } from '../../../redux/SettingsSlice';
+import InteractionSelector from '../Interactions/InteractionSelector';
 
 import { useAddendModalContext } from './AddendModalContext';
 
@@ -38,7 +39,7 @@ const AddendModal: React.FunctionComponent<Props> = ({ }) => {
     const addendModalRef = useAddendModalContext();
 
     // variables
-    const snapPoints = useMemo(() => [1, 360], []);
+    const snapPoints = useMemo(() => [1, '85%'], []);
 
     const handleSheetChanges = useCallback((index: number) => {
         if (index === 0) {
@@ -68,7 +69,9 @@ const AddendModal: React.FunctionComponent<Props> = ({ }) => {
             backgroundStyle={{ backgroundColor: 'rgb(30,40,50)' }}
             handleIndicatorStyle={{ backgroundColor: 'white' }}
         >
-            <View style={styles.modalContainer}>
+            <BottomSheetScrollView style={styles.modalContainer} contentContainerStyle={{ alignItems: 'center' }}>
+                <InteractionSelector />
+
                 <Text style={{ color: 'white', fontSize: 20 }}>Point Values</Text>
 
                 <View style={{
@@ -114,7 +117,7 @@ const AddendModal: React.FunctionComponent<Props> = ({ }) => {
                     </View>
                 </View>
 
-            </View>
+            </BottomSheetScrollView>
         </BottomSheetModal>
     );
 };
@@ -122,7 +125,6 @@ const AddendModal: React.FunctionComponent<Props> = ({ }) => {
 const styles = StyleSheet.create({
     modalContainer: {
         flex: 1,
-        alignItems: 'center',
     },
     picker: {
         width: 90,
