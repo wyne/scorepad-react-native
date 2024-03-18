@@ -2,13 +2,21 @@ import React from 'react';
 
 import { Text, View } from 'react-native';
 
+import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
+import { setInteractionType } from '../../../redux/SettingsSlice';
 import BigButton from '../BigButtons/BigButton';
+
+import { InteractionType } from './InteractionType';
 
 interface InteractionSelectorProps {
     // define your props here
 }
 
-const InteractionSelector: React.FC<InteractionSelectorProps> = (props) => {
+const InteractionSelector: React.FunctionComponent<InteractionSelectorProps> = () => {
+    const dispatch = useAppDispatch();
+
+    const interactionType = useAppSelector(state => state.settings.interactionType);
+
     return (
         <>
             <Text style={{ color: 'white', fontSize: 20 }}>Gesture</Text>
@@ -19,21 +27,23 @@ const InteractionSelector: React.FC<InteractionSelectorProps> = (props) => {
                 padding: 10,
             }}>
                 <View>
-                    <Text style={{ color: 'white', textAlign: 'center' }}>Tap</Text>
                     <BigButton
-                        onPress={() => { }}
+                        onPress={() => {
+                            dispatch(setInteractionType(InteractionType.HalfTap));
+                        }}
                         text="Tap"
                         icon='add'
-                        color="green"
+                        color={interactionType == InteractionType.HalfTap ? "white" : "grey"}
                     />
                 </View>
                 <View>
-                    <Text style={{ color: 'white', textAlign: 'center' }}>Slide</Text>
                     <BigButton
-                        onPress={() => { }}
+                        onPress={() => {
+                            dispatch(setInteractionType(InteractionType.SlideVertical));
+                        }}
                         text="Slide"
                         icon='arrow-up'
-                        color="green"
+                        color={interactionType == InteractionType.SlideVertical ? "white" : "grey"}
                     />
                 </View>
             </View>

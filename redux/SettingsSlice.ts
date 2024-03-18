@@ -2,6 +2,8 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import * as Application from 'expo-application';
 import { SemVer, valid } from 'semver';
 
+import { InteractionType } from '../src/components/Interactions/InteractionType';
+
 export interface SettingsState {
     home_fullscreen: boolean;
     multiplier: number;
@@ -10,6 +12,7 @@ export interface SettingsState {
     currentGameId: string | undefined;
     onboarded: string | undefined;
     showPointParticles: boolean;
+    interactionType: InteractionType;
 };
 
 const initialState: SettingsState = {
@@ -20,6 +23,7 @@ const initialState: SettingsState = {
     currentGameId: undefined,
     onboarded: undefined,
     showPointParticles: true,
+    interactionType: InteractionType.HalfTap,
 };
 
 const settingsSlice = createSlice({
@@ -44,6 +48,9 @@ const settingsSlice = createSlice({
         setAddendTwo(state, action: PayloadAction<number>) {
             state.addendTwo = action.payload;
         },
+        setInteractionType(state, action: PayloadAction<InteractionType>) {
+            state.interactionType = action.payload;
+        },
         setOnboardedVersion(state) {
             const appVersion = new SemVer(Application.nativeApplicationVersion || '0.0.0');
             console.log(`Setting Onboarded Version: ${appVersion}`);
@@ -60,6 +67,7 @@ export const {
     setAddendTwo,
     setOnboardedVersion,
     toggleshowPointParticles,
+    setInteractionType,
 } = settingsSlice.actions;
 
 export default settingsSlice.reducer;

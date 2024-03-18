@@ -4,14 +4,17 @@ import { StyleSheet, Text, TouchableHighlight, View } from 'react-native';
 
 import { useAppSelector } from '../../../redux/hooks';
 import { systemBlue } from '../../constants';
+import { InteractionType } from '../Interactions/InteractionType';
 import { useAddendModalContext } from '../Sheets/AddendModalContext';
 import { useGameSheetContext } from '../Sheets/GameSheetContext';
 
+import SlideGestureIcon from './SlideGestureIcon';
 import TapGestureIcon from './TapGestureIcon';
 
 const AddendButton: React.FunctionComponent = ({ }) => {
     const addendOne = useAppSelector(state => state.settings.addendOne);
     const addendTwo = useAppSelector(state => state.settings.addendTwo);
+    const interactionType = useAppSelector(state => state.settings.interactionType);
 
     const adddendModalRef = useAddendModalContext();
     const gameSheetRef = useGameSheetContext();
@@ -25,11 +28,18 @@ const AddendButton: React.FunctionComponent = ({ }) => {
         adddendModalRef.current?.present();
     };
 
+    const gestureIcons: { [key: string]: React.FunctionComponent; } = {
+        [InteractionType.HalfTap]: TapGestureIcon,
+        [InteractionType.SlideVertical]: SlideGestureIcon,
+    };
+
+    const GestureIcon = gestureIcons[interactionType] || TapGestureIcon;
+
     return (
         <TouchableHighlight onPress={handlePress}>
             <View style={styles.button}>
                 <Text style={styles.buttonText}>{addendOne}, {addendTwo}</Text>
-                <TapGestureIcon />
+                <GestureIcon />
             </View>
         </TouchableHighlight>
     );
