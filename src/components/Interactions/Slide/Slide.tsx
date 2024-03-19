@@ -22,8 +22,72 @@ const Slide: React.FC<HalfTapProps> = ({
     index,
     playerId,
 }) => {
+    // Selector setup
+
+    const currentGameId = useAppSelector(state => state.settings.currentGameId);
+    const currentGame = useAppSelector(state => selectGameById(state, currentGameId));
+    if (typeof currentGame == 'undefined') return null;
+
+    const roundCurrent = currentGame.roundCurrent;
+    const dispatch = useAppDispatch();
+
+    const addendOne = useAppSelector(state => state.settings.addendOne);
+    const addendTwo = useAppSelector(state => state.settings.addendTwo);
+
+    // Power Hold
+
+    const powerHoldTime = 400;
+    const holdDuration = useRef(new Animated.Value(0)).current;
+    let powerHoldTimer: NodeJS.Timeout;
+    const [powerHold, setPowerHold] = useState<boolean>(false);
+    const powerHoldRef = useRef(powerHold);
+    useEffect(() => {
+        powerHoldRef.current = powerHold;
+    }, [powerHold]);
+
+    // Derivated Animation values
+
+    const scale = holdDuration.interpolate({
+        inputRange: [0, powerHoldTime * .9, powerHoldTime],
+        outputRange: [1, 1.1, 1.05],
+        extrapolate: 'clamp',
+    });
+
+    const glow = holdDuration.interpolate({
+        inputRange: [0, powerHoldTime],
+        outputRange: [0, 1],
+        extrapolate: 'clamp',
+    });
+
+    const powerHoldStart = () => {
+        Animated.timing(holdDuration, {
+            toValue: powerHoldTime,
+            duration: powerHoldTime,
+            useNativeDriver: false,
+        }).start();
+
+        powerHoldTimer = setTimeout(() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+            setPowerHold(true);
+        }, powerHoldTime * .8);
+    };
+
+    const powerHoldStop = () => {
+        Animated.timing(holdDuration, {
+            toValue: 0,
+            duration: 100,
+            useNativeDriver: false,
+        }).start();
+
+        setPowerHold(false);
+
+        clearTimeout(powerHoldTimer);
+    };
+
+    // Gesture handling
+
     const pan = useRef(new Animated.ValueXY()).current;
-    let timer: NodeJS.Timeout;
+    const totalOffset = useSharedValue<number | null>(0);
 
     const onGestureEvent = Animated.event(
         // Animate the slider to follow the touch
@@ -37,47 +101,24 @@ const Slide: React.FC<HalfTapProps> = ({
         {
             useNativeDriver: false,
             listener: (event: PanGestureHandlerStateChangeEvent) => {
+                // Handle the gesture movement
+
                 // Invert the value for panning up to be positive
                 totalOffset.value = -event.nativeEvent.translationY;
 
-                clearTimeout(timer);
-
-                if (maxHoldReachedRef.current == false) {
-                    Animated.timing(holdTime, {
-                        toValue: 0,
-                        duration: 100,
-                        useNativeDriver: false,
-                    }).start();
+                if (powerHoldRef.current == false) {
+                    powerHoldStop();
                 }
             },
         }
     );
 
     const onHandlerStateChange = (event: PanGestureHandlerStateChangeEvent) => {
-
-        console.log('change event', event.nativeEvent.oldState, event.nativeEvent.state);
-
         if (event.nativeEvent.oldState === State.UNDETERMINED && event.nativeEvent.state === State.BEGAN) {
-            console.log('start');
             // Handle the start of the gesture
-            // Reset the state of the gesture
-            totalOffset.value = null;
-
-            // Reset 
-            Animated.timing(holdTime, {
-                toValue: maxHoldTime,
-                duration: maxHoldTime,
-                useNativeDriver: false,
-            }).start();
-
-            timer = setTimeout(() => {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-                setMaxHoldReached(true);
-            }, maxHoldTime * .8);
+            powerHoldStart();
         } else if (event.nativeEvent.state == State.FAILED || event.nativeEvent.state === State.END) {
-
-            console.log("release");
-            // Reset the state of the gesture
+            // Handle the end of the gesture
             totalOffset.value = null;
 
             // Spring the animation back to the start
@@ -87,64 +128,19 @@ const Slide: React.FC<HalfTapProps> = ({
                 useNativeDriver: false
             }).start();
 
-            Animated.timing(holdTime, {
-                toValue: 0,
-                duration: 200,
-                useNativeDriver: false,
-            }).start();
-
-            clearTimeout(timer);
-
-            // Toggle to addendOne
-            setMaxHoldReached(false);
+            powerHoldStop();
         }
     };
 
 
-    const currentGameId = useAppSelector(state => state.settings.currentGameId);
-    const currentGame = useAppSelector(state => selectGameById(state, currentGameId));
-    if (typeof currentGame == 'undefined') return null;
-
-    const roundCurrent = currentGame.roundCurrent;
-    const dispatch = useAppDispatch();
-
-    // Hold for addendTwo
-    const addendOne = useAppSelector(state => state.settings.addendOne);
-    const addendTwo = useAppSelector(state => state.settings.addendTwo);
-
-    const [maxHoldReached, setMaxHoldReached] = useState<boolean>(false);
-
-    const maxHoldTime = 400;
-    const maxHoldReachedRef = useRef(maxHoldReached);
-
-    useEffect(() => {
-        maxHoldReachedRef.current = maxHoldReached;
-    }, [maxHoldReached]);
-
-    const holdTime = useRef(new Animated.Value(0)).current;
-
-    const scale = holdTime.interpolate({
-        inputRange: [0, maxHoldTime * .9, maxHoldTime],
-        outputRange: [1, 1.1, 1.05],
-        extrapolate: 'clamp',
-    });
-
-    const glow = holdTime.interpolate({
-        inputRange: [0, maxHoldTime],
-        outputRange: [0, 1],
-        extrapolate: 'clamp',
-    });
-
-    // Panning
-    // const pan = useRef(new Animated.ValueXY()).current;
-    const totalOffset = useSharedValue<number | null>(0);
+    // Helpers
 
     const scoreChangeHandler = (value: number) => {
         if (Math.abs(value) == 0) return;
 
-        const a = value * (maxHoldReached ? addendTwo : addendOne);
+        const a = value * (powerHold ? addendTwo : addendOne);
 
-        if (maxHoldReached) {
+        if (powerHold) {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
         } else {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -176,73 +172,6 @@ const Slide: React.FC<HalfTapProps> = ({
             }
         }
     );
-
-    // const panResponder = useRef(
-    //     PanResponder.create({
-    //         onShouldBlockNativeResponder: () => false,
-    //         onStartShouldSetPanResponderCapture: () => true,
-    //         onMoveShouldSetPanResponderCapture: () => true,
-    //         onStartShouldSetPanResponder: () => true,
-    //         onMoveShouldSetPanResponder: () => true,
-    //         onPanResponderStart: () => {
-    //             // Reset the state of the gesture
-    //             totalOffset.value = null;
-
-    //             // Reset 
-    //             Animated.timing(holdTime, {
-    //                 toValue: maxHoldTime,
-    //                 duration: maxHoldTime,
-    //                 useNativeDriver: false,
-    //             }).start();
-
-    //             timer = setTimeout(() => {
-    //                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-    //                 setMaxHoldReached(true);
-    //             }, maxHoldTime * .8);
-    //         },
-    //         onPanResponderMove: (e, gestureState) => {
-    //             // Invert the value for panning up to be positive
-    //             totalOffset.value = -gestureState.dy;
-
-    //             // Animate the slider to follow the touch
-    //             Animated.event(
-    //                 [null, { dy: pan.y }],
-    //                 { useNativeDriver: false }
-    //             )(e, gestureState);
-
-    //             clearTimeout(timer);
-
-    //             if (maxHoldReachedRef.current == false) {
-    //                 Animated.timing(holdTime, {
-    //                     toValue: 0,
-    //                     duration: 100,
-    //                     useNativeDriver: false,
-    //                 }).start();
-    //             }
-    //         },
-    //         onPanResponderRelease: () => {
-    //             // Reset the state of the gesture
-    //             totalOffset.value = null;
-
-    //             // Spring the animation back to the start
-    //             Animated.spring(pan, {
-    //                 toValue: { x: 0, y: 0 },
-    //                 bounciness: 0,
-    //                 useNativeDriver: false
-    //             }).start();
-
-    //             Animated.timing(holdTime, {
-    //                 toValue: 0,
-    //                 duration: 200,
-    //                 useNativeDriver: false,
-    //             }).start();
-
-    //             clearTimeout(timer);
-    //             // Toggle to addendOne
-    //             setMaxHoldReached(false);
-    //         },
-    //     })
-    // ).current;
 
     return (
         <>
