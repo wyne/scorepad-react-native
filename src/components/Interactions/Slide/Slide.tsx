@@ -57,11 +57,9 @@ const Slide: React.FC<HalfTapProps> = ({
         extrapolate: 'clamp',
     });
 
-    const glow = holdDuration.interpolate({
-        inputRange: [0, powerHoldTime],
-        outputRange: [0, 1],
-        extrapolate: 'clamp',
-    });
+    const wiggleValue = useRef(new Animated.Value(0)).current;
+    const animationRef = useRef<Animated.CompositeAnimation>(
+    );
 
     const powerHoldStart = () => {
         Animated.timing(holdDuration, {
@@ -73,6 +71,27 @@ const Slide: React.FC<HalfTapProps> = ({
         powerHoldTimer = setTimeout(() => {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
             setPowerHold(true);
+
+            animationRef.current = Animated.loop(
+                Animated.sequence([
+                    Animated.timing(wiggleValue, {
+                        toValue: -1,
+                        duration: 50,
+                        useNativeDriver: false,
+                    }),
+                    Animated.timing(wiggleValue, {
+                        toValue: 1,
+                        duration: 100,
+                        useNativeDriver: false,
+                    }),
+                    Animated.timing(wiggleValue, {
+                        toValue: 0,
+                        duration: 50,
+                        useNativeDriver: false,
+                    }),
+                ])
+            );
+            animationRef.current.start();
         }, powerHoldTime * .8);
     };
 
@@ -84,6 +103,15 @@ const Slide: React.FC<HalfTapProps> = ({
         }).start();
 
         setPowerHold(false);
+
+        animationRef.current?.stop();
+
+        // Reset the wiggle value
+        Animated.timing(wiggleValue, {
+            toValue: 0,
+            duration: 0, // Change this to control the speed of the reset
+            useNativeDriver: false,
+        }).start();
 
         clearTimeout(powerHoldTimer);
     };
@@ -188,10 +216,14 @@ const Slide: React.FC<HalfTapProps> = ({
                 {
                     transform: [{
                         scale: scale,
+                    },
+                    {
+                        rotate: wiggleValue.interpolate({
+                            inputRange: [-1, 1],
+                            outputRange: ['-1deg', '1deg'],
+                        }),
                     }],
-                    shadowOpacity: glow,
                 },
-                styles.sliderGlow
             ]}>
                 {children}
             </Animated.View>
@@ -233,12 +265,6 @@ const styles = StyleSheet.create({
     },
     sliderBottom: {
         top: '100%',
-        backgroundColor: 'rgba(255,255,255,0.25)'
-    },
-    sliderGlow: {
-        shadowColor: '#fff',
-        shadowOffset: { width: 0, height: 0 },
-        shadowRadius: 2,
-        backgroundColor: 'transparent',
+        backgroundColor: 'rgba(0,0,0,0.25)'
     },
 });
