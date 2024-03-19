@@ -47,10 +47,6 @@ const Slide: React.FC<HalfTapProps> = ({
         powerHoldRef.current = powerHold;
     }, [powerHold]);
 
-    //#endregion
-
-    //#region Derivated Animation values
-
     const scale = holdDuration.interpolate({
         inputRange: [0, powerHoldTime * .9, powerHoldTime],
         outputRange: [1, 1.1, 1.05],
@@ -261,10 +257,10 @@ const styles = StyleSheet.create({
     },
     sliderTop: {
         top: -1000,
-        backgroundColor: 'rgba(0,0,0,0.25)'
+        backgroundColor: 'rgba(0,0,0,0.15)',
     },
     sliderBottom: {
         top: '100%',
-        backgroundColor: 'rgba(0,0,0,0.25)'
+        backgroundColor: 'rgba(0,0,0,0.15)',
     },
 });
