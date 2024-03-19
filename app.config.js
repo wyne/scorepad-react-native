@@ -99,7 +99,11 @@ export default {
           "useFrameworks": "static"
         }
       }
-    ]
+    ],
+    "expo-av",
+    {
+      "microphonePermission": false
+    }
   ],
   hooks: {
   }
