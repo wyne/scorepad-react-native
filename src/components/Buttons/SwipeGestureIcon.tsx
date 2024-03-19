@@ -5,12 +5,12 @@ import Svg, { Polyline, Rect } from 'react-native-svg';
 
 import { systemBlue } from '../../constants';
 
-interface SlideGestureIconProps {
+interface SwipeGestureIconProps {
     color?: string;
     size?: number;
 }
 
-const SlideGestureIcon: React.FunctionComponent<SlideGestureIconProps> = ({
+const SwipeGestureIcon: React.FunctionComponent<SwipeGestureIconProps> = ({
     color = systemBlue,
     size = 20,
 }) => {
@@ -29,4 +29,4 @@ const SlideGestureIcon: React.FunctionComponent<SlideGestureIconProps> = ({
     );
 };
 
-export default SlideGestureIcon;
+export default SwipeGestureIcon;

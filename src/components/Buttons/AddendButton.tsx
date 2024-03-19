@@ -8,7 +8,7 @@ import { InteractionType } from '../Interactions/InteractionType';
 import { useAddendModalContext } from '../Sheets/AddendModalContext';
 import { useGameSheetContext } from '../Sheets/GameSheetContext';
 
-import SlideGestureIcon from './SlideGestureIcon';
+import SwipeGestureIcon from './SwipeGestureIcon';
 import TapGestureIcon from './TapGestureIcon';
 
 const AddendButton: React.FunctionComponent = ({ }) => {
@@ -30,7 +30,7 @@ const AddendButton: React.FunctionComponent = ({ }) => {
 
     const gestureIcons: { [key: string]: React.FunctionComponent; } = {
         [InteractionType.HalfTap]: TapGestureIcon,
-        [InteractionType.SlideVertical]: SlideGestureIcon,
+        [InteractionType.SwipeVertical]: SwipeGestureIcon,
     };
 
     const GestureIcon = gestureIcons[interactionType] || TapGestureIcon;

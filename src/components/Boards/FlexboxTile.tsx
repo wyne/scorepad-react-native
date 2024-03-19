@@ -5,6 +5,7 @@ import Animated, { Easing, FadeIn } from 'react-native-reanimated';
 
 import { selectGameById } from '../../../redux/GamesSlice';
 import { useAppSelector } from '../../../redux/hooks';
+import { selectInteractionType } from '../../../redux/selectors';
 import { interactionComponents } from '../Interactions/InteractionComponents';
 import { InteractionType } from '../Interactions/InteractionType';
 import AdditionTile from '../PlayerTiles/AdditionTile/AdditionTile';
@@ -42,8 +43,7 @@ const FlexboxTile: React.FunctionComponent<Props> = ({
     const heightPerc: DimensionValue = `${(100 / rows)}%`;
 
     // Dynamic InteractionComponent
-    const interactionType: InteractionType = useAppSelector(state => state.settings.interactionType);
-
+    const interactionType: InteractionType = useAppSelector(selectInteractionType);
     const InteractionComponent = interactionComponents[interactionType];
 
     return (

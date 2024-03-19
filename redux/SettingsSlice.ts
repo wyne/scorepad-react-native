@@ -23,7 +23,7 @@ const initialState: SettingsState = {
     currentGameId: undefined,
     onboarded: undefined,
     showPointParticles: true,
-    interactionType: InteractionType.SlideVertical,
+    interactionType: InteractionType.SwipeVertical,
 };
 
 const settingsSlice = createSlice({

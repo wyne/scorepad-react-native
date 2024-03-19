@@ -1,8 +1,8 @@
 import HalfTap from "./HalfTap/HalfTap";
 import { InteractionType } from "./InteractionType";
-import Slide from "./Slide/Slide";
+import Swipe from "./Swipe/Swipe";
 
 export const interactionComponents = {
     [InteractionType.HalfTap]: HalfTap,
-    [InteractionType.SlideVertical]: Slide,
+    [InteractionType.SwipeVertical]: Swipe,
 };

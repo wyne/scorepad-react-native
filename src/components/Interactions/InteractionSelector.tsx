@@ -5,7 +5,7 @@ import { Text, View } from 'react-native';
 import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
 import { setInteractionType } from '../../../redux/SettingsSlice';
 import BigButton from '../BigButtons/BigButton';
-import SlideGestureIcon from '../Buttons/SlideGestureIcon';
+import SwipeGestureIcon from '../Buttons/SwipeGestureIcon';
 import TapGestureIcon from '../Buttons/TapGestureIcon';
 
 import { InteractionType } from './InteractionType';
@@ -23,8 +23,8 @@ const InteractionSelector: React.FunctionComponent<InteractionSelectorProps> = (
         switch (interactionType) {
             case InteractionType.HalfTap:
                 return "Tap the top or bottom of each player's tile.";
-            case InteractionType.SlideVertical:
-                return "Slide the player's tile up or down.";
+            case InteractionType.SwipeVertical:
+                return "Swipe up or down on the player's tile.";
         }
     })();
 
@@ -50,11 +50,11 @@ const InteractionSelector: React.FunctionComponent<InteractionSelectorProps> = (
                 <View>
                     <BigButton
                         onPress={() => {
-                            dispatch(setInteractionType(InteractionType.SlideVertical));
+                            dispatch(setInteractionType(InteractionType.SwipeVertical));
                         }}
-                        text="Slide"
-                        icon={<SlideGestureIcon color={interactionType === InteractionType.SlideVertical ? "white" : "grey"} size={40} />}
-                        color={interactionType == InteractionType.SlideVertical ? "white" : "grey"}
+                        text="Swipe"
+                        icon={<SwipeGestureIcon color={interactionType === InteractionType.SwipeVertical ? "white" : "grey"} size={40} />}
+                        color={interactionType == InteractionType.SwipeVertical ? "white" : "grey"}
                     />
                 </View>
             </View>

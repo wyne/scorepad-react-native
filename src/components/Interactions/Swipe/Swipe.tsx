@@ -17,7 +17,7 @@ interface HalfTapProps {
     playerId: string;
 }
 
-const Slide: React.FC<HalfTapProps> = ({
+const SwipeVertical: React.FC<HalfTapProps> = ({
     children,
     index,
     playerId,
@@ -183,7 +183,7 @@ const Slide: React.FC<HalfTapProps> = ({
             addend: Math.abs(a),
             round: roundCurrent,
             type: a > 0 ? 'increment' : 'decrement',
-            interaction: 'slide',
+            interaction: 'swipe-vertical',
         });
 
         dispatch(playerRoundScoreIncrement(playerId, roundCurrent, a));
@@ -246,7 +246,7 @@ const Slide: React.FC<HalfTapProps> = ({
     );
 };
 
-export default Slide;
+export default SwipeVertical;
 
 const styles = StyleSheet.create({
     slider: {

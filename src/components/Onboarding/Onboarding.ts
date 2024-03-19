@@ -36,18 +36,18 @@ const onboardingScreens: OnboardingScreens = {
             title: "Adding Points",
             media: {
                 type: 'video',
-                source: require('../../../assets/video/slide-gesture.mp4'),
+                source: require('../../../assets/video/swipe-gesture.mp4'),
             },
-            description: 'Slide up and down to \nchange points.',
+            description: 'Swipe up and down to \nchange points.',
             backgroundColor: '#a0c99a',
         },
         {
-            title: "Hold and Slide",
+            title: "Hold and Swipe",
             media: {
                 type: 'video',
-                source: require('../../../assets/video/slide-powerhold.mp4'),
+                source: require('../../../assets/video/swipe-powerhold.mp4'),
             },
-            description: 'Hold first, then slide \nfor more points.',
+            description: 'Hold first, then swipe \nfor more points.',
             backgroundColor: '#d29898',
         },
         {
@@ -74,18 +74,18 @@ const onboardingScreens: OnboardingScreens = {
             title: "New Default:\nSwipe Gestures",
             media: {
                 type: 'video',
-                source: require('../../../assets/video/slide-gesture.mp4'),
+                source: require('../../../assets/video/swipe-gesture.mp4'),
             },
-            description: 'Slide up and down to \nchange points.',
+            description: 'Swipe up and down to \nchange points.',
             backgroundColor: '#a0c99a',
         },
         {
-            title: "Hold and Slide",
+            title: "Hold and Swipe",
             media: {
                 type: 'video',
-                source: require('../../../assets/video/slide-powerhold.mp4'),
+                source: require('../../../assets/video/swipe-powerhold.mp4'),
             },
-            description: 'Hold first, then slide \nfor more points.',
+            description: 'Hold first, then swipe \nfor more points.',
             backgroundColor: '#d29898',
         },
         {

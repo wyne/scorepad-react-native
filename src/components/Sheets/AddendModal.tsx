@@ -64,8 +64,8 @@ const AddendModal: React.FunctionComponent<Props> = ({ }) => {
         switch (interactionType) {
             case InteractionType.HalfTap:
                 return 'Single Tap';
-            case InteractionType.SlideVertical:
-                return 'Slide';
+            case InteractionType.SwipeVertical:
+                return 'Swipe';
         }
     })();
 
@@ -73,8 +73,8 @@ const AddendModal: React.FunctionComponent<Props> = ({ }) => {
         switch (interactionType) {
             case InteractionType.HalfTap:
                 return 'Long Press';
-            case InteractionType.SlideVertical:
-                return 'Hold + Slide';
+            case InteractionType.SwipeVertical:
+                return 'Hold + Swipe';
         }
     })();
 
