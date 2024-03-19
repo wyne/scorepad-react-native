@@ -22,7 +22,7 @@ const Slide: React.FC<HalfTapProps> = ({
     index,
     playerId,
 }) => {
-    // Selector setup
+    //#region Selector setup
 
     const currentGameId = useAppSelector(state => state.settings.currentGameId);
     const currentGame = useAppSelector(state => selectGameById(state, currentGameId));
@@ -34,7 +34,9 @@ const Slide: React.FC<HalfTapProps> = ({
     const addendOne = useAppSelector(state => state.settings.addendOne);
     const addendTwo = useAppSelector(state => state.settings.addendTwo);
 
-    // Power Hold
+    //#endregion
+
+    //#region Power Hold
 
     const powerHoldTime = 400;
     const holdDuration = useRef(new Animated.Value(0)).current;
@@ -45,7 +47,9 @@ const Slide: React.FC<HalfTapProps> = ({
         powerHoldRef.current = powerHold;
     }, [powerHold]);
 
-    // Derivated Animation values
+    //#endregion
+
+    //#region Derivated Animation values
 
     const scale = holdDuration.interpolate({
         inputRange: [0, powerHoldTime * .9, powerHoldTime],
@@ -84,7 +88,9 @@ const Slide: React.FC<HalfTapProps> = ({
         clearTimeout(powerHoldTimer);
     };
 
-    // Gesture handling
+    //#endregion
+
+    //#region Gesture handling
 
     const pan = useRef(new Animated.ValueXY()).current;
     const totalOffset = useSharedValue<number | null>(0);
@@ -132,8 +138,9 @@ const Slide: React.FC<HalfTapProps> = ({
         }
     };
 
+    //#endregion
 
-    // Helpers
+    //#region Helpers
 
     const scoreChangeHandler = (value: number) => {
         if (Math.abs(value) == 0) return;
@@ -172,6 +179,8 @@ const Slide: React.FC<HalfTapProps> = ({
             }
         }
     );
+
+    //#endregion
 
     return (
         <>
