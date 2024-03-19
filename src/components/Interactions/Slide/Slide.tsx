@@ -2,7 +2,8 @@ import React, { useEffect, useRef, useState } from 'react';
 
 import analytics from '@react-native-firebase/analytics';
 import * as Haptics from 'expo-haptics';
-import { Animated, PanResponder, StyleSheet, View } from 'react-native';
+import { Animated, StyleSheet, View } from 'react-native';
+import { PanGestureHandler, PanGestureHandlerStateChangeEvent, State } from 'react-native-gesture-handler';
 import { runOnJS, useAnimatedReaction, useSharedValue } from 'react-native-reanimated';
 
 import { selectGameById } from '../../../../redux/GamesSlice';
@@ -21,6 +22,85 @@ const Slide: React.FC<HalfTapProps> = ({
     index,
     playerId,
 }) => {
+    const pan = useRef(new Animated.ValueXY()).current;
+    let timer: NodeJS.Timeout;
+
+    const onGestureEvent = Animated.event(
+        // Animate the slider to follow the touch
+        [
+            {
+                nativeEvent: {
+                    translationY: pan.y,
+                },
+            },
+        ],
+        {
+            useNativeDriver: false,
+            listener: (event: PanGestureHandlerStateChangeEvent) => {
+                // Invert the value for panning up to be positive
+                totalOffset.value = -event.nativeEvent.translationY;
+
+                clearTimeout(timer);
+
+                if (maxHoldReachedRef.current == false) {
+                    Animated.timing(holdTime, {
+                        toValue: 0,
+                        duration: 100,
+                        useNativeDriver: false,
+                    }).start();
+                }
+            },
+        }
+    );
+
+    const onHandlerStateChange = (event: PanGestureHandlerStateChangeEvent) => {
+
+        console.log('change event', event.nativeEvent.oldState, event.nativeEvent.state);
+
+        if (event.nativeEvent.oldState === State.UNDETERMINED && event.nativeEvent.state === State.BEGAN) {
+            console.log('start');
+            // Handle the start of the gesture
+            // Reset the state of the gesture
+            totalOffset.value = null;
+
+            // Reset 
+            Animated.timing(holdTime, {
+                toValue: maxHoldTime,
+                duration: maxHoldTime,
+                useNativeDriver: false,
+            }).start();
+
+            timer = setTimeout(() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+                setMaxHoldReached(true);
+            }, maxHoldTime * .8);
+        } else if (event.nativeEvent.state == State.FAILED || event.nativeEvent.state === State.END) {
+
+            console.log("release");
+            // Reset the state of the gesture
+            totalOffset.value = null;
+
+            // Spring the animation back to the start
+            Animated.spring(pan, {
+                toValue: { x: 0, y: 0 },
+                bounciness: 0,
+                useNativeDriver: false
+            }).start();
+
+            Animated.timing(holdTime, {
+                toValue: 0,
+                duration: 200,
+                useNativeDriver: false,
+            }).start();
+
+            clearTimeout(timer);
+
+            // Toggle to addendOne
+            setMaxHoldReached(false);
+        }
+    };
+
+
     const currentGameId = useAppSelector(state => state.settings.currentGameId);
     const currentGame = useAppSelector(state => selectGameById(state, currentGameId));
     if (typeof currentGame == 'undefined') return null;
@@ -56,7 +136,7 @@ const Slide: React.FC<HalfTapProps> = ({
     });
 
     // Panning
-    const pan = useRef(new Animated.ValueXY()).current;
+    // const pan = useRef(new Animated.ValueXY()).current;
     const totalOffset = useSharedValue<number | null>(0);
 
     const scoreChangeHandler = (value: number) => {
@@ -97,71 +177,72 @@ const Slide: React.FC<HalfTapProps> = ({
         }
     );
 
-    let timer: NodeJS.Timeout;
+    // const panResponder = useRef(
+    //     PanResponder.create({
+    //         onShouldBlockNativeResponder: () => false,
+    //         onStartShouldSetPanResponderCapture: () => true,
+    //         onMoveShouldSetPanResponderCapture: () => true,
+    //         onStartShouldSetPanResponder: () => true,
+    //         onMoveShouldSetPanResponder: () => true,
+    //         onPanResponderStart: () => {
+    //             // Reset the state of the gesture
+    //             totalOffset.value = null;
 
-    const panResponder = useRef(
-        PanResponder.create({
-            onStartShouldSetPanResponder: () => true,
-            onMoveShouldSetPanResponder: () => true,
-            onPanResponderStart: () => {
-                // Reset the state of the gesture
-                totalOffset.value = null;
+    //             // Reset 
+    //             Animated.timing(holdTime, {
+    //                 toValue: maxHoldTime,
+    //                 duration: maxHoldTime,
+    //                 useNativeDriver: false,
+    //             }).start();
 
-                // Reset 
-                Animated.timing(holdTime, {
-                    toValue: maxHoldTime,
-                    duration: maxHoldTime,
-                    useNativeDriver: false,
-                }).start();
+    //             timer = setTimeout(() => {
+    //                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+    //                 setMaxHoldReached(true);
+    //             }, maxHoldTime * .8);
+    //         },
+    //         onPanResponderMove: (e, gestureState) => {
+    //             // Invert the value for panning up to be positive
+    //             totalOffset.value = -gestureState.dy;
 
-                timer = setTimeout(() => {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-                    setMaxHoldReached(true);
-                }, maxHoldTime * .8);
-            },
-            onPanResponderMove: (e, gestureState) => {
-                // Invert the value for panning up to be positive
-                totalOffset.value = -gestureState.dy;
+    //             // Animate the slider to follow the touch
+    //             Animated.event(
+    //                 [null, { dy: pan.y }],
+    //                 { useNativeDriver: false }
+    //             )(e, gestureState);
 
-                // Animate the slider to follow the touch
-                Animated.event(
-                    [null, { dy: pan.y }],
-                    { useNativeDriver: false }
-                )(e, gestureState);
+    //             clearTimeout(timer);
 
-                clearTimeout(timer);
+    //             if (maxHoldReachedRef.current == false) {
+    //                 Animated.timing(holdTime, {
+    //                     toValue: 0,
+    //                     duration: 100,
+    //                     useNativeDriver: false,
+    //                 }).start();
+    //             }
+    //         },
+    //         onPanResponderRelease: () => {
+    //             // Reset the state of the gesture
+    //             totalOffset.value = null;
 
-                if (maxHoldReachedRef.current == false) {
-                    Animated.timing(holdTime, {
-                        toValue: 0,
-                        duration: 100,
-                        useNativeDriver: false,
-                    }).start();
-                }
-            },
-            onPanResponderRelease: () => {
-                // Reset the state of the gesture
-                totalOffset.value = null;
+    //             // Spring the animation back to the start
+    //             Animated.spring(pan, {
+    //                 toValue: { x: 0, y: 0 },
+    //                 bounciness: 0,
+    //                 useNativeDriver: false
+    //             }).start();
 
-                // Spring the animation back to the start
-                Animated.spring(pan, {
-                    toValue: { x: 0, y: 0 },
-                    bounciness: 0,
-                    useNativeDriver: false
-                }).start();
+    //             Animated.timing(holdTime, {
+    //                 toValue: 0,
+    //                 duration: 200,
+    //                 useNativeDriver: false,
+    //             }).start();
 
-                Animated.timing(holdTime, {
-                    toValue: 0,
-                    duration: 200,
-                    useNativeDriver: false,
-                }).start();
-
-                clearTimeout(timer);
-                // Toggle to addendOne
-                setMaxHoldReached(false);
-            },
-        })
-    ).current;
+    //             clearTimeout(timer);
+    //             // Toggle to addendOne
+    //             setMaxHoldReached(false);
+    //         },
+    //     })
+    // ).current;
 
     return (
         <>
@@ -177,19 +258,24 @@ const Slide: React.FC<HalfTapProps> = ({
                 {children}
             </Animated.View>
 
-            <Animated.View
-                style={[
-                    StyleSheet.absoluteFillObject,
-                    {
-                        transform: [
-                            { translateX: pan.x },
-                            { translateY: pan.y },
-                        ],
-                    }]}
-                {...(currentGame.locked ? {} : panResponder.panHandlers)}>
-                <View style={[styles.slider, styles.sliderTop]} />
-                <View style={[styles.slider, styles.sliderBottom]} />
-            </Animated.View>
+            <PanGestureHandler
+                minDist={0}
+                onGestureEvent={onGestureEvent}
+                onHandlerStateChange={onHandlerStateChange}
+            >
+                <Animated.View
+                    style={[
+                        StyleSheet.absoluteFillObject,
+                        {
+                            transform: [
+                                { translateY: pan.y },
+                            ],
+                        }]}
+                >
+                    <View style={[styles.slider, styles.sliderTop]} />
+                    <View style={[styles.slider, styles.sliderBottom]} />
+                </Animated.View>
+            </PanGestureHandler>
         </>
     );
 };
