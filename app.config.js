@@ -98,10 +98,12 @@ export default {
                 },
             },
         ],
-        "expo-av",
-        {
-            microphonePermission: false,
-        },
+        [
+            "expo-av",
+            {
+                microphonePermission: false,
+            },
+        ]
     ],
     hooks: {},
 };

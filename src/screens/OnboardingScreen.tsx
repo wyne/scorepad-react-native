@@ -2,8 +2,10 @@ import React from 'react';
 
 import { RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { AVPlaybackSource, Video } from 'expo-av';
 import {
     Dimensions,
+    ImageURISource,
     Animated as RNAnimated,
     StyleSheet,
     Text,
@@ -67,6 +69,48 @@ const OnboardingScreen: React.FunctionComponent<Props> = ({ navigation, route })
     const viewConfigRef = React.useRef({ viewAreaCoveragePercentThreshold: 50 });
 
     const renderItem = React.useCallback(({ item, index }: OnboardingScreenItemProps) => {
+
+        let media;
+        switch (item.media.type) {
+            case 'image':
+                media = (
+                    <RNAnimated.Image source={item.media.source as ImageURISource}
+                        style={{
+                            width: item.media.width || '100%',
+                            height: item.media.height || '100%',
+                            borderRadius: (
+                                index == 0 || index == onboardingScreens.length - 1
+                            ) ? 20 : 0,
+                            resizeMode: 'contain',
+                        }} />
+                );
+                break;
+            case 'video':
+                media = (
+                    <View style={{
+                        backgroundColor: 'black',
+                        padding: 5,
+                        width: item.media.width || '100%',
+                        height: item.media.height || '100%',
+                        borderRadius: 10,
+                    }}>
+                        <Video
+                            source={item.media.source as AVPlaybackSource}
+                            shouldPlay={index == activeIndex}
+                            isLooping={true}
+                            style={{
+                                width: '100%',
+                                height: '100%',
+                                borderRadius: (
+                                    index == 0 || index == onboardingScreens.length - 1
+                                ) ? 20 : 0,
+                            }}
+                        />
+                    </View>
+                );
+                break;
+        }
+
         return (
             <View style={[styles.itemContainer]}>
                 <Animated.View style={[styles.titleContainer]}>
@@ -74,15 +118,7 @@ const OnboardingScreen: React.FunctionComponent<Props> = ({ navigation, route })
                 </Animated.View>
 
                 <Animated.View style={[styles.imageContainer]}>
-                    <RNAnimated.Image source={item.image}
-                        style={{
-                            width: item.imageWidth || '100%',
-                            height: item.imageHeight || '100%',
-                            borderRadius: (
-                                index == 0 || index == onboardingScreens.length - 1
-                            ) ? 20 : 0,
-                            resizeMode: 'contain',
-                        }} />
+                    {media}
                 </Animated.View>
 
                 <Animated.View style={[styles.descriptionContainer]}>

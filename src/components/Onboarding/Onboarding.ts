@@ -1,11 +1,18 @@
-import { ImageURISource, } from 'react-native';
+import { AVPlaybackSource } from 'expo-av/build/AV';
+import { ImageURISource } from 'react-native';
 import { SemVer, compare } from 'semver';
+
+
+export type MediaResource = {
+    type: 'image' | 'video';
+    source: ImageURISource | AVPlaybackSource;
+    width?: number;
+    height?: number;
+};
 
 export type OnboardingScreenItem = {
     title: string;
-    image: ImageURISource;
-    imageHeight?: number;
-    imageWidth?: number;
+    media: MediaResource;
     description: string;
     backgroundColor: string;
 };
@@ -16,74 +23,94 @@ const onboardingScreens: OnboardingScreens = {
     '2.2.2': [
         {
             title: "ScorePad\nwith Rounds",
-            image: require('../../../assets/icon.png'),
-            imageHeight: 150,
-            imageWidth: 150,
+            media: {
+                type: 'image',
+                source: require('../../../assets/icon.png'),
+                width: 150,
+                height: 150,
+            },
             description: 'Swipe left to begin.',
             backgroundColor: '#8ca2b8',
         },
         {
-            title: "Add Points",
-            image: require('../../../assets/onboarding/add.png'),
-            description: 'Tap the top half of a player’s tile to add points.',
+            title: "Adding Points",
+            media: {
+                type: 'video',
+                source: require('../../../assets/video/slide-gesture.mp4'),
+            },
+            description: 'Slide up and down to \nchange points.',
             backgroundColor: '#a0c99a',
         },
         {
-            title: "Subtract Points",
-            image: require('../../../assets/onboarding/subtract.png'),
-            description: 'Tap the bottom half of a player’s tile to subtract points.',
+            title: "Hold and Slide",
+            media: {
+                type: 'video',
+                source: require('../../../assets/video/slide-powerhold.mp4'),
+            },
+            description: 'Hold first, then slide \nfor more points.',
             backgroundColor: '#d29898',
         },
         {
-            title: "Adjust Point Values",
-            image: require('../../../assets/onboarding/addend-button.png'),
-            description: 'Adjust the point value by tapping on the point value selector in the top right.',
+            title: "Change Gestures",
+            media: {
+                type: 'video',
+                source: require('../../../assets/video/gesture-select.mp4'),
+            },
+            description: 'Change gesture methods through the point settings in the top right.',
             backgroundColor: '#9896c5',
         },
         {
-            title: "Swipe Gestures",
-            image: require('../../../assets/onboarding/slide.png'),
-            description: 'Change gestures from the point settings in the top right.',
-            backgroundColor: '#94c49e',
-        },
-        {
-            title: "Change Rounds",
-            image: require('../../../assets/onboarding/rounds.png'),
-            description: 'Use rounds for score history. \nTap the arrows to cycle rounds.',
-            backgroundColor: '#c8b780',
-        },
-        {
             title: "Score History",
-            image: require('../../../assets/onboarding/sheet.png'),
+            media: {
+                type: 'image',
+                source: require('../../../assets/onboarding/sheet.png'),
+            },
             description: 'Pull up the bottom sheet to view score history and edit the game.',
             backgroundColor: '#94c49e',
-        },
-        {
-            title: "That's it!",
-            image: require('../../../assets/icon.png'),
-            imageHeight: 150,
-            imageWidth: 150,
-            description: 'Return to this tutorial \n at any time.',
-            backgroundColor: '#8ca2b8',
         },
     ],
     '2.5.0': [
         {
-            title: "New: Swipe Gestures",
-            image: require('../../../assets/onboarding/slide.png'),
-            description: 'Change gesture methods through the point settings in the top right of a game.',
-            backgroundColor: '#94c49e',
+            title: "New Default:\nSwipe Gestures",
+            media: {
+                type: 'video',
+                source: require('../../../assets/video/slide-gesture.mp4'),
+            },
+            description: 'Slide up and down to \nchange points.',
+            backgroundColor: '#a0c99a',
         },
         {
-            title: "That's it!",
-            image: require('../../../assets/icon.png'),
-            imageHeight: 150,
-            imageWidth: 150,
-            description: 'Return to this tutorial \n at any time.',
-            backgroundColor: '#8ca2b8',
+            title: "Hold and Slide",
+            media: {
+                type: 'video',
+                source: require('../../../assets/video/slide-powerhold.mp4'),
+            },
+            description: 'Hold first, then slide \nfor more points.',
+            backgroundColor: '#d29898',
+        },
+        {
+            title: "Change Gestures",
+            media: {
+                type: 'video',
+                source: require('../../../assets/video/gesture-select.mp4'),
+            },
+            description: 'Change gesture methods through the point settings in the top right.',
+            backgroundColor: '#9896c5',
         },
     ]
 };
+
+const finalScreen: OnboardingScreenItem[] = [{
+    title: "That's it!",
+    media: {
+        type: 'image',
+        source: require('../../../assets/icon.png'),
+        width: 150,
+        height: 150,
+    },
+    description: 'Return to this tutorial \n at any time in the settings.',
+    backgroundColor: '#8ca2b8',
+}];
 
 export const getOnboardingSemVer = (onboardedSemVer: SemVer | null): string | undefined => {
     const keys = Object.keys(onboardingScreens)
@@ -106,8 +133,8 @@ export const getOnboardingScreens = (onboardedSemVer: SemVer): OnboardingScreenI
     const applicableVersion = getOnboardingSemVer(onboardedSemVer);
 
     if (!applicableVersion) {
-        return [];
+        return finalScreen;
     }
 
-    return onboardingScreens[applicableVersion];
+    return onboardingScreens[applicableVersion].concat(finalScreen);
 };
