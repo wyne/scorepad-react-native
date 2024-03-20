@@ -78,9 +78,7 @@ const OnboardingScreen: React.FunctionComponent<Props> = ({ navigation, route })
                         style={{
                             width: item.media.width || '100%',
                             height: item.media.height || '100%',
-                            borderRadius: (
-                                index == 0 || index == onboardingScreens.length - 1
-                            ) ? 20 : 0,
+                            borderRadius: item.media.borderRadius || 0,
                             resizeMode: 'contain',
                         }} />
                 );
@@ -101,9 +99,6 @@ const OnboardingScreen: React.FunctionComponent<Props> = ({ navigation, route })
                             style={{
                                 width: '100%',
                                 height: '100%',
-                                borderRadius: (
-                                    index == 0 || index == onboardingScreens.length - 1
-                                ) ? 20 : 0,
                             }}
                         />
                     </View>
@@ -122,7 +117,7 @@ const OnboardingScreen: React.FunctionComponent<Props> = ({ navigation, route })
                 </Animated.View>
 
                 <Animated.View style={[styles.descriptionContainer]}>
-                    <Text style={[styles.description]}>
+                    <Text style={[styles.description, { color: item.color }]}>
                         {item.description}
                     </Text>
                     <View style={{ alignContent: 'center' }}>

@@ -7,6 +7,7 @@ export type MediaResource = {
     source: ImageURISource | NodeRequire;
     width?: number;
     height?: number;
+    borderRadius?: number;
 };
 
 export type OnboardingScreenItem = {
@@ -14,6 +15,7 @@ export type OnboardingScreenItem = {
     media: MediaResource;
     description: string;
     backgroundColor: string;
+    color?: string;
 };
 
 type OnboardingScreens = Record<string, OnboardingScreenItem[]>;
@@ -27,12 +29,14 @@ const onboardingScreens: OnboardingScreens = {
                 source: require('../../../assets/icon.png'),
                 width: 150,
                 height: 150,
+                borderRadius: 20,
             },
-            description: 'Swipe left to begin.',
+            description: '<< swipe left <<',
             backgroundColor: '#8ca2b8',
+            color: 'rgba(0,0,0,0.6)'
         },
         {
-            title: "Adding Points",
+            title: "Swipe for points",
             media: {
                 type: 'video',
                 source: require('../../../assets/video/swipe-gesture.mp4'),
@@ -41,7 +45,7 @@ const onboardingScreens: OnboardingScreens = {
             backgroundColor: '#a0c99a',
         },
         {
-            title: "Hold and Swipe",
+            title: "Hold for more",
             media: {
                 type: 'video',
                 source: require('../../../assets/video/swipe-powerhold.mp4'),
@@ -55,7 +59,7 @@ const onboardingScreens: OnboardingScreens = {
                 type: 'video',
                 source: require('../../../assets/video/gesture-select.mp4'),
             },
-            description: 'Change gesture methods through the point settings in the top right.',
+            description: 'Change gestures and point values with the Point Settings on the top right.',
             backgroundColor: '#9896c5',
         },
         {
@@ -79,7 +83,7 @@ const onboardingScreens: OnboardingScreens = {
             backgroundColor: '#a0c99a',
         },
         {
-            title: "Hold and Swipe",
+            title: "Hold for more",
             media: {
                 type: 'video',
                 source: require('../../../assets/video/swipe-powerhold.mp4'),
@@ -93,7 +97,7 @@ const onboardingScreens: OnboardingScreens = {
                 type: 'video',
                 source: require('../../../assets/video/gesture-select.mp4'),
             },
-            description: 'Change gesture methods through the point settings in the top right.',
+            description: 'Change gestures and point values with the Point Settings on the top right.',
             backgroundColor: '#9896c5',
         },
     ]
@@ -106,6 +110,7 @@ const finalScreen: OnboardingScreenItem[] = [{
         source: require('../../../assets/icon.png'),
         width: 150,
         height: 150,
+        borderRadius: 20,
     },
     description: 'Return to this tutorial \n at any time in the settings.',
     backgroundColor: '#8ca2b8',

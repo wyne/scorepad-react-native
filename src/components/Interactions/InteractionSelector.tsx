@@ -29,14 +29,9 @@ const InteractionSelector: React.FunctionComponent<InteractionSelectorProps> = (
     })();
 
     return (
-        <>
+        <View style={{ flexDirection: 'column', alignItems: 'center', alignContent: 'flex-start' }}>
             <Text style={{ color: 'white', fontSize: 20 }}>Point Gesture</Text>
-            <View style={{
-                flex: 1,
-                flexDirection: 'row',
-                justifyContent: 'space-around',
-                padding: 10,
-            }}>
+            <View style={{ flexDirection: 'row', padding: 10, }}>
                 <View>
                     <BigButton
                         onPress={() => {
@@ -58,10 +53,11 @@ const InteractionSelector: React.FunctionComponent<InteractionSelectorProps> = (
                     />
                 </View>
             </View>
+
             <View style={{ paddingBottom: 25 }}>
                 <Text style={{ color: 'white' }}>{description}</Text>
             </View>
-        </>
+        </View>
     );
 };
 
