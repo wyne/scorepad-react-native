@@ -30,7 +30,6 @@ const AddendModal: React.FunctionComponent<Props> = ({ }) => {
                 orientation === ScreenOrientation.Orientation.LANDSCAPE_LEFT ||
                 orientation === ScreenOrientation.Orientation.LANDSCAPE_RIGHT
             );
-            console.log("roration");
         };
 
         const subscription = ScreenOrientation.addOrientationChangeListener(({ orientationInfo }) => {

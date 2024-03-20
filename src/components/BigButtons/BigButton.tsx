@@ -9,11 +9,13 @@ interface Props {
     icon: string | JSX.Element;
     text: string;
     color: string;
+    animated?: boolean;
 }
 
-const BigButton: React.FunctionComponent<Props> = ({ icon, text, color, onPress }) => {
+const BigButton: React.FunctionComponent<Props> = ({ icon, text, color, onPress, animated = true }) => {
     return (
-        <Animated.View layout={Layout.duration(400)} entering={FadeIn.delay(400)} exiting={FadeOut}>
+
+        <Animated.View layout={Layout.duration(400)} entering={animated ? FadeIn.delay(400) : undefined} exiting={FadeOut}>
             <TouchableOpacity activeOpacity={.5} onPress={onPress}>
                 <View style={[styles.bigButton]}>
                     {typeof icon === 'string' ? (<Icon name={icon}

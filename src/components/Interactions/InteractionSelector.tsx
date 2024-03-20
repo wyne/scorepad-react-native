@@ -34,6 +34,7 @@ const InteractionSelector: React.FunctionComponent<InteractionSelectorProps> = (
             <View style={{ flexDirection: 'row', padding: 10, }}>
                 <View>
                     <BigButton
+                        animated={false}
                         onPress={() => {
                             dispatch(setInteractionType(InteractionType.HalfTap));
                         }}
@@ -44,6 +45,7 @@ const InteractionSelector: React.FunctionComponent<InteractionSelectorProps> = (
                 </View>
                 <View>
                     <BigButton
+                        animated={false}
                         onPress={() => {
                             dispatch(setInteractionType(InteractionType.SwipeVertical));
                         }}
