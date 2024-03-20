@@ -1,11 +1,10 @@
-import { AVPlaybackSource } from 'expo-av/build/AV';
 import { ImageURISource } from 'react-native';
 import { SemVer, compare } from 'semver';
 
 
 export type MediaResource = {
     type: 'image' | 'video';
-    source: ImageURISource | AVPlaybackSource;
+    source: ImageURISource | NodeRequire;
     width?: number;
     height?: number;
 };

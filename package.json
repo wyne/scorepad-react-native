@@ -29,7 +29,6 @@
     "dotenv": "^16.0.3",
     "expo": "^50.0.13",
     "expo-application": "~5.8.3",
-    "expo-av": "~13.10.5",
     "expo-blur": "~12.9.2",
     "expo-build-properties": "~0.11.1",
     "expo-constants": "~15.4.5",
@@ -65,6 +64,8 @@
     "react-native-safe-area-context": "4.8.2",
     "react-native-screens": "~3.29.0",
     "react-native-size-matters": "^0.4.0",
+    "react-native-svg": "14.1.0",
+    "react-native-video": "^5.2.1",
     "react-native-view-shot": "3.8.0",
     "react-native-web": "~0.19.6",
     "react-navigation": "^4.4.4",
@@ -72,8 +73,7 @@
     "react-redux": "^8.0.2",
     "redux-persist": "^6.0.0",
     "semver": "^7.5.4",
-    "typescript": "^5.1.6",
-    "react-native-svg": "14.1.0"
+    "typescript": "^5.1.6"
   },
   "devDependencies": {
     "@babel/core": "^7.19.3",
@@ -86,6 +86,7 @@
     "@testing-library/react-native": "^12.2.0",
     "@types/jest": "^29.5.3",
     "@types/lodash": "^4.14.202",
+    "@types/react-native-video": "^5.0.20",
     "@typescript-eslint/eslint-plugin": "^6.3.0",
     "babel-jest": "^29.5.0",
     "eslint": "^8.47.0",

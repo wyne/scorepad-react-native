@@ -59,6 +59,9 @@ const AppInfoScreen: React.FunctionComponent<Props> = ({ navigation }) => {
                 <Text style={{ color: '#999' }} onPress={alertWithVersion}>
                     ScorePad with Rounds v{appVersion}
                 </Text>
+                <Text style={{ color: '#999', paddingVertical: 5 }}>
+                    by Justin Wyne
+                </Text>
             </View>
 
             <Section title="Features">

@@ -2,7 +2,6 @@ import React from 'react';
 
 import { RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { AVPlaybackSource, Video } from 'expo-av';
 import {
     Dimensions,
     ImageURISource,
@@ -16,6 +15,7 @@ import { ExpandingDot } from "react-native-animated-pagination-dots";
 import { Button } from 'react-native-elements';
 import Animated, { FadeIn } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Video from 'react-native-video';
 import { parse, SemVer } from 'semver';
 
 import { useAppSelector } from '../../redux/hooks';
@@ -95,9 +95,9 @@ const OnboardingScreen: React.FunctionComponent<Props> = ({ navigation, route })
                         borderRadius: 10,
                     }}>
                         <Video
-                            source={item.media.source as AVPlaybackSource}
-                            shouldPlay={index == activeIndex}
-                            isLooping={true}
+                            source={item.media.source as number}
+                            paused={index != activeIndex}
+                            repeat={true}
                             style={{
                                 width: '100%',
                                 height: '100%',
