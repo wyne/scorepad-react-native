@@ -127,9 +127,11 @@ const AddendModal: React.FunctionComponent<Props> = ({ }) => {
                     flexDirection: isLandscape ? 'row' : 'column',
                 }}>
 
-                    <InteractionSelector />
+                    <View style={{ flex: 1 }}>
+                        <InteractionSelector />
+                    </View>
 
-                    <View style={{ flexDirection: 'column', alignItems: 'center' }}>
+                    <View style={{ flex: 1, flexDirection: 'column', alignItems: 'center' }}>
 
                         <Text style={{ color: 'white', fontSize: 20 }}>Point Values</Text>
 
