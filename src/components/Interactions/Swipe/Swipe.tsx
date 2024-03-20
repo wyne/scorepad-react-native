@@ -61,7 +61,7 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
         Animated.timing(holdDuration, {
             toValue: powerHoldTime,
             duration: powerHoldTime,
-            useNativeDriver: false,
+            useNativeDriver: true,
         }).start();
 
         powerHoldTimer = setTimeout(() => {
@@ -73,17 +73,17 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
                     Animated.timing(wiggleValue, {
                         toValue: -1,
                         duration: 50,
-                        useNativeDriver: false,
+                        useNativeDriver: true,
                     }),
                     Animated.timing(wiggleValue, {
                         toValue: 1,
                         duration: 100,
-                        useNativeDriver: false,
+                        useNativeDriver: true,
                     }),
                     Animated.timing(wiggleValue, {
                         toValue: 0,
                         duration: 50,
-                        useNativeDriver: false,
+                        useNativeDriver: true,
                     }),
                 ])
             );
@@ -95,7 +95,7 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
         Animated.timing(holdDuration, {
             toValue: 0,
             duration: 100,
-            useNativeDriver: false,
+            useNativeDriver: true,
         }).start();
 
         setPowerHold(false);
@@ -106,7 +106,7 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
         Animated.timing(wiggleValue, {
             toValue: 0,
             duration: 0, // Change this to control the speed of the reset
-            useNativeDriver: false,
+            useNativeDriver: true,
         }).start();
 
         clearTimeout(powerHoldTimer);
@@ -129,7 +129,7 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
             },
         ],
         {
-            useNativeDriver: false,
+            useNativeDriver: true,
             listener: (event: PanGestureHandlerStateChangeEvent) => {
                 // Handle the gesture movement
 
@@ -155,7 +155,7 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
             Animated.spring(pan, {
                 toValue: { x: 0, y: 0 },
                 bounciness: 0,
-                useNativeDriver: false
+                useNativeDriver: true
             }).start();
 
             powerHoldStop();
