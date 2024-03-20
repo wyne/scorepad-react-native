@@ -96,6 +96,7 @@ const OnboardingScreen: React.FunctionComponent<Props> = ({ navigation, route })
                             source={item.media.source as number}
                             paused={index != activeIndex}
                             repeat={true}
+                            resizeMode='contain'
                             style={{
                                 width: '100%',
                                 height: '100%',
