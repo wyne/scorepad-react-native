@@ -225,6 +225,7 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
             </Animated.View>
 
             <PanGestureHandler
+                enabled={!currentGame.locked}
                 minDist={0}
                 onGestureEvent={onGestureEvent}
                 onHandlerStateChange={onHandlerStateChange}
