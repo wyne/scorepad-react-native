@@ -7,8 +7,7 @@ import { StyleSheet, TouchableHighlight, View } from 'react-native';
 import { selectGameById } from '../../../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../../../redux/hooks';
 import { playerRoundScoreIncrement } from '../../../../redux/PlayersSlice';
-
-import { ScoreParticle } from './ScoreParticle';
+import { ScoreParticle } from '../../PlayerTiles/AdditionTile/ScoreParticle';
 
 type ScoreParticleProps = {
     key: string;
@@ -22,7 +21,7 @@ type Props = {
     scoreType: 'increment' | 'decrement';
 };
 
-export const TouchSurface: React.FunctionComponent<Props> = (
+export const HalfTileTouchSurface: React.FunctionComponent<Props> = (
     { playerIndex, fontColor, playerId, scoreType }: Props) => {
 
     const showPointParticles = useAppSelector(state => state.settings.showPointParticles);

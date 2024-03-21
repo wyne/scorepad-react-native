@@ -17,7 +17,8 @@ const settingsPersistConfig = {
         'addendTwo',
         'currentGameId',
         'onboarded',
-        'showPointParticles'
+        'showPointParticles',
+        'interactionType',
     ],
 };
 
