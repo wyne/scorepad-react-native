@@ -1,7 +1,8 @@
 import React, { memo } from 'react';
-import { Text, StyleSheet } from 'react-native';
-import { useAppSelector } from '../../../redux/hooks';
 
+import { Text, StyleSheet } from 'react-native';
+
+import { useAppSelector } from '../../../redux/hooks';
 import { selectPlayerById } from '../../../redux/PlayersSlice';
 
 interface Props {

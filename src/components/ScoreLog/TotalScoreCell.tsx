@@ -1,8 +1,9 @@
 import React, { memo } from 'react';
-import { Text } from 'react-native';
-import { selectPlayerById } from '../../../redux/PlayersSlice';
-import { StyleSheet } from 'react-native';
+
+import { Text , StyleSheet } from 'react-native';
+
 import { useAppSelector } from '../../../redux/hooks';
+import { selectPlayerById } from '../../../redux/PlayersSlice';
 
 export type Props = {
     playerId: string;
@@ -16,7 +17,7 @@ const TotalScoreCell: React.FunctionComponent<Props> = ({ playerId }) => {
         return (sum || 0) + (current || 0);
     });
     return (
-        <Text key={playerId} style={[styles.scoreEntry, { color: 'white', fontWeight: 'bold' }]}>
+        <Text key={playerId} style={[styles.scoreEntry, { color: 'white' }]}>
             {scoreTotal}
         </Text>
     );
@@ -25,7 +26,6 @@ const TotalScoreCell: React.FunctionComponent<Props> = ({ playerId }) => {
 const styles = StyleSheet.create({
     totalHeader: {
         color: 'white',
-        fontWeight: 'bold',
         textAlign: 'center',
         fontSize: 20
     },

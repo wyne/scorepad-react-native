@@ -1,41 +1,52 @@
 import React, { useEffect } from 'react';
-import Animated from 'react-native-reanimated';
-import {
+
+import Animated, {
     useSharedValue,
     useAnimatedStyle,
     withTiming
 } from 'react-native-reanimated';
 
-import { calcFontSize, animationDuration, enteringAnimation } from './Helpers';
+import { calculateFontSize, animationDuration, enteringAnimation, multiLineScoreSizeMultiplier, singleLineScoreSizeMultiplier, scoreMathOpacity } from './Helpers';
 
 interface Props {
     roundScore: number;
     totalScore: number;
     fontColor: string;
+    containerWidth: number;
 }
 
-const ScoreBefore: React.FunctionComponent<Props> = ({ roundScore, totalScore, fontColor }) => {
-    const firstRowLength = (roundScore == 0 ? 0 : roundScore.toString().length + 3) + totalScore.toString().length;
-    const d = totalScore - roundScore;
+const ScoreBefore: React.FunctionComponent<Props> = ({
+    containerWidth,
+    roundScore,
+    totalScore,
+    fontColor
+}) => {
+    const scoreBefore = totalScore - roundScore;
 
-    const fontSize = useSharedValue(calcFontSize(firstRowLength));
+    const fontSize = useSharedValue(calculateFontSize(containerWidth));
     const fontOpacity = useSharedValue(100);
+
     const animatedStyles = useAnimatedStyle(() => {
         return {
-            fontSize: roundScore == 0 ? fontSize.value : fontSize.value * .8,
+            fontSize: fontSize.value,
             fontWeight: roundScore == 0 ? 'bold' : 'normal',
             opacity: fontOpacity.value / 100,
         };
     });
 
+    const scaleFactor = roundScore == 0 ? singleLineScoreSizeMultiplier : multiLineScoreSizeMultiplier;
+
     useEffect(() => {
         fontSize.value = withTiming(
-            calcFontSize(firstRowLength), { duration: animationDuration }
+            calculateFontSize(containerWidth) * scaleFactor,
+            { duration: animationDuration }
         );
+
         fontOpacity.value = withTiming(
-            roundScore == 0 ? 100 : 75, { duration: animationDuration }
+            roundScore == 0 ? 100 : scoreMathOpacity * 100,
+            { duration: animationDuration }
         );
-    }, [roundScore]);
+    }, [roundScore, containerWidth]);
 
     return (
         <Animated.View entering={enteringAnimation}>
@@ -44,8 +55,8 @@ const ScoreBefore: React.FunctionComponent<Props> = ({ roundScore, totalScore, f
                 style={[animatedStyles, {
                     fontVariant: ['tabular-nums'],
                     color: fontColor,
-                }]} >
-                {d}
+                }]}>
+                {scoreBefore}
             </Animated.Text>
         </Animated.View>
     );

@@ -1,16 +1,25 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { persistStore, persistReducer } from 'redux-persist';
 import { configureStore } from "@reduxjs/toolkit";
+import { persistStore, persistReducer } from 'redux-persist';
 
-import settingsReducer from './SettingsSlice';
 import gamesReducer from './GamesSlice';
 import scoresReducer from './PlayersSlice';
+import settingsReducer from './SettingsSlice';
 
 const settingsPersistConfig = {
     key: 'settings',
     version: 0,
     storage: AsyncStorage,
-    whitelist: ['home_fullscreen', 'multiplier', 'currentGameId', 'onboarded'],
+    whitelist: [
+        'home_fullscreen',
+        'multiplier',
+        'addendOne',
+        'addendTwo',
+        'currentGameId',
+        'onboarded',
+        'showPointParticles',
+        'interactionType',
+    ],
 };
 
 const gamesPersistConfig = {
@@ -33,6 +42,7 @@ export const store = configureStore({
         games: persistReducer(gamesPersistConfig, gamesReducer),
         players: persistReducer(playersPersistConfig, scoresReducer),
     },
+    // preloadedState: getPreloadedState(),
     middleware: getDefaultMiddleware => getDefaultMiddleware({
         serializableCheck: {
             ignoreActions: true
@@ -46,3 +56,5 @@ export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
 
 export const persistor = persistStore(store);
+
+// exportData();

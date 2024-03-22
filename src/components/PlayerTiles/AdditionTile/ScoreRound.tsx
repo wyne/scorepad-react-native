@@ -1,35 +1,37 @@
 import React, { useEffect } from 'react';
-import Animated from 'react-native-reanimated';
-import {
+
+import Animated, {
     useSharedValue,
     useAnimatedStyle,
     withTiming
 } from 'react-native-reanimated';
 
-import { calcFontSize, animationDuration } from './Helpers';
+import { calculateFontSize, animationDuration, multiLineScoreSizeMultiplier, scoreMathOpacity } from './Helpers';
 
 interface Props {
     roundScore: number;
-    totalScore: number;
     fontColor: string;
+    containerWidth: number;
 }
 
-const ScoreRound: React.FunctionComponent<Props> = ({ roundScore, totalScore, fontColor }) => {
-    const firstRowLength = (roundScore == 0 ? 0 : roundScore.toString().length + 3) + totalScore.toString().length;
-    const fontSizeRound = useSharedValue(calcFontSize(firstRowLength));
+const ScoreRound: React.FunctionComponent<Props> = ({ containerWidth, roundScore, fontColor }) => {
+    const fontSize = useSharedValue(calculateFontSize(containerWidth));
+
     const animatedStyles = useAnimatedStyle(() => {
         return {
-            fontSize: fontSizeRound.value,
+            fontSize: fontSize.value,
         };
     });
 
     const d = roundScore;
 
     useEffect(() => {
-        fontSizeRound.value = withTiming(
-            calcFontSize(firstRowLength) * .8, { duration: animationDuration }
+        fontSize.value = withTiming(
+            calculateFontSize(containerWidth) * multiLineScoreSizeMultiplier,
+            { duration: animationDuration }
         );
-    }, [roundScore]);
+
+    }, [roundScore, containerWidth]);
 
     if (roundScore == 0) {
         return <></>;
@@ -40,7 +42,8 @@ const ScoreRound: React.FunctionComponent<Props> = ({ roundScore, totalScore, fo
             <Animated.Text numberOfLines={1}
                 style={[animatedStyles, {
                     fontVariant: ['tabular-nums'],
-                    color: fontColor, opacity: .75
+                    color: fontColor,
+                    opacity: scoreMathOpacity
                 }]}>
                 {roundScore > 0 && " + "}
                 {roundScore < 0 && " - "}

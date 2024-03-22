@@ -1,14 +1,13 @@
-import { configureStore } from '@reduxjs/toolkit';
+import { configureStore , EntityState } from '@reduxjs/toolkit';
+import { Store } from 'redux';
+
 import gamesReducer, {
     roundNext,
     roundPrevious,
     gameSave,
     gameDelete,
     selectAllGames,
-} from './GamesSlice';
-import { GameState } from './GamesSlice';
-import { EntityState } from '@reduxjs/toolkit';
-import { Store } from 'redux';
+ GameState } from './GamesSlice';
 
 describe('games reducer', () => {
     let store: Store<EntityState<GameState>>;
@@ -39,7 +38,7 @@ describe('games reducer', () => {
             throw new Error('game1 not found');
         }
         expect(state.entities.game1.roundCurrent).toBe(1);
-        expect(state.entities.game1.roundTotal).toBe(1);
+        expect(state.entities.game1.roundTotal).toBe(2);
     });
 
     it('should handle roundPrevious', () => {

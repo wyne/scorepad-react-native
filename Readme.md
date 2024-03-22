@@ -15,7 +15,7 @@ https://github.com/wyne/scorepad-react-native/assets/1986068/05bde405-3025-4156-
 
 ## Website
 
-https://wyne.github.io/scorepad/
+https://www.scorepadapp.com
 
 ## Contributing
 

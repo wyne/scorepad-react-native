@@ -1,18 +1,20 @@
 import React, { memo, useCallback } from 'react';
-import { Text, View } from 'react-native';
-import { TouchableWithoutFeedback } from 'react-native';
+
 import analytics from '@react-native-firebase/analytics';
-import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
+import { Text, View , TouchableWithoutFeedback } from 'react-native';
 
 import { selectGameById, updateGame } from '../../../redux/GamesSlice';
+import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
+
 import RoundScoreCell from './RoundScoreCell';
 
 interface Props {
     round: number;
     isCurrentRound: boolean;
+    disabled?: boolean;
 }
 
-const RoundScoreColumn: React.FunctionComponent<Props> = ({ round, isCurrentRound }) => {
+const RoundScoreColumn: React.FunctionComponent<Props> = ({ round, isCurrentRound, disabled = false }) => {
     const dispatch = useAppDispatch();
 
     const currentGameId = useAppSelector(state => state.settings.currentGameId);
@@ -21,6 +23,8 @@ const RoundScoreColumn: React.FunctionComponent<Props> = ({ round, isCurrentRoun
     if (typeof currentGame == 'undefined') return null;
 
     const onPressHandler = useCallback(async () => {
+        if (disabled) return;
+
         dispatch(updateGame({
             id: currentGameId,
             changes: {
@@ -33,14 +37,23 @@ const RoundScoreColumn: React.FunctionComponent<Props> = ({ round, isCurrentRoun
         });
     }, []);
 
+    let backgroundColor = 'rgba(0,0,0,0)';
+
+    if (isCurrentRound) {
+        backgroundColor = 'rgba(255,0,0,.1)';
+    } else if (round % 2 == 0) {
+        backgroundColor = 'rgba(0,0,0,.1)';
+    }
+
     return (
         <TouchableWithoutFeedback onPress={onPressHandler}>
             <View style={{
                 padding: 10,
-                backgroundColor: isCurrentRound ? '#111' : 'black'
+                paddingBottom: 0,
+                backgroundColor: backgroundColor,
             }}>
                 <Text style={{
-                    color: isCurrentRound ? 'red' : 'yellow',
+                    color: isCurrentRound ? 'red' : '#AAA',
                     fontWeight: 'bold',
                     textAlign: 'center',
                     fontSize: 20,

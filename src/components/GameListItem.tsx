@@ -1,106 +1,97 @@
 import React from 'react';
-import { Text, StyleSheet, Alert } from 'react-native';
-import { ListItem } from 'react-native-elements';
-import Moment from 'react-moment';
-import { Icon } from 'react-native-elements';
-import Animated, { FadeInUp, SlideOutLeft } from 'react-native-reanimated';
-import analytics from '@react-native-firebase/analytics';
 
-import { selectGameById, gameDelete } from '../../redux/GamesSlice';
-import { setCurrentGameId } from '../../redux/SettingsSlice';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import analytics from '@react-native-firebase/analytics';
 import { ParamListBase } from '@react-navigation/native';
-import { useAppDispatch, useAppSelector } from '../../redux/hooks';
-import { GameState } from '../../redux/GamesSlice';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AnyAction, ThunkDispatch } from '@reduxjs/toolkit';
-import { selectAllPlayers } from '../../redux/PlayersSlice';
+import Moment from 'react-moment';
+import { Platform, StyleSheet, Text } from 'react-native';
+import { Icon, ListItem } from 'react-native-elements';
+import Animated, { FadeInUp, SlideOutLeft } from 'react-native-reanimated';
+
+import { selectGameById } from '../../redux/GamesSlice';
+import { useAppDispatch, useAppSelector } from '../../redux/hooks';
+import { setCurrentGameId } from '../../redux/SettingsSlice';
+
+
+import GameListItemPlayerName from './GameListItemPlayerName';
+import AbstractPopupMenu from './PopupMenu/AbstractPopupMenu';
 
 export type Props = {
     navigation: NativeStackNavigationProp<ParamListBase, string, undefined>;
-    game: GameState;
+    gameId: string;
     index: number;
 };
 
-const GameListItem: React.FunctionComponent<Props> = ({ navigation, game, index }) => {
+const GameListItem: React.FunctionComponent<Props> = ({ navigation, gameId, index }) => {
     const dispatch = useAppDispatch();
-    const chosenGame = useAppSelector(state => selectGameById(state, game.id));
-    const playerNames = useAppSelector(state =>
-        selectAllPlayers(state).filter(player => game.playerIds.includes(player.id))
-    )
-        .sort((a, b) => game.playerIds.indexOf(a.id) - game.playerIds.indexOf(b.id))
-        .map(player => player.playerName);
 
-    const rounds: number = chosenGame?.roundTotal || 1;
+    if (gameId == null) { return null; }
+
+    const roundTotal = useAppSelector(state => selectGameById(state, gameId)?.roundTotal);
+    const playerIds = useAppSelector(state => selectGameById(state, gameId)?.playerIds);
+    const gameTitle = useAppSelector(state => selectGameById(state, gameId)?.title);
+    const locked = useAppSelector(state => selectGameById(state, gameId)?.locked);
+    const dateCreated = useAppSelector(state => selectGameById(state, gameId)?.dateCreated);
+    if (roundTotal == null || playerIds == null) { return null; }
 
     const asyncSetCurrentGame = (dispatch: ThunkDispatch<unknown, undefined, AnyAction>) => new Promise<void>((resolve) => {
-        dispatch(setCurrentGameId(game.id));
+        dispatch(setCurrentGameId(gameId));
         resolve();
     });
 
-    // Tap
+    /**
+     * Choose Game and navigate to GameScreen
+     */
     const chooseGameHandler = async () => {
         asyncSetCurrentGame(dispatch).then(() => {
             navigation.navigate("Game");
         });
         await analytics().logEvent('select_game', {
             index: index,
-            game_id: game.id,
-            player_count: playerNames.length,
-            round_count: rounds + 1,
-        });
-    };
-
-    // Long Press
-    const deleteGameHandler = async () => {
-        Alert.alert(
-            'Delete Game',
-            `Are you sure you want to delete ${game.title}?`,
-            [
-                {
-                    text: 'Cancel',
-                    onPress: () => { },
-                    style: 'cancel',
-                },
-                {
-                    text: 'OK',
-                    onPress: () => {
-                        dispatch(gameDelete(game.id));
-                    }
-                },
-            ],
-            { cancelable: false },
-        );
-
-        await analytics().logEvent('delete_game', {
-            index: index,
-            round_count: rounds + 1,
-            player_count: playerNames.length,
+            game_id: gameId,
+            player_count: playerIds.length,
+            round_count: roundTotal,
         });
     };
 
     return (
-        <Animated.View entering={FadeInUp.duration(500).delay(100 + index * 100)}
+        <Animated.View entering={FadeInUp.duration(200).delay(100 + index * 100)}
             exiting={SlideOutLeft.duration(200)}>
-            <ListItem key={game.id} bottomDivider
-                onPress={chooseGameHandler}
-                onLongPress={deleteGameHandler}>
-                <ListItem.Content>
-                    <ListItem.Title>{game.title}</ListItem.Title>
-                    <ListItem.Subtitle style={styles.gameSubtitle}>
-                        <Text><Moment element={Text} fromNow>{game.dateCreated}</Moment></Text>
-                    </ListItem.Subtitle>
-                    <ListItem.Subtitle style={styles.gameSubtitle}>
-                        <Text>{playerNames.join(', ')}</Text>
-                    </ListItem.Subtitle>
-                </ListItem.Content>
-                <Text style={styles.badgePlayers}>
-                    {playerNames.length} <Icon color={'#01497C'} name="users" type="font-awesome-5" size={16} />
-                </Text>
-                <Text style={styles.badgeRounds}>
-                    {rounds + 1} <Icon color={'#c25858'} name="circle-notch" type="font-awesome-5" size={16} />
-                </Text>
-                <ListItem.Chevron />
-            </ListItem>
+            <AbstractPopupMenu
+                gameId={gameId}
+                asyncSetCurrentGame={asyncSetCurrentGame}
+                chooseGameHandler={chooseGameHandler}
+                navigation={navigation}
+                index={index}
+            >
+                <ListItem key={gameId} bottomDivider onPress={
+                    // Only select game if iOS because Android is handled by PopupMenu
+                    Platform.OS == 'ios' ? chooseGameHandler : undefined
+                }>
+                    <ListItem.Content>
+                        <ListItem.Title style={{ alignItems: 'center' }}>
+                            {gameTitle}
+                            {locked && <Icon name="lock-closed-outline" type="ionicon" size={14} color='green' style={{ paddingHorizontal: 4 }} />}
+                        </ListItem.Title>
+                        <ListItem.Subtitle style={styles.gameSubtitle}>
+                            <Text><Moment element={Text} fromNow>{dateCreated}</Moment></Text>
+                        </ListItem.Subtitle>
+                        <ListItem.Subtitle style={styles.gameSubtitle}>
+                            {playerIds.map((playerId, index) => (
+                                <GameListItemPlayerName key={index} playerId={playerId} last={index == playerIds.length - 1} />
+                            ))}
+                        </ListItem.Subtitle>
+                    </ListItem.Content>
+                    <Text style={styles.badgePlayers}>
+                        {playerIds.length} <Icon color={'#01497C'} name="users" type="font-awesome-5" size={16} />
+                    </Text>
+                    <Text style={styles.badgeRounds}>
+                        {roundTotal} <Icon color={'#c25858'} name="circle-notch" type="font-awesome-5" size={16} />
+                    </Text>
+                    <ListItem.Chevron />
+                </ListItem>
+            </AbstractPopupMenu>
         </Animated.View>
     );
 };

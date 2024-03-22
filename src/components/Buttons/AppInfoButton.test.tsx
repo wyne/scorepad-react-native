@@ -1,7 +1,9 @@
-import { render, fireEvent, waitFor } from '@testing-library/react-native';
 import analytics from '@react-native-firebase/analytics';
-import AppInfoButton from './AppInfoButton';
+import { render, fireEvent, waitFor } from '@testing-library/react-native';
+
 import { useNavigationMock } from '../../../test/test-helpers';
+
+import AppInfoButton from './AppInfoButton';
 
 describe('AppInfoButton', () => {
     const navigation = useNavigationMock();

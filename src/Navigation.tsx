@@ -1,19 +1,24 @@
 import React from 'react';
+
 import { DarkTheme, NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import * as Application from 'expo-application';
-
-import ListScreen from "../src/screens/ListScreen";
-import GameScreen from "../src/screens/GameScreen";
-import SettingsScreen from "../src/screens/SettingsScreen";
-import AppInfoScreen from "../src/screens/AppInfoScreen";
-import OnboardingScreen from '../src/screens/OnboardingScreen';
-import HomeHeader from '../src/components/Headers/HomeHeader';
-import GameHeader from '../src/components/Headers/GameHeader';
-import SettingsHeader from '../src/components/Headers/SettingsHeader';
-import AppInfoHeader from '../src/components/Headers/AppInfoHeader';
-import { useAppSelector } from '../redux/hooks';
 import { SemVer, parse } from 'semver';
+
+import { useAppSelector } from '../redux/hooks';
+import AppInfoHeader from '../src/components/Headers/AppInfoHeader';
+import GameHeader from '../src/components/Headers/GameHeader';
+import HomeHeader from '../src/components/Headers/HomeHeader';
+import SettingsHeader from '../src/components/Headers/SettingsHeader';
+import AppInfoScreen from "../src/screens/AppInfoScreen";
+import GameScreen from "../src/screens/GameScreen";
+import ListScreen from "../src/screens/ListScreen";
+import OnboardingScreen from '../src/screens/OnboardingScreen';
+import SettingsScreen from "../src/screens/SettingsScreen";
+
+import ShareHeader from './components/Headers/ShareHeader';
+import { getOnboardingSemVer } from './components/Onboarding/Onboarding';
+import ShareScreen from './screens/ShareScreen';
 
 export type OnboardingScreenParamList = {
     onboarding: boolean;
@@ -22,8 +27,11 @@ export type OnboardingScreenParamList = {
 export type RootStackParamList = {
     List: undefined;
     Game: undefined;
-    Settings: undefined;
+    Settings: {
+        reason?: string;
+    };
     AppInfo: undefined;
+    Share: undefined;
     Onboarding: OnboardingScreenParamList;
     Tutorial: OnboardingScreenParamList;
 };
@@ -46,11 +54,7 @@ export const Navigation = () => {
     console.log(`App Version: ${appVersion}`);
     console.log(`Onboarded Version: ${onboardedSemVer}`);
 
-    let onboarded = true;
-
-    if (onboardedSemVer == null || onboardedSemVer?.compare(new SemVer(appVersion)) == -1) {
-        onboarded = false;
-    }
+    const onboarded = getOnboardingSemVer(onboardedSemVer) === undefined;
 
     return (
         <NavigationContainer theme={MyTheme}>
@@ -94,11 +98,20 @@ export const Navigation = () => {
                     }}
                 />
                 <Stack.Screen name="Settings" component={SettingsScreen}
-                    options={{
+                    options={({ route }) => ({
                         orientation: 'all',
                         title: "Settings",
                         header: ({ navigation }) => {
-                            return <SettingsHeader navigation={navigation} />;
+                            return <SettingsHeader navigation={navigation} route={route} />;
+                        },
+                    })}
+                />
+                <Stack.Screen name="Share" component={ShareScreen}
+                    options={{
+                        orientation: 'all',
+                        title: "Share",
+                        header: ({ navigation }) => {
+                            return <ShareHeader navigation={navigation} />;
                         },
                     }}
                 />

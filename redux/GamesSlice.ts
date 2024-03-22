@@ -1,11 +1,10 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { createEntityAdapter } from '@reduxjs/toolkit';
-import { createAsyncThunk } from '@reduxjs/toolkit';
+import analytics from '@react-native-firebase/analytics';
+import { createSlice, PayloadAction, createEntityAdapter, createAsyncThunk, createSelector } from '@reduxjs/toolkit';
 import * as Crypto from 'expo-crypto';
 
-import analytics from '@react-native-firebase/analytics';
-import { playerAdd } from './PlayersSlice';
+import { playerAdd, selectAllPlayers } from './PlayersSlice';
 import { setCurrentGameId } from './SettingsSlice';
+import { RootState } from './store';
 
 export interface GameState {
     id: string;
@@ -14,6 +13,7 @@ export interface GameState {
     roundCurrent: number;
     roundTotal: number;
     playerIds: string[];
+    locked?: boolean;
 }
 
 const gamesAdapter = createEntityAdapter({
@@ -35,7 +35,7 @@ const gamesSlice = createSlice({
                 id: action.payload,
                 changes: {
                     roundCurrent: game.roundCurrent + 1,
-                    roundTotal: Math.max(game.roundTotal, game.roundCurrent + 1)
+                    roundTotal: Math.max(game.roundTotal, game.roundCurrent + 2)
                 }
             });
         },
@@ -64,30 +64,32 @@ interface GamesSlice {
 
 export const asyncCreateGame = createAsyncThunk(
     'games/create',
-    async (gameCount: number, { dispatch }) => {
-        const player1Id = Crypto.randomUUID();
-        const player2Id = Crypto.randomUUID();
+    async (
+        { gameCount, playerCount }: { gameCount: number, playerCount: number },
+        { dispatch }
+    ) => {
         const newGameId = Crypto.randomUUID();
 
-        dispatch(playerAdd({
-            id: player1Id,
-            playerName: "Player 1",
-            scores: [0],
-        }));
+        const playerIds: string[] = [];
+        for (let i = 0; i < playerCount; i++) {
+            playerIds.push(Crypto.randomUUID());
+        }
 
-        dispatch(playerAdd({
-            id: player2Id,
-            playerName: "Player 2",
-            scores: [0],
-        }));
+        playerIds.forEach((playerId) => {
+            dispatch(playerAdd({
+                id: playerId,
+                playerName: `Player ${playerIds.indexOf(playerId) + 1}`,
+                scores: [0],
+            }));
+        });
 
         dispatch(gameSave({
             id: newGameId,
-            title: `Game ${gameCount}`,
+            title: `Game ${gameCount + 1}`,
             dateCreated: Date.now(),
             roundCurrent: 0,
-            roundTotal: 0,
-            playerIds: [player1Id, player2Id],
+            roundTotal: 1,
+            playerIds: playerIds,
         }));
 
         dispatch(setCurrentGameId(newGameId));
@@ -100,12 +102,25 @@ export const asyncCreateGame = createAsyncThunk(
     }
 );
 
+export const selectSortedPlayers = createSelector(
+    [
+        selectAllPlayers,
+        (state: RootState) => state.games.entities[state.settings.currentGameId]
+    ],
+    (players, currentGame) => players
+        .filter(player => currentGame?.playerIds.includes(player.id))
+        .sort((a, b) => {
+            if (currentGame?.playerIds == undefined) return 0;
+            return currentGame.playerIds.indexOf(a.id) - currentGame.playerIds.indexOf(b.id);
+        })
+);
+
 export const {
     updateGame,
     roundNext,
     roundPrevious,
     gameSave,
-    gameDelete
+    gameDelete,
 } = gamesSlice.actions;
 
 export default gamesSlice.reducer;

@@ -1,19 +1,29 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { SemVer, valid } from 'semver';
 import * as Application from 'expo-application';
+import { SemVer, valid } from 'semver';
+
+import { InteractionType } from '../src/components/Interactions/InteractionType';
 
 export interface SettingsState {
     home_fullscreen: boolean;
     multiplier: number;
+    addendOne: number;
+    addendTwo: number;
     currentGameId: string | undefined;
     onboarded: string | undefined;
+    showPointParticles: boolean;
+    interactionType: InteractionType;
 };
 
 const initialState: SettingsState = {
     home_fullscreen: false,
     multiplier: 1,
+    addendOne: 1,
+    addendTwo: 10,
     currentGameId: undefined,
     onboarded: undefined,
+    showPointParticles: true,
+    interactionType: InteractionType.SwipeVertical,
 };
 
 const settingsSlice = createSlice({
@@ -26,8 +36,20 @@ const settingsSlice = createSlice({
         toggleHomeFullscreen(state) {
             state.home_fullscreen = !state.home_fullscreen;
         },
+        toggleshowPointParticles(state) {
+            state.showPointParticles = !state.showPointParticles;
+        },
         setMultiplier(state, action: PayloadAction<number>) {
             state.multiplier = action.payload;
+        },
+        setAddendOne(state, action: PayloadAction<number>) {
+            state.addendOne = action.payload;
+        },
+        setAddendTwo(state, action: PayloadAction<number>) {
+            state.addendTwo = action.payload;
+        },
+        setInteractionType(state, action: PayloadAction<InteractionType>) {
+            state.interactionType = action.payload;
         },
         setOnboardedVersion(state) {
             const appVersion = new SemVer(Application.nativeApplicationVersion || '0.0.0');
@@ -41,7 +63,11 @@ export const {
     setCurrentGameId,
     toggleHomeFullscreen,
     setMultiplier,
+    setAddendOne,
+    setAddendTwo,
     setOnboardedVersion,
+    toggleshowPointParticles,
+    setInteractionType,
 } = settingsSlice.actions;
 
 export default settingsSlice.reducer;
