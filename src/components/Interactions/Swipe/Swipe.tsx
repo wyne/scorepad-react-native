@@ -17,6 +17,8 @@ interface HalfTapProps {
     playerId: string;
 }
 
+const notchSize = 50;
+
 const SwipeVertical: React.FC<HalfTapProps> = ({
     children,
     index,
@@ -151,6 +153,17 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
             // Handle the end of the gesture
             totalOffset.value = null;
 
+            analytics().logEvent('score_change', {
+                player_index: index,
+                game_id: currentGameId,
+                addend: powerHold ? addendOne : addendTwo,
+                round: roundCurrent,
+                type: event.nativeEvent.translationY > 0 ? 'decrement' : 'increment',
+                power_hold: powerHold,
+                notches: Math.round((event.nativeEvent.translationY || 0) / notchSize),
+                interaction: 'swipe-vertical',
+            });
+
             // Spring the animation back to the start
             Animated.spring(pan, {
                 toValue: { x: 0, y: 0 },
@@ -177,15 +190,6 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
         }
 
-        analytics().logEvent('score_change', {
-            player_index: index,
-            game_id: currentGameId,
-            addend: Math.abs(a),
-            round: roundCurrent,
-            type: a > 0 ? 'increment' : 'decrement',
-            interaction: 'swipe-vertical',
-        });
-
         dispatch(playerRoundScoreIncrement(playerId, roundCurrent, a));
     };
 
@@ -196,8 +200,8 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
         (currentValue, previousValue) => {
             if (currentValue === null) return;
 
-            const c = Math.round((currentValue || 0) / 50);
-            const p = Math.round((previousValue || 0) / 50);
+            const c = Math.round((currentValue || 0) / notchSize);
+            const p = Math.round((previousValue || 0) / notchSize);
             if (c - p !== 0) {
                 runOnJS(scoreChangeHandler)(c - p);
             }
