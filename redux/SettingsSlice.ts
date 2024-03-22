@@ -12,6 +12,7 @@ export interface SettingsState {
     currentGameId: string | undefined;
     onboarded: string | undefined;
     showPointParticles: boolean;
+    showPlayerIndex: boolean;
     interactionType: InteractionType;
 };
 
@@ -23,6 +24,7 @@ const initialState: SettingsState = {
     currentGameId: undefined,
     onboarded: undefined,
     showPointParticles: true,
+    showPlayerIndex: false,
     interactionType: InteractionType.SwipeVertical,
 };
 
@@ -36,8 +38,11 @@ const settingsSlice = createSlice({
         toggleHomeFullscreen(state) {
             state.home_fullscreen = !state.home_fullscreen;
         },
-        toggleshowPointParticles(state) {
+        toggleShowPointParticles(state) {
             state.showPointParticles = !state.showPointParticles;
+        },
+        toggleShowPlayerIndex(state) {
+            state.showPlayerIndex = !state.showPlayerIndex;
         },
         setMultiplier(state, action: PayloadAction<number>) {
             state.multiplier = action.payload;
@@ -66,7 +71,8 @@ export const {
     setAddendOne,
     setAddendTwo,
     setOnboardedVersion,
-    toggleshowPointParticles,
+    toggleShowPointParticles,
+    toggleShowPlayerIndex,
     setInteractionType,
 } = settingsSlice.actions;
 
