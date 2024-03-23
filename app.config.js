@@ -39,6 +39,23 @@ switch (variant) {
         break;
 }
 
+let androidIcon;
+let androidIconBg;
+switch (variant) {
+    case "development":
+        androidIcon = "./assets/adaptive-icon-dev.png";
+        androidIconBg = "./assets/adaptive-icon-bg-dev.png";
+        break;
+    case "preview":
+        androidIcon = "./assets/adaptive-icon-preview.png";
+        androidIconBg = "./assets/adaptive-icon-bg-preview.png";
+        break;
+    default:
+        androidIcon = "./assets/adaptive-icon.png";
+        androidIconBg = "./assets/adaptive-icon-bg.png";
+        break;
+}
+
 export default {
     name: name,
     slug: "scorepad",
@@ -58,10 +75,10 @@ export default {
         googleServicesFile: "./GoogleService-Info.plist",
     },
     android: {
-        icon: "./assets/adaptive-icon.png",
+        icon: androidIcon,
         adaptiveIcon: {
             foregroundImage: "./assets/adaptive-icon-fg.png",
-            backgroundImage: "./assets/adaptive-icon-bg.png",
+            backgroundImage: androidIconBg,
         },
         package: packageName,
         permissions: [],
