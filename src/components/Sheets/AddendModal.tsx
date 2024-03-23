@@ -3,6 +3,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { BottomSheetBackdrop, BottomSheetBackdropProps, BottomSheetModal, BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { Picker } from '@react-native-picker/picker';
 import * as ScreenOrientation from 'expo-screen-orientation';
+import { debounce } from 'lodash';
 import { Platform, StyleSheet, Text, View } from 'react-native';
 
 import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
@@ -59,10 +60,14 @@ const AddendModal: React.FunctionComponent<Props> = ({ }) => {
         // TODO: analytics
     }, [addendOne]);
 
+    const debouncedTapValueChange = debounce(onTapValueChange, 200);
+
     const onLongTapValueChange = useCallback((itemValue: number) => {
         dispatch(setAddendTwo(itemValue));
         // TODO: analytics
     }, [addendTwo]);
+
+    const debouncedLongTapValueChange = debounce(onLongTapValueChange, 200);
 
     // ref
     const addendModalRef = useAddendModalContext();
@@ -146,7 +151,7 @@ const AddendModal: React.FunctionComponent<Props> = ({ }) => {
                                 <View style={isAndroid ? styles.pickerContainerAndroid : styles.pickerContainer}>
                                     <Picker
                                         selectedValue={addendOne}
-                                        onValueChange={onTapValueChange}
+                                        onValueChange={isAndroid ? debouncedTapValueChange : onTapValueChange}
                                         style={isAndroid ? styles.pickerAndroid : styles.picker}
                                         itemStyle={styles.pickerItem}
                                     >
@@ -164,7 +169,7 @@ const AddendModal: React.FunctionComponent<Props> = ({ }) => {
                                 <View style={isAndroid ? styles.pickerContainerAndroid : styles.pickerContainer}>
                                     <Picker
                                         selectedValue={addendTwo}
-                                        onValueChange={onLongTapValueChange}
+                                        onValueChange={isAndroid ? debouncedLongTapValueChange : onLongTapValueChange}
                                         style={isAndroid ? styles.pickerAndroid : styles.picker}
                                         itemStyle={styles.pickerItem}
                                     >
