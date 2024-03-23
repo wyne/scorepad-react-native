@@ -136,9 +136,10 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
                 // Handle the gesture movement
 
                 // Invert the value for panning up to be positive
-                totalOffset.value = -event.nativeEvent.translationY;
+                const y = event.nativeEvent.translationY;
+                totalOffset.value = -y;
 
-                if (powerHoldRef.current == false) {
+                if (powerHoldRef.current == false && Math.abs(y) > 1) {
                     powerHoldStop();
                 }
             },
