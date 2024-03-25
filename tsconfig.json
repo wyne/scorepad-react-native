@@ -1,7 +1,11 @@
 {
   "compilerOptions": {
     "strict": true,
-    "jsx": "react-native"
+    "jsx": "react-native",
+    "types": [
+      "@testing-library/jest-native",
+      "jest",
+    ],
   },
   "extends": "expo/tsconfig.base",
   "include": [

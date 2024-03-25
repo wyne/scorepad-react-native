@@ -138,7 +138,7 @@ const OnboardingScreen: React.FunctionComponent<Props> = ({ navigation, route })
     }, [activeIndex]);
 
     return (
-        <Animated.View style={[styles.container]} entering={FadeIn}>
+        <Animated.View style={[styles.container]} entering={FadeIn} testID={'onboarding'}>
             <SafeAreaView edges={(['top', 'bottom'])} style={onboarding ? { paddingTop: 40 } : {}}>
                 <View style={[StyleSheet.absoluteFillObject]}>
                     {onboardingScreens.map((item, index) => {

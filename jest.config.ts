@@ -1,4 +1,6 @@
-module.exports = {
+import type { Config } from 'jest';
+
+const config: Config = {
     preset: 'jest-expo',
     transform: {
         '^.+\\.tsx?$': 'babel-jest',
@@ -9,6 +11,8 @@ module.exports = {
     testRegex: '(/__tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$',
     moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
     setupFilesAfterEnv: [
-        "@testing-library/jest-native/extend-expect"
+        "@testing-library/jest-native/extend-expect",
     ]
 };
+
+export default config;
