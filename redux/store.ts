@@ -19,6 +19,7 @@ const settingsPersistConfig = {
         'onboarded',
         'showPointParticles',
         'interactionType',
+        'lastStoreReviewPrompt',
     ],
 };
 
