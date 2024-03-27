@@ -17,6 +17,7 @@ import OnboardingScreen from '../src/screens/OnboardingScreen';
 import SettingsScreen from "../src/screens/SettingsScreen";
 
 import ShareHeader from './components/Headers/ShareHeader';
+import { getOnboardingSemVer } from './components/Onboarding/Onboarding';
 import ShareScreen from './screens/ShareScreen';
 
 export type OnboardingScreenParamList = {
@@ -53,11 +54,7 @@ export const Navigation = () => {
     console.log(`App Version: ${appVersion}`);
     console.log(`Onboarded Version: ${onboardedSemVer}`);
 
-    let onboarded = true;
-
-    if (onboardedSemVer == null || onboardedSemVer?.compare(new SemVer('2.2.2')) == -1) {
-        onboarded = false;
-    }
+    const onboarded = getOnboardingSemVer(onboardedSemVer) === undefined;
 
     return (
         <NavigationContainer theme={MyTheme}>

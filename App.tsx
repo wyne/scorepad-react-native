@@ -21,18 +21,18 @@ export default function App() {
     return (
         <View style={{ flex: 1, backgroundColor: '#fff' }}>
             <GestureHandlerRootView style={{ flex: 1 }}>
-                <GameSheetContextProvider>
-                    <MenuProvider>
-                        <AddendModalContextProvider>
-                            <Provider store={store}>
+                <Provider store={store}>
+                    <GameSheetContextProvider>
+                        <MenuProvider>
+                            <AddendModalContextProvider>
                                 <PersistGate loading={null} persistor={persistor}>
                                     <StatusBar />
                                     <Navigation />
                                 </PersistGate>
-                            </Provider>
-                        </AddendModalContextProvider>
-                    </MenuProvider>
-                </GameSheetContextProvider>
+                            </AddendModalContextProvider>
+                        </MenuProvider>
+                    </GameSheetContextProvider>
+                </Provider>
             </GestureHandlerRootView>
         </View>
     );

@@ -1,11 +1,15 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { BottomSheetBackdrop, BottomSheetBackdropProps, BottomSheetModal } from '@gorhom/bottom-sheet';
+import { BottomSheetBackdrop, BottomSheetBackdropProps, BottomSheetModal, BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { Picker } from '@react-native-picker/picker';
-import { View, StyleSheet, Text, Platform } from 'react-native';
+import * as ScreenOrientation from 'expo-screen-orientation';
+import { debounce } from 'lodash';
+import { Platform, StyleSheet, Text, View } from 'react-native';
 
 import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
 import { setAddendOne, setAddendTwo, setMultiplier } from '../../../redux/SettingsSlice';
+import InteractionSelector from '../Interactions/InteractionSelector';
+import { InteractionType } from '../Interactions/InteractionType';
 
 import { useAddendModalContext } from './AddendModalContext';
 
@@ -15,8 +19,35 @@ interface Props {
 const AddendModal: React.FunctionComponent<Props> = ({ }) => {
     const addendOne = useAppSelector(state => state.settings.addendOne);
     const addendTwo = useAppSelector(state => state.settings.addendTwo);
+    const interactionType = useAppSelector(state => state.settings.interactionType);
 
-    // Array of 1 to 50
+    // Store the current orientation
+    const [isLandscape, setIsLandscape] = useState<boolean>(false);
+
+    useEffect(() => {
+        const getOrientation = async () => {
+            const orientation = await ScreenOrientation.getOrientationAsync();
+            setIsLandscape(
+                orientation === ScreenOrientation.Orientation.LANDSCAPE_LEFT ||
+                orientation === ScreenOrientation.Orientation.LANDSCAPE_RIGHT
+            );
+        };
+
+        const subscription = ScreenOrientation.addOrientationChangeListener(({ orientationInfo }) => {
+            setIsLandscape(
+                orientationInfo.orientation === ScreenOrientation.Orientation.LANDSCAPE_LEFT ||
+                orientationInfo.orientation === ScreenOrientation.Orientation.LANDSCAPE_RIGHT
+            );
+        });
+
+        getOrientation();
+
+        return () => {
+            ScreenOrientation.removeOrientationChangeListener(subscription);
+        };
+    }, []);
+
+    // Array of 1 to 100
     const addendOptions = Array.from({ length: 100 }, (_, i) => i + 1);
 
     const dispatch = useAppDispatch();
@@ -27,18 +58,22 @@ const AddendModal: React.FunctionComponent<Props> = ({ }) => {
         dispatch(setMultiplier(addendOptions[itemIndex]));
         dispatch(setAddendOne(addendOptions[itemIndex]));
         // TODO: analytics
-    }, []);
+    }, [addendOne]);
+
+    const debouncedTapValueChange = debounce(onTapValueChange, 200);
 
     const onLongTapValueChange = useCallback((itemValue: number) => {
         dispatch(setAddendTwo(itemValue));
         // TODO: analytics
-    }, []);
+    }, [addendTwo]);
+
+    const debouncedLongTapValueChange = debounce(onLongTapValueChange, 200);
 
     // ref
     const addendModalRef = useAddendModalContext();
 
     // variables
-    const snapPoints = useMemo(() => [1, 320], []);
+    const snapPoints = useMemo(() => [1, 520], []);
 
     const handleSheetChanges = useCallback((index: number) => {
         if (index === 0) {
@@ -57,6 +92,24 @@ const AddendModal: React.FunctionComponent<Props> = ({ }) => {
         []
     );
 
+    const addendOneLabel = (() => {
+        switch (interactionType) {
+            case InteractionType.HalfTap:
+                return 'Single Tap';
+            case InteractionType.SwipeVertical:
+                return 'Swipe';
+        }
+    })();
+
+    const addendTwoLabel = (() => {
+        switch (interactionType) {
+            case InteractionType.HalfTap:
+                return 'Long Press';
+            case InteractionType.SwipeVertical:
+                return 'Hold + Swipe';
+        }
+    })();
+
     return (
         <BottomSheetModal
             ref={addendModalRef}
@@ -68,53 +121,72 @@ const AddendModal: React.FunctionComponent<Props> = ({ }) => {
             backgroundStyle={{ backgroundColor: 'rgb(30,40,50)' }}
             handleIndicatorStyle={{ backgroundColor: 'white' }}
         >
-            <View style={styles.modalContainer}>
-                <Text style={{ color: 'white', fontSize: 20 }}>Point Values</Text>
+            <BottomSheetScrollView style={[
+                styles.modalContainer]}
+                contentContainerStyle={{ alignItems: 'center' }}>
 
                 <View style={{
                     flex: 1,
-                    flexDirection: 'row',
+                    width: '100%',
                     justifyContent: 'space-around',
-                    padding: 10,
+                    flexDirection: isLandscape ? 'row' : 'column',
                 }}>
-                    <View>
-                        <Text style={{ color: 'white', textAlign: 'center' }}>Single Tap</Text>
-                        <View style={isAndroid ? styles.pickerContainerAndroid : styles.pickerContainer}>
-                            <Picker
-                                selectedValue={addendOne}
-                                onValueChange={onTapValueChange}
-                                style={isAndroid ? styles.pickerAndroid : styles.picker}
-                                itemStyle={styles.pickerItem}
-                            >
-                                {
-                                    addendOptions.map((addend) => (
-                                        <Picker.Item key={addend} label={addend.toString()} value={addend} />
-                                    ))
-                                }
-                            </Picker>
-                        </View>
+
+                    <View style={{ flex: 1 }}>
+                        <InteractionSelector />
                     </View>
 
-                    <View>
-                        <Text style={{ color: 'white', textAlign: 'center' }}>Long Press</Text>
-                        <View style={isAndroid ? styles.pickerContainerAndroid : styles.pickerContainer}>
-                            <Picker
-                                selectedValue={addendTwo}
-                                onValueChange={onLongTapValueChange}
-                                style={isAndroid ? styles.pickerAndroid : styles.picker}
-                                itemStyle={styles.pickerItem}
-                            >
-                                {
-                                    addendOptions.map((addend) => (
-                                        <Picker.Item key={addend} label={addend.toString()} value={addend} />
-                                    ))
-                                }
-                            </Picker>
+                    <View style={{ flex: 1, flexDirection: 'column', alignItems: 'center' }}>
+
+                        <Text style={{ color: 'white', fontSize: 20 }}>Point Values</Text>
+
+                        <View style={{
+                            flex: 1,
+                            flexDirection: 'row',
+                            justifyContent: 'space-around',
+                            padding: 10,
+                        }}>
+                            <View>
+                                <Text style={{ color: 'white', textAlign: 'center' }}>{addendOneLabel}</Text>
+                                <View style={isAndroid ? styles.pickerContainerAndroid : styles.pickerContainer}>
+                                    <Picker
+                                        selectedValue={addendOne}
+                                        onValueChange={isAndroid ? debouncedTapValueChange : onTapValueChange}
+                                        style={isAndroid ? styles.pickerAndroid : styles.picker}
+                                        itemStyle={styles.pickerItem}
+                                    >
+                                        {
+                                            addendOptions.map((addend) => (
+                                                <Picker.Item key={addend} label={addend.toString()} value={addend} />
+                                            ))
+                                        }
+                                    </Picker>
+                                </View>
+                            </View>
+
+                            <View>
+                                <Text style={{ color: 'white', textAlign: 'center' }}>{addendTwoLabel}</Text>
+                                <View style={isAndroid ? styles.pickerContainerAndroid : styles.pickerContainer}>
+                                    <Picker
+                                        selectedValue={addendTwo}
+                                        onValueChange={isAndroid ? debouncedLongTapValueChange : onLongTapValueChange}
+                                        style={isAndroid ? styles.pickerAndroid : styles.picker}
+                                        itemStyle={styles.pickerItem}
+                                    >
+                                        {
+                                            addendOptions.map((addend) => (
+                                                <Picker.Item key={addend} label={addend.toString()} value={addend} />
+                                            ))
+                                        }
+                                    </Picker>
+                                </View>
+                            </View>
                         </View>
+
                     </View>
                 </View>
 
-            </View>
+            </BottomSheetScrollView>
         </BottomSheetModal>
     );
 };
@@ -122,7 +194,6 @@ const AddendModal: React.FunctionComponent<Props> = ({ }) => {
 const styles = StyleSheet.create({
     modalContainer: {
         flex: 1,
-        alignItems: 'center',
     },
     picker: {
         width: 90,
