@@ -3,9 +3,9 @@ import React from 'react';
 import { StyleSheet } from 'react-native';
 import Animated from 'react-native-reanimated';
 
-import { selectGameById } from '../../../../redux/GamesSlice';
 import { useAppSelector } from '../../../../redux/hooks';
 import { selectPlayerById } from '../../../../redux/PlayersSlice';
+import { selectCurrentGame } from '../../../../redux/selectors';
 
 import { calculateFontSize } from './Helpers';
 import ScoreAfter from './ScoreAfter';
@@ -26,8 +26,7 @@ const AdditionTile: React.FunctionComponent<Props> = ({
     maxHeight,
     playerId,
 }) => {
-    const currentGameId = useAppSelector(state => state.settings.currentGameId);
-    const currentGame = useAppSelector(state => selectGameById(state, currentGameId));
+    const currentGame = useAppSelector(selectCurrentGame);
     if (typeof currentGame == 'undefined') return null;
 
     const roundCurrent = currentGame.roundCurrent;

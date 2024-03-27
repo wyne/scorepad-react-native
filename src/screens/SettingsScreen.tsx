@@ -9,9 +9,10 @@ import { Button, Icon } from 'react-native-elements';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import Animated, { Layout } from 'react-native-reanimated';
 
-import { selectGameById, selectSortedPlayers, updateGame, } from '../../redux/GamesSlice';
+import { selectSortedPlayers, updateGame } from '../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { playerAdd } from '../../redux/PlayersSlice';
+import { selectCurrentGame } from '../../redux/selectors';
 import EditGame from '../components/EditGame';
 import EditPlayer from '../components/EditPlayer';
 import { systemBlue } from '../constants';
@@ -34,7 +35,7 @@ const SettingsScreen: React.FunctionComponent<Props> = ({ }) => {
     const currentGameId = useAppSelector(state => state.settings.currentGameId);
     if (typeof currentGameId == 'undefined') return null;
 
-    const currentGame = useAppSelector(state => selectGameById(state, state.settings.currentGameId));
+    const currentGame = useAppSelector(selectCurrentGame);
     const players = useAppSelector(selectSortedPlayers);
 
     const maxPlayers = 12;

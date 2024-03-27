@@ -4,8 +4,8 @@ import { getContrastRatio } from 'colorsheet';
 import { LayoutChangeEvent, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { selectGameById } from '../../../redux/GamesSlice';
 import { useAppSelector } from '../../../redux/hooks';
+import { selectCurrentGame } from '../../../redux/selectors';
 import { bottomSheetHeight } from '../../components/Sheets/GameSheet';
 
 import FlexboxTile from './FlexboxTile';
@@ -22,7 +22,7 @@ const FlexboxBoard: React.FC<FlexboxBoardProps> = () => {
     const [rows, setRows] = useState<number>(0);
     const [cols, setCols] = useState<number>(0);
     const fullscreen = useAppSelector(state => state.settings.home_fullscreen);
-    const currentGame = useAppSelector(state => selectGameById(state, state.settings.currentGameId));
+    const currentGame = useAppSelector(selectCurrentGame);
 
     const [width, setWidth] = useState<number | null>(null);
     const [height, setHeight] = useState<number | null>(null);

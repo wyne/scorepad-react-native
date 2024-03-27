@@ -1,16 +1,17 @@
 import React, { useState } from 'react';
 
-import { Text, View, StyleSheet, NativeSyntheticEvent, TextInputEndEditingEventData } from 'react-native';
+import { NativeSyntheticEvent, StyleSheet, Text, TextInputEndEditingEventData, View } from 'react-native';
 import { Input } from 'react-native-elements';
 
-import { selectGameById, updateGame } from '../../redux/GamesSlice';
+import { updateGame } from '../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
+import { selectCurrentGame } from '../../redux/selectors';
 
 const UNTITLED = "Untitled";
 
 const EditGame = ({ }) => {
     const dispatch = useAppDispatch();
-    const currentGame = useAppSelector(state => selectGameById(state, state.settings.currentGameId));
+    const currentGame = useAppSelector(selectCurrentGame);
 
     if (typeof currentGame == 'undefined') return null;
 

@@ -4,13 +4,14 @@ import analytics from '@react-native-firebase/analytics';
 import { ParamListBase } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import * as Sharing from 'expo-sharing';
-import { View, StyleSheet, ScrollView, Text } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Button, Icon } from 'react-native-elements';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { captureRef } from "react-native-view-shot";
 
 import { selectGameById } from '../../redux/GamesSlice';
 import { useAppSelector } from '../../redux/hooks';
+import { selectCurrentGame } from '../../redux/selectors';
 import PlayerNameColumn from '../components/ScoreLog/PlayerNameColumn';
 import RoundScoreColumn from '../components/ScoreLog/RoundScoreColumn';
 import TotalScoreColumn from '../components/ScoreLog/TotalScoreColumn';
@@ -25,7 +26,7 @@ const ShareScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     if (typeof currentGameId == 'undefined') return null;
 
     const roundTotal = useAppSelector(state => selectGameById(state, currentGameId)?.roundTotal || 0);
-    const currentGame = useAppSelector(state => selectGameById(state, state.settings.currentGameId));
+    const currentGame = useAppSelector(selectCurrentGame);
     if (typeof currentGame == 'undefined') return null;
 
     const roundsScrollViewEl = useRef<ScrollView>(null);
