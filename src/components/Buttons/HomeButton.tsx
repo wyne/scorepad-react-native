@@ -33,7 +33,7 @@ const HomeButton: React.FunctionComponent<Props> = ({ navigation }) => {
         if (roundCurrent < 1) { return; }
         if (daysSinceLastPrompt < 180) { return; }
 
-        console.log("Prompt for review");
+        await analytics().logEvent('review_prompt');
 
         dispatch(setLastStoreReviewPrompt(Date.now()));
 
