@@ -56,7 +56,7 @@ const AdditionTile: React.FunctionComponent<Props> = ({
 
     return (
         <Animated.View style={[{ justifyContent: 'center' }]}>
-            <Animated.Text style={[styles.name, dynamicPlayerStyles]} numberOfLines={1}>
+            <Animated.Text style={[styles.name, dynamicPlayerStyles]} allowFontScaling={false} numberOfLines={1}>
                 {playerName}
             </Animated.Text>
 

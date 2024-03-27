@@ -40,6 +40,7 @@ const ScoreRound: React.FunctionComponent<Props> = ({ containerWidth, roundScore
     return (
         <Animated.View>
             <Animated.Text numberOfLines={1}
+                allowFontScaling={false}
                 style={[animatedStyles, {
                     fontVariant: ['tabular-nums'],
                     color: fontColor,
