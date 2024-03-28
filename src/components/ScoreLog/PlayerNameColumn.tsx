@@ -24,6 +24,16 @@ const PlayerNameColumn: React.FunctionComponent<Props> = ({ sortSelector }) => {
 
     if (players == undefined) return null;
 
+    const getPlayerIndex = (playerId: string | undefined) => {
+        if (playerId == undefined) return -1;
+        const index = currentGame.playerIds.findIndex((id) => id === playerId);
+        return index;
+    };
+
+    const playerColor = (playerId: string | undefined) => {
+        return "#" + palette[getPlayerIndex(playerId) % palette.length];
+    };
+
     return (
         <View style={{ paddingVertical: 10 }}>
             <Text style={styles.editRow}>
@@ -34,7 +44,7 @@ const PlayerNameColumn: React.FunctionComponent<Props> = ({ sortSelector }) => {
                     color='white' />
             </Text>
             {players.map((player, index) => (
-                <View key={index} style={{ paddingLeft: 5, borderLeftWidth: 5, borderColor: "#" + palette[index % palette.length] }}>
+                <View key={index} style={{ paddingLeft: 5, borderLeftWidth: 5, borderColor: playerColor(player?.id) }}>
                     <Text key={index} style={{ color: 'white', maxWidth: 100, fontSize: 20, }}
                         numberOfLines={1}
                     >{player?.playerName}</Text>

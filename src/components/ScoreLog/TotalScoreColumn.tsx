@@ -22,7 +22,7 @@ const TotalScoreColumn: React.FunctionComponent<Props> = ({ sortSelector }) => {
     return (
         <View key={'total'} style={{ padding: 10 }}>
             <Text style={[styles.totalHeader]}>
-                Total
+                Total ↓
             </Text>
             {sortedPlayerIds.map((playerId) => (
                 <TotalScoreCell key={playerId} playerId={playerId} />
