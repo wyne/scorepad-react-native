@@ -1,10 +1,11 @@
 import React, { memo, useCallback } from 'react';
 
 import analytics from '@react-native-firebase/analytics';
-import { Text, View , TouchableWithoutFeedback } from 'react-native';
+import { Text, TouchableWithoutFeedback, View } from 'react-native';
 
-import { selectGameById, updateGame } from '../../../redux/GamesSlice';
+import { updateGame } from '../../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
+import { selectCurrentGame } from '../../../redux/selectors';
 
 import RoundScoreCell from './RoundScoreCell';
 
@@ -18,12 +19,12 @@ const RoundScoreColumn: React.FunctionComponent<Props> = ({ round, isCurrentRoun
     const dispatch = useAppDispatch();
 
     const currentGameId = useAppSelector(state => state.settings.currentGameId);
-    const currentGame = useAppSelector(state => selectGameById(state, currentGameId));
+    const currentGame = useAppSelector(selectCurrentGame);
 
     if (typeof currentGame == 'undefined') return null;
 
     const onPressHandler = useCallback(async () => {
-        if (disabled) return;
+        if (disabled || !currentGameId) return;
 
         dispatch(updateGame({
             id: currentGameId,

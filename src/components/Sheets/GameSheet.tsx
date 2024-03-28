@@ -3,14 +3,15 @@ import React, { useCallback, useMemo, useState } from 'react';
 import BottomSheet, { BottomSheetBackdrop, BottomSheetBackdropProps, BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { ParamListBase, useIsFocused } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { View, StyleSheet, Text, Alert, TouchableWithoutFeedback, Platform } from 'react-native';
+import { Alert, Platform, StyleSheet, Text, TouchableWithoutFeedback, View } from 'react-native';
 import { Button } from 'react-native-elements';
 import Animated, { Extrapolate, FadeIn, Layout, interpolate, useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { selectGameById, selectSortedPlayers, updateGame } from '../../../redux/GamesSlice';
+import { selectSortedPlayers, updateGame } from '../../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
 import { updatePlayer } from '../../../redux/PlayersSlice';
+import { selectCurrentGame } from '../../../redux/selectors';
 import { systemBlue } from '../../constants';
 import BigButton from '../BigButtons/BigButton';
 import Rounds from '../Rounds';
@@ -34,7 +35,7 @@ const GameSheet: React.FunctionComponent<Props> = ({ navigation, containerHeight
     if (typeof currentGameId == 'undefined') return null;
 
     const fullscreen = useAppSelector(state => state.settings.home_fullscreen);
-    const currentGame = useAppSelector(state => selectGameById(state, state.settings.currentGameId));
+    const currentGame = useAppSelector(selectCurrentGame);
 
     if (currentGame == undefined) return null;
 

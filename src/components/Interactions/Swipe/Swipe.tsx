@@ -6,9 +6,9 @@ import { Animated, StyleSheet, View } from 'react-native';
 import { PanGestureHandler, PanGestureHandlerStateChangeEvent, State } from 'react-native-gesture-handler';
 import { runOnJS, useAnimatedReaction, useSharedValue } from 'react-native-reanimated';
 
-import { selectGameById } from '../../../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../../../redux/hooks';
 import { playerRoundScoreIncrement } from '../../../../redux/PlayersSlice';
+import { selectCurrentGame } from '../../../../redux/selectors';
 
 interface HalfTapProps {
     children: React.ReactNode;
@@ -27,7 +27,7 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
     //#region Selector setup
 
     const currentGameId = useAppSelector(state => state.settings.currentGameId);
-    const currentGame = useAppSelector(state => selectGameById(state, currentGameId));
+    const currentGame = useAppSelector(selectCurrentGame);
     if (typeof currentGame == 'undefined') return null;
 
     const roundCurrent = currentGame.roundCurrent;

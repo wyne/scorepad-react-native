@@ -1,15 +1,15 @@
 import React from 'react';
 
 import analytics from '@react-native-firebase/analytics';
-import { Text, View, StyleSheet, TouchableOpacity, NativeSyntheticEvent, TextInputEndEditingEventData, Alert } from 'react-native';
+import { Alert, NativeSyntheticEvent, StyleSheet, Text, TextInputEndEditingEventData, TouchableOpacity, View } from 'react-native';
 import { Icon, Input } from 'react-native-elements';
 import Animated from 'react-native-reanimated';
 
-import { selectGameById, updateGame } from '../../redux/GamesSlice';
+import { updateGame } from '../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
-import { selectPlayerById , removePlayer, updatePlayer } from '../../redux/PlayersSlice';
+import { removePlayer, selectPlayerById, updatePlayer } from '../../redux/PlayersSlice';
+import { selectCurrentGame } from '../../redux/selectors';
 import { palette } from '../constants';
-
 
 interface Props {
     playerId: string;
@@ -20,7 +20,7 @@ interface Props {
 
 const EditPlayer: React.FunctionComponent<Props> = ({ playerId, index, setPlayerWasAdded, playerWasAdded }) => {
     const dispatch = useAppDispatch();
-    const currentGame = useAppSelector(state => selectGameById(state, state.settings.currentGameId));
+    const currentGame = useAppSelector(selectCurrentGame);
     const player = useAppSelector(state => selectPlayerById(state, playerId));
 
     if (typeof currentGame == 'undefined') return null;

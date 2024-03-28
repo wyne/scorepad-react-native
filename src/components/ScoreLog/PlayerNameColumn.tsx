@@ -1,19 +1,21 @@
 import React from 'react';
 
-import { Text, View, StyleSheet } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { Icon } from 'react-native-elements/dist/icons/Icon';
 
-import { selectGameById, selectSortedPlayers } from '../../../redux/GamesSlice';
+import { selectSortedPlayers } from '../../../redux/GamesSlice';
 import { useAppSelector } from '../../../redux/hooks';
+import { selectCurrentGame } from '../../../redux/selectors';
 import { palette, systemBlue } from '../../constants';
 
 const PlayerNameColumn: React.FunctionComponent = ({ }) => {
-    const currentGameId = useAppSelector(state => state.settings.currentGameId);
-    const currentGame = useAppSelector(state => selectGameById(state, currentGameId));
+    const currentGame = useAppSelector(selectCurrentGame);
 
     if (currentGame == undefined) return null;
 
     const players = useAppSelector(selectSortedPlayers);
+
+    if (players == undefined) return null;
 
     return (
         <View style={{ paddingVertical: 10 }}>

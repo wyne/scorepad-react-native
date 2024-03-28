@@ -13,6 +13,7 @@ export interface SettingsState {
     onboarded: string | undefined;
     showPointParticles: boolean;
     interactionType: InteractionType;
+    lastStoreReviewPrompt: number;
 };
 
 const initialState: SettingsState = {
@@ -24,6 +25,7 @@ const initialState: SettingsState = {
     onboarded: undefined,
     showPointParticles: true,
     interactionType: InteractionType.SwipeVertical,
+    lastStoreReviewPrompt: 0,
 };
 
 const settingsSlice = createSlice({
@@ -55,7 +57,10 @@ const settingsSlice = createSlice({
             const appVersion = new SemVer(Application.nativeApplicationVersion || '0.0.0');
             console.log(`Setting Onboarded Version: ${appVersion}`);
             state.onboarded = valid(appVersion) || '0.0.0';
-        }
+        },
+        setLastStoreReviewPrompt(state, action: PayloadAction<number>) {
+            state.lastStoreReviewPrompt = action.payload;
+        },
     }
 });
 
@@ -68,6 +73,7 @@ export const {
     setOnboardedVersion,
     toggleshowPointParticles,
     setInteractionType,
+    setLastStoreReviewPrompt,
 } = settingsSlice.actions;
 
 export default settingsSlice.reducer;

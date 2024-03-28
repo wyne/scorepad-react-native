@@ -1,5 +1,6 @@
 import { InteractionType } from '../src/components/Interactions/InteractionType';
 
+import { selectGameById } from './GamesSlice';
 import { RootState } from './store'; // Import your RootState type
 
 export const selectInteractionType = (state: RootState) => {
@@ -13,3 +14,11 @@ export const selectInteractionType = (state: RootState) => {
 
     return safeInteractionType;
 };
+
+export const selectCurrentGame = (state: RootState) => {
+    const currentGameId = state.settings.currentGameId;
+    if (!currentGameId) return;
+
+    return selectGameById(state, currentGameId);
+};
+export const selectLastStoreReviewPrompt = (state: RootState) => state.settings.lastStoreReviewPrompt;

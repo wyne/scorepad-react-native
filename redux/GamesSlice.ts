@@ -2,7 +2,7 @@ import analytics from '@react-native-firebase/analytics';
 import { createSlice, PayloadAction, createEntityAdapter, createAsyncThunk, createSelector } from '@reduxjs/toolkit';
 import * as Crypto from 'expo-crypto';
 
-import { playerAdd, selectAllPlayers } from './PlayersSlice';
+import { ScoreState, playerAdd, selectAllPlayers } from './PlayersSlice';
 import { setCurrentGameId } from './SettingsSlice';
 import { RootState } from './store';
 
@@ -65,7 +65,7 @@ interface GamesSlice {
 export const asyncCreateGame = createAsyncThunk(
     'games/create',
     async (
-        { gameCount, playerCount }: { gameCount: number, playerCount: number },
+        { gameCount, playerCount }: { gameCount: number, playerCount: number; },
         { dispatch }
     ) => {
         const newGameId = Crypto.randomUUID();
@@ -105,14 +105,17 @@ export const asyncCreateGame = createAsyncThunk(
 export const selectSortedPlayers = createSelector(
     [
         selectAllPlayers,
-        (state: RootState) => state.games.entities[state.settings.currentGameId]
+        (state: RootState) => state.settings.currentGameId ? state.games.entities[state.settings.currentGameId] : undefined
     ],
-    (players, currentGame) => players
-        .filter(player => currentGame?.playerIds.includes(player.id))
-        .sort((a, b) => {
-            if (currentGame?.playerIds == undefined) return 0;
-            return currentGame.playerIds.indexOf(a.id) - currentGame.playerIds.indexOf(b.id);
-        })
+    (players: ScoreState[], currentGame: GameState | undefined) => {
+        if (!currentGame) return [];
+
+        return players.filter(player => currentGame.playerIds?.includes(player.id))
+            .sort((a, b) => {
+                if (currentGame?.playerIds == undefined) return 0;
+                return currentGame.playerIds.indexOf(a.id) - currentGame.playerIds.indexOf(b.id);
+            });
+    }
 );
 
 export const {
