@@ -118,6 +118,25 @@ export const selectSortedPlayers = createSelector(
     }
 );
 
+export const selectPlayersByScore = createSelector(
+    [
+        selectAllPlayers,
+        (state: RootState) => state.settings.currentGameId ? state.games.entities[state.settings.currentGameId] : undefined
+    ],
+    (players: ScoreState[], currentGame: GameState | undefined) => {
+        if (!currentGame) return [];
+
+        return [...players]
+            .filter(player => currentGame.playerIds?.includes(player.id))
+            .sort((a, b) => {
+                const totalScoreA = a.scores.reduce((acc, score) => acc + score, 0);
+                const totalScoreB = b.scores.reduce((acc, score) => acc + score, 0);
+                return totalScoreB - totalScoreA;
+            })
+            .map(player => player.id);
+    }
+);
+
 export const {
     updateGame,
     roundNext,

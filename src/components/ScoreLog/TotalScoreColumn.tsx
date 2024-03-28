@@ -4,22 +4,27 @@ import { StyleSheet, Text, View } from 'react-native';
 
 import { useAppSelector } from '../../../redux/hooks';
 import { selectCurrentGame } from '../../../redux/selectors';
+import { RootState } from '../../../redux/store';
 
 import TotalScoreCell from './TotalScoreCell';
 
-const TotalScoreColumn = ({ }) => {
+interface Props {
+    sortSelector: (state: RootState) => string[];
+}
+
+const TotalScoreColumn: React.FunctionComponent<Props> = ({ sortSelector }) => {
     const currentGame = useAppSelector(selectCurrentGame);
 
     if (typeof currentGame == 'undefined') return null;
 
-    const playerIds = currentGame.playerIds;
+    const sortedPlayerIds = useAppSelector(sortSelector);
 
     return (
         <View key={'total'} style={{ padding: 10 }}>
             <Text style={[styles.totalHeader]}>
                 Total
             </Text>
-            {playerIds.map((playerId) => (
+            {sortedPlayerIds.map((playerId) => (
                 <TotalScoreCell key={playerId} playerId={playerId} />
             ))}
         </View>

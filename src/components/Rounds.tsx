@@ -4,7 +4,7 @@ import { ParamListBase } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { View, StyleSheet, ScrollView, Platform, LayoutChangeEvent } from 'react-native';
 
-import { selectGameById } from '../../redux/GamesSlice';
+import { selectGameById, selectPlayersByScore } from '../../redux/GamesSlice';
 import { useAppSelector } from '../../redux/hooks';
 
 import PlayerNameColumn from './ScoreLog/PlayerNameColumn';
@@ -57,14 +57,15 @@ const Rounds: React.FunctionComponent<Props> = ({ }) => {
 
     return (
         <View style={[styles.scoreTableContainer]}>
-            <PlayerNameColumn />
-            <TotalScoreColumn />
+            <PlayerNameColumn sortSelector={selectPlayersByScore} />
+            <TotalScoreColumn sortSelector={selectPlayersByScore} />
             <ScrollView horizontal={true}
                 contentContainerStyle={{ flexDirection: 'row' }}
                 ref={roundsScrollViewEl}>
                 {roundsIterator.map((item, round) => (
                     <View key={round} onLayout={e => onLayoutHandler(e, round)}>
                         <RoundScoreColumn
+                            sortSelector={selectPlayersByScore}
                             round={round}
                             key={round}
                             isCurrentRound={round == roundCurrent} />
