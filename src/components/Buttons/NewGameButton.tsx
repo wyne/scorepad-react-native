@@ -16,7 +16,7 @@ interface Props {
 const NewGameButton: React.FunctionComponent<Props> = ({ navigation }) => {
     const dispatch = useAppDispatch();
 
-    const gameList = useAppSelector(state => selectAllGames(state));
+    const gameList = useAppSelector(selectAllGames);
 
     const playerNumberOptions = [...Array.from(Array(12).keys(), n => n + 1)];
 
@@ -28,9 +28,11 @@ const NewGameButton: React.FunctionComponent<Props> = ({ navigation }) => {
     });
 
     const addGameHandler = async (playerCount: number) => {
+        console.log('games', gameList);
+
         dispatch(
             asyncCreateGame({
-                gameCount: gameList.length + 1,
+                gameCount: gameList.length,
                 playerCount: playerCount
             })
         ).then(() => {
