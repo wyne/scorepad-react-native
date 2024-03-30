@@ -3,6 +3,7 @@ import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { Icon } from 'react-native-elements/dist/icons/Icon';
 
+import { SortSelector } from '../../../redux/GamesSlice';
 import { useAppSelector } from '../../../redux/hooks';
 import { selectPlayersByIds } from '../../../redux/PlayersSlice';
 import { selectCurrentGame } from '../../../redux/selectors';
@@ -10,7 +11,7 @@ import { RootState } from '../../../redux/store';
 import { palette, systemBlue } from '../../constants';
 
 interface Props {
-    sortSelector: (state: RootState) => string[];
+    sortSelector: SortSelector;
 }
 
 const PlayerNameColumn: React.FunctionComponent<Props> = ({ sortSelector }) => {
@@ -43,6 +44,7 @@ const PlayerNameColumn: React.FunctionComponent<Props> = ({ sortSelector }) => {
                     size={19}
                     color='white' />
             </Text>
+
             {players.map((player, index) => (
                 <View key={index} style={{ paddingLeft: 5, borderLeftWidth: 5, borderColor: playerColor(player?.id) }}>
                     <Text key={index} style={{ color: 'white', maxWidth: 100, fontSize: 20, }}

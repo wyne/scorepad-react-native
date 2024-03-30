@@ -1,10 +1,9 @@
 import analytics from '@react-native-firebase/analytics';
-import { createSlice, PayloadAction, createEntityAdapter, createAsyncThunk, createSelector } from '@reduxjs/toolkit';
+import { PayloadAction, createAsyncThunk, createEntityAdapter, createSlice } from '@reduxjs/toolkit';
 import * as Crypto from 'expo-crypto';
 
-import { ScoreState, playerAdd, selectAllPlayers } from './PlayersSlice';
+import { playerAdd } from './PlayersSlice';
 import { setCurrentGameId } from './SettingsSlice';
-import { RootState } from './store';
 
 export interface GameState {
     id: string;
@@ -99,41 +98,6 @@ export const asyncCreateGame = createAsyncThunk(
         });
 
         return newGameId;
-    }
-);
-
-export const selectSortedPlayers = createSelector(
-    [
-        selectAllPlayers,
-        (state: RootState) => state.settings.currentGameId ? state.games.entities[state.settings.currentGameId] : undefined
-    ],
-    (players: ScoreState[], currentGame: GameState | undefined) => {
-        if (!currentGame) return [];
-
-        return players.filter(player => currentGame.playerIds?.includes(player.id))
-            .sort((a, b) => {
-                if (currentGame?.playerIds == undefined) return 0;
-                return currentGame.playerIds.indexOf(a.id) - currentGame.playerIds.indexOf(b.id);
-            });
-    }
-);
-
-export const selectPlayersByScore = createSelector(
-    [
-        selectAllPlayers,
-        (state: RootState) => state.settings.currentGameId ? state.games.entities[state.settings.currentGameId] : undefined
-    ],
-    (players: ScoreState[], currentGame: GameState | undefined) => {
-        if (!currentGame) return [];
-
-        return [...players]
-            .filter(player => currentGame.playerIds?.includes(player.id))
-            .sort((a, b) => {
-                const totalScoreA = a.scores.reduce((acc, score) => acc + score, 0);
-                const totalScoreB = b.scores.reduce((acc, score) => acc + score, 0);
-                return totalScoreB - totalScoreA;
-            })
-            .map(player => player.id);
     }
 );
 

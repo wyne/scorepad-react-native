@@ -9,7 +9,7 @@ import { Button, Icon } from 'react-native-elements';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import Animated, { Layout } from 'react-native-reanimated';
 
-import { selectSortedPlayers, updateGame } from '../../redux/GamesSlice';
+import { selectPlayerIdsByIndex, updateGame } from '../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { playerAdd } from '../../redux/PlayersSlice';
 import { selectCurrentGame } from '../../redux/selectors';
@@ -36,7 +36,7 @@ const SettingsScreen: React.FunctionComponent<Props> = ({ }) => {
     if (typeof currentGameId == 'undefined') return null;
 
     const currentGame = useAppSelector(selectCurrentGame);
-    const players = useAppSelector(selectSortedPlayers);
+    const playerIds = useAppSelector(selectPlayerIdsByIndex);
 
     const maxPlayers = 12;
 
@@ -47,7 +47,7 @@ const SettingsScreen: React.FunctionComponent<Props> = ({ }) => {
 
         dispatch(playerAdd({
             id: newPlayerId,
-            playerName: `Player ${players.length + 1}`,
+            playerName: `Player ${playerIds.length + 1}`,
             scores: [0],
         }));
 
@@ -62,7 +62,7 @@ const SettingsScreen: React.FunctionComponent<Props> = ({ }) => {
 
         await analytics().logEvent('add_player', {
             game_id: currentGameId,
-            player_count: players.length + 1,
+            player_count: playerIds.length + 1,
         });
     };
 
@@ -76,24 +76,24 @@ const SettingsScreen: React.FunctionComponent<Props> = ({ }) => {
 
                 <Text style={styles.heading}>Player Names</Text>
                 <Animated.View layout={Layout.duration(200)}>
-                    {players.map((player, index) => (
+                    {playerIds.map((playerId, index) => (
                         <EditPlayer
-                            playerId={player.id}
+                            playerId={playerId}
                             index={index}
                             setPlayerWasAdded={setPlayerWasAdded}
                             playerWasAdded={playerWasAdded}
-                            key={player.id}
+                            key={playerId}
                         />
                     ))}
                 </Animated.View>
                 <Animated.View style={{ margin: 10 }}>
-                    {players.length < maxPlayers &&
+                    {playerIds.length < maxPlayers &&
                         <Button title="Add Player" type="clear"
                             icon={<Icon name="add" color={systemBlue} />}
-                            disabled={players.length >= maxPlayers}
+                            disabled={playerIds.length >= maxPlayers}
                             onPress={addPlayerHandler} />
                     }
-                    {players.length >= maxPlayers &&
+                    {playerIds.length >= maxPlayers &&
                         <Text style={styles.text}>Max players reached.</Text>
                     }
                 </Animated.View>

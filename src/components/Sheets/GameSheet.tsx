@@ -5,16 +5,17 @@ import { ParamListBase, useIsFocused } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Alert, Platform, StyleSheet, Text, TouchableWithoutFeedback, View } from 'react-native';
 import { Button } from 'react-native-elements';
-import Animated, { Extrapolate, FadeIn, Layout, interpolate, useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
+import Animated, { Extrapolate, FadeIn, interpolate, Layout, useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { selectSortedPlayers, updateGame } from '../../../redux/GamesSlice';
+import { updateGame } from '../../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
 import { updatePlayer } from '../../../redux/PlayersSlice';
 import { selectCurrentGame } from '../../../redux/selectors';
 import { systemBlue } from '../../constants';
 import BigButton from '../BigButtons/BigButton';
 import Rounds from '../Rounds';
+import { selectPlayerIdsByIndex } from '../ScoreLog/SortHelper';
 
 import { useGameSheetContext } from './GameSheetContext';
 
@@ -39,7 +40,7 @@ const GameSheet: React.FunctionComponent<Props> = ({ navigation, containerHeight
 
     if (currentGame == undefined) return null;
 
-    const players = useAppSelector(selectSortedPlayers);
+    const playerIds = useAppSelector(selectPlayerIdsByIndex);
 
     // ref
     const gameSheetRef = useGameSheetContext();
@@ -78,9 +79,9 @@ const GameSheet: React.FunctionComponent<Props> = ({ navigation, containerHeight
                     onPress: () => {
                         if (currentGame == undefined) return;
 
-                        players.forEach((player) => {
+                        playerIds.forEach((playerId) => {
                             dispatch(updatePlayer({
-                                id: player.id,
+                                id: playerId,
                                 changes: {
                                     scores: [0],
                                 }
