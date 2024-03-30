@@ -9,11 +9,12 @@ import { Button, Icon } from 'react-native-elements';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { captureRef } from "react-native-view-shot";
 
-import { selectGameById } from '../../redux/GamesSlice';
+import { selectGameById, selectSortSelectorKey } from '../../redux/GamesSlice';
 import { useAppSelector } from '../../redux/hooks';
 import { selectCurrentGame } from '../../redux/selectors';
 import PlayerNameColumn from '../components/ScoreLog/PlayerNameColumn';
 import RoundScoreColumn from '../components/ScoreLog/RoundScoreColumn';
+import { sortSelectors } from '../components/ScoreLog/SortHelper';
 import TotalScoreColumn from '../components/ScoreLog/TotalScoreColumn';
 import { systemBlue } from '../constants';
 
@@ -52,6 +53,9 @@ const ShareScreen: React.FunctionComponent<Props> = ({ navigation }) => {
 
         await analytics().logEvent('share_image');
     };
+
+    const sortSelectorKey = useAppSelector(state => selectSortSelectorKey(state, currentGameId));
+    const sortSelector = sortSelectors[sortSelectorKey];
 
     return (
         <SafeAreaView edges={['right', 'left']}
@@ -94,11 +98,12 @@ const ShareScreen: React.FunctionComponent<Props> = ({ navigation }) => {
                             </Text>
                         </View>
                         <View style={{ flexDirection: 'row' }}>
-                            <PlayerNameColumn />
-                            <TotalScoreColumn />
+                            <PlayerNameColumn sortSelector={sortSelector} sortSelectorKey={sortSelectorKey} />
+                            <TotalScoreColumn sortSelector={sortSelector} sortSelectorKey={sortSelectorKey} />
                             {roundsIterator.map((item, round) => (
                                 <View key={round}>
                                     <RoundScoreColumn
+                                        sortSelector={sortSelector}
                                         round={round}
                                         key={round}
                                         isCurrentRound={false}

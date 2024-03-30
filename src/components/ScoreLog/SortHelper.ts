@@ -43,7 +43,13 @@ export const selectPlayerIdsByScore: SortSelector = createSelector(
 export interface SortSelector {
     (state: RootState): string[];
 }
-export const sortSelectors: SortSelector[] = [
-    selectPlayerIdsByScore,
-    selectPlayerIdsByIndex,
-];
+
+export enum SortSelectorKey {
+    ByScore = 'byScore',
+    ByIndex = 'byIndex',
+}
+
+export const sortSelectors = {
+    [SortSelectorKey.ByScore]: selectPlayerIdsByScore,
+    [SortSelectorKey.ByIndex]: selectPlayerIdsByIndex,
+};

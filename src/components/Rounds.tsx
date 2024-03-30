@@ -5,8 +5,8 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { LayoutChangeEvent, Platform, ScrollView, StyleSheet, View } from 'react-native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 
-import { selectGameById } from '../../redux/GamesSlice';
-import { useAppSelector } from '../../redux/hooks';
+import { nextSortSelector, selectGameById, selectSortSelectorKey } from '../../redux/GamesSlice';
+import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 
 import PlayerNameColumn from './ScoreLog/PlayerNameColumn';
 import RoundScoreColumn from './ScoreLog/RoundScoreColumn';
@@ -57,25 +57,28 @@ const Rounds: React.FunctionComponent<Props> = ({ }) => {
 
     const roundsIterator = [...Array(roundTotal).keys()];
 
-    const [sortSelectorIndex, setSortSelectorIndex] = useState<number>(0);
+    const dispatch = useAppDispatch();
 
-    const nextSort = () => {
-        setSortSelectorIndex((sortSelectorIndex + 1) % sortSelectors.length);
+    const sortSelectorKey = useAppSelector(state => selectSortSelectorKey(state, currentGameId));
+    const sortSelector = sortSelectors[sortSelectorKey];
+
+    const handlePlayerColumnTap = () => {
+        dispatch(nextSortSelector(currentGameId));
     };
 
     return (
         <View style={[styles.scoreTableContainer]}>
-            <TouchableOpacity onPress={nextSort}>
-                <PlayerNameColumn sortSelector={sortSelectors[sortSelectorIndex]} />
+            <TouchableOpacity onPress={handlePlayerColumnTap}>
+                <PlayerNameColumn sortSelector={sortSelector} sortSelectorKey={sortSelectorKey} />
             </TouchableOpacity>
-            <TotalScoreColumn sortSelector={sortSelectors[sortSelectorIndex]} />
+            <TotalScoreColumn sortSelector={sortSelector} sortSelectorKey={sortSelectorKey} />
             <ScrollView horizontal={true}
                 contentContainerStyle={{ flexDirection: 'row' }}
                 ref={roundsScrollViewEl}>
                 {roundsIterator.map((item, round) => (
                     <View key={round} onLayout={e => onLayoutHandler(e, round)}>
                         <RoundScoreColumn
-                            sortSelector={sortSelectors[sortSelectorIndex]}
+                            sortSelector={sortSelector}
                             round={round}
                             key={round}
                             isCurrentRound={round == roundCurrent} />

@@ -27,7 +27,7 @@ const gamesPersistConfig = {
     key: 'games',
     version: 0,
     storage: AsyncStorage,
-    whitelist: ['entities', 'ids'],
+    whitelist: ['entities', 'ids', 'sortSelectorKey'],
 };
 
 const playersPersistConfig = {

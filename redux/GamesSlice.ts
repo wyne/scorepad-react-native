@@ -2,17 +2,21 @@ import analytics from '@react-native-firebase/analytics';
 import { PayloadAction, createAsyncThunk, createEntityAdapter, createSlice } from '@reduxjs/toolkit';
 import * as Crypto from 'expo-crypto';
 
+import { SortSelectorKey } from '../src/components/ScoreLog/SortHelper';
+
 import { playerAdd } from './PlayersSlice';
 import { setCurrentGameId } from './SettingsSlice';
+import { RootState } from './store';
 
 export interface GameState {
     id: string;
     title: string;
     dateCreated: number;
-    roundCurrent: number;
-    roundTotal: number;
+    roundCurrent: number; // 0-indexed
+    roundTotal: number; // 1-indexed
     playerIds: string[];
     locked?: boolean;
+    sortSelectorKey?: SortSelectorKey;
 }
 
 const gamesAdapter = createEntityAdapter({
@@ -20,6 +24,10 @@ const gamesAdapter = createEntityAdapter({
 });
 
 const initialState = gamesAdapter.getInitialState({
+    roundCurrent: 0,
+    roundTotal: 1,
+    locked: false,
+    SortSelectorKey: SortSelectorKey.ByScore,
 });
 
 const gamesSlice = createSlice({
@@ -53,6 +61,17 @@ const gamesSlice = createSlice({
         },
         gameDelete(state, action: PayloadAction<string>) {
             gamesAdapter.removeOne(state, action.payload);
+        },
+        nextSortSelector(state, action: PayloadAction<string>) {
+            const game = state.entities[action.payload];
+
+            if (!game) { return; }
+            gamesAdapter.updateOne(state, {
+                id: action.payload,
+                changes: {
+                    sortSelectorKey: game.sortSelectorKey == SortSelectorKey.ByIndex ? SortSelectorKey.ByScore : SortSelectorKey.ByIndex,
+                }
+            });
         }
     }
 });
@@ -101,12 +120,18 @@ export const asyncCreateGame = createAsyncThunk(
     }
 );
 
+export const selectSortSelectorKey = (state: RootState, gameId: string) => {
+    const key = selectGameById(state, gameId)?.sortSelectorKey;
+    return key !== undefined ? key : SortSelectorKey.ByScore;
+};
+
 export const {
     updateGame,
     roundNext,
     roundPrevious,
     gameSave,
     gameDelete,
+    nextSortSelector,
 } = gamesSlice.actions;
 
 export default gamesSlice.reducer;

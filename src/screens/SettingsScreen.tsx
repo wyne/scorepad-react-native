@@ -9,12 +9,13 @@ import { Button, Icon } from 'react-native-elements';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import Animated, { Layout } from 'react-native-reanimated';
 
-import { selectPlayerIdsByIndex, updateGame } from '../../redux/GamesSlice';
+import { updateGame } from '../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { playerAdd } from '../../redux/PlayersSlice';
 import { selectCurrentGame } from '../../redux/selectors';
 import EditGame from '../components/EditGame';
 import EditPlayer from '../components/EditPlayer';
+import { selectPlayerIdsByIndex } from '../components/ScoreLog/SortHelper';
 import { systemBlue } from '../constants';
 
 type RouteParams = {
