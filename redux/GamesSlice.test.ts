@@ -1,13 +1,29 @@
-import { configureStore , EntityState } from '@reduxjs/toolkit';
+
+import { configureStore, EntityId, EntityState } from '@reduxjs/toolkit';
 import { Store } from 'redux';
 
 import gamesReducer, {
+    asyncCreateGame,
+    gameDelete,
+    gameSave,
+    GameState,
     roundNext,
     roundPrevious,
-    gameSave,
-    gameDelete,
-    selectAllGames,
- GameState } from './GamesSlice';
+    selectAllGames
+} from './GamesSlice';
+import playersReducer from './PlayersSlice';
+
+jest.mock('@react-native-firebase/analytics', () => {
+    return () => ({
+        logEvent: jest.fn(),
+    });
+});
+
+jest.mock('expo-crypto', () => ({
+    randomUUID: jest.fn().mockImplementation(() => {
+        return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+    })
+}));
 
 describe('games reducer', () => {
     let store: Store<EntityState<GameState>>;
@@ -106,5 +122,35 @@ describe('games reducer', () => {
         expect(games.length).toBe(2);
         expect(games[0].title).toBe('Game 1');
         expect(games[1].title).toBe('Game 2');
+    });
+});
+
+
+describe('asyncCreateGame', () => {
+    it('dispatches the correct actions with the correct payloads', async () => {
+        const store = configureStore({
+            reducer: {
+                games: gamesReducer,
+                players: playersReducer,
+            },
+        });
+
+        // Define the parameters for asyncCreateGame
+        const gameCount = 1;
+        const playerCount = 2;
+
+        // Dispatch asyncCreateGame
+        await store.dispatch(asyncCreateGame({ gameCount, playerCount }));
+
+        const finalState = store.getState();
+
+        const newGameId: EntityId = finalState.games.ids[0];
+        const newGame = finalState.games.entities[newGameId];
+
+        expect(finalState.games.ids.length).toBe(1);
+        expect(newGame?.playerIds.length).toBe(2);
+
+        expect(finalState.players.entities[finalState.players.ids[0]]?.scores).toEqual([0]);
+        expect(finalState.players.entities[finalState.players.ids[1]]?.scores).toEqual([0]);
     });
 });
