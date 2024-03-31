@@ -28,8 +28,6 @@ const NewGameButton: React.FunctionComponent<Props> = ({ navigation }) => {
     });
 
     const addGameHandler = async (playerCount: number) => {
-        console.log('games', gameList);
-
         dispatch(
             asyncCreateGame({
                 gameCount: gameList.length,

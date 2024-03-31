@@ -6,6 +6,7 @@ import { Platform } from 'react-native';
 interface Props {
     children: React.ReactNode;
     gameTitle: string | undefined;
+    rematchGameHandler: () => void;
     editGameHandler: () => void;
     shareGameHandler: () => void;
     deleteGameHandler: () => void;
@@ -14,6 +15,7 @@ interface Props {
 const IOSPopupMenu: React.FC<Props> = ({
     children,
     gameTitle,
+    rematchGameHandler,
     editGameHandler,
     shareGameHandler,
     deleteGameHandler
@@ -24,6 +26,14 @@ const IOSPopupMenu: React.FC<Props> = ({
      * Menu Actions for long press
      */
     const actions: MenuAction[] = [
+        {
+            id: 'rematch',
+            title: 'Rematch',
+            image: Platform.select({
+                ios: 'arrow.uturn.left',
+                android: 'ic_menu_edit',
+            }),
+        },
         {
             id: 'edit',
             title: 'Edit',
@@ -60,6 +70,9 @@ const IOSPopupMenu: React.FC<Props> = ({
      */
     const menuActionHandler: MenuActionHandler = async ({ nativeEvent }) => {
         switch (nativeEvent.event) {
+            case 'rematch':
+                rematchGameHandler();
+                break;
             case 'edit':
                 editGameHandler();
                 break;

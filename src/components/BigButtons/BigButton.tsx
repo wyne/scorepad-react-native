@@ -13,8 +13,8 @@ interface Props {
 }
 
 const BigButton: React.FunctionComponent<Props> = ({ icon, text, color, onPress, animated = true }) => {
-    return (
 
+    return (
         <Animated.View layout={Layout.duration(400)} entering={animated ? FadeIn.delay(400) : undefined} exiting={FadeOut}>
             <TouchableOpacity activeOpacity={.5} onPress={onPress}>
                 <View style={[styles.bigButton]}>
@@ -42,7 +42,7 @@ export default BigButton;
 
 const styles = StyleSheet.create({
     bigButton: {
-        width: 100,
+        width: 130,
         margin: 5,
         padding: 10,
         paddingHorizontal: 20,
