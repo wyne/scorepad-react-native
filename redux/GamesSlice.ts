@@ -1,8 +1,10 @@
 import analytics from '@react-native-firebase/analytics';
-import { createSlice, PayloadAction, createEntityAdapter, createAsyncThunk, createSelector } from '@reduxjs/toolkit';
+import { PayloadAction, createAsyncThunk, createEntityAdapter, createSelector, createSlice } from '@reduxjs/toolkit';
 import * as Crypto from 'expo-crypto';
 
-import { ScoreState, playerAdd, selectAllPlayers } from './PlayersSlice';
+import logger from '../src/Logger';
+
+import { ScoreState, playerAdd, selectAllPlayers, selectPlayerById } from './PlayersSlice';
 import { setCurrentGameId } from './SettingsSlice';
 import { RootState } from './store';
 
@@ -61,6 +63,59 @@ const gamesSlice = createSlice({
 interface GamesSlice {
     games: typeof initialState;
 }
+
+export const asyncRematchGame = createAsyncThunk(
+    'games/rematch',
+    async (
+        { gameId }: { gameId: string; },
+        { dispatch, getState }
+    ) => {
+        const newGameId = Crypto.randomUUID();
+
+        const playerIds: string[] = [];
+
+        const game = selectGameById(getState() as RootState, gameId);
+
+        if (!game) {
+            logger.error('No game found to rematch!');
+            return;
+        }
+
+        game.playerIds.forEach(() => {
+            playerIds.push(Crypto.randomUUID());
+        });
+
+        playerIds.forEach((playerId) => {
+            const oldPlayerId = game.playerIds[playerIds.indexOf(playerId)];
+
+            const player = selectPlayerById(getState() as RootState, oldPlayerId);
+            const playerName = player?.playerName;
+
+            dispatch(playerAdd({
+                id: playerId,
+                playerName: playerName || `Player ${playerIds.indexOf(playerId) + 1}`,
+                scores: [0],
+            }));
+        });
+
+        dispatch(gameSave({
+            id: newGameId,
+            title: game.title,
+            dateCreated: Date.now(),
+            roundCurrent: 0,
+            roundTotal: 1,
+            playerIds: playerIds,
+        }));
+
+        dispatch(setCurrentGameId(newGameId));
+
+        await analytics().logEvent('rematch_game', {
+            gameId: game.id,
+        });
+
+        return newGameId;
+    }
+);
 
 export const asyncCreateGame = createAsyncThunk(
     'games/create',

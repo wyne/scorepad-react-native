@@ -1,5 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+import logger from '../src/Logger';
+
 const keys = [
     'persist:settings',
     'persist:players',
@@ -9,8 +11,8 @@ const keys = [
 export const exportData = () => {
     keys.forEach((key) => {
         AsyncStorage.getItem(key).then((data) => {
-            console.log(key);
-            console.log(JSON.stringify(data));
+            logger.info(key);
+            logger.info(JSON.stringify(data));
         });
     });
 };
@@ -37,7 +39,7 @@ export const getPreloadedState = () => {
         }
     };
 
-    console.log("restoredData");
-    console.log(restoredData);
+    logger.info("restoredData");
+    logger.info(restoredData);
     return restoredData;
 };
