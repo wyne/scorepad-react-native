@@ -21,6 +21,7 @@ import { parse, SemVer } from 'semver';
 import { useAppSelector } from '../../redux/hooks';
 import { getOnboardingScreens, OnboardingScreenItem } from '../components/Onboarding/Onboarding';
 import SkipButton from '../components/Onboarding/SkipButton';
+import logger from '../Logger';
 import { RootStackParamList } from '../Navigation';
 
 const { width } = Dimensions.get('screen');
@@ -41,7 +42,8 @@ const OnboardingScreen: React.FunctionComponent<Props> = ({ navigation, route })
     const onboardedStr = useAppSelector(state => state.settings.onboarded);
     const onboardedSemVer = parse(onboardedStr);
 
-    console.log(onboardedSemVer);
+    logger.info(onboardedSemVer);
+
     const onboardingScreens: OnboardingScreenItem[] = getOnboardingScreens(onboarding ? onboardedSemVer || new SemVer('0.0.0') : new SemVer('0.0.0'));
 
     const scrollX = React.useRef(new RNAnimated.Value(0)).current;

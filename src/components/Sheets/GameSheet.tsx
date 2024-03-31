@@ -68,7 +68,7 @@ const GameSheet: React.FunctionComponent<Props> = ({ navigation, containerHeight
     const resetGameHandler = () => {
         Alert.alert(
             "Reset Game",
-            "Are you sure you want to reset this game? This will reset all scores and rounds.",
+            "Warning: This will reset all scores and rounds for this game. Are you sure you want to reset?",
             [
                 {
                     text: "Cancel",
@@ -106,13 +106,28 @@ const GameSheet: React.FunctionComponent<Props> = ({ navigation, containerHeight
      * Rematch - start new game with same players
      */
     const rematchGameHandler = async () => {
-        dispatch(
-            asyncRematchGame({ game: currentGame })
-        ).then(() => {
-            setTimeout(() => {
-                navigation.navigate("Game");
-            }, 500);
-        });
+        Alert.alert(
+            "Rematch",
+            "This will create a new game with the same players and empty scores.",
+            [
+                {
+                    text: "Cancel",
+                    style: "cancel"
+                },
+                {
+                    text: "Rematch",
+                    onPress: () => {
+                        dispatch(
+                            asyncRematchGame({ gameId: currentGame.id })
+                        ).then(() => {
+                            setTimeout(() => {
+                                navigation.navigate("Game");
+                            }, 500);
+                        });
+                    }
+                }
+            ]
+        );
     };
 
     // State variable for the current snap point index
@@ -258,24 +273,22 @@ const GameSheet: React.FunctionComponent<Props> = ({ navigation, containerHeight
                         </Animated.View>
 
                         <Animated.View key={isFocused + 'b'} layout={Layout.delay(200)} style={{ flexDirection: 'row', justifyContent: 'space-around', paddingVertical: 10 }}>
-                            <Animated.View layout={Layout.delay(200)} style={{ justifyContent: 'center', alignItems: 'center' }}>
-                                {!currentGame.locked &&
+                            {!currentGame.locked &&
+                                <Animated.View layout={Layout.delay(200)} style={{ justifyContent: 'center', alignItems: 'center' }}>
                                     <BigButton text="Reset"
                                         color='red'
                                         icon="backspace-outline"
                                         onPress={resetGameHandler}
                                     />
-                                }
-                            </Animated.View>
+                                </Animated.View>
+                            }
 
                             <Animated.View layout={Layout.delay(200)} style={{ justifyContent: 'center', alignItems: 'center' }}>
-                                {!currentGame.locked &&
-                                    <BigButton text="Rematch"
-                                        color='yellow'
-                                        icon={<RematchIcon fill="yellow" />}
-                                        onPress={rematchGameHandler}
-                                    />
-                                }
+                                <BigButton text="Rematch"
+                                    color='yellow'
+                                    icon={<RematchIcon fill="yellow" />}
+                                    onPress={rematchGameHandler}
+                                />
                             </Animated.View>
 
                         </Animated.View>

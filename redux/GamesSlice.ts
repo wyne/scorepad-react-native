@@ -1,6 +1,8 @@
 import analytics from '@react-native-firebase/analytics';
-import { createSlice, PayloadAction, createEntityAdapter, createAsyncThunk, createSelector } from '@reduxjs/toolkit';
+import { PayloadAction, createAsyncThunk, createEntityAdapter, createSelector, createSlice } from '@reduxjs/toolkit';
 import * as Crypto from 'expo-crypto';
+
+import logger from '../src/Logger';
 
 import { ScoreState, playerAdd, selectAllPlayers, selectPlayerById } from './PlayersSlice';
 import { setCurrentGameId } from './SettingsSlice';
@@ -65,12 +67,20 @@ interface GamesSlice {
 export const asyncRematchGame = createAsyncThunk(
     'games/rematch',
     async (
-        { game }: { game: GameState; },
+        { gameId }: { gameId: string; },
         { dispatch, getState }
     ) => {
         const newGameId = Crypto.randomUUID();
 
         const playerIds: string[] = [];
+
+        const game = selectGameById(getState() as RootState, gameId);
+
+        if (!game) {
+            logger.error('No game found to rematch!');
+            return;
+        }
+
         game.playerIds.forEach(() => {
             playerIds.push(Crypto.randomUUID());
         });

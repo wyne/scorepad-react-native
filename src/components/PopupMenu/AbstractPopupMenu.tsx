@@ -7,7 +7,6 @@ import { Alert, Platform } from 'react-native';
 
 import { asyncRematchGame, gameDelete, selectGameById } from '../../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
-import { selectCurrentGame } from '../../../redux/selectors';
 
 import AndroidPopupMenu from './AndroidPopupMenu';
 import IOSPopupMenu from './IOSPopupMenu';
@@ -28,7 +27,6 @@ const AbstractPopupMenu: React.FC<Props> = (props) => {
     const gameTitle = useAppSelector(state => selectGameById(state, props.gameId)?.title);
     const roundTotal = useAppSelector(state => selectGameById(state, props.gameId)?.roundTotal);
     const playerIds = useAppSelector(state => selectGameById(state, props.gameId)?.playerIds);
-    const currentGame = useAppSelector(selectCurrentGame);
     if (roundTotal == null || playerIds == null) { return null; }
 
     /**
@@ -61,18 +59,14 @@ const AbstractPopupMenu: React.FC<Props> = (props) => {
      * Rematch Game
      */
     const rematchGameHandler = async () => {
-        props.setCurrentGameCallback();
-        if (currentGame) {
-            dispatch(
-                asyncRematchGame({ game: currentGame })
-            ).then(() => {
-                setTimeout(() => {
-                    props.navigation.navigate("Game");
-                }, 500);
-            });
-        }
+        dispatch(
+            asyncRematchGame({ gameId: props.gameId })
+        ).then(() => {
+            setTimeout(() => {
+                props.navigation.navigate("Game");
+            }, 500);
+        });
     };
-
 
     /**
      * Delete Game

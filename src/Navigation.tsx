@@ -3,7 +3,7 @@ import React from 'react';
 import { DarkTheme, NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import * as Application from 'expo-application';
-import { SemVer, parse } from 'semver';
+import { parse, SemVer } from 'semver';
 
 import { useAppSelector } from '../redux/hooks';
 import AppInfoHeader from '../src/components/Headers/AppInfoHeader';
@@ -18,6 +18,7 @@ import SettingsScreen from "../src/screens/SettingsScreen";
 
 import ShareHeader from './components/Headers/ShareHeader';
 import { getOnboardingSemVer } from './components/Onboarding/Onboarding';
+import logger from './Logger';
 import ShareScreen from './screens/ShareScreen';
 
 export type OnboardingScreenParamList = {
@@ -51,8 +52,8 @@ export const Navigation = () => {
     const onboardedSemVer = parse(onboardedStr);
     const appVersion = new SemVer(Application.nativeApplicationVersion || '0.0.0');
 
-    console.log(`App Version: ${appVersion}`);
-    console.log(`Onboarded Version: ${onboardedSemVer}`);
+    logger.info(`App Version: ${appVersion}`);
+    logger.info(`Onboarded Version: ${onboardedSemVer}`);
 
     const onboarded = getOnboardingSemVer(onboardedSemVer) === undefined;
 
