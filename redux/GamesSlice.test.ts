@@ -4,6 +4,7 @@ import { Store } from 'redux';
 
 import gamesReducer, {
     asyncCreateGame,
+    asyncRematchGame,
     gameDelete,
     gameSave,
     GameState,
@@ -125,7 +126,6 @@ describe('games reducer', () => {
     });
 });
 
-
 describe('asyncCreateGame', () => {
     it('dispatches the correct actions with the correct payloads', async () => {
         const store = configureStore({
@@ -152,5 +152,37 @@ describe('asyncCreateGame', () => {
 
         expect(finalState.players.entities[finalState.players.ids[0]]?.scores).toEqual([0]);
         expect(finalState.players.entities[finalState.players.ids[1]]?.scores).toEqual([0]);
+    });
+});
+
+describe('asyncRematchGame', () => {
+    it('dispatches the correct actions with the correct payloads', async () => {
+        const store = configureStore({
+            reducer: {
+                games: gamesReducer,
+                players: playersReducer,
+            },
+        });
+
+        // Define the parameters for asyncCreateGame
+        const gameCount = 1;
+        const playerCount = 2;
+
+        await store.dispatch(asyncCreateGame({ gameCount, playerCount }));
+
+        const originalGameId: EntityId = store.getState().games.ids[0];
+
+        await store.dispatch(asyncRematchGame({ gameId: originalGameId.toString() }));
+
+        const finalState = store.getState();
+
+        const rematchGameId: EntityId = finalState.games.ids[1];
+        const rematchGame = finalState.games.entities[rematchGameId];
+
+        expect(finalState.games.ids.length).toBe(2);
+        expect(rematchGame?.playerIds.length).toBe(2);
+
+        expect(finalState.players.entities[finalState.players.ids[2]]?.scores).toEqual([0]);
+        expect(finalState.players.entities[finalState.players.ids[3]]?.scores).toEqual([0]);
     });
 });
