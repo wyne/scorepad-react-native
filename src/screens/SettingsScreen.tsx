@@ -28,7 +28,7 @@ interface Props {
     route: RouteProp<RouteParams, 'Settings'>;
 }
 
-const SettingsScreen: React.FunctionComponent<Props> = ({ }) => {
+const SettingsScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     const dispatch = useAppDispatch();
     const [playerWasAdded, setPlayerWasAdded] = useState(false);
 
@@ -74,7 +74,7 @@ const SettingsScreen: React.FunctionComponent<Props> = ({ }) => {
 
             <EditGame />
 
-            <Text style={styles.heading}>Player Names</Text>
+            <Text style={styles.heading}>Players</Text>
 
             <Animated.View layout={LinearTransition.duration(200)}>
                 <DraggableFlatList
@@ -82,6 +82,7 @@ const SettingsScreen: React.FunctionComponent<Props> = ({ }) => {
                     renderItem={({ item: player, getIndex, drag, isActive }) => (
                         <ScaleDecorator activeScale={1.05}>
                             <PlayerListItem
+                                navigation={navigation}
                                 playerId={player.id}
                                 drag={drag}
                                 isActive={isActive}

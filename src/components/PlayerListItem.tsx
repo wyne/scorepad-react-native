@@ -1,8 +1,10 @@
 import React from 'react';
 
 import analytics from '@react-native-firebase/analytics';
+import { ParamListBase } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Alert, NativeSyntheticEvent, StyleSheet, Text, TextInputEndEditingEventData, TouchableOpacity, View } from 'react-native';
-import { Icon, Input } from 'react-native-elements';
+import { Icon, ListItem } from 'react-native-elements';
 import Animated from 'react-native-reanimated';
 
 import { updateGame } from '../../redux/GamesSlice';
@@ -18,9 +20,18 @@ interface Props {
     playerWasAdded: boolean;
     isActive: boolean;
     drag: () => void;
+    navigation: NativeStackNavigationProp<ParamListBase, string, undefined>;
 }
 
-const PlayerListItem: React.FunctionComponent<Props> = ({ playerId, index, setPlayerWasAdded, playerWasAdded, drag, isActive }) => {
+const PlayerListItem: React.FunctionComponent<Props> = ({
+    playerId,
+    index,
+    setPlayerWasAdded,
+    playerWasAdded,
+    drag,
+    isActive,
+    navigation
+}) => {
     const dispatch = useAppDispatch();
     const currentGame = useAppSelector(selectCurrentGame);
     const player = useAppSelector(state => selectPlayerById(state, playerId));
@@ -111,24 +122,36 @@ const PlayerListItem: React.FunctionComponent<Props> = ({ playerId, index, setPl
         <Animated.View style={styles.playerContainer} key={player?.id}>
             <TouchableOpacity
                 onLongPress={drag}
+                onPress={() => {
+                    navigation.navigate('EditPlayer', { playerId: playerId });
+                }}
                 disabled={isActive}
                 style={[
                     // styles.rowItem,
                     // { backgroundColor: isActive ? "red" : item.backgroundColor },
+                    {
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                    }
                 ]}
             >
                 <Text style={styles.playerNumber}>
                     {index + 1}
                 </Text>
+
+                <View style={[
+                    styles.colorBadge,
+                    { backgroundColor: "#" + palette[index % palette.length] }
+                ]} >
+                </View>
+
+                <Text style={[styles.input]}>
+                    {player?.playerName}
+                </Text>
+                <ListItem.Chevron />
             </TouchableOpacity>
 
-            <View style={[
-                styles.colorBadge,
-                { backgroundColor: "#" + palette[index % palette.length] }
-            ]} >
-            </View>
-
-            <Input
+            {/* <Input
                 autoFocus={index == playerIds.length - 1 && playerWasAdded}
                 containerStyle={{ flex: 1 }}
                 defaultValue={defaultPlayerName}
@@ -140,9 +163,9 @@ const PlayerListItem: React.FunctionComponent<Props> = ({ playerId, index, setPl
                 selectTextOnFocus={true}
                 style={styles.input}
                 inputContainerStyle={{ borderBottomWidth: 0 }}
-            />
+            /> */}
 
-            <DeleteButton />
+            {/* <DeleteButton /> */}
         </Animated.View>
     );
 };
@@ -176,6 +199,8 @@ const styles = StyleSheet.create({
     },
     input: {
         color: '#eee',
+        flex: 1,
+        fontSize: 18,
     },
 });
 

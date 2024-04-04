@@ -37,7 +37,10 @@ export type RootStackParamList = {
     Share: undefined;
     Onboarding: OnboardingScreenParamList;
     Tutorial: OnboardingScreenParamList;
-    EditPlayer: undefined;
+    EditPlayer: {
+        index: number | undefined;
+        playerId: string | undefined;
+    };
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -120,13 +123,14 @@ export const Navigation = () => {
                     }}
                 />
                 <Stack.Screen name="EditPlayer" component={EditPlayerScreen}
-                    options={{
+                    initialParams={{ index: 0, playerId: '' }}
+                    options={({ route }) => ({
                         orientation: 'portrait',
                         title: "Edit Player",
                         header: ({ navigation }) => {
-                            return <EditPlayerHeader navigation={navigation} />;
+                            return <EditPlayerHeader navigation={navigation} route={route} />;
                         },
-                    }}
+                    })}
                 />
                 <Stack.Screen name="Tutorial" component={OnboardingScreen}
                     initialParams={{ onboarding: false }}
