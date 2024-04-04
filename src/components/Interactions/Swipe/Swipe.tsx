@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 
 import analytics from '@react-native-firebase/analytics';
+import { Audio } from 'expo-av';
 import * as Haptics from 'expo-haptics';
 import { Animated, StyleSheet, View } from 'react-native';
 import { PanGestureHandler, PanGestureHandlerStateChangeEvent, State } from 'react-native-gesture-handler';
@@ -150,8 +151,15 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
         if (event.nativeEvent.oldState === State.UNDETERMINED && event.nativeEvent.state === State.BEGAN) {
             // Handle the start of the gesture
             powerHoldStart();
+
+            try {
+                playSound();
+            } catch (e) {
+                console.log(e);
+            }
         } else if (event.nativeEvent.state == State.FAILED || event.nativeEvent.state === State.END) {
             // Handle the end of the gesture
+
             totalOffset.value = null;
 
             analytics().logEvent('score_change', {
@@ -173,6 +181,12 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
             }).start();
 
             powerHoldStop();
+
+            try {
+                stopSound();
+            } catch (e) {
+                console.log(e);
+            }
         }
     };
 
@@ -189,6 +203,13 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
         } else {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        }
+
+        // playSound();
+        try {
+            increaseRate(value >= 0 ? 0.2 : -0.2);
+        } catch (e) {
+            console.log(e);
         }
 
         dispatch(playerRoundScoreIncrement(playerId, roundCurrent, a));
@@ -208,6 +229,45 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
             }
         }
     );
+
+    //#endregion
+    //
+
+    //#region Sounds
+
+    const [sound, setSound] = useState<Audio.Sound>();
+    const [rate, setRate] = useState(1.5);
+
+    async function playSound() {
+        const { sound } = await Audio.Sound.createAsync(require('../../../../assets/sounds/200.wav'));
+        setSound(sound);
+
+        // await sound.setPositionAsync(9900);
+        await sound.setRateAsync(1.5, false);
+        setRate(1.5);
+        await sound.setVolumeAsync(1);
+        await sound.setIsLoopingAsync(true);
+        await sound.playAsync();
+    }
+
+    async function stopSound() {
+        if (!sound) { return; }
+        await sound.stopAsync();
+    }
+
+    async function increaseRate(inc: number) {
+        if (!sound) { return; }
+        setRate(rate + inc);
+        await sound.setRateAsync(rate, false);
+    }
+
+    useEffect(() => {
+        return sound
+            ? () => {
+                sound.unloadAsync();
+            }
+            : undefined;
+    }, [sound]);
 
     //#endregion
 
