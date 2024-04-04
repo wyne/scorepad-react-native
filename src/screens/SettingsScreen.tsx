@@ -5,16 +5,16 @@ import { ParamListBase, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import * as Crypto from 'expo-crypto';
 import { StyleSheet, Text, View } from 'react-native';
+import DraggableFlatList, { ScaleDecorator } from 'react-native-draggable-flatlist';
 import { Button, Icon } from 'react-native-elements';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-import Animated, { Layout } from 'react-native-reanimated';
+import Animated, { LinearTransition } from 'react-native-reanimated';
 
 import { selectSortedPlayers, updateGame } from '../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { playerAdd } from '../../redux/PlayersSlice';
 import { selectCurrentGame } from '../../redux/selectors';
 import EditGame from '../components/EditGame';
-import EditPlayer from '../components/EditPlayer';
+import PlayerListItem from '../components/PlayerListItem';
 import { systemBlue } from '../constants';
 
 type RouteParams = {
@@ -67,38 +67,52 @@ const SettingsScreen: React.FunctionComponent<Props> = ({ }) => {
     };
 
     return (
-        <KeyboardAwareScrollView style={styles.configScrollContainer}
-            extraScrollHeight={200}>
-            <View style={{ marginBottom: 200 }}>
-                <Text style={styles.heading}>Game Title</Text>
+        // <KeyboardAwareScrollView style={styles.configScrollContainer}
+        //     extraScrollHeight={200}>
+        <View style={{ marginBottom: 200 }}>
+            <Text style={styles.heading}>Game Title</Text>
 
-                <EditGame />
+            <EditGame />
 
-                <Text style={styles.heading}>Player Names</Text>
-                <Animated.View layout={Layout.duration(200)}>
-                    {players.map((player, index) => (
-                        <EditPlayer
-                            playerId={player.id}
-                            index={index}
-                            setPlayerWasAdded={setPlayerWasAdded}
-                            playerWasAdded={playerWasAdded}
-                            key={player.id}
-                        />
-                    ))}
-                </Animated.View>
-                <Animated.View style={{ margin: 10 }}>
-                    {players.length < maxPlayers &&
-                        <Button title="Add Player" type="clear"
-                            icon={<Icon name="add" color={systemBlue} />}
-                            disabled={players.length >= maxPlayers}
-                            onPress={addPlayerHandler} />
-                    }
-                    {players.length >= maxPlayers &&
-                        <Text style={styles.text}>Max players reached.</Text>
-                    }
-                </Animated.View>
-            </View>
-        </KeyboardAwareScrollView>
+            <Text style={styles.heading}>Player Names</Text>
+
+            <Animated.View layout={LinearTransition.duration(200)}>
+                <DraggableFlatList
+                    data={players}
+                    renderItem={({ item: player, getIndex, drag, isActive }) => (
+                        <ScaleDecorator activeScale={1.05}>
+                            <PlayerListItem
+                                playerId={player.id}
+                                drag={drag}
+                                isActive={isActive}
+                                index={getIndex() || 0}
+                                setPlayerWasAdded={setPlayerWasAdded}
+                                playerWasAdded={playerWasAdded}
+                                key={player.id}
+                            />
+                        </ScaleDecorator>
+                    )}
+                    keyExtractor={(player) => player.id}
+                    onDragEnd={({ data }) => {
+                        // Update your state with the new order of players
+                        console.log('End player reoder', data.map((player) => player.id));
+                    }}
+                />
+            </Animated.View>
+
+            <Animated.View style={{ margin: 10 }}>
+                {players.length < maxPlayers &&
+                    <Button title="Add Player" type="clear"
+                        icon={<Icon name="add" color={systemBlue} />}
+                        disabled={players.length >= maxPlayers}
+                        onPress={addPlayerHandler} />
+                }
+                {players.length >= maxPlayers &&
+                    <Text style={styles.text}>Max players reached.</Text>
+                }
+            </Animated.View>
+        </View>
+        // </KeyboardAwareScrollView>
     );
 };
 

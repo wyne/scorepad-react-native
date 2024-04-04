@@ -16,9 +16,11 @@ interface Props {
     index: number;
     setPlayerWasAdded: React.Dispatch<React.SetStateAction<boolean>>;
     playerWasAdded: boolean;
+    isActive: boolean;
+    drag: () => void;
 }
 
-const EditPlayer: React.FunctionComponent<Props> = ({ playerId, index, setPlayerWasAdded, playerWasAdded }) => {
+const PlayerListItem: React.FunctionComponent<Props> = ({ playerId, index, setPlayerWasAdded, playerWasAdded, drag, isActive }) => {
     const dispatch = useAppDispatch();
     const currentGame = useAppSelector(selectCurrentGame);
     const player = useAppSelector(state => selectPlayerById(state, playerId));
@@ -107,9 +109,18 @@ const EditPlayer: React.FunctionComponent<Props> = ({ playerId, index, setPlayer
 
     return (
         <Animated.View style={styles.playerContainer} key={player?.id}>
-            <Text style={styles.playerNumber}>
-                {index + 1}
-            </Text>
+            <TouchableOpacity
+                onLongPress={drag}
+                disabled={isActive}
+                style={[
+                    // styles.rowItem,
+                    // { backgroundColor: isActive ? "red" : item.backgroundColor },
+                ]}
+            >
+                <Text style={styles.playerNumber}>
+                    {index + 1}
+                </Text>
+            </TouchableOpacity>
 
             <View style={[
                 styles.colorBadge,
@@ -168,4 +179,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default EditPlayer;
+export default PlayerListItem;
