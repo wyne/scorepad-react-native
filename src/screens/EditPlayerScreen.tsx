@@ -2,7 +2,7 @@ import React from 'react';
 
 import { RouteProp } from '@react-navigation/native';
 import { StyleSheet, Text, View } from 'react-native';
-import { Input } from 'react-native-elements';
+import { Button, Input } from 'react-native-elements';
 
 import { palette } from '../constants';
 
@@ -30,11 +30,6 @@ const EditPlayerScreen: React.FC<EditPlayerScreenProps> = ({
 
     return (
         <View>
-            <Text>Edit Player Screen</Text>
-            <Text style={styles.playerNumber}>
-                {index + 1}
-            </Text>
-
             <View style={[
                 styles.colorBadge,
                 { backgroundColor: "#" + palette[index % palette.length] }
@@ -54,6 +49,8 @@ const EditPlayerScreen: React.FC<EditPlayerScreenProps> = ({
                 style={styles.input}
                 inputContainerStyle={{ borderBottomWidth: 0 }}
             />
+
+            <Button title="Delete" onPress={() => { }} />
 
         </View>
     );

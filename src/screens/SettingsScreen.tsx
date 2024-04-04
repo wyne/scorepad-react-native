@@ -9,13 +9,14 @@ import DraggableFlatList, { ScaleDecorator } from 'react-native-draggable-flatli
 import { Button, Icon } from 'react-native-elements';
 import Animated, { LinearTransition } from 'react-native-reanimated';
 
-import { selectSortedPlayers, updateGame } from '../../redux/GamesSlice';
+import { reorderPlayers, selectSortedPlayers, updateGame } from '../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { playerAdd } from '../../redux/PlayersSlice';
 import { selectCurrentGame } from '../../redux/selectors';
 import EditGame from '../components/EditGame';
 import PlayerListItem from '../components/PlayerListItem';
 import { systemBlue } from '../constants';
+import logger from '../Logger';
 
 type RouteParams = {
     Settings: {
@@ -95,8 +96,15 @@ const SettingsScreen: React.FunctionComponent<Props> = ({ navigation }) => {
                     )}
                     keyExtractor={(player) => player.id}
                     onDragEnd={({ data }) => {
-                        // Update your state with the new order of players
-                        console.log('End player reoder', data.map((player) => player.id));
+                        // Reorder players
+                        dispatch(
+                            reorderPlayers({
+                                gameId: currentGameId,
+                                playerIds: data.map((player) => player.id)
+                            })
+                        );
+
+                        logger.info('Reorder players');
                     }}
                 />
             </Animated.View>

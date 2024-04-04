@@ -56,6 +56,17 @@ const gamesSlice = createSlice({
         },
         gameDelete(state, action: PayloadAction<string>) {
             gamesAdapter.removeOne(state, action.payload);
+        },
+        reorderPlayers(state, action: PayloadAction<{ gameId: string, playerIds: string[]; }>) {
+            const game = state.entities[action.payload.gameId];
+            if (!game) { return; }
+
+            gamesAdapter.updateOne(state, {
+                id: action.payload.gameId,
+                changes: {
+                    playerIds: action.payload.playerIds,
+                }
+            });
         }
     }
 });
@@ -179,6 +190,7 @@ export const {
     roundPrevious,
     gameSave,
     gameDelete,
+    reorderPlayers,
 } = gamesSlice.actions;
 
 export default gamesSlice.reducer;
