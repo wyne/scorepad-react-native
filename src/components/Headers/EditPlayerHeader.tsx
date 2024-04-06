@@ -6,7 +6,6 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { StyleSheet, Text } from 'react-native';
 
 import { systemBlue } from '../../constants';
-import logger from '../../Logger';
 import HeaderButton from '../Buttons/HeaderButton';
 
 import CustomHeader from './CustomHeader';
@@ -23,7 +22,7 @@ interface EditPlayerScreenProps {
     route: RouteProp<RouteParams, 'EditPlayer'>;
 }
 
-const EditPlayerHeader: React.FunctionComponent<EditPlayerScreenProps> = ({ navigation, route }) => {
+const EditPlayerHeader: React.FunctionComponent<EditPlayerScreenProps> = ({ navigation }) => {
     return (
         <CustomHeader navigation={navigation}
             headerLeft={
@@ -35,21 +34,6 @@ const EditPlayerHeader: React.FunctionComponent<EditPlayerScreenProps> = ({ navi
                 </HeaderButton>
             }
             headerCenter={<Text style={styles.title}>Edit Player</Text>}
-            headerRight={
-                <HeaderButton accessibilityLabel='SavePlayer' onPress={async () => {
-
-                    // TODO: save player
-
-                    logger.info('Save Player', route.params.playerId);
-
-                    navigation.goBack();
-                    await getAnalytics().logEvent('save_player');
-                }}>
-                    <Text style={{ color: systemBlue, fontSize: 20 }}>
-                        {/* TODO:  Save */}
-                    </Text>
-                </HeaderButton>
-            }
         />
     );
 };

@@ -71,18 +71,13 @@ const SettingsScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     }, [players]);
 
     const ListHeader = () => (
-        // TODO: This element re-renders while editing the game name
-        <View>
-            <Text style={styles.heading}>Game Title</Text>
-            <EditGame />
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                <Text style={styles.heading}>Players</Text>
-                {players.length > 1 &&
-                    <TouchableOpacity onPress={() => setEdit(!edit)}>
-                        <Text style={[styles.heading, { color: systemBlue }]}>{edit ? 'Done' : 'Edit'}</Text>
-                    </TouchableOpacity>
-                }
-            </View>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+            <Text style={styles.heading}>Players</Text>
+            {players.length > 1 &&
+                <TouchableOpacity onPress={() => setEdit(!edit)}>
+                    <Text style={[styles.heading, { color: systemBlue }]}>{edit ? 'Done' : 'Edit'}</Text>
+                </TouchableOpacity>
+            }
         </View>
     );
 
@@ -101,36 +96,41 @@ const SettingsScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     );
 
     return (
-        <DraggableFlatList
-            ListHeaderComponent={ListHeader}
-            ListFooterComponent={ListFooter}
-            data={players}
-            renderItem={({ item: player, getIndex, drag, isActive }) => (
-                <ScaleDecorator activeScale={1.05}>
-                    <PlayerListItem
-                        navigation={navigation}
-                        playerId={player.id}
-                        edit={edit}
-                        drag={drag}
-                        isActive={isActive}
-                        index={getIndex()}
-                        key={player.id}
-                    />
-                </ScaleDecorator>
-            )}
-            keyExtractor={(player) => player.id}
-            onDragEnd={({ data }) => {
-                // Reorder players
-                dispatch(
-                    reorderPlayers({
-                        gameId: currentGameId,
-                        playerIds: data.map((player) => player.id)
-                    })
-                );
+        <View>
 
-                logger.info('Reorder players');
-            }}
-        />
+            <Text style={styles.heading}>Game Title</Text>
+            <EditGame />
+            <DraggableFlatList
+                ListHeaderComponent={ListHeader}
+                ListFooterComponent={ListFooter}
+                data={players}
+                renderItem={({ item: player, getIndex, drag, isActive }) => (
+                    <ScaleDecorator activeScale={1.05}>
+                        <PlayerListItem
+                            navigation={navigation}
+                            playerId={player.id}
+                            edit={edit}
+                            drag={drag}
+                            isActive={isActive}
+                            index={getIndex()}
+                            key={player.id}
+                        />
+                    </ScaleDecorator>
+                )}
+                keyExtractor={(player) => player.id}
+                onDragEnd={({ data }) => {
+                    // Reorder players
+                    dispatch(
+                        reorderPlayers({
+                            gameId: currentGameId,
+                            playerIds: data.map((player) => player.id)
+                        })
+                    );
+
+                    logger.info('Reorder players');
+                }}
+            />
+        </View>
     );
 };
 
