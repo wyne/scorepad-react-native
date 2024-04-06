@@ -14,7 +14,7 @@ import { playerAdd } from '../../redux/PlayersSlice';
 import { selectCurrentGame } from '../../redux/selectors';
 import EditGame from '../components/EditGame';
 import PlayerListItem from '../components/PlayerListItem';
-import { systemBlue } from '../constants';
+import { MAX_PLAYERS, systemBlue } from '../constants';
 import logger from '../Logger';
 
 type RouteParams = {
@@ -37,7 +37,6 @@ const SettingsScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     const currentGame = useAppSelector(selectCurrentGame);
     const players = useAppSelector(selectSortedPlayers);
 
-    const maxPlayers = 12;
     const [edit, setEdit] = React.useState(false);
 
     const addPlayerHandler = async () => {
@@ -70,38 +69,35 @@ const SettingsScreen: React.FunctionComponent<Props> = ({ navigation }) => {
         }
     }, [players]);
 
-    const ListHeader = () => (
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-            <Text style={styles.heading}>Players</Text>
-            {players.length > 1 &&
-                <TouchableOpacity onPress={() => setEdit(!edit)}>
-                    <Text style={[styles.heading, { color: systemBlue }]}>{edit ? 'Done' : 'Edit'}</Text>
-                </TouchableOpacity>
-            }
-        </View>
-    );
-
     const ListFooter = () => (
-        <View style={{ margin: 10, marginBottom: 200 }}>
-            {players.length < maxPlayers &&
+        <View style={{ margin: 10, marginBottom: 200, alignSelf: 'center' }}>
+            {players.length < MAX_PLAYERS &&
                 <Button title="Add Player" type="clear"
                     icon={<Icon name="add" color={systemBlue} />}
-                    disabled={players.length >= maxPlayers}
+                    disabled={players.length >= MAX_PLAYERS}
                     onPress={addPlayerHandler} />
             }
-            {players.length >= maxPlayers &&
+            {players.length >= MAX_PLAYERS &&
                 <Text style={styles.text}>Max players reached.</Text>
             }
         </View>
     );
 
     return (
-        <View>
+        <View style={{ flex: 1 }}>
 
             <Text style={styles.heading}>Game Title</Text>
             <EditGame />
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                <Text style={styles.heading}>Players</Text>
+                {players.length > 1 &&
+                    <TouchableOpacity onPress={() => setEdit(!edit)}>
+                        <Text style={[styles.heading, { color: systemBlue }]}>{edit ? 'Done' : 'Edit'}</Text>
+                    </TouchableOpacity>
+                }
+            </View>
+
             <DraggableFlatList
-                ListHeaderComponent={ListHeader}
                 ListFooterComponent={ListFooter}
                 data={players}
                 renderItem={({ item: player, getIndex, drag, isActive }) => (
