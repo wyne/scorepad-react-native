@@ -27,11 +27,11 @@ const EditPlayerHeader: React.FunctionComponent<EditPlayerScreenProps> = ({ navi
     return (
         <CustomHeader navigation={navigation}
             headerLeft={
-                <HeaderButton accessibilityLabel='CancelEditPlayer' onPress={async () => {
+                <HeaderButton accessibilityLabel='EditPlayerBack' onPress={async () => {
                     navigation.goBack();
-                    await getAnalytics().logEvent('cancel_edit_player');
+                    await getAnalytics().logEvent('edit_player_back');
                 }}>
-                    <Text style={{ color: systemBlue, fontSize: 20 }}>Cancel</Text>
+                    <Text style={{ color: systemBlue, fontSize: 20 }}>Back</Text>
                 </HeaderButton>
             }
             headerCenter={<Text style={styles.title}>Edit Player</Text>}
@@ -45,7 +45,9 @@ const EditPlayerHeader: React.FunctionComponent<EditPlayerScreenProps> = ({ navi
                     navigation.goBack();
                     await getAnalytics().logEvent('save_player');
                 }}>
-                    <Text style={{ color: systemBlue, fontSize: 20 }}>Save</Text>
+                    <Text style={{ color: systemBlue, fontSize: 20 }}>
+                        {/* TODO:  Save */}
+                    </Text>
                 </HeaderButton>
             }
         />

@@ -49,7 +49,6 @@ const EditGame = ({ }) => {
                     onBlur={onEndEditingHandler}
                     placeholder={UNTITLED}
                     renderErrorMessage={false}
-                    selectTextOnFocus={true}
                     style={styles.input}
                     inputContainerStyle={{ borderBottomWidth: 0 }}
                 />
