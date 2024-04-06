@@ -86,8 +86,10 @@ const PlayerListItem: React.FunctionComponent<Props> = ({
     return (
         <View style={styles.playerContainer} key={player?.id}>
             <TouchableOpacity
+                onPressIn={edit ? drag : undefined}
                 onLongPress={drag}
                 onPress={() => {
+                    if (edit) { return; }
                     navigation.navigate('EditPlayer', { playerId: playerId, index: index });
                 }}
                 disabled={isActive}
@@ -103,15 +105,15 @@ const PlayerListItem: React.FunctionComponent<Props> = ({
                 <View style={[
                     styles.colorBadge,
                     { backgroundColor: "#" + palette[index % palette.length] }
-                ]} >
-                </View>
+                ]} />
 
                 <Text style={[styles.input]}>
                     {player?.playerName}
                 </Text>
                 {
                     edit ?
-                        <DeleteButton /> :
+                        <DeleteButton />
+                        :
                         <ListItem.Chevron />
                 }
             </TouchableOpacity>
