@@ -16,6 +16,7 @@ export interface GameState {
     roundTotal: number;
     playerIds: string[];
     locked?: boolean;
+    palette?: string;
 }
 
 const gamesAdapter = createEntityAdapter({

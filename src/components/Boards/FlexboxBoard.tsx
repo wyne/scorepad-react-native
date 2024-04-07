@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 
-import { getContrastRatio } from 'colorsheet';
 import { LayoutChangeEvent, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useAppSelector } from '../../../redux/hooks';
 import { selectCurrentGame } from '../../../redux/selectors';
+import { getPlayerColors } from '../../ColorPalette';
 import { bottomSheetHeight } from '../../components/Sheets/GameSheet';
 
 import FlexboxTile from './FlexboxTile';
@@ -18,7 +18,6 @@ const FlexboxBoard: React.FC<FlexboxBoardProps> = () => {
     const currentGameId = useAppSelector(state => state.settings.currentGameId);
     if (typeof currentGameId == 'undefined') return null;
 
-    const palette = ["01497c", "c25858", "f5c800", "275436", "dc902c", "62516a", "755647", "925561"];
     const [rows, setRows] = useState<number>(0);
     const [cols, setCols] = useState<number>(0);
     const fullscreen = useAppSelector(state => state.settings.home_fullscreen);
@@ -102,8 +101,8 @@ const FlexboxBoard: React.FC<FlexboxBoardProps> = () => {
                 <FlexboxTile
                     key={id}
                     playerId={id}
-                    color={'#' + palette[index % palette.length]}
-                    fontColor={getContrastRatio('#' + palette[index % palette.length], '#000').number > 7 ? "#000000" : "#FFFFFF"}
+                    color={getPlayerColors(index)[0]}
+                    fontColor={getPlayerColors(index)[1]}
                     cols={cols}
                     rows={rows}
                     width={calculateTileDimensions(rows, cols).width}

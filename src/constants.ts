@@ -1,13 +1,13 @@
 export const systemBlue = '#0a84ff';
 export const palette = [
-    "01497c",
-    "c25858",
-    "f5c800",
-    "275436",
-    "dc902c",
-    "62516a",
-    "755647",
-    "925561"
+    "#f9d5e5",
+    "#eeac99",
+    "#e06377",
+    "#c83349",
+    "#5b9aa0",
+    "#d1b59b",
+    "#8f3e3f",
+    "#f6416c",
 ];
 export const STORAGE_KEY = {
     GAMES_LIST: '@games_list',
