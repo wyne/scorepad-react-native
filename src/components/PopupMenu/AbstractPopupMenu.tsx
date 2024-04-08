@@ -34,7 +34,7 @@ const AbstractPopupMenu: React.FC<Props> = (props) => {
      */
     const shareGameHandler = async () => {
         props.setCurrentGameCallback();
-        props.navigation.navigate("Share");
+        props.navigation.navigate('Share');
 
         await analytics().logEvent('menu_share', {
             round_count: roundTotal,
@@ -47,7 +47,7 @@ const AbstractPopupMenu: React.FC<Props> = (props) => {
      */
     const editGameHandler = async () => {
         props.setCurrentGameCallback();
-        props.navigation.navigate("Settings", { reason: 'edit_game' });
+        props.navigation.navigate('Settings', { reason: 'edit_game' });
 
         await analytics().logEvent('menu_edit', {
             round_count: roundTotal,
@@ -63,7 +63,7 @@ const AbstractPopupMenu: React.FC<Props> = (props) => {
             asyncRematchGame({ gameId: props.gameId })
         ).then(() => {
             setTimeout(() => {
-                props.navigation.navigate("Game");
+                props.navigation.navigate('Game');
             }, 500);
         });
     };

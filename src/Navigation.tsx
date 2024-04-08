@@ -10,11 +10,11 @@ import AppInfoHeader from '../src/components/Headers/AppInfoHeader';
 import GameHeader from '../src/components/Headers/GameHeader';
 import HomeHeader from '../src/components/Headers/HomeHeader';
 import SettingsHeader from '../src/components/Headers/SettingsHeader';
-import AppInfoScreen from "../src/screens/AppInfoScreen";
-import GameScreen from "../src/screens/GameScreen";
-import ListScreen from "../src/screens/ListScreen";
+import AppInfoScreen from '../src/screens/AppInfoScreen';
+import GameScreen from '../src/screens/GameScreen';
+import ListScreen from '../src/screens/ListScreen';
 import OnboardingScreen from '../src/screens/OnboardingScreen';
-import SettingsScreen from "../src/screens/SettingsScreen";
+import SettingsScreen from '../src/screens/SettingsScreen';
 
 import EditPlayerHeader from './components/Headers/EditPlayerHeader';
 import ShareHeader from './components/Headers/ShareHeader';
@@ -71,7 +71,7 @@ export const Navigation = () => {
                         initialParams={{ onboarding: true }}
                         options={{
                             orientation: 'portrait',
-                            title: "Onboarding",
+                            title: 'Onboarding',
                             headerShown: false,
                         }}
                     />
@@ -89,7 +89,7 @@ export const Navigation = () => {
                 <Stack.Screen name="AppInfo" component={AppInfoScreen}
                     options={{
                         orientation: 'portrait',
-                        title: "Info",
+                        title: 'Info',
                         header: ({ navigation }) => {
                             return <AppInfoHeader navigation={navigation} />;
                         },
@@ -98,7 +98,7 @@ export const Navigation = () => {
                 <Stack.Screen name="Game" component={GameScreen}
                     options={{
                         orientation: 'all',
-                        title: "Current Game",
+                        title: 'Current Game',
                         header: ({ navigation }) => {
                             return <GameHeader navigation={navigation} />;
                         },
@@ -107,7 +107,7 @@ export const Navigation = () => {
                 <Stack.Screen name="Settings" component={SettingsScreen}
                     options={({ route }) => ({
                         orientation: 'all',
-                        title: "Settings",
+                        title: 'Settings',
                         header: ({ navigation }) => {
                             return <SettingsHeader navigation={navigation} route={route} />;
                         },
@@ -116,7 +116,7 @@ export const Navigation = () => {
                 <Stack.Screen name="Share" component={ShareScreen}
                     options={{
                         orientation: 'all',
-                        title: "Share",
+                        title: 'Share',
                         header: ({ navigation }) => {
                             return <ShareHeader navigation={navigation} />;
                         },
@@ -126,7 +126,7 @@ export const Navigation = () => {
                     initialParams={{ index: 0, playerId: '' }}
                     options={({ route }) => ({
                         orientation: 'portrait',
-                        title: "Edit Player",
+                        title: 'Edit Player',
                         header: ({ navigation }) => {
                             return <EditPlayerHeader navigation={navigation} route={route} />;
                         },
@@ -136,7 +136,7 @@ export const Navigation = () => {
                     initialParams={{ onboarding: false }}
                     options={{
                         orientation: 'portrait',
-                        title: "Tutorial",
+                        title: 'Tutorial',
                     }}
                 />
             </Stack.Navigator>

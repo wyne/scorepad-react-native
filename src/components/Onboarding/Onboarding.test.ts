@@ -1,6 +1,6 @@
-import { SemVer } from "semver";
+import { SemVer } from 'semver';
 
-import { getOnboardingSemVer } from "./Onboarding";
+import { getOnboardingSemVer } from './Onboarding';
 
 describe('onboarding', () => {
     it('should return the default if onboarded to 0.0.0', () => {

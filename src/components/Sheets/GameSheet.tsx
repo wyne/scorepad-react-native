@@ -67,15 +67,15 @@ const GameSheet: React.FunctionComponent<Props> = ({ navigation, containerHeight
      */
     const resetGameHandler = () => {
         Alert.alert(
-            "Reset Game",
-            "Warning: This will reset all scores and rounds for this game. Are you sure you want to reset?",
+            'Reset Game',
+            'Warning: This will reset all scores and rounds for this game. Are you sure you want to reset?',
             [
                 {
-                    text: "Cancel",
-                    style: "cancel"
+                    text: 'Cancel',
+                    style: 'cancel'
                 },
                 {
-                    text: "Reset",
+                    text: 'Reset',
                     onPress: () => {
                         if (currentGame == undefined) return;
 
@@ -95,7 +95,7 @@ const GameSheet: React.FunctionComponent<Props> = ({ navigation, containerHeight
                                 roundTotal: 1,
                             }
                         }));
-                        navigation.navigate("Game");
+                        navigation.navigate('Game');
                     }
                 }
             ]
@@ -107,21 +107,21 @@ const GameSheet: React.FunctionComponent<Props> = ({ navigation, containerHeight
      */
     const rematchGameHandler = async () => {
         Alert.alert(
-            "Rematch",
-            "This will create a new game with the same players and empty scores.",
+            'Rematch',
+            'This will create a new game with the same players and empty scores.',
             [
                 {
-                    text: "Cancel",
-                    style: "cancel"
+                    text: 'Cancel',
+                    style: 'cancel'
                 },
                 {
-                    text: "Rematch",
+                    text: 'Rematch',
                     onPress: () => {
                         dispatch(
                             asyncRematchGame({ gameId: currentGame.id })
                         ).then(() => {
                             setTimeout(() => {
-                                navigation.navigate("Game");
+                                navigation.navigate('Game');
                             }, 500);
                         });
                     }
@@ -264,9 +264,9 @@ const GameSheet: React.FunctionComponent<Props> = ({ navigation, containerHeight
                                 />
                             }
 
-                            <BigButton text={currentGame.locked ? "Unlock" : "Lock"}
+                            <BigButton text={currentGame.locked ? 'Unlock' : 'Lock'}
                                 color={currentGame.locked ? 'orange' : 'green'}
-                                icon={currentGame.locked ? "lock-closed-outline" : "lock-open-outline"}
+                                icon={currentGame.locked ? 'lock-closed-outline' : 'lock-open-outline'}
                                 onPress={setLock}
                             />
 

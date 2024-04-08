@@ -23,7 +23,7 @@ type OnboardingScreens = Record<string, OnboardingScreenItem[]>;
 const onboardingScreens: OnboardingScreens = {
     '2.2.2': [
         {
-            title: "ScorePad\nwith Rounds",
+            title: 'ScorePad\nwith Rounds',
             media: {
                 type: 'image',
                 source: require('../../../assets/icon.png'),
@@ -36,7 +36,7 @@ const onboardingScreens: OnboardingScreens = {
             color: 'rgba(0,0,0,0.6)'
         },
         {
-            title: "Swipe for points",
+            title: 'Swipe for points',
             media: {
                 type: 'video',
                 source: require('../../../assets/video/swipe-gesture.mp4'),
@@ -45,7 +45,7 @@ const onboardingScreens: OnboardingScreens = {
             backgroundColor: '#a0c99a',
         },
         {
-            title: "Hold for more",
+            title: 'Hold for more',
             media: {
                 type: 'video',
                 source: require('../../../assets/video/swipe-powerhold.mp4'),
@@ -54,7 +54,7 @@ const onboardingScreens: OnboardingScreens = {
             backgroundColor: '#d29898',
         },
         {
-            title: "Change Gestures",
+            title: 'Change Gestures',
             media: {
                 type: 'video',
                 source: require('../../../assets/video/gesture-select.mp4'),
@@ -63,7 +63,7 @@ const onboardingScreens: OnboardingScreens = {
             backgroundColor: '#9896c5',
         },
         {
-            title: "Score History",
+            title: 'Score History',
             media: {
                 type: 'image',
                 source: require('../../../assets/onboarding/sheet.png'),
@@ -74,7 +74,7 @@ const onboardingScreens: OnboardingScreens = {
     ],
     '2.5.0': [
         {
-            title: "New Default:\nSwipe Gestures",
+            title: 'New Default:\nSwipe Gestures',
             media: {
                 type: 'video',
                 source: require('../../../assets/video/swipe-gesture.mp4'),
@@ -83,7 +83,7 @@ const onboardingScreens: OnboardingScreens = {
             backgroundColor: '#a0c99a',
         },
         {
-            title: "Hold for more",
+            title: 'Hold for more',
             media: {
                 type: 'video',
                 source: require('../../../assets/video/swipe-powerhold.mp4'),
@@ -92,7 +92,7 @@ const onboardingScreens: OnboardingScreens = {
             backgroundColor: '#d29898',
         },
         {
-            title: "Change Gestures",
+            title: 'Change Gestures',
             media: {
                 type: 'video',
                 source: require('../../../assets/video/gesture-select.mp4'),
@@ -104,7 +104,7 @@ const onboardingScreens: OnboardingScreens = {
 };
 
 const finalScreen: OnboardingScreenItem[] = [{
-    title: "That's it!",
+    title: 'That\'s it!',
     media: {
         type: 'image',
         source: require('../../../assets/icon.png'),

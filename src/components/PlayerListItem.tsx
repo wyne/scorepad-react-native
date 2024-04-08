@@ -39,15 +39,15 @@ const PlayerListItem: React.FunctionComponent<Props> = ({
 
     const deleteConfirmHandler = async () => {
         Alert.alert(
-            "Delete Player",
-            "Are you sure you want to delete this player? This will delete all scores for this player.",
+            'Delete Player',
+            'Are you sure you want to delete this player? This will delete all scores for this player.',
             [
                 {
-                    text: "Cancel",
-                    style: "cancel",
+                    text: 'Cancel',
+                    style: 'cancel',
                 },
                 {
-                    text: "Delete",
+                    text: 'Delete',
                     onPress: () => {
                         deleteHandler();
                     }
@@ -104,7 +104,7 @@ const PlayerListItem: React.FunctionComponent<Props> = ({
 
                 <View style={[
                     styles.colorBadge,
-                    { backgroundColor: "#" + palette[index % palette.length] }
+                    { backgroundColor: '#' + palette[index % palette.length] }
                 ]} />
 
                 <Text style={[styles.input]}>
@@ -138,7 +138,7 @@ const styles = StyleSheet.create({
         color: '#eee',
         fontSize: 25,
         fontVariant: ['tabular-nums'],
-        fontWeight: "bold",
+        fontWeight: 'bold',
         padding: 5,
     },
     colorBadge: {

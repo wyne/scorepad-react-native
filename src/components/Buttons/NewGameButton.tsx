@@ -23,7 +23,7 @@ const NewGameButton: React.FunctionComponent<Props> = ({ navigation }) => {
     const menuActions: MenuAction[] = playerNumberOptions.map((number) => {
         return {
             id: number.toString(),
-            title: number.toString() + (number == 1 ? " Player" : " Players"),
+            title: number.toString() + (number == 1 ? ' Player' : ' Players'),
         };
     });
 
@@ -35,7 +35,7 @@ const NewGameButton: React.FunctionComponent<Props> = ({ navigation }) => {
             })
         ).then(() => {
             setTimeout(() => {
-                navigation.navigate("Settings", { reason: 'new_game' });
+                navigation.navigate('Settings', { reason: 'new_game' });
             }, 500);
         });
     };

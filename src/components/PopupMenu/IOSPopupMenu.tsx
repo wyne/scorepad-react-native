@@ -52,7 +52,7 @@ const IOSPopupMenu: React.FC<Props> = ({
         },
         {
             id: 'delete',
-            title: `Delete`,
+            title: 'Delete',
             attributes: {
                 destructive: true,
             },

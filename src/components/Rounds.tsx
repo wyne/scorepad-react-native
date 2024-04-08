@@ -49,7 +49,7 @@ const Rounds: React.FunctionComponent<Props> = ({ }) => {
 
         roundsScrollViewEl.current.scrollTo({
             x: offset,
-            animated: Platform.OS == "ios" ? true : false
+            animated: Platform.OS == 'ios' ? true : false
         });
     }, [roundCurrent, roundScollOffset]);
 

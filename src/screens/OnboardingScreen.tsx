@@ -11,7 +11,7 @@ import {
     View,
     ViewToken,
 } from 'react-native';
-import { ExpandingDot } from "react-native-animated-pagination-dots";
+import { ExpandingDot } from 'react-native-animated-pagination-dots';
 import { Button } from 'react-native-elements';
 import Animated, { FadeIn } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';

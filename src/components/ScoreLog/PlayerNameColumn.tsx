@@ -27,7 +27,7 @@ const PlayerNameColumn: React.FunctionComponent = ({ }) => {
                     color='white' />
             </Text>
             {players.map((player, index) => (
-                <View key={index} style={{ paddingLeft: 5, borderLeftWidth: 5, borderColor: "#" + palette[index % palette.length] }}>
+                <View key={index} style={{ paddingLeft: 5, borderLeftWidth: 5, borderColor: '#' + palette[index % palette.length] }}>
                     <Text key={index} style={{ color: 'white', maxWidth: 100, fontSize: 20, }}
                         numberOfLines={1}
                     >{player.playerName}</Text>
