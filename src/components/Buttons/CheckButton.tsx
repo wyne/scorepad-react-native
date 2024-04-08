@@ -27,6 +27,7 @@ const CheckButton: React.FunctionComponent<Props> = ({ navigation, route }) => {
             if (route?.params?.reason === 'new_game') {
                 navigation.navigate("Game");
             } else {
+                //TODO: when the game is first created, this will go back instead of to game screen
                 navigation.goBack();
             }
         }}>

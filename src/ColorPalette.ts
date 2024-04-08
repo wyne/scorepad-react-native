@@ -38,14 +38,32 @@ const palettes: PaletteType = {
         "#f8961e",
         "#f9844a",
     ],
+    'grey': [
+        "#f8f9fa",
+        "#e9ecef",
+        "#dee2e6",
+        "#ced4da",
+        "#adb5bd",
+        "#6c757d",
+        "#495057",
+        "#343a40",
+        "#212529",
+        "#000000",
+    ],
+    'a': ["#114b5f", "#456990", "#e4fde1", "#f45b69", "#6b2737"],
+    'b': ["#f00", "#00f"],
+    'c': ["#88498f", "#779fa1", "#e0cba8", "#ff6542", "#564154"],
+    'd': ["#f8ffe5", "#06d6a0", "#1b9aaa", "#ef476f", "#ffc43d"],
+    'e': ["#1f2041", "#4b3f72", "#ffc857", "#119da4", "#19647e"],
 };
 
 export const getPlayerColors = (index: number): [string, string] => {
-    const palette = 'original';
+    const palette = Object.keys(palettes)[8];
 
     // TODO: Get player color if it exists
 
-    const bg = palettes[palette][index % palette.length];
+    const length = palettes[palette].length;
+    const bg = palettes[palette][index % length];
 
     const contrast = getContrastRatio(bg, '#000').number;
 
