@@ -8,7 +8,7 @@ import { Button } from 'react-native-elements';
 import Animated, { Extrapolate, FadeIn, interpolate, Layout, useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { asyncRematchGame, selectSortedPlayers, updateGame } from '../../../redux/GamesSlice';
+import { asyncRematchGame, selectGameById, selectSortedPlayers, updateGame } from '../../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
 import { updatePlayer } from '../../../redux/PlayersSlice';
 import { selectCurrentGame } from '../../../redux/selectors';
@@ -40,7 +40,7 @@ const GameSheet: React.FunctionComponent<Props> = ({ navigation, containerHeight
 
     if (currentGame == undefined) return null;
 
-    const players = useAppSelector(selectSortedPlayers);
+    const playerIds = useAppSelector(state => selectGameById(state, currentGame.id)?.playerIds);
 
     // ref
     const gameSheetRef = useGameSheetContext();
@@ -79,9 +79,9 @@ const GameSheet: React.FunctionComponent<Props> = ({ navigation, containerHeight
                     onPress: () => {
                         if (currentGame == undefined) return;
 
-                        players.forEach((player) => {
+                        playerIds.forEach((playerId) => {
                             dispatch(updatePlayer({
-                                id: player.id,
+                                id: playerId,
                                 changes: {
                                     scores: [0],
                                 }
