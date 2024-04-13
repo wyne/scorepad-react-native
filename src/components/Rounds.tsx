@@ -67,12 +67,11 @@ const Rounds: React.FunctionComponent<Props> = ({ }) => {
                 contentContainerStyle={{ flexDirection: 'row' }}
                 ref={roundsScrollViewEl}>
                 {roundsIterator.map((item, round) => (
-                    <View key={round} onLayout={e => onLayoutHandler(e, round)}>
-                        <MemoizedRoundScoreColumn
-                            round={round}
-                            key={round}
-                            isCurrentRound={round == roundCurrent} />
-                    </View>
+                    <MemoizedRoundScoreColumn
+                        onLayout={round == roundCurrent ? e => onLayoutHandler(e, round) : undefined}
+                        round={round}
+                        key={round}
+                        isCurrentRound={round == roundCurrent} />
                 ))}
             </ScrollView>
         </View>

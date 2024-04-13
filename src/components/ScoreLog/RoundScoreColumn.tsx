@@ -1,7 +1,7 @@
 import React, { memo, useCallback } from 'react';
 
 import analytics from '@react-native-firebase/analytics';
-import { Text, TouchableWithoutFeedback, View } from 'react-native';
+import { LayoutChangeEvent, Text, TouchableWithoutFeedback, View } from 'react-native';
 
 import { updateGame } from '../../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
@@ -13,9 +13,15 @@ interface Props {
     round: number;
     isCurrentRound: boolean;
     disabled?: boolean;
+    onLayout?: (event: LayoutChangeEvent, round: number) => void;
 }
 
-const RoundScoreColumn: React.FunctionComponent<Props> = ({ round, isCurrentRound, disabled = false }) => {
+const RoundScoreColumn: React.FunctionComponent<Props> = ({
+    round,
+    isCurrentRound,
+    disabled = false,
+    onLayout,
+}) => {
     const dispatch = useAppDispatch();
 
     const currentGameId = useAppSelector(state => state.settings.currentGameId);
@@ -46,11 +52,13 @@ const RoundScoreColumn: React.FunctionComponent<Props> = ({ round, isCurrentRoun
 
     return (
         <TouchableWithoutFeedback onPress={onPressHandler}>
-            <View style={{
-                padding: 10,
-                paddingBottom: 0,
-                backgroundColor: backgroundColor,
-            }}>
+            <View
+                onLayout={(e) => onLayout?.(e, round)}
+                style={{
+                    padding: 10,
+                    paddingBottom: 0,
+                    backgroundColor: backgroundColor,
+                }}>
                 <Text style={{
                     color: isCurrentRound ? 'red' : '#AAA',
                     fontWeight: 'bold',
