@@ -40,7 +40,7 @@ const ListScreen: React.FunctionComponent<Props> = ({ navigation }) => {
                 renderItem={({ item, index }) =>
                     <GameListItem navigation={navigation} gameId={item} index={index} />
                 }
-                keyExtractor={item => item.id}
+                keyExtractor={item => item}
             >
             </Animated.FlatList>
             <BlurView intensity={20} style={{
