@@ -7,7 +7,7 @@ interface Props {
     selected?: boolean;
 }
 
-const ColorCircle: React.FunctionComponent<Props> = ({ colors, selected }) => {
+const PalettePreview: React.FunctionComponent<Props> = ({ colors, selected }) => {
     const numColumns = Math.ceil(Math.sqrt(colors.length));
     const numRows = Math.ceil(colors.length / numColumns);
 
@@ -26,7 +26,6 @@ const ColorCircle: React.FunctionComponent<Props> = ({ colors, selected }) => {
                 <View
                     key={index}
                     style={{
-                        // backgroundColor: color,
                         width: `${100 / numColumns}%`,
                         height: `${100 / numRows}%`,
                         flexGrow: 1,
@@ -49,4 +48,4 @@ const ColorCircle: React.FunctionComponent<Props> = ({ colors, selected }) => {
     );
 };
 
-export default ColorCircle;
+export default PalettePreview;

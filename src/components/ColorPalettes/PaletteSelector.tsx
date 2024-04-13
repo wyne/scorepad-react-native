@@ -4,14 +4,14 @@ import { ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
 
 import { getPalette, getPalettes } from '../../ColorPalette';
 
-import ColorCircle from './ColorCircle';
+import PalettePreview from './PalettePreview';
 
 interface Props {
     // selectedPalette: ColorPalette;
     // onSelect: (palette: ColorPalette) => void;
 }
 
-const MemoizedColorCircle = React.memo(ColorCircle);
+const MemoizedColorCircle = React.memo(PalettePreview);
 
 const PaletteSelector: React.FunctionComponent<Props> = () => {
     const colorPalettes = getPalettes();
