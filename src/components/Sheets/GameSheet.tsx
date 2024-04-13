@@ -13,6 +13,7 @@ import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
 import { updatePlayer } from '../../../redux/PlayersSlice';
 import { systemBlue } from '../../constants';
 import BigButton from '../BigButtons/BigButton';
+import PaletteSelector from '../ColorPalettes/PaletteSelector';
 import RematchIcon from '../Icons/RematchIcon';
 import Rounds from '../Rounds';
 
@@ -231,6 +232,8 @@ const GameSheet: React.FunctionComponent<Props> = ({ navigation, containerHeight
                         <Text style={{ color: 'white', margin: 10, marginTop: 0 }}>
                             Tap on a column to set the current round.
                         </Text>
+
+                        <PaletteSelector />
 
                         <Animated.View layout={Layout.delay(200)}>
 

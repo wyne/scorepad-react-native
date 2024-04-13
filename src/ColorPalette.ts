@@ -98,6 +98,14 @@ const palettes: PaletteType = {
     ]
 };
 
+export const getPalettes = (): string[] => {
+    return Object.keys(palettes);
+};
+
+export const getPalette = (name: string): string[] => {
+    return palettes[name];
+};
+
 export const getPlayerColors = (index: number): [string, string] => {
     const palette = Object.keys(palettes)[4 % Object.keys(palettes).length];
 
