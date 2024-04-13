@@ -4,7 +4,7 @@ import { DimensionValue, StyleSheet } from 'react-native';
 import Animated, { Easing, FadeIn } from 'react-native-reanimated';
 
 import { useAppSelector } from '../../../redux/hooks';
-import { selectCurrentGame, selectInteractionType } from '../../../redux/selectors';
+import { selectInteractionType } from '../../../redux/selectors';
 import { interactionComponents } from '../Interactions/InteractionComponents';
 import { InteractionType } from '../Interactions/InteractionType';
 import AdditionTile from '../PlayerTiles/AdditionTile/AdditionTile';
@@ -33,9 +33,6 @@ const FlexboxTile: React.FunctionComponent<Props> = ({
     // Short circuit if width or height is not yet defined
     if (!(width > 0 && height > 0)) return null;
     if (Number.isNaN(width) || Number.isNaN(height)) return null;
-
-    const currentGame = useAppSelector(selectCurrentGame);
-    if (typeof currentGame == 'undefined') return null;
 
     const widthPerc: DimensionValue = `${(100 / cols)}%`;
     const heightPerc: DimensionValue = `${(100 / rows)}%`;
