@@ -15,20 +15,16 @@ interface FlexboxBoardProps {
 }
 
 const FlexboxBoard: React.FC<FlexboxBoardProps> = () => {
-    const currentGameId = useAppSelector(state => state.settings.currentGameId);
-    if (typeof currentGameId == 'undefined') return null;
+    const fullscreen = useAppSelector(state => state.settings.home_fullscreen);
+    const playerIds = useAppSelector(state => selectCurrentGame(state)?.playerIds);
+
+    if (playerIds == null || playerIds.length == 0) return null;
 
     const [rows, setRows] = useState<number>(0);
     const [cols, setCols] = useState<number>(0);
-    const fullscreen = useAppSelector(state => state.settings.home_fullscreen);
-    const currentGame = useAppSelector(selectCurrentGame);
 
     const [width, setWidth] = useState<number | null>(null);
     const [height, setHeight] = useState<number | null>(null);
-
-    if (currentGame == undefined) return null;
-
-    const playerIds = currentGame.playerIds;
 
     const playerCount = playerIds.length;
 
