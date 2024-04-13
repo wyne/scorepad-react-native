@@ -26,7 +26,7 @@ const PaletteSelector: React.FunctionComponent<Props> = () => {
                     ]}
                 // onPress={() => onSelect(palette)}
                 >
-                    <MemoizedColorCircle colors={getPalette(palette)} />
+                    <MemoizedColorCircle colors={getPalette(palette)} selected={index == 0} />
                 </TouchableOpacity>
             ))}
         </ScrollView>
@@ -39,14 +39,11 @@ const styles = StyleSheet.create({
     container: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        marginHorizontal: 20,
-        marginTop: 20,
-        marginBottom: 20,
+        marginVertical: 20,
     },
     palette: {
         width: 40,
         height: 40,
-        borderRadius: 20,
         borderWidth: 2,
         borderColor: 'transparent',
         marginHorizontal: 5,
