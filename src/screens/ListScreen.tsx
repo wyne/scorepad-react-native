@@ -7,7 +7,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import Animated, { Easing, LinearTransition } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { selectAllGames } from '../../redux/GamesSlice';
+import { selectGameIds } from '../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { setOnboardedVersion } from '../../redux/SettingsSlice';
 import GameListItem from '../components/GameListItem';
@@ -17,12 +17,12 @@ interface Props {
 }
 
 const ListScreen: React.FunctionComponent<Props> = ({ navigation }) => {
-    const gameList = useAppSelector(state => selectAllGames(state));
+    const gameIds = useAppSelector(state => selectGameIds(state));
     const dispatch = useAppDispatch();
 
     useEffect(() => {
         dispatch(setOnboardedVersion());
-    }, [gameList.length]);
+    }, [gameIds.length]);
 
     return (
         <SafeAreaView edges={['bottom', 'left', 'right']} style={{ backgroundColor: 'white', flex: 1 }}>
@@ -36,18 +36,18 @@ const ListScreen: React.FunctionComponent<Props> = ({ navigation }) => {
                     </>
                 }
                 style={styles.list}
-                data={gameList}
+                data={gameIds}
                 renderItem={({ item, index }) =>
-                    <GameListItem navigation={navigation} gameId={item.id} index={index} />
+                    <GameListItem navigation={navigation} gameId={item} index={index} />
                 }
-                keyExtractor={item => item.id}
+                keyExtractor={item => item}
             >
             </Animated.FlatList>
             <BlurView intensity={20} style={{
                 position: 'absolute', bottom: 0, left: 0, right: 0, height: 60,
                 justifyContent: 'flex-start', alignItems: 'center',
                 borderTopWidth: 1, borderColor: '#ccc',
-                display: gameList.length > 0 ? undefined : 'none',
+                display: gameIds.length > 0 ? undefined : 'none',
             }}>
                 <Text style={{ paddingTop: 10, color: '#555', fontSize: 12 }}>Long press for more options.</Text>
             </BlurView>

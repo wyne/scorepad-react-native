@@ -17,7 +17,27 @@ const EditGame = ({ }) => {
 
     const [localTitle, setLocalTitle] = useState(currentGame.title);
 
-    const setGameTitleHandler = (title: string) => {
+    const onEndEditingHandler = (e: NativeSyntheticEvent<TextInputEndEditingEventData>) => {
+        const text = e.nativeEvent.text;
+
+        if (text == "") {
+            setLocalTitle(UNTITLED);
+            saveGameTitle(UNTITLED);
+        } else {
+            saveGameTitle(text);
+        }
+    };
+
+    const onChangeTextHandler = (text: string) => {
+        if (text == "") {
+            saveGameTitle(UNTITLED);
+        } else {
+            saveGameTitle(text);
+        }
+        setLocalTitle(text);
+    };
+
+    const saveGameTitle = (title: string) => {
         setLocalTitle(title);
 
         dispatch(updateGame({
@@ -26,16 +46,6 @@ const EditGame = ({ }) => {
                 title: title == "" ? UNTITLED : title,
             }
         }));
-    };
-
-    const onEndEditingHandler = (e: NativeSyntheticEvent<TextInputEndEditingEventData>) => {
-        if (e.nativeEvent.text == "") {
-            setGameTitleHandler(UNTITLED);
-        }
-    };
-
-    const onChangeTextHandler = (text: string) => {
-        setGameTitleHandler(text);
     };
 
     return (
@@ -49,7 +59,6 @@ const EditGame = ({ }) => {
                     onBlur={onEndEditingHandler}
                     placeholder={UNTITLED}
                     renderErrorMessage={false}
-                    selectTextOnFocus={true}
                     style={styles.input}
                     inputContainerStyle={{ borderBottomWidth: 0 }}
                 />

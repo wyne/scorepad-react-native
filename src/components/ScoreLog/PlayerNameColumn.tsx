@@ -1,21 +1,27 @@
 import React from 'react';
 
+import { createSelector } from '@reduxjs/toolkit';
 import { StyleSheet, Text, View } from 'react-native';
 import { Icon } from 'react-native-elements/dist/icons/Icon';
 
-import { selectSortedPlayers } from '../../../redux/GamesSlice';
 import { useAppSelector } from '../../../redux/hooks';
 import { selectCurrentGame } from '../../../redux/selectors';
+import { RootState } from '../../../redux/store';
 import { palette, systemBlue } from '../../constants';
 
-const PlayerNameColumn: React.FunctionComponent = ({ }) => {
-    const currentGame = useAppSelector(selectCurrentGame);
+const selectPlayerEntities = (state: RootState) => state.players.entities;
 
-    if (currentGame == undefined) return null;
+const selectPlayerIds = (_: RootState, playerIds: string[]) => playerIds;
 
-    const players = useAppSelector(selectSortedPlayers);
+const selectPlayerNamesByIds = createSelector(
+    [selectPlayerEntities, selectPlayerIds],
+    (players, playerIds) => playerIds.map(id => players[id]?.playerName)
+);
 
-    if (players == undefined) return null;
+const PlayerNameColumn: React.FunctionComponent = () => {
+    const playerIds = useAppSelector(state => selectCurrentGame(state)?.playerIds) || [];
+    const playerNames = useAppSelector(state => selectPlayerNamesByIds(state, playerIds));
+
 
     return (
         <View style={{ paddingVertical: 10 }}>
@@ -26,11 +32,11 @@ const PlayerNameColumn: React.FunctionComponent = ({ }) => {
                     size={19}
                     color='white' />
             </Text>
-            {players.map((player, index) => (
+            {playerNames.map((name, index) => (
                 <View key={index} style={{ paddingLeft: 5, borderLeftWidth: 5, borderColor: "#" + palette[index % palette.length] }}>
                     <Text key={index} style={{ color: 'white', maxWidth: 100, fontSize: 20, }}
                         numberOfLines={1}
-                    >{player.playerName}</Text>
+                    >{name}</Text>
                 </View>
             ))}
         </View>

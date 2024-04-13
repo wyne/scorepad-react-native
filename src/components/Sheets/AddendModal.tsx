@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { BottomSheetBackdrop, BottomSheetBackdropProps, BottomSheetModal, BottomSheetScrollView } from '@gorhom/bottom-sheet';
+import analytics from '@react-native-firebase/analytics';
 import { Picker } from '@react-native-picker/picker';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import { debounce } from 'lodash';
@@ -57,14 +58,18 @@ const AddendModal: React.FunctionComponent<Props> = ({ }) => {
     const onTapValueChange = useCallback((itemValue: number, itemIndex: number) => {
         dispatch(setMultiplier(addendOptions[itemIndex]));
         dispatch(setAddendOne(addendOptions[itemIndex]));
-        // TODO: analytics
+        analytics().logEvent('addend_two_change', {
+            addendOne: itemValue,
+        });
     }, [addendOne]);
 
     const debouncedTapValueChange = debounce(onTapValueChange, 200);
 
     const onLongTapValueChange = useCallback((itemValue: number) => {
         dispatch(setAddendTwo(itemValue));
-        // TODO: analytics
+        analytics().logEvent('addend_two_change', {
+            addendTwo: itemValue,
+        });
     }, [addendTwo]);
 
     const debouncedLongTapValueChange = debounce(onLongTapValueChange, 200);

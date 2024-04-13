@@ -16,9 +16,11 @@ import ListScreen from "../src/screens/ListScreen";
 import OnboardingScreen from '../src/screens/OnboardingScreen';
 import SettingsScreen from "../src/screens/SettingsScreen";
 
+import EditPlayerHeader from './components/Headers/EditPlayerHeader';
 import ShareHeader from './components/Headers/ShareHeader';
 import { getOnboardingSemVer } from './components/Onboarding/Onboarding';
 import logger from './Logger';
+import EditPlayerScreen from './screens/EditPlayerScreen';
 import ShareScreen from './screens/ShareScreen';
 
 export type OnboardingScreenParamList = {
@@ -35,6 +37,10 @@ export type RootStackParamList = {
     Share: undefined;
     Onboarding: OnboardingScreenParamList;
     Tutorial: OnboardingScreenParamList;
+    EditPlayer: {
+        index: number | undefined;
+        playerId: string | undefined;
+    };
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -115,6 +121,16 @@ export const Navigation = () => {
                             return <ShareHeader navigation={navigation} />;
                         },
                     }}
+                />
+                <Stack.Screen name="EditPlayer" component={EditPlayerScreen}
+                    initialParams={{ index: 0, playerId: '' }}
+                    options={({ route }) => ({
+                        orientation: 'portrait',
+                        title: "Edit Player",
+                        header: ({ navigation }) => {
+                            return <EditPlayerHeader navigation={navigation} route={route} />;
+                        },
+                    })}
                 />
                 <Stack.Screen name="Tutorial" component={OnboardingScreen}
                     initialParams={{ onboarding: false }}
