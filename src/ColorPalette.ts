@@ -50,24 +50,67 @@ const palettes: PaletteType = {
         '#212529',
         '#000000',
     ],
-    'a': ['#114b5f', '#456990', '#e4fde1', '#f45b69', '#6b2737'],
-    'b': ['#f00', '#00f'],
-    'c': ['#88498f', '#779fa1', '#e0cba8', '#ff6542', '#564154'],
-    'd': ['#f8ffe5', '#06d6a0', '#1b9aaa', '#ef476f', '#ffc43d'],
-    'e': ['#1f2041', '#4b3f72', '#ffc857', '#119da4', '#19647e'],
+    'a': [
+        '#114b5f',
+        '#456990',
+        '#e4fde1',
+        '#f45b69',
+        '#6b2737'
+    ],
+    'b': [
+        '#c25858',
+        '#01497c',
+    ],
+    'c': [
+        '#88498f',
+        '#779fa1',
+        '#e0cba8',
+        '#ff6542',
+        '#564154'
+    ],
+    'd': [
+        '#f8ffe5',
+        '#06d6a0',
+        '#1b9aaa',
+        '#ef476f',
+        '#ffc43d'
+    ],
+    'e': [
+        '#1f2041',
+        '#4b3f72',
+        '#ffc857',
+        '#119da4',
+        '#19647e'
+    ],
+    'f': [
+        '#fcaa67',
+        '#b0413e',
+        '#ffffc7',
+        '#548687',
+        '#473335'
+    ],
+    'g': [
+        '#ffa400',
+        '#009ffd',
+        '#2a2a72',
+        '#232528',
+        '#eaf6ff'
+    ]
 };
 
 export const getPlayerColors = (index: number): [string, string] => {
-    const palette = Object.keys(palettes)[8];
+    const palette = Object.keys(palettes)[4 % Object.keys(palettes).length];
 
     // TODO: Get player color if it exists
 
     const length = palettes[palette].length;
     const bg = palettes[palette][index % length];
 
-    const contrast = getContrastRatio(bg, '#000').number;
+    const blackContrast = getContrastRatio(bg, '#000').number;
+    const whiteContrast = getContrastRatio(bg, '#fff').number;
 
-    const fg = contrast > 7 ? '#000000' : '#FFFFFF';
+    // +1 to give a slight preference to white
+    const fg = blackContrast >= whiteContrast + 1 ? '#000000' : '#FFFFFF';
 
     return [bg, fg];
 };
