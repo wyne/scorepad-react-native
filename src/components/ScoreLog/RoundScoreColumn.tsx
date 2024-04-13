@@ -19,9 +19,7 @@ const RoundScoreColumn: React.FunctionComponent<Props> = ({ round, isCurrentRoun
     const dispatch = useAppDispatch();
 
     const currentGameId = useAppSelector(state => state.settings.currentGameId);
-    const currentGame = useAppSelector(selectCurrentGame);
-
-    if (typeof currentGame == 'undefined') return null;
+    const playerIds = useAppSelector(state => selectCurrentGame(state)?.playerIds) || [];
 
     const onPressHandler = useCallback(async () => {
         if (disabled || !currentGameId) return;
@@ -61,7 +59,7 @@ const RoundScoreColumn: React.FunctionComponent<Props> = ({ round, isCurrentRoun
                 }}>
                     {round + 1}
                 </Text>
-                {currentGame.playerIds.map((playerId, playerIndex) => (
+                {playerIds.map((playerId, playerIndex) => (
                     <RoundScoreCell playerId={playerId} round={round} key={playerId} playerIndex={playerIndex} />
                 ))}
             </View>
