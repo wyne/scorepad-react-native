@@ -20,6 +20,7 @@ const settingsPersistConfig = {
         'showPointParticles',
         'showPlayerIndex',
         'interactionType',
+        'lastStoreReviewPrompt',
     ],
 };
 
@@ -52,7 +53,12 @@ export const store = configureStore({
 });
 
 // Infer the `RootState` and `AppDispatch` types from the store itself
-export type RootState = ReturnType<typeof store.getState>;
+export interface RootState {
+    settings: ReturnType<typeof settingsReducer>;
+    games: ReturnType<typeof gamesReducer>;
+    players: ReturnType<typeof scoresReducer>;
+}
+
 // Inferred type: {posts: PostsState, comments: CommentsState, users: UsersState}
 export type AppDispatch = typeof store.dispatch;
 

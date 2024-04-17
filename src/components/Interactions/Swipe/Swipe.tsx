@@ -6,9 +6,9 @@ import { Animated, StyleSheet, View } from 'react-native';
 import { PanGestureHandler, PanGestureHandlerStateChangeEvent, State } from 'react-native-gesture-handler';
 import { runOnJS, useAnimatedReaction, useSharedValue } from 'react-native-reanimated';
 
-import { selectGameById } from '../../../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../../../redux/hooks';
 import { playerRoundScoreIncrement } from '../../../../redux/PlayersSlice';
+import { selectCurrentGame } from '../../../../redux/selectors';
 
 interface HalfTapProps {
     children: React.ReactNode;
@@ -27,10 +27,9 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
     //#region Selector setup
 
     const currentGameId = useAppSelector(state => state.settings.currentGameId);
-    const currentGame = useAppSelector(state => selectGameById(state, currentGameId));
-    if (typeof currentGame == 'undefined') return null;
+    const roundCurrent = useAppSelector(state => selectCurrentGame(state)?.roundCurrent) || 0;
+    const currentGameLocked = useAppSelector(state => selectCurrentGame(state)?.locked);
 
-    const roundCurrent = currentGame.roundCurrent;
     const dispatch = useAppDispatch();
 
     const addendOne = useAppSelector(state => state.settings.addendOne);
@@ -142,9 +141,10 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
                 // Handle the gesture movement
 
                 // Invert the value for panning up to be positive
-                totalOffset.value = -event.nativeEvent.translationY;
+                const y = event.nativeEvent.translationY;
+                totalOffset.value = -y;
 
-                if (powerHoldRef.current == false) {
+                if (powerHoldRef.current == false && Math.abs(y) > 1) {
                     powerHoldStop();
                 }
             },
@@ -165,7 +165,7 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
                 addend: powerHold ? addendOne : addendTwo,
                 round: roundCurrent,
                 type: event.nativeEvent.translationY > 0 ? 'decrement' : 'increment',
-                powerHold: powerHold,
+                power_hold: powerHold,
                 notches: Math.round((event.nativeEvent.translationY || 0) / notchSize),
                 interaction: 'swipe-vertical',
             });
@@ -235,7 +235,7 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
             </Animated.View>
 
             <PanGestureHandler
-                enabled={!currentGame.locked}
+                enabled={!currentGameLocked}
                 minDist={0}
                 onGestureEvent={onGestureEvent}
                 onHandlerStateChange={onHandlerStateChange}

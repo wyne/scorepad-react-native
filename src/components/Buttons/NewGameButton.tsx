@@ -7,7 +7,7 @@ import { Icon } from 'react-native-elements';
 
 import { asyncCreateGame, selectAllGames } from '../../../redux/GamesSlice';
 import { useAppSelector, useAppDispatch } from '../../../redux/hooks';
-import { systemBlue } from '../../constants';
+import { MAX_PLAYERS, systemBlue } from '../../constants';
 
 interface Props {
     navigation: NativeStackNavigationProp<ParamListBase, string, undefined>;
@@ -16,9 +16,9 @@ interface Props {
 const NewGameButton: React.FunctionComponent<Props> = ({ navigation }) => {
     const dispatch = useAppDispatch();
 
-    const gameList = useAppSelector(state => selectAllGames(state));
+    const gameList = useAppSelector(selectAllGames);
 
-    const playerNumberOptions = [...Array.from(Array(12).keys(), n => n + 1)];
+    const playerNumberOptions = [...Array.from(Array(MAX_PLAYERS).keys(), n => n + 1)];
 
     const menuActions: MenuAction[] = playerNumberOptions.map((number) => {
         return {
@@ -30,7 +30,7 @@ const NewGameButton: React.FunctionComponent<Props> = ({ navigation }) => {
     const addGameHandler = async (playerCount: number) => {
         dispatch(
             asyncCreateGame({
-                gameCount: gameList.length + 1,
+                gameCount: gameList.length,
                 playerCount: playerCount
             })
         ).then(() => {

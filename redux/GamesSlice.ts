@@ -1,8 +1,10 @@
 import analytics from '@react-native-firebase/analytics';
-import { createSlice, PayloadAction, createEntityAdapter, createAsyncThunk, createSelector } from '@reduxjs/toolkit';
+import { PayloadAction, createAsyncThunk, createEntityAdapter, createSelector, createSlice } from '@reduxjs/toolkit';
 import * as Crypto from 'expo-crypto';
 
-import { playerAdd, selectAllPlayers } from './PlayersSlice';
+import logger from '../src/Logger';
+
+import { ScoreState, playerAdd, selectAllPlayers, selectPlayerById } from './PlayersSlice';
 import { setCurrentGameId } from './SettingsSlice';
 import { RootState } from './store';
 
@@ -54,6 +56,17 @@ const gamesSlice = createSlice({
         },
         gameDelete(state, action: PayloadAction<string>) {
             gamesAdapter.removeOne(state, action.payload);
+        },
+        reorderPlayers(state, action: PayloadAction<{ gameId: string, playerIds: string[]; }>) {
+            const game = state.entities[action.payload.gameId];
+            if (!game) { return; }
+
+            gamesAdapter.updateOne(state, {
+                id: action.payload.gameId,
+                changes: {
+                    playerIds: action.payload.playerIds,
+                }
+            });
         }
     }
 });
@@ -62,10 +75,63 @@ interface GamesSlice {
     games: typeof initialState;
 }
 
+export const asyncRematchGame = createAsyncThunk(
+    'games/rematch',
+    async (
+        { gameId }: { gameId: string; },
+        { dispatch, getState }
+    ) => {
+        const newGameId = Crypto.randomUUID();
+
+        const playerIds: string[] = [];
+
+        const game = selectGameById(getState() as RootState, gameId);
+
+        if (!game) {
+            logger.error('No game found to rematch!');
+            return;
+        }
+
+        game.playerIds.forEach(() => {
+            playerIds.push(Crypto.randomUUID());
+        });
+
+        playerIds.forEach((playerId) => {
+            const oldPlayerId = game.playerIds[playerIds.indexOf(playerId)];
+
+            const player = selectPlayerById(getState() as RootState, oldPlayerId);
+            const playerName = player?.playerName;
+
+            dispatch(playerAdd({
+                id: playerId,
+                playerName: playerName || `Player ${playerIds.indexOf(playerId) + 1}`,
+                scores: [0],
+            }));
+        });
+
+        dispatch(gameSave({
+            id: newGameId,
+            title: game.title,
+            dateCreated: Date.now(),
+            roundCurrent: 0,
+            roundTotal: 1,
+            playerIds: playerIds,
+        }));
+
+        dispatch(setCurrentGameId(newGameId));
+
+        await analytics().logEvent('rematch_game', {
+            gameId: game.id,
+        });
+
+        return newGameId;
+    }
+);
+
 export const asyncCreateGame = createAsyncThunk(
     'games/create',
     async (
-        { gameCount, playerCount }: { gameCount: number, playerCount: number },
+        { gameCount, playerCount }: { gameCount: number, playerCount: number; },
         { dispatch }
     ) => {
         const newGameId = Crypto.randomUUID();
@@ -105,14 +171,17 @@ export const asyncCreateGame = createAsyncThunk(
 export const selectSortedPlayers = createSelector(
     [
         selectAllPlayers,
-        (state: RootState) => state.games.entities[state.settings.currentGameId]
+        (state: RootState) => state.settings.currentGameId ? state.games.entities[state.settings.currentGameId] : undefined
     ],
-    (players, currentGame) => players
-        .filter(player => currentGame?.playerIds.includes(player.id))
-        .sort((a, b) => {
-            if (currentGame?.playerIds == undefined) return 0;
-            return currentGame.playerIds.indexOf(a.id) - currentGame.playerIds.indexOf(b.id);
-        })
+    (players: ScoreState[], currentGame: GameState | undefined) => {
+        if (!currentGame) return [];
+
+        return players.filter(player => currentGame.playerIds?.includes(player.id))
+            .sort((a, b) => {
+                if (currentGame?.playerIds == undefined) return 0;
+                return currentGame.playerIds.indexOf(a.id) - currentGame.playerIds.indexOf(b.id);
+            });
+    }
 );
 
 export const {
@@ -121,6 +190,7 @@ export const {
     roundPrevious,
     gameSave,
     gameDelete,
+    reorderPlayers,
 } = gamesSlice.actions;
 
 export default gamesSlice.reducer;

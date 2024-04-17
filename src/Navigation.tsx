@@ -3,7 +3,7 @@ import React from 'react';
 import { DarkTheme, NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import * as Application from 'expo-application';
-import { SemVer, parse } from 'semver';
+import { parse, SemVer } from 'semver';
 
 import { useAppSelector } from '../redux/hooks';
 import AppInfoHeader from '../src/components/Headers/AppInfoHeader';
@@ -16,8 +16,11 @@ import ListScreen from "../src/screens/ListScreen";
 import OnboardingScreen from '../src/screens/OnboardingScreen';
 import SettingsScreen from "../src/screens/SettingsScreen";
 
+import EditPlayerHeader from './components/Headers/EditPlayerHeader';
 import ShareHeader from './components/Headers/ShareHeader';
 import { getOnboardingSemVer } from './components/Onboarding/Onboarding';
+import logger from './Logger';
+import EditPlayerScreen from './screens/EditPlayerScreen';
 import ShareScreen from './screens/ShareScreen';
 
 export type OnboardingScreenParamList = {
@@ -34,6 +37,10 @@ export type RootStackParamList = {
     Share: undefined;
     Onboarding: OnboardingScreenParamList;
     Tutorial: OnboardingScreenParamList;
+    EditPlayer: {
+        index: number | undefined;
+        playerId: string | undefined;
+    };
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -51,8 +58,8 @@ export const Navigation = () => {
     const onboardedSemVer = parse(onboardedStr);
     const appVersion = new SemVer(Application.nativeApplicationVersion || '0.0.0');
 
-    console.log(`App Version: ${appVersion}`);
-    console.log(`Onboarded Version: ${onboardedSemVer}`);
+    logger.info(`App Version: ${appVersion}`);
+    logger.info(`Onboarded Version: ${onboardedSemVer}`);
 
     const onboarded = getOnboardingSemVer(onboardedSemVer) === undefined;
 
@@ -114,6 +121,16 @@ export const Navigation = () => {
                             return <ShareHeader navigation={navigation} />;
                         },
                     }}
+                />
+                <Stack.Screen name="EditPlayer" component={EditPlayerScreen}
+                    initialParams={{ index: 0, playerId: '' }}
+                    options={({ route }) => ({
+                        orientation: 'portrait',
+                        title: "Edit Player",
+                        header: ({ navigation }) => {
+                            return <EditPlayerHeader navigation={navigation} route={route} />;
+                        },
+                    })}
                 />
                 <Stack.Screen name="Tutorial" component={OnboardingScreen}
                     initialParams={{ onboarding: false }}

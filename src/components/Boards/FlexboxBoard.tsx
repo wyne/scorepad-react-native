@@ -4,8 +4,8 @@ import { getContrastRatio } from 'colorsheet';
 import { LayoutChangeEvent, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { selectGameById } from '../../../redux/GamesSlice';
 import { useAppSelector } from '../../../redux/hooks';
+import { selectCurrentGame } from '../../../redux/selectors';
 import { bottomSheetHeight } from '../../components/Sheets/GameSheet';
 
 import FlexboxTile from './FlexboxTile';
@@ -15,21 +15,17 @@ interface FlexboxBoardProps {
 }
 
 const FlexboxBoard: React.FC<FlexboxBoardProps> = () => {
-    const currentGameId = useAppSelector(state => state.settings.currentGameId);
-    if (typeof currentGameId == 'undefined') return null;
+    const fullscreen = useAppSelector(state => state.settings.home_fullscreen);
+    const playerIds = useAppSelector(state => selectCurrentGame(state)?.playerIds);
+
+    if (playerIds == null || playerIds.length == 0) return null;
 
     const palette = ["01497c", "c25858", "f5c800", "275436", "dc902c", "62516a", "755647", "925561"];
     const [rows, setRows] = useState<number>(0);
     const [cols, setCols] = useState<number>(0);
-    const fullscreen = useAppSelector(state => state.settings.home_fullscreen);
-    const currentGame = useAppSelector(state => selectGameById(state, state.settings.currentGameId));
 
     const [width, setWidth] = useState<number | null>(null);
     const [height, setHeight] = useState<number | null>(null);
-
-    if (currentGame == undefined) return null;
-
-    const playerIds = currentGame.playerIds;
 
     const playerCount = playerIds.length;
 

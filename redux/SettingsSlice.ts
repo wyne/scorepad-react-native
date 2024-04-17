@@ -3,6 +3,7 @@ import * as Application from 'expo-application';
 import { SemVer, valid } from 'semver';
 
 import { InteractionType } from '../src/components/Interactions/InteractionType';
+import logger from '../src/Logger';
 
 export interface SettingsState {
     home_fullscreen: boolean;
@@ -14,6 +15,7 @@ export interface SettingsState {
     showPointParticles: boolean;
     showPlayerIndex: boolean;
     interactionType: InteractionType;
+    lastStoreReviewPrompt: number;
 };
 
 const initialState: SettingsState = {
@@ -26,6 +28,7 @@ const initialState: SettingsState = {
     showPointParticles: true,
     showPlayerIndex: false,
     interactionType: InteractionType.SwipeVertical,
+    lastStoreReviewPrompt: 0,
 };
 
 const settingsSlice = createSlice({
@@ -33,6 +36,7 @@ const settingsSlice = createSlice({
     initialState,
     reducers: {
         setCurrentGameId(state, action: PayloadAction<string>) {
+            console.info('Setting Current Game: ', action.payload);
             state.currentGameId = action.payload;
         },
         toggleHomeFullscreen(state) {
@@ -58,9 +62,12 @@ const settingsSlice = createSlice({
         },
         setOnboardedVersion(state) {
             const appVersion = new SemVer(Application.nativeApplicationVersion || '0.0.0');
-            console.log(`Setting Onboarded Version: ${appVersion}`);
+            logger.info(`Setting Onboarded Version: ${appVersion}`);
             state.onboarded = valid(appVersion) || '0.0.0';
-        }
+        },
+        setLastStoreReviewPrompt(state, action: PayloadAction<number>) {
+            state.lastStoreReviewPrompt = action.payload;
+        },
     }
 });
 
@@ -74,6 +81,7 @@ export const {
     toggleShowPointParticles,
     toggleShowPlayerIndex,
     setInteractionType,
+    setLastStoreReviewPrompt,
 } = settingsSlice.actions;
 
 export default settingsSlice.reducer;

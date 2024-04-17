@@ -4,9 +4,9 @@ import analytics from '@react-native-firebase/analytics';
 import * as Haptics from 'expo-haptics';
 import { StyleSheet, TouchableHighlight, View } from 'react-native';
 
-import { selectGameById } from '../../../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../../../redux/hooks';
 import { playerRoundScoreIncrement } from '../../../../redux/PlayersSlice';
+import { selectCurrentGame } from '../../../../redux/selectors';
 import { ScoreParticle } from '../../PlayerTiles/AdditionTile/ScoreParticle';
 
 type ScoreParticleProps = {
@@ -33,7 +33,7 @@ export const HalfTileTouchSurface: React.FunctionComponent<Props> = (
     const addendTwo = useAppSelector(state => state.settings.addendTwo);
 
     const currentGameId = useAppSelector(state => state.settings.currentGameId);
-    const currentGame = useAppSelector(state => selectGameById(state, currentGameId));
+    const currentGame = useAppSelector(selectCurrentGame);
     if (typeof currentGame == 'undefined') return null;
 
     const roundCurrent = currentGame.roundCurrent;
@@ -48,7 +48,7 @@ export const HalfTileTouchSurface: React.FunctionComponent<Props> = (
         setParticles((particles) => [...particles, { key, value }]);
     };
 
-    const scoreChangeHandler = (addend: number) => {
+    const scoreChangeHandler = (addend: number, powerHold = false) => {
         if (currentGame.locked) return;
 
         if (showPointParticles) {
@@ -61,6 +61,8 @@ export const HalfTileTouchSurface: React.FunctionComponent<Props> = (
             addend: addend,
             round: roundCurrent,
             type: scoreType,
+            power_hold: powerHold,
+            interaction: 'half-tap',
         });
         dispatch(playerRoundScoreIncrement(playerId, roundCurrent, scoreType == 'increment' ? addend : -addend));
     };
@@ -71,7 +73,7 @@ export const HalfTileTouchSurface: React.FunctionComponent<Props> = (
             underlayColor={currentGame.locked ? 'transparent' : fontColor + '30'}
             activeOpacity={1}
             onPress={() => scoreChangeHandler(addendOne)}
-            onLongPress={() => scoreChangeHandler(addendTwo)}>
+            onLongPress={() => scoreChangeHandler(addendTwo, true)}>
             <View style={[StyleSheet.absoluteFill]}>
                 {particles.map((particle) => (
                     <ScoreParticle key={particle.key} id={particle.key} value={particle.value} />

@@ -41,6 +41,7 @@ const ScoreAfter: React.FunctionComponent<Props> = ({ containerWidth, roundScore
     return (
         <Animated.View entering={enteringAnimation} exiting={ZoomOutFadeOut}>
             <Animated.Text
+                allowFontScaling={false}
                 style={[animatedStyles, styles.scoreTotal, { color: fontColor }]}>
                 {totalScore}
             </Animated.Text>

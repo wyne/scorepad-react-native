@@ -4,11 +4,11 @@ import { ParamListBase } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { BlurView } from 'expo-blur';
 import { StyleSheet, Text, View } from 'react-native';
-import Animated, { Layout, Easing } from 'react-native-reanimated';
+import Animated, { Easing, LinearTransition } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { asyncCreateGame, selectAllGames } from '../../redux/GamesSlice';
-import { useAppSelector, useAppDispatch } from '../../redux/hooks';
+import { selectGameIds } from '../../redux/GamesSlice';
+import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { setOnboardedVersion } from '../../redux/SettingsSlice';
 import GameListItem from '../components/GameListItem';
 
@@ -17,39 +17,37 @@ interface Props {
 }
 
 const ListScreen: React.FunctionComponent<Props> = ({ navigation }) => {
-    const gameList = useAppSelector(state => selectAllGames(state));
+    const gameIds = useAppSelector(state => selectGameIds(state));
     const dispatch = useAppDispatch();
 
-    // If no games, create one and navigate to it
     useEffect(() => {
         dispatch(setOnboardedVersion());
-
-        if (gameList.length == 0) {
-            dispatch(asyncCreateGame({ gameCount: gameList.length + 1, playerCount: 2 })).then(() => {
-                setTimeout(() => {
-                    navigation.navigate("Game");
-                }, 500);
-            });
-        }
-    }, [gameList.length]);
+    }, [gameIds.length]);
 
     return (
         <SafeAreaView edges={['bottom', 'left', 'right']} style={{ backgroundColor: 'white', flex: 1 }}>
             <Animated.FlatList
                 ListFooterComponent={<View style={{ paddingBottom: 25 }}></View>}
-                itemLayoutAnimation={Layout.easing(Easing.ease)}
-                style={styles.list}
-                data={gameList}
-                renderItem={({ item, index }) =>
-                    <GameListItem navigation={navigation} gameId={item.id} index={index} />
+                itemLayoutAnimation={LinearTransition.easing(Easing.ease)}
+                ListEmptyComponent={
+                    <>
+                        <Text style={{ textAlign: 'center', padding: 30, paddingBottom: 10, fontSize: 16, fontWeight: 'bold' }}>No Games</Text>
+                        <Text style={{ textAlign: 'center', padding: 10 }}>Tap the + button above to create a new game.</Text>
+                    </>
                 }
-                keyExtractor={item => item.id}
+                style={styles.list}
+                data={gameIds}
+                renderItem={({ item, index }) =>
+                    <GameListItem navigation={navigation} gameId={item} index={index} />
+                }
+                keyExtractor={item => item}
             >
             </Animated.FlatList>
             <BlurView intensity={20} style={{
                 position: 'absolute', bottom: 0, left: 0, right: 0, height: 60,
                 justifyContent: 'flex-start', alignItems: 'center',
                 borderTopWidth: 1, borderColor: '#ccc',
+                display: gameIds.length > 0 ? undefined : 'none',
             }}>
                 <Text style={{ paddingTop: 10, color: '#555', fontSize: 12 }}>Long press for more options.</Text>
             </BlurView>

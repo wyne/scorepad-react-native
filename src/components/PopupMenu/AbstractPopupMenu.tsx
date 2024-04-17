@@ -3,10 +3,9 @@ import React from 'react';
 import analytics from '@react-native-firebase/analytics';
 import { ParamListBase } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { AnyAction, ThunkDispatch } from '@reduxjs/toolkit';
 import { Alert, Platform } from 'react-native';
 
-import { gameDelete, selectGameById } from '../../../redux/GamesSlice';
+import { asyncRematchGame, gameDelete, selectGameById } from '../../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
 
 import AndroidPopupMenu from './AndroidPopupMenu';
@@ -16,7 +15,7 @@ interface Props {
     children: React.ReactNode;
     gameId: string;
     navigation: NativeStackNavigationProp<ParamListBase, string, undefined>;
-    asyncSetCurrentGame: (dispatch: ThunkDispatch<unknown, undefined, AnyAction>) => Promise<void>;
+    setCurrentGameCallback: () => void;
     chooseGameHandler: () => void;
     index: number;
 }
@@ -34,9 +33,8 @@ const AbstractPopupMenu: React.FC<Props> = (props) => {
      * Share Game
      */
     const shareGameHandler = async () => {
-        props.asyncSetCurrentGame(dispatch).then(() => {
-            props.navigation.navigate("Share");
-        });
+        props.setCurrentGameCallback();
+        props.navigation.navigate("Share");
 
         await analytics().logEvent('menu_share', {
             round_count: roundTotal,
@@ -48,13 +46,25 @@ const AbstractPopupMenu: React.FC<Props> = (props) => {
      * Edit Game
      */
     const editGameHandler = async () => {
-        props.asyncSetCurrentGame(dispatch).then(() => {
-            props.navigation.navigate("Settings", { reason: 'edit_game' });
-        });
+        props.setCurrentGameCallback();
+        props.navigation.navigate("Settings", { reason: 'edit_game' });
 
         await analytics().logEvent('menu_edit', {
             round_count: roundTotal,
             player_count: playerIds.length,
+        });
+    };
+
+    /** 
+     * Rematch Game
+     */
+    const rematchGameHandler = async () => {
+        dispatch(
+            asyncRematchGame({ gameId: props.gameId })
+        ).then(() => {
+            setTimeout(() => {
+                props.navigation.navigate("Game");
+            }, 500);
         });
     };
 
@@ -92,6 +102,7 @@ const AbstractPopupMenu: React.FC<Props> = (props) => {
         ios: (
             <IOSPopupMenu
                 gameTitle={gameTitle}
+                rematchGameHandler={rematchGameHandler}
                 editGameHandler={editGameHandler}
                 shareGameHandler={shareGameHandler}
                 deleteGameHandler={deleteGameHandler}
