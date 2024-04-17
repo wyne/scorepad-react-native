@@ -107,7 +107,7 @@ export const getPalette = (name: string): string[] => {
 };
 
 export const getPlayerColors = (index: number): [string, string] => {
-    const palette = Object.keys(palettes)[4 % Object.keys(palettes).length];
+    const palette = Object.keys(palettes)[0 % Object.keys(palettes).length];
 
     // TODO: Get player color if it exists
 
