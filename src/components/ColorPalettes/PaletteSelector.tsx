@@ -2,19 +2,32 @@ import React from 'react';
 
 import { ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
 
+import { updateGame } from '../../../redux/GamesSlice';
+import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
+import { selectCurrentGame } from '../../../redux/selectors';
 import { getPalette, getPalettes } from '../../ColorPalette';
 
 import PalettePreview from './PalettePreview';
 
-interface Props {
-    // selectedPalette: ColorPalette;
-    // onSelect: (palette: ColorPalette) => void;
-}
-
 const MemoizedColorCircle = React.memo(PalettePreview);
 
-const PaletteSelector: React.FunctionComponent<Props> = () => {
+const PaletteSelector: React.FunctionComponent = () => {
     const colorPalettes = getPalettes();
+    const currentGameId = useAppSelector(state => selectCurrentGame(state)?.id);
+    const currentPalette = useAppSelector(state => selectCurrentGame(state)?.palette);
+
+    const dispatch = useAppDispatch();
+
+    if (!currentGameId) return null;
+
+    const onSelect = (palette: string) => {
+        dispatch(updateGame({
+            id: currentGameId,
+            changes: {
+                palette: palette,
+            }
+        }));
+    };
 
     return (
         <ScrollView horizontal={true} contentContainerStyle={styles.container}>
@@ -24,9 +37,9 @@ const PaletteSelector: React.FunctionComponent<Props> = () => {
                     style={[
                         styles.palette,
                     ]}
-                // onPress={() => onSelect(palette)}
+                    onPress={() => onSelect(palette)}
                 >
-                    <MemoizedColorCircle colors={getPalette(palette)} selected={index == 0} />
+                    <MemoizedColorCircle colors={getPalette(palette)} selected={palette == currentPalette} />
                 </TouchableOpacity>
             ))}
         </ScrollView>

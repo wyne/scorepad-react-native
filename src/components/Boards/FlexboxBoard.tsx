@@ -5,7 +5,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useAppSelector } from '../../../redux/hooks';
 import { selectCurrentGame } from '../../../redux/selectors';
-import { getPlayerColors } from '../../ColorPalette';
 import { bottomSheetHeight } from '../../components/Sheets/GameSheet';
 
 import FlexboxTile from './FlexboxTile';
@@ -97,8 +96,6 @@ const FlexboxBoard: React.FC<FlexboxBoardProps> = () => {
                 <FlexboxTile
                     key={id}
                     playerId={id}
-                    color={getPlayerColors(index)[0]}
-                    fontColor={getPlayerColors(index)[1]}
                     cols={cols}
                     rows={rows}
                     width={calculateTileDimensions(rows, cols).width}

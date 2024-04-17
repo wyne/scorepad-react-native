@@ -1,9 +1,5 @@
-import { getContrastRatio } from 'colorsheet';
-
-import { updateGame } from '../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../redux/hooks';
 import { selectPlayerById, updatePlayer } from '../redux/PlayersSlice';
-import { selectCurrentGame } from '../redux/selectors';
 
 type PaletteType = Record<string, string[]>;
 
@@ -106,23 +102,6 @@ export const getPalette = (name: string): string[] => {
     return palettes[name];
 };
 
-export const getPlayerColors = (index: number): [string, string] => {
-    const palette = Object.keys(palettes)[0 % Object.keys(palettes).length];
-
-    // TODO: Get player color if it exists
-
-    const length = palettes[palette].length;
-    const bg = palettes[palette][index % length];
-
-    const blackContrast = getContrastRatio(bg, '#000').number;
-    const whiteContrast = getContrastRatio(bg, '#fff').number;
-
-    // +1 to give a slight preference to white
-    const fg = blackContrast >= whiteContrast + 1 ? '#000000' : '#FFFFFF';
-
-    return [bg, fg];
-};
-
 export const setPlayerColor = (playerId: string, color: string) => {
     const dispatch = useAppDispatch();
 
@@ -134,19 +113,6 @@ export const setPlayerColor = (playerId: string, color: string) => {
         id: playerId,
         changes: {
             color: color,
-        }
-    }));
-};
-
-export const setGamePalette = (gameId: string, palette: string) => {
-    const dispatch = useAppDispatch();
-
-    const game = useAppSelector(selectCurrentGame);
-    if (typeof game == 'undefined') return;
-    dispatch(updateGame({
-        id: game.id,
-        changes: {
-            palette: palette,
         }
     }));
 };
