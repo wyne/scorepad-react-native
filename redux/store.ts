@@ -18,6 +18,7 @@ const settingsPersistConfig = {
         'currentGameId',
         'onboarded',
         'showPointParticles',
+        'showPlayerIndex',
         'interactionType',
         'lastStoreReviewPrompt',
     ],

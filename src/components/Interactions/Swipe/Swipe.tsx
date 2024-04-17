@@ -48,6 +48,12 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
         powerHoldRef.current = powerHold;
     }, [powerHold]);
 
+    useEffect(() => {
+        return () => {
+            clearTimeout(powerHoldTimer);
+        };
+    }, []);
+
     const scale = holdDuration.interpolate({
         inputRange: [0, powerHoldTime * .9, powerHoldTime],
         outputRange: [1, 1.1, 1.05],

@@ -4,11 +4,11 @@ import analytics from '@react-native-firebase/analytics';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ParamListBase } from '@react-navigation/routers';
 import * as Application from 'expo-application';
-import { Text, View, StyleSheet, Alert, ScrollView, Linking, Platform, Switch } from 'react-native';
+import { Alert, Linking, Platform, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import { Button } from 'react-native-elements';
 
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
-import { toggleshowPointParticles } from '../../redux/SettingsSlice';
+import { toggleShowPlayerIndex, toggleShowPointParticles } from '../../redux/SettingsSlice';
 import RotatingIcon from '../components/AppInfo/RotatingIcon';
 
 interface Props {
@@ -40,8 +40,11 @@ const AppInfoScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     const appVersion = Application.nativeApplicationVersion;
 
     const showPointParticles = useAppSelector(state => state.settings.showPointParticles);
+    const showPlayerIndex = useAppSelector(state => state.settings.showPlayerIndex);
+
     const dispatch = useAppDispatch();
-    const toggleSwitch = () => { dispatch(toggleshowPointParticles()); };
+    const toggleParticleSwitch = () => { dispatch(toggleShowPointParticles()); };
+    const togglePlayerIndexSwitch = () => { dispatch(toggleShowPlayerIndex()); };
 
     const alertWithVersion = async () => {
         Alert.alert(`ScorePad with Rounds\n` +
@@ -67,7 +70,11 @@ const AppInfoScreen: React.FunctionComponent<Props> = ({ navigation }) => {
             <Section title="Features">
                 <SectionItem>
                     <SectionItemText text="Point Particle Effect" />
-                    <Switch onValueChange={toggleSwitch} value={showPointParticles} />
+                    <Switch onValueChange={toggleParticleSwitch} value={showPointParticles} />
+                </SectionItem>
+                <SectionItem>
+                    <SectionItemText text="Player Numbers" />
+                    <Switch onValueChange={togglePlayerIndexSwitch} value={showPlayerIndex} />
                 </SectionItem>
             </Section>
 
