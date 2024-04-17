@@ -10,7 +10,7 @@ import { updateGame } from '../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { removePlayer, selectPlayerById } from '../../redux/PlayersSlice';
 import { selectCurrentGame } from '../../redux/selectors';
-import { palette } from '../constants';
+import { getPlayerColors } from '../ColorPalette';
 
 interface Props {
     playerId: string;
@@ -96,7 +96,7 @@ const PlayerListItem: React.FunctionComponent<Props> = ({
                 style={[{
                     flexDirection: 'row',
                     alignItems: 'center',
-                }]} >
+                }]}>
 
                 <Text style={styles.playerNumber}>
                     {index + 1}
@@ -104,7 +104,7 @@ const PlayerListItem: React.FunctionComponent<Props> = ({
 
                 <View style={[
                     styles.colorBadge,
-                    { backgroundColor: '#' + palette[index % palette.length] }
+                    { backgroundColor: getPlayerColors(index)[0] }
                 ]} />
 
                 <Text style={[styles.input]}>

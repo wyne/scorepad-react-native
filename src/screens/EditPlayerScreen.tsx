@@ -9,7 +9,6 @@ import { Input } from 'react-native-elements';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { updatePlayer } from '../../redux/PlayersSlice';
 import { selectCurrentGame } from '../../redux/selectors';
-import { palette } from '../constants';
 
 type RouteParams = {
     EditPlayer: {
@@ -116,28 +115,6 @@ const EditPlayerScreen: React.FC<EditPlayerScreenProps> = ({
                 style={styles.input}
                 value={localPlayerName}
             />
-
-            <View style={{
-                flexDirection: 'row',
-                justifyContent: 'space-around',
-                alignItems: 'center',
-                padding: 10,
-                paddingVertical: 20,
-            }}>
-                {
-                    palette.map((color, i) => (
-                        <View style={[
-                            styles.colorBadge,
-                            {
-                                borderWidth: i == index ? 2 : 0,
-                                backgroundColor: '#' + color,
-                                height: i == index ? 30 : 20,
-                                width: i == index ? 30 : 20,
-                            }
-                        ]} />
-                    ))
-                }
-            </View>
 
             <View style={{ margin: 20 }} />
 

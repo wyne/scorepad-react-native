@@ -7,7 +7,8 @@ import { Icon } from 'react-native-elements/dist/icons/Icon';
 import { useAppSelector } from '../../../redux/hooks';
 import { selectCurrentGame } from '../../../redux/selectors';
 import { RootState } from '../../../redux/store';
-import { palette, systemBlue } from '../../constants';
+import { getPlayerColors } from '../../ColorPalette';
+import { systemBlue } from '../../constants';
 
 const selectPlayerEntities = (state: RootState) => state.players.entities;
 
@@ -33,7 +34,7 @@ const PlayerNameColumn: React.FunctionComponent = () => {
                     color='white' />
             </Text>
             {playerNames.map((name, index) => (
-                <View key={index} style={{ paddingLeft: 5, borderLeftWidth: 5, borderColor: '#' + palette[index % palette.length] }}>
+                <View key={index} style={{ paddingLeft: 5, borderLeftWidth: 5, borderColor: getPlayerColors(index)[0] }}>
                     <Text key={index} style={{ color: 'white', maxWidth: 100, fontSize: 20, }}
                         numberOfLines={1}
                     >{name}</Text>
