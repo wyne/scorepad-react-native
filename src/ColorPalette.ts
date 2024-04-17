@@ -31,8 +31,6 @@ const palettes: PaletteType = {
         '#e71d36',
         '#ff9f1c',
         '#f3722c',
-        '#f8961e',
-        '#f9844a',
     ],
     'grey': [
         '#f8f9fa',
