@@ -11,8 +11,6 @@ const PalettePreview: React.FunctionComponent<Props> = ({ colors, selected }) =>
     const numColumns = Math.ceil(Math.sqrt(colors.length));
     const numRows = Math.ceil(colors.length / numColumns);
 
-    console.log('len, numCols, numRows', colors.length, numColumns, numRows);
-
     return (
         <View style={{
             width: 40, height: 40,
