@@ -8,7 +8,7 @@ import { Alert, Linking, Platform, ScrollView, StyleSheet, Switch, Text, View } 
 import { Button } from 'react-native-elements';
 
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
-import { toggleShowPlayerIndex, toggleShowPointParticles } from '../../redux/SettingsSlice';
+import { toggleShowColorPalettes, toggleShowPlayerIndex, toggleShowPointParticles } from '../../redux/SettingsSlice';
 import RotatingIcon from '../components/AppInfo/RotatingIcon';
 
 interface Props {
@@ -41,10 +41,12 @@ const AppInfoScreen: React.FunctionComponent<Props> = ({ navigation }) => {
 
     const showPointParticles = useAppSelector(state => state.settings.showPointParticles);
     const showPlayerIndex = useAppSelector(state => state.settings.showPlayerIndex);
+    const showColorPalettes = useAppSelector(state => state.settings.showColorPalettes);
 
     const dispatch = useAppDispatch();
     const toggleParticleSwitch = () => { dispatch(toggleShowPointParticles()); };
     const togglePlayerIndexSwitch = () => { dispatch(toggleShowPlayerIndex()); };
+    const toggleColorPalettesSwitch = () => { dispatch(toggleShowColorPalettes()); };
 
     const alertWithVersion = async () => {
         Alert.alert('ScorePad with Rounds\n' +
@@ -75,6 +77,10 @@ const AppInfoScreen: React.FunctionComponent<Props> = ({ navigation }) => {
                 <SectionItem>
                     <SectionItemText text="Player Numbers" />
                     <Switch onValueChange={togglePlayerIndexSwitch} value={showPlayerIndex} />
+                </SectionItem>
+                <SectionItem>
+                    <SectionItemText text="Color Palettes" />
+                    <Switch onValueChange={toggleColorPalettesSwitch} value={showColorPalettes} />
                 </SectionItem>
             </Section>
 

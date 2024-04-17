@@ -190,6 +190,8 @@ const GameSheet: React.FunctionComponent<Props> = ({ navigation, containerHeight
         []
     );
 
+    const showColorPalettes = useAppSelector(state => state.settings.showColorPalettes);
+
     return (
         <BottomSheet
             ref={gameSheetRef}
@@ -229,11 +231,10 @@ const GameSheet: React.FunctionComponent<Props> = ({ navigation, containerHeight
 
                     <Animated.View style={[styles.sheetContent, animatedSheetStyle]}>
                         <Rounds navigation={navigation} show={!fullscreen} />
-                        <Text style={{ color: 'white', margin: 10, marginTop: 0 }}>
-                            Tap on a column to set the current round.
-                        </Text>
 
-                        <PaletteSelector />
+                        {showColorPalettes &&
+                            <PaletteSelector />
+                        }
 
                         <Animated.View layout={Layout.delay(200)}>
 

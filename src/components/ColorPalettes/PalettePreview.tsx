@@ -18,9 +18,10 @@ const PalettePreview: React.FunctionComponent<Props> = ({ colors, selected }) =>
             width: 40, height: 40,
             flexDirection: 'row',
             flexWrap: 'wrap',
-            borderColor: selected ? '#eee' : 'transparent',
+            borderColor: selected ? 'white' : 'transparent',
             borderWidth: 1,
             borderRadius: 3,
+            padding: 1,
         }}>
             {colors.map((color, index) => (
                 <View
