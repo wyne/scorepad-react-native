@@ -8,6 +8,7 @@ import { selectInteractionType } from '../../../redux/selectors';
 import { interactionComponents } from '../Interactions/InteractionComponents';
 import { InteractionType } from '../Interactions/InteractionType';
 import AdditionTile from '../PlayerTiles/AdditionTile/AdditionTile';
+import PlayerIndexLabel from '../PlayerTiles/PlayerIndexLabel';
 
 interface Props {
     index: number;
@@ -34,6 +35,8 @@ const FlexboxTile: React.FunctionComponent<Props> = ({
     if (!(width > 0 && height > 0)) return null;
     if (Number.isNaN(width) || Number.isNaN(height)) return null;
 
+    const playerIndexLabel = useAppSelector(state => state.settings.showPlayerIndex);
+
     const widthPerc: DimensionValue = `${(100 / cols)}%`;
     const heightPerc: DimensionValue = `${(100 / rows)}%`;
 
@@ -49,8 +52,10 @@ const FlexboxTile: React.FunctionComponent<Props> = ({
                 {
                     backgroundColor: color,
                     width: widthPerc,
-                    height: heightPerc
+                    height: heightPerc,
+                    borderBottomLeftRadius: playerIndexLabel ? 7 : undefined,
                 }]}>
+            <PlayerIndexLabel index={index} fontColor={fontColor} enabled={playerIndexLabel} />
             <InteractionComponent index={index} fontColor={fontColor} playerId={playerId}>
                 <AdditionTile
                     playerId={playerId}
