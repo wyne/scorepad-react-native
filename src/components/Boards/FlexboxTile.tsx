@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { DimensionValue, StyleSheet, Text, View } from 'react-native';
+import { DimensionValue, StyleSheet } from 'react-native';
 import Animated, { Easing, FadeIn } from 'react-native-reanimated';
 
 import { useAppSelector } from '../../../redux/hooks';
