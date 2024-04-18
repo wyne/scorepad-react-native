@@ -3,11 +3,12 @@ import React from 'react';
 import analytics from '@react-native-firebase/analytics';
 import { ParamListBase } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { Text, StyleSheet, TouchableOpacity } from 'react-native';
+import * as Haptics from 'expo-haptics';
+import { StyleSheet, Text, TouchableOpacity } from 'react-native';
 import { Button } from 'react-native-elements';
 import { Icon } from 'react-native-elements/dist/icons/Icon';
 
-import { roundNext, roundPrevious , selectGameById } from '../../../redux/GamesSlice';
+import { roundNext, roundPrevious, selectGameById } from '../../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
 import { systemBlue } from '../../constants';
 import AddendButton from '../Buttons/AddendButton';
@@ -83,20 +84,26 @@ const GameHeader: React.FunctionComponent<Props> = ({ navigation }) => {
     const nextRoundHandler = async () => {
         if (isLastRound && currentGame.locked) return;
 
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+
         dispatch(roundNext(currentGame.id));
-        await analytics().logEvent('round_change', {
+        analytics().logEvent('round_change', {
             game_id: currentGameId,
             source: 'next button',
+            round: roundCurrent,
         });
     };
 
     const prevRoundHandler = async () => {
         if (isFirstRound) return;
 
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+
         dispatch(roundPrevious(currentGame.id));
-        await analytics().logEvent('round_change', {
+        analytics().logEvent('round_change', {
             game_id: currentGameId,
             source: 'previous button',
+            round: roundCurrent,
         });
     };
 
