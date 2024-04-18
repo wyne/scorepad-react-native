@@ -31,7 +31,7 @@ export type RootStackParamList = {
     List: undefined;
     Game: undefined;
     Settings: {
-        reason?: string;
+        source?: string;
     };
     AppInfo: undefined;
     Share: undefined;

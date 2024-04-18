@@ -11,7 +11,7 @@ import HeaderButton from './HeaderButton';
 
 type RouteParams = {
     Settings: {
-        reason?: string;
+        source?: string;
     };
 };
 interface Props {
@@ -24,11 +24,10 @@ const CheckButton: React.FunctionComponent<Props> = ({ navigation, route }) => {
     return (
         <HeaderButton accessibilityLabel='Save Game' onPress={async () => {
             await analytics().logEvent('save_game');
-            if (route?.params?.reason === 'new_game') {
-                navigation.navigate('Game');
+            if (route?.params?.source === 'list_screen') {
+                navigation.navigate('List');
             } else {
-                //TODO: when the game is first created, this will go back instead of to game screen
-                navigation.goBack();
+                navigation.navigate('Game');
             }
         }}>
             <Text style={{ color: systemBlue, fontSize: 20 }}>Done</Text>

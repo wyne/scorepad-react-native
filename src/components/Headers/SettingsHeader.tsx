@@ -10,7 +10,7 @@ import CustomHeader from './CustomHeader';
 
 type RouteParams = {
     Settings: {
-        reason?: string;
+        source?: string;
     };
 };
 
