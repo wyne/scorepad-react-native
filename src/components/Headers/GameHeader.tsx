@@ -3,11 +3,12 @@ import React from 'react';
 import analytics from '@react-native-firebase/analytics';
 import { ParamListBase } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { Text, StyleSheet, TouchableOpacity } from 'react-native';
+import * as Haptics from 'expo-haptics';
+import { StyleSheet, Text, TouchableOpacity } from 'react-native';
 import { Button } from 'react-native-elements';
 import { Icon } from 'react-native-elements/dist/icons/Icon';
 
-import { roundNext, roundPrevious , selectGameById } from '../../../redux/GamesSlice';
+import { roundNext, roundPrevious, selectGameById } from '../../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
 import { systemBlue } from '../../constants';
 import AddendButton from '../Buttons/AddendButton';
@@ -38,9 +39,10 @@ const PrevRoundButton: React.FunctionComponent<PrevRoundButtonProps> = ({ prevRo
 interface NextRoundButtonProps {
     nextRoundHandler: () => void;
     visible: boolean;
+    showPlus?: boolean;
 }
 
-const NextRoundButton: React.FunctionComponent<NextRoundButtonProps> = ({ nextRoundHandler, visible }) => {
+const NextRoundButton: React.FunctionComponent<NextRoundButtonProps> = ({ nextRoundHandler, visible, showPlus = false }) => {
     return (
         <TouchableOpacity style={[styles.headerButton]}
             onPress={nextRoundHandler}>
@@ -50,6 +52,19 @@ const NextRoundButton: React.FunctionComponent<NextRoundButtonProps> = ({ nextRo
                 color={systemBlue}
                 style={{ opacity: visible ? 0 : 1 }}
             />
+            {showPlus &&
+                <Icon name="plus"
+                    type="font-awesome-5"
+                    size={7}
+                    color={systemBlue}
+                    containerStyle={{
+                        position: 'absolute',
+                        top: 9,
+                        right: 9,
+                        opacity: visible ? 0 : 1
+                    }}
+                />
+            }
         </TouchableOpacity>
     );
 };
@@ -83,20 +98,31 @@ const GameHeader: React.FunctionComponent<Props> = ({ navigation }) => {
     const nextRoundHandler = async () => {
         if (isLastRound && currentGame.locked) return;
 
+        if (isLastRound) {
+            // Stronger haptics if creating a new round
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+        } else {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        }
+
         dispatch(roundNext(currentGame.id));
-        await analytics().logEvent('round_change', {
+        analytics().logEvent('round_change', {
             game_id: currentGameId,
             source: 'next button',
+            round: roundCurrent,
         });
     };
 
     const prevRoundHandler = async () => {
         if (isFirstRound) return;
 
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+
         dispatch(roundPrevious(currentGame.id));
-        await analytics().logEvent('round_change', {
+        analytics().logEvent('round_change', {
             game_id: currentGameId,
             source: 'previous button',
+            round: roundCurrent,
         });
     };
 
@@ -109,7 +135,10 @@ const GameHeader: React.FunctionComponent<Props> = ({ navigation }) => {
             headerCenter={<>
                 <PrevRoundButton prevRoundHandler={prevRoundHandler} visible={isFirstRound} />
                 <Text style={styles.title}>Round {roundCurrent + 1}</Text>
-                <NextRoundButton nextRoundHandler={nextRoundHandler} visible={isLastRound && (currentGame.locked || false)} />
+                <NextRoundButton nextRoundHandler={nextRoundHandler}
+                    visible={isLastRound && (currentGame.locked || false)}
+                    showPlus={isLastRound && !currentGame.locked}
+                />
             </>}
             headerRight={!currentGame.locked && <AddendButton />}
         />

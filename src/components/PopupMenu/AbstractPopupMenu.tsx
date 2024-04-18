@@ -47,7 +47,7 @@ const AbstractPopupMenu: React.FC<Props> = (props) => {
      */
     const editGameHandler = async () => {
         props.setCurrentGameCallback();
-        props.navigation.navigate('Settings', { reason: 'edit_game' });
+        props.navigation.navigate('Settings', { source: 'list_screen' });
 
         await analytics().logEvent('menu_edit', {
             round_count: roundTotal,
