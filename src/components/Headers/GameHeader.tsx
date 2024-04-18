@@ -39,9 +39,10 @@ const PrevRoundButton: React.FunctionComponent<PrevRoundButtonProps> = ({ prevRo
 interface NextRoundButtonProps {
     nextRoundHandler: () => void;
     visible: boolean;
+    showPlus?: boolean;
 }
 
-const NextRoundButton: React.FunctionComponent<NextRoundButtonProps> = ({ nextRoundHandler, visible }) => {
+const NextRoundButton: React.FunctionComponent<NextRoundButtonProps> = ({ nextRoundHandler, visible, showPlus = false }) => {
     return (
         <TouchableOpacity style={[styles.headerButton]}
             onPress={nextRoundHandler}>
@@ -51,6 +52,19 @@ const NextRoundButton: React.FunctionComponent<NextRoundButtonProps> = ({ nextRo
                 color={systemBlue}
                 style={{ opacity: visible ? 0 : 1 }}
             />
+            {showPlus &&
+                <Icon name="plus"
+                    type="font-awesome-5"
+                    size={7}
+                    color={systemBlue}
+                    containerStyle={{
+                        position: 'absolute',
+                        top: 9,
+                        right: 9,
+                        opacity: visible ? 0 : 1
+                    }}
+                />
+            }
         </TouchableOpacity>
     );
 };
@@ -84,7 +98,12 @@ const GameHeader: React.FunctionComponent<Props> = ({ navigation }) => {
     const nextRoundHandler = async () => {
         if (isLastRound && currentGame.locked) return;
 
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+        if (isLastRound) {
+            // Stronger haptics if creating a new round
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+        } else {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        }
 
         dispatch(roundNext(currentGame.id));
         analytics().logEvent('round_change', {
@@ -116,7 +135,10 @@ const GameHeader: React.FunctionComponent<Props> = ({ navigation }) => {
             headerCenter={<>
                 <PrevRoundButton prevRoundHandler={prevRoundHandler} visible={isFirstRound} />
                 <Text style={styles.title}>Round {roundCurrent + 1}</Text>
-                <NextRoundButton nextRoundHandler={nextRoundHandler} visible={isLastRound && (currentGame.locked || false)} />
+                <NextRoundButton nextRoundHandler={nextRoundHandler}
+                    visible={isLastRound && (currentGame.locked || false)}
+                    showPlus={isLastRound && !currentGame.locked}
+                />
             </>}
             headerRight={!currentGame.locked && <AddendButton />}
         />
