@@ -1,27 +1,35 @@
 import React from 'react';
 
-import { createSelector } from '@reduxjs/toolkit';
 import { StyleSheet, Text, View } from 'react-native';
 import { Icon } from 'react-native-elements/dist/icons/Icon';
 
+import { selectPlayerColors } from '../../../redux/GamesSlice';
 import { useAppSelector } from '../../../redux/hooks';
+import { selectPlayerById } from '../../../redux/PlayersSlice';
 import { selectCurrentGame } from '../../../redux/selectors';
-import { RootState } from '../../../redux/store';
-import { palette, systemBlue } from '../../constants';
+import { systemBlue } from '../../constants';
 
-const selectPlayerEntities = (state: RootState) => state.players.entities;
+interface CellProps {
+    index: number;
+    playerId: string;
+}
 
-const selectPlayerIds = (_: RootState, playerIds: string[]) => playerIds;
+const PlayerNameCell: React.FunctionComponent<CellProps> = ({ index, playerId }) => {
+    const currentGameId = useAppSelector(state => selectCurrentGame(state)?.id);
+    const playerColors = useAppSelector(state => selectPlayerColors(state, currentGameId || '', index || 0));
+    const playerName = useAppSelector(state => selectPlayerById(state, playerId)?.playerName);
 
-const selectPlayerNamesByIds = createSelector(
-    [selectPlayerEntities, selectPlayerIds],
-    (players, playerIds) => playerIds.map(id => players[id]?.playerName)
-);
+    return (
+        <View key={index} style={{ paddingLeft: 5, borderLeftWidth: 5, borderColor: playerColors[0] }}>
+            <Text key={index} style={{ color: 'white', maxWidth: 100, fontSize: 20, }}
+                numberOfLines={1}
+            >{playerName}</Text>
+        </View>
+    );
+};
 
 const PlayerNameColumn: React.FunctionComponent = () => {
     const playerIds = useAppSelector(state => selectCurrentGame(state)?.playerIds) || [];
-    const playerNames = useAppSelector(state => selectPlayerNamesByIds(state, playerIds));
-
 
     return (
         <View style={{ paddingVertical: 10 }}>
@@ -32,12 +40,8 @@ const PlayerNameColumn: React.FunctionComponent = () => {
                     size={19}
                     color='white' />
             </Text>
-            {playerNames.map((name, index) => (
-                <View key={index} style={{ paddingLeft: 5, borderLeftWidth: 5, borderColor: "#" + palette[index % palette.length] }}>
-                    <Text key={index} style={{ color: 'white', maxWidth: 100, fontSize: 20, }}
-                        numberOfLines={1}
-                    >{name}</Text>
-                </View>
+            {playerIds.map((playerId, index) => (
+                <PlayerNameCell key={index} index={index} playerId={playerId} />
             ))}
         </View>
     );

@@ -13,6 +13,7 @@ import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
 import { updatePlayer } from '../../../redux/PlayersSlice';
 import { systemBlue } from '../../constants';
 import BigButton from '../BigButtons/BigButton';
+import PaletteSelector from '../ColorPalettes/PaletteSelector';
 import RematchIcon from '../Icons/RematchIcon';
 import Rounds from '../Rounds';
 
@@ -64,15 +65,15 @@ const GameSheet: React.FunctionComponent<Props> = ({ navigation, containerHeight
      */
     const resetGameHandler = () => {
         Alert.alert(
-            "Reset Game",
-            "Warning: This will reset all scores and rounds for this game. Are you sure you want to reset?",
+            'Reset Game',
+            'Warning: This will reset all scores and rounds for this game. Are you sure you want to reset?',
             [
                 {
-                    text: "Cancel",
-                    style: "cancel"
+                    text: 'Cancel',
+                    style: 'cancel'
                 },
                 {
-                    text: "Reset",
+                    text: 'Reset',
                     onPress: () => {
                         if (currentGameId == undefined) return;
                         if (playerIds == undefined) return;
@@ -93,7 +94,7 @@ const GameSheet: React.FunctionComponent<Props> = ({ navigation, containerHeight
                                 roundTotal: 1,
                             }
                         }));
-                        navigation.navigate("Game");
+                        navigation.navigate('Game');
                     }
                 }
             ]
@@ -105,21 +106,21 @@ const GameSheet: React.FunctionComponent<Props> = ({ navigation, containerHeight
      */
     const rematchGameHandler = async () => {
         Alert.alert(
-            "Rematch",
-            "This will create a new game with the same players and empty scores.",
+            'Rematch',
+            'This will create a new game with the same players and empty scores.',
             [
                 {
-                    text: "Cancel",
-                    style: "cancel"
+                    text: 'Cancel',
+                    style: 'cancel'
                 },
                 {
-                    text: "Rematch",
+                    text: 'Rematch',
                     onPress: () => {
                         dispatch(
                             asyncRematchGame({ gameId: currentGameId })
                         ).then(() => {
                             setTimeout(() => {
-                                navigation.navigate("Game");
+                                navigation.navigate('Game');
                             }, 500);
                         });
                     }
@@ -189,6 +190,8 @@ const GameSheet: React.FunctionComponent<Props> = ({ navigation, containerHeight
         []
     );
 
+    const showColorPalettes = useAppSelector(state => state.settings.showColorPalettes);
+
     return (
         <BottomSheet
             ref={gameSheetRef}
@@ -228,9 +231,10 @@ const GameSheet: React.FunctionComponent<Props> = ({ navigation, containerHeight
 
                     <Animated.View style={[styles.sheetContent, animatedSheetStyle]}>
                         <Rounds navigation={navigation} show={!fullscreen} />
-                        <Text style={{ color: 'white', margin: 10, marginTop: 0 }}>
-                            Tap on a column to set the current round.
-                        </Text>
+
+                        {showColorPalettes &&
+                            <PaletteSelector />
+                        }
 
                         <Animated.View layout={Layout.delay(200)}>
 
@@ -262,9 +266,9 @@ const GameSheet: React.FunctionComponent<Props> = ({ navigation, containerHeight
                                 />
                             }
 
-                            <BigButton text={gameLocked ? "Unlock" : "Lock"}
+                            <BigButton text={gameLocked ? 'Unlock' : 'Lock'}
                                 color={gameLocked ? 'orange' : 'green'}
-                                icon={gameLocked ? "lock-closed-outline" : "lock-open-outline"}
+                                icon={gameLocked ? 'lock-closed-outline' : 'lock-open-outline'}
                                 onPress={setLock}
                             />
 

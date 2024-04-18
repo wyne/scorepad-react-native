@@ -53,7 +53,7 @@ const Rounds: React.FunctionComponent<Props> = ({ }) => {
 
         roundsScrollViewEl.current.scrollTo({
             x: offset,
-            animated: Platform.OS == "ios" ? true : false
+            animated: Platform.OS == 'ios' ? true : false
         });
     }, [roundCurrent, roundScollOffset]);
 
@@ -81,7 +81,6 @@ const Rounds: React.FunctionComponent<Props> = ({ }) => {
 const styles = StyleSheet.create({
     scoreTableContainer: {
         flexDirection: 'row',
-        paddingBottom: 10,
     }
 });
 

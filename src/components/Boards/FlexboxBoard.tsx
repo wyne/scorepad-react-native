@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 
-import { getContrastRatio } from 'colorsheet';
 import { LayoutChangeEvent, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -20,7 +19,6 @@ const FlexboxBoard: React.FC<FlexboxBoardProps> = () => {
 
     if (playerIds == null || playerIds.length == 0) return null;
 
-    const palette = ["01497c", "c25858", "f5c800", "275436", "dc902c", "62516a", "755647", "925561"];
     const [rows, setRows] = useState<number>(0);
     const [cols, setCols] = useState<number>(0);
 
@@ -98,8 +96,6 @@ const FlexboxBoard: React.FC<FlexboxBoardProps> = () => {
                 <FlexboxTile
                     key={id}
                     playerId={id}
-                    color={'#' + palette[index % palette.length]}
-                    fontColor={getContrastRatio('#' + palette[index % palette.length], '#000').number > 7 ? "#000000" : "#FFFFFF"}
                     cols={cols}
                     rows={rows}
                     width={calculateTileDimensions(rows, cols).width}

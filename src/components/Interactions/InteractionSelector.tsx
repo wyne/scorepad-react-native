@@ -22,9 +22,9 @@ const InteractionSelector: React.FunctionComponent<InteractionSelectorProps> = (
     const description = (() => {
         switch (interactionType) {
             case InteractionType.HalfTap:
-                return "Tap the top or bottom of each player's tile.";
+                return 'Tap the top or bottom of each player\'s tile.';
             case InteractionType.SwipeVertical:
-                return "Swipe up or down on the player's tile.";
+                return 'Swipe up or down on the player\'s tile.';
         }
     })();
 
@@ -39,8 +39,8 @@ const InteractionSelector: React.FunctionComponent<InteractionSelectorProps> = (
                             dispatch(setInteractionType(InteractionType.HalfTap));
                         }}
                         text="Tap"
-                        icon={<TapGestureIcon color={interactionType === InteractionType.HalfTap ? "white" : "grey"} size={40} />}
-                        color={interactionType == InteractionType.HalfTap ? "white" : "grey"}
+                        icon={<TapGestureIcon color={interactionType === InteractionType.HalfTap ? 'white' : 'grey'} size={40} />}
+                        color={interactionType == InteractionType.HalfTap ? 'white' : 'grey'}
                     />
                 </View>
                 <View>
@@ -50,8 +50,8 @@ const InteractionSelector: React.FunctionComponent<InteractionSelectorProps> = (
                             dispatch(setInteractionType(InteractionType.SwipeVertical));
                         }}
                         text="Swipe"
-                        icon={<SwipeGestureIcon color={interactionType === InteractionType.SwipeVertical ? "white" : "grey"} size={40} />}
-                        color={interactionType == InteractionType.SwipeVertical ? "white" : "grey"}
+                        icon={<SwipeGestureIcon color={interactionType === InteractionType.SwipeVertical ? 'white' : 'grey'} size={40} />}
+                        color={interactionType == InteractionType.SwipeVertical ? 'white' : 'grey'}
                     />
                 </View>
             </View>

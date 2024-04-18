@@ -3,6 +3,7 @@ import React, { useEffect } from 'react';
 import analytics from '@react-native-firebase/analytics';
 import { ParamListBase, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { createSelector } from '@reduxjs/toolkit';
 import * as Crypto from 'expo-crypto';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import DraggableFlatList, { ScaleDecorator } from 'react-native-draggable-flatlist';
@@ -28,6 +29,12 @@ interface Props {
     route: RouteProp<RouteParams, 'Settings'>;
 }
 
+// This selector takes the state as input and returns a list of sorted player IDs.
+const selectSortedPlayerIds = createSelector(
+    selectSortedPlayers,
+    (players) => players.map(player => player.id)
+);
+
 const SettingsScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     const dispatch = useAppDispatch();
 
@@ -35,7 +42,7 @@ const SettingsScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     if (typeof currentGameId == 'undefined') return null;
 
     const currentGame = useAppSelector(selectCurrentGame);
-    const players = useAppSelector(selectSortedPlayers);
+    const playerIds = useAppSelector(selectSortedPlayerIds);
 
     const [edit, setEdit] = React.useState(false);
 
@@ -46,7 +53,7 @@ const SettingsScreen: React.FunctionComponent<Props> = ({ navigation }) => {
 
         dispatch(playerAdd({
             id: newPlayerId,
-            playerName: `Player ${players.length + 1}`,
+            playerName: `Player ${playerIds.length + 1}`,
             scores: [0],
         }));
 
@@ -59,25 +66,25 @@ const SettingsScreen: React.FunctionComponent<Props> = ({ navigation }) => {
 
         await analytics().logEvent('add_player', {
             game_id: currentGameId,
-            player_count: players.length + 1,
+            player_count: playerIds.length + 1,
         });
     };
 
     useEffect(() => {
-        if (players.length <= 1) {
+        if (playerIds.length <= 1) {
             setEdit(false);
         }
-    }, [players]);
+    }, [playerIds.length]);
 
     const ListFooter = () => (
         <View style={{ margin: 10, marginBottom: 200, alignSelf: 'center' }}>
-            {players.length < MAX_PLAYERS &&
+            {playerIds.length < MAX_PLAYERS &&
                 <Button title="Add Player" type="clear"
                     icon={<Icon name="add" color={systemBlue} />}
-                    disabled={players.length >= MAX_PLAYERS}
+                    disabled={playerIds.length >= MAX_PLAYERS}
                     onPress={addPlayerHandler} />
             }
-            {players.length >= MAX_PLAYERS &&
+            {playerIds.length >= MAX_PLAYERS &&
                 <Text style={styles.text}>Max players reached.</Text>
             }
         </View>
@@ -90,7 +97,7 @@ const SettingsScreen: React.FunctionComponent<Props> = ({ navigation }) => {
             <EditGame />
             <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                 <Text style={styles.heading}>Players</Text>
-                {players.length > 1 &&
+                {playerIds.length > 1 &&
                     <TouchableOpacity onPress={() => setEdit(!edit)}>
                         <Text style={[styles.heading, { color: systemBlue }]}>{edit ? 'Done' : 'Edit'}</Text>
                     </TouchableOpacity>
@@ -99,27 +106,27 @@ const SettingsScreen: React.FunctionComponent<Props> = ({ navigation }) => {
 
             <DraggableFlatList
                 ListFooterComponent={ListFooter}
-                data={players}
-                renderItem={({ item: player, getIndex, drag, isActive }) => (
+                data={playerIds}
+                renderItem={({ item: playerId, getIndex, drag, isActive }) => (
                     <ScaleDecorator activeScale={1.05}>
                         <PlayerListItem
                             navigation={navigation}
-                            playerId={player.id}
+                            playerId={playerId}
                             edit={edit}
                             drag={drag}
                             isActive={isActive}
                             index={getIndex()}
-                            key={player.id}
+                            key={playerId}
                         />
                     </ScaleDecorator>
                 )}
-                keyExtractor={(player) => player.id}
+                keyExtractor={(playerId) => playerId}
                 onDragEnd={({ data }) => {
                     // Reorder players
                     dispatch(
                         reorderPlayers({
                             gameId: currentGameId,
-                            playerIds: data.map((player) => player.id)
+                            playerIds: data.map((playerId) => playerId)
                         })
                     );
 

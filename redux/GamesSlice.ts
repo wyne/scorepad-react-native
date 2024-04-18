@@ -1,7 +1,9 @@
 import analytics from '@react-native-firebase/analytics';
 import { PayloadAction, createAsyncThunk, createEntityAdapter, createSelector, createSlice } from '@reduxjs/toolkit';
+import { getContrastRatio } from 'colorsheet';
 import * as Crypto from 'expo-crypto';
 
+import { getPalette } from '../src/ColorPalette';
 import logger from '../src/Logger';
 
 import { ScoreState, playerAdd, selectAllPlayers, selectPlayerById } from './PlayersSlice';
@@ -16,6 +18,7 @@ export interface GameState {
     roundTotal: number;
     playerIds: string[];
     locked?: boolean;
+    palette?: string;
 }
 
 const gamesAdapter = createEntityAdapter({
@@ -181,6 +184,28 @@ export const selectSortedPlayers = createSelector(
                 if (currentGame?.playerIds == undefined) return 0;
                 return currentGame.playerIds.indexOf(a.id) - currentGame.playerIds.indexOf(b.id);
             });
+    }
+);
+
+const selectPaletteName = (state: RootState, gameId: string) => state.games.entities[gameId]?.palette;
+const selectPlayerIndex = (_: RootState, __: string, playerIndex: number) => playerIndex;
+
+export const selectPlayerColors = createSelector(
+    [selectPaletteName, selectPlayerIndex],
+    (paletteName, playerIndex) => {
+        // TODO: Get player color if it exists
+
+        const palette = getPalette(paletteName || 'original');
+
+        const bg = palette[playerIndex % palette.length];
+
+        const blackContrast = getContrastRatio(bg, '#000').number;
+        const whiteContrast = getContrastRatio(bg, '#fff').number;
+
+        // +1 to give a slight preference to white
+        const fg = blackContrast >= whiteContrast + 1 ? '#000000' : '#FFFFFF';
+
+        return [bg, fg];
     }
 );
 

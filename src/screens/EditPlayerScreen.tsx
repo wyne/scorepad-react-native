@@ -3,13 +3,12 @@ import React, { useState } from 'react';
 import analytics from '@react-native-firebase/analytics';
 import { ParamListBase, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { NativeSyntheticEvent, ScrollView, StyleSheet, Text, TextInput, TextInputEndEditingEventData, View } from 'react-native';
+import { NativeSyntheticEvent, ScrollView, StyleSheet, TextInput, TextInputEndEditingEventData, View } from 'react-native';
 import { Input } from 'react-native-elements';
 
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { updatePlayer } from '../../redux/PlayersSlice';
 import { selectCurrentGame } from '../../redux/selectors';
-import { palette } from '../constants';
 
 type RouteParams = {
     EditPlayer: {
@@ -38,8 +37,8 @@ const EditPlayerScreen: React.FC<EditPlayerScreenProps> = ({
         }
     });
 
-    const [originalPlayerName] = useState<string>(player?.playerName || "");
-    const [localPlayerName, setLocalPlayerName] = useState<string>(player?.playerName || "");
+    const [originalPlayerName] = useState<string>(player?.playerName || '');
+    const [localPlayerName, setLocalPlayerName] = useState<string>(player?.playerName || '');
 
     if (playerId == null) { return null; }
     if (player == null) return null;
@@ -49,7 +48,7 @@ const EditPlayerScreen: React.FC<EditPlayerScreenProps> = ({
     const onEndEditingHandler = (e: NativeSyntheticEvent<TextInputEndEditingEventData>) => {
         const text = e.nativeEvent.text;
 
-        if (text == "") {
+        if (text == '') {
             setLocalPlayerName(originalPlayerName);
             savePlayerName(originalPlayerName);
         } else {
@@ -58,7 +57,7 @@ const EditPlayerScreen: React.FC<EditPlayerScreenProps> = ({
     };
 
     const onChangeHandler = (text: string) => {
-        if (text == "") {
+        if (text == '') {
             savePlayerName(originalPlayerName);
         } else {
             savePlayerName(text);
@@ -117,32 +116,7 @@ const EditPlayerScreen: React.FC<EditPlayerScreenProps> = ({
                 value={localPlayerName}
             />
 
-            <View style={{
-                flexDirection: 'row',
-                justifyContent: 'space-around',
-                alignItems: 'center',
-                padding: 10,
-                paddingVertical: 20,
-            }}>
-                {
-                    palette.map((color, i) => (
-                        <View style={[
-                            styles.colorBadge,
-                            {
-                                borderWidth: i == index ? 2 : 0,
-                                backgroundColor: "#" + color,
-                                height: i == index ? 30 : 20,
-                                width: i == index ? 30 : 20,
-                            }
-                        ]} />
-                    ))
-                }
-            </View>
-
             <View style={{ margin: 20 }} />
-
-            <Text style={{ color: 'white' }}>Local State: {localPlayerName}</Text>
-            <Text style={{ color: 'white' }}>Player State: {player.playerName}</Text>
 
         </ScrollView>
     );
@@ -166,7 +140,7 @@ const styles = StyleSheet.create({
         color: '#eee',
         fontSize: 25,
         fontVariant: ['tabular-nums'],
-        fontWeight: "bold",
+        fontWeight: 'bold',
         padding: 5,
     },
     colorBadge: {

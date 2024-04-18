@@ -7,7 +7,7 @@ import { updateGame } from '../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { selectCurrentGame } from '../../redux/selectors';
 
-const UNTITLED = "Untitled";
+const UNTITLED = 'Untitled';
 
 const EditGame = ({ }) => {
     const dispatch = useAppDispatch();
@@ -20,7 +20,7 @@ const EditGame = ({ }) => {
     const onEndEditingHandler = (e: NativeSyntheticEvent<TextInputEndEditingEventData>) => {
         const text = e.nativeEvent.text;
 
-        if (text == "") {
+        if (text == '') {
             setLocalTitle(UNTITLED);
             saveGameTitle(UNTITLED);
         } else {
@@ -29,7 +29,7 @@ const EditGame = ({ }) => {
     };
 
     const onChangeTextHandler = (text: string) => {
-        if (text == "") {
+        if (text == '') {
             saveGameTitle(UNTITLED);
         } else {
             saveGameTitle(text);
@@ -43,7 +43,7 @@ const EditGame = ({ }) => {
         dispatch(updateGame({
             id: currentGame.id,
             changes: {
-                title: title == "" ? UNTITLED : title,
+                title: title == '' ? UNTITLED : title,
             }
         }));
     };

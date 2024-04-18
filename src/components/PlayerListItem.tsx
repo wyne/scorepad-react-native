@@ -6,11 +6,10 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Icon, ListItem } from 'react-native-elements';
 
-import { updateGame } from '../../redux/GamesSlice';
+import { selectGameById, selectPlayerColors, updateGame } from '../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { removePlayer, selectPlayerById } from '../../redux/PlayersSlice';
 import { selectCurrentGame } from '../../redux/selectors';
-import { palette } from '../constants';
 
 interface Props {
     playerId: string;
@@ -29,25 +28,28 @@ const PlayerListItem: React.FunctionComponent<Props> = ({
     navigation,
     edit,
 }) => {
-    const currentGame = useAppSelector(selectCurrentGame);
+    const currentGameId = useAppSelector(state => selectCurrentGame(state)?.id);
+    const playerIds = useAppSelector(state => selectGameById(state, currentGameId || '')?.playerIds);
     const player = useAppSelector(state => selectPlayerById(state, playerId));
+    const playerColors = useAppSelector(state => selectPlayerColors(state, currentGameId || '', index || 0));
 
-    if (typeof currentGame == 'undefined') return null;
+    if (currentGameId == '' || currentGameId === undefined) return null;
+    if (playerIds === undefined) return null;
     if (typeof index == 'undefined') return null;
 
     const dispatch = useAppDispatch();
 
     const deleteConfirmHandler = async () => {
         Alert.alert(
-            "Delete Player",
-            "Are you sure you want to delete this player? This will delete all scores for this player.",
+            'Delete Player',
+            'Are you sure you want to delete this player? This will delete all scores for this player.',
             [
                 {
-                    text: "Cancel",
-                    style: "cancel",
+                    text: 'Cancel',
+                    style: 'cancel',
                 },
                 {
-                    text: "Delete",
+                    text: 'Delete',
                     onPress: () => {
                         deleteHandler();
                     }
@@ -60,16 +62,16 @@ const PlayerListItem: React.FunctionComponent<Props> = ({
         removePlayerHandler();
 
         await analytics().logEvent('remove_player', {
-            game_id: currentGame.id,
+            game_id: currentGameId,
             player_index: index,
         });
     };
 
     const removePlayerHandler = () => {
         dispatch(updateGame({
-            id: currentGame.id,
+            id: currentGameId,
             changes: {
-                playerIds: currentGame.playerIds.filter((id) => id != playerId),
+                playerIds: playerIds.filter((id) => id != playerId),
             }
         }));
         dispatch(removePlayer(playerId));
@@ -96,7 +98,7 @@ const PlayerListItem: React.FunctionComponent<Props> = ({
                 style={[{
                     flexDirection: 'row',
                     alignItems: 'center',
-                }]} >
+                }]}>
 
                 <Text style={styles.playerNumber}>
                     {index + 1}
@@ -104,7 +106,7 @@ const PlayerListItem: React.FunctionComponent<Props> = ({
 
                 <View style={[
                     styles.colorBadge,
-                    { backgroundColor: "#" + palette[index % palette.length] }
+                    { backgroundColor: playerColors[0] }
                 ]} />
 
                 <Text style={[styles.input]}>
@@ -138,7 +140,7 @@ const styles = StyleSheet.create({
         color: '#eee',
         fontSize: 25,
         fontVariant: ['tabular-nums'],
-        fontWeight: "bold",
+        fontWeight: 'bold',
         padding: 5,
     },
     colorBadge: {

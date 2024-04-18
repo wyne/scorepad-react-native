@@ -42,7 +42,7 @@ const GameListItem: React.FunctionComponent<Props> = ({ navigation, gameId, inde
      */
     const chooseGameHandler = async () => {
         setCurrentGameCallback();
-        navigation.navigate("Game");
+        navigation.navigate('Game');
 
         await analytics().logEvent('select_game', {
             index: index,
