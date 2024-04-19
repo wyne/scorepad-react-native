@@ -2,6 +2,7 @@ import React from 'react';
 
 import { DarkTheme, NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { SemVer } from 'semver';
 
 import AppInfoHeader from '../src/components/Headers/AppInfoHeader';
 import GameHeader from '../src/components/Headers/GameHeader';
@@ -20,6 +21,7 @@ import ShareScreen from './screens/ShareScreen';
 
 export type OnboardingScreenParamList = {
     onboarding: boolean;
+    version: SemVer;
 };
 
 export type RootStackParamList = {

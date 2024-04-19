@@ -15,12 +15,10 @@ import { ExpandingDot } from 'react-native-animated-pagination-dots';
 import { Button } from 'react-native-elements';
 import Animated, { FadeIn } from 'react-native-reanimated';
 import Video from 'react-native-video';
-import { parse, SemVer } from 'semver';
+import { SemVer } from 'semver';
 
-import { useAppSelector } from '../../redux/hooks';
 import { getOnboardingScreens, OnboardingScreenItem } from '../components/Onboarding/Onboarding';
 import SkipButton from '../components/Onboarding/SkipButton';
-import logger from '../Logger';
 import { RootStackParamList } from '../Navigation';
 
 const { width } = Dimensions.get('screen');
@@ -36,14 +34,12 @@ export interface Props {
 }
 
 const OnboardingScreen: React.FunctionComponent<Props> = ({ navigation, route }) => {
-    const { onboarding = false } = route.params;
+    const {
+        onboarding = false,
+        version = new SemVer('0.0.0')
+    } = route.params;
 
-    const onboardedStr = useAppSelector(state => state.settings.onboarded);
-    const onboardedSemVer = parse(onboardedStr);
-
-    logger.info(onboardedSemVer);
-
-    const onboardingScreens: OnboardingScreenItem[] = getOnboardingScreens(onboarding ? onboardedSemVer || new SemVer('0.0.0') : new SemVer('0.0.0'));
+    const onboardingScreens: OnboardingScreenItem[] = getOnboardingScreens(onboarding ? version || new SemVer('0.0.0') : new SemVer('0.0.0'));
 
     const scrollX = React.useRef(new RNAnimated.Value(0)).current;
     const keyExtractor = React.useCallback((_: OnboardingScreenItem, index: number) => index.toString(), []);

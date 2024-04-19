@@ -7,10 +7,11 @@ import { BlurView } from 'expo-blur';
 import { StyleSheet, Text, View } from 'react-native';
 import Animated, { Easing, LinearTransition } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { parse, SemVer } from 'semver';
+import { SemVer, parse } from 'semver';
 
 import { selectGameIds } from '../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
+import { setOnboardedVersion } from '../../redux/SettingsSlice';
 import GameListItem from '../components/GameListItem';
 import { getPendingOnboardingSemVer } from '../components/Onboarding/Onboarding';
 import logger from '../Logger';
@@ -37,10 +38,10 @@ const ListScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     logger.info(`Onboarded: ${onboarded}`);
 
     useEffect(() => {
-        console.log('ListScreen.tsx: useEffect(() => {', onboarded);
         if (!onboarded) {
-            navigation.navigate('Onboarding', { onboarding: true });
-            // TODO: dispatch(setOnboardedVersion());
+            logger.info('Show onboarding!');
+            navigation.navigate('Onboarding', { onboarding: true, version: onboardedSemVer });
+            dispatch(setOnboardedVersion());
         }
     }, [onboarded, dispatch, navigation]);
 
