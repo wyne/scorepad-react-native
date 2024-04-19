@@ -20,7 +20,7 @@ import logger from '../Logger';
 
 type RouteParams = {
     Settings: {
-        reason?: string;
+        source?: string;
     };
 };
 

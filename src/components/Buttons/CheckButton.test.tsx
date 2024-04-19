@@ -9,7 +9,7 @@ describe('CheckButton', () => {
     const navigation = useNavigationMock();
 
     it.skip('should navigate to Game screen when pressed', async () => {
-        const { getByRole } = render(<CheckButton navigation={navigation} route={{ key: 'Settings', name: 'Settings', params: { reason: 'new_game' } }} />);
+        const { getByRole } = render(<CheckButton navigation={navigation} route={{ key: 'Settings', name: 'Settings', params: { source: 'new_game' } }} />);
         const button = getByRole('button');
         await waitFor(() => {
             fireEvent.press(button);
@@ -18,7 +18,7 @@ describe('CheckButton', () => {
     });
 
     it.skip('should navigate back a screen when pressed', async () => {
-        const { getByRole } = render(<CheckButton navigation={navigation} route={{ key: 'Settings', name: 'Settings', params: { reason: '' } }} />);
+        const { getByRole } = render(<CheckButton navigation={navigation} route={{ key: 'Settings', name: 'Settings', params: { source: '' } }} />);
         const button = getByRole('button');
         await waitFor(() => {
             fireEvent.press(button);

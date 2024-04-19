@@ -35,7 +35,7 @@ const NewGameButton: React.FunctionComponent<Props> = ({ navigation }) => {
             })
         ).then(() => {
             setTimeout(() => {
-                navigation.navigate('Settings', { reason: 'new_game' });
+                navigation.navigate('Settings', { source: 'new_game' });
             }, 500);
         });
     };
