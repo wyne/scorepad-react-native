@@ -14,7 +14,6 @@ import {
 import { ExpandingDot } from 'react-native-animated-pagination-dots';
 import { Button } from 'react-native-elements';
 import Animated, { FadeIn } from 'react-native-reanimated';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import Video from 'react-native-video';
 import { parse, SemVer } from 'semver';
 
@@ -51,7 +50,6 @@ const OnboardingScreen: React.FunctionComponent<Props> = ({ navigation, route })
 
     // Current item index of flatlist
     const [activeIndex, setActiveIndex] = React.useState<number>(0);
-    const flatListRef = React.useRef<RNAnimated.FlatList>(null);
 
     const closeOnboarding = React.useCallback(() => {
         if (onboarding) navigation.navigate('List');
@@ -141,76 +139,70 @@ const OnboardingScreen: React.FunctionComponent<Props> = ({ navigation, route })
 
     return (
         <Animated.View style={[styles.container]} entering={FadeIn}>
-            <SafeAreaView edges={(['top', 'bottom'])} style={onboarding ? { paddingTop: 40 } : {}}>
-                <View style={[StyleSheet.absoluteFillObject]}>
-                    {onboardingScreens.map((item, index) => {
-                        const inputRange = [
-                            (index - 1) * width,
-                            index * width,
-                            (index + 1) * width,
-                        ];
-                        const colorFade = scrollX.interpolate({
-                            inputRange,
-                            outputRange: [0, 1, 0],
-                        });
-                        return (
-                            <RNAnimated.View key={index}
-                                style={[
-                                    StyleSheet.absoluteFillObject,
-                                    {
-                                        backgroundColor: item.backgroundColor,
-                                        opacity: colorFade
-                                    },
-                                ]}
-                            />
-                        );
-                    })}
-                </View>
+            <View style={[StyleSheet.absoluteFillObject]}>
+                {onboardingScreens.map((item, index) => {
+                    const inputRange = [
+                        (index - 1) * width,
+                        index * width,
+                        (index + 1) * width,
+                    ];
+                    const colorFade = scrollX.interpolate({
+                        inputRange,
+                        outputRange: [0, 1, 0],
+                    });
+                    return (
+                        <RNAnimated.View key={index}
+                            style={[
+                                StyleSheet.absoluteFillObject,
+                                {
+                                    backgroundColor: item.backgroundColor,
+                                    opacity: colorFade
+                                },
+                            ]}
+                        />
+                    );
+                })}
+            </View>
 
-                <RNAnimated.FlatList
-                    ref={flatListRef}
-                    onViewableItemsChanged={onViewRef.current}
-                    viewabilityConfig={viewConfigRef.current}
-                    data={onboardingScreens}
-                    renderItem={renderItem}
-                    keyExtractor={keyExtractor}
-                    showsHorizontalScrollIndicator={false}
-                    pagingEnabled
-                    horizontal
-                    decelerationRate={'normal'}
-                    scrollEventThrottle={16}
-                    onScroll={RNAnimated.event(
-                        [{ nativeEvent: { contentOffset: { x: scrollX } } }],
-                        {
-                            useNativeDriver: false,
-                        }
-                    )}
-                />
+            <RNAnimated.FlatList
+                onViewableItemsChanged={onViewRef.current}
+                viewabilityConfig={viewConfigRef.current}
+                data={onboardingScreens}
+                renderItem={renderItem}
+                keyExtractor={keyExtractor}
+                showsHorizontalScrollIndicator={false}
+                pagingEnabled
+                horizontal
+                decelerationRate={'normal'}
+                scrollEventThrottle={16}
+                onScroll={RNAnimated.event(
+                    [{ nativeEvent: { contentOffset: { x: scrollX } } }],
+                    {
+                        useNativeDriver: false,
+                    }
+                )}
+            />
 
-                <ExpandingDot
-                    data={onboardingScreens}
-                    scrollX={scrollX}
-                    expandingDotWidth={30}
-                    dotStyle={{
-                        width: 10,
-                        height: 10,
-                        backgroundColor: '#347af0',
-                        borderRadius: 5,
-                        marginHorizontal: 5
-                    }}
-                    inActiveDotOpacity={0.2}
-                    activeDotColor={'#fff'}
-                    containerStyle={{ flex: 1 }}
-                />
+            <ExpandingDot
+                data={onboardingScreens}
+                scrollX={scrollX}
+                expandingDotWidth={30}
+                dotStyle={{
+                    width: 10,
+                    height: 10,
+                    backgroundColor: '#347af0',
+                    borderRadius: 5,
+                    marginHorizontal: 5
+                }}
+                inActiveDotOpacity={0.2}
+                activeDotColor={'#fff'}
+                containerStyle={{ flex: 1 }}
+            />
 
-            </SafeAreaView>
-
-            {onboarding &&
-                <SkipButton
-                    visible={activeIndex !== onboardingScreens.length - 1}
-                    onPress={closeOnboarding}
-                />
-            }
+            <SkipButton
+                visible={activeIndex !== onboardingScreens.length - 1}
+                onPress={closeOnboarding}
+            />
         </Animated.View >
     );
 };

@@ -116,7 +116,7 @@ const finalScreen: OnboardingScreenItem[] = [{
     backgroundColor: '#8ca2b8',
 }];
 
-export const getOnboardingSemVer = (onboardedSemVer: SemVer | null): string | undefined => {
+export const getPendingOnboardingSemVer = (onboardedSemVer: SemVer | null): string | undefined => {
     const keys = Object.keys(onboardingScreens)
         .sort((a, b) => compare(new SemVer(a), new SemVer(b)));
 
@@ -134,7 +134,7 @@ export const getOnboardingSemVer = (onboardedSemVer: SemVer | null): string | un
 };
 
 export const getOnboardingScreens = (onboardedSemVer: SemVer): OnboardingScreenItem[] => {
-    const applicableVersion = getOnboardingSemVer(onboardedSemVer);
+    const applicableVersion = getPendingOnboardingSemVer(onboardedSemVer);
 
     if (!applicableVersion) {
         return finalScreen;

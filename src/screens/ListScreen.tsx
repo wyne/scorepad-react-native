@@ -2,15 +2,18 @@ import React, { memo, useEffect } from 'react';
 
 import { ParamListBase } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import * as Application from 'expo-application';
 import { BlurView } from 'expo-blur';
 import { StyleSheet, Text, View } from 'react-native';
 import Animated, { Easing, LinearTransition } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { parse, SemVer } from 'semver';
 
 import { selectGameIds } from '../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
-import { setOnboardedVersion } from '../../redux/SettingsSlice';
 import GameListItem from '../components/GameListItem';
+import { getPendingOnboardingSemVer } from '../components/Onboarding/Onboarding';
+import logger from '../Logger';
 
 interface Props {
     navigation: NativeStackNavigationProp<ParamListBase, string, undefined>;
@@ -20,9 +23,26 @@ const ListScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     const gameIds = useAppSelector(state => selectGameIds(state));
     const dispatch = useAppDispatch();
 
+    const onboardedStr = useAppSelector(state => state.settings.onboarded);
+    const onboardedSemVer = parse(onboardedStr);
+    const appVersion = new SemVer(Application.nativeApplicationVersion || '0.0.0');
+
+    logger.info(`App Version: ${appVersion}`);
+    logger.info(`Onboarded Version: ${onboardedSemVer}`);
+
+    const pendingOnboardingVer = getPendingOnboardingSemVer(onboardedSemVer);
+    const onboarded = pendingOnboardingVer === undefined;
+
+    logger.info(`Pending onboard: ${pendingOnboardingVer}`);
+    logger.info(`Onboarded: ${onboarded}`);
+
     useEffect(() => {
-        dispatch(setOnboardedVersion());
-    }, [gameIds.length]);
+        console.log('ListScreen.tsx: useEffect(() => {', onboarded);
+        if (!onboarded) {
+            navigation.navigate('Onboarding', { onboarding: true });
+            // TODO: dispatch(setOnboardedVersion());
+        }
+    }, [onboarded, dispatch, navigation]);
 
     return (
         <SafeAreaView edges={['bottom', 'left', 'right']} style={{ backgroundColor: 'white', flex: 1 }}>
