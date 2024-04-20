@@ -103,7 +103,7 @@ export const Navigation = () => {
                 />
                 <Stack.Screen name="Onboarding" component={OnboardingScreen}
                     options={{
-                        presentation: 'formSheet',
+                        presentation: 'modal',
                         orientation: 'portrait',
                         title: 'Onboarding',
                         headerShown: false,
