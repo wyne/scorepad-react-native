@@ -59,7 +59,7 @@ const AppInfoScreen: React.FunctionComponent<Props> = ({ navigation }) => {
 
     return (
         <ScrollView style={{ backgroundColor: '#F2F2F7', flex: 1 }}>
-            <View style={[styles.paragraph, { alignItems: 'center' }]}>
+            <View style={[styles.iconWrapper, { alignItems: 'center' }]}>
                 <RotatingIcon />
                 <Text style={{ color: '#999' }} onPress={alertWithVersion}>
                     ScorePad with Rounds v{appVersion}
@@ -88,7 +88,7 @@ const AppInfoScreen: React.FunctionComponent<Props> = ({ navigation }) => {
                 <SectionItem>
                     <SectionItemText text="Instructions" />
                     <Button title="View Tutorial" type="clear" onPress={() => {
-                        navigation.navigate('Tutorial');
+                        navigation.navigate('Onboarding', { onboarding: false });
                     }} />
                 </SectionItem>
             </Section>
@@ -110,10 +110,9 @@ const AppInfoScreen: React.FunctionComponent<Props> = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-    paragraph: {
+    iconWrapper: {
         flex: 1,
-        margin: 20,
-        padding: 20,
+        margin: 10,
         alignContent: 'center',
         justifyContent: 'center',
     },

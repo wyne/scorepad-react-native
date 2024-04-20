@@ -2,10 +2,8 @@ import React from 'react';
 
 import { DarkTheme, NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import * as Application from 'expo-application';
-import { parse, SemVer } from 'semver';
+import { SemVer } from 'semver';
 
-import { useAppSelector } from '../redux/hooks';
 import AppInfoHeader from '../src/components/Headers/AppInfoHeader';
 import GameHeader from '../src/components/Headers/GameHeader';
 import HomeHeader from '../src/components/Headers/HomeHeader';
@@ -18,13 +16,12 @@ import SettingsScreen from '../src/screens/SettingsScreen';
 
 import EditPlayerHeader from './components/Headers/EditPlayerHeader';
 import ShareHeader from './components/Headers/ShareHeader';
-import { getOnboardingSemVer } from './components/Onboarding/Onboarding';
-import logger from './Logger';
 import EditPlayerScreen from './screens/EditPlayerScreen';
 import ShareScreen from './screens/ShareScreen';
 
 export type OnboardingScreenParamList = {
     onboarding: boolean;
+    version: SemVer;
 };
 
 export type RootStackParamList = {
@@ -54,28 +51,9 @@ const MyTheme = {
 };
 
 export const Navigation = () => {
-    const onboardedStr = useAppSelector(state => state.settings.onboarded);
-    const onboardedSemVer = parse(onboardedStr);
-    const appVersion = new SemVer(Application.nativeApplicationVersion || '0.0.0');
-
-    logger.info(`App Version: ${appVersion}`);
-    logger.info(`Onboarded Version: ${onboardedSemVer}`);
-
-    const onboarded = getOnboardingSemVer(onboardedSemVer) === undefined;
-
     return (
         <NavigationContainer theme={MyTheme}>
-            <Stack.Navigator>
-                {!onboarded &&
-                    <Stack.Screen name="Onboarding" component={OnboardingScreen}
-                        initialParams={{ onboarding: true }}
-                        options={{
-                            orientation: 'portrait',
-                            title: 'Onboarding',
-                            headerShown: false,
-                        }}
-                    />
-                }
+            <Stack.Navigator initialRouteName='List' >
                 <Stack.Screen name="List" component={ListScreen}
                     options={{
                         orientation: 'portrait',
@@ -83,15 +61,6 @@ export const Navigation = () => {
                         headerTitle: 'ScorePad with Rounds',
                         header: ({ navigation }) => {
                             return <HomeHeader navigation={navigation} />;
-                        },
-                    }}
-                />
-                <Stack.Screen name="AppInfo" component={AppInfoScreen}
-                    options={{
-                        orientation: 'portrait',
-                        title: 'Info',
-                        header: ({ navigation }) => {
-                            return <AppInfoHeader navigation={navigation} />;
                         },
                     }}
                 />
@@ -132,11 +101,22 @@ export const Navigation = () => {
                         },
                     })}
                 />
-                <Stack.Screen name="Tutorial" component={OnboardingScreen}
-                    initialParams={{ onboarding: false }}
+                <Stack.Screen name="Onboarding" component={OnboardingScreen}
                     options={{
+                        presentation: 'modal',
                         orientation: 'portrait',
-                        title: 'Tutorial',
+                        title: 'Onboarding',
+                        headerShown: false,
+                    }}
+                />
+                <Stack.Screen name="AppInfo" component={AppInfoScreen}
+                    options={{
+                        presentation: 'modal',
+                        orientation: 'portrait',
+                        title: 'Info',
+                        header: ({ navigation }) => {
+                            return <AppInfoHeader navigation={navigation} />;
+                        },
                     }}
                 />
             </Stack.Navigator>
