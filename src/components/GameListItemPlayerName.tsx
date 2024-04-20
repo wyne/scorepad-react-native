@@ -1,7 +1,7 @@
-import { Text } from "react-native";
+import { Text } from 'react-native';
 
-import { useAppSelector } from "../../redux/hooks";
-import { selectPlayerById } from "../../redux/PlayersSlice";
+import { useAppSelector } from '../../redux/hooks';
+import { selectPlayerById } from '../../redux/PlayersSlice';
 
 interface Props {
     playerId: string;

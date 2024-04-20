@@ -1,16 +1,16 @@
 import React, { useEffect } from 'react';
 
 import {
-    View, StyleSheet,
+    StyleSheet,
     Text,
     TouchableOpacity,
+    View,
 } from 'react-native';
 import Animated, {
     useAnimatedStyle,
     useSharedValue,
     withTiming
 } from 'react-native-reanimated';
-import { SafeAreaView } from 'react-native-safe-area-context';
 
 type Props = {
     visible: boolean;
@@ -31,9 +31,7 @@ const SkipButton: React.FunctionComponent<Props> = ({ visible, onPress }) => {
     });
 
     return (
-        <SafeAreaView pointerEvents='box-none' edges={['top', 'bottom']}
-            style={[StyleSheet.absoluteFill]}
-        >
+        <View pointerEvents='box-none' style={[StyleSheet.absoluteFill]}>
             <Animated.View pointerEvents='box-none'
                 style={[{ alignItems: 'flex-end' }, skipButtonStyles]}
             >
@@ -45,7 +43,7 @@ const SkipButton: React.FunctionComponent<Props> = ({ visible, onPress }) => {
                     </View>
                 </TouchableOpacity>
             </Animated.View>
-        </SafeAreaView>
+        </View>
     );
 };
 

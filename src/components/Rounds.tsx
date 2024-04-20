@@ -22,6 +22,10 @@ interface RoundScollOffset {
     [key: number]: number;
 }
 
+const MemoizedRoundScoreColumn = React.memo(RoundScoreColumn);
+const MemoizedTotalScoreColumn = React.memo(TotalScoreColumn);
+const MemoizedPlayerNameColumn = React.memo(PlayerNameColumn);
+
 const Rounds: React.FunctionComponent<Props> = ({ }) => {
     const [roundScollOffset, setRoundScrollOffset] = useState<RoundScollOffset>({});
 
@@ -51,7 +55,7 @@ const Rounds: React.FunctionComponent<Props> = ({ }) => {
 
         roundsScrollViewEl.current.scrollTo({
             x: offset,
-            animated: Platform.OS == "ios" ? true : false
+            animated: Platform.OS == 'ios' ? true : false
         });
     }, [roundCurrent, roundScollOffset]);
 
@@ -69,15 +73,15 @@ const Rounds: React.FunctionComponent<Props> = ({ }) => {
     return (
         <View style={[styles.scoreTableContainer]}>
             <TouchableOpacity onPress={handlePlayerColumnTap}>
-                <PlayerNameColumn sortSelector={sortSelector} sortSelectorKey={sortSelectorKey} />
+                <MemoizedPlayerNameColumn sortSelector={sortSelector} sortSelectorKey={sortSelectorKey} />
             </TouchableOpacity>
-            <TotalScoreColumn sortSelector={sortSelector} sortSelectorKey={sortSelectorKey} />
+            <MemoizedTotalScoreColumn sortSelector={sortSelector} sortSelectorKey={sortSelectorKey} />
             <ScrollView horizontal={true}
                 contentContainerStyle={{ flexDirection: 'row' }}
                 ref={roundsScrollViewEl}>
                 {roundsIterator.map((item, round) => (
                     <View key={round} onLayout={e => onLayoutHandler(e, round)}>
-                        <RoundScoreColumn
+                        <MemoizedRoundScoreColumn
                             sortSelector={sortSelector}
                             round={round}
                             key={round}
@@ -92,7 +96,6 @@ const Rounds: React.FunctionComponent<Props> = ({ }) => {
 const styles = StyleSheet.create({
     scoreTableContainer: {
         flexDirection: 'row',
-        paddingBottom: 10,
     }
 });
 

@@ -1,10 +1,13 @@
 import analytics from '@react-native-firebase/analytics';
-import { PayloadAction, createAsyncThunk, createEntityAdapter, createSlice } from '@reduxjs/toolkit';
+import { PayloadAction, createAsyncThunk, createEntityAdapter, createSelector, createSlice } from '@reduxjs/toolkit';
+import { getContrastRatio } from 'colorsheet';
 import * as Crypto from 'expo-crypto';
 
+import { getPalette } from '../src/ColorPalette';
 import { SortSelectorKey } from '../src/components/ScoreLog/SortHelper';
+import logger from '../src/Logger';
 
-import { playerAdd } from './PlayersSlice';
+import { playerAdd, selectPlayerById } from './PlayersSlice';
 import { setCurrentGameId } from './SettingsSlice';
 import { RootState } from './store';
 
@@ -17,6 +20,7 @@ export interface GameState {
     playerIds: string[];
     locked?: boolean;
     sortSelectorKey?: SortSelectorKey;
+    palette?: string;
 }
 
 const gamesAdapter = createEntityAdapter({
@@ -72,6 +76,17 @@ const gamesSlice = createSlice({
                     sortSelectorKey: game.sortSelectorKey == SortSelectorKey.ByIndex ? SortSelectorKey.ByScore : SortSelectorKey.ByIndex,
                 }
             });
+        },
+        reorderPlayers(state, action: PayloadAction<{ gameId: string, playerIds: string[]; }>) {
+            const game = state.entities[action.payload.gameId];
+            if (!game) { return; }
+
+            gamesAdapter.updateOne(state, {
+                id: action.payload.gameId,
+                changes: {
+                    playerIds: action.payload.playerIds,
+                }
+            });
         }
     }
 });
@@ -79,6 +94,59 @@ const gamesSlice = createSlice({
 interface GamesSlice {
     games: typeof initialState;
 }
+
+export const asyncRematchGame = createAsyncThunk(
+    'games/rematch',
+    async (
+        { gameId }: { gameId: string; },
+        { dispatch, getState }
+    ) => {
+        const newGameId = Crypto.randomUUID();
+
+        const playerIds: string[] = [];
+
+        const game = selectGameById(getState() as RootState, gameId);
+
+        if (!game) {
+            logger.error('No game found to rematch!');
+            return;
+        }
+
+        game.playerIds.forEach(() => {
+            playerIds.push(Crypto.randomUUID());
+        });
+
+        playerIds.forEach((playerId) => {
+            const oldPlayerId = game.playerIds[playerIds.indexOf(playerId)];
+
+            const player = selectPlayerById(getState() as RootState, oldPlayerId);
+            const playerName = player?.playerName;
+
+            dispatch(playerAdd({
+                id: playerId,
+                playerName: playerName || `Player ${playerIds.indexOf(playerId) + 1}`,
+                scores: [0],
+            }));
+        });
+
+        dispatch(gameSave({
+            id: newGameId,
+            title: game.title,
+            dateCreated: Date.now(),
+            roundCurrent: 0,
+            roundTotal: 1,
+            playerIds: playerIds,
+        }));
+
+        dispatch(setCurrentGameId(newGameId));
+
+        await analytics().logEvent('rematch_game', {
+            gameId: game.id,
+        });
+
+        return newGameId;
+    }
+);
 
 export const asyncCreateGame = createAsyncThunk(
     'games/create',
@@ -125,6 +193,28 @@ export const selectSortSelectorKey = (state: RootState, gameId: string) => {
     return key !== undefined ? key : SortSelectorKey.ByScore;
 };
 
+const selectPaletteName = (state: RootState, gameId: string) => state.games.entities[gameId]?.palette;
+const selectPlayerIndex = (_: RootState, __: string, playerIndex: number) => playerIndex;
+
+export const selectPlayerColors = createSelector(
+    [selectPaletteName, selectPlayerIndex],
+    (paletteName, playerIndex) => {
+        // TODO: Get player color if it exists
+
+        const palette = getPalette(paletteName || 'original');
+
+        const bg = palette[playerIndex % palette.length];
+
+        const blackContrast = getContrastRatio(bg, '#000').number;
+        const whiteContrast = getContrastRatio(bg, '#fff').number;
+
+        // +1 to give a slight preference to white
+        const fg = blackContrast >= whiteContrast + 1 ? '#000000' : '#FFFFFF';
+
+        return [bg, fg];
+    }
+);
+
 export const {
     updateGame,
     roundNext,
@@ -132,6 +222,7 @@ export const {
     gameSave,
     gameDelete,
     nextSortSelector,
+    reorderPlayers,
 } = gamesSlice.actions;
 
 export default gamesSlice.reducer;

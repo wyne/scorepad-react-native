@@ -13,7 +13,7 @@ import { AddendModalContextProvider } from './src/components/Sheets/AddendModalC
 import { GameSheetContextProvider } from './src/components/Sheets/GameSheetContext';
 import { Navigation } from './src/Navigation';
 
-if (process.env.EXPO_PUBLIC_FIREBASE_ANALYTICS == "false") {
+if (process.env.EXPO_PUBLIC_FIREBASE_ANALYTICS == 'false') {
     analytics().setAnalyticsCollectionEnabled(false);
 }
 

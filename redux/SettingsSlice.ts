@@ -3,6 +3,7 @@ import * as Application from 'expo-application';
 import { SemVer, valid } from 'semver';
 
 import { InteractionType } from '../src/components/Interactions/InteractionType';
+import logger from '../src/Logger';
 
 export interface SettingsState {
     home_fullscreen: boolean;
@@ -12,6 +13,8 @@ export interface SettingsState {
     currentGameId: string | undefined;
     onboarded: string | undefined;
     showPointParticles: boolean;
+    showPlayerIndex: boolean;
+    showColorPalettes?: boolean;
     interactionType: InteractionType;
     lastStoreReviewPrompt: number;
 };
@@ -24,6 +27,7 @@ const initialState: SettingsState = {
     currentGameId: undefined,
     onboarded: undefined,
     showPointParticles: true,
+    showPlayerIndex: false,
     interactionType: InteractionType.SwipeVertical,
     lastStoreReviewPrompt: 0,
 };
@@ -33,13 +37,20 @@ const settingsSlice = createSlice({
     initialState,
     reducers: {
         setCurrentGameId(state, action: PayloadAction<string>) {
+            console.info('Setting Current Game: ', action.payload);
             state.currentGameId = action.payload;
         },
         toggleHomeFullscreen(state) {
             state.home_fullscreen = !state.home_fullscreen;
         },
-        toggleshowPointParticles(state) {
+        toggleShowPointParticles(state) {
             state.showPointParticles = !state.showPointParticles;
+        },
+        toggleShowPlayerIndex(state) {
+            state.showPlayerIndex = !state.showPlayerIndex;
+        },
+        toggleShowColorPalettes(state) {
+            state.showColorPalettes = !state.showColorPalettes;
         },
         setMultiplier(state, action: PayloadAction<number>) {
             state.multiplier = action.payload;
@@ -55,7 +66,7 @@ const settingsSlice = createSlice({
         },
         setOnboardedVersion(state) {
             const appVersion = new SemVer(Application.nativeApplicationVersion || '0.0.0');
-            console.log(`Setting Onboarded Version: ${appVersion}`);
+            logger.info(`Setting Onboarded Version: ${appVersion}`);
             state.onboarded = valid(appVersion) || '0.0.0';
         },
         setLastStoreReviewPrompt(state, action: PayloadAction<number>) {
@@ -71,7 +82,9 @@ export const {
     setAddendOne,
     setAddendTwo,
     setOnboardedVersion,
-    toggleshowPointParticles,
+    toggleShowPointParticles,
+    toggleShowPlayerIndex,
+    toggleShowColorPalettes,
     setInteractionType,
     setLastStoreReviewPrompt,
 } = settingsSlice.actions;

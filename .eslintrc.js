@@ -12,19 +12,20 @@ module.exports = {
         'prettier',
     ],
     rules: {
+        'quotes': ['error', 'single'],
         '@typescript-eslint/no-var-requires': 0,
         'jest/no-disabled-tests': 0,
         'semi': ['error', 'always'],
         'eol-last': ['error', 'always'],
         'import/order': ['error', {
-            "pathGroups": [
+            'pathGroups': [
                 {
-                    "pattern": "react",
-                    "group": "builtin",
-                    "position": "before"
+                    'pattern': 'react',
+                    'group': 'builtin',
+                    'position': 'before'
                 }
             ],
-            "pathGroupsExcludedImportTypes": ["react"],
+            'pathGroupsExcludedImportTypes': ['react'],
             'groups': ['builtin', 'external', 'internal', 'parent', 'sibling', 'index'],
             'alphabetize': {
                 'order': 'asc',

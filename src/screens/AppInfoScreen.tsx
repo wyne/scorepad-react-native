@@ -4,11 +4,11 @@ import analytics from '@react-native-firebase/analytics';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ParamListBase } from '@react-navigation/routers';
 import * as Application from 'expo-application';
-import { Text, View, StyleSheet, Alert, ScrollView, Linking, Platform, Switch } from 'react-native';
+import { Alert, Linking, Platform, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import { Button } from 'react-native-elements';
 
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
-import { toggleshowPointParticles } from '../../redux/SettingsSlice';
+import { toggleShowColorPalettes, toggleShowPlayerIndex, toggleShowPointParticles } from '../../redux/SettingsSlice';
 import RotatingIcon from '../components/AppInfo/RotatingIcon';
 
 interface Props {
@@ -40,11 +40,16 @@ const AppInfoScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     const appVersion = Application.nativeApplicationVersion;
 
     const showPointParticles = useAppSelector(state => state.settings.showPointParticles);
+    const showPlayerIndex = useAppSelector(state => state.settings.showPlayerIndex);
+    const showColorPalettes = useAppSelector(state => state.settings.showColorPalettes);
+
     const dispatch = useAppDispatch();
-    const toggleSwitch = () => { dispatch(toggleshowPointParticles()); };
+    const toggleParticleSwitch = () => { dispatch(toggleShowPointParticles()); };
+    const togglePlayerIndexSwitch = () => { dispatch(toggleShowPlayerIndex()); };
+    const toggleColorPalettesSwitch = () => { dispatch(toggleShowColorPalettes()); };
 
     const alertWithVersion = async () => {
-        Alert.alert(`ScorePad with Rounds\n` +
+        Alert.alert('ScorePad with Rounds\n' +
             `v${appVersion} (${buildNumber})\n` +
             `${Platform.OS} ${Platform.Version}\n` +
             (process.env.EXPO_PUBLIC_FIREBASE_ANALYTICS)
@@ -54,7 +59,7 @@ const AppInfoScreen: React.FunctionComponent<Props> = ({ navigation }) => {
 
     return (
         <ScrollView style={{ backgroundColor: '#F2F2F7', flex: 1 }}>
-            <View style={[styles.paragraph, { alignItems: 'center' }]}>
+            <View style={[styles.iconWrapper, { alignItems: 'center' }]}>
                 <RotatingIcon />
                 <Text style={{ color: '#999' }} onPress={alertWithVersion}>
                     ScorePad with Rounds v{appVersion}
@@ -67,7 +72,15 @@ const AppInfoScreen: React.FunctionComponent<Props> = ({ navigation }) => {
             <Section title="Features">
                 <SectionItem>
                     <SectionItemText text="Point Particle Effect" />
-                    <Switch onValueChange={toggleSwitch} value={showPointParticles} />
+                    <Switch onValueChange={toggleParticleSwitch} value={showPointParticles} />
+                </SectionItem>
+                <SectionItem>
+                    <SectionItemText text="Player Numbers" />
+                    <Switch onValueChange={togglePlayerIndexSwitch} value={showPlayerIndex} />
+                </SectionItem>
+                <SectionItem>
+                    <SectionItemText text="Color Palettes" />
+                    <Switch onValueChange={toggleColorPalettesSwitch} value={showColorPalettes} />
                 </SectionItem>
             </Section>
 
@@ -75,7 +88,7 @@ const AppInfoScreen: React.FunctionComponent<Props> = ({ navigation }) => {
                 <SectionItem>
                     <SectionItemText text="Instructions" />
                     <Button title="View Tutorial" type="clear" onPress={() => {
-                        navigation.navigate('Tutorial');
+                        navigation.navigate('Onboarding', { onboarding: false });
                     }} />
                 </SectionItem>
             </Section>
@@ -97,10 +110,9 @@ const AppInfoScreen: React.FunctionComponent<Props> = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-    paragraph: {
+    iconWrapper: {
         flex: 1,
-        margin: 20,
-        padding: 20,
+        margin: 10,
         alignContent: 'center',
         justifyContent: 'center',
     },

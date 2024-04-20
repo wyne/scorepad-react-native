@@ -27,10 +27,9 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
     //#region Selector setup
 
     const currentGameId = useAppSelector(state => state.settings.currentGameId);
-    const currentGame = useAppSelector(selectCurrentGame);
-    if (typeof currentGame == 'undefined') return null;
+    const roundCurrent = useAppSelector(state => selectCurrentGame(state)?.roundCurrent) || 0;
+    const currentGameLocked = useAppSelector(state => selectCurrentGame(state)?.locked);
 
-    const roundCurrent = currentGame.roundCurrent;
     const dispatch = useAppDispatch();
 
     const addendOne = useAppSelector(state => state.settings.addendOne);
@@ -48,6 +47,12 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
     useEffect(() => {
         powerHoldRef.current = powerHold;
     }, [powerHold]);
+
+    useEffect(() => {
+        return () => {
+            clearTimeout(powerHoldTimer);
+        };
+    }, []);
 
     const scale = holdDuration.interpolate({
         inputRange: [0, powerHoldTime * .9, powerHoldTime],
@@ -230,7 +235,7 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
             </Animated.View>
 
             <PanGestureHandler
-                enabled={!currentGame.locked}
+                enabled={!currentGameLocked}
                 minDist={0}
                 onGestureEvent={onGestureEvent}
                 onHandlerStateChange={onHandlerStateChange}

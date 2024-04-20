@@ -8,14 +8,14 @@ import { Button } from 'react-native-elements';
 import Animated, { Extrapolate, FadeIn, interpolate, Layout, useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { updateGame } from '../../../redux/GamesSlice';
+import { asyncRematchGame, selectGameById, updateGame } from '../../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
 import { updatePlayer } from '../../../redux/PlayersSlice';
-import { selectCurrentGame } from '../../../redux/selectors';
 import { systemBlue } from '../../constants';
 import BigButton from '../BigButtons/BigButton';
+import PaletteSelector from '../ColorPalettes/PaletteSelector';
+import RematchIcon from '../Icons/RematchIcon';
 import Rounds from '../Rounds';
-import { selectPlayerIdsByIndex } from '../ScoreLog/SortHelper';
 
 import { useGameSheetContext } from './GameSheetContext';
 
@@ -33,14 +33,12 @@ const GameSheet: React.FunctionComponent<Props> = ({ navigation, containerHeight
     const isFocused = useIsFocused();
 
     const currentGameId = useAppSelector(state => state.settings.currentGameId);
-    if (typeof currentGameId == 'undefined') return null;
-
     const fullscreen = useAppSelector(state => state.settings.home_fullscreen);
-    const currentGame = useAppSelector(selectCurrentGame);
+    const gameTitle = useAppSelector(state => selectGameById(state, currentGameId || '')?.title);
+    const gameLocked = useAppSelector(state => selectGameById(state, currentGameId || '')?.locked);
+    const playerIds = useAppSelector(state => selectGameById(state, currentGameId || '')?.playerIds);
 
-    if (currentGame == undefined) return null;
-
-    const playerIds = useAppSelector(selectPlayerIdsByIndex);
+    if (currentGameId == undefined) return null;
 
     // ref
     const gameSheetRef = useGameSheetContext();
@@ -55,9 +53,9 @@ const GameSheet: React.FunctionComponent<Props> = ({ navigation, containerHeight
      */
     const setLock = () => dispatch(
         updateGame({
-            id: currentGame.id,
+            id: currentGameId,
             changes: {
-                locked: !currentGame.locked,
+                locked: !gameLocked,
             }
         })
     );
@@ -67,17 +65,18 @@ const GameSheet: React.FunctionComponent<Props> = ({ navigation, containerHeight
      */
     const resetGameHandler = () => {
         Alert.alert(
-            "Reset Game",
-            "Are you sure you want to reset this game? This will reset all scores and rounds.",
+            'Reset Game',
+            'Warning: This will reset all scores and rounds for this game. Are you sure you want to reset?',
             [
                 {
-                    text: "Cancel",
-                    style: "cancel"
+                    text: 'Cancel',
+                    style: 'cancel'
                 },
                 {
-                    text: "Reset",
+                    text: 'Reset',
                     onPress: () => {
-                        if (currentGame == undefined) return;
+                        if (currentGameId == undefined) return;
+                        if (playerIds == undefined) return;
 
                         playerIds.forEach((playerId) => {
                             dispatch(updatePlayer({
@@ -89,13 +88,41 @@ const GameSheet: React.FunctionComponent<Props> = ({ navigation, containerHeight
                             ));
                         });
                         dispatch(updateGame({
-                            id: currentGame.id,
+                            id: currentGameId,
                             changes: {
                                 roundCurrent: 0,
                                 roundTotal: 1,
                             }
                         }));
-                        navigation.navigate("Game");
+                        navigation.navigate('Game');
+                    }
+                }
+            ]
+        );
+    };
+
+    /**
+     * Rematch - start new game with same players
+     */
+    const rematchGameHandler = async () => {
+        Alert.alert(
+            'Rematch',
+            'This will create a new game with the same players and empty scores.',
+            [
+                {
+                    text: 'Cancel',
+                    style: 'cancel'
+                },
+                {
+                    text: 'Rematch',
+                    onPress: () => {
+                        dispatch(
+                            asyncRematchGame({ gameId: currentGameId })
+                        ).then(() => {
+                            setTimeout(() => {
+                                navigation.navigate('Game');
+                            }, 500);
+                        });
                     }
                 }
             ]
@@ -163,6 +190,8 @@ const GameSheet: React.FunctionComponent<Props> = ({ navigation, containerHeight
         []
     );
 
+    const showColorPalettes = useAppSelector(state => state.settings.showColorPalettes);
+
     return (
         <BottomSheet
             ref={gameSheetRef}
@@ -181,12 +210,12 @@ const GameSheet: React.FunctionComponent<Props> = ({ navigation, containerHeight
                         <TouchableWithoutFeedback onPress={() => sheetTitlePress()}>
                             <View style={[styles.sheetTitleView]}>
                                 <Text style={[styles.sheetTitle]} numberOfLines={1}>
-                                    {currentGame.title}
+                                    {gameTitle}
                                 </Text>
                             </View>
                         </TouchableWithoutFeedback>
 
-                        {currentGame.locked &&
+                        {gameLocked &&
                             <Text style={{ color: 'gray', fontSize: 20, paddingHorizontal: 10 }}
                                 onPress={() => { gameSheetRef?.current?.snapToIndex(snapPoints.length - 1); }}
                             >
@@ -202,9 +231,10 @@ const GameSheet: React.FunctionComponent<Props> = ({ navigation, containerHeight
 
                     <Animated.View style={[styles.sheetContent, animatedSheetStyle]}>
                         <Rounds navigation={navigation} show={!fullscreen} />
-                        <Text style={{ color: 'white', margin: 10, marginTop: 0 }}>
-                            Tap on a column to set the current round.
-                        </Text>
+
+                        {showColorPalettes &&
+                            <PaletteSelector />
+                        }
 
                         <Text style={{ color: 'white', margin: 10, marginTop: 0 }}>
                             Tap the player column to toggle sorting by total score and original order.
@@ -212,7 +242,7 @@ const GameSheet: React.FunctionComponent<Props> = ({ navigation, containerHeight
 
                         <Animated.View layout={Layout.delay(200)}>
 
-                            {!currentGame.locked &&
+                            {!gameLocked &&
                                 <Animated.View entering={FadeIn.delay(400)}>
                                     <Button title="Edit Title and Players"
                                         type="clear"
@@ -231,7 +261,7 @@ const GameSheet: React.FunctionComponent<Props> = ({ navigation, containerHeight
                             https://github.com/software-mansion/react-native-reanimated/issues/4816
                             https://github.com/software-mansion/react-native-reanimated/issues/4822
                         */}
-                        <Animated.View key={isFocused + ''} layout={Layout.delay(200)} style={{ flexDirection: 'row', justifyContent: 'space-around', paddingVertical: 10 }}>
+                        <Animated.View key={isFocused + 'a'} layout={Layout.delay(200)} style={{ flexDirection: 'row', justifyContent: 'space-around', paddingVertical: 10 }}>
                             {Platform.OS === 'ios' &&
                                 <BigButton text="Share"
                                     color={systemBlue}
@@ -240,21 +270,32 @@ const GameSheet: React.FunctionComponent<Props> = ({ navigation, containerHeight
                                 />
                             }
 
-                            <Animated.View layout={Layout.delay(200)} style={{ justifyContent: 'center', alignItems: 'center' }}>
-                                {!currentGame.locked &&
-                                    <BigButton text="Reset"
-                                        color='red'
-                                        icon="refresh-outline"
-                                        onPress={resetGameHandler}
-                                    />
-                                }
-                            </Animated.View>
-
-                            <BigButton text={currentGame.locked ? "Unlock" : "Lock"}
-                                color={currentGame.locked ? 'orange' : 'green'}
-                                icon={currentGame.locked ? "lock-closed-outline" : "lock-open-outline"}
+                            <BigButton text={gameLocked ? 'Unlock' : 'Lock'}
+                                color={gameLocked ? 'orange' : 'green'}
+                                icon={gameLocked ? 'lock-closed-outline' : 'lock-open-outline'}
                                 onPress={setLock}
                             />
+
+                        </Animated.View>
+
+                        <Animated.View key={isFocused + 'b'} layout={Layout.delay(200)} style={{ flexDirection: 'row', justifyContent: 'space-around', paddingVertical: 10 }}>
+                            {!gameLocked &&
+                                <Animated.View layout={Layout.delay(200)} style={{ justifyContent: 'center', alignItems: 'center' }}>
+                                    <BigButton text="Reset"
+                                        color='red'
+                                        icon="backspace-outline"
+                                        onPress={resetGameHandler}
+                                    />
+                                </Animated.View>
+                            }
+
+                            <Animated.View layout={Layout.delay(200)} style={{ justifyContent: 'center', alignItems: 'center' }}>
+                                <BigButton text="Rematch"
+                                    color='yellow'
+                                    icon={<RematchIcon fill="yellow" />}
+                                    onPress={rematchGameHandler}
+                                />
+                            </Animated.View>
 
                         </Animated.View>
                     </Animated.View>

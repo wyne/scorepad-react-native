@@ -1,11 +1,10 @@
 import React, { memo, useCallback } from 'react';
 
 import analytics from '@react-native-firebase/analytics';
-import { Text, TouchableWithoutFeedback, View } from 'react-native';
+import { LayoutChangeEvent, Text, TouchableWithoutFeedback, View } from 'react-native';
 
 import { updateGame } from '../../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
-import { selectCurrentGame } from '../../../redux/selectors';
 import { RootState } from '../../../redux/store';
 
 import RoundScoreCell from './RoundScoreCell';
@@ -15,15 +14,19 @@ interface Props {
     isCurrentRound: boolean;
     disabled?: boolean;
     sortSelector: (state: RootState) => string[];
+    onLayout?: (event: LayoutChangeEvent, round: number) => void;
 }
 
-const RoundScoreColumn: React.FunctionComponent<Props> = ({ round, isCurrentRound, disabled = false, sortSelector }) => {
+const RoundScoreColumn: React.FunctionComponent<Props> = ({
+    round,
+    isCurrentRound,
+    disabled = false,
+    sortSelector,
+    onLayout,
+}) => {
     const dispatch = useAppDispatch();
 
     const currentGameId = useAppSelector(state => state.settings.currentGameId);
-    const currentGame = useAppSelector(selectCurrentGame);
-
-    if (typeof currentGame == 'undefined') return null;
 
     const sortedPlayerIds = useAppSelector(sortSelector);
 
@@ -52,11 +55,13 @@ const RoundScoreColumn: React.FunctionComponent<Props> = ({ round, isCurrentRoun
 
     return (
         <TouchableWithoutFeedback onPress={onPressHandler}>
-            <View style={{
-                padding: 10,
-                paddingBottom: 0,
-                backgroundColor: backgroundColor,
-            }}>
+            <View
+                onLayout={(e) => onLayout?.(e, round)}
+                style={{
+                    padding: 10,
+                    paddingBottom: 0,
+                    backgroundColor: backgroundColor,
+                }}>
                 <Text style={{
                     color: isCurrentRound ? 'red' : '#AAA',
                     fontWeight: 'bold',

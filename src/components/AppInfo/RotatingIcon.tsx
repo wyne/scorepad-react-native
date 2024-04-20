@@ -5,7 +5,6 @@ import { Image } from 'expo-image';
 import { TouchableWithoutFeedback } from 'react-native';
 import Animated, {
     Easing,
-    PinwheelIn,
     useAnimatedStyle,
     useSharedValue,
     withTiming
@@ -28,7 +27,7 @@ const RotatingIcon: React.FunctionComponent = ({ }) => {
 
         await analytics().logEvent('app_icon');
     }}>
-        <Animated.View style={[animatedStyles]} entering={PinwheelIn.delay(0).duration(2000).easing(Easing.elastic(1))}>
+        <Animated.View style={[animatedStyles]}>
             <Image source={require('../../../assets/icon.png')}
                 contentFit='contain'
                 style={{

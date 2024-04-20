@@ -7,7 +7,7 @@ import { Icon } from 'react-native-elements';
 
 import { asyncCreateGame, selectAllGames } from '../../../redux/GamesSlice';
 import { useAppSelector, useAppDispatch } from '../../../redux/hooks';
-import { systemBlue } from '../../constants';
+import { MAX_PLAYERS, systemBlue } from '../../constants';
 
 interface Props {
     navigation: NativeStackNavigationProp<ParamListBase, string, undefined>;
@@ -18,18 +18,16 @@ const NewGameButton: React.FunctionComponent<Props> = ({ navigation }) => {
 
     const gameList = useAppSelector(selectAllGames);
 
-    const playerNumberOptions = [...Array.from(Array(12).keys(), n => n + 1)];
+    const playerNumberOptions = [...Array.from(Array(MAX_PLAYERS).keys(), n => n + 1)];
 
     const menuActions: MenuAction[] = playerNumberOptions.map((number) => {
         return {
             id: number.toString(),
-            title: number.toString() + (number == 1 ? " Player" : " Players"),
+            title: number.toString() + (number == 1 ? ' Player' : ' Players'),
         };
     });
 
     const addGameHandler = async (playerCount: number) => {
-        console.log('games', gameList);
-
         dispatch(
             asyncCreateGame({
                 gameCount: gameList.length,
@@ -37,7 +35,7 @@ const NewGameButton: React.FunctionComponent<Props> = ({ navigation }) => {
             })
         ).then(() => {
             setTimeout(() => {
-                navigation.navigate("Settings", { reason: 'new_game' });
+                navigation.navigate('Settings', { source: 'new_game' });
             }, 500);
         });
     };

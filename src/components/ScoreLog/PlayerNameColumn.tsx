@@ -3,39 +3,43 @@ import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { Icon } from 'react-native-elements/dist/icons/Icon';
 
+import { selectPlayerColors } from '../../../redux/GamesSlice';
 import { useAppSelector } from '../../../redux/hooks';
-import { selectPlayersByIds } from '../../../redux/PlayersSlice';
+import { selectPlayerById, selectPlayersByIds } from '../../../redux/PlayersSlice';
 import { selectCurrentGame } from '../../../redux/selectors';
 import { RootState } from '../../../redux/store';
-import { palette } from '../../constants';
 
 import { SortSelector, SortSelectorKey } from './SortHelper';
+
 
 interface Props {
     sortSelector: SortSelector;
     sortSelectorKey: SortSelectorKey;
 }
 
+interface CellProps {
+    index: number;
+    playerId: string;
+}
+
+const PlayerNameCell: React.FunctionComponent<CellProps> = ({ index, playerId }) => {
+    const currentGameId = useAppSelector(state => selectCurrentGame(state)?.id);
+    const playerColors = useAppSelector(state => selectPlayerColors(state, currentGameId || '', index || 0));
+    const playerName = useAppSelector(state => selectPlayerById(state, playerId)?.playerName);
+
+    return (
+        <View key={index} style={{ paddingLeft: 5, borderLeftWidth: 5, borderColor: playerColors[0] }}>
+            <Text key={index} style={{ color: 'white', maxWidth: 100, fontSize: 20, }}
+                numberOfLines={1}
+            >{playerName}</Text>
+        </View>
+    );
+};
+
 const PlayerNameColumn: React.FunctionComponent<Props> = ({ sortSelector, sortSelectorKey }) => {
-    const currentGame = useAppSelector(selectCurrentGame);
-
-    if (currentGame == undefined) return null;
-
     const sortedPlayerIds = useAppSelector(sortSelector);
 
-    const players = useAppSelector((state: RootState) => selectPlayersByIds(state, sortedPlayerIds));
-
-    if (players == undefined) return null;
-
-    const getPlayerIndex = (playerId: string | undefined) => {
-        if (playerId == undefined) return -1;
-        const index = currentGame.playerIds.findIndex((id) => id === playerId);
-        return index;
-    };
-
-    const playerColor = (playerId: string | undefined) => {
-        return "#" + palette[getPlayerIndex(playerId) % palette.length];
-    };
+    const playerIds = useAppSelector((state: RootState) => selectPlayersByIds(state, sortedPlayerIds).map(player => player?.id));
 
     return (
         <View style={{ paddingVertical: 10 }}>
@@ -48,13 +52,8 @@ const PlayerNameColumn: React.FunctionComponent<Props> = ({ sortSelector, sortSe
                     sortSelectorKey == SortSelectorKey.ByIndex ? '↓' : ''
                 }
             </Text>
-
-            {players.map((player, index) => (
-                <View key={index} style={{ paddingLeft: 5, borderLeftWidth: 5, borderColor: playerColor(player?.id) }}>
-                    <Text key={index} style={{ color: 'white', maxWidth: 100, fontSize: 20, }}
-                        numberOfLines={1}
-                    >{player?.playerName}</Text>
-                </View>
+            {playerIds.map((playerId, index) => (
+                playerId && <PlayerNameCell key={index} index={index} playerId={playerId} />
             ))}
         </View>
     );

@@ -1,9 +1,8 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 
 import analytics from '@react-native-firebase/analytics';
 import { ParamListBase } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { AnyAction, ThunkDispatch } from '@reduxjs/toolkit';
 import Moment from 'react-moment';
 import { Platform, StyleSheet, Text } from 'react-native';
 import { Icon, ListItem } from 'react-native-elements';
@@ -12,7 +11,6 @@ import Animated, { FadeInUp, SlideOutLeft } from 'react-native-reanimated';
 import { selectGameById } from '../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { setCurrentGameId } from '../../redux/SettingsSlice';
-
 
 import GameListItemPlayerName from './GameListItemPlayerName';
 import AbstractPopupMenu from './PopupMenu/AbstractPopupMenu';
@@ -35,18 +33,17 @@ const GameListItem: React.FunctionComponent<Props> = ({ navigation, gameId, inde
     const dateCreated = useAppSelector(state => selectGameById(state, gameId)?.dateCreated);
     if (roundTotal == null || playerIds == null) { return null; }
 
-    const asyncSetCurrentGame = (dispatch: ThunkDispatch<unknown, undefined, AnyAction>) => new Promise<void>((resolve) => {
+    const setCurrentGameCallback = useCallback(() => {
         dispatch(setCurrentGameId(gameId));
-        resolve();
-    });
+    }, [gameId]);
 
     /**
      * Choose Game and navigate to GameScreen
      */
     const chooseGameHandler = async () => {
-        asyncSetCurrentGame(dispatch).then(() => {
-            navigation.navigate("Game");
-        });
+        setCurrentGameCallback();
+        navigation.navigate('Game');
+
         await analytics().logEvent('select_game', {
             index: index,
             game_id: gameId,
@@ -60,7 +57,7 @@ const GameListItem: React.FunctionComponent<Props> = ({ navigation, gameId, inde
             exiting={SlideOutLeft.duration(200)}>
             <AbstractPopupMenu
                 gameId={gameId}
-                asyncSetCurrentGame={asyncSetCurrentGame}
+                setCurrentGameCallback={setCurrentGameCallback}
                 chooseGameHandler={chooseGameHandler}
                 navigation={navigation}
                 index={index}

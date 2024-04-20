@@ -9,6 +9,7 @@ export interface ScoreState {
     id: string;
     playerName: string;
     scores: number[];
+    color?: string;
 }
 
 const playersAdapter = createEntityAdapter({

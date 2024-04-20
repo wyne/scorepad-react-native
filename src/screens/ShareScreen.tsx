@@ -7,7 +7,7 @@ import * as Sharing from 'expo-sharing';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Button, Icon } from 'react-native-elements';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { captureRef } from "react-native-view-shot";
+import { captureRef } from 'react-native-view-shot';
 
 import { selectGameById, selectSortSelectorKey } from '../../redux/GamesSlice';
 import { useAppSelector } from '../../redux/hooks';
@@ -71,7 +71,7 @@ const ShareScreen: React.FunctionComponent<Props> = ({ navigation }) => {
                     icon={<Icon name='edit' color={systemBlue} />}
                     style={{ padding: 10 }}
                     onPress={async () => {
-                        navigation.navigate("Settings");
+                        navigation.navigate('Settings');
                     }} />
 
                 <View style={{
