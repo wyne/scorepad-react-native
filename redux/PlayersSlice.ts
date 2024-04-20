@@ -1,7 +1,5 @@
 import crashlytics from '@react-native-firebase/crashlytics';
-import { PayloadAction, createEntityAdapter, createSelector, createSlice } from '@reduxjs/toolkit';
-
-import { RootState } from './store';
+import { PayloadAction, createEntityAdapter, createSlice } from '@reduxjs/toolkit';
 
 type RoundIndex = number;
 
@@ -58,14 +56,6 @@ const scoresSlice = createSlice({
 interface PlayersSlice {
     players: typeof initialState;
 }
-
-export const selectPlayersByIds = createSelector(
-    [
-        (state: RootState) => state.players.entities,
-        (_, playerIds: string[]) => playerIds,
-    ],
-    (players, playerIds) => playerIds.map(id => players[id])
-);
 
 export const {
     updatePlayer,

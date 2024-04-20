@@ -5,9 +5,8 @@ import { Icon } from 'react-native-elements/dist/icons/Icon';
 
 import { selectPlayerColors } from '../../../redux/GamesSlice';
 import { useAppSelector } from '../../../redux/hooks';
-import { selectPlayerById, selectPlayersByIds } from '../../../redux/PlayersSlice';
+import { selectPlayerById } from '../../../redux/PlayersSlice';
 import { selectCurrentGame } from '../../../redux/selectors';
-import { RootState } from '../../../redux/store';
 
 import { SortSelector, SortSelectorKey } from './SortHelper';
 
@@ -39,8 +38,6 @@ const PlayerNameCell: React.FunctionComponent<CellProps> = ({ index, playerId })
 const PlayerNameColumn: React.FunctionComponent<Props> = ({ sortSelector, sortSelectorKey }) => {
     const sortedPlayerIds = useAppSelector(sortSelector);
 
-    const playerIds = useAppSelector((state: RootState) => selectPlayersByIds(state, sortedPlayerIds).map(player => player?.id));
-
     return (
         <View style={{ paddingVertical: 10 }}>
             <Text style={styles.editRow}>
@@ -52,7 +49,7 @@ const PlayerNameColumn: React.FunctionComponent<Props> = ({ sortSelector, sortSe
                     sortSelectorKey == SortSelectorKey.ByIndex ? '↓' : ''
                 }
             </Text>
-            {playerIds.map((playerId, index) => (
+            {sortedPlayerIds.map((playerId, index) => (
                 playerId && <PlayerNameCell key={index} index={index} playerId={playerId} />
             ))}
         </View>
