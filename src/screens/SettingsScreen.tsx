@@ -14,7 +14,7 @@ import { playerAdd } from '../../redux/PlayersSlice';
 import { selectCurrentGame } from '../../redux/selectors';
 import EditGame from '../components/EditGame';
 import PlayerListItem from '../components/PlayerListItem';
-import { selectPlayerIdsByIndex } from '../components/ScoreLog/SortHelper';
+import { selectSortedPlayerIdsByIndex } from '../components/ScoreLog/SortHelper';
 import { MAX_PLAYERS, systemBlue } from '../constants';
 import logger from '../Logger';
 
@@ -36,7 +36,7 @@ const SettingsScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     if (typeof currentGameId == 'undefined') return null;
 
     const currentGame = useAppSelector(selectCurrentGame);
-    const playerIds = useAppSelector(selectPlayerIdsByIndex);
+    const playerIds = useAppSelector(selectSortedPlayerIdsByIndex);
 
     const [edit, setEdit] = React.useState(false);
 

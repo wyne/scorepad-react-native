@@ -62,7 +62,6 @@ const MemoizedPlayerNameCell = React.memo(PlayerNameCell);
 
 const PlayerNameColumn: React.FunctionComponent = () => {
     const sortKey = useAppSelector(state => selectCurrentGame(state)?.sortSelectorKey);
-
     const sortSelector = sortSelectors[sortKey || SortSelectorKey.ByIndex];
     const sortedPlayerIds = useAppSelector(sortSelector);
 

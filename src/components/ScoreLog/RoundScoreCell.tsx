@@ -3,7 +3,7 @@ import React, { memo } from 'react';
 import { StyleSheet, Text } from 'react-native';
 
 import { useAppSelector } from '../../../redux/hooks';
-import { makeSelectPlayerScoreByRound, selectPlayerScoreByRound } from '../../../redux/PlayersSlice';
+import { selectPlayerScoreByRound } from '../../../redux/PlayersSlice';
 
 interface Props {
     playerId: string;
@@ -12,7 +12,6 @@ interface Props {
 }
 
 const RoundScoreCell: React.FunctionComponent<Props> = ({ playerId, round, playerIndex }) => {
-    const selectPlayerScoreByRound = makeSelectPlayerScoreByRound();
     const scoreRound = useAppSelector(state => selectPlayerScoreByRound(state, playerId, round));
 
     return (
