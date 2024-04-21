@@ -8,13 +8,8 @@ import { useAppSelector } from '../../../redux/hooks';
 import { selectPlayerById } from '../../../redux/PlayersSlice';
 import { selectCurrentGame } from '../../../redux/selectors';
 
-import { SortSelector, SortSelectorKey } from './SortHelper';
+import { SortDirectionKey, SortSelectorKey, sortSelectors } from './SortHelper';
 
-
-interface Props {
-    sortSelector: SortSelector;
-    sortSelectorKey: SortSelectorKey;
-}
 
 interface CellProps {
     index: number;
@@ -35,20 +30,42 @@ const PlayerNameCell: React.FunctionComponent<CellProps> = ({ index, playerId })
     );
 };
 
-const PlayerNameColumn: React.FunctionComponent<Props> = ({ sortSelector, sortSelectorKey }) => {
+const PlayerHeaderCell: React.FunctionComponent = () => {
+    const sortKey = useAppSelector(state => selectCurrentGame(state)?.sortSelectorKey);
+    const sortDirection = useAppSelector(state => selectCurrentGame(state)?.sortDirectionKey);
+
+    let sortLabel = '';
+    if (sortKey === SortSelectorKey.ByIndex && sortDirection === SortDirectionKey.Normal) {
+        sortLabel = '↓';
+    } else if (sortKey === SortSelectorKey.ByIndex && sortDirection === SortDirectionKey.Reversed) {
+        sortLabel = '↑';
+    }
+
+    return (
+
+        <Text style={styles.editRow}>
+            &nbsp;
+            <Icon name="users"
+                type="font-awesome-5"
+                size={19}
+                color='white' /> {
+                sortLabel
+            }
+        </Text>
+    );
+};
+
+
+const PlayerNameColumn: React.FunctionComponent = () => {
+    const sortKey = useAppSelector(state => selectCurrentGame(state)?.sortSelectorKey);
+
+    const sortSelector = sortSelectors[sortKey || SortSelectorKey.ByIndex];
     const sortedPlayerIds = useAppSelector(sortSelector);
 
     return (
         <View style={{ paddingVertical: 10 }}>
-            <Text style={styles.editRow}>
-                &nbsp;
-                <Icon name="users"
-                    type="font-awesome-5"
-                    size={19}
-                    color='white' /> {
-                    sortSelectorKey == SortSelectorKey.ByIndex ? '↓' : ''
-                }
-            </Text>
+            <PlayerHeaderCell />
+
             {sortedPlayerIds.map((playerId, index) => (
                 playerId && <PlayerNameCell key={index} index={index} playerId={playerId} />
             ))}

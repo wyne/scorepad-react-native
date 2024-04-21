@@ -7,29 +7,38 @@ import { RootState } from '../../../redux/store';
 export const selectPlayerIdsByIndex: SortSelector = createSelector(
     [
         selectAllPlayers,
-        (state: RootState) => state.settings.currentGameId ? state.games.entities[state.settings.currentGameId] : undefined
+        (state: RootState) => state.settings.currentGameId ? state.games.entities[state.settings.currentGameId] : undefined,
+        (state: RootState) => state.settings.currentGameId ? state.games.entities[state.settings.currentGameId]?.sortDirectionKey : undefined
     ],
     (players: ScoreState[], currentGame: GameState | undefined) => {
         if (!currentGame) return [];
 
-        return players.filter(player => currentGame.playerIds?.includes(player.id))
+        const playerIds = players.filter(player => currentGame.playerIds?.includes(player.id))
             .sort((a, b) => {
                 if (currentGame?.playerIds == undefined) return 0;
                 return currentGame.playerIds.indexOf(a.id) - currentGame.playerIds.indexOf(b.id);
             })
             .map(player => player.id);
+
+        if (SortDirectionKey.Normal === currentGame.sortDirectionKey) {
+            return playerIds;
+        } else {
+            return playerIds.reverse();
+        }
     }
 );
 
 export const selectPlayerIdsByScore: SortSelector = createSelector(
     [
         selectAllPlayers,
-        (state: RootState) => state.settings.currentGameId ? state.games.entities[state.settings.currentGameId] : undefined
+        (state: RootState) => state.settings.currentGameId ? state.games.entities[state.settings.currentGameId] : undefined,
+        (state: RootState) => state.settings.currentGameId ? state.games.entities[state.settings.currentGameId]?.sortDirectionKey : undefined
     ],
-    (players: ScoreState[], currentGame: GameState | undefined) => {
+    (players: ScoreState[], currentGame: GameState | undefined, sortDirectionKey: SortDirectionKey | undefined) => {
+        console.log('sort selector');
         if (!currentGame) return [];
 
-        return [...players]
+        const playerIds = [...players]
             .filter(player => currentGame.playerIds?.includes(player.id))
             .sort((a, b) => {
                 const totalScoreA = a.scores.reduce((acc, score) => acc + score, 0);
@@ -46,6 +55,12 @@ export const selectPlayerIdsByScore: SortSelector = createSelector(
                 return totalScoreB - totalScoreA;
             })
             .map(player => player.id);
+
+        if (sortDirectionKey === SortDirectionKey.Normal) {
+            return playerIds;
+        } else {
+            return playerIds.reverse();
+        }
     }
 );
 
@@ -56,6 +71,11 @@ export interface SortSelector {
 export enum SortSelectorKey {
     ByScore = 'byScore',
     ByIndex = 'byIndex',
+}
+
+export enum SortDirectionKey {
+    Normal = 'normal',
+    Reversed = 'reversed',
 }
 
 export const sortSelectors = {

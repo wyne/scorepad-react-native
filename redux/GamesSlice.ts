@@ -4,7 +4,7 @@ import { getContrastRatio } from 'colorsheet';
 import * as Crypto from 'expo-crypto';
 
 import { getPalette } from '../src/ColorPalette';
-import { SortSelectorKey } from '../src/components/ScoreLog/SortHelper';
+import { SortDirectionKey, SortSelectorKey } from '../src/components/ScoreLog/SortHelper';
 import logger from '../src/Logger';
 
 import { playerAdd, selectPlayerById } from './PlayersSlice';
@@ -20,6 +20,7 @@ export interface GameState {
     playerIds: string[];
     locked?: boolean;
     sortSelectorKey?: SortSelectorKey;
+    sortDirectionKey?: SortDirectionKey;
     palette?: string;
 }
 
@@ -31,7 +32,8 @@ const initialState = gamesAdapter.getInitialState({
     roundCurrent: 0,
     roundTotal: 1,
     locked: false,
-    SortSelectorKey: SortSelectorKey.ByScore,
+    sortSelectorKey: SortSelectorKey.ByIndex,
+    sortDirectionKey: SortDirectionKey.Normal,
 });
 
 const gamesSlice = createSlice({
@@ -70,10 +72,19 @@ const gamesSlice = createSlice({
             const game = state.entities[action.payload.gameId];
 
             if (!game) { return; }
+
+            let newSortDirection = SortDirectionKey.Normal;
+
+            // Toggle sort direction if the same sort selector is selected
+            if (game.sortSelectorKey === action.payload.sortSelector) {
+                newSortDirection = game.sortDirectionKey === SortDirectionKey.Normal ? SortDirectionKey.Reversed : SortDirectionKey.Normal;
+            }
+
             gamesAdapter.updateOne(state, {
                 id: game.id,
                 changes: {
                     sortSelectorKey: action.payload.sortSelector,
+                    sortDirectionKey: newSortDirection,
                 }
             });
         },

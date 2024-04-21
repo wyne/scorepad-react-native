@@ -23,8 +23,6 @@ interface RoundScollOffset {
 }
 
 const MemoizedRoundScoreColumn = React.memo(RoundScoreColumn);
-const MemoizedTotalScoreColumn = React.memo(TotalScoreColumn);
-const MemoizedPlayerNameColumn = React.memo(PlayerNameColumn);
 
 const Rounds: React.FunctionComponent<Props> = ({ }) => {
     const [roundScollOffset, setRoundScrollOffset] = useState<RoundScollOffset>({});
@@ -77,11 +75,11 @@ const Rounds: React.FunctionComponent<Props> = ({ }) => {
     return (
         <View style={[styles.scoreTableContainer]}>
             <TouchableOpacity onPress={sortByPlayerIndex}>
-                <MemoizedPlayerNameColumn sortSelector={sortSelector} sortSelectorKey={sortSelectorKey} />
+                <PlayerNameColumn />
             </TouchableOpacity>
 
             <TouchableOpacity onPress={sortByTotalScore}>
-                <MemoizedTotalScoreColumn sortSelector={sortSelector} sortSelectorKey={sortSelectorKey} />
+                <TotalScoreColumn />
             </TouchableOpacity>
 
             <ScrollView horizontal={true}

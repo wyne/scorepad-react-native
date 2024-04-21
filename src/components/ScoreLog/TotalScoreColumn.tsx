@@ -4,29 +4,29 @@ import { StyleSheet, Text, View } from 'react-native';
 
 import { useAppSelector } from '../../../redux/hooks';
 import { selectCurrentGame } from '../../../redux/selectors';
-import { RootState } from '../../../redux/store';
 
-import { SortSelectorKey } from './SortHelper';
+import { SortDirectionKey, SortSelectorKey, sortSelectors } from './SortHelper';
 import TotalScoreCell from './TotalScoreCell';
 
-interface Props {
-    sortSelector: (state: RootState) => string[];
-    sortSelectorKey: SortSelectorKey;
-}
+const TotalScoreColumn: React.FunctionComponent = () => {
+    const sortKey = useAppSelector(state => selectCurrentGame(state)?.sortSelectorKey);
 
-const TotalScoreColumn: React.FunctionComponent<Props> = ({ sortSelector, sortSelectorKey }) => {
-    const currentGame = useAppSelector(selectCurrentGame);
-
-    if (typeof currentGame == 'undefined') return null;
-
+    const sortSelector = sortSelectors[sortKey || SortSelectorKey.ByIndex];
     const sortedPlayerIds = useAppSelector(sortSelector);
+
+    const sortDirection = useAppSelector(state => selectCurrentGame(state)?.sortDirectionKey);
+
+    let sortLabel = '';
+    if (sortKey === SortSelectorKey.ByScore && sortDirection === SortDirectionKey.Normal) {
+        sortLabel = '↓';
+    } else if (sortKey === SortSelectorKey.ByScore && sortDirection === SortDirectionKey.Reversed) {
+        sortLabel = '↑';
+    }
 
     return (
         <View key={'total'} style={{ padding: 10 }}>
             <Text style={[styles.totalHeader]}>
-                Total {
-                    sortSelectorKey == SortSelectorKey.ByScore ? '↓' : ''
-                }
+                Total {sortLabel}
             </Text>
             {sortedPlayerIds.map((playerId) => (
                 <TotalScoreCell key={playerId} playerId={playerId} />
