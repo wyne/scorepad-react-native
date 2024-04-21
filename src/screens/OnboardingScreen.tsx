@@ -3,10 +3,11 @@ import React from 'react';
 import { RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import {
+    NativeScrollEvent,
+    NativeSyntheticEvent,
     Animated as RNAnimated,
     StyleSheet,
-    View,
-    ViewToken
+    View
 } from 'react-native';
 import { ExpandingDot } from 'react-native-animated-pagination-dots';
 import Animated, { FadeIn } from 'react-native-reanimated';
@@ -43,15 +44,11 @@ const OnboardingScreen: React.FunctionComponent<Props> = ({ navigation, route })
         else navigation.goBack();
     }, []);
 
-    type ViewableItemsChangedProps = {
-        viewableItems: ViewToken[];
-    };
-
     // Flatlist props that calculates current item index
-    const onViewRef = React.useRef(({ viewableItems }: ViewableItemsChangedProps) => {
-        if (viewableItems[0].index === null) return;
-        setActiveIndex(viewableItems[0].index);
-    });
+    const onScrollEnd = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+        const pageIndex = Math.round(event.nativeEvent.contentOffset.x / width);
+        setActiveIndex(pageIndex);
+    };
 
     const viewConfigRef = React.useRef({ viewAreaCoveragePercentThreshold: 50 });
 
@@ -87,7 +84,7 @@ const OnboardingScreen: React.FunctionComponent<Props> = ({ navigation, route })
             </View>
 
             <RNAnimated.FlatList
-                onViewableItemsChanged={onViewRef.current}
+                onMomentumScrollEnd={onScrollEnd}
                 viewabilityConfig={viewConfigRef.current}
                 data={onboardingScreens}
                 renderItem={({ item, index }) =>
