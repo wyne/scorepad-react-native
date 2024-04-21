@@ -81,3 +81,10 @@ export const selectPlayerNameById = createSelector(
     ],
     (player) => player?.playerName
 );
+
+export const makeSelectPlayerScoreByRound = () => createSelector(
+    [
+        (state: RootState, playerId: string, round: number) => state.players.entities[playerId]?.scores[round]
+    ],
+    (score) => score || 0
+);
