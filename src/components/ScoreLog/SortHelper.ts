@@ -12,7 +12,7 @@ export const selectSortedPlayerIdsByIndex = createSelector(
     (game: GameState | undefined, sortDirectionKey: SortDirectionKey | undefined) => {
         if (!game) return [];
 
-        const playerIds = game.playerIds
+        const playerIds = [...game.playerIds]
             .sort((a, b) => {
                 if (game?.playerIds == undefined) return 0;
                 return game.playerIds.indexOf(a) - game.playerIds.indexOf(b);
