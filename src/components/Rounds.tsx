@@ -5,12 +5,12 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { LayoutChangeEvent, Platform, ScrollView, StyleSheet, View } from 'react-native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 
-import { selectGameById, selectSortSelectorKey, setSortSelector } from '../../redux/GamesSlice';
+import { selectGameById, setSortSelector } from '../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 
 import PlayerNameColumn from './ScoreLog/PlayerNameColumn';
 import RoundScoreColumn from './ScoreLog/RoundScoreColumn';
-import { SortSelectorKey, sortSelectors } from './ScoreLog/SortHelper';
+import { SortSelectorKey } from './ScoreLog/SortHelper';
 import TotalScoreColumn from './ScoreLog/TotalScoreColumn';
 
 interface Props {
@@ -61,9 +61,6 @@ const Rounds: React.FunctionComponent<Props> = ({ }) => {
 
     const dispatch = useAppDispatch();
 
-    const sortSelectorKey = useAppSelector(state => selectSortSelectorKey(state, currentGameId));
-    const sortSelector = sortSelectors[sortSelectorKey];
-
     const sortByPlayerIndex = () => {
         dispatch(setSortSelector({ gameId: currentGameId, sortSelector: SortSelectorKey.ByIndex }));
     };
@@ -88,10 +85,10 @@ const Rounds: React.FunctionComponent<Props> = ({ }) => {
                 {roundsIterator.map((item, round) => (
                     <View key={round} onLayout={e => onLayoutHandler(e, round)}>
                         <MemoizedRoundScoreColumn
-                            sortSelector={sortSelector}
                             round={round}
                             key={round}
-                            isCurrentRound={round == roundCurrent} />
+                            isCurrentRound={round == roundCurrent}
+                        />
                     </View>
                 ))}
             </ScrollView>

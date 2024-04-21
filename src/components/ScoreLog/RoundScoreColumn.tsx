@@ -3,17 +3,16 @@ import React, { memo, useCallback } from 'react';
 import analytics from '@react-native-firebase/analytics';
 import { LayoutChangeEvent, Text, TouchableWithoutFeedback, View } from 'react-native';
 
-import { updateGame } from '../../../redux/GamesSlice';
+import { selectSortSelectorKey, updateGame } from '../../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
-import { RootState } from '../../../redux/store';
 
 import RoundScoreCell from './RoundScoreCell';
+import { sortSelectors } from './SortHelper';
 
 interface Props {
     round: number;
     isCurrentRound: boolean;
     disabled?: boolean;
-    sortSelector: (state: RootState) => string[];
     onLayout?: (event: LayoutChangeEvent, round: number) => void;
 }
 
@@ -21,12 +20,14 @@ const RoundScoreColumn: React.FunctionComponent<Props> = ({
     round,
     isCurrentRound,
     disabled = false,
-    sortSelector,
     onLayout,
 }) => {
     const dispatch = useAppDispatch();
 
     const currentGameId = useAppSelector(state => state.settings.currentGameId);
+
+    const sortSelectorKey = useAppSelector(state => selectSortSelectorKey(state, currentGameId || ''));
+    const sortSelector = sortSelectors[sortSelectorKey];
 
     const sortedPlayerIds = useAppSelector(sortSelector);
 

@@ -207,19 +207,19 @@ export const selectSortSelectorKey = (state: RootState, gameId: string) => {
 export const makeSelectPlayerColors = () => createSelector(
     [
         (state: RootState, gameId: string) => state.games.entities[gameId],
-        (state: RootState, gameId: string, playerId: string) => state.players.entities[playerId],
+        (state: RootState, gameId: string, playerId: string) => playerId,
     ],
-    (game, player) => {
+    (game, playerId) => {
         // TODO: Get player color if it exists
 
-        if (!game || !player) {
+        if (!game || !playerId) {
             return ['#000000', '#FFFFFF'];
         }
 
         const paletteName = game.palette;
         const playerIds = game.playerIds;
 
-        const index = playerIds.indexOf(player.id);
+        const index = playerIds.indexOf(playerId);
 
         const palette = getPalette(paletteName || 'original');
 

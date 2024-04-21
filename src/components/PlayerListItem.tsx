@@ -6,7 +6,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Icon, ListItem } from 'react-native-elements';
 
-import { selectGameById, selectPlayerColors, updateGame } from '../../redux/GamesSlice';
+import { makeSelectPlayerColors, selectGameById, updateGame } from '../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { removePlayer, selectPlayerById } from '../../redux/PlayersSlice';
 import { selectCurrentGame } from '../../redux/selectors';
@@ -31,7 +31,9 @@ const PlayerListItem: React.FunctionComponent<Props> = ({
     const currentGameId = useAppSelector(state => selectCurrentGame(state)?.id);
     const playerIds = useAppSelector(state => selectGameById(state, currentGameId || '')?.playerIds);
     const player = useAppSelector(state => selectPlayerById(state, playerId));
-    const playerColors = useAppSelector(state => selectPlayerColors(state, currentGameId || '', index || 0));
+
+    const selectPlayerColors = makeSelectPlayerColors();
+    const playerColors = useAppSelector(state => selectPlayerColors(state, currentGameId || '', playerId));
 
     if (currentGameId == '' || currentGameId === undefined) return null;
     if (playerIds === undefined) return null;

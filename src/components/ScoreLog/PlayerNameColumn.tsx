@@ -1,11 +1,11 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 
 import { StyleSheet, Text, View } from 'react-native';
 import { Icon } from 'react-native-elements/dist/icons/Icon';
 
 import { makeSelectPlayerColors } from '../../../redux/GamesSlice';
 import { useAppSelector } from '../../../redux/hooks';
-import { selectPlayerById } from '../../../redux/PlayersSlice';
+import { selectPlayerNameById } from '../../../redux/PlayersSlice';
 import { selectCurrentGame } from '../../../redux/selectors';
 
 import { SortDirectionKey, SortSelectorKey, sortSelectors } from './SortHelper';
@@ -18,9 +18,11 @@ interface CellProps {
 
 const PlayerNameCell: React.FunctionComponent<CellProps> = ({ index, playerId }) => {
     const currentGameId = useAppSelector(state => selectCurrentGame(state)?.id);
-    const selectPlayerColors = makeSelectPlayerColors();
+
+    const selectPlayerColors = useMemo(() => makeSelectPlayerColors(), []);
     const playerColors = useAppSelector(state => selectPlayerColors(state, currentGameId || '', playerId));
-    const playerName = useAppSelector(state => selectPlayerById(state, playerId)?.playerName);
+
+    const playerName = useAppSelector(state => selectPlayerNameById(state, playerId));
 
     return (
         <View key={index} style={{ paddingLeft: 5, borderLeftWidth: 5, borderColor: playerColors[0] }}>
@@ -56,6 +58,7 @@ const PlayerHeaderCell: React.FunctionComponent = () => {
     );
 };
 
+const MemoizedPlayerNameCell = React.memo(PlayerNameCell);
 
 const PlayerNameColumn: React.FunctionComponent = () => {
     const sortKey = useAppSelector(state => selectCurrentGame(state)?.sortSelectorKey);
@@ -68,7 +71,7 @@ const PlayerNameColumn: React.FunctionComponent = () => {
             <PlayerHeaderCell />
 
             {sortedPlayerIds.map((playerId, index) => (
-                playerId && <PlayerNameCell key={index} index={index} playerId={playerId} />
+                playerId && <MemoizedPlayerNameCell key={index} index={index} playerId={playerId} />
             ))}
         </View>
     );

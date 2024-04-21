@@ -1,5 +1,7 @@
 import crashlytics from '@react-native-firebase/crashlytics';
-import { PayloadAction, createEntityAdapter, createSlice } from '@reduxjs/toolkit';
+import { PayloadAction, createEntityAdapter, createSelector, createSlice } from '@reduxjs/toolkit';
+
+import { RootState } from './store';
 
 type RoundIndex = number;
 
@@ -72,3 +74,10 @@ export const {
     selectIds: selectPlayerIds,
     // Pass in a selector that returns the posts slice of state 
 } = playersAdapter.getSelectors((state: PlayersSlice) => state.players);
+
+export const selectPlayerNameById = createSelector(
+    [
+        (state: RootState, playerId: string) => state.players.entities[playerId]
+    ],
+    (player) => player?.playerName
+);
