@@ -34,6 +34,15 @@ export const selectPlayerIdsByScore: SortSelector = createSelector(
             .sort((a, b) => {
                 const totalScoreA = a.scores.reduce((acc, score) => acc + score, 0);
                 const totalScoreB = b.scores.reduce((acc, score) => acc + score, 0);
+                const scoreDifference = totalScoreB - totalScoreA;
+
+                if (scoreDifference === 0) {
+                    // If the total scores are equal, sort by player index
+                    const indexA = currentGame.playerIds?.indexOf(a.id) || 0;
+                    const indexB = currentGame.playerIds?.indexOf(b.id) || 0;
+                    return indexA - indexB;
+                }
+
                 return totalScoreB - totalScoreA;
             })
             .map(player => player.id);
