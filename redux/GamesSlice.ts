@@ -66,14 +66,14 @@ const gamesSlice = createSlice({
         gameDelete(state, action: PayloadAction<string>) {
             gamesAdapter.removeOne(state, action.payload);
         },
-        nextSortSelector(state, action: PayloadAction<string>) {
-            const game = state.entities[action.payload];
+        setSortSelector(state, action: PayloadAction<{ gameId: string, sortSelector: SortSelectorKey; }>) {
+            const game = state.entities[action.payload.gameId];
 
             if (!game) { return; }
             gamesAdapter.updateOne(state, {
-                id: action.payload,
+                id: game.id,
                 changes: {
-                    sortSelectorKey: game.sortSelectorKey == SortSelectorKey.ByIndex ? SortSelectorKey.ByScore : SortSelectorKey.ByIndex,
+                    sortSelectorKey: action.payload.sortSelector,
                 }
             });
         },
@@ -221,7 +221,7 @@ export const {
     roundPrevious,
     gameSave,
     gameDelete,
-    nextSortSelector,
+    setSortSelector,
     reorderPlayers,
 } = gamesSlice.actions;
 

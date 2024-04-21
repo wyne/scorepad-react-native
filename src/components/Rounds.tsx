@@ -5,12 +5,12 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { LayoutChangeEvent, Platform, ScrollView, StyleSheet, View } from 'react-native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 
-import { nextSortSelector, selectGameById, selectSortSelectorKey } from '../../redux/GamesSlice';
+import { selectGameById, selectSortSelectorKey, setSortSelector } from '../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 
 import PlayerNameColumn from './ScoreLog/PlayerNameColumn';
 import RoundScoreColumn from './ScoreLog/RoundScoreColumn';
-import { sortSelectors } from './ScoreLog/SortHelper';
+import { SortSelectorKey, sortSelectors } from './ScoreLog/SortHelper';
 import TotalScoreColumn from './ScoreLog/TotalScoreColumn';
 
 interface Props {
@@ -66,16 +66,24 @@ const Rounds: React.FunctionComponent<Props> = ({ }) => {
     const sortSelectorKey = useAppSelector(state => selectSortSelectorKey(state, currentGameId));
     const sortSelector = sortSelectors[sortSelectorKey];
 
-    const handlePlayerColumnTap = () => {
-        dispatch(nextSortSelector(currentGameId));
+    const sortByPlayerIndex = () => {
+        dispatch(setSortSelector({ gameId: currentGameId, sortSelector: SortSelectorKey.ByIndex }));
+    };
+
+    const sortByTotalScore = () => {
+        dispatch(setSortSelector({ gameId: currentGameId, sortSelector: SortSelectorKey.ByScore }));
     };
 
     return (
         <View style={[styles.scoreTableContainer]}>
-            <TouchableOpacity onPress={handlePlayerColumnTap}>
+            <TouchableOpacity onPress={sortByPlayerIndex}>
                 <MemoizedPlayerNameColumn sortSelector={sortSelector} sortSelectorKey={sortSelectorKey} />
             </TouchableOpacity>
-            <MemoizedTotalScoreColumn sortSelector={sortSelector} sortSelectorKey={sortSelectorKey} />
+
+            <TouchableOpacity onPress={sortByTotalScore}>
+                <MemoizedTotalScoreColumn sortSelector={sortSelector} sortSelectorKey={sortSelectorKey} />
+            </TouchableOpacity>
+
             <ScrollView horizontal={true}
                 contentContainerStyle={{ flexDirection: 'row' }}
                 ref={roundsScrollViewEl}>
