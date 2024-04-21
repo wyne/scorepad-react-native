@@ -7,7 +7,9 @@ import { selectPlayerColors } from '../../../redux/GamesSlice';
 import { useAppSelector } from '../../../redux/hooks';
 import { selectPlayerById } from '../../../redux/PlayersSlice';
 import { selectCurrentGame } from '../../../redux/selectors';
-import { systemBlue } from '../../constants';
+
+import { SortDirectionKey, SortSelectorKey, sortSelectors } from './SortHelper';
+
 
 interface CellProps {
     index: number;
@@ -28,20 +30,44 @@ const PlayerNameCell: React.FunctionComponent<CellProps> = ({ index, playerId })
     );
 };
 
+const PlayerHeaderCell: React.FunctionComponent = () => {
+    const sortKey = useAppSelector(state => selectCurrentGame(state)?.sortSelectorKey);
+    const sortDirection = useAppSelector(state => selectCurrentGame(state)?.sortDirectionKey);
+
+    let sortLabel = '';
+    if (sortKey === SortSelectorKey.ByIndex && sortDirection === SortDirectionKey.Normal) {
+        sortLabel = '↓';
+    } else if (sortKey === SortSelectorKey.ByIndex && sortDirection === SortDirectionKey.Reversed) {
+        sortLabel = '↑';
+    }
+
+    return (
+
+        <Text style={styles.editRow}>
+            &nbsp;
+            <Icon name="users"
+                type="font-awesome-5"
+                size={19}
+                color='white' /> {
+                sortLabel
+            }
+        </Text>
+    );
+};
+
+
 const PlayerNameColumn: React.FunctionComponent = () => {
-    const playerIds = useAppSelector(state => selectCurrentGame(state)?.playerIds) || [];
+    const sortKey = useAppSelector(state => selectCurrentGame(state)?.sortSelectorKey);
+
+    const sortSelector = sortSelectors[sortKey || SortSelectorKey.ByIndex];
+    const sortedPlayerIds = useAppSelector(sortSelector);
 
     return (
         <View style={{ paddingVertical: 10 }}>
-            <Text style={styles.editRow}>
-                &nbsp;
-                <Icon name="users"
-                    type="font-awesome-5"
-                    size={19}
-                    color='white' />
-            </Text>
-            {playerIds.map((playerId, index) => (
-                <PlayerNameCell key={index} index={index} playerId={playerId} />
+            <PlayerHeaderCell />
+
+            {sortedPlayerIds.map((playerId, index) => (
+                playerId && <PlayerNameCell key={index} index={index} playerId={playerId} />
             ))}
         </View>
     );
@@ -49,7 +75,7 @@ const PlayerNameColumn: React.FunctionComponent = () => {
 
 const styles = StyleSheet.create({
     editRow: {
-        color: systemBlue,
+        color: 'white',
         fontSize: 20,
         textAlign: 'center',
     }

@@ -1,14 +1,16 @@
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import { ParamListBase } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { View, StyleSheet, ScrollView, Platform, LayoutChangeEvent } from 'react-native';
+import { LayoutChangeEvent, Platform, ScrollView, StyleSheet, View } from 'react-native';
+import { TouchableOpacity } from 'react-native-gesture-handler';
 
-import { selectGameById } from '../../redux/GamesSlice';
-import { useAppSelector } from '../../redux/hooks';
+import { selectGameById, selectSortSelectorKey, setSortSelector } from '../../redux/GamesSlice';
+import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 
 import PlayerNameColumn from './ScoreLog/PlayerNameColumn';
 import RoundScoreColumn from './ScoreLog/RoundScoreColumn';
+import { SortSelectorKey, sortSelectors } from './ScoreLog/SortHelper';
 import TotalScoreColumn from './ScoreLog/TotalScoreColumn';
 
 interface Props {
@@ -21,8 +23,6 @@ interface RoundScollOffset {
 }
 
 const MemoizedRoundScoreColumn = React.memo(RoundScoreColumn);
-const MemoizedTotalScoreColumn = React.memo(TotalScoreColumn);
-const MemoizedPlayerNameColumn = React.memo(PlayerNameColumn);
 
 const Rounds: React.FunctionComponent<Props> = ({ }) => {
     const [roundScollOffset, setRoundScrollOffset] = useState<RoundScollOffset>({});
@@ -59,19 +59,40 @@ const Rounds: React.FunctionComponent<Props> = ({ }) => {
 
     const roundsIterator = [...Array(roundTotal).keys()];
 
+    const dispatch = useAppDispatch();
+
+    const sortSelectorKey = useAppSelector(state => selectSortSelectorKey(state, currentGameId));
+    const sortSelector = sortSelectors[sortSelectorKey];
+
+    const sortByPlayerIndex = () => {
+        dispatch(setSortSelector({ gameId: currentGameId, sortSelector: SortSelectorKey.ByIndex }));
+    };
+
+    const sortByTotalScore = () => {
+        dispatch(setSortSelector({ gameId: currentGameId, sortSelector: SortSelectorKey.ByScore }));
+    };
+
     return (
         <View style={[styles.scoreTableContainer]}>
-            <MemoizedPlayerNameColumn />
-            <MemoizedTotalScoreColumn />
+            <TouchableOpacity onPress={sortByPlayerIndex}>
+                <PlayerNameColumn />
+            </TouchableOpacity>
+
+            <TouchableOpacity onPress={sortByTotalScore}>
+                <TotalScoreColumn />
+            </TouchableOpacity>
+
             <ScrollView horizontal={true}
                 contentContainerStyle={{ flexDirection: 'row' }}
                 ref={roundsScrollViewEl}>
                 {roundsIterator.map((item, round) => (
-                    <MemoizedRoundScoreColumn
-                        onLayout={round == roundCurrent ? e => onLayoutHandler(e, round) : undefined}
-                        round={round}
-                        key={round}
-                        isCurrentRound={round == roundCurrent} />
+                    <View key={round} onLayout={e => onLayoutHandler(e, round)}>
+                        <MemoizedRoundScoreColumn
+                            sortSelector={sortSelector}
+                            round={round}
+                            key={round}
+                            isCurrentRound={round == roundCurrent} />
+                    </View>
                 ))}
             </ScrollView>
         </View>

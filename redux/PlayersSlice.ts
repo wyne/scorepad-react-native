@@ -1,5 +1,5 @@
 import crashlytics from '@react-native-firebase/crashlytics';
-import { createSlice, PayloadAction, createEntityAdapter } from '@reduxjs/toolkit';
+import { PayloadAction, createEntityAdapter, createSlice } from '@reduxjs/toolkit';
 
 type RoundIndex = number;
 

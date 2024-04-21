@@ -3,18 +3,18 @@ import React, { useEffect } from 'react';
 import analytics from '@react-native-firebase/analytics';
 import { ParamListBase, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { createSelector } from '@reduxjs/toolkit';
 import * as Crypto from 'expo-crypto';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import DraggableFlatList, { ScaleDecorator } from 'react-native-draggable-flatlist';
 import { Button, Icon } from 'react-native-elements';
 
-import { reorderPlayers, selectSortedPlayers, updateGame } from '../../redux/GamesSlice';
+import { reorderPlayers, updateGame } from '../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { playerAdd } from '../../redux/PlayersSlice';
 import { selectCurrentGame } from '../../redux/selectors';
 import EditGame from '../components/EditGame';
 import PlayerListItem from '../components/PlayerListItem';
+import { selectPlayerIdsByIndex } from '../components/ScoreLog/SortHelper';
 import { MAX_PLAYERS, systemBlue } from '../constants';
 import logger from '../Logger';
 
@@ -29,12 +29,6 @@ interface Props {
     route: RouteProp<RouteParams, 'Settings'>;
 }
 
-// This selector takes the state as input and returns a list of sorted player IDs.
-const selectSortedPlayerIds = createSelector(
-    selectSortedPlayers,
-    (players) => players.map(player => player.id)
-);
-
 const SettingsScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     const dispatch = useAppDispatch();
 
@@ -42,7 +36,7 @@ const SettingsScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     if (typeof currentGameId == 'undefined') return null;
 
     const currentGame = useAppSelector(selectCurrentGame);
-    const playerIds = useAppSelector(selectSortedPlayerIds);
+    const playerIds = useAppSelector(selectPlayerIdsByIndex);
 
     const [edit, setEdit] = React.useState(false);
 

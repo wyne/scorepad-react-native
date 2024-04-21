@@ -5,21 +5,30 @@ import { StyleSheet, Text, View } from 'react-native';
 import { useAppSelector } from '../../../redux/hooks';
 import { selectCurrentGame } from '../../../redux/selectors';
 
+import { SortDirectionKey, SortSelectorKey, sortSelectors } from './SortHelper';
 import TotalScoreCell from './TotalScoreCell';
 
-const TotalScoreColumn = ({ }) => {
-    const currentGame = useAppSelector(selectCurrentGame);
+const TotalScoreColumn: React.FunctionComponent = () => {
+    const sortKey = useAppSelector(state => selectCurrentGame(state)?.sortSelectorKey);
 
-    if (typeof currentGame == 'undefined') return null;
+    const sortSelector = sortSelectors[sortKey || SortSelectorKey.ByIndex];
+    const sortedPlayerIds = useAppSelector(sortSelector);
 
-    const playerIds = currentGame.playerIds;
+    const sortDirection = useAppSelector(state => selectCurrentGame(state)?.sortDirectionKey);
+
+    let sortLabel = '';
+    if (sortKey === SortSelectorKey.ByScore && sortDirection === SortDirectionKey.Normal) {
+        sortLabel = '↓';
+    } else if (sortKey === SortSelectorKey.ByScore && sortDirection === SortDirectionKey.Reversed) {
+        sortLabel = '↑';
+    }
 
     return (
         <View key={'total'} style={{ padding: 10 }}>
             <Text style={[styles.totalHeader]}>
-                Total
+                Total {sortLabel}
             </Text>
-            {playerIds.map((playerId) => (
+            {sortedPlayerIds.map((playerId) => (
                 <TotalScoreCell key={playerId} playerId={playerId} />
             ))}
         </View>

@@ -5,7 +5,7 @@ import { LayoutChangeEvent, Text, TouchableWithoutFeedback, View } from 'react-n
 
 import { updateGame } from '../../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
-import { selectCurrentGame } from '../../../redux/selectors';
+import { RootState } from '../../../redux/store';
 
 import RoundScoreCell from './RoundScoreCell';
 
@@ -13,6 +13,7 @@ interface Props {
     round: number;
     isCurrentRound: boolean;
     disabled?: boolean;
+    sortSelector: (state: RootState) => string[];
     onLayout?: (event: LayoutChangeEvent, round: number) => void;
 }
 
@@ -20,12 +21,14 @@ const RoundScoreColumn: React.FunctionComponent<Props> = ({
     round,
     isCurrentRound,
     disabled = false,
+    sortSelector,
     onLayout,
 }) => {
     const dispatch = useAppDispatch();
 
     const currentGameId = useAppSelector(state => state.settings.currentGameId);
-    const playerIds = useAppSelector(state => selectCurrentGame(state)?.playerIds) || [];
+
+    const sortedPlayerIds = useAppSelector(sortSelector);
 
     const onPressHandler = useCallback(async () => {
         if (disabled || !currentGameId) return;
@@ -67,7 +70,7 @@ const RoundScoreColumn: React.FunctionComponent<Props> = ({
                 }}>
                     {round + 1}
                 </Text>
-                {playerIds.map((playerId, playerIndex) => (
+                {sortedPlayerIds.map((playerId, playerIndex) => (
                     <RoundScoreCell playerId={playerId} round={round} key={playerId} playerIndex={playerIndex} />
                 ))}
             </View>

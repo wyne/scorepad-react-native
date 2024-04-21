@@ -4,9 +4,10 @@ import { getContrastRatio } from 'colorsheet';
 import * as Crypto from 'expo-crypto';
 
 import { getPalette } from '../src/ColorPalette';
+import { SortDirectionKey, SortSelectorKey } from '../src/components/ScoreLog/SortHelper';
 import logger from '../src/Logger';
 
-import { ScoreState, playerAdd, selectAllPlayers, selectPlayerById } from './PlayersSlice';
+import { playerAdd, selectPlayerById } from './PlayersSlice';
 import { setCurrentGameId } from './SettingsSlice';
 import { RootState } from './store';
 
@@ -14,10 +15,12 @@ export interface GameState {
     id: string;
     title: string;
     dateCreated: number;
-    roundCurrent: number;
-    roundTotal: number;
+    roundCurrent: number; // 0-indexed
+    roundTotal: number; // 1-indexed
     playerIds: string[];
     locked?: boolean;
+    sortSelectorKey?: SortSelectorKey;
+    sortDirectionKey?: SortDirectionKey;
     palette?: string;
 }
 
@@ -26,6 +29,11 @@ const gamesAdapter = createEntityAdapter({
 });
 
 const initialState = gamesAdapter.getInitialState({
+    roundCurrent: 0,
+    roundTotal: 1,
+    locked: false,
+    sortSelectorKey: SortSelectorKey.ByIndex,
+    sortDirectionKey: SortDirectionKey.Normal,
 });
 
 const gamesSlice = createSlice({
@@ -59,6 +67,26 @@ const gamesSlice = createSlice({
         },
         gameDelete(state, action: PayloadAction<string>) {
             gamesAdapter.removeOne(state, action.payload);
+        },
+        setSortSelector(state, action: PayloadAction<{ gameId: string, sortSelector: SortSelectorKey; }>) {
+            const game = state.entities[action.payload.gameId];
+
+            if (!game) { return; }
+
+            let newSortDirection = SortDirectionKey.Normal;
+
+            // Toggle sort direction if the same sort selector is selected
+            if (game.sortSelectorKey === action.payload.sortSelector) {
+                newSortDirection = game.sortDirectionKey === SortDirectionKey.Normal ? SortDirectionKey.Reversed : SortDirectionKey.Normal;
+            }
+
+            gamesAdapter.updateOne(state, {
+                id: game.id,
+                changes: {
+                    sortSelectorKey: action.payload.sortSelector,
+                    sortDirectionKey: newSortDirection,
+                }
+            });
         },
         reorderPlayers(state, action: PayloadAction<{ gameId: string, playerIds: string[]; }>) {
             const game = state.entities[action.payload.gameId];
@@ -171,21 +199,10 @@ export const asyncCreateGame = createAsyncThunk(
     }
 );
 
-export const selectSortedPlayers = createSelector(
-    [
-        selectAllPlayers,
-        (state: RootState) => state.settings.currentGameId ? state.games.entities[state.settings.currentGameId] : undefined
-    ],
-    (players: ScoreState[], currentGame: GameState | undefined) => {
-        if (!currentGame) return [];
-
-        return players.filter(player => currentGame.playerIds?.includes(player.id))
-            .sort((a, b) => {
-                if (currentGame?.playerIds == undefined) return 0;
-                return currentGame.playerIds.indexOf(a.id) - currentGame.playerIds.indexOf(b.id);
-            });
-    }
-);
+export const selectSortSelectorKey = (state: RootState, gameId: string) => {
+    const key = selectGameById(state, gameId)?.sortSelectorKey;
+    return key !== undefined ? key : SortSelectorKey.ByScore;
+};
 
 const selectPaletteName = (state: RootState, gameId: string) => state.games.entities[gameId]?.palette;
 const selectPlayerIndex = (_: RootState, __: string, playerIndex: number) => playerIndex;
@@ -215,6 +232,7 @@ export const {
     roundPrevious,
     gameSave,
     gameDelete,
+    setSortSelector,
     reorderPlayers,
 } = gamesSlice.actions;
 
