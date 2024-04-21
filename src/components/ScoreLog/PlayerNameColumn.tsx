@@ -3,7 +3,7 @@ import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { Icon } from 'react-native-elements/dist/icons/Icon';
 
-import { selectPlayerColors } from '../../../redux/GamesSlice';
+import { makeSelectPlayerColors } from '../../../redux/GamesSlice';
 import { useAppSelector } from '../../../redux/hooks';
 import { selectPlayerById } from '../../../redux/PlayersSlice';
 import { selectCurrentGame } from '../../../redux/selectors';
@@ -18,7 +18,8 @@ interface CellProps {
 
 const PlayerNameCell: React.FunctionComponent<CellProps> = ({ index, playerId }) => {
     const currentGameId = useAppSelector(state => selectCurrentGame(state)?.id);
-    const playerColors = useAppSelector(state => selectPlayerColors(state, currentGameId || '', index || 0));
+    const selectPlayerColors = makeSelectPlayerColors();
+    const playerColors = useAppSelector(state => selectPlayerColors(state, currentGameId || '', playerId));
     const playerName = useAppSelector(state => selectPlayerById(state, playerId)?.playerName);
 
     return (

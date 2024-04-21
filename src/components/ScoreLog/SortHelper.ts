@@ -35,7 +35,6 @@ export const selectPlayerIdsByScore: SortSelector = createSelector(
         (state: RootState) => state.settings.currentGameId ? state.games.entities[state.settings.currentGameId]?.sortDirectionKey : undefined
     ],
     (players: ScoreState[], currentGame: GameState | undefined, sortDirectionKey: SortDirectionKey | undefined) => {
-        console.log('sort selector');
         if (!currentGame) return [];
 
         const playerIds = [...players]
