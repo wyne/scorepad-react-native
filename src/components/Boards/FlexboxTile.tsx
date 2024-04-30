@@ -46,7 +46,7 @@ const FlexboxTile: React.FunctionComponent<Props> = ({
 
     return (
         <Animated.View
-            entering={FadeIn.delay(100 * index + 200).duration(400).easing(Easing.ease)}
+            entering={FadeIn.delay(25 * index + 50).duration(400).easing(Easing.ease)}
             style={[
                 styles.playerCard,
                 {
