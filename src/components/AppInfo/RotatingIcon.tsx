@@ -10,7 +10,12 @@ import Animated, {
     withTiming
 } from 'react-native-reanimated';
 
+import { useAppDispatch } from '../../../redux/hooks';
+import { toggleDevMenuEnabled } from '../../../redux/SettingsSlice';
+
 const RotatingIcon: React.FunctionComponent = ({ }) => {
+    const dispatch = useAppDispatch();
+
     const rotation = useSharedValue(0);
     const rotationCount = useSharedValue(1);
     const animatedStyles = useAnimatedStyle(() => {
@@ -21,12 +26,28 @@ const RotatingIcon: React.FunctionComponent = ({ }) => {
         };
     });
 
-    return <TouchableWithoutFeedback onPress={async () => {
-        rotationCount.value = rotationCount.value + 1;
-        rotation.value = withTiming((rotationCount.value * 90), { duration: 1000, easing: Easing.elastic(1) });
+    let holdCallback: NodeJS.Timeout;
+    const onPressIn = () => {
+        holdCallback = setTimeout(() => {
+            dispatch(toggleDevMenuEnabled());
+            // spring expand animate the Animated.View
+        }, 5000);
+    };
 
-        await analytics().logEvent('app_icon');
-    }}>
+    const onPressOut = () => {
+        if (holdCallback == null) return;
+        clearTimeout(holdCallback);
+    };
+
+    return <TouchableWithoutFeedback
+        onPressIn={onPressIn}
+        onPressOut={onPressOut}
+        onPress={async () => {
+            rotationCount.value = rotationCount.value + 1;
+            rotation.value = withTiming((rotationCount.value * 90), { duration: 1000, easing: Easing.elastic(1) });
+
+            await analytics().logEvent('app_icon');
+        }}>
         <Animated.View style={[animatedStyles]}>
             <Image source={require('../../../assets/icon.png')}
                 contentFit='contain'

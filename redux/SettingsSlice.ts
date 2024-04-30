@@ -17,6 +17,7 @@ export interface SettingsState {
     showColorPalettes?: boolean;
     interactionType: InteractionType;
     lastStoreReviewPrompt: number;
+    devMenuEnabled?: boolean;
 };
 
 const initialState: SettingsState = {
@@ -72,6 +73,9 @@ const settingsSlice = createSlice({
         setLastStoreReviewPrompt(state, action: PayloadAction<number>) {
             state.lastStoreReviewPrompt = action.payload;
         },
+        toggleDevMenuEnabled(state) {
+            state.devMenuEnabled = !state.devMenuEnabled;
+        }
     }
 });
 
@@ -87,6 +91,7 @@ export const {
     toggleShowColorPalettes,
     setInteractionType,
     setLastStoreReviewPrompt,
+    toggleDevMenuEnabled,
 } = settingsSlice.actions;
 
 export default settingsSlice.reducer;

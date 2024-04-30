@@ -42,6 +42,7 @@ const AppInfoScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     const showPointParticles = useAppSelector(state => state.settings.showPointParticles);
     const showPlayerIndex = useAppSelector(state => state.settings.showPlayerIndex);
     const showColorPalettes = useAppSelector(state => state.settings.showColorPalettes);
+    const devMenuEnabled = useAppSelector(state => state.settings.devMenuEnabled);
 
     const dispatch = useAppDispatch();
     const toggleParticleSwitch = () => { dispatch(toggleShowPointParticles()); };
@@ -74,14 +75,18 @@ const AppInfoScreen: React.FunctionComponent<Props> = ({ navigation }) => {
                     <SectionItemText text="Point Particle Effect" />
                     <Switch onValueChange={toggleParticleSwitch} value={showPointParticles} />
                 </SectionItem>
-                <SectionItem>
-                    <SectionItemText text="Player Numbers" />
-                    <Switch onValueChange={togglePlayerIndexSwitch} value={showPlayerIndex} />
-                </SectionItem>
-                <SectionItem>
-                    <SectionItemText text="Color Palettes" />
-                    <Switch onValueChange={toggleColorPalettesSwitch} value={showColorPalettes} />
-                </SectionItem>
+                {devMenuEnabled && (
+                    <>
+                        <SectionItem>
+                            <SectionItemText text="Player Numbers" />
+                            <Switch onValueChange={togglePlayerIndexSwitch} value={showPlayerIndex} />
+                        </SectionItem>
+                        <SectionItem>
+                            <SectionItemText text="Change Colors (Beta)" />
+                            <Switch onValueChange={toggleColorPalettesSwitch} value={showColorPalettes} />
+                        </SectionItem>
+                    </>
+                )}
             </Section>
 
             <Section title="Help">
