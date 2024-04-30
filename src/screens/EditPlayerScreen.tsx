@@ -3,12 +3,13 @@ import React, { useState } from 'react';
 import analytics from '@react-native-firebase/analytics';
 import { ParamListBase, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { NativeSyntheticEvent, ScrollView, StyleSheet, TextInput, TextInputEndEditingEventData, View } from 'react-native';
+import { NativeSyntheticEvent, ScrollView, StyleSheet, Text, TextInput, TextInputEndEditingEventData, View } from 'react-native';
 import { Input } from 'react-native-elements';
 
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { updatePlayer } from '../../redux/PlayersSlice';
 import { selectCurrentGame } from '../../redux/selectors';
+import ColorSelector from '../components/ColorPalettes/ColorSelector';
 
 type RouteParams = {
     EditPlayer: {
@@ -117,6 +118,10 @@ const EditPlayerScreen: React.FC<EditPlayerScreenProps> = ({
             />
 
             <View style={{ margin: 20 }} />
+
+            <Text style={{ color: 'white' }}>Select a color</Text>
+
+            <ColorSelector />
 
         </ScrollView>
     );

@@ -9,7 +9,7 @@ import { getPalette, getPalettes } from '../../ColorPalette';
 
 import PalettePreview from './PalettePreview';
 
-const MemoizedColorCircle = React.memo(PalettePreview);
+const MemoizedPalettePreview = React.memo(PalettePreview);
 
 const PaletteSelector: React.FunctionComponent = () => {
     const colorPalettes = getPalettes();
@@ -39,7 +39,7 @@ const PaletteSelector: React.FunctionComponent = () => {
                     ]}
                     onPress={() => onSelect(palette)}
                 >
-                    <MemoizedColorCircle colors={getPalette(palette)} selected={palette == currentPalette} />
+                    <MemoizedPalettePreview colors={getPalette(palette)} selected={palette == currentPalette} />
                 </TouchableOpacity>
             ))}
         </ScrollView>
