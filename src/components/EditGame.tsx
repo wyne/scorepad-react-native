@@ -7,6 +7,8 @@ import { updateGame } from '../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { selectCurrentGame } from '../../redux/selectors';
 
+import PaletteSelector from './ColorPalettes/PaletteSelector';
+
 const UNTITLED = 'Untitled';
 
 const EditGame = ({ }) => {
@@ -48,6 +50,8 @@ const EditGame = ({ }) => {
         }));
     };
 
+    const showColorPalettes = useAppSelector(state => state.settings.showColorPalettes);
+
     return (
         <>
             <View style={styles.inputContainer}>
@@ -68,6 +72,12 @@ const EditGame = ({ }) => {
                     Created: {new Date(currentGame.dateCreated).toLocaleDateString()}
                     &nbsp; {new Date(currentGame.dateCreated).toLocaleTimeString()}
                 </Text>
+            </View>
+
+            <View>
+                {showColorPalettes &&
+                    <PaletteSelector />
+                }
             </View>
         </>
     );
