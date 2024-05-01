@@ -33,7 +33,10 @@ const ColorSelector: React.FC<ColorSelectorProps> = () => {
                                 key={'currentPalette' + i}
                                 style={[]}
                             >
-                                <View style={{ ...styles.colorBadge, backgroundColor: color }} />
+                                <View style={{
+                                    ...styles.colorBadge, backgroundColor: color,
+                                    borderColor: i % 5 == 0 ? 'white' : 'transparent',
+                                }} />
                             </TouchableOpacity>
                         ))
                     }
@@ -54,7 +57,13 @@ const ColorSelector: React.FC<ColorSelectorProps> = () => {
                                     key={'TO' + i}
                                     style={[]}
                                 >
-                                    <View style={{ ...styles.colorBadge, backgroundColor: color }} />
+                                    <View style={{
+                                        ...styles.colorBadge, backgroundColor: color,
+                                        borderWidth: i % 5 == 0 ? 2 : 1,
+                                        borderColor: i % 5 == 0 ? 'white' : '#999',
+                                        // TODO: Animated this for fun
+                                        borderRadius: i % 5 == 0 ? 3 : 25,
+                                    }} />
                                 </TouchableOpacity>
                             ))
                         }
@@ -69,8 +78,10 @@ export default ColorSelector;
 
 const styles = StyleSheet.create({
     colorBadge: {
-        borderColor: '#eee',
+        borderColor: '#999',
+        borderWidth: 1,
         borderRadius: 25,
+        borderStyle: 'solid',
         height: 25,
         marginHorizontal: 5,
         padding: 5,
@@ -84,5 +95,4 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         marginVertical: 20,
     }
-
 });
