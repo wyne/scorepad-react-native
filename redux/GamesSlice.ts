@@ -204,17 +204,26 @@ export const selectSortSelectorKey = (state: RootState, gameId: string) => {
     return key !== undefined ? key : SortSelectorKey.ByScore;
 };
 
-const selectPaletteName = (state: RootState, gameId: string) => state.games.entities[gameId]?.palette;
-const selectPlayerIndex = (_: RootState, __: string, playerIndex: number) => playerIndex;
-
 export const selectPlayerColors = createSelector(
-    [selectPaletteName, selectPlayerIndex],
-    (paletteName, playerIndex) => {
+    [
+        (state: RootState, playerId: string) => {
+            const gameId = selectAllGames(state).filter((game) => game.playerIds.includes(playerId))[0].id;
+            const paletteName = state.games.entities[gameId]?.palette;
+
+            const playerColor = state.players.entities[playerId]?.color;
+
+            const playerIndex = state.games.entities[gameId]?.playerIds.indexOf(playerId) || 0;
+
+            return { paletteName, playerColor, playerIndex };
+        },
+    ],
+    ({ paletteName, playerColor, playerIndex }) => {
         // TODO: Get player color if it exists
 
         const palette = getPalette(paletteName || 'original');
+        const paletteBG = palette[playerIndex % palette.length];
 
-        const bg = palette[playerIndex % palette.length];
+        const bg = playerColor || paletteBG;
 
         const blackContrast = getContrastRatio(bg, '#000').number;
         const whiteContrast = getContrastRatio(bg, '#fff').number;

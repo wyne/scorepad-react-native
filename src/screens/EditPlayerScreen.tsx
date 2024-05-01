@@ -121,7 +121,7 @@ const EditPlayerScreen: React.FC<EditPlayerScreenProps> = ({
 
             <Text style={{ color: 'white' }}>Select a color</Text>
 
-            <ColorSelector />
+            <ColorSelector playerId={playerId} />
 
         </ScrollView>
     );

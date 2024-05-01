@@ -34,7 +34,7 @@ const FlexboxTile: React.FunctionComponent<Props> = ({
 
     const currentGameId = useAppSelector(state => selectCurrentGame(state)?.id);
     const playerIndexLabel = useAppSelector(state => state.settings.showPlayerIndex);
-    const playerColors = useAppSelector(state => selectPlayerColors(state, currentGameId || '', index || 0));
+    const playerColors = useAppSelector(state => selectPlayerColors(state, playerId));
     const [bg, fg] = playerColors;
 
     const widthPerc: DimensionValue = `${(100 / cols)}%`;
