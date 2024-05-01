@@ -237,7 +237,7 @@ const GameSheet: React.FunctionComponent<Props> = ({ navigation, containerHeight
 
                             {!gameLocked &&
                                 <Animated.View entering={FadeIn.delay(400)}>
-                                    <Button title="Edit Title and Players"
+                                    <Button title="Edit Game and Players"
                                         type="clear"
                                         style={{
                                             margin: 5, marginTop: 15,

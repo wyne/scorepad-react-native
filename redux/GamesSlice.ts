@@ -7,9 +7,10 @@ import { getPalette } from '../src/ColorPalette';
 import { SortDirectionKey, SortSelectorKey } from '../src/components/ScoreLog/SortHelper';
 import logger from '../src/Logger';
 
-import { playerAdd, selectPlayerById } from './PlayersSlice';
+import { playerAdd, selectPlayerById, updatePlayer } from './PlayersSlice';
 import { setCurrentGameId } from './SettingsSlice';
 import { RootState } from './store';
+import { set } from 'lodash';
 
 export interface GameState {
     id: string;
@@ -98,7 +99,8 @@ const gamesSlice = createSlice({
                     playerIds: action.payload.playerIds,
                 }
             });
-        }
+        },
+
     }
 });
 
@@ -156,6 +158,36 @@ export const asyncRematchGame = createAsyncThunk(
         });
 
         return newGameId;
+    }
+);
+
+
+export const asyncSetGamePalette = createAsyncThunk(
+    'games/setpalette',
+    async (
+        { gameId, palette }: { gameId: string, palette: string; },
+        { dispatch, getState }
+    ) => {
+        // Update game
+        dispatch(updateGame({
+            id: gameId,
+            changes: {
+                palette: palette,
+            }
+        }));
+        // Get palette colors
+        const paletteColors = getPalette(palette);
+
+        const game = selectGameById(getState() as RootState, gameId);
+
+        // Update players
+        game?.playerIds.forEach((playerId) => {
+            const color = paletteColors[game.playerIds.indexOf(playerId) % paletteColors.length];
+            dispatch(updatePlayer({
+                id: playerId,
+                changes: { color: color }
+            }));
+        });
     }
 );
 

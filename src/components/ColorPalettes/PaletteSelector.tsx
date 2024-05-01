@@ -2,7 +2,7 @@ import React from 'react';
 
 import { ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
 
-import { updateGame } from '../../../redux/GamesSlice';
+import { asyncSetGamePalette, updateGame } from '../../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
 import { selectCurrentGame } from '../../../redux/selectors';
 import { getPalette, getPalettes } from '../../ColorPalette';
@@ -21,12 +21,12 @@ const PaletteSelector: React.FunctionComponent = () => {
     if (!currentGameId) return null;
 
     const onSelect = (palette: string) => {
-        dispatch(updateGame({
-            id: currentGameId,
-            changes: {
+        dispatch(
+            asyncSetGamePalette({
+                gameId: currentGameId,
                 palette: palette,
-            }
-        }));
+            })
+        );
     };
 
     return (
