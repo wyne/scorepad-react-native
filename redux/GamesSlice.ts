@@ -160,7 +160,6 @@ export const asyncRematchGame = createAsyncThunk(
     }
 );
 
-
 export const asyncSetGamePalette = createAsyncThunk(
     'games/setpalette',
     async (
@@ -226,6 +225,37 @@ export const asyncCreateGame = createAsyncThunk(
         });
 
         return newGameId;
+    }
+);
+
+export const addPlayer = createAsyncThunk(
+    'games/addplayer',
+    async (
+        { gameId, playerName }: { gameId: string, playerName: string; },
+        { dispatch, getState }
+    ) => {
+        const playerId = Crypto.randomUUID();
+        const s = getState() as RootState;
+        const paletteName = s.games.entities[gameId]?.palette;
+        const palette = getPalette(paletteName || 'original');
+        const playerIndex = s.games.entities[gameId]?.playerIds.length || 0;
+        const paletteColor = palette[playerIndex % palette.length];
+
+        dispatch(playerAdd({
+            id: playerId,
+            playerName: playerName,
+            scores: [0],
+            color: paletteColor,
+        }));
+
+        dispatch(updateGame({
+            id: gameId,
+            changes: {
+                playerIds: [...selectGameById(getState() as RootState, gameId)?.playerIds || [], playerId],
+            }
+        }));
+
+        return playerId;
     }
 );
 

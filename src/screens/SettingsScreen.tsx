@@ -3,14 +3,12 @@ import React, { useEffect } from 'react';
 import analytics from '@react-native-firebase/analytics';
 import { ParamListBase, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import * as Crypto from 'expo-crypto';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import DraggableFlatList, { ScaleDecorator } from 'react-native-draggable-flatlist';
 import { Button, Icon } from 'react-native-elements';
 
-import { reorderPlayers, updateGame } from '../../redux/GamesSlice';
+import { addPlayer, reorderPlayers } from '../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
-import { playerAdd } from '../../redux/PlayersSlice';
 import { selectCurrentGame } from '../../redux/selectors';
 import EditGame from '../components/EditGame';
 import PlayerListItem from '../components/PlayerListItem';
@@ -42,19 +40,9 @@ const SettingsScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     const addPlayerHandler = async () => {
         if (currentGame == undefined) return;
 
-        const newPlayerId = Crypto.randomUUID();
-
-        dispatch(playerAdd({
-            id: newPlayerId,
+        dispatch(addPlayer({
+            gameId: currentGameId,
             playerName: `Player ${playerIds.length + 1}`,
-            scores: [0],
-        }));
-
-        dispatch(updateGame({
-            id: currentGame.id,
-            changes: {
-                playerIds: [...currentGame.playerIds, newPlayerId],
-            }
         }));
 
         await analytics().logEvent('add_player', {
