@@ -10,7 +10,6 @@ import logger from '../src/Logger';
 import { playerAdd, selectPlayerById, updatePlayer } from './PlayersSlice';
 import { setCurrentGameId } from './SettingsSlice';
 import { RootState } from './store';
-import { set } from 'lodash';
 
 export interface GameState {
     id: string;
@@ -213,11 +212,10 @@ export const asyncCreateGame = createAsyncThunk(
         });
 
         dispatch(gameSave({
+            ...initialState,
             id: newGameId,
             title: `Game ${gameCount + 1}`,
             dateCreated: Date.now(),
-            roundCurrent: 0,
-            roundTotal: 1,
             playerIds: playerIds,
         }));
 

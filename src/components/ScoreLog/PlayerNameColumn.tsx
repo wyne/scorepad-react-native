@@ -54,7 +54,6 @@ const PlayerHeaderCell: React.FunctionComponent = () => {
     );
 };
 
-
 const PlayerNameColumn: React.FunctionComponent = () => {
     const sortKey = useAppSelector(state => selectCurrentGame(state)?.sortSelectorKey);
 

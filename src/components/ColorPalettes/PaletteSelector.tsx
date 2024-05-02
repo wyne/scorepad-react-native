@@ -2,7 +2,7 @@ import React from 'react';
 
 import { ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
 
-import { asyncSetGamePalette, updateGame } from '../../../redux/GamesSlice';
+import { asyncSetGamePalette } from '../../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
 import { selectCurrentGame } from '../../../redux/selectors';
 import { getPalette, getPalettes } from '../../ColorPalette';
