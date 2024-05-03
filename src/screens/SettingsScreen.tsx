@@ -58,7 +58,7 @@ const SettingsScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     }, [playerIds.length]);
 
     const ListFooter = () => (
-        <View style={{ margin: 10, marginBottom: 200, alignSelf: 'center' }}>
+        <View style={{ margin: 10, marginBottom: 50, alignSelf: 'center' }}>
             {playerIds.length < MAX_PLAYERS &&
                 <Button title="Add Player" type="clear"
                     icon={<Icon name="add" color={systemBlue} />}
@@ -86,6 +86,7 @@ const SettingsScreen: React.FunctionComponent<Props> = ({ navigation }) => {
             </View>
 
             <DraggableFlatList
+                containerStyle={{ flex: 1 }}
                 ListFooterComponent={ListFooter}
                 data={playerIds}
                 renderItem={({ item: playerId, getIndex, drag, isActive }) => (
