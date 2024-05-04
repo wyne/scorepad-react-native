@@ -17,14 +17,11 @@ const ColorSelector: React.FC<ColorSelectorProps> = ({ playerId }) => {
     const currentPalette = useAppSelector(state => selectCurrentGame(state)?.palette);
     const playerColor = useAppSelector(state => state.players.entities[playerId]?.color);
 
-    console.log('player color: ', playerColor);
-
     if (!currentGameId) return null;
 
     const dispatch = useAppDispatch();
 
     const tapColorHandler = (color: string) => {
-        console.log('ColorSelector.tsx tapColorHandler color:', color);
         dispatch(updatePlayer({
             id: playerId,
             changes: { color: color }
