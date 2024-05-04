@@ -64,9 +64,9 @@ const ColorSelector: React.FC<ColorSelectorProps> = ({ playerId }) => {
                 <Text style={[styles.title]}>Other Palletes</Text>
             </View>
 
-            {colorPalettes.map((palette) => (
+            {colorPalettes.map((palette, palette_index) => (
                 currentPalette !== palette && (
-                    <View style={{ flexDirection: 'row', marginVertical: 5 }}>
+                    <View style={{ flexDirection: 'row', marginVertical: 5 }} key={'v' + palette_index}>
                         {
                             getPalette(palette).map((color, i) => (
                                 <TouchableOpacity
