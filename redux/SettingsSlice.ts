@@ -27,8 +27,9 @@ const initialState: SettingsState = {
     addendTwo: 10,
     currentGameId: undefined,
     onboarded: undefined,
-    showPointParticles: true,
+    showPointParticles: false,
     showPlayerIndex: false,
+    showColorPalettes: false,
     interactionType: InteractionType.SwipeVertical,
     lastStoreReviewPrompt: 0,
 };

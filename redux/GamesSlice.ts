@@ -34,6 +34,7 @@ const initialState = gamesAdapter.getInitialState({
     locked: false,
     sortSelectorKey: SortSelectorKey.ByIndex,
     sortDirectionKey: SortDirectionKey.Normal,
+    palette: 'original',
 });
 
 const gamesSlice = createSlice({
@@ -202,11 +203,16 @@ export const asyncCreateGame = createAsyncThunk(
             playerIds.push(Crypto.randomUUID());
         }
 
-        playerIds.forEach((playerId) => {
+        const paletteName = initialState.palette;
+        const paletteColors = getPalette(paletteName);
+
+        playerIds.forEach((playerId, index) => {
+            const color = paletteColors[index % paletteColors.length];
             dispatch(playerAdd({
                 id: playerId,
                 playerName: `Player ${playerIds.indexOf(playerId) + 1}`,
                 scores: [0],
+                color: color,
             }));
         });
 
