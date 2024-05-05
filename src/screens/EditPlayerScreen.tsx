@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import analytics from '@react-native-firebase/analytics';
 import { ParamListBase, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { NativeSyntheticEvent, ScrollView, StyleSheet, Text, TextInput, TextInputEndEditingEventData, View } from 'react-native';
+import { NativeSyntheticEvent, ScrollView, StyleSheet, TextInput, TextInputEndEditingEventData, View } from 'react-native';
 import { Input } from 'react-native-elements';
 
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
@@ -117,11 +117,9 @@ const EditPlayerScreen: React.FC<EditPlayerScreenProps> = ({
                 value={localPlayerName}
             />
 
-            <View style={{ margin: 20 }} />
-
-            <Text style={{ color: 'white' }}>Select a color</Text>
-
-            <ColorSelector playerId={playerId} />
+            <View style={{ marginHorizontal: 20 }}>
+                <ColorSelector playerId={playerId} />
+            </View>
 
         </ScrollView>
     );

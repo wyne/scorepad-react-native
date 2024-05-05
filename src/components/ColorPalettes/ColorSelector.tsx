@@ -106,6 +106,6 @@ const styles = StyleSheet.create({
     titleContainer: {
         flexDirection: 'column',
         justifyContent: 'space-between',
-        marginVertical: 20,
+        marginVertical: 10,
     }
 });
