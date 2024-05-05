@@ -27,7 +27,7 @@ const FlexboxBoard: React.FC<FlexboxBoardProps> = () => {
 
     const playerCount = playerIds.length;
 
-    const desiredAspectRatio = 0.8;
+    const desiredAspectRatio = 1;
 
     const layoutHandler = (e: LayoutChangeEvent) => {
         const { width, height } = e.nativeEvent.layout;
