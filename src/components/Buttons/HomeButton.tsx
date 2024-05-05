@@ -8,7 +8,7 @@ import { Platform } from 'react-native';
 import { Icon } from 'react-native-elements/dist/icons/Icon';
 
 import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
-import { selectCurrentGame, selectLastStoreReviewPrompt } from '../../../redux/selectors';
+import { selectLastStoreReviewPrompt } from '../../../redux/selectors';
 import { setLastStoreReviewPrompt } from '../../../redux/SettingsSlice';
 import { systemBlue } from '../../constants';
 
@@ -20,8 +20,6 @@ interface Props {
 
 const HomeButton: React.FunctionComponent<Props> = ({ navigation }) => {
     const gameCount = useAppSelector((state) => state.games.ids.length);
-    const currentGame = useAppSelector(selectCurrentGame);
-    const roundCurrent = currentGame?.roundCurrent || 0;
     const lastStoreReviewPrompt = useAppSelector(selectLastStoreReviewPrompt);
     const dispatch = useAppDispatch();
 
@@ -30,14 +28,14 @@ const HomeButton: React.FunctionComponent<Props> = ({ navigation }) => {
         const daysSinceLastPrompt = (now - lastStoreReviewPrompt) / (1000 * 60 * 60 * 24);
 
         if (gameCount < 3) { return; }
-        if (roundCurrent < 1) { return; }
-        if (daysSinceLastPrompt < 180) { return; }
+        if (daysSinceLastPrompt < 90) { return; }
 
         await analytics().logEvent('review_prompt');
 
         dispatch(setLastStoreReviewPrompt(Date.now()));
 
         const isAvailable = await StoreReview.isAvailableAsync();
+
         if (isAvailable) {
             const platform = Platform.OS;
             if (platform === 'ios') {
