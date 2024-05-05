@@ -3,18 +3,15 @@ import React, { useEffect } from 'react';
 import analytics from '@react-native-firebase/analytics';
 import { ParamListBase, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import * as Crypto from 'expo-crypto';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import DraggableFlatList, { ScaleDecorator } from 'react-native-draggable-flatlist';
 import { Button, Icon } from 'react-native-elements';
 
-import { reorderPlayers, updateGame } from '../../redux/GamesSlice';
+import { addPlayer, reorderPlayers } from '../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
-import { playerAdd } from '../../redux/PlayersSlice';
 import { selectCurrentGame } from '../../redux/selectors';
 import EditGame from '../components/EditGame';
 import PlayerListItem from '../components/PlayerListItem';
-import { selectSortedPlayerIdsByIndex } from '../components/ScoreLog/SortHelper';
 import { MAX_PLAYERS, systemBlue } from '../constants';
 import logger from '../Logger';
 
@@ -33,29 +30,19 @@ const SettingsScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     const dispatch = useAppDispatch();
 
     const currentGameId = useAppSelector(state => state.settings.currentGameId);
-    if (typeof currentGameId == 'undefined') return null;
-
     const currentGame = useAppSelector(selectCurrentGame);
-    const playerIds = useAppSelector(selectSortedPlayerIdsByIndex);
-
+    const playerIds = useAppSelector(state => selectCurrentGame(state)?.playerIds);
     const [edit, setEdit] = React.useState(false);
+
+    if (typeof currentGameId == 'undefined') return null;
+    if (typeof playerIds == 'undefined') return null;
 
     const addPlayerHandler = async () => {
         if (currentGame == undefined) return;
 
-        const newPlayerId = Crypto.randomUUID();
-
-        dispatch(playerAdd({
-            id: newPlayerId,
+        dispatch(addPlayer({
+            gameId: currentGameId,
             playerName: `Player ${playerIds.length + 1}`,
-            scores: [0],
-        }));
-
-        dispatch(updateGame({
-            id: currentGame.id,
-            changes: {
-                playerIds: [...currentGame.playerIds, newPlayerId],
-            }
         }));
 
         await analytics().logEvent('add_player', {
@@ -71,7 +58,7 @@ const SettingsScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     }, [playerIds.length]);
 
     const ListFooter = () => (
-        <View style={{ margin: 10, marginBottom: 200, alignSelf: 'center' }}>
+        <View style={{ margin: 10, marginBottom: 50, alignSelf: 'center' }}>
             {playerIds.length < MAX_PLAYERS &&
                 <Button title="Add Player" type="clear"
                     icon={<Icon name="add" color={systemBlue} />}
@@ -99,6 +86,7 @@ const SettingsScreen: React.FunctionComponent<Props> = ({ navigation }) => {
             </View>
 
             <DraggableFlatList
+                containerStyle={{ flex: 1 }}
                 ListFooterComponent={ListFooter}
                 data={playerIds}
                 renderItem={({ item: playerId, getIndex, drag, isActive }) => (

@@ -9,10 +9,10 @@ For android, use JDK 17.
 ```zsh
 npx react-native-clean-project
 npx expo prebuild
-eas build --profile development-simulator --platform ios --local
-eas build --profile development-simulator --platform android --local
-eas build:run -p ios # select expo build from above
-eas build:run -p android # select expo build from above
+npx eas build --profile development-simulator --platform ios --local
+npx eas build --profile development-simulator --platform android --local
+npx eas build:run -p ios # select expo build from above
+npx eas build:run -p android # select expo build from above
 npx expo start --dev-client
 ```
 

@@ -1,11 +1,11 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 
 import { StyleSheet, Text, View } from 'react-native';
 import { Icon } from 'react-native-elements/dist/icons/Icon';
 
-import { makeSelectPlayerColors } from '../../../redux/GamesSlice';
+import { selectPlayerColors } from '../../../redux/GamesSlice';
 import { useAppSelector } from '../../../redux/hooks';
-import { selectPlayerNameById } from '../../../redux/PlayersSlice';
+import { selectPlayerById } from '../../../redux/PlayersSlice';
 import { selectCurrentGame } from '../../../redux/selectors';
 
 import { SortDirectionKey, SortSelectorKey, sortSelectors } from './SortHelper';
@@ -17,12 +17,8 @@ interface CellProps {
 }
 
 const PlayerNameCell: React.FunctionComponent<CellProps> = ({ index, playerId }) => {
-    const currentGameId = useAppSelector(state => selectCurrentGame(state)?.id);
-
-    const selectPlayerColors = useMemo(() => makeSelectPlayerColors(), []);
-    const playerColors = useAppSelector(state => selectPlayerColors(state, currentGameId || '', playerId));
-
-    const playerName = useAppSelector(state => selectPlayerNameById(state, playerId));
+    const playerColors = useAppSelector(state => selectPlayerColors(state, playerId));
+    const playerName = useAppSelector(state => selectPlayerById(state, playerId)?.playerName);
 
     return (
         <View key={index} style={{ paddingLeft: 5, borderLeftWidth: 5, borderColor: playerColors[0] }}>

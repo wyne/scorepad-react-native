@@ -17,6 +17,7 @@ export interface SettingsState {
     showColorPalettes?: boolean;
     interactionType: InteractionType;
     lastStoreReviewPrompt: number;
+    devMenuEnabled?: boolean;
 };
 
 const initialState: SettingsState = {
@@ -26,8 +27,9 @@ const initialState: SettingsState = {
     addendTwo: 10,
     currentGameId: undefined,
     onboarded: undefined,
-    showPointParticles: true,
+    showPointParticles: false,
     showPlayerIndex: false,
+    showColorPalettes: false,
     interactionType: InteractionType.SwipeVertical,
     lastStoreReviewPrompt: 0,
 };
@@ -72,6 +74,9 @@ const settingsSlice = createSlice({
         setLastStoreReviewPrompt(state, action: PayloadAction<number>) {
             state.lastStoreReviewPrompt = action.payload;
         },
+        toggleDevMenuEnabled(state) {
+            state.devMenuEnabled = !state.devMenuEnabled;
+        }
     }
 });
 
@@ -87,6 +92,7 @@ export const {
     toggleShowColorPalettes,
     setInteractionType,
     setLastStoreReviewPrompt,
+    toggleDevMenuEnabled,
 } = settingsSlice.actions;
 
 export default settingsSlice.reducer;
