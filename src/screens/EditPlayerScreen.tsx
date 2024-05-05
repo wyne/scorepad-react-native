@@ -9,6 +9,7 @@ import { Input } from 'react-native-elements';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { updatePlayer } from '../../redux/PlayersSlice';
 import { selectCurrentGame } from '../../redux/selectors';
+import ColorSelector from '../components/ColorPalettes/ColorSelector';
 
 type RouteParams = {
     EditPlayer: {
@@ -116,7 +117,9 @@ const EditPlayerScreen: React.FC<EditPlayerScreenProps> = ({
                 value={localPlayerName}
             />
 
-            <View style={{ margin: 20 }} />
+            <View style={{ marginHorizontal: 20 }}>
+                <ColorSelector playerId={playerId} />
+            </View>
 
         </ScrollView>
     );

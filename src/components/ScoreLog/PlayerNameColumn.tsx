@@ -17,8 +17,7 @@ interface CellProps {
 }
 
 const PlayerNameCell: React.FunctionComponent<CellProps> = ({ index, playerId }) => {
-    const currentGameId = useAppSelector(state => selectCurrentGame(state)?.id);
-    const playerColors = useAppSelector(state => selectPlayerColors(state, currentGameId || '', index || 0));
+    const playerColors = useAppSelector(state => selectPlayerColors(state, playerId));
     const playerName = useAppSelector(state => selectPlayerById(state, playerId)?.playerName);
 
     return (
@@ -54,7 +53,6 @@ const PlayerHeaderCell: React.FunctionComponent = () => {
         </Text>
     );
 };
-
 
 const PlayerNameColumn: React.FunctionComponent = () => {
     const sortKey = useAppSelector(state => selectCurrentGame(state)?.sortSelectorKey);

@@ -13,7 +13,6 @@ import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
 import { updatePlayer } from '../../../redux/PlayersSlice';
 import { systemBlue } from '../../constants';
 import BigButton from '../BigButtons/BigButton';
-import PaletteSelector from '../ColorPalettes/PaletteSelector';
 import RematchIcon from '../Icons/RematchIcon';
 import Rounds from '../Rounds';
 
@@ -190,8 +189,6 @@ const GameSheet: React.FunctionComponent<Props> = ({ navigation, containerHeight
         []
     );
 
-    const showColorPalettes = useAppSelector(state => state.settings.showColorPalettes);
-
     return (
         <BottomSheet
             ref={gameSheetRef}
@@ -232,10 +229,6 @@ const GameSheet: React.FunctionComponent<Props> = ({ navigation, containerHeight
                     <Animated.View style={[styles.sheetContent, animatedSheetStyle]}>
                         <Rounds navigation={navigation} show={!fullscreen} />
 
-                        {showColorPalettes &&
-                            <PaletteSelector />
-                        }
-
                         <Text style={{ color: 'white', margin: 10, marginTop: 0 }}>
                             Tap the player column to toggle sorting by total score and original order.
                         </Text>
@@ -244,7 +237,7 @@ const GameSheet: React.FunctionComponent<Props> = ({ navigation, containerHeight
 
                             {!gameLocked &&
                                 <Animated.View entering={FadeIn.delay(400)}>
-                                    <Button title="Edit Title and Players"
+                                    <Button title="Edit Game and Players"
                                         type="clear"
                                         style={{
                                             margin: 5, marginTop: 15,

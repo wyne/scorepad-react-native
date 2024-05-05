@@ -31,7 +31,7 @@ const PlayerListItem: React.FunctionComponent<Props> = ({
     const currentGameId = useAppSelector(state => selectCurrentGame(state)?.id);
     const playerIds = useAppSelector(state => selectGameById(state, currentGameId || '')?.playerIds);
     const player = useAppSelector(state => selectPlayerById(state, playerId));
-    const playerColors = useAppSelector(state => selectPlayerColors(state, currentGameId || '', index || 0));
+    const playerColors = useAppSelector(state => selectPlayerColors(state, playerId));
 
     if (currentGameId == '' || currentGameId === undefined) return null;
     if (playerIds === undefined) return null;

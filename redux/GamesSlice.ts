@@ -7,7 +7,7 @@ import { getPalette } from '../src/ColorPalette';
 import { SortDirectionKey, SortSelectorKey } from '../src/components/ScoreLog/SortHelper';
 import logger from '../src/Logger';
 
-import { playerAdd, selectPlayerById } from './PlayersSlice';
+import { playerAdd, selectPlayerById, updatePlayer } from './PlayersSlice';
 import { setCurrentGameId } from './SettingsSlice';
 import { RootState } from './store';
 
@@ -34,6 +34,7 @@ const initialState = gamesAdapter.getInitialState({
     locked: false,
     sortSelectorKey: SortSelectorKey.ByIndex,
     sortDirectionKey: SortDirectionKey.Normal,
+    palette: 'original',
 });
 
 const gamesSlice = createSlice({
@@ -98,7 +99,8 @@ const gamesSlice = createSlice({
                     playerIds: action.payload.playerIds,
                 }
             });
-        }
+        },
+
     }
 });
 
@@ -159,6 +161,35 @@ export const asyncRematchGame = createAsyncThunk(
     }
 );
 
+export const asyncSetGamePalette = createAsyncThunk(
+    'games/setpalette',
+    async (
+        { gameId, palette }: { gameId: string, palette: string; },
+        { dispatch, getState }
+    ) => {
+        // Update game
+        dispatch(updateGame({
+            id: gameId,
+            changes: {
+                palette: palette,
+            }
+        }));
+        // Get palette colors
+        const paletteColors = getPalette(palette);
+
+        const game = selectGameById(getState() as RootState, gameId);
+
+        // Update players
+        game?.playerIds.forEach((playerId) => {
+            const color = paletteColors[game.playerIds.indexOf(playerId) % paletteColors.length];
+            dispatch(updatePlayer({
+                id: playerId,
+                changes: { color: color }
+            }));
+        });
+    }
+);
+
 export const asyncCreateGame = createAsyncThunk(
     'games/create',
     async (
@@ -172,20 +203,24 @@ export const asyncCreateGame = createAsyncThunk(
             playerIds.push(Crypto.randomUUID());
         }
 
-        playerIds.forEach((playerId) => {
+        const paletteName = initialState.palette;
+        const paletteColors = getPalette(paletteName);
+
+        playerIds.forEach((playerId, index) => {
+            const color = paletteColors[index % paletteColors.length];
             dispatch(playerAdd({
                 id: playerId,
                 playerName: `Player ${playerIds.indexOf(playerId) + 1}`,
                 scores: [0],
+                color: color,
             }));
         });
 
         dispatch(gameSave({
+            ...initialState,
             id: newGameId,
             title: `Game ${gameCount + 1}`,
             dateCreated: Date.now(),
-            roundCurrent: 0,
-            roundTotal: 1,
             playerIds: playerIds,
         }));
 
@@ -199,22 +234,60 @@ export const asyncCreateGame = createAsyncThunk(
     }
 );
 
+export const addPlayer = createAsyncThunk(
+    'games/addplayer',
+    async (
+        { gameId, playerName }: { gameId: string, playerName: string; },
+        { dispatch, getState }
+    ) => {
+        const playerId = Crypto.randomUUID();
+        const s = getState() as RootState;
+        const paletteName = s.games.entities[gameId]?.palette;
+        const palette = getPalette(paletteName || 'original');
+        const playerIndex = s.games.entities[gameId]?.playerIds.length || 0;
+        const paletteColor = palette[playerIndex % palette.length];
+
+        dispatch(playerAdd({
+            id: playerId,
+            playerName: playerName,
+            scores: [0],
+            color: paletteColor,
+        }));
+
+        dispatch(updateGame({
+            id: gameId,
+            changes: {
+                playerIds: [...selectGameById(getState() as RootState, gameId)?.playerIds || [], playerId],
+            }
+        }));
+
+        return playerId;
+    }
+);
+
 export const selectSortSelectorKey = (state: RootState, gameId: string) => {
     const key = selectGameById(state, gameId)?.sortSelectorKey;
     return key !== undefined ? key : SortSelectorKey.ByScore;
 };
 
-const selectPaletteName = (state: RootState, gameId: string) => state.games.entities[gameId]?.palette;
-const selectPlayerIndex = (_: RootState, __: string, playerIndex: number) => playerIndex;
-
 export const selectPlayerColors = createSelector(
-    [selectPaletteName, selectPlayerIndex],
-    (paletteName, playerIndex) => {
-        // TODO: Get player color if it exists
+    [
+        (state: RootState, playerId: string) => {
+            const gameId = selectAllGames(state).filter((game) => game.playerIds.includes(playerId))[0].id;
+            const paletteName = state.games.entities[gameId]?.palette;
 
-        const palette = getPalette(paletteName || 'original');
+            const playerColor = state.players.entities[playerId]?.color;
 
-        const bg = palette[playerIndex % palette.length];
+            const playerIndex = state.games.entities[gameId]?.playerIds.indexOf(playerId) || 0;
+
+            return { paletteName, playerColor, playerIndex };
+        },
+    ],
+    ({ paletteName, playerColor, playerIndex }) => {
+        const palette = getPalette(paletteName || 'original') || getPalette('original');
+        const paletteBG = palette[playerIndex % palette.length];
+
+        const bg = playerColor || paletteBG;
 
         const blackContrast = getContrastRatio(bg, '#000').number;
         const whiteContrast = getContrastRatio(bg, '#fff').number;
