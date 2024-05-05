@@ -284,9 +284,7 @@ export const selectPlayerColors = createSelector(
         },
     ],
     ({ paletteName, playerColor, playerIndex }) => {
-        // TODO: Get player color if it exists
-
-        const palette = getPalette(paletteName || 'original');
+        const palette = getPalette(paletteName || 'original') || getPalette('original');
         const paletteBG = palette[playerIndex % palette.length];
 
         const bg = playerColor || paletteBG;

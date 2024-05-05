@@ -74,7 +74,7 @@ const EditGame = ({ }) => {
                 </Text>
             </View>
 
-            <View>
+            <View style={{ marginHorizontal: 10 }}>
                 {showColorPalettes &&
                     <PaletteSelector />
                 }
