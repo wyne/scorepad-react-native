@@ -4,23 +4,22 @@ import { GameState } from '../../../redux/GamesSlice';
 import { ScoreState, selectAllPlayers } from '../../../redux/PlayersSlice';
 import { RootState } from '../../../redux/store';
 
-export const selectPlayerIdsByIndex: SortSelector = createSelector(
+export const selectSortedPlayerIdsByIndex = createSelector(
     [
-        selectAllPlayers,
         (state: RootState) => state.settings.currentGameId ? state.games.entities[state.settings.currentGameId] : undefined,
         (state: RootState) => state.settings.currentGameId ? state.games.entities[state.settings.currentGameId]?.sortDirectionKey : undefined
     ],
-    (players: ScoreState[], currentGame: GameState | undefined) => {
-        if (!currentGame) return [];
+    (game: GameState | undefined, sortDirectionKey: SortDirectionKey | undefined) => {
+        if (!game) return [];
 
-        const playerIds = players.filter(player => currentGame.playerIds?.includes(player.id))
+        const playerIds = [...game.playerIds]
             .sort((a, b) => {
-                if (currentGame?.playerIds == undefined) return 0;
-                return currentGame.playerIds.indexOf(a.id) - currentGame.playerIds.indexOf(b.id);
+                if (game?.playerIds == undefined) return 0;
+                return game.playerIds.indexOf(a) - game.playerIds.indexOf(b);
             })
-            .map(player => player.id);
+            .map(player => player);
 
-        if (SortDirectionKey.Normal === currentGame.sortDirectionKey) {
+        if (SortDirectionKey.Normal === sortDirectionKey) {
             return playerIds;
         } else {
             return playerIds.reverse();
@@ -28,7 +27,7 @@ export const selectPlayerIdsByIndex: SortSelector = createSelector(
     }
 );
 
-export const selectPlayerIdsByScore: SortSelector = createSelector(
+export const selectSortedPlayerIdsByScore: SortSelector = createSelector(
     [
         selectAllPlayers,
         (state: RootState) => state.settings.currentGameId ? state.games.entities[state.settings.currentGameId] : undefined,
@@ -78,6 +77,6 @@ export enum SortDirectionKey {
 }
 
 export const sortSelectors = {
-    [SortSelectorKey.ByScore]: selectPlayerIdsByScore,
-    [SortSelectorKey.ByIndex]: selectPlayerIdsByIndex,
+    [SortSelectorKey.ByScore]: selectSortedPlayerIdsByScore,
+    [SortSelectorKey.ByIndex]: selectSortedPlayerIdsByIndex,
 };

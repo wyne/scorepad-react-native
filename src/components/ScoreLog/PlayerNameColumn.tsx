@@ -3,7 +3,7 @@ import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { Icon } from 'react-native-elements/dist/icons/Icon';
 
-import { selectPlayerColors } from '../../../redux/GamesSlice';
+import { makeSelectPlayerColors } from '../../../redux/GamesSlice';
 import { useAppSelector } from '../../../redux/hooks';
 import { selectPlayerById } from '../../../redux/PlayersSlice';
 import { selectCurrentGame } from '../../../redux/selectors';
@@ -17,7 +17,9 @@ interface CellProps {
 }
 
 const PlayerNameCell: React.FunctionComponent<CellProps> = ({ index, playerId }) => {
-    const playerColors = useAppSelector(state => selectPlayerColors(state, playerId));
+    const selectPlayerColors = makeSelectPlayerColors();
+    const currentGameId = useAppSelector(state => selectCurrentGame(state)?.id);
+    const playerColors = useAppSelector(state => selectPlayerColors(state, currentGameId, playerId));
     const playerName = useAppSelector(state => selectPlayerById(state, playerId)?.playerName);
 
     return (
@@ -54,9 +56,10 @@ const PlayerHeaderCell: React.FunctionComponent = () => {
     );
 };
 
+const MemoizedPlayerNameCell = React.memo(PlayerNameCell);
+
 const PlayerNameColumn: React.FunctionComponent = () => {
     const sortKey = useAppSelector(state => selectCurrentGame(state)?.sortSelectorKey);
-
     const sortSelector = sortSelectors[sortKey || SortSelectorKey.ByIndex];
     const sortedPlayerIds = useAppSelector(sortSelector);
 
@@ -65,7 +68,7 @@ const PlayerNameColumn: React.FunctionComponent = () => {
             <PlayerHeaderCell />
 
             {sortedPlayerIds.map((playerId, index) => (
-                playerId && <PlayerNameCell key={index} index={index} playerId={playerId} />
+                playerId && <MemoizedPlayerNameCell key={index} index={index} playerId={playerId} />
             ))}
         </View>
     );

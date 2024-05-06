@@ -5,15 +5,15 @@ import { LayoutChangeEvent, Text, TouchableWithoutFeedback, View } from 'react-n
 
 import { updateGame } from '../../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
-import { RootState } from '../../../redux/store';
+import { selectCurrentGame } from '../../../redux/selectors';
 
 import RoundScoreCell from './RoundScoreCell';
+import { SortSelectorKey, sortSelectors } from './SortHelper';
 
 interface Props {
     round: number;
     isCurrentRound: boolean;
     disabled?: boolean;
-    sortSelector: (state: RootState) => string[];
     onLayout?: (event: LayoutChangeEvent, round: number) => void;
 }
 
@@ -21,13 +21,13 @@ const RoundScoreColumn: React.FunctionComponent<Props> = ({
     round,
     isCurrentRound,
     disabled = false,
-    sortSelector,
     onLayout,
 }) => {
     const dispatch = useAppDispatch();
 
-    const currentGameId = useAppSelector(state => state.settings.currentGameId);
-
+    const currentGameId = useAppSelector(state => selectCurrentGame(state)?.id);
+    const sortKey = useAppSelector(state => selectCurrentGame(state)?.sortSelectorKey);
+    const sortSelector = sortSelectors[sortKey || SortSelectorKey.ByIndex];
     const sortedPlayerIds = useAppSelector(sortSelector);
 
     const onPressHandler = useCallback(async () => {
