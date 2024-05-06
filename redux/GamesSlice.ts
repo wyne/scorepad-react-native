@@ -270,20 +270,27 @@ export const selectSortSelectorKey = (state: RootState, gameId: string) => {
     return key !== undefined ? key : SortSelectorKey.ByScore;
 };
 
-export const selectPlayerColors = createSelector(
+export const makeSelectPlayerColors = () => createSelector(
     [
-        (state: RootState, playerId: string) => {
-            const gameId = selectAllGames(state).filter((game) => game.playerIds.includes(playerId))[0].id;
-            const paletteName = state.games.entities[gameId]?.palette;
-
-            const playerColor = state.players.entities[playerId]?.color;
-
-            const playerIndex = state.games.entities[gameId]?.playerIds.indexOf(playerId) || 0;
-
-            return { paletteName, playerColor, playerIndex };
+        (state: RootState, gameId: string | undefined): GameState | undefined => {
+            if (!gameId) {
+                return undefined;
+            }
+            return state.games.entities[gameId];
         },
+        (state: RootState, gameId: string | undefined, playerId: string): string => playerId,
+        (state: RootState, gameId: string | undefined, playerId: string): string | undefined => state.players.entities[playerId]?.color,
     ],
-    ({ paletteName, playerColor, playerIndex }) => {
+    (game, playerId, playerColor) => {
+        if (!game || !playerId) {
+            return ['#000000', '#FFFFFF'];
+        }
+
+        const paletteName = game.palette;
+        const playerIds = game.playerIds;
+
+        const playerIndex = playerIds.indexOf(playerId);
+
         const palette = getPalette(paletteName || 'original') || getPalette('original');
         const paletteBG = palette[playerIndex % palette.length];
 
@@ -298,6 +305,7 @@ export const selectPlayerColors = createSelector(
         return [bg, fg];
     }
 );
+
 
 export const {
     updateGame,

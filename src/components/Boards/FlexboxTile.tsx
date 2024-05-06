@@ -3,9 +3,9 @@ import React from 'react';
 import { DimensionValue, StyleSheet } from 'react-native';
 import Animated, { Easing, FadeIn } from 'react-native-reanimated';
 
-import { selectPlayerColors } from '../../../redux/GamesSlice';
+import { makeSelectPlayerColors } from '../../../redux/GamesSlice';
 import { useAppSelector } from '../../../redux/hooks';
-import { selectInteractionType } from '../../../redux/selectors';
+import { selectCurrentGame, selectInteractionType } from '../../../redux/selectors';
 import { interactionComponents } from '../Interactions/InteractionComponents';
 import { InteractionType } from '../Interactions/InteractionType';
 import AdditionTile from '../PlayerTiles/AdditionTile/AdditionTile';
@@ -32,8 +32,10 @@ const FlexboxTile: React.FunctionComponent<Props> = React.memo(({
     if (!(width > 0 && height > 0)) return null;
     if (Number.isNaN(width) || Number.isNaN(height)) return null;
 
+    const currentGameId = useAppSelector(state => selectCurrentGame(state)?.id);
     const playerIndexLabel = useAppSelector(state => state.settings.showPlayerIndex);
-    const playerColors = useAppSelector(state => selectPlayerColors(state, playerId));
+    const selectPlayerColors = makeSelectPlayerColors();
+    const playerColors = useAppSelector(state => selectPlayerColors(state, currentGameId, playerId));
     const [bg, fg] = playerColors;
 
     const widthPerc: DimensionValue = `${(100 / cols)}%`;
