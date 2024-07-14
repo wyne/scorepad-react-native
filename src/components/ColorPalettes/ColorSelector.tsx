@@ -1,6 +1,5 @@
 import React from 'react';
 
-import { getContrastRatio } from 'colorsheet';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import { useAppDispatch, useAppSelector } from '../../../redux/hooks';

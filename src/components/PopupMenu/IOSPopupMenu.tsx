@@ -1,7 +1,8 @@
 import React from 'react';
 
 import { MenuAction, MenuView, NativeActionEvent } from '@react-native-menu/menu';
-import { Platform, Text, TouchableOpacity } from 'react-native';
+import * as Haptics from 'expo-haptics';
+import { Platform } from 'react-native';
 
 interface Props {
     children: React.ReactNode;
