@@ -3,6 +3,7 @@ import React, { useCallback } from 'react';
 import analytics from '@react-native-firebase/analytics';
 import { ParamListBase } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import * as Haptics from 'expo-haptics';
 import Moment from 'react-moment';
 import { Platform, StyleSheet, Text } from 'react-native';
 import { Icon, ListItem } from 'react-native-elements';
@@ -62,10 +63,12 @@ const GameListItem: React.FunctionComponent<Props> = ({ navigation, gameId, inde
                 navigation={navigation}
                 index={index}
             >
-                <ListItem key={gameId} bottomDivider onPress={
-                    // Only select game if iOS because Android is handled by PopupMenu
-                    Platform.OS == 'ios' ? chooseGameHandler : undefined
-                }>
+                <ListItem key={gameId} bottomDivider
+                    onLongPress={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy)}
+                    onPress={
+                        // Only select game if iOS because Android is handled by PopupMenu
+                        Platform.OS == 'ios' ? chooseGameHandler : undefined
+                    }>
                     <ListItem.Content>
                         <ListItem.Title style={{ alignItems: 'center' }}>
                             {gameTitle}
