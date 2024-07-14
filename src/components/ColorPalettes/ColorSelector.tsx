@@ -1,5 +1,6 @@
 import React from 'react';
 
+import { getContrastRatio } from 'colorsheet';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
@@ -10,6 +11,19 @@ import { getPalette, getPalettes } from '../../ColorPalette';
 interface ColorSelectorProps {
     playerId: string;
 }
+
+const ColorButton: React.FC<{ color: string, playerColor: string | undefined; }> = ({ color, playerColor }) => {
+    return (
+        <View style={{
+            ...styles.colorBadge, backgroundColor: color,
+            borderWidth: color == playerColor ? 2 : 1,
+            transform: [{ scale: color == playerColor ? 1.4 : 1 }],
+            borderColor: color == playerColor ? 'rgba(255, 255, 255, 0.8)' : 'rgba(255, 255, 255, 0.3)',
+            // TODO: Animate borderRadius
+            borderRadius: color == playerColor ? 25 : 3,
+        }} />
+    );
+};
 
 const ColorSelector: React.FC<ColorSelectorProps> = ({ playerId }) => {
     const colorPalettes = getPalettes();
@@ -44,12 +58,7 @@ const ColorSelector: React.FC<ColorSelectorProps> = ({ playerId }) => {
                                 key={'currentPalette' + i}
                                 onPress={() => tapColorHandler(color)}
                             >
-                                <View style={{
-                                    ...styles.colorBadge, backgroundColor: color,
-                                    borderWidth: color == playerColor ? 2 : 1,
-                                    borderColor: color == playerColor ? 'white' : '#999',
-                                    borderRadius: color == playerColor ? 3 : 25,
-                                }} />
+                                <ColorButton color={color} playerColor={playerColor} />
                             </TouchableOpacity>
                         ))
                     }
@@ -70,13 +79,7 @@ const ColorSelector: React.FC<ColorSelectorProps> = ({ playerId }) => {
                                     key={'TO' + i}
                                     onPress={() => tapColorHandler(color)}
                                 >
-                                    <View style={{
-                                        ...styles.colorBadge, backgroundColor: color,
-                                        borderWidth: color == playerColor ? 2 : 1,
-                                        borderColor: color == playerColor ? 'white' : '#999',
-                                        // TODO: Animated this for fun
-                                        borderRadius: color == playerColor ? 3 : 25,
-                                    }} />
+                                    <ColorButton color={color} playerColor={playerColor} />
                                 </TouchableOpacity>
                             ))
                         }

@@ -90,6 +90,7 @@ const EditPlayerScreen: React.FC<EditPlayerScreenProps> = ({
             <Input
                 ref={inputRef}
                 rightIcon={{
+                    style: { padding: 8 },
                     disabled: localPlayerName == '',
                     disabledStyle: { display: 'none' },
                     color: '#555',
