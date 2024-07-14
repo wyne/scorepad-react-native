@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { MenuAction, MenuView, NativeActionEvent } from '@react-native-menu/menu';
-import { Platform } from 'react-native';
+import { Platform, Text, TouchableOpacity } from 'react-native';
 
 interface Props {
     children: React.ReactNode;
@@ -69,6 +69,8 @@ const IOSPopupMenu: React.FC<Props> = ({
      * @returns void
      */
     const menuActionHandler: MenuActionHandler = async ({ nativeEvent }) => {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+
         switch (nativeEvent.event) {
             case 'rematch':
                 rematchGameHandler();

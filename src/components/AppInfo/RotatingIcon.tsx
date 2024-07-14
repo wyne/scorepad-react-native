@@ -1,6 +1,7 @@
 import React from 'react';
 
 import analytics from '@react-native-firebase/analytics';
+import * as Haptics from 'expo-haptics';
 import { Image } from 'expo-image';
 import { TouchableWithoutFeedback } from 'react-native';
 import Animated, {
@@ -28,9 +29,10 @@ const RotatingIcon: React.FunctionComponent = ({ }) => {
 
     let holdCallback: NodeJS.Timeout;
     const onPressIn = () => {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
         holdCallback = setTimeout(() => {
             dispatch(toggleDevMenuEnabled());
-            // spring expand animate the Animated.View
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
         }, 5000);
     };
 
