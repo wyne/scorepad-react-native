@@ -230,7 +230,7 @@ const GameSheet: React.FunctionComponent<Props> = ({ navigation, containerHeight
                         <Rounds navigation={navigation} show={!fullscreen} />
 
                         <Text style={{ color: 'white', margin: 10, marginTop: 0 }}>
-                            Tap the player column to toggle sorting by total score and original order.
+                            Tap the player column or total score column to change sorting.
                         </Text>
 
                         <Animated.View layout={Layout.delay(200)}>
