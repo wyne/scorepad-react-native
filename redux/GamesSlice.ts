@@ -32,7 +32,7 @@ const initialState = gamesAdapter.getInitialState({
     roundCurrent: 0,
     roundTotal: 1,
     locked: false,
-    sortSelectorKey: SortSelectorKey.ByIndex,
+    sortSelectorKey: SortSelectorKey.ByScore,
     sortDirectionKey: SortDirectionKey.Normal,
     palette: 'original',
 });
