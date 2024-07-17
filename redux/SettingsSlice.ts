@@ -18,6 +18,7 @@ export interface SettingsState {
     interactionType: InteractionType;
     lastStoreReviewPrompt: number;
     devMenuEnabled?: boolean;
+    appOpens: number;
 };
 
 const initialState: SettingsState = {
@@ -32,6 +33,7 @@ const initialState: SettingsState = {
     showColorPalettes: false,
     interactionType: InteractionType.SwipeVertical,
     lastStoreReviewPrompt: 0,
+    appOpens: 0,
 };
 
 const settingsSlice = createSlice({
@@ -76,6 +78,9 @@ const settingsSlice = createSlice({
         },
         toggleDevMenuEnabled(state) {
             state.devMenuEnabled = !state.devMenuEnabled;
+        },
+        increaseAppOpens(state) {
+            state.appOpens += 1;
         }
     }
 });
@@ -93,6 +98,7 @@ export const {
     setInteractionType,
     setLastStoreReviewPrompt,
     toggleDevMenuEnabled,
+    increaseAppOpens,
 } = settingsSlice.actions;
 
 export default settingsSlice.reducer;

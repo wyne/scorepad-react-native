@@ -1,4 +1,4 @@
-const isDebugMode = process.env.APP_VARIANT == 'development';
+const isDebugMode = __DEV__;
 
 const logger = {
     log: (...args: unknown[]) => {
