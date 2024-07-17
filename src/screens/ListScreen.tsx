@@ -1,5 +1,6 @@
 import React, { memo, useEffect } from 'react';
 
+import analytics from '@react-native-firebase/analytics';
 import { ParamListBase } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import * as Application from 'expo-application';
@@ -11,7 +12,7 @@ import { SemVer, parse } from 'semver';
 
 import { selectGameIds } from '../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
-import { setOnboardedVersion } from '../../redux/SettingsSlice';
+import { increaseAppOpens, setOnboardedVersion } from '../../redux/SettingsSlice';
 import GameListItem from '../components/GameListItem';
 import { getPendingOnboardingSemVer } from '../components/Onboarding/Onboarding';
 import logger from '../Logger';
@@ -21,6 +22,8 @@ interface Props {
 }
 
 const ListScreen: React.FunctionComponent<Props> = ({ navigation }) => {
+    const appOpens = useAppSelector(state => state.settings.appOpens);
+    const devMenuEnabled = useAppSelector(state => state.settings.devMenuEnabled);
     const gameIds = useAppSelector(state => selectGameIds(state));
     const dispatch = useAppDispatch();
 
@@ -29,6 +32,7 @@ const ListScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     const appVersion = new SemVer(Application.nativeApplicationVersion || '0.0.0');
 
     logger.info(`App Version: ${appVersion}`);
+    logger.info(`Dev Menu Enabled: ${devMenuEnabled}`);
     logger.info(`Onboarded Version: ${onboardedSemVer}`);
 
     const pendingOnboardingVer = getPendingOnboardingSemVer(onboardedSemVer);
@@ -36,6 +40,20 @@ const ListScreen: React.FunctionComponent<Props> = ({ navigation }) => {
 
     logger.info(`Pending onboard: ${pendingOnboardingVer}`);
     logger.info(`Onboarded: ${onboarded}`);
+
+    useEffect(() => {
+        analytics().logEvent('game_list', {
+            gameCount: gameIds.length,
+            appOpens: appOpens,
+            appVersion: appVersion.version,
+            devMenuEnabled: devMenuEnabled,
+            onboardedVersion: onboardedSemVer?.version,
+            pendingOnboardingVersion: pendingOnboardingVer,
+        });
+
+        logger.info('App Opens: ', appOpens);
+        dispatch(increaseAppOpens());
+    }, []);
 
     useEffect(() => {
         if (!onboarded) {

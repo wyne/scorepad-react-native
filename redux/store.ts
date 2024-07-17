@@ -22,6 +22,8 @@ const settingsPersistConfig = {
         'showColorPalettes',
         'interactionType',
         'lastStoreReviewPrompt',
+        'devMenuEnabled',
+        'appOpens',
     ],
 };
 
