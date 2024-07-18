@@ -13,7 +13,6 @@ import { logEvent } from '../Analytics';
 import EditGame from '../components/EditGame';
 import PlayerListItem from '../components/PlayerListItem';
 import { MAX_PLAYERS, systemBlue } from '../constants';
-import logger from '../Logger';
 
 type RouteParams = {
     Settings: {
@@ -112,7 +111,10 @@ const SettingsScreen: React.FunctionComponent<Props> = ({ navigation }) => {
                         })
                     );
 
-                    logger.info('Reorder players');
+                    logEvent('reorder_players', {
+                        game_id: currentGameId,
+                        playerCount: data.length,
+                    });
                 }}
             />
         </View>

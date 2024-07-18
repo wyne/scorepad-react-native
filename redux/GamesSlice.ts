@@ -228,6 +228,7 @@ export const asyncCreateGame = createAsyncThunk(
 
         await logEvent('new_game', {
             index: gameCount,
+            playerCount: playerCount,
         });
 
         return newGameId;
