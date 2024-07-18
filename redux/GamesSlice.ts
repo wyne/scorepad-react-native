@@ -8,7 +8,7 @@ import { SortDirectionKey, SortSelectorKey } from '../src/components/ScoreLog/So
 import logger from '../src/Logger';
 
 import { playerAdd, selectPlayerById, updatePlayer } from './PlayersSlice';
-import { setCurrentGameId } from './SettingsSlice';
+import { incrementRollingGameCounter, setCurrentGameId } from './SettingsSlice';
 import { RootState } from './store';
 
 export interface GameState {
@@ -225,6 +225,7 @@ export const asyncCreateGame = createAsyncThunk(
         }));
 
         dispatch(setCurrentGameId(newGameId));
+        dispatch(incrementRollingGameCounter());
 
         await logEvent('new_game', {
             index: gameCount,

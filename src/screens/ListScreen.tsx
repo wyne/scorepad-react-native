@@ -34,10 +34,9 @@ const ListScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     const appVersion = new SemVer(Application.nativeApplicationVersion || '0.0.0');
     const pendingOnboardingVer = getPendingOnboardingSemVer(onboardedSemVer);
     const onboarded = pendingOnboardingVer === undefined;
+    const rollingGameCounter = useAppSelector(state => state.settings.rollingGameCounter);
 
     useEffect(() => {
-        logger.info(`Onboarded: ${onboarded}`);
-
         if (installId === undefined) {
             console.log('no install id');
             const installId = Crypto.randomUUID();
@@ -53,9 +52,9 @@ const ListScreen: React.FunctionComponent<Props> = ({ navigation }) => {
             onboardedVersion: onboardedSemVer?.version,
             pendingOnboardingVersion: pendingOnboardingVer,
             installId,
+            rollingGameCounter,
         });
 
-        logger.info('App Opens: ', appOpens);
         dispatch(increaseAppOpens());
     }, []);
 

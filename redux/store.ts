@@ -25,6 +25,7 @@ const settingsPersistConfig = {
         'devMenuEnabled',
         'appOpens',
         'installId',
+        'rollingGameCounter',
     ],
 };
 
