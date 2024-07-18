@@ -36,11 +36,6 @@ const ListScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     const onboarded = pendingOnboardingVer === undefined;
 
     useEffect(() => {
-        logger.info(`App Version: ${appVersion}`);
-        logger.info(`Install ID: ${installId}`);
-        logger.info(`Dev Menu Enabled: ${devMenuEnabled}`);
-        logger.info(`Onboarded Version: ${onboardedSemVer}`);
-        logger.info(`Pending onboard: ${pendingOnboardingVer}`);
         logger.info(`Onboarded: ${onboarded}`);
 
         if (installId === undefined) {
@@ -50,6 +45,7 @@ const ListScreen: React.FunctionComponent<Props> = ({ navigation }) => {
         }
 
         logEvent('game_list', {
+            onboarded: onboarded,
             gameCount: gameIds.length,
             appOpens: appOpens,
             appVersion: appVersion.version,

@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 
-import { RouteProp } from '@react-navigation/native';
+import { RouteProp, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import {
     NativeScrollEvent,
@@ -13,6 +13,7 @@ import { ExpandingDot } from 'react-native-animated-pagination-dots';
 import Animated, { FadeIn } from 'react-native-reanimated';
 import { SemVer } from 'semver';
 
+import { logEvent } from '../Analytics';
 import { getOnboardingScreens, OnboardingScreenItem } from '../components/Onboarding/Onboarding';
 import OnboardingPage from '../components/Onboarding/OnboardingPage';
 import SkipButton from '../components/Onboarding/SkipButton';
@@ -40,9 +41,17 @@ const OnboardingScreen: React.FunctionComponent<Props> = ({ navigation, route })
     const [activeIndex, setActiveIndex] = React.useState<number>(0);
 
     const closeOnboarding = React.useCallback(() => {
+        const end = activeIndex == onboardingScreens.length - 1;
+        const eventName = end ? 'onboarding_complete' : 'onboarding_skip';
+        logEvent(eventName, {
+            onboarding: onboarding,
+            index: activeIndex,
+            end: end
+        });
+
         if (onboarding) navigation.navigate('List');
         else navigation.goBack();
-    }, []);
+    }, [activeIndex]);
 
     // Flatlist props that calculates current item index
     const onScrollEnd = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
@@ -51,6 +60,34 @@ const OnboardingScreen: React.FunctionComponent<Props> = ({ navigation, route })
     };
 
     const viewConfigRef = React.useRef({ viewAreaCoveragePercentThreshold: 50 });
+
+    useEffect(() => {
+        logEvent('onboarding_page', {
+            onboarding: onboarding,
+            index: activeIndex,
+            end: activeIndex == onboardingScreens.length - 1
+        });
+    }, [activeIndex]);
+
+    const activeIndexRef = useRef(activeIndex); // Create a ref to store the current activeIndex
+
+    useEffect(() => {
+        activeIndexRef.current = activeIndex; // Update the ref's value whenever activeIndex changes
+    }, [activeIndex]);
+
+    useFocusEffect(
+        useCallback(() => {
+            // This function is called when the screen comes into focus
+            return () => {
+                // This function is called when the screen goes out of focus
+                logEvent('onboarding_close', {
+                    onboarding: onboarding,
+                    index: activeIndexRef.current,
+                    end: activeIndexRef.current == onboardingScreens.length - 1
+                });
+            };
+        }, [onboarding])
+    );
 
     return (
         <Animated.View style={[styles.container]} entering={FadeIn}
