@@ -10,7 +10,13 @@ import logger from './Logger';
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const logEvent = async (eventName: string, params?: Record<string, any>) => {
     // Additional logging logic here (e.g., console.log for debugging)
-    logger.log(`Logging event: ${eventName}`, params);
+    logger.info(
+        '\x1b[34m', // Set the color to blue
+        'EVENT',
+        eventName,
+        JSON.stringify(params, null, 2),
+        '\x1b[0m' // Reset the color
+    );
 
     // Log the event to Firebase Analytics
     await analytics().logEvent(eventName, params);
