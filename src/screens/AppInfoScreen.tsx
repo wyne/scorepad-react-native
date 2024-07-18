@@ -1,6 +1,5 @@
 import React from 'react';
 
-import analytics from '@react-native-firebase/analytics';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ParamListBase } from '@react-navigation/routers';
 import * as Application from 'expo-application';
@@ -9,6 +8,7 @@ import { Button } from 'react-native-elements';
 
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { toggleShowColorPalettes, toggleShowPlayerIndex, toggleShowPointParticles } from '../../redux/SettingsSlice';
+import { logEvent } from '../Analytics';
 import RotatingIcon from '../components/AppInfo/RotatingIcon';
 
 interface Props {
@@ -55,7 +55,7 @@ const AppInfoScreen: React.FunctionComponent<Props> = ({ navigation }) => {
             `${Platform.OS} ${Platform.Version}\n` +
             (process.env.EXPO_PUBLIC_FIREBASE_ANALYTICS)
         );
-        await analytics().logEvent('view_version');
+        await logEvent('view_version');
     };
 
     return (

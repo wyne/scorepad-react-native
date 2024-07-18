@@ -1,6 +1,5 @@
 import React, { useCallback } from 'react';
 
-import analytics from '@react-native-firebase/analytics';
 import { ParamListBase } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import * as Haptics from 'expo-haptics';
@@ -12,6 +11,7 @@ import Animated, { FadeInUp, SlideOutLeft } from 'react-native-reanimated';
 import { selectGameById } from '../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { setCurrentGameId } from '../../redux/SettingsSlice';
+import { logEvent } from '../Analytics';
 
 import GameListItemPlayerName from './GameListItemPlayerName';
 import AbstractPopupMenu from './PopupMenu/AbstractPopupMenu';
@@ -45,7 +45,7 @@ const GameListItem: React.FunctionComponent<Props> = ({ navigation, gameId, inde
         setCurrentGameCallback();
         navigation.navigate('Game');
 
-        await analytics().logEvent('select_game', {
+        await logEvent('select_game', {
             index: index,
             game_id: gameId,
             player_count: playerIds.length,

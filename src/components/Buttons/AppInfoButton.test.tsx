@@ -1,9 +1,11 @@
-import analytics from '@react-native-firebase/analytics';
-import { render, fireEvent, waitFor } from '@testing-library/react-native';
+import { fireEvent, render, waitFor } from '@testing-library/react-native';
 
 import { useNavigationMock } from '../../../test/test-helpers';
+import { logEvent } from '../../Analytics';
 
 import AppInfoButton from './AppInfoButton';
+
+jest.mock('../../Analytics');
 
 describe('AppInfoButton', () => {
     const navigation = useNavigationMock();
@@ -22,7 +24,7 @@ describe('AppInfoButton', () => {
         fireEvent.press(button);
 
         await waitFor(() => {
-            expect(analytics().logEvent).toHaveBeenCalledWith('app_info');
+            expect(logEvent).toHaveBeenCalledWith('app_info');
         });
     });
 });

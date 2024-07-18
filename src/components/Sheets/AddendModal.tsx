@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { BottomSheetBackdrop, BottomSheetBackdropProps, BottomSheetModal, BottomSheetScrollView } from '@gorhom/bottom-sheet';
-import analytics from '@react-native-firebase/analytics';
 import { Picker } from '@react-native-picker/picker';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import { debounce } from 'lodash';
@@ -9,6 +8,7 @@ import { Platform, StyleSheet, Text, View } from 'react-native';
 
 import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
 import { setAddendOne, setAddendTwo, setMultiplier } from '../../../redux/SettingsSlice';
+import { logEvent } from '../../Analytics';
 import InteractionSelector from '../Interactions/InteractionSelector';
 import { InteractionType } from '../Interactions/InteractionType';
 
@@ -58,7 +58,7 @@ const AddendModal: React.FunctionComponent<Props> = ({ }) => {
     const onTapValueChange = useCallback((itemValue: number, itemIndex: number) => {
         dispatch(setMultiplier(addendOptions[itemIndex]));
         dispatch(setAddendOne(addendOptions[itemIndex]));
-        analytics().logEvent('addend_two_change', {
+        logEvent('addend_two_change', {
             addendOne: itemValue,
         });
     }, [addendOne]);
@@ -67,7 +67,7 @@ const AddendModal: React.FunctionComponent<Props> = ({ }) => {
 
     const onLongTapValueChange = useCallback((itemValue: number) => {
         dispatch(setAddendTwo(itemValue));
-        analytics().logEvent('addend_two_change', {
+        logEvent('addend_two_change', {
             addendTwo: itemValue,
         });
     }, [addendTwo]);

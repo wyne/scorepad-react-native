@@ -1,8 +1,8 @@
-import analytics from '@react-native-firebase/analytics';
 import { PayloadAction, createAsyncThunk, createEntityAdapter, createSelector, createSlice } from '@reduxjs/toolkit';
 import { getContrastRatio } from 'colorsheet';
 import * as Crypto from 'expo-crypto';
 
+import { logEvent } from '../src/Analytics';
 import { getPalette } from '../src/ColorPalette';
 import { SortDirectionKey, SortSelectorKey } from '../src/components/ScoreLog/SortHelper';
 import logger from '../src/Logger';
@@ -153,7 +153,7 @@ export const asyncRematchGame = createAsyncThunk(
 
         dispatch(setCurrentGameId(newGameId));
 
-        await analytics().logEvent('rematch_game', {
+        await logEvent('rematch_game', {
             gameId: game.id,
         });
 
@@ -226,7 +226,7 @@ export const asyncCreateGame = createAsyncThunk(
 
         dispatch(setCurrentGameId(newGameId));
 
-        await analytics().logEvent('new_game', {
+        await logEvent('new_game', {
             index: gameCount,
         });
 

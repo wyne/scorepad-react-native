@@ -1,6 +1,5 @@
 import React, { memo, useEffect } from 'react';
 
-import analytics from '@react-native-firebase/analytics';
 import { ParamListBase } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import * as Application from 'expo-application';
@@ -9,11 +8,12 @@ import * as Crypto from 'expo-crypto';
 import { StyleSheet, Text, View } from 'react-native';
 import Animated, { Easing, LinearTransition } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { parse, SemVer } from 'semver';
+import { SemVer, parse } from 'semver';
 
 import { selectGameIds } from '../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { increaseAppOpens, setInstallId, setOnboardedVersion } from '../../redux/SettingsSlice';
+import { logEvent } from '../Analytics';
 import GameListItem from '../components/GameListItem';
 import { getPendingOnboardingSemVer } from '../components/Onboarding/Onboarding';
 import logger from '../Logger';
@@ -49,7 +49,7 @@ const ListScreen: React.FunctionComponent<Props> = ({ navigation }) => {
             dispatch(setInstallId(installId));
         }
 
-        analytics().logEvent('game_list', {
+        logEvent('game_list', {
             gameCount: gameIds.length,
             appOpens: appOpens,
             appVersion: appVersion.version,

@@ -1,6 +1,5 @@
 import React from 'react';
 
-import analytics from '@react-native-firebase/analytics';
 import { ParamListBase } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import * as StoreReview from 'expo-store-review';
@@ -10,6 +9,7 @@ import { Icon } from 'react-native-elements/dist/icons/Icon';
 import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
 import { selectLastStoreReviewPrompt } from '../../../redux/selectors';
 import { setLastStoreReviewPrompt } from '../../../redux/SettingsSlice';
+import { logEvent } from '../../Analytics';
 import { systemBlue } from '../../constants';
 
 import HeaderButton from './HeaderButton';
@@ -30,7 +30,7 @@ const HomeButton: React.FunctionComponent<Props> = ({ navigation }) => {
         if (gameCount < 3) { return; }
         if (daysSinceLastPrompt < 90) { return; }
 
-        await analytics().logEvent('review_prompt');
+        await logEvent('review_prompt');
 
         dispatch(setLastStoreReviewPrompt(Date.now()));
 
@@ -49,7 +49,7 @@ const HomeButton: React.FunctionComponent<Props> = ({ navigation }) => {
     return (
         <HeaderButton accessibilityLabel='Home' onPress={async () => {
             navigation.navigate('List');
-            await analytics().logEvent('menu');
+            await logEvent('menu');
 
             storePrompt();
         }}>

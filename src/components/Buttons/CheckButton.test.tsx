@@ -1,9 +1,11 @@
-import analytics from '@react-native-firebase/analytics';
-import { render, fireEvent, waitFor } from '@testing-library/react-native';
+import { fireEvent, render, waitFor } from '@testing-library/react-native';
 
 import { useNavigationMock } from '../../../test/test-helpers';
+import { logEvent } from '../../Analytics';
 
 import CheckButton from './CheckButton';
+
+jest.mock('../../Analytics');
 
 describe('CheckButton', () => {
     const navigation = useNavigationMock();
@@ -33,7 +35,7 @@ describe('CheckButton', () => {
         fireEvent.press(button);
 
         await waitFor(() => {
-            expect(analytics().logEvent).toHaveBeenCalledWith('save_game');
+            expect(logEvent).toHaveBeenCalledWith('save_game');
         });
     });
 });

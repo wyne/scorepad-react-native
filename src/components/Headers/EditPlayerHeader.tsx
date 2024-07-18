@@ -1,10 +1,10 @@
 import React from 'react';
 
-import { getAnalytics } from '@react-native-firebase/analytics';
 import { ParamListBase, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { StyleSheet, Text } from 'react-native';
 
+import { logEvent } from '../../Analytics';
 import { systemBlue } from '../../constants';
 import HeaderButton from '../Buttons/HeaderButton';
 
@@ -28,7 +28,7 @@ const EditPlayerHeader: React.FunctionComponent<EditPlayerScreenProps> = ({ navi
             headerLeft={
                 <HeaderButton accessibilityLabel='EditPlayerBack' onPress={async () => {
                     navigation.goBack();
-                    await getAnalytics().logEvent('edit_player_back');
+                    await logEvent('edit_player_back');
                 }}>
                     <Text style={{ color: systemBlue, fontSize: 20 }}>Back</Text>
                 </HeaderButton>

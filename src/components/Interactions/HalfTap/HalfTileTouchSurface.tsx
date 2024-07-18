@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 
-import analytics from '@react-native-firebase/analytics';
 import * as Haptics from 'expo-haptics';
 import { StyleSheet, TouchableHighlight, View } from 'react-native';
 
 import { useAppDispatch, useAppSelector } from '../../../../redux/hooks';
 import { playerRoundScoreIncrement } from '../../../../redux/PlayersSlice';
 import { selectCurrentGame } from '../../../../redux/selectors';
+import { logEvent } from '../../../Analytics';
 import { ScoreParticle } from '../../PlayerTiles/AdditionTile/ScoreParticle';
 
 type ScoreParticleProps = {
@@ -55,7 +55,7 @@ export const HalfTileTouchSurface: React.FunctionComponent<Props> = (
             addParticle(addend);
         }
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-        analytics().logEvent('score_change', {
+        logEvent('score_change', {
             player_index: playerIndex,
             game_id: currentGameId,
             addend: addend,
