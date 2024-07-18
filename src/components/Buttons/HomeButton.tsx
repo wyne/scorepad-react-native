@@ -32,9 +32,9 @@ const HomeButton: React.FunctionComponent<Props> = ({ navigation }) => {
         if (daysSinceLastPrompt < 90) { return; }
 
         await logEvent('review_prompt', {
-            daysSinceLastPrompt: daysSinceLastPrompt,
-            gameCount: gameCount,
-            installId: installId
+            daysSinceLastPrompt,
+            gameCount,
+            installId
         });
 
         dispatch(setLastStoreReviewPrompt(Date.now()));

@@ -45,14 +45,14 @@ const ListScreen: React.FunctionComponent<Props> = ({ navigation }) => {
         }
 
         logEvent('game_list', {
-            onboarded: onboarded,
+            onboarded,
             gameCount: gameIds.length,
-            appOpens: appOpens,
+            appOpens,
             appVersion: appVersion.version,
-            devMenuEnabled: devMenuEnabled,
+            devMenuEnabled,
             onboardedVersion: onboardedSemVer?.version,
             pendingOnboardingVersion: pendingOnboardingVer,
-            installId: installId,
+            installId,
         });
 
         logger.info('App Opens: ', appOpens);

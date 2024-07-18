@@ -36,7 +36,7 @@ const RotatingIcon: React.FunctionComponent = ({ }) => {
             dispatch(toggleDevMenuEnabled());
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
             logEvent('dev_menu', {
-                installId: installId,
+                installId,
             });
         }, 5000);
     };
