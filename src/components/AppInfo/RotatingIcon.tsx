@@ -10,12 +10,14 @@ import Animated, {
     withTiming
 } from 'react-native-reanimated';
 
-import { useAppDispatch } from '../../../redux/hooks';
+import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
 import { toggleDevMenuEnabled } from '../../../redux/SettingsSlice';
 import { logEvent } from '../../Analytics';
 
 const RotatingIcon: React.FunctionComponent = ({ }) => {
     const dispatch = useAppDispatch();
+
+    const installId = useAppSelector(state => state.settings.installId);
 
     const rotation = useSharedValue(0);
     const rotationCount = useSharedValue(1);
@@ -33,6 +35,9 @@ const RotatingIcon: React.FunctionComponent = ({ }) => {
         holdCallback = setTimeout(() => {
             dispatch(toggleDevMenuEnabled());
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+            logEvent('dev_menu', {
+                installId: installId,
+            });
         }, 5000);
     };
 
