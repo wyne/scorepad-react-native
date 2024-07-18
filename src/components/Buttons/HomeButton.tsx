@@ -20,6 +20,7 @@ interface Props {
 
 const HomeButton: React.FunctionComponent<Props> = ({ navigation }) => {
     const gameCount = useAppSelector((state) => state.games.ids.length);
+    const installId = useAppSelector((state) => state.settings.installId);
     const lastStoreReviewPrompt = useAppSelector(selectLastStoreReviewPrompt);
     const dispatch = useAppDispatch();
 
@@ -30,7 +31,11 @@ const HomeButton: React.FunctionComponent<Props> = ({ navigation }) => {
         if (gameCount < 3) { return; }
         if (daysSinceLastPrompt < 90) { return; }
 
-        await logEvent('review_prompt');
+        await logEvent('review_prompt', {
+            daysSinceLastPrompt: daysSinceLastPrompt,
+            gameCount: gameCount,
+            installId: installId
+        });
 
         dispatch(setLastStoreReviewPrompt(Date.now()));
 
