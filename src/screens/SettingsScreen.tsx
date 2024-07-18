@@ -78,7 +78,13 @@ const SettingsScreen: React.FunctionComponent<Props> = ({ navigation }) => {
             <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                 <Text style={styles.heading}>Players</Text>
                 {playerIds.length > 1 &&
-                    <TouchableOpacity onPress={() => setEdit(!edit)}>
+                    <TouchableOpacity onPress={() => {
+                        setEdit(!edit);
+                        logEvent('edit_players', {
+                            game_id: currentGameId,
+                            player_count: playerIds.length,
+                        });
+                    }}>
                         <Text style={[styles.heading, { color: systemBlue }]}>{edit ? 'Done' : 'Edit'}</Text>
                     </TouchableOpacity>
                 }
@@ -113,7 +119,7 @@ const SettingsScreen: React.FunctionComponent<Props> = ({ navigation }) => {
 
                     logEvent('reorder_players', {
                         game_id: currentGameId,
-                        playerCount: data.length,
+                        player_count: data.length,
                     });
                 }}
             />

@@ -96,6 +96,8 @@ const GameHeader: React.FunctionComponent<Props> = ({ navigation }) => {
             game_id: currentGameId,
             source: 'next button',
             round: roundCurrent,
+            next_round: roundCurrent + 1,
+            new_round: isLastRound
         });
     };
 
@@ -109,6 +111,7 @@ const GameHeader: React.FunctionComponent<Props> = ({ navigation }) => {
             game_id: currentGameId,
             source: 'previous button',
             round: roundCurrent,
+            next_round: roundCurrent - 1,
         });
     };
 
