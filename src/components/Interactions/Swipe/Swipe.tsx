@@ -156,12 +156,6 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
         if (event.nativeEvent.oldState === State.UNDETERMINED && event.nativeEvent.state === State.BEGAN) {
             // Handle the start of the gesture
             powerHoldStart();
-
-            try {
-                playSound();
-            } catch (e) {
-                console.log(e);
-            }
         } else if (event.nativeEvent.state == State.FAILED || event.nativeEvent.state === State.END) {
             // Handle the end of the gesture
 
@@ -186,12 +180,6 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
             }).start();
 
             powerHoldStop();
-
-            try {
-                stopSound();
-            } catch (e) {
-                console.log(e);
-            }
         }
     };
 
@@ -210,12 +198,7 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
         }
 
-        // playSound();
-        try {
-            increaseRate(value >= 0 ? 0.2 : -0.2);
-        } catch (e) {
-            console.log(e);
-        }
+        playBubbleSound(value > 0 ? 'increment' : 'decrement');
 
         dispatch(playerRoundScoreIncrement(playerId, roundCurrent, a));
     };
@@ -236,51 +219,27 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
     );
 
     //#endregion
-    //
 
     //#region Sounds
+    async function playBubbleSound(direction: 'increment' | 'decrement' = 'increment') {
+        const soundFiles = {
+            increment: require('../../../../assets/sounds/increment.mp3'),
+            decrement: require('../../../../assets/sounds/decrement.mp3'),
+        };
+        const soundFile = soundFiles[direction];
 
-    const [sound, setSound] = useState<Audio.Sound>();
-    const [rate, setRate] = useState(1.5);
-
-    async function playSound() {
-
-        await Audio.setAudioModeAsync({ playsInSilentModeIOS: true });
-
-        console.log('Loading Sound');
-        // const { sound } = await Audio.Sound.createAsync(
-        //     // { uri: 'https://cdn.pixabay.com/download/audio/2022/03/15/audio_2271eb75c5.mp3?filename=pop-91931.mp3' },
-        //     { shouldPlay: true }
-        // );
-
-        const { sound } = await Audio.Sound.createAsync(
-            require('../../../../assets/sounds/200.wav')
+        const { sound: newSound } = await Audio.Sound.createAsync(
+            soundFile,
+            { shouldPlay: false } // This starts playing the sound immediately upon loading
         );
 
-        setSound(sound);
-        await sound.setIsLoopingAsync(true);
-        await sound.playFromPositionAsync(50);
-    }
-
-    async function stopSound() {
-        if (!sound) { return; }
-        await sound.stopAsync();
-    }
-
-    async function increaseRate(inc: number) {
-        if (!sound) { return; }
-        setRate(rate + inc);
-        await sound.setRateAsync(rate, false);
-    }
-
-    useEffect(() => {
-        return sound
-            ? () => {
-                sound.unloadAsync();
+        // Optionally, add a listener to unload the sound once it's done playing
+        newSound.setOnPlaybackStatusUpdate(async (status) => {
+            if (status.didJustFinish) {
+                await newSound.unloadAsync();
             }
-            : undefined;
-    }, [sound]);
-
+        });
+    }
     //#endregion
 
     return (
