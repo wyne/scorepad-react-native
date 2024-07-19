@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
 
-import analytics from '@react-native-firebase/analytics';
 import * as Haptics from 'expo-haptics';
 import { Animated, StyleSheet, View } from 'react-native';
 import { PanGestureHandler, PanGestureHandlerStateChangeEvent, State } from 'react-native-gesture-handler';
@@ -9,6 +8,7 @@ import { runOnJS, useAnimatedReaction, useSharedValue } from 'react-native-reani
 import { useAppDispatch, useAppSelector } from '../../../../redux/hooks';
 import { playerRoundScoreIncrement } from '../../../../redux/PlayersSlice';
 import { selectCurrentGame } from '../../../../redux/selectors';
+import { logEvent } from '../../../Analytics';
 
 interface HalfTapProps {
     children: React.ReactNode;
@@ -39,7 +39,7 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
 
     //#region Power Hold
 
-    const powerHoldTime = 400;
+    const powerHoldTime = 500;
     const holdDuration = useRef(new Animated.Value(0)).current;
     let powerHoldTimer: NodeJS.Timeout;
     const [powerHold, setPowerHold] = useState<boolean>(false);
@@ -55,8 +55,8 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
     }, []);
 
     const scale = holdDuration.interpolate({
-        inputRange: [0, powerHoldTime * .9, powerHoldTime],
-        outputRange: [1, 1.1, 1.05],
+        inputRange: [0, powerHoldTime * .2, powerHoldTime * .9, powerHoldTime],
+        outputRange: [1, 1, 1.1, 1.05],
         extrapolate: 'clamp',
     });
 
@@ -159,14 +159,14 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
             // Handle the end of the gesture
             totalOffset.value = null;
 
-            analytics().logEvent('score_change', {
+            logEvent('score_change', {
                 player_index: index,
                 game_id: currentGameId,
                 addend: powerHold ? addendOne : addendTwo,
                 round: roundCurrent,
                 type: event.nativeEvent.translationY > 0 ? 'decrement' : 'increment',
                 power_hold: powerHold,
-                notches: Math.round((event.nativeEvent.translationY || 0) / notchSize),
+                notches: -Math.round((event.nativeEvent.translationY || 0) / notchSize),
                 interaction: 'swipe-vertical',
             });
 
