@@ -31,7 +31,7 @@ const gamesPersistConfig = {
     key: 'games',
     version: 0,
     storage: AsyncStorage,
-    whitelist: ['entities', 'ids', 'sortSelectorKey'],
+    whitelist: ['entities', 'ids'],
 };
 
 const playersPersistConfig = {

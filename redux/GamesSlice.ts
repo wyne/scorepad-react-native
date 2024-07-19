@@ -29,13 +29,16 @@ const gamesAdapter = createEntityAdapter({
 });
 
 const initialState = gamesAdapter.getInitialState({
+});
+
+const gameDefaults = {
     roundCurrent: 0,
     roundTotal: 1,
     locked: false,
     sortSelectorKey: SortSelectorKey.ByScore,
     sortDirectionKey: SortDirectionKey.Normal,
     palette: 'original',
-});
+};
 
 const gamesSlice = createSlice({
     name: 'games',
@@ -143,11 +146,10 @@ export const asyncRematchGame = createAsyncThunk(
         });
 
         dispatch(gameSave({
+            ...gameDefaults,
             id: newGameId,
             title: game.title,
             dateCreated: Date.now(),
-            roundCurrent: 0,
-            roundTotal: 1,
             playerIds: playerIds,
         }));
 
@@ -203,7 +205,7 @@ export const asyncCreateGame = createAsyncThunk(
             playerIds.push(Crypto.randomUUID());
         }
 
-        const paletteName = initialState.palette;
+        const paletteName = gameDefaults.palette;
         const paletteColors = getPalette(paletteName);
 
         playerIds.forEach((playerId, index) => {
@@ -217,7 +219,7 @@ export const asyncCreateGame = createAsyncThunk(
         });
 
         dispatch(gameSave({
-            ...initialState,
+            ...gameDefaults,
             id: newGameId,
             title: `Game ${gameCount + 1}`,
             dateCreated: Date.now(),
