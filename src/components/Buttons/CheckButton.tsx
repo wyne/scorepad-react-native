@@ -1,10 +1,10 @@
 import React from 'react';
 
-import analytics from '@react-native-firebase/analytics';
 import { ParamListBase, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Text } from 'react-native';
 
+import { logEvent } from '../../Analytics';
 import { systemBlue } from '../../constants';
 
 import HeaderButton from './HeaderButton';
@@ -23,7 +23,7 @@ const CheckButton: React.FunctionComponent<Props> = ({ navigation, route }) => {
 
     return (
         <HeaderButton accessibilityLabel='Save Game' onPress={async () => {
-            await analytics().logEvent('save_game');
+            await logEvent('save_game');
             if (route?.params?.source === 'list_screen') {
                 navigation.navigate('List');
             } else {

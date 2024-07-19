@@ -3,6 +3,7 @@ import React from 'react';
 import { StyleSheet, Text, TouchableHighlight, View } from 'react-native';
 
 import { useAppSelector } from '../../../redux/hooks';
+import { logEvent } from '../../Analytics';
 import { systemBlue } from '../../constants';
 import { InteractionType } from '../Interactions/InteractionType';
 import { useAddendModalContext } from '../Sheets/AddendModalContext';
@@ -15,6 +16,7 @@ const AddendButton: React.FunctionComponent = ({ }) => {
     const addendOne = useAppSelector(state => state.settings.addendOne);
     const addendTwo = useAppSelector(state => state.settings.addendTwo);
     const interactionType = useAppSelector(state => state.settings.interactionType);
+    const installId = useAppSelector(state => state.settings.installId);
 
     const adddendModalRef = useAddendModalContext();
     const gameSheetRef = useGameSheetContext();
@@ -26,6 +28,10 @@ const AddendButton: React.FunctionComponent = ({ }) => {
 
         gameSheetRef?.current?.snapToIndex(0);
         adddendModalRef.current?.present();
+
+        logEvent('addend_sheet', {
+            installId
+        });
     };
 
     const gestureIcons: { [key: string]: React.FunctionComponent; } = {

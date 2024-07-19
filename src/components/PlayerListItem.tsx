@@ -1,6 +1,5 @@
 import React from 'react';
 
-import analytics from '@react-native-firebase/analytics';
 import { ParamListBase } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -10,6 +9,7 @@ import { makeSelectPlayerColors, selectGameById, updateGame } from '../../redux/
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { removePlayer, selectPlayerById } from '../../redux/PlayersSlice';
 import { selectCurrentGame } from '../../redux/selectors';
+import { logEvent } from '../Analytics';
 
 interface Props {
     playerId: string;
@@ -62,7 +62,7 @@ const PlayerListItem: React.FunctionComponent<Props> = ({
     const deleteHandler = async () => {
         removePlayerHandler();
 
-        await analytics().logEvent('remove_player', {
+        await logEvent('remove_player', {
             game_id: currentGameId,
             player_index: index,
         });

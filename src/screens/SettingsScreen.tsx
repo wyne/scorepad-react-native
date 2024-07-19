@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react';
 
-import analytics from '@react-native-firebase/analytics';
 import { ParamListBase, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -10,10 +9,10 @@ import { Button, Icon } from 'react-native-elements';
 import { addPlayer, reorderPlayers } from '../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { selectCurrentGame } from '../../redux/selectors';
+import { logEvent } from '../Analytics';
 import EditGame from '../components/EditGame';
 import PlayerListItem from '../components/PlayerListItem';
 import { MAX_PLAYERS, systemBlue } from '../constants';
-import logger from '../Logger';
 
 type RouteParams = {
     Settings: {
@@ -45,7 +44,7 @@ const SettingsScreen: React.FunctionComponent<Props> = ({ navigation }) => {
             playerName: `Player ${playerIds.length + 1}`,
         }));
 
-        await analytics().logEvent('add_player', {
+        await logEvent('add_player', {
             game_id: currentGameId,
             player_count: playerIds.length + 1,
         });
@@ -79,7 +78,13 @@ const SettingsScreen: React.FunctionComponent<Props> = ({ navigation }) => {
             <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                 <Text style={styles.heading}>Players</Text>
                 {playerIds.length > 1 &&
-                    <TouchableOpacity onPress={() => setEdit(!edit)}>
+                    <TouchableOpacity onPress={() => {
+                        setEdit(!edit);
+                        logEvent('edit_players', {
+                            game_id: currentGameId,
+                            player_count: playerIds.length,
+                        });
+                    }}>
                         <Text style={[styles.heading, { color: systemBlue }]}>{edit ? 'Done' : 'Edit'}</Text>
                     </TouchableOpacity>
                 }
@@ -112,7 +117,10 @@ const SettingsScreen: React.FunctionComponent<Props> = ({ navigation }) => {
                         })
                     );
 
-                    logger.info('Reorder players');
+                    logEvent('reorder_players', {
+                        game_id: currentGameId,
+                        player_count: data.length,
+                    });
                 }}
             />
         </View>

@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import BottomSheet, { BottomSheetBackdrop, BottomSheetBackdropProps, BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { ParamListBase, useIsFocused } from '@react-navigation/native';
@@ -11,6 +11,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { asyncRematchGame, selectGameById, updateGame } from '../../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
 import { updatePlayer } from '../../../redux/PlayersSlice';
+import { logEvent } from '../../Analytics';
 import { systemBlue } from '../../constants';
 import BigButton from '../BigButtons/BigButton';
 import RematchIcon from '../Icons/RematchIcon';
@@ -50,14 +51,20 @@ const GameSheet: React.FunctionComponent<Props> = ({ navigation, containerHeight
     /**
      * Lock the game
      */
-    const setLock = () => dispatch(
-        updateGame({
-            id: currentGameId,
-            changes: {
-                locked: !gameLocked,
-            }
-        })
-    );
+    const setLock = () => {
+        dispatch(
+            updateGame({
+                id: currentGameId,
+                changes: {
+                    locked: !gameLocked,
+                }
+            })
+        );
+        logEvent('lock_game', {
+            game_id: currentGameId,
+            locked: !gameLocked
+        });
+    };
 
     /**
      * Reset the game, but keep the players
@@ -94,6 +101,8 @@ const GameSheet: React.FunctionComponent<Props> = ({ navigation, containerHeight
                             }
                         }));
                         navigation.navigate('Game');
+
+                        logEvent('reset_game', { game_id: currentGameId });
                     }
                 }
             ]
@@ -129,7 +138,24 @@ const GameSheet: React.FunctionComponent<Props> = ({ navigation, containerHeight
     };
 
     // State variable for the current snap point index
-    const [, setSnapPointIndex] = useState(0);
+    const [snapPointIndex, setSnapPointIndex] = useState(0);
+    const hasMountedRef = useRef(false);
+
+    useEffect(() => {
+        if (hasMountedRef.current) {
+            if (snapPointIndex == 0) {
+                logEvent('game_sheet_close');
+            } else {
+                logEvent('game_sheet_snap', {
+                    snapPointIndex: snapPointIndex,
+                });
+
+            }
+        } else {
+            // Skip the effect on the first render
+            hasMountedRef.current = true;
+        }
+    }, [snapPointIndex]);
 
     /**
      * Function to handle changes in the bottom sheet
@@ -243,7 +269,14 @@ const GameSheet: React.FunctionComponent<Props> = ({ navigation, containerHeight
                                             margin: 5, marginTop: 15,
                                             backgroundColor: 'rgba(0,0,0,.2)', borderRadius: 10
                                         }}
-                                        onPress={() => navigation.navigate('Settings')}
+                                        onPress={() => {
+
+                                            logEvent('edit_game', {
+                                                game_id: currentGameId
+                                            });
+                                            navigation.navigate('Settings');
+                                        }
+                                        }
                                     />
                                 </Animated.View>
                             }

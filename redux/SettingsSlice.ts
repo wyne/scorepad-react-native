@@ -19,6 +19,8 @@ export interface SettingsState {
     lastStoreReviewPrompt: number;
     devMenuEnabled?: boolean;
     appOpens: number;
+    installId: string | undefined;
+    rollingGameCounter?: number;
 };
 
 const initialState: SettingsState = {
@@ -34,6 +36,8 @@ const initialState: SettingsState = {
     interactionType: InteractionType.SwipeVertical,
     lastStoreReviewPrompt: 0,
     appOpens: 0,
+    installId: undefined,
+    rollingGameCounter: 0,
 };
 
 const settingsSlice = createSlice({
@@ -81,7 +85,13 @@ const settingsSlice = createSlice({
         },
         increaseAppOpens(state) {
             state.appOpens += 1;
-        }
+        },
+        setInstallId(state, action: PayloadAction<string>) {
+            state.installId = action.payload;
+        },
+        incrementRollingGameCounter(state) {
+            state.rollingGameCounter = (state.rollingGameCounter ?? 0) + 1;
+        },
     }
 });
 
@@ -99,6 +109,8 @@ export const {
     setLastStoreReviewPrompt,
     toggleDevMenuEnabled,
     increaseAppOpens,
+    setInstallId,
+    incrementRollingGameCounter,
 } = settingsSlice.actions;
 
 export default settingsSlice.reducer;

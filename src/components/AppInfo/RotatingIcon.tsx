@@ -1,6 +1,5 @@
 import React from 'react';
 
-import analytics from '@react-native-firebase/analytics';
 import * as Haptics from 'expo-haptics';
 import { Image } from 'expo-image';
 import { TouchableWithoutFeedback } from 'react-native';
@@ -11,11 +10,14 @@ import Animated, {
     withTiming
 } from 'react-native-reanimated';
 
-import { useAppDispatch } from '../../../redux/hooks';
+import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
 import { toggleDevMenuEnabled } from '../../../redux/SettingsSlice';
+import { logEvent } from '../../Analytics';
 
 const RotatingIcon: React.FunctionComponent = ({ }) => {
     const dispatch = useAppDispatch();
+
+    const installId = useAppSelector(state => state.settings.installId);
 
     const rotation = useSharedValue(0);
     const rotationCount = useSharedValue(1);
@@ -33,6 +35,9 @@ const RotatingIcon: React.FunctionComponent = ({ }) => {
         holdCallback = setTimeout(() => {
             dispatch(toggleDevMenuEnabled());
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+            logEvent('dev_menu', {
+                installId,
+            });
         }, 5000);
     };
 
@@ -48,7 +53,7 @@ const RotatingIcon: React.FunctionComponent = ({ }) => {
             rotationCount.value = rotationCount.value + 1;
             rotation.value = withTiming((rotationCount.value * 90), { duration: 1000, easing: Easing.elastic(1) });
 
-            await analytics().logEvent('app_icon');
+            await logEvent('app_icon');
         }}>
         <Animated.View style={[animatedStyles]}>
             <Image source={require('../../../assets/icon.png')}

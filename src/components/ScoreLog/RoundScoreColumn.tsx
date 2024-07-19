@@ -1,11 +1,11 @@
 import React, { memo, useCallback } from 'react';
 
-import analytics from '@react-native-firebase/analytics';
 import { LayoutChangeEvent, Text, TouchableWithoutFeedback, View } from 'react-native';
 
 import { updateGame } from '../../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
 import { selectCurrentGame } from '../../../redux/selectors';
+import { logEvent } from '../../Analytics';
 
 import RoundScoreCell from './RoundScoreCell';
 import { SortSelectorKey, sortSelectors } from './SortHelper';
@@ -39,7 +39,7 @@ const RoundScoreColumn: React.FunctionComponent<Props> = ({
                 roundCurrent: round,
             }
         }));
-        await analytics().logEvent('round_change', {
+        await logEvent('round_change', {
             game_id: currentGameId,
             source: 'direct select',
         });

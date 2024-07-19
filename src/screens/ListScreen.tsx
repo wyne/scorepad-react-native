@@ -1,10 +1,10 @@
 import React, { memo, useEffect } from 'react';
 
-import analytics from '@react-native-firebase/analytics';
 import { ParamListBase } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import * as Application from 'expo-application';
 import { BlurView } from 'expo-blur';
+import * as Crypto from 'expo-crypto';
 import { StyleSheet, Text, View } from 'react-native';
 import Animated, { Easing, LinearTransition } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -12,7 +12,8 @@ import { SemVer, parse } from 'semver';
 
 import { selectGameIds } from '../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
-import { increaseAppOpens, setOnboardedVersion } from '../../redux/SettingsSlice';
+import { increaseAppOpens, setInstallId, setOnboardedVersion } from '../../redux/SettingsSlice';
+import { logEvent } from '../Analytics';
 import GameListItem from '../components/GameListItem';
 import { getPendingOnboardingSemVer } from '../components/Onboarding/Onboarding';
 import logger from '../Logger';
@@ -24,34 +25,36 @@ interface Props {
 const ListScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     const appOpens = useAppSelector(state => state.settings.appOpens);
     const devMenuEnabled = useAppSelector(state => state.settings.devMenuEnabled);
+    const installId = useAppSelector(state => state.settings.installId);
     const gameIds = useAppSelector(state => selectGameIds(state));
     const dispatch = useAppDispatch();
 
     const onboardedStr = useAppSelector(state => state.settings.onboarded);
     const onboardedSemVer = parse(onboardedStr);
     const appVersion = new SemVer(Application.nativeApplicationVersion || '0.0.0');
-
-    logger.info(`App Version: ${appVersion}`);
-    logger.info(`Dev Menu Enabled: ${devMenuEnabled}`);
-    logger.info(`Onboarded Version: ${onboardedSemVer}`);
-
     const pendingOnboardingVer = getPendingOnboardingSemVer(onboardedSemVer);
     const onboarded = pendingOnboardingVer === undefined;
-
-    logger.info(`Pending onboard: ${pendingOnboardingVer}`);
-    logger.info(`Onboarded: ${onboarded}`);
+    const rollingGameCounter = useAppSelector(state => state.settings.rollingGameCounter);
 
     useEffect(() => {
-        analytics().logEvent('game_list', {
+        if (installId === undefined) {
+            logger.log('No install id');
+            const installId = Crypto.randomUUID();
+            dispatch(setInstallId(installId));
+        }
+
+        logEvent('game_list', {
+            onboarded,
             gameCount: gameIds.length,
-            appOpens: appOpens,
+            appOpens,
             appVersion: appVersion.version,
-            devMenuEnabled: devMenuEnabled,
+            devMenuEnabled,
             onboardedVersion: onboardedSemVer?.version,
             pendingOnboardingVersion: pendingOnboardingVer,
+            installId,
+            rollingGameCounter,
         });
 
-        logger.info('App Opens: ', appOpens);
         dispatch(increaseAppOpens());
     }, []);
 

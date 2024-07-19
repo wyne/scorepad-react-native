@@ -1,6 +1,5 @@
 import React from 'react';
 
-import analytics from '@react-native-firebase/analytics';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ParamListBase } from '@react-navigation/routers';
 import * as Application from 'expo-application';
@@ -9,6 +8,7 @@ import { Button } from 'react-native-elements';
 
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { toggleShowColorPalettes, toggleShowPlayerIndex, toggleShowPointParticles } from '../../redux/SettingsSlice';
+import { logEvent } from '../Analytics';
 import RotatingIcon from '../components/AppInfo/RotatingIcon';
 
 interface Props {
@@ -43,11 +43,33 @@ const AppInfoScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     const showPlayerIndex = useAppSelector(state => state.settings.showPlayerIndex);
     const showColorPalettes = useAppSelector(state => state.settings.showColorPalettes);
     const devMenuEnabled = useAppSelector(state => state.settings.devMenuEnabled);
+    const installId = useAppSelector(state => state.settings.installId);
 
     const dispatch = useAppDispatch();
-    const toggleParticleSwitch = () => { dispatch(toggleShowPointParticles()); };
-    const togglePlayerIndexSwitch = () => { dispatch(toggleShowPlayerIndex()); };
-    const toggleColorPalettesSwitch = () => { dispatch(toggleShowColorPalettes()); };
+    const toggleParticleSwitch = () => {
+        dispatch(toggleShowPointParticles());
+        logEvent('toggle_feature', {
+            feature: 'point_particles',
+            value: !showPointParticles,
+            installId
+        });
+    };
+    const togglePlayerIndexSwitch = () => {
+        dispatch(toggleShowPlayerIndex());
+        logEvent('toggle_feature', {
+            feature: 'player_index',
+            value: !showPlayerIndex,
+            installId
+        });
+    };
+    const toggleColorPalettesSwitch = () => {
+        dispatch(toggleShowColorPalettes());
+        logEvent('toggle_feature', {
+            feature: 'color_palettes',
+            value: !showColorPalettes,
+            installId
+        });
+    };
 
     const alertWithVersion = async () => {
         Alert.alert('ScorePad with Rounds\n' +
@@ -55,7 +77,7 @@ const AppInfoScreen: React.FunctionComponent<Props> = ({ navigation }) => {
             `${Platform.OS} ${Platform.Version}\n` +
             (process.env.EXPO_PUBLIC_FIREBASE_ANALYTICS)
         );
-        await analytics().logEvent('view_version');
+        await logEvent('view_version');
     };
 
     return (

@@ -1,6 +1,5 @@
 import React from 'react';
 
-import analytics from '@react-native-firebase/analytics';
 import { ParamListBase } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import * as Haptics from 'expo-haptics';
@@ -10,6 +9,7 @@ import { Icon } from 'react-native-elements/dist/icons/Icon';
 
 import { roundNext, roundPrevious, selectGameById } from '../../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
+import { logEvent } from '../../Analytics';
 import { systemBlue } from '../../constants';
 import AddendButton from '../Buttons/AddendButton';
 import FullscreenButton from '../Buttons/FullscreenButton';
@@ -92,10 +92,12 @@ const GameHeader: React.FunctionComponent<Props> = ({ navigation }) => {
         }
 
         dispatch(roundNext(currentGame.id));
-        analytics().logEvent('round_change', {
+        logEvent('round_change', {
             game_id: currentGameId,
             source: 'next button',
             round: roundCurrent,
+            next_round: roundCurrent + 1,
+            new_round: isLastRound
         });
     };
 
@@ -105,10 +107,11 @@ const GameHeader: React.FunctionComponent<Props> = ({ navigation }) => {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
         dispatch(roundPrevious(currentGame.id));
-        analytics().logEvent('round_change', {
+        logEvent('round_change', {
             game_id: currentGameId,
             source: 'previous button',
             round: roundCurrent,
+            next_round: roundCurrent - 1,
         });
     };
 

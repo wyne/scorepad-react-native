@@ -24,6 +24,8 @@ const settingsPersistConfig = {
         'lastStoreReviewPrompt',
         'devMenuEnabled',
         'appOpens',
+        'installId',
+        'rollingGameCounter',
     ],
 };
 

@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 
-import analytics from '@react-native-firebase/analytics';
 import { ParamListBase, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { NativeSyntheticEvent, ScrollView, StyleSheet, TextInput, TextInputEndEditingEventData, View } from 'react-native';
@@ -9,6 +8,7 @@ import { Input } from 'react-native-elements';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { updatePlayer } from '../../redux/PlayersSlice';
 import { selectCurrentGame } from '../../redux/selectors';
+import { logEvent } from '../Analytics';
 import ColorSelector from '../components/ColorPalettes/ColorSelector';
 
 type RouteParams = {
@@ -74,7 +74,7 @@ const EditPlayerScreen: React.FC<EditPlayerScreenProps> = ({
             }
         }));
 
-        analytics().logEvent('update_player', {
+        logEvent('update_player', {
             game_id: currentGame.id,
             player_index: index,
         });

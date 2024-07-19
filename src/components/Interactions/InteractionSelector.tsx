@@ -4,6 +4,7 @@ import { Text, View } from 'react-native';
 
 import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
 import { setInteractionType } from '../../../redux/SettingsSlice';
+import { logEvent } from '../../Analytics';
 import BigButton from '../BigButtons/BigButton';
 import SwipeGestureIcon from '../Buttons/SwipeGestureIcon';
 import TapGestureIcon from '../Buttons/TapGestureIcon';
@@ -18,6 +19,7 @@ const InteractionSelector: React.FunctionComponent<InteractionSelectorProps> = (
     const dispatch = useAppDispatch();
 
     const interactionType = useAppSelector(state => state.settings.interactionType);
+    const gameId = useAppSelector(state => state.settings.currentGameId);
 
     const description = (() => {
         switch (interactionType) {
@@ -37,6 +39,10 @@ const InteractionSelector: React.FunctionComponent<InteractionSelectorProps> = (
                         animated={false}
                         onPress={() => {
                             dispatch(setInteractionType(InteractionType.HalfTap));
+                            logEvent('interaction_type', {
+                                interactionType: 'half_tap',
+                                gameId,
+                            });
                         }}
                         text="Tap"
                         icon={<TapGestureIcon color={interactionType === InteractionType.HalfTap ? 'white' : 'grey'} size={40} />}
@@ -48,6 +54,10 @@ const InteractionSelector: React.FunctionComponent<InteractionSelectorProps> = (
                         animated={false}
                         onPress={() => {
                             dispatch(setInteractionType(InteractionType.SwipeVertical));
+                            logEvent('interaction_type', {
+                                interactionType: 'swipe_vertical',
+                                gameId,
+                            });
                         }}
                         text="Swipe"
                         icon={<SwipeGestureIcon color={interactionType === InteractionType.SwipeVertical ? 'white' : 'grey'} size={40} />}
