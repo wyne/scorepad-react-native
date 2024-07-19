@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import BottomSheet, { BottomSheetBackdrop, BottomSheetBackdropProps, BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { ParamListBase, useIsFocused } from '@react-navigation/native';
@@ -138,7 +138,24 @@ const GameSheet: React.FunctionComponent<Props> = ({ navigation, containerHeight
     };
 
     // State variable for the current snap point index
-    const [, setSnapPointIndex] = useState(0);
+    const [snapPointIndex, setSnapPointIndex] = useState(0);
+    const hasMountedRef = useRef(false);
+
+    useEffect(() => {
+        if (hasMountedRef.current) {
+            if (snapPointIndex == 0) {
+                logEvent('game_sheet_close');
+            } else {
+                logEvent('game_sheet_snap', {
+                    snapPointIndex: snapPointIndex,
+                });
+
+            }
+        } else {
+            // Skip the effect on the first render
+            hasMountedRef.current = true;
+        }
+    }, [snapPointIndex]);
 
     /**
      * Function to handle changes in the bottom sheet

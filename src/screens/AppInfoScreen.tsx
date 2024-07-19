@@ -43,11 +43,33 @@ const AppInfoScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     const showPlayerIndex = useAppSelector(state => state.settings.showPlayerIndex);
     const showColorPalettes = useAppSelector(state => state.settings.showColorPalettes);
     const devMenuEnabled = useAppSelector(state => state.settings.devMenuEnabled);
+    const installId = useAppSelector(state => state.settings.installId);
 
     const dispatch = useAppDispatch();
-    const toggleParticleSwitch = () => { dispatch(toggleShowPointParticles()); };
-    const togglePlayerIndexSwitch = () => { dispatch(toggleShowPlayerIndex()); };
-    const toggleColorPalettesSwitch = () => { dispatch(toggleShowColorPalettes()); };
+    const toggleParticleSwitch = () => {
+        dispatch(toggleShowPointParticles());
+        logEvent('toggle_feature', {
+            feature: 'point_particles',
+            value: !showPointParticles,
+            installId
+        });
+    };
+    const togglePlayerIndexSwitch = () => {
+        dispatch(toggleShowPlayerIndex());
+        logEvent('toggle_feature', {
+            feature: 'player_index',
+            value: !showPlayerIndex,
+            installId
+        });
+    };
+    const toggleColorPalettesSwitch = () => {
+        dispatch(toggleShowColorPalettes());
+        logEvent('toggle_feature', {
+            feature: 'color_palettes',
+            value: !showColorPalettes,
+            installId
+        });
+    };
 
     const alertWithVersion = async () => {
         Alert.alert('ScorePad with Rounds\n' +

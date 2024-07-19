@@ -64,7 +64,10 @@ const GameListItem: React.FunctionComponent<Props> = ({ navigation, gameId, inde
                 index={index}
             >
                 <ListItem key={gameId} bottomDivider
-                    onLongPress={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy)}
+                    onLongPress={() => {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+                        logEvent('list_menu_open');
+                    }}
                     onPress={
                         // Only select game if iOS because Android is handled by PopupMenu
                         Platform.OS == 'ios' ? chooseGameHandler : undefined

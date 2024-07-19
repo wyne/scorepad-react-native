@@ -38,7 +38,7 @@ const ListScreen: React.FunctionComponent<Props> = ({ navigation }) => {
 
     useEffect(() => {
         if (installId === undefined) {
-            console.log('no install id');
+            logger.log('No install id');
             const installId = Crypto.randomUUID();
             dispatch(setInstallId(installId));
         }
