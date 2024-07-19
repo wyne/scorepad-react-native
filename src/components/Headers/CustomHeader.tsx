@@ -8,7 +8,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 interface Props {
     navigation: NativeStackNavigationProp<ParamListBase, string, undefined>;
-    headerLeft: React.ReactNode;
+    headerLeft?: React.ReactNode;
     headerCenter: React.ReactNode;
     headerRight?: React.ReactNode;
     animated?: boolean;

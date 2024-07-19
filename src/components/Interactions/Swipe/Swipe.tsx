@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
 
-import analytics from '@react-native-firebase/analytics';
 import { Audio } from 'expo-av';
 import * as Haptics from 'expo-haptics';
 import { Animated, StyleSheet, View } from 'react-native';
@@ -10,6 +9,7 @@ import { runOnJS, useAnimatedReaction, useSharedValue } from 'react-native-reani
 import { useAppDispatch, useAppSelector } from '../../../../redux/hooks';
 import { playerRoundScoreIncrement } from '../../../../redux/PlayersSlice';
 import { selectCurrentGame } from '../../../../redux/selectors';
+import { logEvent } from '../../../Analytics';
 
 interface HalfTapProps {
     children: React.ReactNode;
@@ -28,10 +28,9 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
     //#region Selector setup
 
     const currentGameId = useAppSelector(state => state.settings.currentGameId);
-    const currentGame = useAppSelector(selectCurrentGame);
-    if (typeof currentGame == 'undefined') return null;
+    const roundCurrent = useAppSelector(state => selectCurrentGame(state)?.roundCurrent) || 0;
+    const currentGameLocked = useAppSelector(state => selectCurrentGame(state)?.locked);
 
-    const roundCurrent = currentGame.roundCurrent;
     const dispatch = useAppDispatch();
 
     const addendOne = useAppSelector(state => state.settings.addendOne);
@@ -41,7 +40,7 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
 
     //#region Power Hold
 
-    const powerHoldTime = 400;
+    const powerHoldTime = 500;
     const holdDuration = useRef(new Animated.Value(0)).current;
     let powerHoldTimer: NodeJS.Timeout;
     const [powerHold, setPowerHold] = useState<boolean>(false);
@@ -50,9 +49,15 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
         powerHoldRef.current = powerHold;
     }, [powerHold]);
 
+    useEffect(() => {
+        return () => {
+            clearTimeout(powerHoldTimer);
+        };
+    }, []);
+
     const scale = holdDuration.interpolate({
-        inputRange: [0, powerHoldTime * .9, powerHoldTime],
-        outputRange: [1, 1.1, 1.05],
+        inputRange: [0, powerHoldTime * .2, powerHoldTime * .9, powerHoldTime],
+        outputRange: [1, 1, 1.1, 1.05],
         extrapolate: 'clamp',
     });
 
@@ -162,14 +167,14 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
 
             totalOffset.value = null;
 
-            analytics().logEvent('score_change', {
+            logEvent('score_change', {
                 player_index: index,
                 game_id: currentGameId,
                 addend: powerHold ? addendOne : addendTwo,
                 round: roundCurrent,
                 type: event.nativeEvent.translationY > 0 ? 'decrement' : 'increment',
                 power_hold: powerHold,
-                notches: Math.round((event.nativeEvent.translationY || 0) / notchSize),
+                notches: -Math.round((event.nativeEvent.translationY || 0) / notchSize),
                 interaction: 'swipe-vertical',
             });
 
@@ -290,7 +295,7 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
             </Animated.View>
 
             <PanGestureHandler
-                enabled={!currentGame.locked}
+                enabled={!currentGameLocked}
                 minDist={0}
                 onGestureEvent={onGestureEvent}
                 onHandlerStateChange={onHandlerStateChange}

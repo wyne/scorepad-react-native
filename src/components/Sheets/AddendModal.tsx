@@ -8,6 +8,7 @@ import { Platform, StyleSheet, Text, View } from 'react-native';
 
 import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
 import { setAddendOne, setAddendTwo, setMultiplier } from '../../../redux/SettingsSlice';
+import { logEvent } from '../../Analytics';
 import InteractionSelector from '../Interactions/InteractionSelector';
 import { InteractionType } from '../Interactions/InteractionType';
 
@@ -57,14 +58,18 @@ const AddendModal: React.FunctionComponent<Props> = ({ }) => {
     const onTapValueChange = useCallback((itemValue: number, itemIndex: number) => {
         dispatch(setMultiplier(addendOptions[itemIndex]));
         dispatch(setAddendOne(addendOptions[itemIndex]));
-        // TODO: analytics
+        logEvent('addend_two_change', {
+            addendOne: itemValue,
+        });
     }, [addendOne]);
 
     const debouncedTapValueChange = debounce(onTapValueChange, 200);
 
     const onLongTapValueChange = useCallback((itemValue: number) => {
         dispatch(setAddendTwo(itemValue));
-        // TODO: analytics
+        logEvent('addend_two_change', {
+            addendTwo: itemValue,
+        });
     }, [addendTwo]);
 
     const debouncedLongTapValueChange = debounce(onLongTapValueChange, 200);

@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 
-import { getContrastRatio } from 'colorsheet';
 import { LayoutChangeEvent, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -15,25 +14,20 @@ interface FlexboxBoardProps {
 }
 
 const FlexboxBoard: React.FC<FlexboxBoardProps> = () => {
-    const currentGameId = useAppSelector(state => state.settings.currentGameId);
-    if (typeof currentGameId == 'undefined') return null;
+    const fullscreen = useAppSelector(state => state.settings.home_fullscreen);
+    const playerIds = useAppSelector(state => selectCurrentGame(state)?.playerIds);
 
-    const palette = ["01497c", "c25858", "f5c800", "275436", "dc902c", "62516a", "755647", "925561"];
+    if (playerIds == null || playerIds.length == 0) return null;
+
     const [rows, setRows] = useState<number>(0);
     const [cols, setCols] = useState<number>(0);
-    const fullscreen = useAppSelector(state => state.settings.home_fullscreen);
-    const currentGame = useAppSelector(selectCurrentGame);
 
     const [width, setWidth] = useState<number | null>(null);
     const [height, setHeight] = useState<number | null>(null);
 
-    if (currentGame == undefined) return null;
-
-    const playerIds = currentGame.playerIds;
-
     const playerCount = playerIds.length;
 
-    const desiredAspectRatio = 0.8;
+    const desiredAspectRatio = 1;
 
     const layoutHandler = (e: LayoutChangeEvent) => {
         const { width, height } = e.nativeEvent.layout;
@@ -102,8 +96,6 @@ const FlexboxBoard: React.FC<FlexboxBoardProps> = () => {
                 <FlexboxTile
                     key={id}
                     playerId={id}
-                    color={'#' + palette[index % palette.length]}
-                    fontColor={getContrastRatio('#' + palette[index % palette.length], '#000').number > 7 ? "#000000" : "#FFFFFF"}
                     cols={cols}
                     rows={rows}
                     width={calculateTileDimensions(rows, cols).width}

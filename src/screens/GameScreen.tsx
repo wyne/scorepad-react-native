@@ -5,7 +5,6 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { LayoutChangeEvent, StyleSheet, View } from 'react-native';
 
 import { useAppSelector } from '../../redux/hooks';
-import { selectCurrentGame } from '../../redux/selectors';
 import FlexboxBoard from '../components/Boards/FlexboxBoard';
 import AddendModal from '../components/Sheets/AddendModal';
 import GameSheet from '../components/Sheets/GameSheet';
@@ -19,9 +18,6 @@ const ScoreBoardScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     if (typeof currentGameId == 'undefined') return null;
 
     const fullscreen = useAppSelector(state => state.settings.home_fullscreen);
-    const currentGame = useAppSelector(selectCurrentGame);
-
-    if (currentGame == undefined) return null;
 
     const [windowHeight, setWindowHeight] = useState<number>(0);
 

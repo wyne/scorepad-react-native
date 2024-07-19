@@ -13,8 +13,14 @@ export interface SettingsState {
     currentGameId: string | undefined;
     onboarded: string | undefined;
     showPointParticles: boolean;
+    showPlayerIndex: boolean;
+    showColorPalettes?: boolean;
     interactionType: InteractionType;
     lastStoreReviewPrompt: number;
+    devMenuEnabled?: boolean;
+    appOpens: number;
+    installId: string | undefined;
+    rollingGameCounter?: number;
 };
 
 const initialState: SettingsState = {
@@ -24,9 +30,14 @@ const initialState: SettingsState = {
     addendTwo: 10,
     currentGameId: undefined,
     onboarded: undefined,
-    showPointParticles: true,
+    showPointParticles: false,
+    showPlayerIndex: false,
+    showColorPalettes: false,
     interactionType: InteractionType.SwipeVertical,
     lastStoreReviewPrompt: 0,
+    appOpens: 0,
+    installId: undefined,
+    rollingGameCounter: 0,
 };
 
 const settingsSlice = createSlice({
@@ -40,8 +51,14 @@ const settingsSlice = createSlice({
         toggleHomeFullscreen(state) {
             state.home_fullscreen = !state.home_fullscreen;
         },
-        toggleshowPointParticles(state) {
+        toggleShowPointParticles(state) {
             state.showPointParticles = !state.showPointParticles;
+        },
+        toggleShowPlayerIndex(state) {
+            state.showPlayerIndex = !state.showPlayerIndex;
+        },
+        toggleShowColorPalettes(state) {
+            state.showColorPalettes = !state.showColorPalettes;
         },
         setMultiplier(state, action: PayloadAction<number>) {
             state.multiplier = action.payload;
@@ -63,6 +80,18 @@ const settingsSlice = createSlice({
         setLastStoreReviewPrompt(state, action: PayloadAction<number>) {
             state.lastStoreReviewPrompt = action.payload;
         },
+        toggleDevMenuEnabled(state) {
+            state.devMenuEnabled = !state.devMenuEnabled;
+        },
+        increaseAppOpens(state) {
+            state.appOpens += 1;
+        },
+        setInstallId(state, action: PayloadAction<string>) {
+            state.installId = action.payload;
+        },
+        incrementRollingGameCounter(state) {
+            state.rollingGameCounter = (state.rollingGameCounter ?? 0) + 1;
+        },
     }
 });
 
@@ -73,9 +102,15 @@ export const {
     setAddendOne,
     setAddendTwo,
     setOnboardedVersion,
-    toggleshowPointParticles,
+    toggleShowPointParticles,
+    toggleShowPlayerIndex,
+    toggleShowColorPalettes,
     setInteractionType,
     setLastStoreReviewPrompt,
+    toggleDevMenuEnabled,
+    increaseAppOpens,
+    setInstallId,
+    incrementRollingGameCounter,
 } = settingsSlice.actions;
 
 export default settingsSlice.reducer;

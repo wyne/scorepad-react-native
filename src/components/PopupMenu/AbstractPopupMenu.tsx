@@ -1,12 +1,12 @@
 import React from 'react';
 
-import analytics from '@react-native-firebase/analytics';
 import { ParamListBase } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Alert, Platform } from 'react-native';
 
 import { asyncRematchGame, gameDelete, selectGameById } from '../../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
+import { logEvent } from '../../Analytics';
 
 import AndroidPopupMenu from './AndroidPopupMenu';
 import IOSPopupMenu from './IOSPopupMenu';
@@ -34,9 +34,9 @@ const AbstractPopupMenu: React.FC<Props> = (props) => {
      */
     const shareGameHandler = async () => {
         props.setCurrentGameCallback();
-        props.navigation.navigate("Share");
+        props.navigation.navigate('Share');
 
-        await analytics().logEvent('menu_share', {
+        await logEvent('menu_share', {
             round_count: roundTotal,
             player_count: playerIds.length,
         });
@@ -47,9 +47,9 @@ const AbstractPopupMenu: React.FC<Props> = (props) => {
      */
     const editGameHandler = async () => {
         props.setCurrentGameCallback();
-        props.navigation.navigate("Settings", { reason: 'edit_game' });
+        props.navigation.navigate('Settings', { source: 'list_screen' });
 
-        await analytics().logEvent('menu_edit', {
+        await logEvent('menu_edit', {
             round_count: roundTotal,
             player_count: playerIds.length,
         });
@@ -63,7 +63,7 @@ const AbstractPopupMenu: React.FC<Props> = (props) => {
             asyncRematchGame({ gameId: props.gameId })
         ).then(() => {
             setTimeout(() => {
-                props.navigation.navigate("Game");
+                props.navigation.navigate('Game');
             }, 500);
         });
     };
@@ -91,7 +91,7 @@ const AbstractPopupMenu: React.FC<Props> = (props) => {
             { cancelable: false },
         );
 
-        await analytics().logEvent('delete_game', {
+        await logEvent('delete_game', {
             index: props.index,
             round_count: roundTotal,
             player_count: playerIds.length,

@@ -1,8 +1,8 @@
 import React, { useCallback } from 'react';
 
-import analytics from '@react-native-firebase/analytics';
 import { ParamListBase } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import * as Haptics from 'expo-haptics';
 import Moment from 'react-moment';
 import { Platform, StyleSheet, Text } from 'react-native';
 import { Icon, ListItem } from 'react-native-elements';
@@ -11,6 +11,7 @@ import Animated, { FadeInUp, SlideOutLeft } from 'react-native-reanimated';
 import { selectGameById } from '../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { setCurrentGameId } from '../../redux/SettingsSlice';
+import { logEvent } from '../Analytics';
 
 import GameListItemPlayerName from './GameListItemPlayerName';
 import AbstractPopupMenu from './PopupMenu/AbstractPopupMenu';
@@ -42,9 +43,9 @@ const GameListItem: React.FunctionComponent<Props> = ({ navigation, gameId, inde
      */
     const chooseGameHandler = async () => {
         setCurrentGameCallback();
-        navigation.navigate("Game");
+        navigation.navigate('Game');
 
-        await analytics().logEvent('select_game', {
+        await logEvent('select_game', {
             index: index,
             game_id: gameId,
             player_count: playerIds.length,
@@ -62,10 +63,15 @@ const GameListItem: React.FunctionComponent<Props> = ({ navigation, gameId, inde
                 navigation={navigation}
                 index={index}
             >
-                <ListItem key={gameId} bottomDivider onPress={
-                    // Only select game if iOS because Android is handled by PopupMenu
-                    Platform.OS == 'ios' ? chooseGameHandler : undefined
-                }>
+                <ListItem key={gameId} bottomDivider
+                    onLongPress={() => {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+                        logEvent('list_menu_open');
+                    }}
+                    onPress={
+                        // Only select game if iOS because Android is handled by PopupMenu
+                        Platform.OS == 'ios' ? chooseGameHandler : undefined
+                    }>
                     <ListItem.Content>
                         <ListItem.Title style={{ alignItems: 'center' }}>
                             {gameTitle}
