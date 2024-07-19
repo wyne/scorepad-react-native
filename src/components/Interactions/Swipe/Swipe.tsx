@@ -244,15 +244,31 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
     const [rate, setRate] = useState(1.5);
 
     async function playSound() {
-        const { sound } = await Audio.Sound.createAsync(require('../../../../assets/sounds/200.wav'));
+
+        await Audio.setAudioModeAsync({ playsInSilentModeIOS: true });
+
+        console.log('Loading Sound');
+        const { sound } = await Audio.Sound.createAsync(
+            { uri: 'https://cdn.pixabay.com/download/audio/2022/03/15/audio_2271eb75c5.mp3?filename=pop-91931.mp3' },
+            { shouldPlay: true }
+        );
+
         setSound(sound);
 
-        // await sound.setPositionAsync(9900);
-        await sound.setRateAsync(1.5, false);
-        setRate(1.5);
-        await sound.setVolumeAsync(1);
-        await sound.setIsLoopingAsync(true);
-        await sound.playAsync();
+        console.log('Playing Sound', sound);
+        await sound?.playAsync();
+
+
+        // const { sound } = await Audio.Sound.createAsync(require('../../../../assets/sounds/200.wav'));
+        // console.log('sound', sound);
+        // setSound(sound);
+
+        // // await sound.setPositionAsync(9900);
+        // // await sound.setRateAsync(1.5, false);
+        // // setRate(1.5);
+        // await sound.setVolumeAsync(1);
+        // await sound.setIsLoopingAsync(true);
+        // await sound.playAsync();
     }
 
     async function stopSound() {
