@@ -82,6 +82,7 @@ export default {
         },
         package: packageName,
         permissions: [],
+        blockedPermissions: ['android.permission.ACTIVITY_RECOGNITION'],
         versionCode: 80,
         googleServicesFile: './google-services.json',
     },
