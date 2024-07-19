@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Text , DimensionValue } from 'react-native';
+import { Text, DimensionValue } from 'react-native';
 import Animated, { FadeOut } from 'react-native-reanimated';
 
 type Props = {
@@ -38,7 +38,6 @@ export const ScoreParticle: React.FunctionComponent<Props> = React.memo(({ id, v
             right: right,
             transform: [{ rotate: randomRotation }],
             backgroundColor: 'white',
-            opacity: 0.7,
             borderRadius: 100,
             borderWidth: 2,
             borderColor: 'black',
