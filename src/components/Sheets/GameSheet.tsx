@@ -227,7 +227,7 @@ const GameSheet: React.FunctionComponent<Props> = ({ navigation, containerHeight
             animatedPosition={animatedPosition}
             enablePanDownToClose={false}
         >
-            <BottomSheetScrollView >
+            <BottomSheetScrollView>
                 <SafeAreaView edges={['right', 'left']}>
                     <View style={styles.sheetHeaderContainer}>
                         <TouchableWithoutFeedback onPress={() => sheetTitlePress()}>
