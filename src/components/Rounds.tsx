@@ -2,8 +2,8 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import { ParamListBase } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { LayoutChangeEvent, Platform, ScrollView, StyleSheet, View } from 'react-native';
-import { TouchableOpacity } from 'react-native-gesture-handler';
+import { LayoutChangeEvent, Platform, StyleSheet, View } from 'react-native';
+import { TouchableOpacity, ScrollView } from 'react-native-gesture-handler';
 
 import { selectGameById, setSortSelector } from '../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
@@ -83,6 +83,7 @@ const Rounds: React.FunctionComponent<Props> = ({ }) => {
             </TouchableOpacity>
 
             <ScrollView horizontal={true}
+                nestedScrollEnabled={true}
                 contentContainerStyle={{ flexDirection: 'row' }}
                 ref={roundsScrollViewEl}>
                 {roundsIterator.map((item, round) => (

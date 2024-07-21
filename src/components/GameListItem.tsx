@@ -4,7 +4,7 @@ import { ParamListBase } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import * as Haptics from 'expo-haptics';
 import Moment from 'react-moment';
-import { Platform, StyleSheet, Text } from 'react-native';
+import { StyleSheet, Text } from 'react-native';
 import { Icon, ListItem } from 'react-native-elements';
 import Animated, { FadeInUp, SlideOutLeft } from 'react-native-reanimated';
 
@@ -68,10 +68,7 @@ const GameListItem: React.FunctionComponent<Props> = ({ navigation, gameId, inde
                         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
                         logEvent('list_menu_open');
                     }}
-                    onPress={
-                        // Only select game if iOS because Android is handled by PopupMenu
-                        Platform.OS == 'ios' ? chooseGameHandler : undefined
-                    }>
+                    onPress={chooseGameHandler}>
                     <ListItem.Content>
                         <ListItem.Title style={{ alignItems: 'center' }}>
                             {gameTitle}
