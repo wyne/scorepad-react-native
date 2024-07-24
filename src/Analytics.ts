@@ -1,4 +1,6 @@
 import analytics from '@react-native-firebase/analytics';
+import * as Application from 'expo-application';
+import { Platform } from 'react-native';
 
 import logger from './Logger';
 
@@ -9,15 +11,29 @@ import logger from './Logger';
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const logEvent = async (eventName: string, params?: Record<string, any>) => {
-    // Additional logging logic here (e.g., console.log for debugging)
+    const appInstanceId = await analytics().getAppInstanceId();
+    const sessionId = await analytics().getSessionId();
+    const os = Platform.OS;
+    const osVersion = Platform.Version;
+    const appVersion = Application.nativeApplicationVersion;
+
+    const fullParams = {
+        ...params,
+        appInstanceId,
+        sessionId,
+        os,
+        appVersion,
+        osVersion,
+    };
+
     logger.info(
         '\x1b[34m', // Set the color to blue
         'EVENT',
         eventName,
-        JSON.stringify(params, null, 2),
+        JSON.stringify(fullParams, null, 2),
         '\x1b[0m' // Reset the color
     );
 
     // Log the event to Firebase Analytics
-    await analytics().logEvent(eventName, params);
+    await analytics().logEvent(eventName, fullParams);
 };
