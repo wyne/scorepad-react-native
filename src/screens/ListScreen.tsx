@@ -12,7 +12,7 @@ import { SemVer, parse } from 'semver';
 
 import { selectGameIds } from '../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
-import { increaseAppOpens, setInstallId, setOnboardedVersion } from '../../redux/SettingsSlice';
+import { increaseAppOpens, setInstallId, setOnboardedVersion, setRollingGameCounter } from '../../redux/SettingsSlice';
 import { logEvent } from '../Analytics';
 import GameListItem from '../components/GameListItem';
 import { getPendingOnboardingSemVer } from '../components/Onboarding/Onboarding';
@@ -38,10 +38,15 @@ const ListScreen: React.FunctionComponent<Props> = ({ navigation }) => {
 
     useEffect(() => {
         if (installId === undefined) {
-            logger.log('No install id');
             const installId = Crypto.randomUUID();
             dispatch(setInstallId(installId));
         }
+
+        // Update rollingGameCounter if it is undefined or less than the current gameIds length
+        if (rollingGameCounter === undefined || rollingGameCounter < gameIds.length) {
+            setRollingGameCounter(gameIds.length);
+        }
+
 
         logEvent('game_list', {
             onboarded,
