@@ -92,6 +92,9 @@ const settingsSlice = createSlice({
         incrementRollingGameCounter(state) {
             state.rollingGameCounter = (state.rollingGameCounter ?? 0) + 1;
         },
+        setRollingGameCounter(state, action: PayloadAction<number>) {
+            state.rollingGameCounter = action.payload;
+        },
     }
 });
 
@@ -111,6 +114,7 @@ export const {
     increaseAppOpens,
     setInstallId,
     incrementRollingGameCounter,
+    setRollingGameCounter,
 } = settingsSlice.actions;
 
 export default settingsSlice.reducer;
