@@ -137,6 +137,7 @@ const styles = StyleSheet.create({
     },
     finishButton: {
         borderColor: 'black',
+        borderWidth: 1,
         borderRadius: 20,
         padding: 10,
         margin: 15,

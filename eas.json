@@ -23,6 +23,9 @@
       "ios": {
         "resourceClass": "m-medium"
       },
+      "android": {
+        "buildType": "apk"
+      },
       "env": {
         "APP_VARIANT": "development",
         "EXPO_PUBLIC_FIREBASE_ANALYTICS": "false"
@@ -33,6 +36,9 @@
       "distribution": "internal",
       "ios": {
         "resourceClass": "m-medium"
+      },
+      "android": {
+        "buildType": "apk"
       },
       "channel": "preview",
       "env": {

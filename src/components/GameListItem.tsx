@@ -64,14 +64,12 @@ const GameListItem: React.FunctionComponent<Props> = ({ navigation, gameId, inde
                 index={index}
             >
                 <ListItem key={gameId} bottomDivider
-                    onLongPress={() => {
+                    onLongPress={Platform.OS == 'android' ? undefined : () => {
                         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
                         logEvent('list_menu_open');
                     }}
-                    onPress={
-                        // Only select game if iOS because Android is handled by PopupMenu
-                        Platform.OS == 'ios' ? chooseGameHandler : undefined
-                    }>
+                    onPress={Platform.OS == 'android' ? undefined : chooseGameHandler}
+                >
                     <ListItem.Content>
                         <ListItem.Title style={{ alignItems: 'center' }}>
                             {gameTitle}

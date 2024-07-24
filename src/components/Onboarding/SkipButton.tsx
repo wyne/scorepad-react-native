@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 
 import {
+    Platform,
     StyleSheet,
     Text,
     TouchableOpacity,
@@ -51,6 +52,7 @@ export default SkipButton;
 
 const styles = StyleSheet.create({
     button: {
+        marginTop: Platform.OS == 'ios' ? 'auto' : 30,
         padding: 10,
         margin: 10,
         borderRadius: 20,
