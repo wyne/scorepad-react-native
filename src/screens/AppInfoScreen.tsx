@@ -97,15 +97,18 @@ const AppInfoScreen: React.FunctionComponent<Props> = ({ navigation }) => {
                     <SectionItemText text="Point Particle Effect" />
                     <Switch onValueChange={toggleParticleSwitch} value={showPointParticles} />
                 </SectionItem>
+                <SectionItem>
+                    <SectionItemText text="Change Colors (Beta*)" />
+                    <Switch onValueChange={toggleColorPalettesSwitch} value={showColorPalettes} />
+                </SectionItem>
+                <SectionItem>
+                    <SectionItemText text="*Beta features may change or be removed without warning." />
+                </SectionItem>
                 {devMenuEnabled && (
                     <>
                         <SectionItem>
                             <SectionItemText text="Player Numbers" />
                             <Switch onValueChange={togglePlayerIndexSwitch} value={showPlayerIndex} />
-                        </SectionItem>
-                        <SectionItem>
-                            <SectionItemText text="Change Colors (Beta)" />
-                            <Switch onValueChange={toggleColorPalettesSwitch} value={showColorPalettes} />
                         </SectionItem>
                     </>
                 )}
