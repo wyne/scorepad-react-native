@@ -12,47 +12,31 @@ const palettes: PaletteType = {
         '#dc902c',
         '#62516a',
         '#755647',
-        '#925561',
+        '#e9ecef',
+        '#212529',
     ],
-    'c': [
-        '#88498f',
-        '#779fa1',
-        '#e0cba8',
-        '#ff6542',
-        '#564154'
-    ],
-    'd': [
+    'tropical-fiesta': [
         '#f8ffe5',
         '#06d6a0',
         '#1b9aaa',
         '#ef476f',
         '#ffc43d'
     ],
-    'pastel': [
-        '#f9d5e5',
-        '#eeac99',
-        '#e06377',
-        '#c83349',
-        '#5b9aa0',
-        '#d1b59b',
-        '#8f3e3f',
-        '#f6416c',
+    'spring': [
+        '#7bdff2',
+        '#b2f7ef',
+        '#eff7f6',
+        '#f7d6e0',
+        '#f2b5d4'
     ],
-    'dark': [
-        '#fdfffc',
-        '#2ec4b6',
-        '#e71d36',
-        '#ff9f1c',
-        '#f3722c',
-    ],
-    'f': [
+    'autumn': [
         '#fcaa67',
         '#b0413e',
         '#ffffc7',
         '#548687',
         '#473335'
     ],
-    'grey': [
+    'harkonnen': [
         '#f8f9fa',
         '#e9ecef',
         '#dee2e6',
@@ -64,6 +48,35 @@ const palettes: PaletteType = {
         '#212529',
         '#000000',
     ],
+    'electric-orchid': [
+        '#f72585',
+        '#b5179e',
+        '#7209b7',
+        '#560bad',
+        '#480ca8',
+        '#3a0ca3',
+        '#3f37c9',
+        '#4361ee',
+        '#4895ef',
+        '#4cc9f0',
+    ],
+    'autumn-ocean': [
+        '#005f73',
+        '#0a9396',
+        '#94d2bd',
+        '#e9d8a6',
+        '#ee9b00',
+        '#ca6702',
+        '#bb3e03',
+        '#ae2012',
+    ],
+    'sunset-harbor': [
+        '#edae49',
+        '#d1495b',
+        '#00798c',
+        '#30638e',
+        '#003d5b',
+    ]
 };
 
 export const getPalettes = (): string[] => {
