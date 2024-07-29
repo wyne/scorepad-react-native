@@ -56,7 +56,7 @@ const styles = StyleSheet.create({
     },
     palette: {
         width: 40,
-        height: 40,
+        height: 42,
         borderWidth: 2,
         borderColor: 'transparent',
         marginHorizontal: 5,
