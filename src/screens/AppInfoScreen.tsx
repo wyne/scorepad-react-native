@@ -7,7 +7,7 @@ import { Alert, Linking, Platform, ScrollView, StyleSheet, Switch, Text, View } 
 import { Button } from 'react-native-elements';
 
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
-import { toggleShowColorPalettes, toggleShowPlayerIndex, toggleShowPointParticles } from '../../redux/SettingsSlice';
+import { toggleShowPlayerIndex, toggleShowPointParticles } from '../../redux/SettingsSlice';
 import { logEvent } from '../Analytics';
 import RotatingIcon from '../components/AppInfo/RotatingIcon';
 
@@ -41,7 +41,6 @@ const AppInfoScreen: React.FunctionComponent<Props> = ({ navigation }) => {
 
     const showPointParticles = useAppSelector(state => state.settings.showPointParticles);
     const showPlayerIndex = useAppSelector(state => state.settings.showPlayerIndex);
-    const showColorPalettes = useAppSelector(state => state.settings.showColorPalettes);
     const devMenuEnabled = useAppSelector(state => state.settings.devMenuEnabled);
     const installId = useAppSelector(state => state.settings.installId);
 
@@ -59,14 +58,6 @@ const AppInfoScreen: React.FunctionComponent<Props> = ({ navigation }) => {
         logEvent('toggle_feature', {
             feature: 'player_index',
             value: !showPlayerIndex,
-            installId
-        });
-    };
-    const toggleColorPalettesSwitch = () => {
-        dispatch(toggleShowColorPalettes());
-        logEvent('toggle_feature', {
-            feature: 'color_palettes',
-            value: !showColorPalettes,
             installId
         });
     };
@@ -94,22 +85,18 @@ const AppInfoScreen: React.FunctionComponent<Props> = ({ navigation }) => {
 
             <Section title="Features">
                 <SectionItem>
-                    <SectionItemText text="Point Particle Effect" />
+                    <SectionItemText text="Particle Effect (tap-only)" />
                     <Switch onValueChange={toggleParticleSwitch} value={showPointParticles} />
                 </SectionItem>
                 <SectionItem>
-                    <SectionItemText text="Change Colors (Beta*)" />
-                    <Switch onValueChange={toggleColorPalettesSwitch} value={showColorPalettes} />
+                    <SectionItemText text="Player Numbers (Beta*)" />
+                    <Switch onValueChange={togglePlayerIndexSwitch} value={showPlayerIndex} />
                 </SectionItem>
                 <SectionItem>
                     <SectionItemText text="*Beta features may change or be removed without warning." />
                 </SectionItem>
                 {devMenuEnabled && (
                     <>
-                        <SectionItem>
-                            <SectionItemText text="Player Numbers" />
-                            <Switch onValueChange={togglePlayerIndexSwitch} value={showPlayerIndex} />
-                        </SectionItem>
                     </>
                 )}
             </Section>
