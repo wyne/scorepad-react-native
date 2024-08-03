@@ -274,7 +274,7 @@ const GameSheet: React.FunctionComponent<Props> = ({ navigation, containerHeight
                                             logEvent('edit_game', {
                                                 game_id: currentGameId
                                             });
-                                            navigation.navigate('Settings');
+                                            navigation.navigate('Settings', { source: 'edit_game' });
                                         }
                                         }
                                     />

@@ -5,6 +5,7 @@ import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
 import { updatePlayer } from '../../../redux/PlayersSlice';
 import { selectCurrentGame } from '../../../redux/selectors';
+import { logEvent } from '../../Analytics';
 import { getPalette, getPalettes } from '../../ColorPalette';
 
 interface ColorSelectorProps {
@@ -27,6 +28,7 @@ const ColorButton: React.FC<{ color: string, playerColor: string | undefined; }>
 const ColorSelector: React.FC<ColorSelectorProps> = ({ playerId }) => {
     const colorPalettes = getPalettes();
     const currentGameId = useAppSelector(state => selectCurrentGame(state)?.id);
+    const currentGame = useAppSelector(state => selectCurrentGame(state));
     const currentPalette = useAppSelector(state => selectCurrentGame(state)?.palette);
     const playerColor = useAppSelector(state => state.players.entities[playerId]?.color);
 
@@ -34,11 +36,17 @@ const ColorSelector: React.FC<ColorSelectorProps> = ({ playerId }) => {
 
     const dispatch = useAppDispatch();
 
-    const tapColorHandler = (color: string) => {
+    const tapColorHandler = (color: string, inCurrentPalette: boolean = false) => {
         dispatch(updatePlayer({
             id: playerId,
             changes: { color: color }
         }));
+        logEvent('set_player_color', {
+            gameId: currentGameId,
+            palette: currentGame?.palette,
+            color,
+            inCurrentPalette,
+        });
     };
 
     return (
@@ -55,7 +63,7 @@ const ColorSelector: React.FC<ColorSelectorProps> = ({ playerId }) => {
                         getPalette(currentPalette).map((color, i) => (
                             <TouchableOpacity
                                 key={'currentPalette' + i}
-                                onPress={() => tapColorHandler(color)}
+                                onPress={() => tapColorHandler(color, true)}
                             >
                                 <ColorButton color={color} playerColor={playerColor} />
                             </TouchableOpacity>

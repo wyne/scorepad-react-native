@@ -5,6 +5,7 @@ import { ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
 import { asyncSetGamePalette } from '../../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
 import { selectCurrentGame } from '../../../redux/selectors';
+import { logEvent } from '../../Analytics';
 import { getPalette, getPalettes } from '../../ColorPalette';
 
 import PalettePreview from './PalettePreview';
@@ -27,6 +28,10 @@ const PaletteSelector: React.FunctionComponent = () => {
                 palette: palette,
             })
         );
+        logEvent('set_game_palette', {
+            game_id: currentGameId,
+            palette,
+        });
     };
 
     return (
