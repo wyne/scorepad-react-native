@@ -1,11 +1,13 @@
 import React from 'react';
 
 import { MenuAction, MenuView, NativeActionEvent } from '@react-native-menu/menu';
+import * as Haptics from 'expo-haptics';
 import { Platform } from 'react-native';
 
 interface Props {
     children: React.ReactNode;
     gameTitle: string | undefined;
+    rematchGameHandler: () => void;
     editGameHandler: () => void;
     shareGameHandler: () => void;
     deleteGameHandler: () => void;
@@ -14,6 +16,7 @@ interface Props {
 const IOSPopupMenu: React.FC<Props> = ({
     children,
     gameTitle,
+    rematchGameHandler,
     editGameHandler,
     shareGameHandler,
     deleteGameHandler
@@ -24,6 +27,14 @@ const IOSPopupMenu: React.FC<Props> = ({
      * Menu Actions for long press
      */
     const actions: MenuAction[] = [
+        {
+            id: 'rematch',
+            title: 'Rematch',
+            image: Platform.select({
+                ios: 'arrow.uturn.left',
+                android: 'ic_menu_edit',
+            }),
+        },
         {
             id: 'edit',
             title: 'Edit',
@@ -42,7 +53,7 @@ const IOSPopupMenu: React.FC<Props> = ({
         },
         {
             id: 'delete',
-            title: `Delete`,
+            title: 'Delete',
             attributes: {
                 destructive: true,
             },
@@ -59,7 +70,12 @@ const IOSPopupMenu: React.FC<Props> = ({
      * @returns void
      */
     const menuActionHandler: MenuActionHandler = async ({ nativeEvent }) => {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+
         switch (nativeEvent.event) {
+            case 'rematch':
+                rematchGameHandler();
+                break;
             case 'edit':
                 editGameHandler();
                 break;

@@ -1,29 +1,37 @@
 import React, { memo, useCallback } from 'react';
 
-import analytics from '@react-native-firebase/analytics';
-import { Text, View , TouchableWithoutFeedback } from 'react-native';
+import { LayoutChangeEvent, Text, TouchableWithoutFeedback, View } from 'react-native';
 
-import { selectGameById, updateGame } from '../../../redux/GamesSlice';
+import { updateGame } from '../../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
+import { selectCurrentGame } from '../../../redux/selectors';
+import { logEvent } from '../../Analytics';
 
 import RoundScoreCell from './RoundScoreCell';
+import { SortSelectorKey, sortSelectors } from './SortHelper';
 
 interface Props {
     round: number;
     isCurrentRound: boolean;
     disabled?: boolean;
+    onLayout?: (event: LayoutChangeEvent, round: number) => void;
 }
 
-const RoundScoreColumn: React.FunctionComponent<Props> = ({ round, isCurrentRound, disabled = false }) => {
+const RoundScoreColumn: React.FunctionComponent<Props> = ({
+    round,
+    isCurrentRound,
+    disabled = false,
+    onLayout,
+}) => {
     const dispatch = useAppDispatch();
 
-    const currentGameId = useAppSelector(state => state.settings.currentGameId);
-    const currentGame = useAppSelector(state => selectGameById(state, currentGameId));
-
-    if (typeof currentGame == 'undefined') return null;
+    const currentGameId = useAppSelector(state => selectCurrentGame(state)?.id);
+    const sortKey = useAppSelector(state => selectCurrentGame(state)?.sortSelectorKey);
+    const sortSelector = sortSelectors[sortKey || SortSelectorKey.ByIndex];
+    const sortedPlayerIds = useAppSelector(sortSelector);
 
     const onPressHandler = useCallback(async () => {
-        if (disabled) return;
+        if (disabled || !currentGameId) return;
 
         dispatch(updateGame({
             id: currentGameId,
@@ -31,7 +39,7 @@ const RoundScoreColumn: React.FunctionComponent<Props> = ({ round, isCurrentRoun
                 roundCurrent: round,
             }
         }));
-        await analytics().logEvent('round_change', {
+        await logEvent('round_change', {
             game_id: currentGameId,
             source: 'direct select',
         });
@@ -47,11 +55,13 @@ const RoundScoreColumn: React.FunctionComponent<Props> = ({ round, isCurrentRoun
 
     return (
         <TouchableWithoutFeedback onPress={onPressHandler}>
-            <View style={{
-                padding: 10,
-                paddingBottom: 0,
-                backgroundColor: backgroundColor,
-            }}>
+            <View
+                onLayout={(e) => onLayout?.(e, round)}
+                style={{
+                    padding: 10,
+                    paddingBottom: 0,
+                    backgroundColor: backgroundColor,
+                }}>
                 <Text style={{
                     color: isCurrentRound ? 'red' : '#AAA',
                     fontWeight: 'bold',
@@ -60,7 +70,7 @@ const RoundScoreColumn: React.FunctionComponent<Props> = ({ round, isCurrentRoun
                 }}>
                     {round + 1}
                 </Text>
-                {currentGame.playerIds.map((playerId, playerIndex) => (
+                {sortedPlayerIds.map((playerId, playerIndex) => (
                     <RoundScoreCell playerId={playerId} round={round} key={playerId} playerIndex={playerIndex} />
                 ))}
             </View>

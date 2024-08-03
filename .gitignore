@@ -5,7 +5,8 @@
 *.key
 *.mobileprovision
 *.orig.*
-
+*.ipa
+*.apk
 
 
 # Ignore iOS and Android builds

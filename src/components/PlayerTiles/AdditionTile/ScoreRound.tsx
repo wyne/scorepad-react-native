@@ -40,13 +40,14 @@ const ScoreRound: React.FunctionComponent<Props> = ({ containerWidth, roundScore
     return (
         <Animated.View>
             <Animated.Text numberOfLines={1}
+                allowFontScaling={false}
                 style={[animatedStyles, {
                     fontVariant: ['tabular-nums'],
                     color: fontColor,
                     opacity: scoreMathOpacity
                 }]}>
-                {roundScore > 0 && " + "}
-                {roundScore < 0 && " - "}
+                {roundScore > 0 && ' + '}
+                {roundScore < 0 && ' - '}
                 {Math.abs(d)}
             </Animated.Text>
         </Animated.View>

@@ -3,6 +3,7 @@ import * as Application from 'expo-application';
 import { SemVer, valid } from 'semver';
 
 import { InteractionType } from '../src/components/Interactions/InteractionType';
+import logger from '../src/Logger';
 
 export interface SettingsState {
     home_fullscreen: boolean;
@@ -12,18 +13,29 @@ export interface SettingsState {
     currentGameId: string | undefined;
     onboarded: string | undefined;
     showPointParticles: boolean;
+    showPlayerIndex: boolean;
     interactionType: InteractionType;
+    lastStoreReviewPrompt: number;
+    devMenuEnabled?: boolean;
+    appOpens: number;
+    installId: string | undefined;
+    rollingGameCounter?: number;
 };
 
-const initialState: SettingsState = {
+export const initialState: SettingsState = {
     home_fullscreen: false,
     multiplier: 1,
     addendOne: 1,
     addendTwo: 10,
     currentGameId: undefined,
     onboarded: undefined,
-    showPointParticles: true,
+    showPointParticles: false,
+    showPlayerIndex: false,
     interactionType: InteractionType.SwipeVertical,
+    lastStoreReviewPrompt: 0,
+    appOpens: 0,
+    installId: undefined,
+    rollingGameCounter: 0,
 };
 
 const settingsSlice = createSlice({
@@ -31,13 +43,17 @@ const settingsSlice = createSlice({
     initialState,
     reducers: {
         setCurrentGameId(state, action: PayloadAction<string>) {
+            console.info('Setting Current Game: ', action.payload);
             state.currentGameId = action.payload;
         },
         toggleHomeFullscreen(state) {
             state.home_fullscreen = !state.home_fullscreen;
         },
-        toggleshowPointParticles(state) {
+        toggleShowPointParticles(state) {
             state.showPointParticles = !state.showPointParticles;
+        },
+        toggleShowPlayerIndex(state) {
+            state.showPlayerIndex = !state.showPlayerIndex;
         },
         setMultiplier(state, action: PayloadAction<number>) {
             state.multiplier = action.payload;
@@ -53,9 +69,27 @@ const settingsSlice = createSlice({
         },
         setOnboardedVersion(state) {
             const appVersion = new SemVer(Application.nativeApplicationVersion || '0.0.0');
-            console.log(`Setting Onboarded Version: ${appVersion}`);
+            logger.info(`Setting Onboarded Version: ${appVersion}`);
             state.onboarded = valid(appVersion) || '0.0.0';
-        }
+        },
+        setLastStoreReviewPrompt(state, action: PayloadAction<number>) {
+            state.lastStoreReviewPrompt = action.payload;
+        },
+        toggleDevMenuEnabled(state) {
+            state.devMenuEnabled = !state.devMenuEnabled;
+        },
+        increaseAppOpens(state) {
+            state.appOpens += 1;
+        },
+        setInstallId(state, action: PayloadAction<string>) {
+            state.installId = action.payload;
+        },
+        incrementRollingGameCounter(state) {
+            state.rollingGameCounter = (state.rollingGameCounter ?? 0) + 1;
+        },
+        setRollingGameCounter(state, action: PayloadAction<number>) {
+            state.rollingGameCounter = action.payload;
+        },
     }
 });
 
@@ -66,8 +100,15 @@ export const {
     setAddendOne,
     setAddendTwo,
     setOnboardedVersion,
-    toggleshowPointParticles,
+    toggleShowPointParticles,
+    toggleShowPlayerIndex,
     setInteractionType,
+    setLastStoreReviewPrompt,
+    toggleDevMenuEnabled,
+    increaseAppOpens,
+    setInstallId,
+    incrementRollingGameCounter,
+    setRollingGameCounter,
 } = settingsSlice.actions;
 
 export default settingsSlice.reducer;

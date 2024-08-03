@@ -1,14 +1,15 @@
 import React from 'react';
 
-import analytics from '@react-native-firebase/analytics';
 import { ParamListBase } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { Text, StyleSheet, TouchableOpacity } from 'react-native';
+import * as Haptics from 'expo-haptics';
+import { StyleSheet, Text, TouchableOpacity } from 'react-native';
 import { Button } from 'react-native-elements';
 import { Icon } from 'react-native-elements/dist/icons/Icon';
 
-import { roundNext, roundPrevious , selectGameById } from '../../../redux/GamesSlice';
+import { roundNext, roundPrevious, selectGameById } from '../../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
+import { logEvent } from '../../Analytics';
 import { systemBlue } from '../../constants';
 import AddendButton from '../Buttons/AddendButton';
 import FullscreenButton from '../Buttons/FullscreenButton';
@@ -83,20 +84,34 @@ const GameHeader: React.FunctionComponent<Props> = ({ navigation }) => {
     const nextRoundHandler = async () => {
         if (isLastRound && currentGame.locked) return;
 
+        if (isLastRound) {
+            // Stronger haptics if creating a new round
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+        } else {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        }
+
         dispatch(roundNext(currentGame.id));
-        await analytics().logEvent('round_change', {
+        logEvent('round_change', {
             game_id: currentGameId,
             source: 'next button',
+            round: roundCurrent,
+            next_round: roundCurrent + 1,
+            new_round: isLastRound
         });
     };
 
     const prevRoundHandler = async () => {
         if (isFirstRound) return;
 
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+
         dispatch(roundPrevious(currentGame.id));
-        await analytics().logEvent('round_change', {
+        logEvent('round_change', {
             game_id: currentGameId,
             source: 'previous button',
+            round: roundCurrent,
+            next_round: roundCurrent - 1,
         });
     };
 
@@ -108,8 +123,12 @@ const GameHeader: React.FunctionComponent<Props> = ({ navigation }) => {
             </>}
             headerCenter={<>
                 <PrevRoundButton prevRoundHandler={prevRoundHandler} visible={isFirstRound} />
-                <Text style={styles.title}>Round {roundCurrent + 1}</Text>
-                <NextRoundButton nextRoundHandler={nextRoundHandler} visible={isLastRound && (currentGame.locked || false)} />
+                <Text style={styles.title}>Round {roundCurrent + 1}{
+                    isLastRound ? '' : `/${lastRoundIndex}`
+                }</Text>
+                <NextRoundButton nextRoundHandler={nextRoundHandler}
+                    visible={isLastRound && (currentGame.locked || false)}
+                />
             </>}
             headerRight={!currentGame.locked && <AddendButton />}
         />

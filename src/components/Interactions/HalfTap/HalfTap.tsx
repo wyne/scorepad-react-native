@@ -1,9 +1,8 @@
 import React from 'react';
 
-
-import { selectGameById } from '../../../../redux/GamesSlice';
 import { useAppSelector } from '../../../../redux/hooks';
 import { selectPlayerById } from '../../../../redux/PlayersSlice';
+import { selectCurrentGame } from '../../../../redux/selectors';
 
 import { HalfTileTouchSurface } from './HalfTileTouchSurface';
 
@@ -20,8 +19,7 @@ const HalfTap: React.FC<HalfTapProps> = ({
     fontColor,
     playerId
 }) => {
-    const currentGameId = useAppSelector(state => state.settings.currentGameId);
-    const currentGame = useAppSelector(state => selectGameById(state, currentGameId));
+    const currentGame = useAppSelector(selectCurrentGame);
     if (typeof currentGame == 'undefined') return null;
 
     const player = useAppSelector(state => selectPlayerById(state, playerId));

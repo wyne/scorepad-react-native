@@ -1,40 +1,53 @@
 import React, { useState } from 'react';
 
-import { Text, View, StyleSheet, NativeSyntheticEvent, TextInputEndEditingEventData } from 'react-native';
+import { NativeSyntheticEvent, StyleSheet, Text, TextInputEndEditingEventData, View } from 'react-native';
 import { Input } from 'react-native-elements';
 
-import { selectGameById, updateGame } from '../../redux/GamesSlice';
+import { updateGame } from '../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
+import { selectCurrentGame } from '../../redux/selectors';
 
-const UNTITLED = "Untitled";
+import PaletteSelector from './ColorPalettes/PaletteSelector';
+
+const UNTITLED = 'Untitled';
 
 const EditGame = ({ }) => {
     const dispatch = useAppDispatch();
-    const currentGame = useAppSelector(state => selectGameById(state, state.settings.currentGameId));
+    const currentGame = useAppSelector(selectCurrentGame);
 
     if (typeof currentGame == 'undefined') return null;
 
     const [localTitle, setLocalTitle] = useState(currentGame.title);
 
-    const setGameTitleHandler = (title: string) => {
+    const onEndEditingHandler = (e: NativeSyntheticEvent<TextInputEndEditingEventData>) => {
+        const text = e.nativeEvent.text;
+
+        if (text == '') {
+            setLocalTitle(UNTITLED);
+            saveGameTitle(UNTITLED);
+        } else {
+            saveGameTitle(text);
+        }
+    };
+
+    const onChangeTextHandler = (text: string) => {
+        if (text == '') {
+            saveGameTitle(UNTITLED);
+        } else {
+            saveGameTitle(text);
+        }
+        setLocalTitle(text);
+    };
+
+    const saveGameTitle = (title: string) => {
         setLocalTitle(title);
 
         dispatch(updateGame({
             id: currentGame.id,
             changes: {
-                title: title == "" ? UNTITLED : title,
+                title: title == '' ? UNTITLED : title,
             }
         }));
-    };
-
-    const onEndEditingHandler = (e: NativeSyntheticEvent<TextInputEndEditingEventData>) => {
-        if (e.nativeEvent.text == "") {
-            setGameTitleHandler(UNTITLED);
-        }
-    };
-
-    const onChangeTextHandler = (text: string) => {
-        setGameTitleHandler(text);
     };
 
     return (
@@ -48,7 +61,6 @@ const EditGame = ({ }) => {
                     onBlur={onEndEditingHandler}
                     placeholder={UNTITLED}
                     renderErrorMessage={false}
-                    selectTextOnFocus={true}
                     style={styles.input}
                     inputContainerStyle={{ borderBottomWidth: 0 }}
                 />
@@ -58,6 +70,10 @@ const EditGame = ({ }) => {
                     Created: {new Date(currentGame.dateCreated).toLocaleDateString()}
                     &nbsp; {new Date(currentGame.dateCreated).toLocaleTimeString()}
                 </Text>
+            </View>
+
+            <View style={{ marginHorizontal: 10 }}>
+                <PaletteSelector />
             </View>
         </>
     );

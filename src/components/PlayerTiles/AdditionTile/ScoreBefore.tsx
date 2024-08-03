@@ -51,6 +51,7 @@ const ScoreBefore: React.FunctionComponent<Props> = ({
     return (
         <Animated.View entering={enteringAnimation}>
             <Animated.Text
+                allowFontScaling={false}
                 numberOfLines={1}
                 style={[animatedStyles, {
                     fontVariant: ['tabular-nums'],

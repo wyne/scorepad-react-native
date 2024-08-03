@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { configureStore } from "@reduxjs/toolkit";
+import { configureStore } from '@reduxjs/toolkit';
 import { persistStore, persistReducer } from 'redux-persist';
 
 import gamesReducer from './GamesSlice';
@@ -18,7 +18,13 @@ const settingsPersistConfig = {
         'currentGameId',
         'onboarded',
         'showPointParticles',
+        'showPlayerIndex',
         'interactionType',
+        'lastStoreReviewPrompt',
+        'devMenuEnabled',
+        'appOpens',
+        'installId',
+        'rollingGameCounter',
     ],
 };
 
@@ -51,7 +57,12 @@ export const store = configureStore({
 });
 
 // Infer the `RootState` and `AppDispatch` types from the store itself
-export type RootState = ReturnType<typeof store.getState>;
+export interface RootState {
+    settings: ReturnType<typeof settingsReducer>;
+    games: ReturnType<typeof gamesReducer>;
+    players: ReturnType<typeof scoresReducer>;
+}
+
 // Inferred type: {posts: PostsState, comments: CommentsState, users: UsersState}
 export type AppDispatch = typeof store.dispatch;
 

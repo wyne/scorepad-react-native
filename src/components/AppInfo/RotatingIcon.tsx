@@ -1,17 +1,24 @@
 import React from 'react';
 
-import analytics from '@react-native-firebase/analytics';
+import * as Haptics from 'expo-haptics';
 import { Image } from 'expo-image';
 import { TouchableWithoutFeedback } from 'react-native';
 import Animated, {
     Easing,
-    PinwheelIn,
     useAnimatedStyle,
     useSharedValue,
     withTiming
 } from 'react-native-reanimated';
 
+import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
+import { toggleDevMenuEnabled } from '../../../redux/SettingsSlice';
+import { logEvent } from '../../Analytics';
+
 const RotatingIcon: React.FunctionComponent = ({ }) => {
+    const dispatch = useAppDispatch();
+
+    const installId = useAppSelector(state => state.settings.installId);
+
     const rotation = useSharedValue(0);
     const rotationCount = useSharedValue(1);
     const animatedStyles = useAnimatedStyle(() => {
@@ -22,13 +29,33 @@ const RotatingIcon: React.FunctionComponent = ({ }) => {
         };
     });
 
-    return <TouchableWithoutFeedback onPress={async () => {
-        rotationCount.value = rotationCount.value + 1;
-        rotation.value = withTiming((rotationCount.value * 90), { duration: 1000, easing: Easing.elastic(1) });
+    let holdCallback: NodeJS.Timeout;
+    const onPressIn = () => {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        holdCallback = setTimeout(() => {
+            dispatch(toggleDevMenuEnabled());
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+            logEvent('dev_menu', {
+                installId,
+            });
+        }, 5000);
+    };
 
-        await analytics().logEvent('app_icon');
-    }}>
-        <Animated.View style={[animatedStyles]} entering={PinwheelIn.delay(0).duration(2000).easing(Easing.elastic(1))}>
+    const onPressOut = () => {
+        if (holdCallback == null) return;
+        clearTimeout(holdCallback);
+    };
+
+    return <TouchableWithoutFeedback
+        onPressIn={onPressIn}
+        onPressOut={onPressOut}
+        onPress={async () => {
+            rotationCount.value = rotationCount.value + 1;
+            rotation.value = withTiming((rotationCount.value * 90), { duration: 1000, easing: Easing.elastic(1) });
+
+            await logEvent('app_icon');
+        }}>
+        <Animated.View style={[animatedStyles]}>
             <Image source={require('../../../assets/icon.png')}
                 contentFit='contain'
                 style={{

@@ -3,28 +3,25 @@ import React from 'react';
 import { DimensionValue, StyleSheet } from 'react-native';
 import Animated, { Easing, FadeIn } from 'react-native-reanimated';
 
-import { selectGameById } from '../../../redux/GamesSlice';
+import { makeSelectPlayerColors } from '../../../redux/GamesSlice';
 import { useAppSelector } from '../../../redux/hooks';
-import { selectInteractionType } from '../../../redux/selectors';
+import { selectCurrentGame, selectInteractionType } from '../../../redux/selectors';
 import { interactionComponents } from '../Interactions/InteractionComponents';
 import { InteractionType } from '../Interactions/InteractionType';
 import AdditionTile from '../PlayerTiles/AdditionTile/AdditionTile';
+import PlayerIndexLabel from '../PlayerTiles/PlayerIndexLabel';
 
 interface Props {
     index: number;
     playerId: string;
-    color: string;
-    fontColor: string;
     cols: number;
     rows: number;
     width: number;
     height: number;
 }
 
-const FlexboxTile: React.FunctionComponent<Props> = ({
+const FlexboxTile: React.FunctionComponent<Props> = React.memo(({
     index,
-    color,
-    fontColor,
     width,
     height,
     cols,
@@ -35,9 +32,11 @@ const FlexboxTile: React.FunctionComponent<Props> = ({
     if (!(width > 0 && height > 0)) return null;
     if (Number.isNaN(width) || Number.isNaN(height)) return null;
 
-    const currentGameId = useAppSelector(state => state.settings.currentGameId);
-    const currentGame = useAppSelector(state => selectGameById(state, currentGameId));
-    if (typeof currentGame == 'undefined') return null;
+    const currentGameId = useAppSelector(state => selectCurrentGame(state)?.id);
+    const playerIndexLabel = useAppSelector(state => state.settings.showPlayerIndex);
+    const selectPlayerColors = makeSelectPlayerColors();
+    const playerColors = useAppSelector(state => selectPlayerColors(state, currentGameId, playerId));
+    const [bg, fg] = playerColors;
 
     const widthPerc: DimensionValue = `${(100 / cols)}%`;
     const heightPerc: DimensionValue = `${(100 / rows)}%`;
@@ -48,18 +47,20 @@ const FlexboxTile: React.FunctionComponent<Props> = ({
 
     return (
         <Animated.View
-            entering={FadeIn.delay(100 * index + 200).duration(400).easing(Easing.ease)}
+            entering={FadeIn.delay(25 * index + 50).duration(400).easing(Easing.ease)}
             style={[
                 styles.playerCard,
                 {
-                    backgroundColor: color,
+                    backgroundColor: bg,
                     width: widthPerc,
-                    height: heightPerc
+                    height: heightPerc,
+                    borderBottomLeftRadius: playerIndexLabel ? 7 : undefined,
                 }]}>
-            <InteractionComponent index={index} fontColor={fontColor} playerId={playerId}>
+            <PlayerIndexLabel index={index} fontColor={fg} enabled={playerIndexLabel} />
+            <InteractionComponent index={index} fontColor={fg} playerId={playerId}>
                 <AdditionTile
                     playerId={playerId}
-                    fontColor={fontColor}
+                    fontColor={fg}
                     maxWidth={width}
                     maxHeight={height}
                     index={index}
@@ -67,7 +68,7 @@ const FlexboxTile: React.FunctionComponent<Props> = ({
             </InteractionComponent>
         </Animated.View>
     );
-};
+});
 
 const styles = StyleSheet.create({
     playerCard: {

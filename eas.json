@@ -5,6 +5,7 @@
   },
   "build": {
     "development-simulator": {
+      "node": "18.18.2",
       "developmentClient": true,
       "distribution": "internal",
       "ios": {
@@ -16,10 +17,14 @@
       }
     },
     "development": {
+      "node": "18.18.2",
       "developmentClient": true,
       "distribution": "internal",
       "ios": {
         "resourceClass": "m-medium"
+      },
+      "android": {
+        "buildType": "apk"
       },
       "env": {
         "APP_VARIANT": "development",
@@ -27,9 +32,13 @@
       }
     },
     "preview": {
+      "node": "18.18.2",
       "distribution": "internal",
       "ios": {
         "resourceClass": "m-medium"
+      },
+      "android": {
+        "buildType": "apk"
       },
       "channel": "preview",
       "env": {
@@ -38,6 +47,7 @@
       }
     },
     "production": {
+      "node": "18.18.2",
       "ios": {
         "resourceClass": "m-medium"
       },

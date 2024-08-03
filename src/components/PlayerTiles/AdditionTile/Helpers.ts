@@ -1,4 +1,4 @@
-import { ZoomIn, ZoomOut , Layout, Easing , withTiming } from 'react-native-reanimated';
+import { Easing, LinearTransition, ZoomIn, ZoomOut, withTiming } from 'react-native-reanimated';
 
 /**
  * The duration of the animation in milliseconds.
@@ -18,7 +18,7 @@ export const exitingAnimation = ZoomOut.duration(animationDuration);
 /**
  * The easing and duration of the layout animation.
  */
-export const layoutAnimation = Layout.easing(Easing.ease).duration(animationDuration);
+export const layoutAnimation = LinearTransition.easing(Easing.ease).duration(animationDuration);
 
 export const singleLineScoreSizeMultiplier = 1.2;
 

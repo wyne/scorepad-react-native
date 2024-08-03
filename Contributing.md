@@ -7,12 +7,14 @@ Run any build command remotely by removing `--local` flag.
 For android, use JDK 17.
 
 ```zsh
+nvm use
+
 npx react-native-clean-project
 npx expo prebuild
-eas build --profile development-simulator --platform ios --local
-eas build --profile development-simulator --platform android --local
-eas build:run -p ios # select expo build from above
-eas build:run -p android # select expo build from above
+npx eas build --profile development-simulator --platform ios --local
+npx eas build --profile development-simulator --platform android --local
+npx eas build:run -p ios # select expo build from above
+npx eas build:run -p android # select expo build from above
 npx expo start --dev-client
 ```
 
@@ -25,16 +27,20 @@ Debug Firebase Crashlytics by running simulator with `FIRDebugEnabled` flag:
 ### Development - Physical Device
 
 ```zsh
+nvm use
+
 npx expo prebuild -p ios
-eas build --platform ios --profile development --local
+npx eas build --platform ios --profile development --local
 
 npx expo prebuild -p android
-eas build --platform android --profile development --local
+npx eas build --platform android --profile development --local
 ```
 
 ### Preview Build (Standalone)
 
 ```zsh
+nvm use
+
 npx expo prebuild -p ios
 npx eas-cli build --platform ios --profile preview --local
 
@@ -47,10 +53,12 @@ npx eas-cli build --platform android --profile preview --local
 Remember to bump `versionCode` and `buildNumber` in `app.config.js`.
 
 ```zsh
+nvm use
+
 npx expo-doctor
 npx expo prebuild
-eas build --platform ios
-eas build --platform android
+npx eas build --platform ios
+npx eas build --platform android
 ```
 
 ## Run
