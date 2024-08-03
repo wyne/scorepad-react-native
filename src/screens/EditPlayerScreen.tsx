@@ -83,7 +83,6 @@ const EditPlayerScreen: React.FC<EditPlayerScreenProps> = ({
     };
 
     const inputRef = React.useRef<TextInput>(null);
-    const showColorPalettes = useAppSelector(state => state.settings.showColorPalettes);
 
     return (
         <ScrollView style={{ flex: 1 }}>
@@ -119,12 +118,9 @@ const EditPlayerScreen: React.FC<EditPlayerScreenProps> = ({
                 value={localPlayerName}
             />
 
-            {
-                showColorPalettes &&
-                <View style={{ marginHorizontal: 20 }}>
-                    <ColorSelector playerId={playerId} />
-                </View>
-            }
+            <View style={{ marginHorizontal: 20 }}>
+                <ColorSelector playerId={playerId} />
+            </View>
 
         </ScrollView>
     );

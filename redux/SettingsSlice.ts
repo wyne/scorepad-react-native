@@ -14,7 +14,6 @@ export interface SettingsState {
     onboarded: string | undefined;
     showPointParticles: boolean;
     showPlayerIndex: boolean;
-    showColorPalettes?: boolean;
     interactionType: InteractionType;
     lastStoreReviewPrompt: number;
     devMenuEnabled?: boolean;
@@ -32,7 +31,6 @@ const initialState: SettingsState = {
     onboarded: undefined,
     showPointParticles: false,
     showPlayerIndex: false,
-    showColorPalettes: false,
     interactionType: InteractionType.SwipeVertical,
     lastStoreReviewPrompt: 0,
     appOpens: 0,
@@ -56,9 +54,6 @@ const settingsSlice = createSlice({
         },
         toggleShowPlayerIndex(state) {
             state.showPlayerIndex = !state.showPlayerIndex;
-        },
-        toggleShowColorPalettes(state) {
-            state.showColorPalettes = !state.showColorPalettes;
         },
         setMultiplier(state, action: PayloadAction<number>) {
             state.multiplier = action.payload;
@@ -107,7 +102,6 @@ export const {
     setOnboardedVersion,
     toggleShowPointParticles,
     toggleShowPlayerIndex,
-    toggleShowColorPalettes,
     setInteractionType,
     setLastStoreReviewPrompt,
     toggleDevMenuEnabled,

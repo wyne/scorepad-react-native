@@ -19,7 +19,6 @@ const settingsPersistConfig = {
         'onboarded',
         'showPointParticles',
         'showPlayerIndex',
-        'showColorPalettes',
         'interactionType',
         'lastStoreReviewPrompt',
         'devMenuEnabled',

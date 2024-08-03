@@ -50,8 +50,6 @@ const EditGame = ({ }) => {
         }));
     };
 
-    const showColorPalettes = useAppSelector(state => state.settings.showColorPalettes);
-
     return (
         <>
             <View style={styles.inputContainer}>
@@ -75,9 +73,7 @@ const EditGame = ({ }) => {
             </View>
 
             <View style={{ marginHorizontal: 10 }}>
-                {showColorPalettes &&
-                    <PaletteSelector />
-                }
+                <PaletteSelector />
             </View>
         </>
     );
