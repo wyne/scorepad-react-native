@@ -22,7 +22,7 @@ export interface SettingsState {
     rollingGameCounter?: number;
 };
 
-const initialState: SettingsState = {
+export const initialState: SettingsState = {
     home_fullscreen: false,
     multiplier: 1,
     addendOne: 1,

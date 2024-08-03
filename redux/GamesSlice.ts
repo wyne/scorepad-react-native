@@ -31,7 +31,7 @@ const gamesAdapter = createEntityAdapter({
 const initialState = gamesAdapter.getInitialState({
 });
 
-const gameDefaults = {
+export const gameDefaults = {
     roundCurrent: 0,
     roundTotal: 1,
     locked: false,
