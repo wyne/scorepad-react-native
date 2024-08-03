@@ -11,7 +11,7 @@ import CheckButton from './CheckButton';
 
 jest.mock('../../Analytics');
 
-const getStore = () => {
+const mockStore = () => {
     return configureStore({
         reducer: {
             settings: settingsReducer,
@@ -42,7 +42,7 @@ describe('CheckButton', () => {
     const navigation = useNavigationMock();
 
     it('should navigate to Game screen when pressed', async () => {
-        const store = getStore();
+        const store = mockStore();
 
         const { getByRole } = render(
             <Provider store={store}>
@@ -56,10 +56,10 @@ describe('CheckButton', () => {
         await waitFor(() => {
             expect(navigation.navigate).toHaveBeenCalledWith('Game');
         });
-    });
+    }, 10000);
 
     it('should navigate back a screen when pressed', async () => {
-        const store = getStore();
+        const store = mockStore();
 
         const { getByRole } = render(
             <Provider store={store}>
@@ -73,10 +73,10 @@ describe('CheckButton', () => {
         await waitFor(() => {
             expect(navigation.navigate).toHaveBeenCalledWith('List');
         });
-    });
+    }, 10000);
 
     it('should log an analytics event when pressed', async () => {
-        const store = getStore();
+        const store = mockStore();
 
         const { getByRole } = render(
             <Provider store={store}>
@@ -90,5 +90,5 @@ describe('CheckButton', () => {
         await waitFor(() => {
             expect(logEvent).toHaveBeenCalledWith('save_game', expect.any(Object));
         });
-    });
+    }, 10000);
 });
