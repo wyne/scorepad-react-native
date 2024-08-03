@@ -67,7 +67,7 @@ const ShareScreen: React.FunctionComponent<Props> = ({ navigation }) => {
                     icon={<Icon name='edit' color={systemBlue} />}
                     style={{ padding: 10 }}
                     onPress={async () => {
-                        navigation.navigate('Settings');
+                        navigation.navigate('Settings', { source: 'share_screen' });
                     }} />
 
                 <View style={{
