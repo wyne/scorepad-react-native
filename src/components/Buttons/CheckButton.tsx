@@ -36,8 +36,12 @@ const CheckButton: React.FunctionComponent<Props> = ({ navigation, route }) => {
 
             if (route?.params?.source === 'list_screen') {
                 navigation.navigate('List');
-            } else {
+            } else if (route?.params?.source === 'share_screen') {
+                navigation.navigate('Share');
+            } else if (route?.params?.source === 'new_game') {
                 navigation.navigate('Game');
+            } else {
+                navigation.goBack();
             }
         }}>
             <Text style={{ color: systemBlue, fontSize: 20 }}>Done</Text>

@@ -41,7 +41,7 @@ const mockStore = () => {
 describe('CheckButton', () => {
     const navigation = useNavigationMock();
 
-    it('should navigate to Game screen when pressed', async () => {
+    it('should navigate to Game screen when pressed from new game', async () => {
         const store = mockStore();
 
         const { getByRole } = render(
@@ -58,7 +58,7 @@ describe('CheckButton', () => {
         });
     }, 10000);
 
-    it('should navigate back a screen when pressed', async () => {
+    it('should navigate back to list screen screen when pressed from list screen menu', async () => {
         const store = mockStore();
 
         const { getByRole } = render(
@@ -72,6 +72,23 @@ describe('CheckButton', () => {
 
         await waitFor(() => {
             expect(navigation.navigate).toHaveBeenCalledWith('List');
+        });
+    }, 10000);
+
+    it('should navigate back to share screen screen when pressed from share screen', async () => {
+        const store = mockStore();
+
+        const { getByRole } = render(
+            <Provider store={store}>
+                <CheckButton navigation={navigation} route={{ key: 'Settings', name: 'Settings', params: { source: 'share_screen' } }} />
+            </Provider>
+        );
+
+        const button = getByRole('button');
+        fireEvent.press(button);
+
+        await waitFor(() => {
+            expect(navigation.navigate).toHaveBeenCalledWith('Share');
         });
     }, 10000);
 
