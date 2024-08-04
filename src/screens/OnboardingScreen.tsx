@@ -90,7 +90,7 @@ const OnboardingScreen: React.FunctionComponent<Props> = ({ navigation, route })
     );
 
     return (
-        <Animated.View style={[styles.container]} entering={FadeIn}
+        <Animated.View style={[styles.container]} entering={FadeIn} testID={'onboarding'}
             onLayout={event => {
                 const { width } = event.nativeEvent.layout;
                 setWidth(width);

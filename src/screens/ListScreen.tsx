@@ -47,7 +47,6 @@ const ListScreen: React.FunctionComponent<Props> = ({ navigation }) => {
             setRollingGameCounter(gameIds.length);
         }
 
-
         logEvent('game_list', {
             onboarded,
             gameCount: gameIds.length,
