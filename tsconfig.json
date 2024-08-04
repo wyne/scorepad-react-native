@@ -5,6 +5,7 @@
     "types": [
       "@testing-library/jest-native",
       "jest",
+      "node",
     ],
   },
   "extends": "expo/tsconfig.base",

@@ -29,7 +29,7 @@ const RotatingIcon: React.FunctionComponent = ({ }) => {
         };
     });
 
-    let holdCallback: NodeJS.Timeout;
+    let holdCallback: ReturnType<typeof setTimeout>;
     const onPressIn = () => {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
         holdCallback = setTimeout(() => {

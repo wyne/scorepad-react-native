@@ -41,7 +41,7 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
 
     const powerHoldTime = 500;
     const holdDuration = useRef(new Animated.Value(0)).current;
-    let powerHoldTimer: NodeJS.Timeout;
+    let powerHoldTimer: ReturnType<typeof setTimeout>;
     const [powerHold, setPowerHold] = useState<boolean>(false);
     const powerHoldRef = useRef(powerHold);
     useEffect(() => {
