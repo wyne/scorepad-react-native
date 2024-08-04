@@ -29,19 +29,20 @@ const HomeButton: React.FunctionComponent<Props> = ({ navigation }) => {
         const daysSinceLastPrompt = (now - lastStoreReviewPrompt) / (1000 * 60 * 60 * 24);
 
         if (gameCount < 3) { return; }
-        if (daysSinceLastPrompt < 90) { return; }
+        if (daysSinceLastPrompt < 30) { return; }
 
-        await logEvent('review_prompt', {
-            daysSinceLastPrompt,
-            gameCount,
-            installId
-        });
-
-        dispatch(setLastStoreReviewPrompt(Date.now()));
 
         const isAvailable = await StoreReview.isAvailableAsync();
 
         if (isAvailable) {
+            await logEvent('review_prompt', {
+                daysSinceLastPrompt,
+                gameCount,
+                installId
+            });
+
+            dispatch(setLastStoreReviewPrompt(Date.now()));
+
             const platform = Platform.OS;
             if (platform === 'ios') {
                 StoreReview.requestReview();
