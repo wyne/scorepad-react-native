@@ -12,7 +12,10 @@ const config: Config = {
     moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
     setupFilesAfterEnv: [
         '@testing-library/jest-native/extend-expect',
-    ]
+    ],
+    moduleNameMapper: {
+        '^react-native-video$': '__mocks__/react-native-video.js'
+    }
 };
 
 export default config;

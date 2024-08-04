@@ -51,7 +51,7 @@ describe('Navigation', () => {
         expect(screen.queryByTestId('onboarding')).toBeOnTheScreen();
     });
 
-    it.skip('does not show the onboarding screen when onboardedSemVer is equal or greater than 2.2.2', () => {
+    it('does not show the onboarding screen when onboardedSemVer is equal or greater than 2.2.2', () => {
         const store = mockStore();
 
         store.dispatch(setOnboardedVersion());
