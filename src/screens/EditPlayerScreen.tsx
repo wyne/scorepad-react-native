@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { ParamListBase, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -8,6 +8,7 @@ import { Input } from 'react-native-elements';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { updatePlayer } from '../../redux/PlayersSlice';
 import { selectCurrentGame } from '../../redux/selectors';
+import { logEvent } from '../Analytics';
 import ColorSelector from '../components/ColorPalettes/ColorSelector';
 
 type RouteParams = {
@@ -44,6 +45,14 @@ const EditPlayerScreen: React.FC<EditPlayerScreenProps> = ({
     if (player == null) return null;
     if (typeof currentGame == 'undefined') return null;
     if (index == null) { return null; }
+
+    const [nameChanged, setNameChanged] = useState(false);
+
+    useEffect(() => {
+        if (nameChanged) {
+            logEvent('player_name_changed');
+        }
+    }, [nameChanged]);
 
     const onEndEditingHandler = (e: NativeSyntheticEvent<TextInputEndEditingEventData>) => {
         const text = e.nativeEvent.text;
@@ -103,6 +112,9 @@ const EditPlayerScreen: React.FC<EditPlayerScreenProps> = ({
                 maxLength={15}
                 onChangeText={onChangeHandler}
                 onEndEditing={onEndEditingHandler}
+                onTextInput={() => {
+                    setNameChanged(true);
+                }}
                 placeholder='Player Name'
                 renderErrorMessage={false}
                 selectTextOnFocus={true}
