@@ -44,7 +44,7 @@ const AddendButton: React.FunctionComponent = ({ }) => {
     return (
         <TouchableHighlight onPress={handlePress}>
             <View style={styles.button}>
-                <Text style={styles.buttonText}>{addendOne}, {addendTwo}</Text>
+                <Text style={styles.buttonText} allowFontScaling={false}>{addendOne}, {addendTwo}</Text>
                 <GestureIcon />
             </View>
         </TouchableHighlight>

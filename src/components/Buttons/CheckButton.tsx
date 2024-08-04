@@ -44,7 +44,7 @@ const CheckButton: React.FunctionComponent<Props> = ({ navigation, route }) => {
                 navigation.goBack();
             }
         }}>
-            <Text style={{ color: systemBlue, fontSize: 20 }}>Done</Text>
+            <Text style={{ color: systemBlue, fontSize: 20 }} allowFontScaling={false}>Done</Text>
         </HeaderButton>
     );
 };

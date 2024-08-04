@@ -30,7 +30,7 @@ const AppInfoHeader: React.FunctionComponent<Props> = ({ navigation }: Props) =>
                     onPress={async () => {
                         navigation.goBack();
                     }}>
-                    <Text style={{ color: systemBlue, fontSize: 20 }}>Done</Text>
+                    <Text style={{ color: systemBlue, fontSize: 20 }} allowFontScaling={false}>Done</Text>
                 </HeaderButton>
             </View>
         </Wrapper>

@@ -23,7 +23,7 @@ const SettingsHeader: React.FunctionComponent<Props> = ({ navigation, route }) =
     return (
         <CustomHeader navigation={navigation}
             headerLeft={<></>}
-            headerCenter={<Text style={styles.title}>Edit Game</Text>}
+            headerCenter={<Text style={styles.title} allowFontScaling={false}>Edit Game</Text>}
             headerRight={<CheckButton navigation={navigation} route={route} />}
         />
     );

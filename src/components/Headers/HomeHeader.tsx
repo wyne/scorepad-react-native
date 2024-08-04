@@ -18,7 +18,7 @@ const HomeHeader: React.FunctionComponent<Props> = ({ navigation }) => {
         <View style={{ backgroundColor: 'white' }}>
             <CustomHeader navigation={navigation}
                 headerLeft={<AppInfoButton navigation={navigation} />}
-                headerCenter={<Text style={styles.title}>ScorePad</Text>}
+                headerCenter={<Text style={styles.title} allowFontScaling={false}>ScorePad</Text>}
                 headerRight={<NewGameButton navigation={navigation} />}
                 animated={true}
             />
