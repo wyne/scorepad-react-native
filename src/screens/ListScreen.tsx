@@ -5,7 +5,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import * as Application from 'expo-application';
 import { BlurView } from 'expo-blur';
 import * as Crypto from 'expo-crypto';
-import { StyleSheet, Text, View } from 'react-native';
+import { Platform, StyleSheet, Text, View } from 'react-native';
 import Animated, { Easing, LinearTransition } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { SemVer, parse } from 'semver';
@@ -89,7 +89,7 @@ const ListScreen: React.FunctionComponent<Props> = ({ navigation }) => {
                 keyExtractor={item => item}
             >
             </Animated.FlatList>
-            <BlurView intensity={20} style={{
+            <BlurView intensity={20} experimentalBlurMethod={Platform.OS == 'android' ? 'dimezisBlurView' : undefined} style={{
                 position: 'absolute', bottom: 0, left: 0, right: 0, height: 60,
                 justifyContent: 'flex-start', alignItems: 'center',
                 borderTopWidth: 1, borderColor: '#ccc',
