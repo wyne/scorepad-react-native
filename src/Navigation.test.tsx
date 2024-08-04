@@ -1,14 +1,13 @@
 import React from 'react';
 
 import { configureStore } from '@reduxjs/toolkit';
-import { render, screen, waitFor } from '@testing-library/react-native';
+import { render, waitFor } from '@testing-library/react-native';
 import { Provider } from 'react-redux';
 
 import gamesReducer, { gameDefaults } from '../redux/GamesSlice';
-import settingsReducer, { setOnboardedVersion, initialState as settingsState } from '../redux/SettingsSlice';
-
-import { Navigation } from './Navigation';
+import settingsReducer, { initialState as settingsState } from '../redux/SettingsSlice';
 import { useNavigationMock } from '../test/test-helpers';
+
 import ListScreen from './screens/ListScreen';
 
 jest.mock('Analytics');
@@ -61,7 +60,7 @@ describe('Navigation', () => {
         });
     });
 
-    it('does not show the onboarding screen when onboardedSemVer is equal or greater than 2.2.2', async () => {
+    it('does not show the onboarding screen when onboardedSemVer is equal or greater than 2.5.7', async () => {
         const navigation = useNavigationMock();
 
         jest.doMock('expo-application', () => ({
