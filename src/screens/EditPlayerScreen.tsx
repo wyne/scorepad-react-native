@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { ParamListBase, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -46,6 +46,14 @@ const EditPlayerScreen: React.FC<EditPlayerScreenProps> = ({
     if (typeof currentGame == 'undefined') return null;
     if (index == null) { return null; }
 
+    const [nameChanged, setNameChanged] = useState(false);
+
+    useEffect(() => {
+        if (nameChanged) {
+            logEvent('player_name_changed');
+        }
+    }, [nameChanged]);
+
     const onEndEditingHandler = (e: NativeSyntheticEvent<TextInputEndEditingEventData>) => {
         const text = e.nativeEvent.text;
 
@@ -73,13 +81,6 @@ const EditPlayerScreen: React.FC<EditPlayerScreenProps> = ({
                 playerName: text,
             }
         }));
-
-        logEvent('update_player', {
-            game_id: currentGame.id,
-            player_index: index,
-        });
-
-        // navigation.goBack();
     };
 
     const inputRef = React.useRef<TextInput>(null);
@@ -111,6 +112,9 @@ const EditPlayerScreen: React.FC<EditPlayerScreenProps> = ({
                 maxLength={15}
                 onChangeText={onChangeHandler}
                 onEndEditing={onEndEditingHandler}
+                onTextInput={() => {
+                    setNameChanged(true);
+                }}
                 placeholder='Player Name'
                 renderErrorMessage={false}
                 selectTextOnFocus={true}

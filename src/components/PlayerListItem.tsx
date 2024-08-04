@@ -94,6 +94,11 @@ const PlayerListItem: React.FunctionComponent<Props> = ({
                 onPress={() => {
                     if (edit) { return; }
                     navigation.navigate('EditPlayer', { playerId: playerId, index: index });
+
+                    logEvent('edit_player', {
+                        game_id: currentGameId,
+                        player_index: index,
+                    });
                 }}
                 disabled={isActive}
                 style={[{
