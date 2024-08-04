@@ -123,7 +123,7 @@ const GameHeader: React.FunctionComponent<Props> = ({ navigation }) => {
             </>}
             headerCenter={<>
                 <PrevRoundButton prevRoundHandler={prevRoundHandler} visible={isFirstRound} />
-                <Text style={styles.title}>Round {roundCurrent + 1}{
+                <Text style={styles.title} allowFontScaling={false}>Round {roundCurrent + 1}{
                     isLastRound ? '' : `/${lastRoundIndex}`
                 }</Text>
                 <NextRoundButton nextRoundHandler={nextRoundHandler}
