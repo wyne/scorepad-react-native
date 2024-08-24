@@ -59,7 +59,7 @@ switch (variant) {
 export default {
     name: name,
     slug: 'scorepad',
-    version: '2.5.7',
+    version: '2.5.9',
     orientation: 'default',
     icon: icon,
     assetBundlePatterns: ['assets/*'],
@@ -68,7 +68,7 @@ export default {
         bundleIdentifier: packageName,
         supportsTablet: true,
         requireFullScreen: false,
-        buildNumber: '83',
+        buildNumber: '85',
         infoPlist: {
             RCTAsyncStorageExcludeFromBackup: false,
         },
@@ -83,7 +83,7 @@ export default {
         package: packageName,
         permissions: [],
         blockedPermissions: ['android.permission.ACTIVITY_RECOGNITION'],
-        versionCode: 83,
+        versionCode: 85,
         googleServicesFile: './google-services.json',
     },
     userInterfaceStyle: 'dark',

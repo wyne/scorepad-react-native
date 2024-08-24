@@ -89,7 +89,8 @@ const ListScreen: React.FunctionComponent<Props> = ({ navigation }) => {
                 keyExtractor={item => item}
             >
             </Animated.FlatList>
-            <BlurView intensity={20} experimentalBlurMethod={Platform.OS == 'android' ? 'dimezisBlurView' : undefined} style={{
+            <BlurView intensity={20} style={{
+                backgroundColor: Platform.OS == 'android' ? 'white' : undefined,
                 position: 'absolute', bottom: 0, left: 0, right: 0, height: 60,
                 justifyContent: 'flex-start', alignItems: 'center',
                 borderTopWidth: 1, borderColor: '#ccc',
