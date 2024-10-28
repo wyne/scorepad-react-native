@@ -55,7 +55,7 @@
     "react-native-animated-pagination-dots": "^0.1.73",
     "react-native-draggable-flatlist": "^4.0.1",
     "react-native-elements": "^3.4.2",
-    "react-native-gesture-handler": "~2.14.0",
+    "react-native-gesture-handler": "~2.20.2",
     "react-native-get-random-values": "~1.8.0",
     "react-native-keyboard-aware-scroll-view": "^0.9.4",
     "react-native-onboarding-swiper": "^1.2.0",
