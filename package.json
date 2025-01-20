@@ -23,7 +23,7 @@
     "@react-native-picker/picker": "2.7.5",
     "@react-navigation/drawer": "^6.6.2",
     "@react-navigation/native": "^6.1.17",
-    "@react-navigation/native-stack": "^6.9.12",
+    "@react-navigation/native-stack": "^6.11.0",
     "@reduxjs/toolkit": "^1.9.3",
     "colorsheet": "^1.0.5",
     "dotenv": "^16.0.3",
