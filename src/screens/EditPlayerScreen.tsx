@@ -112,9 +112,6 @@ const EditPlayerScreen: React.FC<EditPlayerScreenProps> = ({
                 maxLength={15}
                 onChangeText={onChangeHandler}
                 onEndEditing={onEndEditingHandler}
-                onTextInput={() => {
-                    setNameChanged(true);
-                }}
                 placeholder='Player Name'
                 renderErrorMessage={false}
                 selectTextOnFocus={true}
