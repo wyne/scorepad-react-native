@@ -46,7 +46,7 @@ const EditPlayerScreen: React.FC<EditPlayerScreenProps> = ({
     if (typeof currentGame == 'undefined') return null;
     if (index == null) { return null; }
 
-    const [nameChanged, setNameChanged] = useState(false);
+    const [nameChanged] = useState(false);
 
     useEffect(() => {
         if (nameChanged) {
