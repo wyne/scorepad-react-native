@@ -46,14 +46,6 @@ const EditPlayerScreen: React.FC<EditPlayerScreenProps> = ({
     if (typeof currentGame == 'undefined') return null;
     if (index == null) { return null; }
 
-    const [nameChanged] = useState(false);
-
-    useEffect(() => {
-        if (nameChanged) {
-            logEvent('player_name_changed');
-        }
-    }, [nameChanged]);
-
     const onEndEditingHandler = (e: NativeSyntheticEvent<TextInputEndEditingEventData>) => {
         const text = e.nativeEvent.text;
 
