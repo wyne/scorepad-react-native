@@ -46,14 +46,6 @@ const EditPlayerScreen: React.FC<EditPlayerScreenProps> = ({
     if (typeof currentGame == 'undefined') return null;
     if (index == null) { return null; }
 
-    const [nameChanged, setNameChanged] = useState(false);
-
-    useEffect(() => {
-        if (nameChanged) {
-            logEvent('player_name_changed');
-        }
-    }, [nameChanged]);
-
     const onEndEditingHandler = (e: NativeSyntheticEvent<TextInputEndEditingEventData>) => {
         const text = e.nativeEvent.text;
 
@@ -112,9 +104,6 @@ const EditPlayerScreen: React.FC<EditPlayerScreenProps> = ({
                 maxLength={15}
                 onChangeText={onChangeHandler}
                 onEndEditing={onEndEditingHandler}
-                onTextInput={() => {
-                    setNameChanged(true);
-                }}
                 placeholder='Player Name'
                 renderErrorMessage={false}
                 selectTextOnFocus={true}
