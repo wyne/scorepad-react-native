@@ -8,7 +8,8 @@
     "dev": "APP_VARIANT=development expo start",
     "lint": "eslint . ; tsc",
     "test": "jest --silent",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage --silent"
   },
   "dependencies": {
     "@babel/plugin-transform-react-jsx": "^7.22.5",

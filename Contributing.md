@@ -67,9 +67,9 @@ Use a development build from above, then: `npx expo start --dev-client`
 
 ## Publish
 
-Apple: `eas submit -p ios` or `eas submit -p ios --non-interactive`
+Apple: `npx eas submit -p ios` or `npx eas submit -p ios --non-interactive`
 
-Android: `eas submit -p android --changes-not-sent-for-review`
+Android: `npx eas submit -p android --changes-not-sent-for-review`
 
 ## Debug
 
@@ -81,4 +81,4 @@ Then use the dev client to launch React Dev Tools or debug JS remotely.
 
 ### EAS
 
-Debug eas config settings: `eas config --platform=ios --profile=development`
+Debug eas config settings: `npx eas config --platform=ios --profile=development`
