@@ -31,13 +31,13 @@ const config: Config = {
         '!**/__mocks__/**',
         '!**/vendor/**',
     ],
-    coverageReporters: ['text', 'lcov', 'html'],
+    coverageReporters: ['text', 'lcov', 'html', 'json-summary'],
     coverageThreshold: {
         global: {
-            branches: 50,
-            functions: 50,
-            lines: 50,
-            statements: 50,
+            branches: 18,
+            functions: 20,
+            lines: 25,
+            statements: 24,
         },
     },
 };

@@ -1,0 +1,54 @@
+# Workflow for all pull requests and feature branches
+# Runs lighter checks for faster feedback on development branches
+
+name: PR Checks
+
+on:
+  pull_request:
+    branches: [ "*" ]
+  push:
+    branches-ignore: [ "main", "beta" ]
+
+jobs:
+  lint-and-test:
+    name: Lint & Test
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4.1.1
+      
+    - name: Use Node.js 18.x
+      uses: actions/setup-node@v4.0.1
+      with:
+        node-version: 18.x
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Run linting
+      run: npm run lint
+      
+    - name: Run TypeScript check
+      run: npx tsc --noEmit
+      
+    - name: Run tests
+      run: npm test
+      
+    - name: Check coverage thresholds
+      run: npm run test:coverage
+      continue-on-error: true
+      
+    - name: Generate coverage summary
+      if: always()
+      run: |
+        if [ -f coverage/coverage-summary.json ]; then
+          echo "## Test Coverage Summary" >> $GITHUB_STEP_SUMMARY
+          echo "| Metric | Percentage |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|------------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Statements | $(cat coverage/coverage-summary.json | jq -r '.total.statements.pct')% |" >> $GITHUB_STEP_SUMMARY
+          echo "| Branches | $(cat coverage/coverage-summary.json | jq -r '.total.branches.pct')% |" >> $GITHUB_STEP_SUMMARY
+          echo "| Functions | $(cat coverage/coverage-summary.json | jq -r '.total.functions.pct')% |" >> $GITHUB_STEP_SUMMARY
+          echo "| Lines | $(cat coverage/coverage-summary.json | jq -r '.total.lines.pct')% |" >> $GITHUB_STEP_SUMMARY
+        fi

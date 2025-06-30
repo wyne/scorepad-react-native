@@ -82,3 +82,81 @@ Then use the dev client to launch React Dev Tools or debug JS remotely.
 ### EAS
 
 Debug eas config settings: `npx eas config --platform=ios --profile=development`
+
+## Testing
+
+### Run Tests
+
+```zsh
+# Run tests once
+npm test
+
+# Run tests with coverage
+npm run test:coverage
+
+# Run tests in watch mode
+npm run test -- --watch
+```
+
+### Coverage Requirements
+
+- **Statements**: 24% minimum
+- **Branches**: 18% minimum  
+- **Functions**: 20% minimum
+- **Lines**: 25% minimum
+
+Coverage reports are generated in the `coverage/` directory and include:
+- Text summary (console output)
+- HTML report (`coverage/lcov-report/index.html`)
+- LCOV format for CI integration
+
+### Writing Tests
+
+- Use React Native Testing Library for component tests
+- Mock external dependencies (react-native-reanimated, navigation, etc.)
+- Follow existing test patterns in the codebase
+- Ensure tests are deterministic and don't rely on timers
+
+## Code Quality
+
+### Linting
+
+```zsh
+# Run ESLint and TypeScript checks
+npm run lint
+
+# Auto-fix linting issues where possible
+npx eslint . --fix
+```
+
+### CI/CD
+
+The project uses GitHub Actions for continuous integration:
+
+#### Main Workflow (`node.yml`)
+- Runs on push to `main` and all pull requests to `main`
+- Executes linting, TypeScript checks, and full test suite with coverage
+- Uploads coverage reports as GitHub artifacts
+- Posts coverage summaries on pull requests
+
+#### PR Checks (`pr-checks.yml`)
+- Runs on all feature branches and pull requests
+- Provides faster feedback with basic linting and testing
+- Shows coverage summary in GitHub Actions summary
+
+#### Quality Gates
+- All tests must pass
+- Code must pass ESLint rules
+- TypeScript compilation must succeed
+- Coverage thresholds must be met
+- No merge to main without passing CI
+
+### Pre-commit Checklist
+
+Before creating a pull request:
+
+1. Run `npm run lint` and fix any issues
+2. Run `npm run test:coverage` and ensure all tests pass
+3. Verify coverage hasn't decreased significantly
+4. Test the app functionality manually
+5. Update tests for any new features or bug fixes
