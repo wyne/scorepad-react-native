@@ -5,7 +5,9 @@
       "Bash(npm run test:coverage:*)",
       "Bash(npx eslint:*)",
       "Bash(npm run lint)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(npm run lint:*)",
+      "Bash(ls:*)"
     ],
     "deny": []
   }
