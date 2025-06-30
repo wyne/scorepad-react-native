@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm test:*)",
+      "Bash(npm run test:coverage:*)",
+      "Bash(npx eslint:*)",
+      "Bash(npm run lint)",
+      "Bash(grep:*)"
+    ],
+    "deny": []
+  }
+}

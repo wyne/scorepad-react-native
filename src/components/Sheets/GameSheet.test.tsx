@@ -1,0 +1,691 @@
+import React from 'react';
+
+import { configureStore } from '@reduxjs/toolkit';
+import { fireEvent, render, waitFor } from '@testing-library/react-native';
+import { Alert } from 'react-native';
+import { Provider } from 'react-redux';
+
+import gamesReducer from '../../../redux/GamesSlice';
+import playersReducer from '../../../redux/PlayersSlice';
+import settingsReducer from '../../../redux/SettingsSlice';
+import { logEvent } from '../../Analytics';
+
+import GameSheet from './GameSheet';
+
+// Mock Analytics
+jest.mock('../../Analytics', () => ({
+    logEvent: jest.fn(),
+}));
+
+// Mock @gorhom/bottom-sheet
+jest.mock('@gorhom/bottom-sheet', () => {
+    const { forwardRef, useImperativeHandle } = require('react');
+    const { View, ScrollView } = require('react-native');
+    
+    const MockBottomSheet = forwardRef((props: {
+        children: React.ReactNode;
+        onChange?: (index: number) => void;
+        snapPoints: (string | number)[];
+        index: number;
+        backdropComponent?: React.ComponentType;
+        backgroundStyle?: object;
+        handleIndicatorStyle?: object;
+        animatedPosition?: object;
+        enablePanDownToClose?: boolean;
+    }, ref: React.Ref<{ snapToIndex: (index: number) => void }>) => {
+        useImperativeHandle(ref, () => ({
+            snapToIndex: jest.fn((index: number) => {
+                props.onChange?.(index);
+            }),
+        }));
+        
+        return (
+            <View testID="bottom-sheet" style={{ backgroundColor: 'rgb(30,40,50)' }}>
+                {props.children}
+            </View>
+        );
+    });
+    
+    const MockBottomSheetScrollView = ({ children }: { children: React.ReactNode }) => (
+        <ScrollView testID="bottom-sheet-scroll">{children}</ScrollView>
+    );
+    
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const MockBottomSheetBackdrop = (props: {
+        disappearsOnIndex: number;
+        appearsOnIndex: number;
+        pressBehavior: number;
+    }) => (
+        <View testID="bottom-sheet-backdrop" />
+    );
+    
+    return {
+        __esModule: true,
+        default: MockBottomSheet,
+        BottomSheetScrollView: MockBottomSheetScrollView,
+        BottomSheetBackdrop: MockBottomSheetBackdrop,
+    };
+});
+
+// Mock react-navigation
+jest.mock('@react-navigation/native', () => ({
+    useIsFocused: jest.fn(() => true),
+}));
+
+// Mock react-native-reanimated
+jest.mock('react-native-reanimated', () => {
+    const View = require('react-native').View;
+    const Text = require('react-native').Text;
+    
+    return {
+        __esModule: true,
+        default: {
+            View: View,
+            Text: Text,
+        },
+        useSharedValue: jest.fn((value) => ({ value })),
+        useAnimatedStyle: jest.fn((callback) => callback()),
+        withTiming: jest.fn((value) => value),
+        FadeIn: {
+            delay: jest.fn(() => ({ delay: jest.fn() })),
+        },
+        Layout: {
+            delay: jest.fn(() => ({ delay: jest.fn() })),
+        },
+        interpolate: jest.fn(),
+        Extrapolate: {
+            CLAMP: 'clamp',
+        },
+    };
+});
+
+// Mock react-native-safe-area-context
+jest.mock('react-native-safe-area-context', () => ({
+    SafeAreaView: ({ children }: { children: React.ReactNode }) => {
+        const { View } = require('react-native');
+        return <View testID="safe-area-view">{children}</View>;
+    },
+}));
+
+// Mock react-native-elements
+jest.mock('react-native-elements', () => ({
+    Button: ({ title, onPress, testID }: {
+        title: string;
+        onPress: () => void;
+        testID?: string;
+    }) => {
+        const { TouchableOpacity, Text } = require('react-native');
+        return (
+            <TouchableOpacity onPress={onPress} testID={testID}>
+                <Text>{title}</Text>
+            </TouchableOpacity>
+        );
+    },
+}));
+
+// Mock components
+jest.mock('../BigButtons/BigButton', () => {
+    return function MockBigButton({ text, onPress, testID }: {
+        text: string;
+        onPress: () => void;
+        testID?: string;
+    }) {
+        const { TouchableOpacity, Text } = require('react-native');
+        return (
+            <TouchableOpacity onPress={onPress} testID={testID || `big-button-${text.toLowerCase()}`}>
+                <Text>{text}</Text>
+            </TouchableOpacity>
+        );
+    };
+});
+
+jest.mock('../Icons/RematchIcon', () => {
+    return function MockRematchIcon() {
+        const { View, Text } = require('react-native');
+        return <View testID="rematch-icon"><Text>Rematch Icon</Text></View>;
+    };
+});
+
+jest.mock('../Rounds', () => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    return function MockRounds({ navigation, show }: {
+        navigation: object;
+        show: boolean;
+    }) {
+        const { View, Text } = require('react-native');
+        return (
+            <View testID="rounds">
+                <Text>Rounds - Show: {show.toString()}</Text>
+            </View>
+        );
+    };
+});
+
+// Mock GameSheetContext
+jest.mock('./GameSheetContext', () => ({
+    useGameSheetContext: jest.fn(() => ({
+        current: {
+            snapToIndex: jest.fn(),
+        },
+    })),
+}));
+
+// Mock Alert
+jest.spyOn(Alert, 'alert');
+
+const mockNavigation = {
+    navigate: jest.fn(),
+    goBack: jest.fn(),
+    dispatch: jest.fn(),
+    setOptions: jest.fn(),
+    isFocused: jest.fn(() => true),
+    canGoBack: jest.fn(() => true),
+    getId: jest.fn(),
+    getParent: jest.fn(),
+    getState: jest.fn(),
+    reset: jest.fn(),
+    setParams: jest.fn(),
+    push: jest.fn(),
+    pop: jest.fn(),
+    popToTop: jest.fn(),
+    replace: jest.fn(),
+    jumpTo: jest.fn(),
+    addListener: jest.fn(),
+    removeListener: jest.fn(),
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+} as any;
+
+const createMockStore = (initialState: Parameters<typeof configureStore>[0]['preloadedState']) => {
+    return configureStore({
+        reducer: {
+            settings: settingsReducer,
+            games: gamesReducer,
+            players: playersReducer,
+        },
+        preloadedState: initialState,
+    });
+};
+
+describe('GameSheet', () => {
+    const mockGame = {
+        id: 'game-1',
+        title: 'Test Game',
+        dateCreated: Date.now(),
+        roundCurrent: 1,
+        roundTotal: 3,
+        playerIds: ['player-1', 'player-2'],
+        locked: false,
+    };
+
+    const mockPlayers = {
+        'player-1': {
+            id: 'player-1',
+            playerName: 'Player 1',
+            scores: [10, 15],
+        },
+        'player-2': {
+            id: 'player-2',
+            playerName: 'Player 2',
+            scores: [5, 20],
+        },
+    };
+
+    const defaultProps = {
+        navigation: mockNavigation,
+        containerHeight: 800,
+    };
+
+    beforeEach(() => {
+        jest.clearAllMocks();
+    });
+
+    it('should render null when no current game is set', () => {
+        const store = createMockStore({
+            settings: {
+                currentGameId: undefined,
+                home_fullscreen: false,
+            },
+            games: {
+                entities: {},
+                ids: [],
+            },
+            players: {
+                entities: {},
+                ids: [],
+            },
+        });
+
+        const { toJSON } = render(
+            <Provider store={store}>
+                <GameSheet {...defaultProps} />
+            </Provider>
+        );
+
+        expect(toJSON()).toBeNull();
+    });
+
+    it('should render game sheet when current game is set', () => {
+        const store = createMockStore({
+            settings: {
+                currentGameId: 'game-1',
+                home_fullscreen: false,
+            },
+            games: {
+                entities: {
+                    'game-1': mockGame,
+                },
+                ids: ['game-1'],
+            },
+            players: {
+                entities: mockPlayers,
+                ids: ['player-1', 'player-2'],
+            },
+        });
+
+        const { getByTestId, getByText } = render(
+            <Provider store={store}>
+                <GameSheet {...defaultProps} />
+            </Provider>
+        );
+
+        expect(getByTestId('bottom-sheet')).toBeTruthy();
+        expect(getByText('Test Game')).toBeTruthy();
+        expect(getByTestId('rounds')).toBeTruthy();
+    });
+
+    it('should show locked text when game is locked', () => {
+        const lockedGame = { ...mockGame, locked: true };
+        const store = createMockStore({
+            settings: {
+                currentGameId: 'game-1',
+                home_fullscreen: false,
+            },
+            games: {
+                entities: {
+                    'game-1': lockedGame,
+                },
+                ids: ['game-1'],
+            },
+            players: {
+                entities: mockPlayers,
+                ids: ['player-1', 'player-2'],
+            },
+        });
+
+        const { getByText } = render(
+            <Provider store={store}>
+                <GameSheet {...defaultProps} />
+            </Provider>
+        );
+
+        expect(getByText('Locked')).toBeTruthy();
+        expect(getByText('Unlock')).toBeTruthy();
+    });
+
+    it('should show unlock button when game is locked', () => {
+        const lockedGame = { ...mockGame, locked: true };
+        const store = createMockStore({
+            settings: {
+                currentGameId: 'game-1',
+                home_fullscreen: false,
+            },
+            games: {
+                entities: {
+                    'game-1': lockedGame,
+                },
+                ids: ['game-1'],
+            },
+            players: {
+                entities: mockPlayers,
+                ids: ['player-1', 'player-2'],
+            },
+        });
+
+        const { getByTestId } = render(
+            <Provider store={store}>
+                <GameSheet {...defaultProps} />
+            </Provider>
+        );
+
+        expect(getByTestId('big-button-unlock')).toBeTruthy();
+    });
+
+    it('should show lock button when game is unlocked', () => {
+        const store = createMockStore({
+            settings: {
+                currentGameId: 'game-1',
+                home_fullscreen: false,
+            },
+            games: {
+                entities: {
+                    'game-1': mockGame,
+                },
+                ids: ['game-1'],
+            },
+            players: {
+                entities: mockPlayers,
+                ids: ['player-1', 'player-2'],
+            },
+        });
+
+        const { getByTestId } = render(
+            <Provider store={store}>
+                <GameSheet {...defaultProps} />
+            </Provider>
+        );
+
+        expect(getByTestId('big-button-lock')).toBeTruthy();
+    });
+
+    it('should toggle lock when lock button is pressed', async () => {
+        const store = createMockStore({
+            settings: {
+                currentGameId: 'game-1',
+                home_fullscreen: false,
+            },
+            games: {
+                entities: {
+                    'game-1': mockGame,
+                },
+                ids: ['game-1'],
+            },
+            players: {
+                entities: mockPlayers,
+                ids: ['player-1', 'player-2'],
+            },
+        });
+
+        const { getByTestId } = render(
+            <Provider store={store}>
+                <GameSheet {...defaultProps} />
+            </Provider>
+        );
+
+        const lockButton = getByTestId('big-button-lock');
+        fireEvent.press(lockButton);
+
+        await waitFor(() => {
+            expect(logEvent).toHaveBeenCalledWith('lock_game', {
+                game_id: 'game-1',
+                locked: true,
+            });
+        });
+    });
+
+    it('should show reset button when game is not locked', () => {
+        const store = createMockStore({
+            settings: {
+                currentGameId: 'game-1',
+                home_fullscreen: false,
+            },
+            games: {
+                entities: {
+                    'game-1': mockGame,
+                },
+                ids: ['game-1'],
+            },
+            players: {
+                entities: mockPlayers,
+                ids: ['player-1', 'player-2'],
+            },
+        });
+
+        const { getByTestId } = render(
+            <Provider store={store}>
+                <GameSheet {...defaultProps} />
+            </Provider>
+        );
+
+        expect(getByTestId('big-button-reset')).toBeTruthy();
+    });
+
+    it('should not show reset button when game is locked', () => {
+        const lockedGame = { ...mockGame, locked: true };
+        const store = createMockStore({
+            settings: {
+                currentGameId: 'game-1',
+                home_fullscreen: false,
+            },
+            games: {
+                entities: {
+                    'game-1': lockedGame,
+                },
+                ids: ['game-1'],
+            },
+            players: {
+                entities: mockPlayers,
+                ids: ['player-1', 'player-2'],
+            },
+        });
+
+        const { queryByTestId } = render(
+            <Provider store={store}>
+                <GameSheet {...defaultProps} />
+            </Provider>
+        );
+
+        expect(queryByTestId('big-button-reset')).toBeNull();
+    });
+
+    it('should show rematch button', () => {
+        const store = createMockStore({
+            settings: {
+                currentGameId: 'game-1',
+                home_fullscreen: false,
+            },
+            games: {
+                entities: {
+                    'game-1': mockGame,
+                },
+                ids: ['game-1'],
+            },
+            players: {
+                entities: mockPlayers,
+                ids: ['player-1', 'player-2'],
+            },
+        });
+
+        const { getByTestId } = render(
+            <Provider store={store}>
+                <GameSheet {...defaultProps} />
+            </Provider>
+        );
+
+        expect(getByTestId('big-button-rematch')).toBeTruthy();
+    });
+
+    it('should show alert when reset button is pressed', async () => {
+        const store = createMockStore({
+            settings: {
+                currentGameId: 'game-1',
+                home_fullscreen: false,
+            },
+            games: {
+                entities: {
+                    'game-1': mockGame,
+                },
+                ids: ['game-1'],
+            },
+            players: {
+                entities: mockPlayers,
+                ids: ['player-1', 'player-2'],
+            },
+        });
+
+        const { getByTestId } = render(
+            <Provider store={store}>
+                <GameSheet {...defaultProps} />
+            </Provider>
+        );
+
+        const resetButton = getByTestId('big-button-reset');
+        fireEvent.press(resetButton);
+
+        await waitFor(() => {
+            expect(Alert.alert).toHaveBeenCalledWith(
+                'Reset Game',
+                'Warning: This will reset all scores and rounds for this game. Are you sure you want to reset?',
+                expect.arrayContaining([
+                    expect.objectContaining({ text: 'Cancel' }),
+                    expect.objectContaining({ text: 'Reset' }),
+                ])
+            );
+        });
+    });
+
+    it('should show alert when rematch button is pressed', async () => {
+        const store = createMockStore({
+            settings: {
+                currentGameId: 'game-1',
+                home_fullscreen: false,
+            },
+            games: {
+                entities: {
+                    'game-1': mockGame,
+                },
+                ids: ['game-1'],
+            },
+            players: {
+                entities: mockPlayers,
+                ids: ['player-1', 'player-2'],
+            },
+        });
+
+        const { getByTestId } = render(
+            <Provider store={store}>
+                <GameSheet {...defaultProps} />
+            </Provider>
+        );
+
+        const rematchButton = getByTestId('big-button-rematch');
+        fireEvent.press(rematchButton);
+
+        await waitFor(() => {
+            expect(Alert.alert).toHaveBeenCalledWith(
+                'Rematch',
+                'This will create a new game with the same players and empty scores.',
+                expect.arrayContaining([
+                    expect.objectContaining({ text: 'Cancel' }),
+                    expect.objectContaining({ text: 'Rematch' }),
+                ])
+            );
+        });
+    });
+
+    it('should navigate to Settings when edit game button is pressed', async () => {
+        const store = createMockStore({
+            settings: {
+                currentGameId: 'game-1',
+                home_fullscreen: false,
+            },
+            games: {
+                entities: {
+                    'game-1': mockGame,
+                },
+                ids: ['game-1'],
+            },
+            players: {
+                entities: mockPlayers,
+                ids: ['player-1', 'player-2'],
+            },
+        });
+
+        const { getByText } = render(
+            <Provider store={store}>
+                <GameSheet {...defaultProps} />
+            </Provider>
+        );
+
+        const editButton = getByText('Edit Game and Players');
+        fireEvent.press(editButton);
+
+        await waitFor(() => {
+            expect(mockNavigation.navigate).toHaveBeenCalledWith('Settings', { source: 'edit_game' });
+            expect(logEvent).toHaveBeenCalledWith('edit_game', {
+                game_id: 'game-1',
+            });
+        });
+    });
+
+    it('should not show edit game button when game is locked', () => {
+        const lockedGame = { ...mockGame, locked: true };
+        const store = createMockStore({
+            settings: {
+                currentGameId: 'game-1',
+                home_fullscreen: false,
+            },
+            games: {
+                entities: {
+                    'game-1': lockedGame,
+                },
+                ids: ['game-1'],
+            },
+            players: {
+                entities: mockPlayers,
+                ids: ['player-1', 'player-2'],
+            },
+        });
+
+        const { queryByText } = render(
+            <Provider store={store}>
+                <GameSheet {...defaultProps} />
+            </Provider>
+        );
+
+        expect(queryByText('Edit Game and Players')).toBeNull();
+    });
+
+    it('should pass fullscreen state to Rounds component', () => {
+        const store = createMockStore({
+            settings: {
+                currentGameId: 'game-1',
+                home_fullscreen: true,
+            },
+            games: {
+                entities: {
+                    'game-1': mockGame,
+                },
+                ids: ['game-1'],
+            },
+            players: {
+                entities: mockPlayers,
+                ids: ['player-1', 'player-2'],
+            },
+        });
+
+        const { getByText } = render(
+            <Provider store={store}>
+                <GameSheet {...defaultProps} />
+            </Provider>
+        );
+
+        expect(getByText('Rounds - Show: false')).toBeTruthy();
+    });
+
+    it('should show sorting instruction text', () => {
+        const store = createMockStore({
+            settings: {
+                currentGameId: 'game-1',
+                home_fullscreen: false,
+            },
+            games: {
+                entities: {
+                    'game-1': mockGame,
+                },
+                ids: ['game-1'],
+            },
+            players: {
+                entities: mockPlayers,
+                ids: ['player-1', 'player-2'],
+            },
+        });
+
+        const { getByText } = render(
+            <Provider store={store}>
+                <GameSheet {...defaultProps} />
+            </Provider>
+        );
+
+        expect(getByText('Tap the player column or total score column to change sorting.')).toBeTruthy();
+    });
+});
