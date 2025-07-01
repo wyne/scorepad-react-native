@@ -3,11 +3,11 @@ import { getPalettes, getPalette, setPlayerColor } from './ColorPalette';
 // Mock the Redux hooks
 jest.mock('../redux/hooks', () => ({
   useAppDispatch: () => mockDispatch,
-  useAppSelector: (selector: any) => selector(mockState),
+  useAppSelector: (selector: (state: unknown) => unknown) => selector(mockState),
 }));
 
 const mockDispatch = jest.fn();
-const mockState: any = {
+const mockState = {
   players: {
     entities: {
       'player-1': {
