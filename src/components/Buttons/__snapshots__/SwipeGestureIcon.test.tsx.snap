@@ -1,0 +1,173 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SwipeGestureIcon should render with both custom color and size 1`] = `
+<View
+  style={
+    {
+      "paddingHorizontal": 2,
+    }
+  }
+>
+  <Svg
+    height={25}
+    viewBox="1 1 30 44"
+    width={25}
+  >
+    <Rect
+      height="40"
+      rx="7"
+      ry="7"
+      stroke="#00ff00"
+      strokeWidth={4}
+      width="28"
+      x="3"
+      y="3"
+    />
+    <Polyline
+      fill="none"
+      points="9,18 17,10 25,18 "
+      stroke="#00ff00"
+      stroke-linejoin="round"
+      strokeLinecap="round"
+      strokeWidth="3"
+    />
+    <Polyline
+      fill="none"
+      points="9,28 17,36 25,28 "
+      stroke="#00ff00"
+      stroke-linejoin="round"
+      strokeLinecap="round"
+      strokeWidth="3"
+    />
+  </Svg>
+</View>
+`;
+
+exports[`SwipeGestureIcon should render with custom color 1`] = `
+<View
+  style={
+    {
+      "paddingHorizontal": 2,
+    }
+  }
+>
+  <Svg
+    height={20}
+    viewBox="1 1 30 44"
+    width={20}
+  >
+    <Rect
+      height="40"
+      rx="7"
+      ry="7"
+      stroke="#ff0000"
+      strokeWidth={4}
+      width="28"
+      x="3"
+      y="3"
+    />
+    <Polyline
+      fill="none"
+      points="9,18 17,10 25,18 "
+      stroke="#ff0000"
+      stroke-linejoin="round"
+      strokeLinecap="round"
+      strokeWidth="3"
+    />
+    <Polyline
+      fill="none"
+      points="9,28 17,36 25,28 "
+      stroke="#ff0000"
+      stroke-linejoin="round"
+      strokeLinecap="round"
+      strokeWidth="3"
+    />
+  </Svg>
+</View>
+`;
+
+exports[`SwipeGestureIcon should render with custom size 1`] = `
+<View
+  style={
+    {
+      "paddingHorizontal": 2,
+    }
+  }
+>
+  <Svg
+    height={30}
+    viewBox="1 1 30 44"
+    width={30}
+  >
+    <Rect
+      height="40"
+      rx="7"
+      ry="7"
+      stroke="#0a84ff"
+      strokeWidth={4}
+      width="28"
+      x="3"
+      y="3"
+    />
+    <Polyline
+      fill="none"
+      points="9,18 17,10 25,18 "
+      stroke="#0a84ff"
+      stroke-linejoin="round"
+      strokeLinecap="round"
+      strokeWidth="3"
+    />
+    <Polyline
+      fill="none"
+      points="9,28 17,36 25,28 "
+      stroke="#0a84ff"
+      stroke-linejoin="round"
+      strokeLinecap="round"
+      strokeWidth="3"
+    />
+  </Svg>
+</View>
+`;
+
+exports[`SwipeGestureIcon should render with default props 1`] = `
+<View
+  style={
+    {
+      "paddingHorizontal": 2,
+    }
+  }
+>
+  <Svg
+    height={20}
+    viewBox="1 1 30 44"
+    width={20}
+  >
+    <Rect
+      height="40"
+      rx="7"
+      ry="7"
+      stroke="#0a84ff"
+      strokeWidth={4}
+      width="28"
+      x="3"
+      y="3"
+    />
+    <Polyline
+      fill="none"
+      points="9,18 17,10 25,18 "
+      stroke="#0a84ff"
+      stroke-linejoin="round"
+      strokeLinecap="round"
+      strokeWidth="3"
+    />
+    <Polyline
+      fill="none"
+      points="9,28 17,36 25,28 "
+      stroke="#0a84ff"
+      stroke-linejoin="round"
+      strokeLinecap="round"
+      strokeWidth="3"
+    />
+  </Svg>
+</View>
+`;
