@@ -9,7 +9,8 @@
     "lint": "eslint . ; tsc",
     "test": "jest --silent",
     "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage --silent"
+    "test:coverage": "jest --coverage --silent",
+    "test:coverage-summary": "jest --coverage --coverageReporters=text-summary --silent"
   },
   "dependencies": {
     "@babel/plugin-transform-react-jsx": "^7.22.5",
