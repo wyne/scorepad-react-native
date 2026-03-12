@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 
 import { ParamListBase, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -8,7 +8,6 @@ import { Input } from 'react-native-elements';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { updatePlayer } from '../../redux/PlayersSlice';
 import { selectCurrentGame } from '../../redux/selectors';
-import { logEvent } from '../Analytics';
 import ColorSelector from '../components/ColorPalettes/ColorSelector';
 
 type RouteParams = {

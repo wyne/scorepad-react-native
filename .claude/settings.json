@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "WebFetch(domain:docs.expo.dev)",
+      "Bash(npm test:*)",
+      "Bash(powershell.exe -ExecutionPolicy Bypass -File \"C:\\\\Users\\\\Justin\\\\workspace\\\\scorepad-react-native\\\\setup-node.ps1\")"
+    ]
+  }
+}
