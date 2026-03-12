@@ -1,3 +1,71 @@
+## Setup
+
+### Prerequisites
+
+| Tool | Version | Notes |
+|------|---------|-------|
+| nvm | latest | Node version manager |
+| Node.js | 20.18 (via `.nvmrc`) | Installed via `nvm` |
+| npm | (bundled with Node) | Used for all JS dependencies |
+| EAS CLI | latest | Required for building and submitting |
+| JDK | 17 | Android builds only |
+| Xcode | latest stable | iOS builds only (macOS required) |
+| Android Studio | latest stable | Android builds only (includes Android SDK) |
+| CocoaPods | latest | iOS native code after `expo prebuild` |
+
+### Install nvm & Node
+
+```zsh
+# Install nvm — https://github.com/nvm-sh/nvm
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
+
+# From the project root — installs and activates the version in .nvmrc (20.18)
+nvm install
+nvm use
+```
+
+### Install project dependencies
+
+```zsh
+npm install --legacy-peer-deps
+```
+
+> `--legacy-peer-deps` is required because some packages (e.g. `@reduxjs/toolkit`) have not yet declared React 19 peer dependency support, though they are compatible.
+
+### Install EAS CLI
+
+```zsh
+npm install -g eas-cli
+eas login     # authenticate with your Expo account
+eas whoami    # verify login
+```
+
+### iOS — Xcode & CocoaPods
+
+- Install Xcode from the Mac App Store and accept the license agreement
+- Install CocoaPods:
+
+```zsh
+sudo gem install cocoapods
+```
+
+- After running `expo prebuild`, install native iOS dependencies:
+
+```zsh
+cd ios && pod install && cd ..
+```
+
+### Android — JDK 17 & Android Studio
+
+- Install JDK 17 (e.g. via Homebrew: `brew install --cask temurin@17`)
+- Install [Android Studio](https://developer.android.com/studio) and open the SDK Manager to install:
+  - Android SDK Platform (target API level)
+  - Android SDK Build-Tools
+  - Android Emulator
+- Ensure `JAVA_HOME` points to your JDK 17 installation
+
+---
+
 ## Build
 
 Run any build command remotely by removing `--local` flag.
