@@ -81,6 +81,9 @@ export ANDROID_HOME=/mnt/c/Users/<YourUsername>/AppData/Local/Android/Sdk
 export PATH=$PATH:$ANDROID_HOME/platform-tools
 export PATH=$PATH:$ANDROID_HOME/emulator
 export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin
+
+# Points WSL's adb client at the Windows ADB server via the WSL gateway IP
+export ANDROID_ADB_SERVER_HOST=$(ip route | grep default | awk '{print $3}')
 ```
 
 Reload your shell:
@@ -143,36 +146,33 @@ adb --version
 
 ---
 
-WSL2 uses NAT networking by default — WSL's `adb` client cannot reach the Windows ADB server via
-`localhost`. Fix this by pointing `adb` at the Windows host IP.
+WSL2 uses NAT networking — WSL's `adb` cannot reach the Windows ADB server on `localhost` by
+default. The fix is a Windows port proxy that forwards the ADB port from the Windows gateway IP
+to the local ADB server.
 
-Add to `~/.bashrc` or `~/.zshrc`:
+**Connect WSL ADB to the Windows ADB server**
 
-```zsh
-export ANDROID_ADB_SERVER_HOST=$(cat /etc/resolv.conf | grep nameserver | awk '{print $2}')
-```
-
-Then start the ADB server from a **Windows** terminal (PowerShell or cmd) once per session:
+Run once from **Windows PowerShell as Administrator**:
 
 ```powershell
-adb -a nodaemon server start
+# Start the Windows ADB server (daemonized)
+adb start-server
+
+# Forward the ADB port from the WSL-facing gateway IP to localhost
+netsh interface portproxy add v4tov4 listenaddress=172.18.192.1 listenport=5037 connectaddress=127.0.0.1 connectport=5037
+
+# Allow the connection through the firewall
+netsh advfirewall firewall add rule name="WSL ADB" dir=in action=allow protocol=TCP localport=5037
 ```
+
+> The `listenaddress` (`172.18.192.1`) is the default WSL2 gateway IP. If your gateway is
+> different, check it from WSL with: `ip route | grep default`
 
 Verify from WSL (with an emulator running):
 
 ```zsh
-source ~/.bashrc
 adb devices   # should list the running emulator
 ```
-
-> **Alternative — WSL Mirrored Networking (Windows 11 only)**
-> Create `C:\Users\<YourUsername>\.wslconfig` on Windows:
-> ```ini
-> [wsl2]
-> networkingMode=mirrored
-> ```
-> Run `wsl --shutdown` and restart. With mirrored mode `localhost` works bidirectionally and the
-> `ANDROID_ADB_SERVER_HOST` workaround above is not needed.
 
 ### 4. Metro Bundler Port Forwarding
 
@@ -221,20 +221,23 @@ List of devices attached
 emulator-5554   device
 ```
 
-If nothing appears, ensure the Windows ADB server is running (`adb -a nodaemon server start`
-from a Windows terminal) and that `ANDROID_ADB_SERVER_HOST` is set in your shell (step 3).
+If nothing appears, ensure the Windows ADB server is running (`adb start-server` from a Windows
+terminal) and that the port proxy from step 3 is active.
 
 **3. Build the development app (from WSL project root)**
 
 ```zsh
 nvm use
 npx expo prebuild --platform android
-npx eas build --profile development-simulator --platform android --local
+eas build --profile development --platform android --local
 ```
 
 > Use `--platform android` with `expo prebuild` to skip iOS. The `@react-native-firebase` iOS
 > plugin is incompatible with the Swift AppDelegate in Expo 53 and will error if you prebuild
 > for both platforms on a non-Mac machine.
+
+> The project includes a `.npmrc` with `legacy-peer-deps=true` so the build's internal
+> `npm ci` step resolves correctly with React 19.
 
 This compiles the APK using the Android SDK at `$ANDROID_HOME`. The first build takes several
 minutes; subsequent builds are faster.

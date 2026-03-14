@@ -8,7 +8,8 @@
     "dev": "APP_VARIANT=development expo start",
     "lint": "eslint . && tsc",
     "test": "jest --silent",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "postinstall": "patch-package"
   },
   "dependencies": {
     "@babel/plugin-transform-react-jsx": "^7.22.5",
@@ -99,6 +100,7 @@
     "gh-pages": "^6.1.1",
     "jest": "^29.5.0",
     "jest-expo": "~53.0.14",
+    "patch-package": "^8.0.1",
     "prettier": "^3.0.1",
     "react-test-renderer": "^19.0.0",
     "redux-mock-store": "^1.5.4",
