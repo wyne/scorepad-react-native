@@ -7,6 +7,9 @@
 *.orig.*
 *.ipa
 *.apk
+*.app
+*.tar.gz
+*.tgz
 
 
 # Ignore iOS and Android builds
