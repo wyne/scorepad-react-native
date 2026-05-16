@@ -107,6 +107,7 @@ export default {
     githubUrl: 'https://github.com/wyne/scorepad-react-native',
     owner: 'wyne',
     plugins: [
+        './plugins/firebase-mods',
         '@react-native-firebase/app',
         '@react-native-firebase/crashlytics',
         'expo-image',
