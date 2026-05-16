@@ -38,6 +38,7 @@
     "expo-device": "~55.0.17",
     "expo-haptics": "~55.0.14",
     "expo-image": "~55.0.10",
+    "expo-keep-awake": "~55.0.8",
     "expo-linking": "~55.0.15",
     "expo-screen-orientation": "~55.0.15",
     "expo-sensors": "~55.0.15",

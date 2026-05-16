@@ -25,6 +25,7 @@ const settingsPersistConfig = {
         'appOpens',
         'installId',
         'rollingGameCounter',
+        'keepScreenAwakeDuration',
     ],
 };
 

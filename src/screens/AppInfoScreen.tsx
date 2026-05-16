@@ -1,5 +1,6 @@
 import React from 'react';
 
+import { MenuAction, MenuView } from '@react-native-menu/menu';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ParamListBase } from '@react-navigation/routers';
 import * as Application from 'expo-application';
@@ -7,7 +8,8 @@ import { Alert, Linking, Platform, ScrollView, StyleSheet, Switch, Text, View } 
 import { Button } from 'react-native-elements';
 
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
-import { toggleShowPlayerIndex, toggleShowPointParticles } from '../../redux/SettingsSlice';
+import { setKeepScreenAwakeDuration, toggleShowPlayerIndex, toggleShowPointParticles } from '../../redux/SettingsSlice';
+import { systemBlue } from '../constants';
 import { logEvent } from '../Analytics';
 import RotatingIcon from '../components/AppInfo/RotatingIcon';
 
@@ -43,8 +45,26 @@ const AppInfoScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     const showPlayerIndex = useAppSelector(state => state.settings.showPlayerIndex);
     const devMenuEnabled = useAppSelector(state => state.settings.devMenuEnabled);
     const installId = useAppSelector(state => state.settings.installId);
+    const keepScreenAwakeDuration = useAppSelector(state => state.settings.keepScreenAwakeDuration);
 
     const dispatch = useAppDispatch();
+    const durationOptions: { value: number; label: string; }[] = [
+        { value: 0, label: 'Off' },
+        { value: 5, label: '5 min' },
+        { value: 10, label: '10 min' },
+        { value: 15, label: '15 min' },
+        { value: 30, label: '30 min' },
+    ];
+
+    const durationLabel = (minutes: number) =>
+        durationOptions.find(o => o.value === minutes)?.label ?? 'Off';
+
+    const keepAwakeMenuActions: MenuAction[] = durationOptions.map((option) => ({
+        id: option.value.toString(),
+        title: option.label,
+        state: keepScreenAwakeDuration === option.value ? 'on' : 'off',
+    }));
+
     const toggleParticleSwitch = () => {
         dispatch(toggleShowPointParticles());
         logEvent('toggle_feature', {
@@ -91,6 +111,24 @@ const AppInfoScreen: React.FunctionComponent<Props> = ({ navigation }) => {
                 <SectionItem>
                     <SectionItemText text="Player Numbers (Beta*)" />
                     <Switch onValueChange={togglePlayerIndexSwitch} value={showPlayerIndex} />
+                </SectionItem>
+                <SectionItem>
+                    <SectionItemText text="Keep Screen Awake (Beta*)" />
+                    <MenuView
+                        onPressAction={({ nativeEvent }) => {
+                            const duration = parseInt(nativeEvent.event);
+                            dispatch(setKeepScreenAwakeDuration(duration));
+                            logEvent('toggle_feature', {
+                                feature: 'keep_screen_awake',
+                                value: duration,
+                                installId
+                            });
+                        }}
+                        actions={keepAwakeMenuActions}>
+                        <Text style={styles.menuTrigger}>
+                            {durationLabel(keepScreenAwakeDuration)}
+                        </Text>
+                    </MenuView>
                 </SectionItem>
                 <SectionItem>
                     <SectionItemText text="*Beta features may change or be removed without warning." />
@@ -155,6 +193,11 @@ const styles = StyleSheet.create({
     },
     sectionItemText: {
         fontSize: 16,
+        paddingVertical: 5,
+    },
+    menuTrigger: {
+        fontSize: 16,
+        color: systemBlue,
         paddingVertical: 5,
     },
     text: {

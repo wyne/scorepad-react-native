@@ -11,6 +11,7 @@
 *.tar.gz
 *.tgz
 
+coverage
 
 # Ignore iOS and Android builds
 ios/
