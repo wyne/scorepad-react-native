@@ -3,7 +3,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import * as Haptics from 'expo-haptics';
 import { Animated, StyleSheet, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
-import ReAnimated, { runOnJS, useAnimatedReaction, useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
+import ReAnimated, { runOnJS, useAnimatedReaction, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 
 import { useAppDispatch, useAppSelector } from '../../../../redux/hooks';
 import { playerRoundScoreIncrement } from '../../../../redux/PlayersSlice';
@@ -156,7 +156,7 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
         })
         .onEnd((event) => {
             totalOffset.value = null;
-            panY.value = withSpring(0, { stiffness: 200, damping: 20 });
+            panY.value = withTiming(0, { duration: 200 });
             runOnJS(endGesture)(event.translationY);
         })
         .onFinalize(() => {
