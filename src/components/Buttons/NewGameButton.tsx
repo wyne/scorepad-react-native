@@ -3,8 +3,8 @@ import React from 'react';
 import { MenuAction, MenuView } from '@react-native-menu/menu';
 import { ParamListBase } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { Icon } from 'react-native-elements';
 import { View, StyleSheet } from 'react-native';
+import { Icon } from 'react-native-elements';
 
 import { asyncCreateGame, selectAllGames } from '../../../redux/GamesSlice';
 import { useAppSelector, useAppDispatch } from '../../../redux/hooks';

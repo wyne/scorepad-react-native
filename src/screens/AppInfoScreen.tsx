@@ -9,9 +9,9 @@ import { Button } from 'react-native-elements';
 
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { setKeepScreenAwakeDuration, toggleShowPlayerIndex, toggleShowPointParticles } from '../../redux/SettingsSlice';
-import { systemBlue } from '../constants';
 import { logEvent } from '../Analytics';
 import RotatingIcon from '../components/AppInfo/RotatingIcon';
+import { systemBlue } from '../constants';
 
 interface Props {
     navigation: NativeStackNavigationProp<ParamListBase, string, undefined>;

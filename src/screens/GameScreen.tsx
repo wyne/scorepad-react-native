@@ -2,8 +2,8 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import { ParamListBase } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { LayoutChangeEvent, StyleSheet, View } from 'react-native';
 import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake';
+import { LayoutChangeEvent, StyleSheet, View } from 'react-native';
 
 import { useAppSelector } from '../../redux/hooks';
 import FlexboxBoard from '../components/Boards/FlexboxBoard';

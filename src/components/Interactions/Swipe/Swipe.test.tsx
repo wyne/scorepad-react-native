@@ -1,8 +1,12 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React from 'react';
-import { act, render } from '@testing-library/react-native';
+
 import { configureStore } from '@reduxjs/toolkit';
+import { act, render } from '@testing-library/react-native';
 import { Provider } from 'react-redux';
+
 import { playerRoundScoreIncrement } from '../../../../redux/PlayersSlice';
+
 import SwipeVertical from './Swipe';
 
 jest.mock('react-native-reanimated', () => ({

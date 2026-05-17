@@ -1,13 +1,13 @@
-import React from "react";
+import React from 'react';
 
-import { ParamListBase } from "@react-navigation/native";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { Text, StyleSheet, View } from "react-native";
+import { ParamListBase } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { Text, StyleSheet, View } from 'react-native';
 
-import AppInfoButton from "../Buttons/AppInfoButton";
-import NewGameButton from "../Buttons/NewGameButton";
+import AppInfoButton from '../Buttons/AppInfoButton';
+import NewGameButton from '../Buttons/NewGameButton';
 
-import CustomHeader from "./CustomHeader";
+import CustomHeader from './CustomHeader';
 
 interface Props {
   navigation: NativeStackNavigationProp<ParamListBase, string, undefined>;
@@ -15,7 +15,7 @@ interface Props {
 
 const HomeHeader: React.FunctionComponent<Props> = ({ navigation }) => {
   return (
-    <View style={{ backgroundColor: "white" }}>
+    <View style={{ backgroundColor: 'white' }}>
       <CustomHeader
         navigation={navigation}
         headerLeft={<AppInfoButton navigation={navigation} />}
@@ -33,9 +33,9 @@ const HomeHeader: React.FunctionComponent<Props> = ({ navigation }) => {
 
 const styles = StyleSheet.create({
   title: {
-    color: "white",
+    color: 'white',
     fontSize: 20,
-    fontVariant: ["tabular-nums"],
+    fontVariant: ['tabular-nums'],
   },
 });
 
