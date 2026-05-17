@@ -1,9 +1,9 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import * as Haptics from 'expo-haptics';
 import { Animated, StyleSheet, View } from 'react-native';
-import { PanGestureHandler, PanGestureHandlerStateChangeEvent, State } from 'react-native-gesture-handler';
-import { runOnJS, useAnimatedReaction, useSharedValue } from 'react-native-reanimated';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import ReAnimated, { runOnJS, useAnimatedReaction, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 
 import { useAppDispatch, useAppSelector } from '../../../../redux/hooks';
 import { playerRoundScoreIncrement } from '../../../../redux/PlayersSlice';
@@ -43,10 +43,7 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
     const holdDuration = useRef(new Animated.Value(0)).current;
     let powerHoldTimer: ReturnType<typeof setTimeout>;
     const [powerHold, setPowerHold] = useState<boolean>(false);
-    const powerHoldRef = useRef(powerHold);
-    useEffect(() => {
-        powerHoldRef.current = powerHold;
-    }, [powerHold]);
+    const isPowerHoldActive = useSharedValue(false);
 
     useEffect(() => {
         return () => {
@@ -74,6 +71,7 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
         powerHoldTimer = setTimeout(() => {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
             setPowerHold(true);
+            isPowerHoldActive.value = true;
 
             animationRef.current = Animated.loop(
                 Animated.sequence([
@@ -106,6 +104,7 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
         }).start();
 
         setPowerHold(false);
+        isPowerHoldActive.value = false;
 
         animationRef.current?.stop();
 
@@ -123,63 +122,50 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
 
     //#region Gesture handling
 
-    const pan = useRef(new Animated.ValueXY()).current;
     const totalOffset = useSharedValue<number | null>(0);
+    const panY = useSharedValue(0);
 
-    const onGestureEvent = Animated.event(
-        // Animate the slider to follow the touch
-        [
-            {
-                nativeEvent: {
-                    translationY: pan.y,
-                },
-            },
-        ],
-        {
-            useNativeDriver: true,
-            listener: (event: PanGestureHandlerStateChangeEvent) => {
-                // Handle the gesture movement
+    const endGesture = useCallback((translationY: number) => {
+        logEvent('score_change', {
+            player_index: index,
+            game_id: currentGameId,
+            addend: powerHold ? addendOne : addendTwo,
+            round: roundCurrent,
+            type: translationY > 0 ? 'decrement' : 'increment',
+            power_hold: powerHold,
+            notches: -Math.round((translationY || 0) / notchSize),
+            interaction: 'swipe-vertical',
+        });
+        powerHoldStop();
+    }, [index, currentGameId, powerHold, addendOne, addendTwo, roundCurrent]);
 
-                // Invert the value for panning up to be positive
-                const y = event.nativeEvent.translationY;
-                totalOffset.value = -y;
+    const panGesture = Gesture.Pan()
+        .enabled(!currentGameLocked)
+        .minDistance(0)
+        .onBegin(() => {
+            runOnJS(powerHoldStart)();
+        })
+        .onUpdate((event) => {
+            const y = event.translationY;
+            panY.value = y;
+            totalOffset.value = -y;
 
-                if (powerHoldRef.current == false && Math.abs(y) > 1) {
-                    powerHoldStop();
-                }
-            },
-        }
-    );
-
-    const onHandlerStateChange = (event: PanGestureHandlerStateChangeEvent) => {
-        if (event.nativeEvent.oldState === State.UNDETERMINED && event.nativeEvent.state === State.BEGAN) {
-            // Handle the start of the gesture
-            powerHoldStart();
-        } else if (event.nativeEvent.state == State.FAILED || event.nativeEvent.state === State.END) {
-            // Handle the end of the gesture
+            if (isPowerHoldActive.value == false && Math.abs(y) > 1) {
+                runOnJS(powerHoldStop)();
+            }
+        })
+        .onEnd((event) => {
             totalOffset.value = null;
+            panY.value = withTiming(0, { duration: 200 });
+            runOnJS(endGesture)(event.translationY);
+        })
+        .onFinalize(() => {
+            runOnJS(powerHoldStop)();
+        });
 
-            logEvent('score_change', {
-                player_index: index,
-                game_id: currentGameId,
-                addend: powerHold ? addendOne : addendTwo,
-                round: roundCurrent,
-                type: event.nativeEvent.translationY > 0 ? 'decrement' : 'increment',
-                power_hold: powerHold,
-                notches: -Math.round((event.nativeEvent.translationY || 0) / notchSize),
-                interaction: 'swipe-vertical',
-            });
-
-            // Spring the animation back to the start
-            Animated.spring(pan, {
-                toValue: { x: 0, y: 0 },
-                bounciness: 0,
-                useNativeDriver: true
-            }).start();
-
-            powerHoldStop();
-        }
-    };
+    const overlayAnimatedStyle = useAnimatedStyle(() => ({
+        transform: [{ translateY: panY.value }],
+    }));
 
     //#endregion
 
@@ -234,25 +220,17 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
                 {children}
             </Animated.View>
 
-            <PanGestureHandler
-                enabled={!currentGameLocked}
-                minDist={0}
-                onGestureEvent={onGestureEvent}
-                onHandlerStateChange={onHandlerStateChange}
-            >
-                <Animated.View
+            <GestureDetector gesture={panGesture}>
+                <ReAnimated.View
                     style={[
                         StyleSheet.absoluteFillObject,
-                        {
-                            transform: [
-                                { translateY: pan.y },
-                            ],
-                        }]}
+                        overlayAnimatedStyle,
+                    ]}
                 >
                     <View style={[styles.slider, styles.sliderTop]} />
                     <View style={[styles.slider, styles.sliderBottom]} />
-                </Animated.View>
-            </PanGestureHandler>
+                </ReAnimated.View>
+            </GestureDetector>
         </>
     );
 };

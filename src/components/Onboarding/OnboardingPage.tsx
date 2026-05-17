@@ -52,7 +52,7 @@ const OnboardingPage: React.FC<Props> = React.memo(({
                     borderRadius: 10,
                 }}>
                     <Video
-                        source={item.media.source as number}
+                        source={{ uri: item.media.source as unknown as string }}
                         paused={!active}
                         repeat={true}
                         resizeMode='contain'

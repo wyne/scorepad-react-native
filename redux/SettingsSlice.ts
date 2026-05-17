@@ -20,6 +20,7 @@ export interface SettingsState {
     appOpens: number;
     installId: string | undefined;
     rollingGameCounter?: number;
+    keepScreenAwakeDuration: number;
 };
 
 export const initialState: SettingsState = {
@@ -36,6 +37,7 @@ export const initialState: SettingsState = {
     appOpens: 0,
     installId: undefined,
     rollingGameCounter: 0,
+    keepScreenAwakeDuration: 0,
 };
 
 const settingsSlice = createSlice({
@@ -90,6 +92,9 @@ const settingsSlice = createSlice({
         setRollingGameCounter(state, action: PayloadAction<number>) {
             state.rollingGameCounter = action.payload;
         },
+        setKeepScreenAwakeDuration(state, action: PayloadAction<number>) {
+            state.keepScreenAwakeDuration = action.payload;
+        },
     }
 });
 
@@ -109,6 +114,7 @@ export const {
     setInstallId,
     incrementRollingGameCounter,
     setRollingGameCounter,
+    setKeepScreenAwakeDuration,
 } = settingsSlice.actions;
 
 export default settingsSlice.reducer;

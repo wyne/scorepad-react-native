@@ -58,7 +58,12 @@ const EditGame = ({ }) => {
                     maxLength={30}
                     onChangeText={onChangeTextHandler}
                     onEndEditing={onEndEditingHandler}
-                    onBlur={onEndEditingHandler}
+                    onBlur={() => {
+                        if (localTitle == '') {
+                            setLocalTitle(UNTITLED);
+                            saveGameTitle(UNTITLED);
+                        }
+                    }}
                     placeholder={UNTITLED}
                     renderErrorMessage={false}
                     style={styles.input}

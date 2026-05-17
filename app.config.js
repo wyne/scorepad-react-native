@@ -71,6 +71,7 @@ export default {
         buildNumber: '86',
         infoPlist: {
             RCTAsyncStorageExcludeFromBackup: false,
+            ITSAppUsesNonExemptEncryption: false,
         },
         googleServicesFile: './GoogleService-Info.plist',
     },
@@ -106,13 +107,17 @@ export default {
     githubUrl: 'https://github.com/wyne/scorepad-react-native',
     owner: 'wyne',
     plugins: [
+        './plugins/firebase-mods',
         '@react-native-firebase/app',
         '@react-native-firebase/crashlytics',
+        'expo-image',
+        'expo-sharing',
         [
             'expo-build-properties',
             {
                 ios: {
                     useFrameworks: 'static',
+                    forceStaticLinking: ['RNFBApp', 'RNFBAnalytics', 'RNFBAuth', 'RNFBCrashlytics'],
                 },
             },
         ],
