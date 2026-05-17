@@ -1,0 +1,14 @@
+diff --git a/node_modules/expo-screen-orientation/ios/ScreenOrientationViewController.swift b/node_modules/expo-screen-orientation/ios/ScreenOrientationViewController.swift
+index 85544f8..9271564 100644
+--- a/node_modules/expo-screen-orientation/ios/ScreenOrientationViewController.swift
++++ b/node_modules/expo-screen-orientation/ios/ScreenOrientationViewController.swift
+@@ -68,6 +68,9 @@ class ScreenOrientationViewController: UIViewController {
+       // react-native-screens has per-screen orientation set. Return that VC's
+       // supportedInterfaceOrientations — which RNScreens has swizzled to resolve
+       // the active screen's orientation mask.
++      if vc === self {
++        return super.supportedInterfaceOrientations
++      }
+       return vc.supportedInterfaceOrientations
+     }
+ 

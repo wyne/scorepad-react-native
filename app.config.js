@@ -117,7 +117,6 @@ export default {
             {
                 ios: {
                     useFrameworks: 'static',
-                    newArchEnabled: false,
                     forceStaticLinking: ['RNFBApp', 'RNFBAnalytics', 'RNFBAuth', 'RNFBCrashlytics'],
                 },
             },
