@@ -19,7 +19,7 @@ jest.mock('react-native-reanimated', () => ({
   useAnimatedReaction: function (_p: () => unknown, r: (c: unknown, p: unknown) => void) { r(_p(), undefined); },
   runOnJS: function (fn: (...args: unknown[]) => unknown) { return fn; },
   withTiming: function (_t: number) { return _t; },
-  default: { View: function () { return null; }, FlatList: function (p: any) { return p.children || null; } },
+  default: { View: function () { return null; }, FlatList: function (p: { children?: React.ReactNode }) { return p.children || null; } },
   createAnimatedComponent: function (c: unknown) { return c; },
   LinearTransition: { easing: function () { return {}; } },
   Easing: { ease: {} },
