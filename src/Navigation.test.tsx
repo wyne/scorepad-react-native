@@ -12,6 +12,19 @@ import { useNavigationMock } from '../test/test-helpers';
 
 import ListScreen from './screens/ListScreen';
 
+jest.mock('react-native-reanimated', () => ({
+  __esModule: true,
+  useSharedValue: function (i: unknown) { return { value: i }; },
+  useAnimatedStyle: function (fn: () => unknown) { return fn(); },
+  useAnimatedReaction: function (_p: () => unknown, r: (c: unknown, p: unknown) => void) { r(_p(), undefined); },
+  runOnJS: function (fn: (...args: unknown[]) => unknown) { return fn; },
+  withTiming: function (_t: number) { return _t; },
+  default: { View: function () { return null; }, FlatList: function (p: any) { return p.children || null; } },
+  createAnimatedComponent: function (c: unknown) { return c; },
+  LinearTransition: { easing: function () { return {}; } },
+  Easing: { ease: {} },
+}));
+
 jest.mock('Analytics');
 jest.mock('expo-font'); // https://github.com/callstack/react-native-paper/issues/4561
 
