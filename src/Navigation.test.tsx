@@ -58,6 +58,7 @@ const mockStore = () => {
 describe('Navigation', () => {
   it('show the onboarding screen when onboardedSemVer 1.0.0', async () => {
     const navigation = useNavigationMock();
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { Application } = require('expo-application');
     expect(Application.nativeApplicationVersion).toBe('1.0.0');
 
@@ -88,6 +89,7 @@ describe('Navigation', () => {
       },
     }));
 
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { Application } = require('expo-application');
     expect(Application.nativeApplicationVersion).toBe('2.5.7');
 

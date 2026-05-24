@@ -11,11 +11,7 @@ import TapGestureIcon from '../Buttons/TapGestureIcon';
 
 import { InteractionType } from './InteractionType';
 
-interface InteractionSelectorProps {
-    // define your props here
-}
-
-const InteractionSelector: React.FunctionComponent<InteractionSelectorProps> = () => {
+const InteractionSelector: React.FunctionComponent = () => {
     const dispatch = useAppDispatch();
 
     const interactionType = useAppSelector(state => state.settings.interactionType);

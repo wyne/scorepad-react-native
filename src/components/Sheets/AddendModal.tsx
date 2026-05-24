@@ -14,10 +14,7 @@ import { InteractionType } from '../Interactions/InteractionType';
 
 import { useAddendModalContext } from './AddendModalContext';
 
-interface Props {
-}
-
-const AddendModal: React.FunctionComponent<Props> = ({ }) => {
+const AddendModal: React.FunctionComponent = ({ }) => {
     const addendOne = useAppSelector(state => state.settings.addendOne);
     const addendTwo = useAppSelector(state => state.settings.addendTwo);
     const interactionType = useAppSelector(state => state.settings.interactionType);
