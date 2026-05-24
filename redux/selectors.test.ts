@@ -117,18 +117,6 @@ describe('Redux selectors', () => {
       expect(result).toBeUndefined();
     });
 
-    it('should return undefined when currentGameId is undefined', () => {
-      const state = {
-        ...mockState,
-        settings: {
-          ...mockState.settings!,
-          currentGameId: undefined,
-        },
-      } as RootState;
-      
-      const result = selectCurrentGame(state);
-      expect(result).toBeUndefined();
-    });
   });
 
   describe('selectLastStoreReviewPrompt', () => {

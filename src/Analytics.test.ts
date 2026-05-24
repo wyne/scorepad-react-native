@@ -135,7 +135,7 @@ describe('Analytics', () => {
       });
     });
 
-    it('should handle Firebase Analytics errors gracefully', async () => {
+    it('should propagate Firebase Analytics errors', async () => {
       const error = new Error('Firebase error');
       mockGetAppInstanceId.mockRejectedValue(error);
 

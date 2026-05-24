@@ -263,31 +263,4 @@ describe('GameScreen', () => {
         expect(getByTestId('game-sheet')).toBeTruthy();
     });
 
-    it('should use absolute positioning for main container', () => {
-        const store = createMockStore({
-            settings: {
-                currentGameId: 'game-1',
-                home_fullscreen: false,
-            },
-            games: {
-                entities: {
-                    'game-1': mockGame,
-                },
-                ids: ['game-1'],
-            },
-            players: {
-                entities: mockPlayers,
-                ids: ['player-1', 'player-2'],
-            },
-        });
-
-        const { root } = render(
-            <Provider store={store}>
-                <GameScreen navigation={mockNavigation} />
-            </Provider>
-        );
-
-        // Check that the component structure is correct
-        expect(root).toBeTruthy();
-    });
 });

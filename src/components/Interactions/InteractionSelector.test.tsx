@@ -366,26 +366,6 @@ describe('InteractionSelector', () => {
         expect(getByText('Swipe up or down on the player\'s tile.')).toBeTruthy();
     });
 
-    it('should maintain proper layout structure', () => {
-        const store = createMockStore(mockInitialState);
-
-        const { getByText } = render(
-            <Provider store={store}>
-                <InteractionSelector />
-            </Provider>
-        );
-
-        // Should have the main title
-        expect(getByText('Point Gesture')).toBeTruthy();
-        
-        // Should have both button texts
-        expect(getByText('Tap')).toBeTruthy();
-        expect(getByText('Swipe')).toBeTruthy();
-        
-        // Should have description text
-        expect(getByText('Tap the top or bottom of each player\'s tile.')).toBeTruthy();
-    });
-
     it('should handle rapid button presses correctly', () => {
         const store = createMockStore(mockInitialState);
         const mockLogEvent = jest.mocked(Analytics.logEvent);

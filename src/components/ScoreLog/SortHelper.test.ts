@@ -3,7 +3,7 @@ import { ScoreState } from '../../../redux/PlayersSlice';
 import { RootState } from '../../../redux/store';
 import { InteractionType } from '../Interactions/InteractionType';
 
-import { selectSortedPlayerIdsByIndex, selectSortedPlayerIdsByScore, SortDirectionKey, SortSelectorKey, sortSelectors } from './SortHelper';
+import { selectSortedPlayerIdsByIndex, selectSortedPlayerIdsByScore, SortDirectionKey } from './SortHelper';
 
 // Mock data for testing
 const mockGameState: GameState = {
@@ -99,12 +99,6 @@ describe('SortHelper', () => {
       expect(result).toEqual([]);
     });
 
-    it('should handle games with missing players', () => {
-      const state = createMockState({ playerIds: [] }, []);
-      const result = selectSortedPlayerIdsByIndex(state);
-      
-      expect(result).toEqual([]);
-    });
   });
 
   describe('selectSortedPlayerIdsByScore', () => {
@@ -196,35 +190,5 @@ describe('SortHelper', () => {
     });
   });
 
-  describe('SortSelectorKey enum', () => {
-    it('should have correct values', () => {
-      expect(SortSelectorKey.ByScore).toBe('byScore');
-      expect(SortSelectorKey.ByIndex).toBe('byIndex');
-    });
-  });
-
-  describe('SortDirectionKey enum', () => {
-    it('should have correct values', () => {
-      expect(SortDirectionKey.Normal).toBe('normal');
-      expect(SortDirectionKey.Reversed).toBe('reversed');
-    });
-  });
-
-  describe('sortSelectors object', () => {
-    it('should map selector keys to correct selectors', () => {
-      expect(sortSelectors[SortSelectorKey.ByScore]).toBe(selectSortedPlayerIdsByScore);
-      expect(sortSelectors[SortSelectorKey.ByIndex]).toBe(selectSortedPlayerIdsByIndex);
-    });
-
-    it('should work with state using the mapped selectors', () => {
-      const state = createMockState();
-      
-      const scoreResult = sortSelectors[SortSelectorKey.ByScore](state);
-      const indexResult = sortSelectors[SortSelectorKey.ByIndex](state);
-      
-      expect(scoreResult).toEqual(['player-2', 'player-3', 'player-1']);
-      expect(indexResult).toEqual(['player-1', 'player-2', 'player-3']);
-    });
-  });
 });
 

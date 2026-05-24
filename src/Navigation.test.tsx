@@ -25,7 +25,6 @@ jest.mock('react-native-reanimated', () => ({
   Easing: { ease: {} },
 }));
 
-jest.mock('Analytics');
 jest.mock('expo-font'); // https://github.com/callstack/react-native-paper/issues/4561
 
 const mockStore = () => {

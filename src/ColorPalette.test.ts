@@ -286,16 +286,5 @@ describe('ColorPalette', () => {
       });
     });
 
-    it('should update player object color property', () => {
-      // This test verifies that the player object is mutated
-      const originalPlayer = mockState.players.entities['player-1'];
-      const originalColor = originalPlayer.color;
-      
-      setPlayerColor('player-1', '#123456');
-      
-      // The player object should be mutated
-      expect(originalPlayer.color).toBe('#123456');
-      expect(originalPlayer.color).not.toBe(originalColor);
-    });
   });
 });

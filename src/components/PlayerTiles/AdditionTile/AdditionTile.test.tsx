@@ -472,14 +472,13 @@ describe('AdditionTile', () => {
             },
         });
 
-        // This should not crash and should handle the empty array gracefully
-        // Since the reduce will fail without an initial value, we expect the component to handle this edge case
+        // Should not crash and render with zero total
         expect(() => {
             render(
                 <Provider store={store}>
                     <AdditionTile {...defaultProps} />
                 </Provider>
             );
-        }).toThrow('Reduce of empty array with no initial value');
+        }).not.toThrow();
     });
 });

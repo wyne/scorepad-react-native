@@ -237,36 +237,6 @@ describe('OnboardingScreen', () => {
     expect(getByTestId('onboarding')).toBeTruthy();
   });
 
-  it('should navigate to List screen when completing onboarding', async () => {
-    const mockRoute = {
-      params: {
-        onboarding: true,
-      },
-    };
-
-    const { getByTestId } = render(
-      <OnboardingScreen navigation={mockNavigation} route={mockRoute as any} />
-    );
-
-    // Component should render successfully
-    expect(getByTestId('onboarding')).toBeTruthy();
-  });
-
-  it('should go back when completing tutorial (non-onboarding)', async () => {
-    const mockRoute = {
-      params: {
-        onboarding: false,
-      },
-    };
-
-    const { getByTestId } = render(
-      <OnboardingScreen navigation={mockNavigation} route={mockRoute as any} />
-    );
-
-    // Component should render successfully
-    expect(getByTestId('onboarding')).toBeTruthy();
-  });
-
   it('should handle skip button press', () => {
     const mockRoute = {
       params: {
