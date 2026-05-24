@@ -1,10 +1,16 @@
 import { ImageURISource } from 'react-native';
 import { SemVer, compare } from 'semver';
 
+import icon from '../../../assets/icon.png';
+import sheet from '../../../assets/onboarding/sheet.png';
+import gestureSelect from '../../../assets/video/gesture-select.mp4';
+import swipeGesture from '../../../assets/video/swipe-gesture.mp4';
+import swipePowerhold from '../../../assets/video/swipe-powerhold.mp4';
+
 
 export type MediaResource = {
     type: 'image' | 'video';
-    source: ImageURISource | NodeRequire;
+    source: ImageURISource | number;
     width?: number;
     height?: number;
     borderRadius?: number;
@@ -26,7 +32,7 @@ const onboardingScreens: OnboardingScreens = {
             title: 'ScorePad\nwith Rounds',
             media: {
                 type: 'image',
-                source: require('../../../assets/icon.png'),
+                source: icon,
                 width: 150,
                 height: 150,
                 borderRadius: 20,
@@ -39,7 +45,7 @@ const onboardingScreens: OnboardingScreens = {
             title: 'Swipe for points',
             media: {
                 type: 'video',
-                source: require('../../../assets/video/swipe-gesture.mp4'),
+                source: swipeGesture,
             },
             description: 'Swipe up and down to \nchange points.',
             backgroundColor: '#a0c99a',
@@ -48,7 +54,7 @@ const onboardingScreens: OnboardingScreens = {
             title: 'Hold for more',
             media: {
                 type: 'video',
-                source: require('../../../assets/video/swipe-powerhold.mp4'),
+                source: swipePowerhold,
             },
             description: 'Hold first, then swipe \nfor more points.',
             backgroundColor: '#d29898',
@@ -57,7 +63,7 @@ const onboardingScreens: OnboardingScreens = {
             title: 'Change Gestures',
             media: {
                 type: 'video',
-                source: require('../../../assets/video/gesture-select.mp4'),
+                source: gestureSelect,
             },
             description: 'Change gestures and point values with the Point Settings on the top right.',
             backgroundColor: '#9896c5',
@@ -66,7 +72,7 @@ const onboardingScreens: OnboardingScreens = {
             title: 'Score History',
             media: {
                 type: 'image',
-                source: require('../../../assets/onboarding/sheet.png'),
+                source: sheet,
             },
             description: 'Pull up the bottom sheet to view score history and edit the game.',
             backgroundColor: '#94c49e',
@@ -77,7 +83,7 @@ const onboardingScreens: OnboardingScreens = {
             title: 'New Default:\nSwipe Gestures',
             media: {
                 type: 'video',
-                source: require('../../../assets/video/swipe-gesture.mp4'),
+                source: swipeGesture,
             },
             description: 'Swipe up and down to \nchange points.',
             backgroundColor: '#a0c99a',
@@ -86,7 +92,7 @@ const onboardingScreens: OnboardingScreens = {
             title: 'Hold for more',
             media: {
                 type: 'video',
-                source: require('../../../assets/video/swipe-powerhold.mp4'),
+                source: swipePowerhold,
             },
             description: 'Hold first, then swipe \nfor more points.',
             backgroundColor: '#d29898',
@@ -95,7 +101,7 @@ const onboardingScreens: OnboardingScreens = {
             title: 'Change Gestures',
             media: {
                 type: 'video',
-                source: require('../../../assets/video/gesture-select.mp4'),
+                source: gestureSelect,
             },
             description: 'Change gestures and point values with the Point Settings on the top right.',
             backgroundColor: '#9896c5',
@@ -107,7 +113,7 @@ const finalScreen: OnboardingScreenItem[] = [{
     title: 'That\'s it!',
     media: {
         type: 'image',
-        source: require('../../../assets/icon.png'),
+        source: icon,
         width: 150,
         height: 150,
         borderRadius: 20,

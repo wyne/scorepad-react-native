@@ -2,6 +2,7 @@
   "compilerOptions": {
     "strict": true,
     "jsx": "react-native",
+    "module": "esnext",
     "types": [
       "@testing-library/jest-native",
       "jest",

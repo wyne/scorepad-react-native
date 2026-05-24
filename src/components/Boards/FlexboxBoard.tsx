@@ -9,11 +9,7 @@ import { bottomSheetHeight } from '../../components/Sheets/GameSheet';
 
 import FlexboxTile from './FlexboxTile';
 
-interface FlexboxBoardProps {
-    // define your props here
-}
-
-const FlexboxBoard: React.FC<FlexboxBoardProps> = () => {
+const FlexboxBoard: React.FC = () => {
     const fullscreen = useAppSelector(state => state.settings.home_fullscreen);
     const playerIds = useAppSelector(state => selectCurrentGame(state)?.playerIds);
 

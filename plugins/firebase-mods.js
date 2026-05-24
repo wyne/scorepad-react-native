@@ -1,46 +1,49 @@
-const fs = require('fs');
-const path = require('path');
+/* eslint-disable @typescript-eslint/no-require-imports */
+const { withAppDelegate } = require('@expo/config-plugins');
+const { mergeContents } = require('@expo/config-plugins/build/utils/generateCode');
 
-const { withDangerousMod, withPlugins } = require('@expo/config-plugins');
-const {
-    mergeContents
-} = require('@expo/config-plugins/build/utils/generateCode');
+function modifyAppDelegateSwift(contents) {
+  const configureCall = 'FirebaseApp.configure()';
 
-async function readFileAsync(path) {
-    return fs.promises.readFile(path, 'utf8');
-}
+  if (contents.includes(configureCall)) {
+    return contents;
+  }
 
-async function saveFileAsync(path, content) {
-    return fs.promises.writeFile(path, content, 'utf8');
-}
-
-const withFirebaseMods = (c) => {
-    return withDangerousMod(c, [
-        'ios',
-        async (config) => {
-            const file = path.join(config.modRequest.platformProjectRoot, 'Podfile');
-            const contents = await readFileAsync(file);
-            await saveFileAsync(file, addFirebaseConfigsToPodFile(contents));
-            return config;
-        }
-    ]);
-};
-
-function addFirebaseConfigsToPodFile(src) {
+  if (contents.includes('import FirebaseCore')) {
     return mergeContents({
-        tag: 'firebase-mods',
-        src,
-        newSrc: `
-# install react-native-firebase as a static framework
-$RNFirebaseAsStaticFramework = true
-pod 'Firebase', :modular_headers => true
-pod 'FirebaseCore', :modular_headers => true
-pod 'GoogleUtilities', :modular_headers => true
-`,
-        anchor: /platform :ios/,
-        offset: 0,
-        comment: '#'
+      tag: 'firebase-mods-configure',
+      src: contents,
+      newSrc: configureCall,
+      anchor: /let delegate = ReactNativeDelegate\(\)/,
+      offset: 0,
+      comment: '//',
     }).contents;
+  }
+
+  contents = mergeContents({
+    tag: 'firebase-mods-import',
+    src: contents,
+    newSrc: 'import FirebaseCore',
+    anchor: /^internal import Expo/m,
+    offset: 1,
+    comment: '//',
+  }).contents;
+
+  return mergeContents({
+    tag: 'firebase-mods-configure',
+    src: contents,
+    newSrc: configureCall,
+    anchor: /let delegate = ReactNativeDelegate\(\)/,
+    offset: 0,
+    comment: '//',
+  }).contents;
 }
 
-module.exports = (config) => withPlugins(config, [withFirebaseMods]);
+module.exports = (config) => {
+  return withAppDelegate(config, (config) => {
+    if (config.modResults.language === 'swift') {
+      config.modResults.contents = modifyAppDelegateSwift(config.modResults.contents);
+    }
+    return config;
+  });
+};

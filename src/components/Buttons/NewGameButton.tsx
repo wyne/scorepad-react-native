@@ -3,6 +3,7 @@ import React from 'react';
 import { MenuAction, MenuView } from '@react-native-menu/menu';
 import { ParamListBase } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { View, StyleSheet } from 'react-native';
 import { Icon } from 'react-native-elements';
 
 import { asyncCreateGame, selectAllGames } from '../../../redux/GamesSlice';
@@ -41,23 +42,35 @@ const NewGameButton: React.FunctionComponent<Props> = ({ navigation }) => {
     };
 
     return (
-        <MenuView
-            style={{
-                padding: 10,
-                paddingHorizontal: 15,
-            }}
-
-            onPressAction={async ({ nativeEvent }) => {
-                const playerNumber = parseInt(nativeEvent.event);
-                addGameHandler(playerNumber);
-            }}
-            actions={menuActions}>
-            <Icon name="plus"
-                type="font-awesome-5"
-                size={20}
-                color={systemBlue} />
-        </MenuView>
+        <View style={styles.wrapper}>
+            <MenuView
+                style={StyleSheet.absoluteFill}
+                onPressAction={async ({ nativeEvent }) => {
+                    const playerNumber = parseInt(nativeEvent.event);
+                    addGameHandler(playerNumber);
+                }}
+                actions={menuActions}>
+                <View style={styles.iconContainer}>
+                    <Icon name="plus"
+                        type="font-awesome-5"
+                        size={20}
+                        color={systemBlue} />
+                </View>
+            </MenuView>
+        </View>
     );
 };
+
+const styles = StyleSheet.create({
+    wrapper: {
+        padding: 10,
+        paddingHorizontal: 15,
+    },
+    iconContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+});
 
 export default NewGameButton;
