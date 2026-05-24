@@ -12,27 +12,10 @@ index 80cf23f..10e1dfc 100644
    }
  
 diff --git a/node_modules/@react-native-menu/menu/android/src/main/java/com/reactnativemenu/MenuViewManager.kt b/node_modules/@react-native-menu/menu/android/src/main/java/com/reactnativemenu/MenuViewManager.kt
-index 19f6b4e..2d7e0cf 100644
+index 19f6b4e..190714b 100644
 --- a/node_modules/@react-native-menu/menu/android/src/main/java/com/reactnativemenu/MenuViewManager.kt
 +++ b/node_modules/@react-native-menu/menu/android/src/main/java/com/reactnativemenu/MenuViewManager.kt
-@@ -110,13 +110,13 @@ class MenuViewManager: ReactClippingViewManager<MenuView>() {
-   @ReactProp(name = "hitSlop")
-   fun setHitSlop(view: ReactViewGroup, @Nullable hitSlop: ReadableMap?) {
-     if (hitSlop == null) {
--      view.hitSlopRect = null
-+      view.setHitSlopRect(null)
-     } else {
--      view.hitSlopRect = Rect(
-+      view.setHitSlopRect(Rect(
-         if (hitSlop.hasKey("left")) PixelUtil.toPixelFromDIP(hitSlop.getDouble("left")).toInt() else 0,
-         if (hitSlop.hasKey("top")) PixelUtil.toPixelFromDIP(hitSlop.getDouble("top")).toInt() else 0,
-         if (hitSlop.hasKey("right")) PixelUtil.toPixelFromDIP(hitSlop.getDouble("right")).toInt() else 0,
--        if (hitSlop.hasKey("bottom")) PixelUtil.toPixelFromDIP(hitSlop.getDouble("bottom")).toInt() else 0)
-+        if (hitSlop.hasKey("bottom")) PixelUtil.toPixelFromDIP(hitSlop.getDouble("bottom")).toInt() else 0))
-     }
-   }
- 
-@@ -152,19 +152,17 @@ class MenuViewManager: ReactClippingViewManager<MenuView>() {
+@@ -152,9 +152,7 @@ class MenuViewManager: ReactClippingViewManager<MenuView>() {
  
    @ReactPropGroup(names = [ViewProps.BORDER_COLOR, ViewProps.BORDER_LEFT_COLOR, ViewProps.BORDER_RIGHT_COLOR, ViewProps.BORDER_TOP_COLOR, ViewProps.BORDER_BOTTOM_COLOR, ViewProps.BORDER_START_COLOR, ViewProps.BORDER_END_COLOR], customType = "Color")
    fun setBorderColor(view: ReactViewGroup, index: Int, color: Int?) {
@@ -43,10 +26,7 @@ index 19f6b4e..2d7e0cf 100644
    }
  
    @ReactProp(name = ViewProps.OVERFLOW)
-   fun setOverflow(view: ReactViewGroup, overflow: String?) {
--    view.overflow = overflow
-+    view.setOverflow(overflow)
-   }
+@@ -164,7 +162,7 @@ class MenuViewManager: ReactClippingViewManager<MenuView>() {
  
    @ReactProp(name = "backfaceVisibility")
    fun setBackfaceVisibility(view: ReactViewGroup, backfaceVisibility: String?) {
