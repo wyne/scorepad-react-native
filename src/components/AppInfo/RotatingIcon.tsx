@@ -10,6 +10,7 @@ import Animated, {
     withTiming
 } from 'react-native-reanimated';
 
+import icon from '../../../assets/icon.png';
 import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
 import { toggleDevMenuEnabled } from '../../../redux/SettingsSlice';
 import { logEvent } from '../../Analytics';
@@ -56,7 +57,7 @@ const RotatingIcon: React.FunctionComponent = ({ }) => {
             await logEvent('app_icon');
         }}>
         <Animated.View style={[animatedStyles]}>
-            <Image source={require('../../../assets/icon.png')}
+            <Image source={icon}
                 contentFit='contain'
                 style={{
                     alignSelf: 'center',
