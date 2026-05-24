@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { DarkTheme, NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { createNativeStackNavigator, NativeStackHeaderProps, NativeStackOptionsArgs } from '@react-navigation/native-stack';
 import { SemVer } from 'semver';
 
 import AppInfoHeader from '../src/components/Headers/AppInfoHeader';
@@ -59,7 +59,7 @@ export const Navigation = () => {
                         orientation: 'portrait',
                         title: 'Home',
                         headerTitle: 'ScorePad with Rounds',
-                        header: ({ navigation }) => {
+                        header: ({ navigation }: NativeStackHeaderProps) => {
                             return <HomeHeader navigation={navigation} />;
                         },
                     }}
@@ -68,16 +68,16 @@ export const Navigation = () => {
                     options={{
                         orientation: 'all',
                         title: 'Current Game',
-                        header: ({ navigation }) => {
+                        header: ({ navigation }: NativeStackHeaderProps) => {
                             return <GameHeader navigation={navigation} />;
                         },
                     }}
                 />
                 <Stack.Screen name="Settings" component={SettingsScreen}
-                    options={({ route }) => ({
+                    options={({ route }: NativeStackOptionsArgs<RootStackParamList, 'Settings'>) => ({
                         orientation: 'all',
                         title: 'Settings',
-                        header: ({ navigation }) => {
+                        header: ({ navigation }: NativeStackHeaderProps) => {
                             return <SettingsHeader navigation={navigation} route={route} />;
                         },
                     })}
@@ -86,17 +86,17 @@ export const Navigation = () => {
                     options={{
                         orientation: 'all',
                         title: 'Share',
-                        header: ({ navigation }) => {
+                        header: ({ navigation }: NativeStackHeaderProps) => {
                             return <ShareHeader navigation={navigation} />;
                         },
                     }}
                 />
                 <Stack.Screen name="EditPlayer" component={EditPlayerScreen}
                     initialParams={{ index: 0, playerId: '' }}
-                    options={({ route }) => ({
+                    options={({ route }: NativeStackOptionsArgs<RootStackParamList, 'EditPlayer'>) => ({
                         orientation: 'portrait',
                         title: 'Edit Player',
-                        header: ({ navigation }) => {
+                        header: ({ navigation }: NativeStackHeaderProps) => {
                             return <EditPlayerHeader navigation={navigation} route={route} />;
                         },
                     })}
@@ -114,7 +114,7 @@ export const Navigation = () => {
                         presentation: 'modal',
                         orientation: 'portrait',
                         title: 'Info',
-                        header: ({ navigation }) => {
+                        header: ({ navigation }: NativeStackHeaderProps) => {
                             return <AppInfoHeader navigation={navigation} />;
                         },
                     }}
