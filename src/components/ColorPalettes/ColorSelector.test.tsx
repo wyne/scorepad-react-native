@@ -168,7 +168,7 @@ describe('ColorSelector', () => {
         );
 
         // Get all TouchableOpacity components
-        const TouchableOpacity = require('react-native').TouchableOpacity;
+        const TouchableOpacity = jest.requireActual('react-native').TouchableOpacity;
         const touchableComponents = UNSAFE_getAllByType(TouchableOpacity);
         
         // Press the first color in current palette (should be #FF0000)
@@ -199,7 +199,7 @@ describe('ColorSelector', () => {
         );
 
         // Get all TouchableOpacity components
-        const TouchableOpacity = require('react-native').TouchableOpacity;
+        const TouchableOpacity = jest.requireActual('react-native').TouchableOpacity;
         const touchableComponents = UNSAFE_getAllByType(TouchableOpacity);
         
         // Press a color from another palette (should be from warm palette: #FF6B6B)
@@ -360,7 +360,7 @@ describe('ColorSelector', () => {
         );
 
         // Get all TouchableOpacity components
-        const TouchableOpacity = require('react-native').TouchableOpacity;
+        const TouchableOpacity = jest.requireActual('react-native').TouchableOpacity;
         const touchableComponents = UNSAFE_getAllByType(TouchableOpacity);
 
         // Rapidly press multiple colors

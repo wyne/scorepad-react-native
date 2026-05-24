@@ -12,8 +12,8 @@ import AdditionTile from './AdditionTile';
 
 // Mock react-native-reanimated
 jest.mock('react-native-reanimated', () => {
-    const View = require('react-native').View;
-    const Text = require('react-native').Text;
+    const View = jest.requireActual('react-native').View;
+    const Text = jest.requireActual('react-native').Text;
     
     return {
         __esModule: true,
@@ -48,7 +48,7 @@ jest.mock('./ScoreBefore', () => {
         totalScore: number;
         fontColor: string;
     }) {
-        const { View, Text } = require('react-native');
+        const { View, Text } = jest.requireActual('react-native');
         return (
             <View testID="score-before">
                 <Text>Before: {totalScore - roundScore}</Text>
@@ -65,7 +65,7 @@ jest.mock('./ScoreRound', () => {
         roundScore: number;
         fontColor: string;
     }) {
-        const { View, Text } = require('react-native');
+        const { View, Text } = jest.requireActual('react-native');
         return (
             <View testID="score-round">
                 <Text>Round: {roundScore}</Text>
@@ -84,7 +84,7 @@ jest.mock('./ScoreAfter', () => {
         totalScore: number;
         fontColor: string;
     }) {
-        const { View, Text } = require('react-native');
+        const { View, Text } = jest.requireActual('react-native');
         return (
             <View testID="score-after">
                 <Text>After: {totalScore}</Text>

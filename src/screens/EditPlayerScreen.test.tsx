@@ -20,7 +20,7 @@ jest.mock('expo-font', () => ({
 // Mock the components that EditPlayerScreen uses
 jest.mock('../components/ColorPalettes/ColorSelector', () => {
     return function MockColorSelector({ playerId }: { playerId: string }) {
-        const { View, Text } = require('react-native');
+        const { View, Text } = jest.requireActual('react-native');
         return (
             <View testID={`color-selector-${playerId}`}>
                 <Text>ColorSelector for {playerId}</Text>

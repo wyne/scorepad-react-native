@@ -30,7 +30,7 @@ jest.mock('../BigButtons/BigButton', () => {
         color: string; 
         animated: boolean;
     }) {
-        const { TouchableOpacity, Text, View } = require('react-native');
+        const { TouchableOpacity, Text, View } = jest.requireActual('react-native');
         return (
             <TouchableOpacity onPress={onPress} testID={`big-button-${text.toLowerCase()}`}>
                 <View>
@@ -46,7 +46,7 @@ jest.mock('../BigButtons/BigButton', () => {
 
 jest.mock('../Buttons/TapGestureIcon', () => {
     return function MockTapGestureIcon({ color, size }: { color: string; size: number }) {
-        const { View, Text } = require('react-native');
+        const { View, Text } = jest.requireActual('react-native');
         return (
             <View testID="tap-gesture-icon">
                 <Text>TapIcon - Color: {color}, Size: {size}</Text>
@@ -57,7 +57,7 @@ jest.mock('../Buttons/TapGestureIcon', () => {
 
 jest.mock('../Buttons/SwipeGestureIcon', () => {
     return function MockSwipeGestureIcon({ color, size }: { color: string; size: number }) {
-        const { View, Text } = require('react-native');
+        const { View, Text } = jest.requireActual('react-native');
         return (
             <View testID="swipe-gesture-icon">
                 <Text>SwipeIcon - Color: {color}, Size: {size}</Text>

@@ -19,7 +19,7 @@ jest.mock('expo-application', () => ({
 
 jest.mock('expo-blur', () => ({
     BlurView: ({ children, style }: { children: React.ReactNode; style: object }) => {
-        const { View } = require('react-native');
+        const { View } = jest.requireActual('react-native');
         return <View style={style} testID="blur-view">{children}</View>;
     },
 }));
@@ -29,8 +29,8 @@ jest.mock('expo-crypto', () => ({
 }));
 
 jest.mock('react-native-reanimated', () => {
-    const View = require('react-native').View;
-    const FlatList = require('react-native').FlatList;
+    const View = jest.requireActual('react-native').View;
+    const FlatList = jest.requireActual('react-native').FlatList;
     
     return {
         __esModule: true,
@@ -49,7 +49,7 @@ jest.mock('react-native-reanimated', () => {
 
 jest.mock('react-native-safe-area-context', () => ({
     SafeAreaView: ({ children, style }: { children: React.ReactNode; style: object }) => {
-        const { View } = require('react-native');
+        const { View } = jest.requireActual('react-native');
         return <View style={style} testID="safe-area-view">{children}</View>;
     },
 }));
@@ -68,7 +68,7 @@ jest.mock('../components/Onboarding/Onboarding', () => ({
 
 jest.mock('../components/GameListItem', () => {
     return function MockGameListItem({ gameId, index, navigation }: { gameId: string; index: number; navigation: { navigate: (screen: string, params: object) => void } }) {
-        const { View, Text, TouchableOpacity } = require('react-native');
+        const { View, Text, TouchableOpacity } = jest.requireActual('react-native');
         return (
             <View testID={`game-list-item-${gameId}`}>
                 <TouchableOpacity onPress={() => navigation.navigate('Game', { gameId })}>
@@ -134,6 +134,7 @@ describe('ListScreen', () => {
 
     beforeEach(() => {
         jest.clearAllMocks();
+        // eslint-disable-next-line @typescript-eslint/no-require-imports
         const { getPendingOnboardingSemVer } = require('../components/Onboarding/Onboarding');
         getPendingOnboardingSemVer.mockReturnValue(undefined); // Default to onboarded
     });
@@ -314,6 +315,7 @@ describe('ListScreen', () => {
             },
         });
 
+        // eslint-disable-next-line @typescript-eslint/no-require-imports
         const { logEvent } = require('../Analytics');
 
         render(
@@ -336,6 +338,7 @@ describe('ListScreen', () => {
     });
 
     it('should navigate to onboarding when not onboarded', async () => {
+        // eslint-disable-next-line @typescript-eslint/no-require-imports
         const { getPendingOnboardingSemVer } = require('../components/Onboarding/Onboarding');
         getPendingOnboardingSemVer.mockReturnValue('1.1.0');
 
@@ -510,6 +513,7 @@ describe('ListScreen', () => {
             },
         });
 
+        // eslint-disable-next-line @typescript-eslint/no-require-imports
         const { logEvent } = require('../Analytics');
 
         render(

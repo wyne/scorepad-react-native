@@ -15,10 +15,10 @@ import Rounds from './Rounds';
 
 // Mock dependencies
 jest.mock('react-native-gesture-handler', () => {
-    const mockReact = require('react');
+    const mockReact = jest.requireActual('react');
     return {
         TouchableOpacity: ({ onPress, children }: { onPress: () => void; children: React.ReactNode }) => {
-            const { TouchableOpacity: RNTouchableOpacity } = require('react-native');
+            const { TouchableOpacity: RNTouchableOpacity } = jest.requireActual('react-native');
             return mockReact.createElement(RNTouchableOpacity, { onPress }, children);
         },
         ScrollView: mockReact.forwardRef(({ children, onLayout, horizontal, contentContainerStyle, nestedScrollEnabled }: {
@@ -28,7 +28,7 @@ jest.mock('react-native-gesture-handler', () => {
             contentContainerStyle?: object;
             nestedScrollEnabled?: boolean;
         }, ref: React.Ref<ScrollView>) => {
-            const { ScrollView: RNScrollView } = require('react-native');
+            const { ScrollView: RNScrollView } = jest.requireActual('react-native');
             return mockReact.createElement(RNScrollView, {
                 ref,
                 onLayout,
@@ -47,8 +47,8 @@ jest.mock('../Analytics', () => ({
 
 jest.mock('./ScoreLog/PlayerNameColumn', () => {
     return function MockPlayerNameColumn() {
-        const mockReact = require('react');
-        const { View, Text } = require('react-native');
+        const mockReact = jest.requireActual('react');
+        const { View, Text } = jest.requireActual('react-native');
         return mockReact.createElement(
             View,
             { testID: 'player-name-column' },
@@ -59,8 +59,8 @@ jest.mock('./ScoreLog/PlayerNameColumn', () => {
 
 jest.mock('./ScoreLog/TotalScoreColumn', () => {
     return function MockTotalScoreColumn() {
-        const mockReact = require('react');
-        const { View, Text } = require('react-native');
+        const mockReact = jest.requireActual('react');
+        const { View, Text } = jest.requireActual('react-native');
         return mockReact.createElement(
             View,
             { testID: 'total-score-column' },
@@ -71,8 +71,8 @@ jest.mock('./ScoreLog/TotalScoreColumn', () => {
 
 jest.mock('./ScoreLog/RoundScoreColumn', () => {
     return function MockRoundScoreColumn({ round, isCurrentRound }: { round: number; isCurrentRound: boolean }) {
-        const mockReact = require('react');
-        const { View, Text } = require('react-native');
+        const mockReact = jest.requireActual('react');
+        const { View, Text } = jest.requireActual('react-native');
         return mockReact.createElement(
             View,
             { testID: `round-score-column-${round}` },
@@ -268,6 +268,7 @@ describe('Rounds', () => {
             },
         });
 
+        // eslint-disable-next-line @typescript-eslint/no-require-imports
         const { logEvent } = require('../Analytics');
         const { getByTestId } = render(
             <Provider store={store}>
@@ -303,6 +304,7 @@ describe('Rounds', () => {
             },
         });
 
+        // eslint-disable-next-line @typescript-eslint/no-require-imports
         const { logEvent } = require('../Analytics');
         const { getByTestId } = render(
             <Provider store={store}>
@@ -378,7 +380,7 @@ describe('Rounds', () => {
         const roundColumn = getByTestId('round-score-column-0');
         
         // Simulate layout event - this should trigger the onLayoutHandler
-        fireEvent(roundColumn.parent, 'layout', {
+        fireEvent(roundColumn.parent!, 'layout', {
             nativeEvent: {
                 layout: {
                     x: 100,

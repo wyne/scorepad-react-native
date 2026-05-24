@@ -22,14 +22,14 @@ jest.mock('react-native-safe-area-context', () => ({
         onLayout?: (event: { nativeEvent: { layout: { width: number; height: number } } }) => void;
         style?: object;
     }) => {
-        const { View } = require('react-native');
+        const { View } = jest.requireActual('react-native');
         return <View onLayout={onLayout} style={style} testID="safe-area-view">{children}</View>;
     },
 }));
 
 // Mock react-native-reanimated
 jest.mock('react-native-reanimated', () => {
-    const View = require('react-native').View;
+    const View = jest.requireActual('react-native').View;
     
     return {
         __esModule: true,
@@ -55,7 +55,7 @@ jest.mock('./FlexboxTile', () => {
         height: number;
         index: number;
     }) {
-        const { View, Text } = require('react-native');
+        const { View, Text } = jest.requireActual('react-native');
         return (
             <View testID={`flexbox-tile-${playerId}`}>
                 <Text>Player: {playerId}</Text>

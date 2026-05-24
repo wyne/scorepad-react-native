@@ -13,21 +13,21 @@ import GameScreen from './GameScreen';
 // Mock the components that GameScreen uses
 jest.mock('../components/Boards/FlexboxBoard', () => {
     return function MockFlexboxBoard() {
-        const { View, Text } = require('react-native');
+        const { View, Text } = jest.requireActual('react-native');
         return <View testID="flexbox-board"><Text>FlexboxBoard</Text></View>;
     };
 });
 
 jest.mock('../components/Sheets/AddendModal', () => {
     return function MockAddendModal() {
-        const { View, Text } = require('react-native');
+        const { View, Text } = jest.requireActual('react-native');
         return <View testID="addend-modal"><Text>AddendModal</Text></View>;
     };
 });
 
 jest.mock('../components/Sheets/GameSheet', () => {
     return function MockGameSheet({ containerHeight }: { containerHeight: number }) {
-        const { View, Text } = require('react-native');
+        const { View, Text } = jest.requireActual('react-native');
         return (
             <View testID="game-sheet">
                 <Text>GameSheet - Height: {containerHeight}</Text>

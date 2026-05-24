@@ -20,7 +20,7 @@ jest.mock('react-native-elements', () => ({
         placeholder: string;
         testID?: string;
     }) => {
-        const { TextInput } = require('react-native');
+        const { TextInput } = jest.requireActual('react-native');
         return (
             <TextInput
                 defaultValue={defaultValue}
@@ -37,7 +37,7 @@ jest.mock('react-native-elements', () => ({
 // Mock PaletteSelector component
 jest.mock('./ColorPalettes/PaletteSelector', () => {
     return function MockPaletteSelector() {
-        const { View, Text } = require('react-native');
+        const { View, Text } = jest.requireActual('react-native');
         return (
             <View testID="palette-selector">
                 <Text>Color Palette Selector</Text>
@@ -349,8 +349,8 @@ describe('EditGame', () => {
 
         const input = getByTestId('game-title-input');
         
-        // Trigger blur event
-        fireEvent(input, 'blur', {
+        // Trigger end editing event (onBlur doesn't carry text data)
+        fireEvent(input, 'onEndEditing', {
             nativeEvent: { text: 'Blur Test Title' }
         });
 

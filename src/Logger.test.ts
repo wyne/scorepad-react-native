@@ -18,13 +18,15 @@ describe('Logger', () => {
     jest.clearAllMocks();
     // Clear module cache to get fresh logger instance
     jest.resetModules();
-    logger = require('./Logger').default;
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+      logger = require('./Logger').default;
   });
 
   describe('when in development mode (__DEV__ = true)', () => {
     beforeEach(() => {
       mockDev.mockReturnValue(true);
       jest.resetModules();
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       logger = require('./Logger').default;
     });
 
@@ -53,6 +55,7 @@ describe('Logger', () => {
     beforeEach(() => {
       mockDev.mockReturnValue(false);
       jest.resetModules();
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       logger = require('./Logger').default;
     });
 
@@ -81,6 +84,7 @@ describe('Logger', () => {
     beforeEach(() => {
       mockDev.mockReturnValue(true);
       jest.resetModules();
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       logger = require('./Logger').default;
     });
 

@@ -251,7 +251,9 @@ describe('ColorPalette', () => {
       };
       
       // Override the mock selector for this test
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       const originalMock = require('../redux/hooks').useAppSelector;
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       require('../redux/hooks').useAppSelector = jest.fn((selector: (state: unknown) => unknown) => 
         selector(mockStateWithoutPlayer)
       );
@@ -261,6 +263,7 @@ describe('ColorPalette', () => {
       expect(mockDispatch).not.toHaveBeenCalled();
       
       // Restore the original mock
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       require('../redux/hooks').useAppSelector = originalMock;
     });
 

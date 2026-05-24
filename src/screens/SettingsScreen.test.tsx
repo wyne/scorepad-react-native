@@ -18,7 +18,7 @@ jest.mock('../Analytics', () => ({
 
 // Mock react-native-elements
 jest.mock('react-native-elements', () => {
-    const { TouchableOpacity, Text, View } = require('react-native');
+    const { TouchableOpacity, Text, View } = jest.requireActual('react-native');
     
     return {
         Button: ({ title, onPress, disabled, testID }: { 
@@ -41,7 +41,7 @@ jest.mock('react-native-elements', () => {
 
 // Mock DraggableFlatList and ScaleDecorator
 jest.mock('react-native-draggable-flatlist', () => {
-    const { FlatList } = require('react-native');
+    const { FlatList } = jest.requireActual('react-native');
     
     const MockDraggableFlatList = ({ data, renderItem, keyExtractor, ListFooterComponent, ...props }: {
         data: string[];
@@ -88,7 +88,7 @@ jest.mock('react-native-draggable-flatlist', () => {
 // Mock components
 jest.mock('../components/EditGame', () => {
     return function MockEditGame() {
-        const { View, Text } = require('react-native');
+        const { View, Text } = jest.requireActual('react-native');
         return <View testID="edit-game"><Text>Edit Game</Text></View>;
     };
 });
@@ -101,7 +101,7 @@ jest.mock('../components/PlayerListItem', () => {
         isActive: boolean;
         index: number;
     }) {
-        const { View, Text, TouchableOpacity } = require('react-native');
+        const { View, Text, TouchableOpacity } = jest.requireActual('react-native');
         return (
             <View testID={`player-list-item-${playerId}`}>
                 <Text>Player: {playerId}</Text>

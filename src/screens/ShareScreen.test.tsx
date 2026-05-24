@@ -25,14 +25,14 @@ jest.mock('expo-font', () => ({
 // Mock the components that ShareScreen uses
 jest.mock('../components/ScoreLog/PlayerNameColumn', () => {
     return function MockPlayerNameColumn() {
-        const { View, Text } = require('react-native');
+        const { View, Text } = jest.requireActual('react-native');
         return <View testID="player-name-column"><Text>PlayerNameColumn</Text></View>;
     };
 });
 
 jest.mock('../components/ScoreLog/RoundScoreColumn', () => {
     return function MockRoundScoreColumn({ round, isCurrentRound, disabled }: { round: number; isCurrentRound: boolean; disabled: boolean }) {
-        const { View, Text } = require('react-native');
+        const { View, Text } = jest.requireActual('react-native');
         return (
             <View testID={`round-score-column-${round}`}>
                 <Text>Round {round} - Current: {isCurrentRound.toString()} - Disabled: {disabled.toString()}</Text>
@@ -43,7 +43,7 @@ jest.mock('../components/ScoreLog/RoundScoreColumn', () => {
 
 jest.mock('../components/ScoreLog/TotalScoreColumn', () => {
     return function MockTotalScoreColumn() {
-        const { View, Text } = require('react-native');
+        const { View, Text } = jest.requireActual('react-native');
         return <View testID="total-score-column"><Text>TotalScoreColumn</Text></View>;
     };
 });

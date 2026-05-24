@@ -19,8 +19,8 @@ jest.mock('../../Analytics', () => ({
 
 // Mock @gorhom/bottom-sheet
 jest.mock('@gorhom/bottom-sheet', () => {
-    const { forwardRef, useImperativeHandle } = require('react');
-    const { View, ScrollView } = require('react-native');
+    const { forwardRef, useImperativeHandle } = jest.requireActual('react');
+    const { View, ScrollView } = jest.requireActual('react-native');
     
     const MockBottomSheet = forwardRef((props: {
         children: React.ReactNode;
@@ -74,8 +74,8 @@ jest.mock('@react-navigation/native', () => ({
 
 // Mock react-native-reanimated
 jest.mock('react-native-reanimated', () => {
-    const View = require('react-native').View;
-    const Text = require('react-native').Text;
+    const View = jest.requireActual('react-native').View;
+    const Text = jest.requireActual('react-native').Text;
     
     return {
         __esModule: true,
@@ -102,7 +102,7 @@ jest.mock('react-native-reanimated', () => {
 // Mock react-native-safe-area-context
 jest.mock('react-native-safe-area-context', () => ({
     SafeAreaView: ({ children }: { children: React.ReactNode }) => {
-        const { View } = require('react-native');
+        const { View } = jest.requireActual('react-native');
         return <View testID="safe-area-view">{children}</View>;
     },
 }));
@@ -114,7 +114,7 @@ jest.mock('react-native-elements', () => ({
         onPress: () => void;
         testID?: string;
     }) => {
-        const { TouchableOpacity, Text } = require('react-native');
+        const { TouchableOpacity, Text } = jest.requireActual('react-native');
         return (
             <TouchableOpacity onPress={onPress} testID={testID}>
                 <Text>{title}</Text>
@@ -130,7 +130,7 @@ jest.mock('../BigButtons/BigButton', () => {
         onPress: () => void;
         testID?: string;
     }) {
-        const { TouchableOpacity, Text } = require('react-native');
+        const { TouchableOpacity, Text } = jest.requireActual('react-native');
         return (
             <TouchableOpacity onPress={onPress} testID={testID || `big-button-${text.toLowerCase()}`}>
                 <Text>{text}</Text>
@@ -141,7 +141,7 @@ jest.mock('../BigButtons/BigButton', () => {
 
 jest.mock('../Icons/RematchIcon', () => {
     return function MockRematchIcon() {
-        const { View, Text } = require('react-native');
+        const { View, Text } = jest.requireActual('react-native');
         return <View testID="rematch-icon"><Text>Rematch Icon</Text></View>;
     };
 });
@@ -152,7 +152,7 @@ jest.mock('../Rounds', () => {
         navigation: object;
         show: boolean;
     }) {
-        const { View, Text } = require('react-native');
+        const { View, Text } = jest.requireActual('react-native');
         return (
             <View testID="rounds">
                 <Text>Rounds - Show: {show.toString()}</Text>

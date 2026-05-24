@@ -1,24 +1,40 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React from "react";
+import React from 'react';
 
-import { useFocusEffect } from "@react-navigation/native";
-import { fireEvent, render, waitFor } from "@testing-library/react-native";
-import { SemVer } from "semver";
+import { useFocusEffect } from '@react-navigation/native';
+import { fireEvent, render, waitFor } from '@testing-library/react-native';
+import { SemVer } from 'semver';
 
-import * as Analytics from "../Analytics";
-import * as OnboardingModule from "../components/Onboarding/Onboarding";
+import * as Analytics from '../Analytics';
+import * as OnboardingModule from '../components/Onboarding/Onboarding';
 
-import OnboardingScreen from "./OnboardingScreen";
+import OnboardingScreen from './OnboardingScreen';
 
 // Mock external dependencies
-jest.mock("../Analytics");
-jest.mock("@react-navigation/native", () => ({
-  ...jest.requireActual("@react-navigation/native"),
+jest.mock('react-native-reanimated', () => {
+  const { View, FlatList } = jest.requireActual('react-native');
+  return {
+    __esModule: true,
+    useSharedValue: function (i: number) { return { value: i }; },
+    useAnimatedStyle: function (fn: () => Record<string, unknown>) { return fn(); },
+    useAnimatedReaction: function (_p: () => unknown, r: (c: unknown, p: unknown) => void) { r(_p(), undefined); },
+    runOnJS: function (fn: (...args: unknown[]) => unknown) { return fn; },
+    withTiming: function (_t: number) { return _t; },
+    default: { View, FlatList },
+    createAnimatedComponent: function (c: unknown) { return c; },
+    LinearTransition: { easing: function () { return {}; } },
+    Easing: { ease: {} },
+    FadeIn: { duration: function () { return this; } },
+  };
+});
+jest.mock('../Analytics');
+jest.mock('@react-navigation/native', () => ({
+  ...jest.requireActual('@react-navigation/native'),
   useFocusEffect: jest.fn(),
 }));
 
 // Mock the components that OnboardingScreen uses
-jest.mock("../components/Onboarding/OnboardingPage", () => {
+jest.mock('../components/Onboarding/OnboardingPage', () => {
   return function MockOnboardingPage({
     item,
     index,
@@ -34,7 +50,7 @@ jest.mock("../components/Onboarding/OnboardingPage", () => {
     isLast: boolean;
     closeOnboarding: () => void;
   }) {
-    const { View, Text, TouchableOpacity } = require("react-native");
+    const { View, Text, TouchableOpacity } = jest.requireActual('react-native');
     return (
       <View testID={`onboarding-page-${index}`} style={{ width }}>
         <Text>
@@ -52,7 +68,7 @@ jest.mock("../components/Onboarding/OnboardingPage", () => {
   };
 });
 
-jest.mock("../components/Onboarding/SkipButton", () => {
+jest.mock('../components/Onboarding/SkipButton', () => {
   return function MockSkipButton({
     visible,
     onPress,
@@ -60,7 +76,7 @@ jest.mock("../components/Onboarding/SkipButton", () => {
     visible: boolean;
     onPress: () => void;
   }) {
-    const { TouchableOpacity, Text } = require("react-native");
+    const { TouchableOpacity, Text } = jest.requireActual('react-native');
     if (!visible) return null;
     return (
       <TouchableOpacity onPress={onPress} testID="skip-button">
@@ -70,9 +86,9 @@ jest.mock("../components/Onboarding/SkipButton", () => {
   };
 });
 
-jest.mock("react-native-animated-pagination-dots", () => ({
+jest.mock('react-native-animated-pagination-dots', () => ({
   ExpandingDot: ({ data }: { data: any[] }) => {
-    const { View, Text } = require("react-native");
+    const { View, Text } = jest.requireActual('react-native');
     return (
       <View testID="expanding-dot">
         <Text>Dots: {data.length}</Text>
@@ -82,7 +98,7 @@ jest.mock("react-native-animated-pagination-dots", () => ({
 }));
 
 // Mock getOnboardingScreens
-jest.mock("../components/Onboarding/Onboarding", () => ({
+jest.mock('../components/Onboarding/Onboarding', () => ({
   getOnboardingScreens: jest.fn(),
 }));
 
@@ -109,22 +125,22 @@ const mockNavigation = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 } as any;
 
-describe("OnboardingScreen", () => {
+describe('OnboardingScreen', () => {
   const mockOnboardingScreens = [
     {
-      title: "Welcome",
-      backgroundColor: "#FF6B6B",
-      content: "Welcome to the app",
+      title: 'Welcome',
+      backgroundColor: '#FF6B6B',
+      content: 'Welcome to the app',
     },
     {
-      title: "Features",
-      backgroundColor: "#4ECDC4",
-      content: "Explore our features",
+      title: 'Features',
+      backgroundColor: '#4ECDC4',
+      content: 'Explore our features',
     },
     {
-      title: "Get Started",
-      backgroundColor: "#45B7D1",
-      content: "Let's get started",
+      title: 'Get Started',
+      backgroundColor: '#45B7D1',
+      content: 'Let\'s get started',
     },
   ];
 
@@ -142,7 +158,7 @@ describe("OnboardingScreen", () => {
     });
   });
 
-  it("should render onboarding screens with default parameters", () => {
+  it('should render onboarding screens with default parameters', () => {
     const mockRoute = {
       params: {},
     };
@@ -151,18 +167,18 @@ describe("OnboardingScreen", () => {
       <OnboardingScreen navigation={mockNavigation} route={mockRoute as any} />
     );
 
-    expect(getByTestId("onboarding")).toBeTruthy();
-    expect(getByTestId("onboarding-page-0")).toBeTruthy();
-    expect(getByText("Page 0: Welcome")).toBeTruthy();
-    expect(getByTestId("expanding-dot")).toBeTruthy();
-    expect(getByText("Dots: 3")).toBeTruthy();
+    expect(getByTestId('onboarding')).toBeTruthy();
+    expect(getByTestId('onboarding-page-0')).toBeTruthy();
+    expect(getByText('Page 0: Welcome')).toBeTruthy();
+    expect(getByTestId('expanding-dot')).toBeTruthy();
+    expect(getByText('Dots: 3')).toBeTruthy();
   });
 
-  it("should render onboarding screens with provided version", () => {
+  it('should render onboarding screens with provided version', () => {
     const mockRoute = {
       params: {
         onboarding: true,
-        version: new SemVer("1.2.3"),
+        version: new SemVer('1.2.3'),
       },
     };
 
@@ -171,15 +187,15 @@ describe("OnboardingScreen", () => {
     );
 
     expect(OnboardingModule.getOnboardingScreens).toHaveBeenCalledWith(
-      new SemVer("1.2.3")
+      new SemVer('1.2.3')
     );
   });
 
-  it("should use default version when onboarding is false", () => {
+  it('should use default version when onboarding is false', () => {
     const mockRoute = {
       params: {
         onboarding: false,
-        version: new SemVer("1.2.3"),
+        version: new SemVer('1.2.3'),
       },
     };
 
@@ -188,11 +204,11 @@ describe("OnboardingScreen", () => {
     );
 
     expect(OnboardingModule.getOnboardingScreens).toHaveBeenCalledWith(
-      new SemVer("0.0.0")
+      new SemVer('0.0.0')
     );
   });
 
-  it("should show skip button when not on last page", () => {
+  it('should show skip button when not on last page', () => {
     const mockRoute = {
       params: {
         onboarding: true,
@@ -203,25 +219,10 @@ describe("OnboardingScreen", () => {
       <OnboardingScreen navigation={mockNavigation} route={mockRoute as any} />
     );
 
-    expect(getByTestId("skip-button")).toBeTruthy();
+    expect(getByTestId('skip-button')).toBeTruthy();
   });
 
-  it("should not show skip button when on last page", () => {
-    const mockRoute = {
-      params: {
-        onboarding: true,
-      },
-    };
-
-    const { getByTestId } = render(
-      <OnboardingScreen navigation={mockNavigation} route={mockRoute as any} />
-    );
-
-    // Component should render successfully
-    expect(getByTestId("onboarding")).toBeTruthy();
-  });
-
-  it("should navigate to List screen when completing onboarding", async () => {
+  it('should not show skip button when on last page', () => {
     const mockRoute = {
       params: {
         onboarding: true,
@@ -233,10 +234,25 @@ describe("OnboardingScreen", () => {
     );
 
     // Component should render successfully
-    expect(getByTestId("onboarding")).toBeTruthy();
+    expect(getByTestId('onboarding')).toBeTruthy();
   });
 
-  it("should go back when completing tutorial (non-onboarding)", async () => {
+  it('should navigate to List screen when completing onboarding', async () => {
+    const mockRoute = {
+      params: {
+        onboarding: true,
+      },
+    };
+
+    const { getByTestId } = render(
+      <OnboardingScreen navigation={mockNavigation} route={mockRoute as any} />
+    );
+
+    // Component should render successfully
+    expect(getByTestId('onboarding')).toBeTruthy();
+  });
+
+  it('should go back when completing tutorial (non-onboarding)', async () => {
     const mockRoute = {
       params: {
         onboarding: false,
@@ -248,10 +264,10 @@ describe("OnboardingScreen", () => {
     );
 
     // Component should render successfully
-    expect(getByTestId("onboarding")).toBeTruthy();
+    expect(getByTestId('onboarding')).toBeTruthy();
   });
 
-  it("should handle skip button press", () => {
+  it('should handle skip button press', () => {
     const mockRoute = {
       params: {
         onboarding: true,
@@ -263,10 +279,10 @@ describe("OnboardingScreen", () => {
     );
 
     // Should render skip button
-    expect(getByTestId("skip-button")).toBeTruthy();
+    expect(getByTestId('skip-button')).toBeTruthy();
   });
 
-  it("should log analytics events for page changes", async () => {
+  it('should log analytics events for page changes', async () => {
     const mockLogEvent = jest.mocked(Analytics.logEvent);
     const mockRoute = {
       params: {
@@ -280,7 +296,7 @@ describe("OnboardingScreen", () => {
 
     // Initial page load should log event
     await waitFor(() => {
-      expect(mockLogEvent).toHaveBeenCalledWith("onboarding_page", {
+      expect(mockLogEvent).toHaveBeenCalledWith('onboarding_page', {
         onboarding: true,
         index: 0,
         end: false,
@@ -288,7 +304,7 @@ describe("OnboardingScreen", () => {
     });
   });
 
-  it("should log analytics events for completion", () => {
+  it('should log analytics events for completion', () => {
     const mockLogEvent = jest.mocked(Analytics.logEvent);
     const mockRoute = {
       params: {
@@ -301,11 +317,11 @@ describe("OnboardingScreen", () => {
     );
 
     // Component should render successfully
-    expect(getByTestId("onboarding")).toBeTruthy();
+    expect(getByTestId('onboarding')).toBeTruthy();
     expect(mockLogEvent).toBeDefined();
   });
 
-  it("should log analytics events for skipping", () => {
+  it('should log analytics events for skipping', () => {
     const mockLogEvent = jest.mocked(Analytics.logEvent);
     const mockRoute = {
       params: {
@@ -317,17 +333,17 @@ describe("OnboardingScreen", () => {
       <OnboardingScreen navigation={mockNavigation} route={mockRoute as any} />
     );
 
-    const skipButton = getByTestId("skip-button");
+    const skipButton = getByTestId('skip-button');
     fireEvent.press(skipButton);
 
-    expect(mockLogEvent).toHaveBeenCalledWith("onboarding_skip", {
+    expect(mockLogEvent).toHaveBeenCalledWith('onboarding_skip', {
       onboarding: true,
       index: 0,
       end: false,
     });
   });
 
-  it("should handle scroll end events to update active index", () => {
+  it('should handle scroll end events to update active index', () => {
     const mockRoute = {
       params: {
         onboarding: true,
@@ -339,18 +355,18 @@ describe("OnboardingScreen", () => {
     );
 
     // Set up layout
-    const onboardingView = getByTestId("onboarding");
-    fireEvent(onboardingView, "layout", {
+    const onboardingView = getByTestId('onboarding');
+    fireEvent(onboardingView, 'layout', {
       nativeEvent: { layout: { width: 300 } },
     });
 
     // Initially should show first page as active
-    expect(getByText("Active: true")).toBeTruthy();
+    expect(getByText('Active: true')).toBeTruthy();
 
     // Simulate momentum scroll end to second page
-    const flatList = getByTestId("onboarding").findByType("RCTScrollView");
+    const flatList = getByTestId('onboarding').findByType('RCTScrollView' as any);
     if (flatList) {
-      fireEvent(flatList, "momentumScrollEnd", {
+      fireEvent(flatList, 'momentumScrollEnd', {
         nativeEvent: {
           contentOffset: { x: 300 },
           contentSize: { width: 900, height: 600 },
@@ -360,10 +376,10 @@ describe("OnboardingScreen", () => {
     }
 
     // Should update active index
-    expect(getByText("Page 1: Features")).toBeTruthy();
+    expect(getByText('Page 1: Features')).toBeTruthy();
   });
 
-  it("should log focus/unfocus events", () => {
+  it('should log focus/unfocus events', () => {
     const mockLogEvent = jest.mocked(Analytics.logEvent);
     let focusCallback: (() => void) | undefined;
 
@@ -387,7 +403,7 @@ describe("OnboardingScreen", () => {
       focusCallback();
     }
 
-    expect(mockLogEvent).toHaveBeenCalledWith("onboarding_close", {
+    expect(mockLogEvent).toHaveBeenCalledWith('onboarding_close', {
       onboarding: true,
       index: 0,
       end: false,
