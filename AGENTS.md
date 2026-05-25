@@ -35,14 +35,14 @@ npm run lint  # Run ESLint and TypeScript checks
 
 ### Building
 
-| Goal | Command | Build type |
-|------|---------|------------|
-| Simulator (dev) | `npm run ios:dev` | Always local |
-| Simulator (preview) | `npm run ios:preview` | Always local |
-| Simulator (production) | `npm run ios` | Always local |
-| Physical device (dev) | `npx eas build --profile development --platform ios` | Supports `--local` |
-| Physical device (preview) | `npx eas build --profile preview --platform ios` | Supports `--local` |
-| Store submission | `npx eas build --profile production --platform ios` | Cloud only |
+| Goal | Command | Type | Location |
+|------|---------|------|----------|
+| Simulator (dev) | `npm run ios:dev` | Dev client | Local only |
+| Simulator (preview) | `APP_VARIANT=preview npx expo run:ios --configuration Release` | Standalone | Local only |
+| Simulator (production) | `npm run ios` | Dev client | Local only |
+| Physical device (dev) | `npx eas build --profile development --platform ios` | Dev client | Local (`--local`) or Cloud |
+| Physical device (preview) | `npx eas build --profile preview --platform ios` | Standalone | Local (`--local`) or Cloud |
+| Store submission | `npx eas build --profile production --platform ios` | Release | Cloud only |
 
 Android counterparts:
 
