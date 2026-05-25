@@ -1,12 +1,12 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 
-import { MenuAction, MenuView, NativeActionEvent } from '@react-native-menu/menu';
-import * as Haptics from 'expo-haptics';
-import { Platform } from 'react-native';
+import ContextMenu from 'react-native-context-menu-view';
 
 interface Props {
     children: React.ReactNode;
+    gameId: string;
     gameTitle: string | undefined;
+    chooseGameHandler: () => void;
     rematchGameHandler: () => void;
     editGameHandler: () => void;
     shareGameHandler: () => void;
@@ -16,86 +16,60 @@ interface Props {
 const IOSPopupMenu: React.FC<Props> = ({
     children,
     gameTitle,
+    chooseGameHandler,
     rematchGameHandler,
     editGameHandler,
     shareGameHandler,
     deleteGameHandler
 }) => {
-    type MenuActionHandler = (NativeEvent: NativeActionEvent) => void;
-
-    /**
-     * Menu Actions for long press
-     */
-    const actions: MenuAction[] = [
-        {
-            id: 'rematch',
-            title: 'Rematch',
-            image: Platform.select({
-                ios: 'arrow.uturn.left',
-                android: 'ic_menu_edit',
-            }),
-        },
-        {
-            id: 'edit',
-            title: 'Edit',
-            image: Platform.select({
-                ios: 'pencil',
-                android: 'ic_menu_edit',
-            }),
-        },
-        {
-            id: 'share',
-            title: 'Share',
-            image: Platform.select({
-                ios: 'square.and.arrow.up',
-                android: 'ic_menu_share',
-            }),
-        },
-        {
-            id: 'delete',
-            title: 'Delete',
-            attributes: {
-                destructive: true,
-            },
-            image: Platform.select({
-                ios: 'trash',
-                android: 'ic_menu_delete',
-            }),
-        },
-    ];
-
-    /**
-     * Menu Action Handler - handles long press actions for games
-     * @param nativeEvent
-     * @returns void
-     */
-    const menuActionHandler: MenuActionHandler = async ({ nativeEvent }) => {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-
-        switch (nativeEvent.event) {
-            case 'rematch':
+    const handlePress = useCallback(({ nativeEvent }: { nativeEvent: { index: number } }) => {
+        switch (nativeEvent.index) {
+            case 0:
                 rematchGameHandler();
                 break;
-            case 'edit':
+            case 1:
                 editGameHandler();
                 break;
-            case 'share':
+            case 2:
                 shareGameHandler();
                 break;
-            case 'delete':
+            case 3:
                 deleteGameHandler();
                 break;
         }
-    };
+    }, [rematchGameHandler, editGameHandler, shareGameHandler, deleteGameHandler]);
+
+    const handlePreviewPress = useCallback(() => {
+        chooseGameHandler();
+    }, [chooseGameHandler]);
 
     return (
-        <MenuView
-            title={gameTitle}
-            shouldOpenOnLongPress={true}
-            onPressAction={menuActionHandler}
-            actions={actions}>
+        <ContextMenu
+            title={gameTitle ?? ''}
+            actions={[
+                {
+                    title: 'Rematch',
+                    systemIcon: 'arrow.uturn.left',
+                },
+                {
+                    title: 'Edit',
+                    systemIcon: 'pencil',
+                },
+                {
+                    title: 'Share',
+                    systemIcon: 'square.and.arrow.up',
+                },
+                {
+                    title: 'Delete',
+                    systemIcon: 'trash',
+                    destructive: true,
+                },
+            ]}
+            onPress={handlePress}
+            onPreviewPress={handlePreviewPress}
+        >
             {children}
-        </MenuView>
+        </ContextMenu>
     );
 };
 

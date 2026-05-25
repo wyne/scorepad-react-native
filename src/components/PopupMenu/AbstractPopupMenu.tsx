@@ -101,7 +101,9 @@ const AbstractPopupMenu: React.FC<Props> = (props) => {
     return Platform.select({
         ios: (
             <IOSPopupMenu
+                gameId={props.gameId}
                 gameTitle={gameTitle}
+                chooseGameHandler={props.chooseGameHandler}
                 rematchGameHandler={rematchGameHandler}
                 editGameHandler={editGameHandler}
                 shareGameHandler={shareGameHandler}
@@ -114,6 +116,7 @@ const AbstractPopupMenu: React.FC<Props> = (props) => {
             <AndroidPopupMenu
                 gameTitle={gameTitle}
                 chooseGameHandler={props.chooseGameHandler}
+                rematchGameHandler={rematchGameHandler}
                 editGameHandler={editGameHandler}
                 shareGameHandler={shareGameHandler}
                 deleteGameHandler={deleteGameHandler}

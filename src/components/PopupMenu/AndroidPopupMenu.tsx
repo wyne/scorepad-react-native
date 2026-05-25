@@ -13,6 +13,7 @@ interface Props {
     children: React.ReactNode;
     gameTitle: string | undefined;
     chooseGameHandler: () => void;
+    rematchGameHandler: () => void;
     editGameHandler: () => void;
     shareGameHandler: () => void;
     deleteGameHandler: () => void;
@@ -31,7 +32,9 @@ const AndroidPopupMenu: React.FC<Props> = (props) => {
                 customStyles={{ optionsContainer: { padding: 5 } }}
             >
                 <Text style={{ color: 'grey', padding: 5 }}>{props.gameTitle}</Text>
+                <MenuOption onSelect={props.rematchGameHandler} text='Rematch' />
                 <MenuOption onSelect={props.editGameHandler} text='Edit' />
+                <MenuOption onSelect={props.shareGameHandler} text='Share' />
                 <MenuOption onSelect={props.deleteGameHandler} >
                     <Text style={{ color: 'red' }}>Delete</Text>
                 </MenuOption>

@@ -2,7 +2,6 @@ import React, { useCallback } from 'react';
 
 import { ParamListBase } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import * as Haptics from 'expo-haptics';
 import Moment from 'react-moment';
 import { Platform, StyleSheet, Text } from 'react-native';
 import { Icon, ListItem } from 'react-native-elements';
@@ -64,10 +63,6 @@ const GameListItem: React.FunctionComponent<Props> = ({ navigation, gameId, inde
                 index={index}
             >
                 <ListItem key={gameId} bottomDivider
-                    onLongPress={Platform.OS == 'android' ? undefined : () => {
-                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-                        logEvent('list_menu_open');
-                    }}
                     onPress={Platform.OS == 'android' ? undefined : chooseGameHandler}
                 >
                     <ListItem.Content>
