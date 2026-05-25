@@ -3,6 +3,8 @@
     "start": "expo start --dev-client",
     "android": "expo run:android",
     "ios": "expo run:ios",
+    "ios:dev": "APP_VARIANT=development expo run:ios",
+    "ios:preview": "APP_VARIANT=preview expo run:ios",
     "web": "expo start --web",
     "eject": "expo eject",
     "dev": "APP_VARIANT=development expo start",

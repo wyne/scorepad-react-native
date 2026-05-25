@@ -5,42 +5,16 @@
     "appVersionSource": "remote"
   },
   "build": {
-    "development-simulator": {
-      "node": "20.18.2",
-      "developmentClient": true,
-      "distribution": "internal",
-      "ios": {
-        "simulator": true
-      },
-      "env": {
-        "APP_VARIANT": "development",
-        "EXPO_PUBLIC_FIREBASE_ANALYTICS": "false"
-      }
-    },
     "development": {
-      "node": "20.18.2",
       "developmentClient": true,
       "distribution": "internal",
-      "ios": {
-        "resourceClass": "m-medium"
-      },
-      "android": {
-        "buildType": "apk"
-      },
       "env": {
         "APP_VARIANT": "development",
         "EXPO_PUBLIC_FIREBASE_ANALYTICS": "false"
       }
     },
     "preview": {
-      "node": "20.18.2",
       "distribution": "internal",
-      "ios": {
-        "resourceClass": "m-medium"
-      },
-      "android": {
-        "buildType": "apk"
-      },
       "channel": "preview",
       "env": {
         "APP_VARIANT": "preview",
@@ -48,10 +22,6 @@
       }
     },
     "production": {
-      "node": "20.18.2",
-      "ios": {
-        "resourceClass": "m-medium"
-      },
       "autoIncrement": true,
       "channel": "production"
     }

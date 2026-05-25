@@ -1,6 +1,6 @@
-# CLAUDE.md
+# AGENTS.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to AI coding agents when working with code in this repository.
 
 ## Project Overview
 
@@ -35,16 +35,29 @@ npm run lint  # Run ESLint and TypeScript checks
 
 ### Building
 
+| Goal | Command | Build type |
+|------|---------|------------|
+| Simulator (dev) | `npm run ios:dev` | Always local |
+| Simulator (preview) | `npm run ios:preview` | Always local |
+| Simulator (production) | `npm run ios` | Always local |
+| Physical device (dev) | `npx eas build --profile development --platform ios` | Supports `--local` |
+| Physical device (preview) | `npx eas build --profile preview --platform ios` | Supports `--local` |
+| Store submission | `npx eas build --profile production --platform ios` | Cloud only |
+
+Android counterparts:
+
 ```bash
-# Development builds
-npx eas build --profile development-simulator --platform ios --local
-npx eas build --profile development-simulator --platform android --local
+npm run android                          # Simulator/emulator (always local)
+APP_VARIANT=development npx expo run:android  # Dev variant
+APP_VARIANT=preview npx expo run:android      # Preview variant
+npx eas build --profile development --platform android   # Physical device
+npx eas build --profile preview --platform android       # Physical device
+npx eas build --profile production --platform android    # Store submission
+```
 
-# Preview builds
-npx eas build --platform ios --profile preview --local
-npx eas build --platform android --profile preview --local
+Before a production build, bump the user-facing `version` in `app.config.js`:
 
-# Production builds (bump user-facing version in app.config.js before release)
+```bash
 npx expo-doctor
 npx expo prebuild
 npx eas build --platform ios
