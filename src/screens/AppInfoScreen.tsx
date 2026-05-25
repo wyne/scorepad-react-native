@@ -150,7 +150,7 @@ const AppInfoScreen: React.FunctionComponent<Props> = ({ navigation }) => {
 
             <Section title="Contact">
                 <SectionItem>
-                    <SectionItemText text="For questions and feedback, please  the website or use the email address below." />
+                    <SectionItemText text="For questions and feedback, please visit the website or use the email address below." />
                 </SectionItem>
                 <SectionSeparator />
                 <SectionItem>
