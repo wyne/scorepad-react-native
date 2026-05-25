@@ -68,7 +68,6 @@ export default {
         bundleIdentifier: packageName,
         supportsTablet: true,
         requireFullScreen: false,
-        buildNumber: '87',
         infoPlist: {
             RCTAsyncStorageExcludeFromBackup: false,
             ITSAppUsesNonExemptEncryption: false,
