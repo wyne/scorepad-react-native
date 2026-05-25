@@ -44,7 +44,7 @@ npx eas build --profile development-simulator --platform android --local
 npx eas build --platform ios --profile preview --local
 npx eas build --platform android --profile preview --local
 
-# Production builds (remember to bump version in app.config.js)
+# Production builds (bump user-facing version in app.config.js before release)
 npx expo-doctor
 npx expo prebuild
 npx eas build --platform ios
@@ -107,9 +107,29 @@ npx eas build --platform android
   - Analytics: `-FIRAnalyticsDebugEnabled`
   - Crashlytics: `-FIRDebugEnabled`
 
+## Version Management
+
+App versions are managed via EAS **remote** version source:
+
+- **User-facing version** (`version` in `app.config.js`): bump manually before each store submission.
+- **Build numbers** (`versionCode` / `buildNumber`): managed remotely by EAS. Set to `autoIncrement: true` on the production profile in `eas.json`. The build number auto-increments on every production build for the same user-facing version.
+
+To sync or reset the remote build number (e.g. after a rollback or when adopting remote for the first time):
+
+```bash
+eas build:version:set
+```
+
+This prompts for platform, confirms switching to remote source, and lets you enter the starting build number.
+
+To pull the remote version into your local project:
+
+```bash
+eas build:version:sync
+```
+
 ## Development Notes
 
 - Use `npx expo start --dev-client` for development with React DevTools
 - Android development requires JDK 17
-- Version bumping required in `app.config.js` for production builds
 - EAS CLI used for building and submitting to stores
