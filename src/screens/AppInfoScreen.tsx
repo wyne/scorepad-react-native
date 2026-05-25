@@ -150,7 +150,13 @@ const AppInfoScreen: React.FunctionComponent<Props> = ({ navigation }) => {
 
             <Section title="Contact">
                 <SectionItem>
-                    <SectionItemText text="For questions and feedback, please visit the website below." />
+                    <SectionItemText text="For questions and feedback, please visit the website or use the email address below." />
+                </SectionItem>
+                <SectionSeparator />
+                <SectionItem>
+                    <Button title="scorepad@justinwyne.com" type="clear" onPress={() => {
+                        Linking.openURL('mailto:scorepad@justinwyne.com');
+                    }} />
                 </SectionItem>
                 <SectionSeparator />
                 <SectionItem>

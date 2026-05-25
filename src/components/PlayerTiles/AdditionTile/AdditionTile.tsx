@@ -37,8 +37,9 @@ const AdditionTile: React.FunctionComponent<Props> = ({
     const scoreTotal = player.scores.reduce(
         (sum, current, round) => {
             if (round > roundCurrent) { return sum; }
-            return (sum || 0) + (current || 0);
-        }
+            return sum + (current || 0);
+        },
+        0
     );
     const scoreRound = player.scores[roundCurrent] || 0;
 

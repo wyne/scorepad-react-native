@@ -16,7 +16,30 @@ const config: Config = {
     ],
     moduleNameMapper: {
         '^react-native-video$': '__mocks__/react-native-video.js'
-    }
+    },
+    collectCoverage: true,
+    coverageDirectory: 'coverage',
+    collectCoverageFrom: [
+        'src/**/*.{ts,tsx}',
+        'redux/**/*.{ts,tsx}',
+        '!src/**/*.test.{ts,tsx}',
+        '!redux/**/*.test.{ts,tsx}',
+        '!src/**/*.d.ts',
+        '!src/**/index.{ts,tsx}',
+        '!coverage/**',
+        '!node_modules/**',
+        '!**/__mocks__/**',
+        '!**/vendor/**',
+    ],
+    coverageReporters: ['text', 'lcov', 'html', 'json-summary'],
+    coverageThreshold: {
+        global: {
+            branches: 18,
+            functions: 20,
+            lines: 25,
+            statements: 24,
+        },
+    },
 };
 
 export default config;

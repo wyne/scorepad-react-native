@@ -91,6 +91,7 @@ describe('players reducer', () => {
         if (actual.entities['1'] === undefined) {
             throw ('Player not found');
         }
+        expect(actual.entities['1'].scores[3]).toEqual(10);
         expect(actual.entities['1'].scores[0]).toEqual(10);
     });
 });
