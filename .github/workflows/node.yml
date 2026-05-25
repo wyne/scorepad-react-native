@@ -4,6 +4,7 @@
 name: Node.js CI
 
 on:
+  workflow_dispatch:
   push:
     branches: [ "main" ]
   pull_request:
@@ -41,16 +42,5 @@ jobs:
     - name: Run tests with coverage
       run: npm run test:coverage
       
-    - name: Upload coverage to GitHub
-      uses: actions/upload-artifact@v4.3.1
-      if: success() || failure()
-      with:
-        name: coverage-report
-        path: coverage/
-        
-    - name: Comment coverage on PR
-      if: github.event_name == 'pull_request'
-      uses: romeovs/lcov-reporter-action@v0.3.1
-      with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        lcov-file: ./coverage/lcov.info
+    - name: Coverage report saved locally
+      run: echo "Coverage report available in ./coverage/"
