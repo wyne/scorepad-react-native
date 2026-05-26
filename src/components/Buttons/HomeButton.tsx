@@ -54,7 +54,7 @@ const HomeButton: React.FunctionComponent<Props> = ({ navigation }) => {
 
     return (
         <HeaderButton accessibilityLabel='Home' onPress={async () => {
-            navigation.navigate('List');
+            navigation.popToTop();
             await logEvent('menu');
 
             storePrompt();

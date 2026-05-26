@@ -81,7 +81,6 @@ const AppInfoScreen: React.FunctionComponent<Props> = ({ navigation }) => {
             installId
         });
     };
-
     const alertWithVersion = async () => {
         Alert.alert('ScorePad with Rounds\n' +
             `v${appVersion} (${buildNumber})\n` +

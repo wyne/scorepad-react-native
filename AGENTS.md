@@ -1,6 +1,6 @@
-# CLAUDE.md
+# AGENTS.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to AI coding agents when working with code in this repository.
 
 ## Project Overview
 
@@ -35,16 +35,29 @@ npm run lint  # Run ESLint and TypeScript checks
 
 ### Building
 
+| Goal | Command | Type | Location |
+|------|---------|------|----------|
+| Simulator (dev) | `npm run ios:dev` | Dev client | Local only |
+| Simulator (preview) | `APP_VARIANT=preview npx expo run:ios --configuration Release` | Standalone | Local only |
+| Simulator (production) | `npm run ios` | Dev client | Local only |
+| Physical device (dev) | `npx eas build --profile development --platform ios` | Dev client | Local (`--local`) or Cloud |
+| Physical device (preview) | `npx eas build --profile preview --platform ios` | Standalone | Local (`--local`) or Cloud |
+| Store submission | `npx eas build --profile production --platform ios` | Release | Cloud only |
+
+Android counterparts:
+
 ```bash
-# Development builds
-npx eas build --profile development-simulator --platform ios --local
-npx eas build --profile development-simulator --platform android --local
+npm run android                          # Simulator/emulator (always local)
+APP_VARIANT=development npx expo run:android  # Dev variant
+APP_VARIANT=preview npx expo run:android      # Preview variant
+npx eas build --profile development --platform android   # Physical device
+npx eas build --profile preview --platform android       # Physical device
+npx eas build --profile production --platform android    # Store submission
+```
 
-# Preview builds
-npx eas build --platform ios --profile preview --local
-npx eas build --platform android --profile preview --local
+Before a production build, bump the user-facing `version` in `app.config.js`:
 
-# Production builds (remember to bump version in app.config.js)
+```bash
 npx expo-doctor
 npx expo prebuild
 npx eas build --platform ios
@@ -107,9 +120,29 @@ npx eas build --platform android
   - Analytics: `-FIRAnalyticsDebugEnabled`
   - Crashlytics: `-FIRDebugEnabled`
 
+## Version Management
+
+App versions are managed via EAS **remote** version source:
+
+- **User-facing version** (`version` in `app.config.js`): bump manually before each store submission.
+- **Build numbers** (`versionCode` / `buildNumber`): managed remotely by EAS. Set to `autoIncrement: true` on the production profile in `eas.json`. The build number auto-increments on every production build for the same user-facing version.
+
+To sync or reset the remote build number (e.g. after a rollback or when adopting remote for the first time):
+
+```bash
+eas build:version:set
+```
+
+This prompts for platform, confirms switching to remote source, and lets you enter the starting build number.
+
+To pull the remote version into your local project:
+
+```bash
+eas build:version:sync
+```
+
 ## Development Notes
 
 - Use `npx expo start --dev-client` for development with React DevTools
 - Android development requires JDK 17
-- Version bumping required in `app.config.js` for production builds
 - EAS CLI used for building and submitting to stores

@@ -33,12 +33,11 @@ const PlayerListItem: React.FunctionComponent<Props> = ({
     const player = useAppSelector(state => selectPlayerById(state, playerId));
     const selectPlayerColors = makeSelectPlayerColors();
     const playerColors = useAppSelector(state => selectPlayerColors(state, currentGameId, playerId));
+    const dispatch = useAppDispatch();
 
     if (currentGameId == '' || currentGameId === undefined) return null;
     if (playerIds === undefined) return null;
     if (typeof index == 'undefined') return null;
-
-    const dispatch = useAppDispatch();
 
     const deleteConfirmHandler = async () => {
         Alert.alert(

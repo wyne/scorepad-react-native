@@ -33,6 +33,12 @@ const SettingsScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     const playerIds = useAppSelector(state => selectCurrentGame(state)?.playerIds);
     const [edit, setEdit] = React.useState(false);
 
+    useEffect(() => {
+        if (playerIds !== undefined && playerIds.length <= 1) {
+            setEdit(false);
+        }
+    }, [playerIds]);
+
     if (typeof currentGameId == 'undefined') return null;
     if (typeof playerIds == 'undefined') return null;
 
@@ -49,12 +55,6 @@ const SettingsScreen: React.FunctionComponent<Props> = ({ navigation }) => {
             player_count: playerIds.length + 1,
         });
     };
-
-    useEffect(() => {
-        if (playerIds.length <= 1) {
-            setEdit(false);
-        }
-    }, [playerIds.length]);
 
     const ListFooter = () => (
         <View style={{ margin: 10, marginBottom: 50, alignSelf: 'center' }}>

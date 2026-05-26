@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import { ParamListBase } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake';
+import { activateKeepAwake, deactivateKeepAwake } from 'expo-keep-awake';
 import { LayoutChangeEvent, StyleSheet, View } from 'react-native';
 
 import { useAppSelector } from '../../redux/hooks';
@@ -29,7 +29,7 @@ function useKeepScreenAwake(durationMinutes: number): () => void {
 
     useEffect(() => {
         if (durationMinutes > 0) {
-            activateKeepAwakeAsync('game-screen');
+            activateKeepAwake('game-screen');
             startTimer();
         } else {
             clearTimer();

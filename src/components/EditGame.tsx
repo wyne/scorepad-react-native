@@ -14,10 +14,9 @@ const UNTITLED = 'Untitled';
 const EditGame = ({ }) => {
     const dispatch = useAppDispatch();
     const currentGame = useAppSelector(selectCurrentGame);
+    const [localTitle, setLocalTitle] = useState(currentGame?.title ?? '');
 
     if (typeof currentGame == 'undefined') return null;
-
-    const [localTitle, setLocalTitle] = useState(currentGame.title);
 
     const onEndEditingHandler = (e: NativeSyntheticEvent<TextInputEndEditingEventData>) => {
         const text = e.nativeEvent.text;
