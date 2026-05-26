@@ -18,6 +18,32 @@
 | Physical device (preview) | `npx eas build --profile preview --platform ios` | Standalone | Local (`--local`) or Cloud |
 | Store submission | `npx eas build --profile production --platform ios` | Release | Cloud only |
 
+## Install IPA on Physical Device (Wireless)
+
+Or use the interactive script from the project root:
+
+```zsh
+scripts/install-ipa.sh
+```
+
+Manual approach:
+
+Requires the device to have **Wireless Debugging** enabled (Settings → Developer → Enable Wireless Debugging).
+
+```zsh
+# List available devices (wireless and wired)
+xcrun devicectl list devices
+
+# Install IPA (UDID from the list command above)
+xcrun devicectl device install app --device <UDID> /path/to/app.ipa
+```
+
+You can also stream device logs while the app is running:
+
+```zsh
+xcrun devicectl device stream log --device <UDID>
+```
+
 ## Production Build Checklist
 
 Before a production build, bump the user-facing `version` in `app.config.js`:
