@@ -15,13 +15,12 @@ import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
 import { toggleDevMenuEnabled } from '../../../redux/SettingsSlice';
 import { logEvent } from '../../Analytics';
 
-const RotatingIcon: React.FunctionComponent = ({ }) => {
+const RotatingIcon: React.FunctionComponent = () => {
     const dispatch = useAppDispatch();
 
     const installId = useAppSelector(state => state.settings.installId);
 
     const rotation = useSharedValue(0);
-    const rotationCount = useSharedValue(1);
     const animatedStyles = useAnimatedStyle(() => {
         return {
             transform: [
@@ -32,13 +31,13 @@ const RotatingIcon: React.FunctionComponent = ({ }) => {
 
     let holdCallback: ReturnType<typeof setTimeout>;
     const onPressIn = () => {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
         holdCallback = setTimeout(() => {
             dispatch(toggleDevMenuEnabled());
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
             logEvent('dev_menu', {
                 installId,
             });
+            rotation.value = withTiming(rotation.value + 360, { duration: 1000, easing: Easing.elastic(1) });
         }, 5000);
     };
 
@@ -49,13 +48,7 @@ const RotatingIcon: React.FunctionComponent = ({ }) => {
 
     return <TouchableWithoutFeedback
         onPressIn={onPressIn}
-        onPressOut={onPressOut}
-        onPress={async () => {
-            rotationCount.value = rotationCount.value + 1;
-            rotation.value = withTiming((rotationCount.value * 90), { duration: 1000, easing: Easing.elastic(1) });
-
-            await logEvent('app_icon');
-        }}>
+        onPressOut={onPressOut}>
         <Animated.View style={[animatedStyles]}>
             <Image source={icon}
                 contentFit='contain'

@@ -12,7 +12,7 @@ const settingsMigrations: any = {
         const s: Record<string, unknown> = state ?? {};
         const keepScreenAwake = (s.keepScreenAwakeDuration as number ?? 0) > 0;
         delete s.keepScreenAwakeDuration;
-        return { ...s, keepScreenAwake };
+        return { ...s, keepScreenAwake, seenFeatureNotifications: [] };
     },
 };
 
@@ -37,6 +37,7 @@ const settingsPersistConfig = {
         'installId',
         'rollingGameCounter',
         'keepScreenAwake',
+        'seenFeatureNotifications',
     ],
 };
 

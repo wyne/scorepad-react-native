@@ -21,6 +21,7 @@ export interface SettingsState {
     installId: string | undefined;
     rollingGameCounter?: number;
     keepScreenAwake: boolean;
+    seenFeatureNotifications: string[];
 };
 
 export const initialState: SettingsState = {
@@ -38,6 +39,7 @@ export const initialState: SettingsState = {
     installId: undefined,
     rollingGameCounter: 0,
     keepScreenAwake: false,
+    seenFeatureNotifications: [],
 };
 
 const settingsSlice = createSlice({
@@ -95,6 +97,17 @@ const settingsSlice = createSlice({
         setKeepScreenAwake(state, action: PayloadAction<boolean>) {
             state.keepScreenAwake = action.payload;
         },
+        markFeatureNotificationSeen(state, action: PayloadAction<string>) {
+            if (!state.seenFeatureNotifications.includes(action.payload)) {
+                state.seenFeatureNotifications.push(action.payload);
+            }
+        },
+        resetSeenFeatureNotifications(state) {
+            state.seenFeatureNotifications = [];
+        },
+        resetOnboarding(state) {
+            state.onboarded = undefined;
+        },
     }
 });
 
@@ -115,6 +128,9 @@ export const {
     incrementRollingGameCounter,
     setRollingGameCounter,
     setKeepScreenAwake,
+    markFeatureNotificationSeen,
+    resetSeenFeatureNotifications,
+    resetOnboarding,
 } = settingsSlice.actions;
 
 export default settingsSlice.reducer;

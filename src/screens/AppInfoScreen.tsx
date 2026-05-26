@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ParamListBase } from '@react-navigation/routers';
@@ -6,9 +6,10 @@ import * as Application from 'expo-application';
 import { Alert, Linking, Platform, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
 
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
-import { setKeepScreenAwake, toggleShowPlayerIndex, toggleShowPointParticles } from '../../redux/SettingsSlice';
+import { markFeatureNotificationSeen, resetOnboarding, resetSeenFeatureNotifications, setKeepScreenAwake, toggleShowPlayerIndex, toggleShowPointParticles } from '../../redux/SettingsSlice';
 import { logEvent } from '../Analytics';
 import RotatingIcon from '../components/AppInfo/RotatingIcon';
+import { FEATURE_KEEP_SCREEN_AWAKE } from '../constants';
 
 interface Props {
     navigation: NativeStackNavigationProp<ParamListBase, string, undefined>;
@@ -48,9 +49,19 @@ const AppInfoScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     const showPlayerIndex = useAppSelector(state => state.settings.showPlayerIndex);
     const devMenuEnabled = useAppSelector(state => state.settings.devMenuEnabled);
     const installId = useAppSelector(state => state.settings.installId);
+    const seenFeatureNotifications = useAppSelector(state => state.settings.seenFeatureNotifications);
     const keepScreenAwake = useAppSelector(state => state.settings.keepScreenAwake);
 
     const dispatch = useAppDispatch();
+
+    const isUnseen = !seenFeatureNotifications.includes(FEATURE_KEEP_SCREEN_AWAKE);
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            dispatch(markFeatureNotificationSeen(FEATURE_KEEP_SCREEN_AWAKE));
+        }, 30000);
+        return () => clearTimeout(timer);
+    }, [dispatch]);
 
     const toggleParticleSwitch = () => {
         dispatch(toggleShowPointParticles());
@@ -107,7 +118,7 @@ const AppInfoScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     };
 
     return (
-        <ScrollView style={{ backgroundColor: '#F2F2F7', flex: 1 }}>
+        <ScrollView style={{ backgroundColor: '#F2F2F7', flex: 1 }} contentContainerStyle={{ paddingBottom: 50 }}>
             <View style={[styles.iconWrapper, { alignItems: 'center' }]}>
                 <RotatingIcon />
                 <Text style={{ color: '#999' }} onPress={alertWithVersion}>
@@ -136,6 +147,7 @@ const AppInfoScreen: React.FunctionComponent<Props> = ({ navigation }) => {
                 <SectionSeparator />
                 <SectionItem>
                     <View style={styles.labelRow}>
+                        {isUnseen && <View style={styles.featureDot} />}
                         <SectionItemText text="Keep Screen Awake" />
                         <View style={styles.betaPill}>
                             <Text style={styles.betaPillText}>Beta</Text>
@@ -143,11 +155,42 @@ const AppInfoScreen: React.FunctionComponent<Props> = ({ navigation }) => {
                     </View>
                     <Switch onValueChange={toggleKeepAwake} value={keepScreenAwake} ios_backgroundColor="#E5E5EA" />
                 </SectionItem>
-                {devMenuEnabled && (
-                    <>
-                    </>
-                )}
             </Section>
+
+            {devMenuEnabled && (
+                <Section title="Developer">
+                    <DisclosureRow label="Reset Feature Notifications" onPress={() => {
+                        Alert.alert(
+                            'Reset Feature Notifications',
+                            'This will clear all seen feature notifications, causing orange dots to reappear.',
+                            [
+                                { text: 'Cancel', style: 'cancel' },
+                                {
+                                    text: 'Reset', style: 'destructive', onPress: () => {
+                                        dispatch(resetSeenFeatureNotifications());
+                                        setTimeout(() => navigation.goBack(), 0);
+                                    }
+                                },
+                            ]
+                        );
+                    }} />
+                    <SectionSeparator />
+                    <DisclosureRow label="Reset Onboarding" onPress={() => {
+                        Alert.alert(
+                            'Reset Onboarding',
+                            'Your onboarding progress will be reset. Return to the home screen to trigger the onboarding flow.',
+                            [
+                                { text: 'Cancel', style: 'cancel' },
+                                {
+                                    text: 'Reset', style: 'destructive', onPress: () => {
+                                        dispatch(resetOnboarding());
+                                    }
+                                },
+                            ]
+                        );
+                    }} />
+                </Section>
+            )}
 
             <Section title="Help">
                 <DisclosureRow label="View Tutorial" onPress={() => {
@@ -218,6 +261,13 @@ const styles = StyleSheet.create({
     betaPillText: {
         fontSize: 11,
         color: '#666',
+    },
+    featureDot: {
+        width: 8,
+        height: 8,
+        borderRadius: 4,
+        backgroundColor: '#FF9500',
+        marginRight: 8,
     },
     disclosureRow: {
         flexDirection: 'row',
