@@ -1,15 +1,26 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { configureStore } from '@reduxjs/toolkit';
-import { persistStore, persistReducer } from 'redux-persist';
+import { persistStore, persistReducer, createMigrate } from 'redux-persist';
 
 import gamesReducer from './GamesSlice';
 import scoresReducer from './PlayersSlice';
 import settingsReducer from './SettingsSlice';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const settingsMigrations: any = {
+    0: (state: Record<string, unknown> | undefined) => {
+        const s: Record<string, unknown> = state ?? {};
+        const keepScreenAwake = (s.keepScreenAwakeDuration as number ?? 0) > 0;
+        delete s.keepScreenAwakeDuration;
+        return { ...s, keepScreenAwake, seenFeatureNotifications: [] };
+    },
+};
+
 const settingsPersistConfig = {
     key: 'settings',
-    version: 0,
+    version: 1,
     storage: AsyncStorage,
+    migrate: createMigrate(settingsMigrations),
     whitelist: [
         'home_fullscreen',
         'multiplier',
@@ -25,7 +36,8 @@ const settingsPersistConfig = {
         'appOpens',
         'installId',
         'rollingGameCounter',
-        'keepScreenAwakeDuration',
+        'keepScreenAwake',
+        'seenFeatureNotifications',
     ],
 };
 

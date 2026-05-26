@@ -18,7 +18,8 @@ const mockState: Partial<RootState> = {
     lastStoreReviewPrompt: 1234567890,
     appOpens: 1,
     installId: 'test-install-id',
-    keepScreenAwakeDuration: 0,
+    keepScreenAwake: false,
+    seenFeatureNotifications: [],
   },
   games: {
     entities: {

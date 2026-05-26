@@ -55,7 +55,8 @@ const createMockState = (
     lastStoreReviewPrompt: Date.now(),
     appOpens: 1,
     installId: 'test-install-id',
-    keepScreenAwakeDuration: 0,
+    keepScreenAwake: false,
+    seenFeatureNotifications: [],
   },
   games: {
     entities: {

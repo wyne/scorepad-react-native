@@ -1,17 +1,15 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
-import { MenuAction, MenuView } from '@react-native-menu/menu';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ParamListBase } from '@react-navigation/routers';
 import * as Application from 'expo-application';
-import { Alert, Linking, Platform, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
-import { Button } from 'react-native-elements';
+import { Alert, Linking, Platform, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
 
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
-import { setKeepScreenAwakeDuration, toggleShowPlayerIndex, toggleShowPointParticles } from '../../redux/SettingsSlice';
+import { markFeatureNotificationSeen, resetOnboarding, resetSeenFeatureNotifications, setKeepScreenAwake, toggleShowPlayerIndex, toggleShowPointParticles } from '../../redux/SettingsSlice';
 import { logEvent } from '../Analytics';
 import RotatingIcon from '../components/AppInfo/RotatingIcon';
-import { systemBlue } from '../constants';
+import { FEATURE_KEEP_SCREEN_AWAKE } from '../constants';
 
 interface Props {
     navigation: NativeStackNavigationProp<ParamListBase, string, undefined>;
@@ -31,10 +29,16 @@ const SectionItem = ({ children }: { children: React.ReactNode; }) => (
     </View>
 );
 const SectionItemText = ({ text }: { text: string; }) => (
-    <Text style={styles.sectionItemText}>{text} </Text>
+    <Text style={styles.sectionItemText}>{text}</Text>
 );
 const SectionSeparator = () => (
     <View style={{ height: 1, backgroundColor: '#EFEFF4' }} />
+);
+const DisclosureRow = ({ label, onPress }: { label: string; onPress: () => void; }) => (
+    <TouchableOpacity style={styles.disclosureRow} onPress={onPress}>
+        <Text style={styles.disclosureLabel}>{label}</Text>
+        <Text style={styles.disclosureArrow}>›</Text>
+    </TouchableOpacity>
 );
 
 const AppInfoScreen: React.FunctionComponent<Props> = ({ navigation }) => {
@@ -45,25 +49,19 @@ const AppInfoScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     const showPlayerIndex = useAppSelector(state => state.settings.showPlayerIndex);
     const devMenuEnabled = useAppSelector(state => state.settings.devMenuEnabled);
     const installId = useAppSelector(state => state.settings.installId);
-    const keepScreenAwakeDuration = useAppSelector(state => state.settings.keepScreenAwakeDuration);
+    const seenFeatureNotifications = useAppSelector(state => state.settings.seenFeatureNotifications);
+    const keepScreenAwake = useAppSelector(state => state.settings.keepScreenAwake);
 
     const dispatch = useAppDispatch();
-    const durationOptions: { value: number; label: string; }[] = [
-        { value: 0, label: 'Off' },
-        { value: 5, label: '5 min' },
-        { value: 10, label: '10 min' },
-        { value: 15, label: '15 min' },
-        { value: 30, label: '30 min' },
-    ];
 
-    const durationLabel = (minutes: number) =>
-        durationOptions.find(o => o.value === minutes)?.label ?? 'Off';
+    const isUnseen = !seenFeatureNotifications.includes(FEATURE_KEEP_SCREEN_AWAKE);
 
-    const keepAwakeMenuActions: MenuAction[] = durationOptions.map((option) => ({
-        id: option.value.toString(),
-        title: option.label,
-        state: keepScreenAwakeDuration === option.value ? 'on' : 'off',
-    }));
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            dispatch(markFeatureNotificationSeen(FEATURE_KEEP_SCREEN_AWAKE));
+        }, 30000);
+        return () => clearTimeout(timer);
+    }, [dispatch]);
 
     const toggleParticleSwitch = () => {
         dispatch(toggleShowPointParticles());
@@ -81,6 +79,35 @@ const AppInfoScreen: React.FunctionComponent<Props> = ({ navigation }) => {
             installId
         });
     };
+    const toggleKeepAwake = () => {
+        const newValue = !keepScreenAwake;
+        if (newValue) {
+            Alert.alert(
+                'Keep Screen Awake',
+                'Your screen will not auto-lock while Keep Screen Awake is enabled. This could be a security risk if you leave your device unattended.',
+                [
+                    { text: 'Cancel', style: 'cancel' },
+                    {
+                        text: 'OK', style: 'default', onPress: () => {
+                            dispatch(setKeepScreenAwake(true));
+                            logEvent('toggle_feature', {
+                                feature: 'keep_screen_awake',
+                                value: true,
+                                installId
+                            });
+                        }
+                    },
+                ]
+            );
+        } else {
+            dispatch(setKeepScreenAwake(false));
+            logEvent('toggle_feature', {
+                feature: 'keep_screen_awake',
+                value: false,
+                installId
+            });
+        }
+    };
     const alertWithVersion = async () => {
         Alert.alert('ScorePad with Rounds\n' +
             `v${appVersion} (${buildNumber})\n` +
@@ -91,7 +118,7 @@ const AppInfoScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     };
 
     return (
-        <ScrollView style={{ backgroundColor: '#F2F2F7', flex: 1 }}>
+        <ScrollView style={{ backgroundColor: '#F2F2F7', flex: 1 }} contentContainerStyle={{ paddingBottom: 50 }}>
             <View style={[styles.iconWrapper, { alignItems: 'center' }]}>
                 <RotatingIcon />
                 <Text style={{ color: '#999' }} onPress={alertWithVersion}>
@@ -105,46 +132,70 @@ const AppInfoScreen: React.FunctionComponent<Props> = ({ navigation }) => {
             <Section title="Features">
                 <SectionItem>
                     <SectionItemText text="Particle Effect (tap-only)" />
-                    <Switch onValueChange={toggleParticleSwitch} value={showPointParticles} />
+                    <Switch onValueChange={toggleParticleSwitch} value={showPointParticles} ios_backgroundColor="#E5E5EA" />
                 </SectionItem>
+                <SectionSeparator />
                 <SectionItem>
-                    <SectionItemText text="Player Numbers (Beta*)" />
-                    <Switch onValueChange={togglePlayerIndexSwitch} value={showPlayerIndex} />
+                    <View style={styles.labelRow}>
+                        <SectionItemText text="Player Numbers" />
+                        <View style={styles.betaPill}>
+                            <Text style={styles.betaPillText}>Beta</Text>
+                        </View>
+                    </View>
+                    <Switch onValueChange={togglePlayerIndexSwitch} value={showPlayerIndex} ios_backgroundColor="#E5E5EA" />
                 </SectionItem>
+                <SectionSeparator />
                 <SectionItem>
-                    <SectionItemText text="Keep Screen Awake (Beta*)" />
-                    <MenuView
-                        onPressAction={({ nativeEvent }) => {
-                            const duration = parseInt(nativeEvent.event);
-                            dispatch(setKeepScreenAwakeDuration(duration));
-                            logEvent('toggle_feature', {
-                                feature: 'keep_screen_awake',
-                                value: duration,
-                                installId
-                            });
-                        }}
-                        actions={keepAwakeMenuActions}>
-                        <Text style={styles.menuTrigger}>
-                            {durationLabel(keepScreenAwakeDuration)}
-                        </Text>
-                    </MenuView>
+                    <View style={styles.labelRow}>
+                        {isUnseen && <View style={styles.featureDot} />}
+                        <SectionItemText text="Keep Screen Awake" />
+                        <View style={styles.betaPill}>
+                            <Text style={styles.betaPillText}>Beta</Text>
+                        </View>
+                    </View>
+                    <Switch onValueChange={toggleKeepAwake} value={keepScreenAwake} ios_backgroundColor="#E5E5EA" />
                 </SectionItem>
-                <SectionItem>
-                    <SectionItemText text="*Beta features may change or be removed without warning." />
-                </SectionItem>
-                {devMenuEnabled && (
-                    <>
-                    </>
-                )}
             </Section>
 
-            <Section title="Help">
-                <SectionItem>
-                    <SectionItemText text="Instructions" />
-                    <Button title="View Tutorial" type="clear" onPress={() => {
-                        navigation.navigate('Onboarding', { onboarding: false });
+            {devMenuEnabled && (
+                <Section title="Developer">
+                    <DisclosureRow label="Reset Feature Notifications" onPress={() => {
+                        Alert.alert(
+                            'Reset Feature Notifications',
+                            'This will clear all seen feature notifications, causing orange dots to reappear.',
+                            [
+                                { text: 'Cancel', style: 'cancel' },
+                                {
+                                    text: 'Reset', style: 'destructive', onPress: () => {
+                                        dispatch(resetSeenFeatureNotifications());
+                                        setTimeout(() => navigation.goBack(), 0);
+                                    }
+                                },
+                            ]
+                        );
                     }} />
-                </SectionItem>
+                    <SectionSeparator />
+                    <DisclosureRow label="Reset Onboarding" onPress={() => {
+                        Alert.alert(
+                            'Reset Onboarding',
+                            'Your onboarding progress will be reset. Return to the home screen to trigger the onboarding flow.',
+                            [
+                                { text: 'Cancel', style: 'cancel' },
+                                {
+                                    text: 'Reset', style: 'destructive', onPress: () => {
+                                        dispatch(resetOnboarding());
+                                    }
+                                },
+                            ]
+                        );
+                    }} />
+                </Section>
+            )}
+
+            <Section title="Help">
+                <DisclosureRow label="View Tutorial" onPress={() => {
+                    navigation.navigate('Onboarding', { onboarding: false });
+                }} />
             </Section>
 
             <Section title="Contact">
@@ -152,17 +203,13 @@ const AppInfoScreen: React.FunctionComponent<Props> = ({ navigation }) => {
                     <SectionItemText text="For questions and feedback, please visit the website or use the email address below." />
                 </SectionItem>
                 <SectionSeparator />
-                <SectionItem>
-                    <Button title="scorepad@justinwyne.com" type="clear" onPress={() => {
-                        Linking.openURL('mailto:scorepad@justinwyne.com');
-                    }} />
-                </SectionItem>
+                <DisclosureRow label="scorepad@justinwyne.com" onPress={() => {
+                    Linking.openURL('mailto:scorepad@justinwyne.com');
+                }} />
                 <SectionSeparator />
-                <SectionItem>
-                    <Button title="www.scorepadapp.com" type="clear" onPress={() => {
-                        Linking.openURL('https://www.scorepadapp.com');
-                    }} />
-                </SectionItem>
+                <DisclosureRow label="www.scorepadapp.com" onPress={() => {
+                    Linking.openURL('https://www.scorepadapp.com');
+                }} />
             </Section>
 
         </ScrollView>
@@ -200,10 +247,40 @@ const styles = StyleSheet.create({
         fontSize: 16,
         paddingVertical: 5,
     },
-    menuTrigger: {
+    labelRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    betaPill: {
+        backgroundColor: '#E5E5EA',
+        borderRadius: 4,
+        paddingHorizontal: 6,
+        paddingVertical: 2,
+        marginLeft: 6,
+    },
+    betaPillText: {
+        fontSize: 11,
+        color: '#666',
+    },
+    featureDot: {
+        width: 8,
+        height: 8,
+        borderRadius: 4,
+        backgroundColor: '#FF9500',
+        marginRight: 8,
+    },
+    disclosureRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingVertical: 12,
+    },
+    disclosureLabel: {
         fontSize: 16,
-        color: systemBlue,
-        paddingVertical: 5,
+    },
+    disclosureArrow: {
+        fontSize: 20,
+        color: '#C8C8CC',
     },
     text: {
         fontSize: 16,

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 
 import * as Haptics from 'expo-haptics';
 import { Image } from 'expo-image';
@@ -15,13 +15,12 @@ import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
 import { toggleDevMenuEnabled } from '../../../redux/SettingsSlice';
 import { logEvent } from '../../Analytics';
 
-const RotatingIcon: React.FunctionComponent = ({ }) => {
+const RotatingIcon: React.FunctionComponent = () => {
     const dispatch = useAppDispatch();
 
     const installId = useAppSelector(state => state.settings.installId);
 
     const rotation = useSharedValue(0);
-    const rotationCount = useSharedValue(1);
     const animatedStyles = useAnimatedStyle(() => {
         return {
             transform: [
@@ -30,32 +29,40 @@ const RotatingIcon: React.FunctionComponent = ({ }) => {
         };
     });
 
-    let holdCallback: ReturnType<typeof setTimeout>;
+    const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
+
+    const clearAllTimers = () => {
+        timers.current.forEach(clearTimeout);
+        timers.current = [];
+    };
+
+    const scheduleTimer = (fn: () => void, delay: number) => {
+        const id = setTimeout(fn, delay);
+        timers.current.push(id);
+    };
+
     const onPressIn = () => {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-        holdCallback = setTimeout(() => {
+        scheduleTimer(() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light), 1000);
+        scheduleTimer(() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light), 2000);
+        scheduleTimer(() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium), 3000);
+        scheduleTimer(() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy), 4000);
+        scheduleTimer(() => {
             dispatch(toggleDevMenuEnabled());
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
             logEvent('dev_menu', {
                 installId,
             });
+            rotation.value = withTiming(rotation.value + 360, { duration: 1000, easing: Easing.elastic(1) });
         }, 5000);
     };
 
     const onPressOut = () => {
-        if (holdCallback == null) return;
-        clearTimeout(holdCallback);
+        clearAllTimers();
     };
 
     return <TouchableWithoutFeedback
         onPressIn={onPressIn}
-        onPressOut={onPressOut}
-        onPress={async () => {
-            rotationCount.value = rotationCount.value + 1;
-            rotation.value = withTiming((rotationCount.value * 90), { duration: 1000, easing: Easing.elastic(1) });
-
-            await logEvent('app_icon');
-        }}>
+        onPressOut={onPressOut}>
         <Animated.View style={[animatedStyles]}>
             <Image source={icon}
                 contentFit='contain'

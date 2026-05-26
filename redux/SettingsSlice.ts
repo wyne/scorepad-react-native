@@ -20,7 +20,8 @@ export interface SettingsState {
     appOpens: number;
     installId: string | undefined;
     rollingGameCounter?: number;
-    keepScreenAwakeDuration: number;
+    keepScreenAwake: boolean;
+    seenFeatureNotifications: string[];
 };
 
 export const initialState: SettingsState = {
@@ -37,7 +38,8 @@ export const initialState: SettingsState = {
     appOpens: 0,
     installId: undefined,
     rollingGameCounter: 0,
-    keepScreenAwakeDuration: 0,
+    keepScreenAwake: false,
+    seenFeatureNotifications: [],
 };
 
 const settingsSlice = createSlice({
@@ -92,8 +94,19 @@ const settingsSlice = createSlice({
         setRollingGameCounter(state, action: PayloadAction<number>) {
             state.rollingGameCounter = action.payload;
         },
-        setKeepScreenAwakeDuration(state, action: PayloadAction<number>) {
-            state.keepScreenAwakeDuration = action.payload;
+        setKeepScreenAwake(state, action: PayloadAction<boolean>) {
+            state.keepScreenAwake = action.payload;
+        },
+        markFeatureNotificationSeen(state, action: PayloadAction<string>) {
+            if (!state.seenFeatureNotifications.includes(action.payload)) {
+                state.seenFeatureNotifications.push(action.payload);
+            }
+        },
+        resetSeenFeatureNotifications(state) {
+            state.seenFeatureNotifications = [];
+        },
+        resetOnboarding(state) {
+            state.onboarded = undefined;
         },
     }
 });
@@ -114,7 +127,10 @@ export const {
     setInstallId,
     incrementRollingGameCounter,
     setRollingGameCounter,
-    setKeepScreenAwakeDuration,
+    setKeepScreenAwake,
+    markFeatureNotificationSeen,
+    resetSeenFeatureNotifications,
+    resetOnboarding,
 } = settingsSlice.actions;
 
 export default settingsSlice.reducer;
