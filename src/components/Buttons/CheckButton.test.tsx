@@ -75,7 +75,7 @@ describe('CheckButton', () => {
         });
     }, 10000);
 
-    it('should navigate back to share screen screen when pressed from share screen', async () => {
+    it('should navigate back when pressed from share screen', async () => {
         const store = mockStore();
 
         const { getByRole } = render(
@@ -88,7 +88,7 @@ describe('CheckButton', () => {
         fireEvent.press(button);
 
         await waitFor(() => {
-            expect(navigation.navigate).toHaveBeenCalledWith('Share');
+            expect(navigation.goBack).toHaveBeenCalled();
         });
     }, 10000);
 
