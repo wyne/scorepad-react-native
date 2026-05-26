@@ -49,8 +49,7 @@ const OnboardingScreen: React.FunctionComponent<Props> = ({ navigation, route })
             end: end
         });
 
-        if (onboarding) navigation.navigate('List');
-        else navigation.goBack();
+        navigation.goBack();
     }, [activeIndex]);
 
     // Flatlist props that calculates current item index

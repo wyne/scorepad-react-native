@@ -5,7 +5,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Moment from 'react-moment';
 import { Platform, StyleSheet, Text } from 'react-native';
 import { Icon, ListItem } from 'react-native-elements';
-import Animated, { FadeInUp, SlideOutLeft } from 'react-native-reanimated';
+import Animated, { FadeInUp } from 'react-native-reanimated';
 
 import { selectGameById } from '../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
@@ -53,8 +53,7 @@ const GameListItem: React.FunctionComponent<Props> = ({ navigation, gameId, inde
     };
 
     return (
-        <Animated.View entering={FadeInUp.duration(200).delay(100 + index * 100)}
-            exiting={SlideOutLeft.duration(200)}>
+        <Animated.View entering={FadeInUp.duration(200).delay(100 + index * 100)}>
             <AbstractPopupMenu
                 gameId={gameId}
                 setCurrentGameCallback={setCurrentGameCallback}
