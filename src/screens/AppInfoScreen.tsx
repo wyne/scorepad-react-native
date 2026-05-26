@@ -184,6 +184,7 @@ const AppInfoScreen: React.FunctionComponent<Props> = ({ navigation }) => {
                                 {
                                     text: 'Reset', style: 'destructive', onPress: () => {
                                         dispatch(resetOnboarding());
+                                        navigation.goBack();
                                     }
                                 },
                             ]

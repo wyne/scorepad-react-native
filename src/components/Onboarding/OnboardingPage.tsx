@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import {
     ImageURISource,
@@ -8,7 +8,13 @@ import {
     View
 } from 'react-native';
 import { Button } from 'react-native-elements';
-import Animated from 'react-native-reanimated';
+import Animated, {
+    Easing,
+    useAnimatedStyle,
+    useSharedValue,
+    withRepeat,
+    withTiming
+} from 'react-native-reanimated';
 import Video from 'react-native-video';
 
 import { OnboardingScreenItem } from './Onboarding';
@@ -21,6 +27,28 @@ interface Props {
     item: OnboardingScreenItem;
     width: number;
 }
+
+const SwipeHint: React.FC = () => {
+    const offset = useSharedValue(0);
+
+    useEffect(() => {
+        offset.value = withRepeat(
+            withTiming(-12, { duration: 1200, easing: Easing.inOut(Easing.sin) }),
+            -1,
+            true
+        );
+    }, []);
+
+    const animatedStyle = useAnimatedStyle(() => ({
+        transform: [{ translateX: offset.value }],
+    }));
+
+    return (
+        <Animated.View style={animatedStyle}>
+            <Text style={{ fontSize: 48, color: 'rgba(0,0,0,0.3)', textAlign: 'center' }}>‹</Text>
+        </Animated.View>
+    );
+};
 
 const OnboardingPage: React.FC<Props> = React.memo(({
     active = false,
@@ -77,9 +105,16 @@ const OnboardingPage: React.FC<Props> = React.memo(({
             </Animated.View>
 
             <Animated.View style={[styles.descriptionContainer]}>
-                <Text style={[styles.description, { color: item.color }]}>
-                    {item.description}
-                </Text>
+                {item.swipeHint ? (
+                    <View style={styles.swipeHintContainer}>
+                        <Text style={styles.swipeHintText}>Swipe left to begin</Text>
+                        <SwipeHint />
+                    </View>
+                ) : (
+                    <Text style={[styles.description, { color: item.color }]}>
+                        {item.description}
+                    </Text>
+                )}
                 <View style={{ alignContent: 'center' }}>
                     {isLast &&
                         <Button
@@ -88,6 +123,8 @@ const OnboardingPage: React.FC<Props> = React.memo(({
                             onPress={closeOnboarding}
                             buttonStyle={[styles.finishButton]}
                             type='outline'
+                            accessibilityLabel="Get started"
+                            accessibilityRole="button"
                         />
                     }
                 </View>
@@ -141,5 +178,14 @@ const styles = StyleSheet.create({
         borderRadius: 20,
         padding: 10,
         margin: 15,
+    },
+    swipeHintContainer: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 4,
+    },
+    swipeHintText: {
+        fontSize: 17,
+        color: 'rgba(0,0,0,0.5)',
     },
 });

@@ -145,6 +145,8 @@ const OnboardingScreen: React.FunctionComponent<Props> = ({ navigation, route })
                         useNativeDriver: false,
                     }
                 )}
+                accessibilityLabel="Onboarding pages"
+                accessibilityRole="adjustable"
             />
 
             <ExpandingDot
