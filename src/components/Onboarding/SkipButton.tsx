@@ -36,7 +36,7 @@ const SkipButton: React.FunctionComponent<Props> = ({ visible, onPress }) => {
             <Animated.View pointerEvents='box-none'
                 style={[{ alignItems: 'flex-end' }, skipButtonStyles]}
             >
-                <TouchableOpacity style={{ padding: 10 }} onPress={onPress}>
+                <TouchableOpacity style={{ padding: 10 }} onPress={onPress} accessibilityLabel="Skip onboarding" accessibilityRole="button">
                     <View style={styles.button}>
                         <Text style={{ fontSize: 20, color: '#fff', }}>
                             Skip
@@ -57,6 +57,6 @@ const styles = StyleSheet.create({
         margin: 10,
         borderRadius: 20,
         borderColor: '#fff',
-        backgroundColor: 'rgba(255, 255, 255, .2)',
+        backgroundColor: 'rgba(255, 255, 255, .35)',
     }
 });

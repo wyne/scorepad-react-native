@@ -22,6 +22,7 @@ export type OnboardingScreenItem = {
     description: string;
     backgroundColor: string;
     color?: string;
+    swipeHint?: boolean;
 };
 
 type OnboardingScreens = Record<string, OnboardingScreenItem[]>;
@@ -37,9 +38,10 @@ const onboardingScreens: OnboardingScreens = {
                 height: 150,
                 borderRadius: 20,
             },
-            description: '<< swipe left <<',
+            description: '',
             backgroundColor: '#8ca2b8',
-            color: 'rgba(0,0,0,0.6)'
+            color: 'rgba(0,0,0,0.75)',
+            swipeHint: true,
         },
         {
             title: 'Swipe for points',
