@@ -116,15 +116,15 @@ const AppInfoScreen: React.FunctionComponent<Props> = ({ navigation }) => {
             <Section title="Features">
                 <SectionItem>
                     <SectionItemText text="Particle Effect (tap-only)" />
-                    <Switch onValueChange={toggleParticleSwitch} value={showPointParticles} />
+                    <Switch onValueChange={toggleParticleSwitch} value={showPointParticles} ios_backgroundColor="#E5E5EA" />
                 </SectionItem>
                 <SectionItem>
                     <SectionItemText text="Player Numbers (Beta*)" />
-                    <Switch onValueChange={togglePlayerIndexSwitch} value={showPlayerIndex} />
+                    <Switch onValueChange={togglePlayerIndexSwitch} value={showPlayerIndex} ios_backgroundColor="#E5E5EA" />
                 </SectionItem>
                 <SectionItem>
                     <SectionItemText text="Keep Screen Awake (Beta*)" />
-                    <Switch onValueChange={toggleKeepAwake} value={keepScreenAwake} />
+                    <Switch onValueChange={toggleKeepAwake} value={keepScreenAwake} ios_backgroundColor="#E5E5EA" />
                 </SectionItem>
                 <SectionItem>
                     <SectionItemText text="*Beta features may change or be removed without warning." />
