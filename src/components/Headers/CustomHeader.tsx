@@ -2,9 +2,9 @@ import React from 'react';
 
 import { ParamListBase } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, useWindowDimensions } from 'react-native';
 import Animated, { Easing, FadeInUp } from 'react-native-reanimated';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface Props {
     navigation: NativeStackNavigationProp<ParamListBase, string, undefined>;
@@ -15,9 +15,14 @@ interface Props {
 }
 
 const CustomHeader: React.FunctionComponent<Props> = ({ headerLeft, headerCenter, headerRight, animated = false }) => {
+    const insets = useSafeAreaInsets();
+    const { width, height } = useWindowDimensions();
+    const isLandscape = width > height;
+    const topInset = isLandscape ? 0 : insets.top;
+
     return (
         <Animated.View entering={animated ? FadeInUp.duration(500).easing(Easing.out(Easing.ease)) : undefined}>
-            <SafeAreaView edges={['top']} style={[styles.headerContainer]}>
+            <View style={[styles.headerContainer, { paddingTop: topInset }]}>
                 <SafeAreaView edges={['left']} style={styles.headerLeft}>
                     {headerLeft}
                 </SafeAreaView>
@@ -27,7 +32,7 @@ const CustomHeader: React.FunctionComponent<Props> = ({ headerLeft, headerCenter
                 <SafeAreaView edges={['right']} style={styles.headerRight}>
                     {headerRight}
                 </SafeAreaView>
-            </SafeAreaView>
+            </View>
         </Animated.View>
     );
 };
