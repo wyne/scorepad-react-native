@@ -307,7 +307,6 @@ describe('ShareScreen', () => {
                     quality: 1,
                     format: 'png',
                     snapshotContentContainer: true,
-                    fileName: 'Test Game.png',
                 }
             );
         });

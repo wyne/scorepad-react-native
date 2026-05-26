@@ -36,21 +36,24 @@ const ShareScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     const exportImage = async () => {
         if (roundsScrollViewEl.current == null) return;
 
-        captureRef(roundsScrollViewEl, {
-            result: 'tmpfile',
-            quality: 1,
-            format: 'png',
-            snapshotContentContainer: true,
-            fileName: `${currentGame?.title}.png`,
-        }).then(uri => {
-            Sharing.shareAsync(uri, {
+        try {
+            const uri = await captureRef(roundsScrollViewEl, {
+                result: 'tmpfile',
+                quality: 1,
+                format: 'png',
+                snapshotContentContainer: true,
+            });
+
+            await Sharing.shareAsync(uri, {
                 mimeType: 'image/png',
                 dialogTitle: 'Share Scoreboard',
                 UTI: 'image/png',
             });
-        });
 
-        await logEvent('share_image');
+            await logEvent('share_image');
+        } catch (error) {
+            console.error('Failed to capture or share image:', error);
+        }
     };
 
     return (
