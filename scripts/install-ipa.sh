@@ -3,113 +3,167 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 
-# ---- Step 1: Pick an IPA ----
-IPAS=()
-while IFS= read -r f; do
-  IPAS+=("$f")
-done < <(ls -1t "$ROOT_DIR"/*.ipa 2>/dev/null || true)
+COLOR_RESET='\033[0m'
+COLOR_BOLD='\033[1m'
+COLOR_CYAN='\033[36m'
+COLOR_YELLOW='\033[33m'
+COLOR_DIM='\033[2m'
 
-if [ ${#IPAS[@]} -eq 0 ]; then
-  echo "No .ipa files found in $ROOT_DIR" >&2
-  exit 1
-fi
+relative_time() {
+    local epoch=$1 now diff
+    now=$(date +%s)
+    diff=$((now - epoch))
+    if   [ $diff -lt 60 ];    then echo "just now"
+    elif [ $diff -lt 3600 ];  then echo "$((diff / 60))m ago"
+    elif [ $diff -lt 86400 ]; then echo "$((diff / 3600))h ago"
+    elif [ $diff -lt 172800 ]; then echo "yesterday"
+    else echo "$((diff / 86400))d ago"
+    fi
+}
 
-echo "Available .ipa files:"
-for i in "${!IPAS[@]}"; do
-  name=$(basename "${IPAS[$i]}")
-  f="${IPAS[$i]}"
-
-  # Parse timestamp from build-<epoch_ms>.ipa filename
-  ts=""
-  if [[ "$name" =~ ^build-([0-9]+)\.ipa$ ]]; then
-    epoch_ms="${BASH_REMATCH[1]}"
-    ts=$(date -r $((epoch_ms / 1000)) "+%Y-%m-%d %H:%M" 2>/dev/null || echo "unknown")
-  fi
-  mtime=$(stat -f "%Sm" -t "%Y-%m-%d %H:%M" "$f" 2>/dev/null || echo "")
-
-  # Extract version/bundle info from IPA
-  ver=""
-  if plist=$(unzip -p "$f" "Payload/*.app/Info.plist" 2>/dev/null); then
-    ver=$(echo "$plist" | plutil -convert json -o - - 2>/dev/null | python3 -c "
+ipa_info() {
+    local f=$1 name=$2
+    local ver="" ts="" rel=""
+    if [[ "$name" =~ ^build-([0-9]+)\.ipa$ ]]; then
+        local e=$((BASH_REMATCH[1] / 1000))
+        ts=$(date -r "$e" "+%Y-%m-%d %H:%M" 2>/dev/null || echo "unknown")
+        rel=$(relative_time "$e")
+    fi
+    if plist=$(unzip -p "$f" "Payload/*.app/Info.plist" 2>/dev/null); then
+        ver=$(echo "$plist" | plutil -convert json -o - - 2>/dev/null | python3 -c "
 import sys, json
 d = json.load(sys.stdin)
-bundle = d.get('CFBundleIdentifier', '')
-if bundle.endswith('.dev'): variant = 'dev'
-elif bundle.endswith('.preview'): variant = 'preview'
-else: variant = 'production'
+b = d.get('CFBundleIdentifier', '')
 v = d.get('CFBundleShortVersionString', '?')
-b = d.get('CFBundleVersion', '?')
-print(f'v{v} (build {b})  {variant}  {bundle}')
+n = d.get('CFBundleVersion', '?')
+if b.endswith('.dev'): variant = 'dev'
+elif b.endswith('.preview'): variant = 'preview'
+else: variant = 'production'
+print(f'v{v} (build {n})  {variant}')
 " 2>/dev/null || echo "")
-  fi
+    fi
+    echo "$ver|$ts|$rel"
+}
 
-  echo "  $((i+1)). $name"
-  echo "     $ver    built: $ts"
-done
+# ---- Step 1: Pick an IPA ----
+IPAS=()
+while IFS= read -r f; do IPAS+=("$f"); done < <(ls -1t "$ROOT_DIR"/*.ipa 2>/dev/null || true)
 
-printf "Select IPA [1-%d]: " "${#IPAS[@]}"
-read -r ipa_idx
-ipa_idx=$((ipa_idx - 1))
-if [ "$ipa_idx" -lt 0 ] || [ "$ipa_idx" -ge "${#IPAS[@]}" ]; then
-  echo "Invalid selection" >&2
-  exit 1
+if [ ${#IPAS[@]} -eq 0 ]; then
+    echo "No .ipa files found in $ROOT_DIR" >&2
+    exit 1
 fi
-IPA_PATH="${IPAS[$ipa_idx]}"
-echo "Selected: $IPA_PATH"
+
+if command -v fzf &>/dev/null; then
+    echo "Select an IPA:"
+    IPA_PATH=$(
+        for f in "${IPAS[@]}"; do
+            name=$(basename "$f")
+            IFS='|' read -r ver ts rel <<< "$(ipa_info "$f" "$name")"
+            if [ -n "$rel" ]; then ts_disp="${ts} (${rel})"; else ts_disp="$ts"; fi
+            printf "%s|%s|%s|%s\n" "$name" "$ver" "$ts_disp" "$f"
+        done | fzf \
+            --prompt='> ' \
+            --with-nth='1..3' \
+            --delimiter='|' \
+            --preview "
+                f=\$(echo {} | cut -d'|' -f4)
+                unzip -p \"\$f\" 'Payload/*.app/Info.plist' 2>/dev/null | plutil -convert json -o - - 2>/dev/null | python3 -c \"
+import sys, json
+d = json.load(sys.stdin)
+print('Identifier:', d.get('CFBundleIdentifier', '?'))
+print('Version:', d.get('CFBundleShortVersionString', '?'))
+print('Build:', d.get('CFBundleVersion', '?'))
+print('Min OS:', d.get('MinimumOSVersion', '?'))
+\" 2>/dev/null || echo 'No metadata available'
+            " \
+            --preview-window=right:40%:wrap \
+            --height=~50% \
+            2>/dev/null || true)
+    if [ -z "$IPA_PATH" ]; then echo "Cancelled." >&2; exit 1; fi
+    IPA_PATH=$(echo "$IPA_PATH" | cut -d'|' -f4)
+else
+    echo -e "${COLOR_BOLD}Select an IPA:${COLOR_RESET}"
+    for i in "${!IPAS[@]}"; do
+        name=$(basename "${IPAS[$i]}")
+        IFS='|' read -r ver ts rel <<< "$(ipa_info "${IPAS[$i]}" "$name")"
+        ts_disp="${ts:+$ts (${rel:-$ts})}"
+        echo -e "  $((i+1)). ${COLOR_CYAN}${name}${COLOR_RESET}  ${COLOR_YELLOW}${ver}${COLOR_RESET}  ${COLOR_DIM}${ts_disp}${COLOR_RESET}"
+    done
+    printf "Select IPA [1-%d]: " "${#IPAS[@]}"
+    read -r n; n=$((n - 1))
+    if [ "$n" -lt 0 ] || [ "$n" -ge "${#IPAS[@]}" ]; then echo "Invalid selection" >&2; exit 1; fi
+    IPA_PATH="${IPAS[$n]}"
+fi
+
+echo -e "Selected: ${COLOR_CYAN}$(basename "$IPA_PATH")${COLOR_RESET}"
 echo
 
 # ---- Step 2: List devices ----
 echo "Fetching available devices..."
-DEVICES_JSON=$(mktemp)
-xcrun devicectl list devices --json-output "$DEVICES_JSON" >/dev/null 2>&1
+JSON=$(mktemp)
+xcrun devicectl list devices --json-output "$JSON" >/dev/null 2>&1
 
-DEVICE_NAMES=()
-DEVICE_IDS=()
-while IFS=$'\t' read -r name id; do
-  DEVICE_NAMES+=("$name")
-  DEVICE_IDS+=("$id")
+DEVICES=()
+while IFS=$'\t' read -r name id model; do
+    DEVICES+=("$name|$id|$model")
 done < <(python3 -c "
 import json, sys
-with open('$DEVICES_JSON') as f:
+with open('$JSON') as f:
     data = json.load(f)
 for d in data['result']['devices']:
-    state = d.get('connectionProperties', {}).get('tunnelState', '')
-    pairing = d.get('connectionProperties', {}).get('pairingState', '')
-    # Only show devices that are paired and reachable
-    if pairing != 'paired':
-        continue
-    if state == 'unavailable':
+    s = d.get('connectionProperties', {}).get('tunnelState', '')
+    p = d.get('connectionProperties', {}).get('pairingState', '')
+    if p != 'paired' or s == 'unavailable':
         continue
     name = d['deviceProperties']['name']
     ident = d['identifier']
     model = d.get('hardwareProperties', {}).get('productType', '')
-    print(f'{name}\t{ident}')
+    print(f'{name}\t{ident}\t{model}')
 " 2>/dev/null)
-rm -f "$DEVICES_JSON"
+rm -f "$JSON"
 
-if [ ${#DEVICE_NAMES[@]} -eq 0 ]; then
-  echo "No available (paired) devices found. Make sure Wireless Debugging is enabled on your device." >&2
-  exit 1
+if [ ${#DEVICES[@]} -eq 0 ]; then
+    echo "No available (paired) devices found. Make sure Wireless Debugging is enabled on your device." >&2
+    exit 1
 fi
 
-echo "Available devices:"
-for i in "${!DEVICE_NAMES[@]}"; do
-  echo "  $((i+1)). ${DEVICE_NAMES[$i]} (${DEVICE_IDS[$i]})"
-done
-
-printf "Select device [1-%d]: " "${#DEVICE_NAMES[@]}"
-read -r dev_idx
-dev_idx=$((dev_idx - 1))
-if [ "$dev_idx" -lt 0 ] || [ "$dev_idx" -ge "${#DEVICE_NAMES[@]}" ]; then
-  echo "Invalid selection" >&2
-  exit 1
+if command -v fzf &>/dev/null; then
+    echo "Select a device:"
+    selected=$(
+        for line in "${DEVICES[@]}"; do
+            name=$(echo "$line" | cut -d'|' -f1)
+            model=$(echo "$line" | cut -d'|' -f3)
+            id=$(echo "$line" | cut -d'|' -f2)
+            printf "%s|%s|%s\n" "$name" "$model" "$id"
+        done | fzf \
+            --prompt='> ' \
+            --with-nth='1,2' \
+            --delimiter='|' \
+            --height=~50% \
+            2>/dev/null || true)
+    if [ -z "$selected" ]; then echo "Cancelled." >&2; exit 1; fi
+    SELECTED_DEVICE=$(echo "$selected" | cut -d'|' -f3)
+    SELECTED_NAME=$(echo "$selected" | cut -d'|' -f1)
+else
+    echo -e "${COLOR_BOLD}Select a device:${COLOR_RESET}"
+    for i in "${!DEVICES[@]}"; do
+        name=$(echo "${DEVICES[$i]}" | cut -d'|' -f1)
+        model=$(echo "${DEVICES[$i]}" | cut -d'|' -f3)
+        echo -e "  $((i+1)). ${COLOR_CYAN}${name}${COLOR_RESET}  ${COLOR_DIM}${model}${COLOR_RESET}"
+    done
+    printf "Select device [1-%d]: " "${#DEVICES[@]}"
+    read -r n; n=$((n - 1))
+    if [ "$n" -lt 0 ] || [ "$n" -ge "${#DEVICES[@]}" ]; then echo "Invalid selection" >&2; exit 1; fi
+    SELECTED_DEVICE=$(echo "${DEVICES[$n]}" | cut -d'|' -f2)
+    SELECTED_NAME=$(echo "${DEVICES[$n]}" | cut -d'|' -f1)
 fi
-SELECTED_DEVICE="${DEVICE_IDS[$dev_idx]}"
-echo "Selected: ${DEVICE_NAMES[$dev_idx]} ($SELECTED_DEVICE)"
+
+echo -e "Selected: ${COLOR_CYAN}${SELECTED_NAME}${COLOR_RESET}"
 echo
 
 # ---- Step 3: Install ----
-echo "Installing $(basename "$IPA_PATH") on ${DEVICE_NAMES[$dev_idx]}..."
+echo "Installing $(basename "$IPA_PATH")..."
 xcrun devicectl device install app --device "$SELECTED_DEVICE" "$IPA_PATH"
 
 echo

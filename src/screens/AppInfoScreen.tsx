@@ -5,6 +5,7 @@ import { ParamListBase } from '@react-navigation/routers';
 import * as Application from 'expo-application';
 import { Alert, Linking, Platform, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
 
+import { exportBackup, importBackup } from '../../redux/backup';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { markFeatureNotificationSeen, resetOnboarding, resetSeenFeatureNotifications, setKeepScreenAwake, toggleShowPlayerIndex, toggleShowPointParticles } from '../../redux/SettingsSlice';
 import { logEvent } from '../Analytics';
@@ -109,6 +110,21 @@ const AppInfoScreen: React.FunctionComponent<Props> = ({ navigation }) => {
             });
         }
     };
+    const handleRestore = () => {
+        Alert.alert(
+            'Restore from Backup',
+            'This will replace all current games, players, and scores with the data from the backup. This action cannot be undone.',
+            [
+                { text: 'Cancel', style: 'cancel' },
+                { text: 'Restore', style: 'destructive', onPress: importBackup },
+            ]
+        );
+    };
+
+    const handleExport = async () => {
+        await exportBackup();
+    };
+
     const alertWithVersion = async () => {
         Alert.alert('ScorePad with Rounds\n' +
             `v${appVersion} (${buildNumber})\n` +
@@ -194,6 +210,12 @@ const AppInfoScreen: React.FunctionComponent<Props> = ({ navigation }) => {
                     }} />
                 </Section>
             )}
+
+            <Section title="Backup">
+                <DisclosureRow label="Export Backup" onPress={handleExport} />
+                <SectionSeparator />
+                <DisclosureRow label="Restore from Backup" onPress={handleRestore} />
+            </Section>
 
             <Section title="Help">
                 <DisclosureRow label="View Tutorial" onPress={() => {

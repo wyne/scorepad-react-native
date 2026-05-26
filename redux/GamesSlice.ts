@@ -103,6 +103,9 @@ const gamesSlice = createSlice({
                 }
             });
         },
+        restoreAllGames(state, action: PayloadAction<Record<string, GameState>>) {
+            gamesAdapter.setAll(state, action.payload);
+        },
 
     }
 });
@@ -319,6 +322,7 @@ export const {
     gameDelete,
     setSortSelector,
     reorderPlayers,
+    restoreAllGames,
 } = gamesSlice.actions;
 
 export default gamesSlice.reducer;
