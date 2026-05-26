@@ -3,8 +3,7 @@ import React from 'react';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ParamListBase } from '@react-navigation/routers';
 import * as Application from 'expo-application';
-import { Alert, Linking, Platform, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
-import { Button } from 'react-native-elements';
+import { Alert, Linking, Platform, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
 
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { setKeepScreenAwake, toggleShowPlayerIndex, toggleShowPointParticles } from '../../redux/SettingsSlice';
@@ -29,10 +28,16 @@ const SectionItem = ({ children }: { children: React.ReactNode; }) => (
     </View>
 );
 const SectionItemText = ({ text }: { text: string; }) => (
-    <Text style={styles.sectionItemText}>{text} </Text>
+    <Text style={styles.sectionItemText}>{text}</Text>
 );
 const SectionSeparator = () => (
     <View style={{ height: 1, backgroundColor: '#EFEFF4' }} />
+);
+const DisclosureRow = ({ label, onPress }: { label: string; onPress: () => void; }) => (
+    <TouchableOpacity style={styles.disclosureRow} onPress={onPress}>
+        <Text style={styles.disclosureLabel}>{label}</Text>
+        <Text style={styles.disclosureArrow}>›</Text>
+    </TouchableOpacity>
 );
 
 const AppInfoScreen: React.FunctionComponent<Props> = ({ navigation }) => {
@@ -118,6 +123,7 @@ const AppInfoScreen: React.FunctionComponent<Props> = ({ navigation }) => {
                     <SectionItemText text="Particle Effect (tap-only)" />
                     <Switch onValueChange={toggleParticleSwitch} value={showPointParticles} ios_backgroundColor="#E5E5EA" />
                 </SectionItem>
+                <SectionSeparator />
                 <SectionItem>
                     <View style={styles.labelRow}>
                         <SectionItemText text="Player Numbers" />
@@ -127,6 +133,7 @@ const AppInfoScreen: React.FunctionComponent<Props> = ({ navigation }) => {
                     </View>
                     <Switch onValueChange={togglePlayerIndexSwitch} value={showPlayerIndex} ios_backgroundColor="#E5E5EA" />
                 </SectionItem>
+                <SectionSeparator />
                 <SectionItem>
                     <View style={styles.labelRow}>
                         <SectionItemText text="Keep Screen Awake" />
@@ -143,12 +150,9 @@ const AppInfoScreen: React.FunctionComponent<Props> = ({ navigation }) => {
             </Section>
 
             <Section title="Help">
-                <SectionItem>
-                    <SectionItemText text="Instructions" />
-                    <Button title="View Tutorial" type="clear" onPress={() => {
-                        navigation.navigate('Onboarding', { onboarding: false });
-                    }} />
-                </SectionItem>
+                <DisclosureRow label="View Tutorial" onPress={() => {
+                    navigation.navigate('Onboarding', { onboarding: false });
+                }} />
             </Section>
 
             <Section title="Contact">
@@ -156,17 +160,13 @@ const AppInfoScreen: React.FunctionComponent<Props> = ({ navigation }) => {
                     <SectionItemText text="For questions and feedback, please visit the website or use the email address below." />
                 </SectionItem>
                 <SectionSeparator />
-                <SectionItem>
-                    <Button title="scorepad@justinwyne.com" type="clear" onPress={() => {
-                        Linking.openURL('mailto:scorepad@justinwyne.com');
-                    }} />
-                </SectionItem>
+                <DisclosureRow label="scorepad@justinwyne.com" onPress={() => {
+                    Linking.openURL('mailto:scorepad@justinwyne.com');
+                }} />
                 <SectionSeparator />
-                <SectionItem>
-                    <Button title="www.scorepadapp.com" type="clear" onPress={() => {
-                        Linking.openURL('https://www.scorepadapp.com');
-                    }} />
-                </SectionItem>
+                <DisclosureRow label="www.scorepadapp.com" onPress={() => {
+                    Linking.openURL('https://www.scorepadapp.com');
+                }} />
             </Section>
 
         </ScrollView>
@@ -218,6 +218,19 @@ const styles = StyleSheet.create({
     betaPillText: {
         fontSize: 11,
         color: '#666',
+    },
+    disclosureRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingVertical: 12,
+    },
+    disclosureLabel: {
+        fontSize: 16,
+    },
+    disclosureArrow: {
+        fontSize: 20,
+        color: '#C8C8CC',
     },
     text: {
         fontSize: 16,
