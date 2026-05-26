@@ -20,6 +20,7 @@ const EditGame = ({ }) => {
     const navigation = useNavigation();
 
     const commitTitle = (title: string) => {
+        if (currentGame == undefined) return;
         const finalTitle = title == '' ? UNTITLED : title;
         setLocalTitle(finalTitle);
 
