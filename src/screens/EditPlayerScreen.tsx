@@ -62,9 +62,9 @@ const EditPlayerScreen: React.FC<EditPlayerScreenProps> = ({
         if (!isFocused || localPlayerName.length === 0) return [];
         const lower = localPlayerName.toLowerCase();
         return allPlayerNames
-            .filter(name => name !== originalPlayerName && name.toLowerCase().includes(lower))
+            .filter(name => name !== player?.playerName && name.toLowerCase().includes(lower))
             .slice(0, 8);
-    }, [isFocused, localPlayerName, allPlayerNames, originalPlayerName]);
+    }, [isFocused, localPlayerName, allPlayerNames, player?.playerName]);
 
     if (playerId == null) { return null; }
     if (player == null) return null;
@@ -152,7 +152,7 @@ const EditPlayerScreen: React.FC<EditPlayerScreenProps> = ({
                 />
 
                 {suggestions.length > 0 && (
-                    <View style={styles.suggestionsContainer}>
+                    <View style={styles.suggestionsContainer} testID="suggestions-list">
                         {suggestions.map((name, idx) => (
                             <TouchableOpacity key={name} activeOpacity={0.6} onPress={() => onSuggestionSelect(name)}>
                                 <View style={[styles.suggestionItem, idx < suggestions.length - 1 && styles.suggestionBorder]}>
