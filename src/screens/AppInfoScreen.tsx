@@ -119,15 +119,22 @@ const AppInfoScreen: React.FunctionComponent<Props> = ({ navigation }) => {
                     <Switch onValueChange={toggleParticleSwitch} value={showPointParticles} ios_backgroundColor="#E5E5EA" />
                 </SectionItem>
                 <SectionItem>
-                    <SectionItemText text="Player Numbers (Beta*)" />
+                    <View style={styles.labelRow}>
+                        <SectionItemText text="Player Numbers" />
+                        <View style={styles.betaPill}>
+                            <Text style={styles.betaPillText}>Beta</Text>
+                        </View>
+                    </View>
                     <Switch onValueChange={togglePlayerIndexSwitch} value={showPlayerIndex} ios_backgroundColor="#E5E5EA" />
                 </SectionItem>
                 <SectionItem>
-                    <SectionItemText text="Keep Screen Awake (Beta*)" />
+                    <View style={styles.labelRow}>
+                        <SectionItemText text="Keep Screen Awake" />
+                        <View style={styles.betaPill}>
+                            <Text style={styles.betaPillText}>Beta</Text>
+                        </View>
+                    </View>
                     <Switch onValueChange={toggleKeepAwake} value={keepScreenAwake} ios_backgroundColor="#E5E5EA" />
-                </SectionItem>
-                <SectionItem>
-                    <SectionItemText text="*Beta features may change or be removed without warning." />
                 </SectionItem>
                 {devMenuEnabled && (
                     <>
@@ -196,6 +203,21 @@ const styles = StyleSheet.create({
     sectionItemText: {
         fontSize: 16,
         paddingVertical: 5,
+    },
+    labelRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    betaPill: {
+        backgroundColor: '#E5E5EA',
+        borderRadius: 4,
+        paddingHorizontal: 6,
+        paddingVertical: 2,
+        marginLeft: 6,
+    },
+    betaPillText: {
+        fontSize: 11,
+        color: '#666',
     },
     text: {
         fontSize: 16,
