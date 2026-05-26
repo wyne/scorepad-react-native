@@ -29,7 +29,6 @@ const SettingsScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     const dispatch = useAppDispatch();
 
     const currentGameId = useAppSelector(state => state.settings.currentGameId);
-    const currentGame = useAppSelector(selectCurrentGame);
     const playerIds = useAppSelector(state => selectCurrentGame(state)?.playerIds);
     const [edit, setEdit] = React.useState(false);
 
@@ -43,8 +42,6 @@ const SettingsScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     if (typeof playerIds == 'undefined') return null;
 
     const addPlayerHandler = async () => {
-        if (currentGame == undefined) return;
-
         dispatch(addPlayer({
             gameId: currentGameId,
             playerName: `Player ${playerIds.length + 1}`,
