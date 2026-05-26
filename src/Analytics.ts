@@ -1,4 +1,4 @@
-import analytics from '@react-native-firebase/analytics';
+import { getAnalytics, getAppInstanceId, getSessionId, logEvent as firebaseLogEvent } from '@react-native-firebase/analytics';
 import * as Application from 'expo-application';
 import { Platform } from 'react-native';
 
@@ -11,8 +11,9 @@ import logger from './Logger';
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const logEvent = async (eventName: string, params?: Record<string, any>) => {
-    const appInstanceId = await analytics().getAppInstanceId();
-    const sessionId = await analytics().getSessionId();
+    const analytics = getAnalytics();
+    const appInstanceId = await getAppInstanceId(analytics);
+    const sessionId = await getSessionId(analytics);
     const os = Platform.OS;
     const osVersion = Platform.Version;
     const appVersion = Application.nativeApplicationVersion;
@@ -35,5 +36,5 @@ export const logEvent = async (eventName: string, params?: Record<string, any>) 
     );
 
     // Log the event to Firebase Analytics
-    await analytics().logEvent(eventName, fullParams);
+    await firebaseLogEvent(analytics, eventName, fullParams);
 };

@@ -1,20 +1,11 @@
+import { getAnalytics, getAppInstanceId, getSessionId, logEvent as firebaseLogEvent } from '@react-native-firebase/analytics';
 import { Platform } from 'react-native';
 
 import { logEvent } from './Analytics';
 import logger from './Logger';
 
-// Mock Firebase Analytics
-const mockGetAppInstanceId = jest.fn();
-const mockGetSessionId = jest.fn();
-const mockLogEvent = jest.fn();
-
-jest.mock('@react-native-firebase/analytics', () => {
-  return jest.fn(() => ({
-    getAppInstanceId: mockGetAppInstanceId,
-    getSessionId: mockGetSessionId,
-    logEvent: mockLogEvent,
-  }));
-});
+// Mock Firebase Analytics — uses manual mock at __mocks__/@react-native-firebase/analytics.js
+jest.mock('@react-native-firebase/analytics');
 
 // Mock Logger
 jest.mock('./Logger', () => ({
@@ -37,9 +28,9 @@ jest.mock('react-native', () => ({
 describe('Analytics', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockGetAppInstanceId.mockResolvedValue('test-app-instance-id');
-    mockGetSessionId.mockResolvedValue('test-session-id');
-    mockLogEvent.mockResolvedValue(undefined);
+    (getAppInstanceId as jest.Mock).mockResolvedValue('test-app-instance-id');
+    (getSessionId as jest.Mock).mockResolvedValue('test-session-id');
+    (firebaseLogEvent as jest.Mock).mockResolvedValue(undefined);
     
     // Reset Platform to default state
     (Platform as unknown as { OS: string; Version: string | number }).OS = 'ios';
@@ -53,10 +44,11 @@ describe('Analytics', () => {
 
       await logEvent(eventName, params);
 
-      expect(mockGetAppInstanceId).toHaveBeenCalled();
-      expect(mockGetSessionId).toHaveBeenCalled();
+      expect(getAnalytics).toHaveBeenCalled();
+      expect(getAppInstanceId).toHaveBeenCalledWith(expect.anything());
+      expect(getSessionId).toHaveBeenCalledWith(expect.anything());
       
-      expect(mockLogEvent).toHaveBeenCalledWith(eventName, {
+      expect(firebaseLogEvent).toHaveBeenCalledWith(expect.anything(), eventName, {
         customParam: 'customValue',
         appInstanceId: 'test-app-instance-id',
         sessionId: 'test-session-id',
@@ -71,7 +63,7 @@ describe('Analytics', () => {
 
       await logEvent(eventName);
 
-      expect(mockLogEvent).toHaveBeenCalledWith(eventName, {
+      expect(firebaseLogEvent).toHaveBeenCalledWith(expect.anything(), eventName, {
         appInstanceId: 'test-app-instance-id',
         sessionId: 'test-session-id',
         os: 'ios',
@@ -108,7 +100,7 @@ describe('Analytics', () => {
 
       await logEvent(eventName, params);
 
-      expect(mockLogEvent).toHaveBeenCalledWith(eventName, {
+      expect(firebaseLogEvent).toHaveBeenCalledWith(expect.anything(), eventName, {
         appInstanceId: 'test-app-instance-id',
         sessionId: 'test-session-id',
         os: 'ios',
@@ -126,7 +118,7 @@ describe('Analytics', () => {
 
       await logEvent(eventName);
 
-      expect(mockLogEvent).toHaveBeenCalledWith(eventName, {
+      expect(firebaseLogEvent).toHaveBeenCalledWith(expect.anything(), eventName, {
         appInstanceId: 'test-app-instance-id',
         sessionId: 'test-session-id',
         os: 'android',
@@ -137,7 +129,7 @@ describe('Analytics', () => {
 
     it('should propagate Firebase Analytics errors', async () => {
       const error = new Error('Firebase error');
-      mockGetAppInstanceId.mockRejectedValue(error);
+      (getAppInstanceId as jest.Mock).mockRejectedValue(error);
 
       const eventName = 'error_event';
 
@@ -159,7 +151,7 @@ describe('Analytics', () => {
 
       await logEvent(eventName, params);
 
-      expect(mockLogEvent).toHaveBeenCalledWith(eventName, {
+      expect(firebaseLogEvent).toHaveBeenCalledWith(expect.anything(), eventName, {
         ...params,
         appInstanceId: 'test-app-instance-id',
         sessionId: 'test-session-id',
@@ -178,7 +170,7 @@ describe('Analytics', () => {
 
       await logEvent(eventName, params);
 
-      expect(mockLogEvent).toHaveBeenCalledWith(eventName, {
+      expect(firebaseLogEvent).toHaveBeenCalledWith(expect.anything(), eventName, {
         os: 'ios', // System value should override custom
         appVersion: '1.0.0', // System value should override custom
         appInstanceId: 'test-app-instance-id',
