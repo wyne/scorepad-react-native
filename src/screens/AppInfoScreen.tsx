@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ParamListBase } from '@react-navigation/routers';
@@ -55,12 +55,13 @@ const AppInfoScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     const dispatch = useAppDispatch();
 
     const isUnseen = !seenFeatureNotifications.includes(FEATURE_KEEP_SCREEN_AWAKE);
+    const featureNotificationsResetRef = useRef(false);
 
     useEffect(() => {
-        const timer = setTimeout(() => {
+        return () => {
+            if (featureNotificationsResetRef.current) return;
             dispatch(markFeatureNotificationSeen(FEATURE_KEEP_SCREEN_AWAKE));
-        }, 30000);
-        return () => clearTimeout(timer);
+        };
     }, [dispatch]);
 
     const toggleParticleSwitch = () => {
@@ -167,6 +168,7 @@ const AppInfoScreen: React.FunctionComponent<Props> = ({ navigation }) => {
                                 { text: 'Cancel', style: 'cancel' },
                                 {
                                     text: 'Reset', style: 'destructive', onPress: () => {
+                                        featureNotificationsResetRef.current = true;
                                         dispatch(resetSeenFeatureNotifications());
                                         setTimeout(() => navigation.goBack(), 0);
                                     }
