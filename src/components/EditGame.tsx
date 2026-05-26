@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
+import { useNavigation } from '@react-navigation/native';
 import { NativeSyntheticEvent, StyleSheet, Text, TextInputEndEditingEventData, View } from 'react-native';
 import { Input } from 'react-native-elements';
 
@@ -16,37 +17,37 @@ const EditGame = ({ }) => {
     const currentGame = useAppSelector(selectCurrentGame);
     const [localTitle, setLocalTitle] = useState(currentGame?.title ?? '');
 
-    if (typeof currentGame == 'undefined') return null;
+    const navigation = useNavigation();
 
-    const onEndEditingHandler = (e: NativeSyntheticEvent<TextInputEndEditingEventData>) => {
-        const text = e.nativeEvent.text;
-
-        if (text == '') {
-            setLocalTitle(UNTITLED);
-            saveGameTitle(UNTITLED);
-        } else {
-            saveGameTitle(text);
-        }
-    };
-
-    const onChangeTextHandler = (text: string) => {
-        if (text == '') {
-            saveGameTitle(UNTITLED);
-        } else {
-            saveGameTitle(text);
-        }
-        setLocalTitle(text);
-    };
-
-    const saveGameTitle = (title: string) => {
-        setLocalTitle(title);
+    const commitTitle = (title: string) => {
+        if (currentGame == undefined) return;
+        const finalTitle = title == '' ? UNTITLED : title;
+        setLocalTitle(finalTitle);
 
         dispatch(updateGame({
             id: currentGame.id,
             changes: {
-                title: title == '' ? UNTITLED : title,
+                title: finalTitle,
             }
         }));
+    };
+
+    useEffect(() => {
+        const unsubscribe = navigation.addListener('beforeRemove', () => {
+            commitTitle(localTitle);
+        });
+        return unsubscribe;
+    }, [navigation, localTitle]);
+
+    if (typeof currentGame == 'undefined') return null;
+
+    const onEndEditingHandler = (e: NativeSyntheticEvent<TextInputEndEditingEventData>) => {
+        const text = e.nativeEvent.text;
+        commitTitle(text);
+    };
+
+    const onChangeTextHandler = (text: string) => {
+        setLocalTitle(text);
     };
 
     return (
@@ -59,8 +60,7 @@ const EditGame = ({ }) => {
                     onEndEditing={onEndEditingHandler}
                     onBlur={() => {
                         if (localTitle == '') {
-                            setLocalTitle(UNTITLED);
-                            saveGameTitle(UNTITLED);
+                            commitTitle(UNTITLED);
                         }
                     }}
                     placeholder={UNTITLED}

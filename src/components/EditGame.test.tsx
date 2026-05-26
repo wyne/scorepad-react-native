@@ -34,6 +34,13 @@ jest.mock('react-native-elements', () => ({
     },
 }));
 
+// Mock @react-navigation/native
+jest.mock('@react-navigation/native', () => ({
+    useNavigation: () => ({
+        addListener: jest.fn(() => jest.fn()),
+    }),
+}));
+
 // Mock PaletteSelector component
 jest.mock('./ColorPalettes/PaletteSelector', () => {
     return function MockPaletteSelector() {
@@ -213,12 +220,17 @@ describe('EditGame', () => {
 
         const input = getByTestId('game-title-input');
         
-        // Change text to new title
         fireEvent.changeText(input, 'New Game Title');
 
-        // Check that the change was dispatched to Redux
         const state = store.getState();
-        expect(state.games.entities['game-1']?.title).toBe('New Game Title');
+        expect(state.games.entities['game-1']?.title).toBe('Test Game');
+
+        fireEvent(input, 'endEditing', {
+            nativeEvent: { text: 'New Game Title' }
+        });
+
+        const stateAfter = store.getState();
+        expect(stateAfter.games.entities['game-1']?.title).toBe('New Game Title');
     });
 
     it('should set title to "Untitled" when empty text is entered', () => {
@@ -246,10 +258,11 @@ describe('EditGame', () => {
 
         const input = getByTestId('game-title-input');
         
-        // Change text to empty string
         fireEvent.changeText(input, '');
+        fireEvent(input, 'endEditing', {
+            nativeEvent: { text: '' }
+        });
 
-        // Check that title was set to "Untitled"
         const state = store.getState();
         expect(state.games.entities['game-1']?.title).toBe('Untitled');
     });
@@ -444,10 +457,11 @@ describe('EditGame', () => {
 
         const input = getByTestId('game-title-input');
         
-        // Change text to long title
         fireEvent.changeText(input, longTitle);
+        fireEvent(input, 'endEditing', {
+            nativeEvent: { text: longTitle }
+        });
 
-        // Check that the title was updated
         const state = store.getState();
         expect(state.games.entities['game-1']?.title).toBe(longTitle);
     });
@@ -479,10 +493,11 @@ describe('EditGame', () => {
 
         const input = getByTestId('game-title-input');
         
-        // Change text to title with special characters
         fireEvent.changeText(input, specialTitle);
+        fireEvent(input, 'endEditing', {
+            nativeEvent: { text: specialTitle }
+        });
 
-        // Check that the title was updated correctly
         const state = store.getState();
         expect(state.games.entities['game-1']?.title).toBe(specialTitle);
     });

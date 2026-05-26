@@ -108,6 +108,9 @@ const settingsSlice = createSlice({
         resetOnboarding(state) {
             state.onboarded = undefined;
         },
+        restoreSettings(_state, action: PayloadAction<SettingsState>) {
+            return action.payload;
+        },
     }
 });
 
@@ -131,6 +134,7 @@ export const {
     markFeatureNotificationSeen,
     resetSeenFeatureNotifications,
     resetOnboarding,
+    restoreSettings,
 } = settingsSlice.actions;
 
 export default settingsSlice.reducer;
