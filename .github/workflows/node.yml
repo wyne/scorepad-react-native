@@ -13,6 +13,9 @@ jobs:
   test:
     name: Test & Coverage
     runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      contents: read
 
     strategy:
       matrix:
@@ -42,7 +45,7 @@ jobs:
       run: npm run test:coverage
       
     - name: Upload coverage to GitHub
-      uses: actions/upload-artifact@v4.3.1
+      uses: actions/upload-artifact@v7.0.1
       if: success() || failure()
       with:
         name: coverage-report
@@ -50,7 +53,7 @@ jobs:
         
     - name: Comment coverage on PR
       if: github.event_name == 'pull_request'
-      uses: romeovs/lcov-reporter-action@v0.3.1
+      uses: romeovs/lcov-reporter-action@v0.4.0
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
         lcov-file: ./coverage/lcov.info
