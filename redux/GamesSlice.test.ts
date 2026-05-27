@@ -1,6 +1,5 @@
 
-import { configureStore, EntityId, EntityState } from '@reduxjs/toolkit';
-import { Store } from 'redux';
+import { configureStore, EntityState, Store } from '@reduxjs/toolkit';
 
 import gamesReducer, {
     asyncCreateGame,
@@ -27,7 +26,7 @@ jest.mock('expo-crypto', () => ({
 }));
 
 describe('games reducer', () => {
-    let store: Store<EntityState<GameState>>;
+    let store: Store<EntityState<GameState, string>>;
 
     beforeEach(() => {
         store = configureStore({
@@ -144,7 +143,7 @@ describe('asyncCreateGame', () => {
 
         const finalState = store.getState();
 
-        const newGameId: EntityId = finalState.games.ids[0];
+        const newGameId: string = finalState.games.ids[0];
         const newGame = finalState.games.entities[newGameId];
 
         expect(finalState.games.ids.length).toBe(1);
@@ -170,13 +169,13 @@ describe('asyncRematchGame', () => {
 
         await store.dispatch(asyncCreateGame({ gameCount, playerCount }));
 
-        const originalGameId: EntityId = store.getState().games.ids[0];
+        const originalGameId: string = store.getState().games.ids[0];
 
         await store.dispatch(asyncRematchGame({ gameId: originalGameId.toString() }));
 
         const finalState = store.getState();
 
-        const rematchGameId: EntityId = finalState.games.ids[1];
+        const rematchGameId: string = finalState.games.ids[1];
         const rematchGame = finalState.games.entities[rematchGameId];
 
         expect(finalState.games.ids.length).toBe(2);
