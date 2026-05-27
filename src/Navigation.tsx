@@ -1,23 +1,19 @@
 import React, { useState } from 'react';
 
 import { DarkTheme, DefaultTheme, NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator, NativeStackHeaderProps, NativeStackOptionsArgs } from '@react-navigation/native-stack';
+import { createNativeStackNavigator, NativeStackHeaderProps } from '@react-navigation/native-stack';
 import { View } from 'react-native';
 import { SemVer } from 'semver';
 
 import { useAppSelector } from '../redux/hooks';
-import AppInfoHeader from '../src/components/Headers/AppInfoHeader';
+import AppInfoButton from '../src/components/Buttons/AppInfoButton';
 import GameHeader from '../src/components/Headers/GameHeader';
-import HomeHeader from '../src/components/Headers/HomeHeader';
-import SettingsHeader from '../src/components/Headers/SettingsHeader';
 import AppInfoScreen from '../src/screens/AppInfoScreen';
 import GameScreen from '../src/screens/GameScreen';
 import ListScreen from '../src/screens/ListScreen';
 import OnboardingScreen from '../src/screens/OnboardingScreen';
 import SettingsScreen from '../src/screens/SettingsScreen';
 
-import EditPlayerHeader from './components/Headers/EditPlayerHeader';
-import ShareHeader from './components/Headers/ShareHeader';
 import GameSheet from './components/Sheets/GameSheet';
 import EditPlayerScreen from './screens/EditPlayerScreen';
 import ShareScreen from './screens/ShareScreen';
@@ -71,11 +67,11 @@ export const Navigation = () => {
                     <Stack.Screen name="List" component={ListScreen}
                         options={{
                             orientation: 'portrait',
-                            title: 'Home',
-                            headerTitle: 'ScorePad with Rounds',
-                            header: ({ navigation }: NativeStackHeaderProps) => {
-                                return <HomeHeader navigation={navigation} />;
-                            },
+                            title: 'ScorePad',
+                            headerTransparent: true,
+                            headerBlurEffect: 'systemChromeMaterial',
+                            headerShadowVisible: false,
+                            headerLeft: () => <AppInfoButton />,
                         }}
                     />
                     <Stack.Screen name="Game" component={GameScreen}
@@ -88,32 +84,23 @@ export const Navigation = () => {
                         }}
                     />
                     <Stack.Screen name="Settings" component={SettingsScreen}
-                        options={({ route }: NativeStackOptionsArgs<RootStackParamList, 'Settings'>) => ({
+                        options={{
                             orientation: 'all',
-                            title: 'Settings',
-                            header: ({ navigation }: NativeStackHeaderProps) => {
-                                return <SettingsHeader navigation={navigation} route={route} />;
-                            },
-                        })}
+                            title: 'Edit Game',
+                        }}
                     />
                     <Stack.Screen name="Share" component={ShareScreen}
                         options={{
                             orientation: 'all',
                             title: 'Share',
-                            header: ({ navigation }: NativeStackHeaderProps) => {
-                                return <ShareHeader navigation={navigation} />;
-                            },
                         }}
                     />
                     <Stack.Screen name="EditPlayer" component={EditPlayerScreen}
                         initialParams={{ index: 0, playerId: '' }}
-                        options={({ route }: NativeStackOptionsArgs<RootStackParamList, 'EditPlayer'>) => ({
+                        options={{
                             orientation: 'portrait',
                             title: 'Edit Player',
-                            header: ({ navigation }: NativeStackHeaderProps) => {
-                                return <EditPlayerHeader navigation={navigation} route={route} />;
-                            },
-                        })}
+                        }}
                     />
                     <Stack.Screen name="Onboarding" component={OnboardingScreen}
                         options={{
@@ -128,9 +115,6 @@ export const Navigation = () => {
                             presentation: 'modal',
                             orientation: 'portrait',
                             title: 'Info',
-                            header: ({ navigation }: NativeStackHeaderProps) => {
-                                return <AppInfoHeader navigation={navigation} />;
-                            },
                         }}
                     />
                 </Stack.Navigator>

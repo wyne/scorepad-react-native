@@ -20,7 +20,7 @@ const HomeHeader: React.FunctionComponent<Props> = ({ navigation }) => {
     <View style={{ backgroundColor: theme.headerBackground }}>
       <CustomHeader
         navigation={navigation}
-        headerLeft={<AppInfoButton navigation={navigation} />}
+        headerLeft={<AppInfoButton />}
         headerCenter={
           <Text style={[styles.title, { color: theme.headerText }]} allowFontScaling={false}>
             ScorePad

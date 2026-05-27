@@ -3,9 +3,8 @@ import React, { memo, useEffect } from 'react';
 import { ParamListBase } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import * as Application from 'expo-application';
-import { BlurView } from 'expo-blur';
 import * as Crypto from 'expo-crypto';
-import { Platform, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text } from 'react-native';
 import Animated, { Easing, LinearTransition } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { SemVer, parse } from 'semver';
@@ -14,6 +13,7 @@ import { selectGameIds } from '../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { increaseAppOpens, setInstallId, setOnboardedVersion, setRollingGameCounter } from '../../redux/SettingsSlice';
 import { logEvent } from '../Analytics';
+import FloatingActionButton from '../components/FloatingActionButton';
 import GameListItem from '../components/GameListItem';
 import { getPendingOnboardingSemVer } from '../components/Onboarding/Onboarding';
 import logger from '../Logger';
@@ -73,14 +73,16 @@ const ListScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     }, [onboarded, dispatch, navigation]);
 
     return (
-        <SafeAreaView edges={['bottom', 'left', 'right']} style={{ backgroundColor: theme.backgroundSecondary, flex: 1 }}>
+        <SafeAreaView edges={['left', 'right']} style={{ backgroundColor: theme.backgroundSecondary, flex: 1 }}>
             <Animated.FlatList
-                ListFooterComponent={<View style={{ paddingBottom: 25 }}></View>}
+                contentInsetAdjustmentBehavior="automatic"
+                contentInset={{ bottom: 70 }}
+                scrollIndicatorInsets={{ bottom: 70 }}
                 itemLayoutAnimation={LinearTransition.easing(Easing.ease)}
                 ListEmptyComponent={
                     <>
                         <Text style={{ textAlign: 'center', padding: 30, paddingBottom: 10, fontSize: 16, fontWeight: 'bold', color: theme.text }}>No Games</Text>
-                        <Text style={{ textAlign: 'center', padding: 10, color: theme.textSecondary }}>Tap the + button above to create a new game.</Text>
+                        <Text style={{ textAlign: 'center', padding: 10, color: theme.textSecondary }}>Tap the + button to create a new game.</Text>
                     </>
                 }
                 style={[styles.list, { backgroundColor: theme.backgroundSecondary }]}
@@ -91,15 +93,7 @@ const ListScreen: React.FunctionComponent<Props> = ({ navigation }) => {
                 keyExtractor={item => item as string}
             >
             </Animated.FlatList>
-            <BlurView intensity={20} style={{
-                backgroundColor: Platform.OS == 'android' ? theme.backgroundSecondary : undefined,
-                position: 'absolute', bottom: 0, left: 0, right: 0, height: 60,
-                justifyContent: 'flex-start', alignItems: 'center',
-                borderTopWidth: 1, borderColor: theme.separator,
-                display: gameIds.length > 0 ? undefined : 'none',
-            }}>
-                <Text style={{ paddingTop: 10, color: theme.textSecondary, fontSize: 12 }}>Long press for more options.</Text>
-            </BlurView>
+            {gameIds.length > 0 && <FloatingActionButton navigation={navigation} />}
         </SafeAreaView>
     );
 };
@@ -107,11 +101,6 @@ const ListScreen: React.FunctionComponent<Props> = ({ navigation }) => {
 const styles = StyleSheet.create({
     list: {
     },
-    newGame: {
-        margin: 20,
-        width: 200,
-        alignSelf: 'center',
-    }
 });
 
 export default memo(ListScreen);

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useLayoutEffect, useRef } from 'react';
 
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ParamListBase } from '@react-navigation/routers';
@@ -10,6 +10,7 @@ import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { markFeatureNotificationSeen, resetOnboarding, resetSeenFeatureNotifications, setColorScheme, setKeepScreenAwake, toggleShowPlayerIndex, toggleShowPointParticles } from '../../redux/SettingsSlice';
 import { logEvent } from '../Analytics';
 import RotatingIcon from '../components/AppInfo/RotatingIcon';
+import HeaderButton from '../components/Buttons/HeaderButton';
 import { FEATURE_KEEP_SCREEN_AWAKE } from '../constants';
 import { useTheme } from '../theme';
 
@@ -19,6 +20,17 @@ interface Props {
 
 const AppInfoScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     const theme = useTheme();
+
+    useLayoutEffect(() => {
+        navigation.setOptions({
+            headerRight: () => (
+                <HeaderButton accessibilityLabel='Done'
+                    onPress={() => { navigation.goBack(); }}>
+                    <Text style={{ color: theme.tint, fontSize: 20 }} allowFontScaling={false}>Done</Text>
+                </HeaderButton>
+            ),
+        });
+    }, [navigation, theme.tint]);
     const Section = ({ children, title }: { children: React.ReactNode, title: string; }) => (
         <>
             <Text style={[styles.sectionHeader, { color: theme.textTertiary }]}>{title}</Text>
