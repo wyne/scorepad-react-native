@@ -36,7 +36,7 @@ const CheckButton: React.FunctionComponent<Props> = ({ navigation, route }) => {
             });
 
             if (route?.params?.source === 'list_screen') {
-                navigation.navigate('List');
+                navigation.goBack();
             } else if (route?.params?.source === 'share_screen') {
                 navigation.goBack();
             } else if (route?.params?.source === 'new_game') {

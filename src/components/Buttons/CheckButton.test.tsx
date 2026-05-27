@@ -71,7 +71,7 @@ describe('CheckButton', () => {
         fireEvent.press(button);
 
         await waitFor(() => {
-            expect(navigation.navigate).toHaveBeenCalledWith('List');
+            expect(navigation.goBack).toHaveBeenCalled();
         });
     }, 10000);
 
