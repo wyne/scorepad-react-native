@@ -1,12 +1,12 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import BottomSheet, { BottomSheetBackdrop, BottomSheetBackdropProps, BottomSheetScrollView } from '@gorhom/bottom-sheet';
-import { ParamListBase, useIsFocused } from '@react-navigation/native';
+import { ParamListBase, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { Alert, Platform, StyleSheet, Text, TouchableWithoutFeedback, View } from 'react-native';
+import { Alert, Platform, StyleSheet, Text, TouchableWithoutFeedback, View, useWindowDimensions } from 'react-native';
 import { Button } from 'react-native-elements';
 import Animated, { Extrapolate, FadeIn, interpolate, Layout, useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { asyncRematchGame, selectGameById, updateGame } from '../../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
@@ -24,14 +24,10 @@ import { useGameSheetContext } from './GameSheetContext';
  */
 export const bottomSheetHeight = 80;
 
-interface Props {
-    navigation: NativeStackNavigationProp<ParamListBase, string, undefined>;
-    containerHeight: number;
-}
-
-const GameSheet: React.FunctionComponent<Props> = ({ navigation, containerHeight }) => {
+const GameSheet: React.FunctionComponent = () => {
     const theme = useTheme();
-    const isFocused = useIsFocused();
+    const navigation = useNavigation<NativeStackNavigationProp<ParamListBase>>();
+    const { height: containerHeight } = useWindowDimensions();
     const currentGameId = useAppSelector(state => state.settings.currentGameId);
     const fullscreen = useAppSelector(state => state.settings.home_fullscreen);
     const gameTitle = useAppSelector(state => selectGameById(state, currentGameId || '')?.title);
@@ -47,6 +43,12 @@ const GameSheet: React.FunctionComponent<Props> = ({ navigation, containerHeight
     const snapPoints = useMemo(() => [bottomSheetHeight, '60%', '100%'], []);
 
     const dispatch = useAppDispatch();
+
+    const insets = useSafeAreaInsets();
+    const topInset = insets.top + 50;
+
+    // Stable key for animated children to force remount on each mount
+    const mountKey = useRef(Date.now()).current;
 
     /**
      * Lock the game
@@ -226,6 +228,7 @@ const GameSheet: React.FunctionComponent<Props> = ({ navigation, containerHeight
             handleIndicatorStyle={{ backgroundColor: theme.sheetHandle }}
             animatedPosition={animatedPosition}
             enablePanDownToClose={false}
+            topInset={topInset}
             style={theme.background === '#000000' ? undefined : styles.sheetShadow}
         >
             <BottomSheetScrollView>
@@ -284,12 +287,7 @@ const GameSheet: React.FunctionComponent<Props> = ({ navigation, containerHeight
                             }
                         </Animated.View>
 
-                        {/*
-                            isFocused + '' is a workaround for broken animations when navigating back to the game screen
-                            https://github.com/software-mansion/react-native-reanimated/issues/4816
-                            https://github.com/software-mansion/react-native-reanimated/issues/4822
-                        */}
-                        <Animated.View key={isFocused + 'a'} layout={Layout.delay(200)} style={{ flexDirection: 'row', justifyContent: 'space-around', paddingVertical: 10 }}>
+                        <Animated.View key={mountKey + 'a'} layout={Layout.delay(200)} style={{ flexDirection: 'row', justifyContent: 'space-around', paddingVertical: 10 }}>
                             {Platform.OS === 'ios' &&
                                 <BigButton text="Share"
                                     color={theme.tint}
@@ -306,7 +304,7 @@ const GameSheet: React.FunctionComponent<Props> = ({ navigation, containerHeight
 
                         </Animated.View>
 
-                        <Animated.View key={isFocused + 'b'} layout={Layout.delay(200)} style={{ flexDirection: 'row', justifyContent: 'space-around', paddingVertical: 10 }}>
+                        <Animated.View key={mountKey + 'b'} layout={Layout.delay(200)} style={{ flexDirection: 'row', justifyContent: 'space-around', paddingVertical: 10 }}>
                             {!gameLocked &&
                                 <Animated.View layout={Layout.delay(200)} style={{ justifyContent: 'center', alignItems: 'center' }}>
                                     <BigButton text="Reset"

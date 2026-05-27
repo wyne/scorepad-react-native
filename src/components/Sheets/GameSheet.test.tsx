@@ -161,6 +161,31 @@ jest.mock('../Rounds', () => {
     };
 });
 
+// Mock @react-navigation/native
+const mockNavigate = jest.fn();
+jest.mock('@react-navigation/native', () => {
+    const actual = jest.requireActual('@react-navigation/native');
+    return {
+        ...actual,
+        useNavigation: jest.fn(() => ({
+            navigate: mockNavigate,
+        })),
+        useNavigationState: jest.fn((selector) => {
+            const state = { routes: [{ name: 'Game' }], index: 0 };
+            return selector(state);
+        }),
+    };
+});
+
+// Mock react-native-safe-area-context
+jest.mock('react-native-safe-area-context', () => ({
+    SafeAreaView: ({ children }: { children: React.ReactNode }) => {
+        const { View } = jest.requireActual('react-native');
+        return <View>{children}</View>;
+    },
+    useSafeAreaInsets: jest.fn(() => ({ top: 50, bottom: 34, left: 0, right: 0 })),
+}));
+
 // Mock GameSheetContext
 jest.mock('./GameSheetContext', () => ({
     useGameSheetContext: jest.fn(() => ({
@@ -173,27 +198,6 @@ jest.mock('./GameSheetContext', () => ({
 // Mock Alert
 jest.spyOn(Alert, 'alert');
 
-const mockNavigation = {
-    navigate: jest.fn(),
-    goBack: jest.fn(),
-    dispatch: jest.fn(),
-    setOptions: jest.fn(),
-    isFocused: jest.fn(() => true),
-    canGoBack: jest.fn(() => true),
-    getId: jest.fn(),
-    getParent: jest.fn(),
-    getState: jest.fn(),
-    reset: jest.fn(),
-    setParams: jest.fn(),
-    push: jest.fn(),
-    pop: jest.fn(),
-    popToTop: jest.fn(),
-    replace: jest.fn(),
-    jumpTo: jest.fn(),
-    addListener: jest.fn(),
-    removeListener: jest.fn(),
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-} as any;
 
 const createMockStore = (initialState: Parameters<typeof configureStore>[0]['preloadedState']) => {
     return configureStore({
@@ -230,10 +234,7 @@ describe('GameSheet', () => {
         },
     };
 
-    const defaultProps = {
-        navigation: mockNavigation,
-        containerHeight: 800,
-    };
+    const defaultProps = {};
 
     beforeEach(() => {
         jest.clearAllMocks();
@@ -600,7 +601,7 @@ describe('GameSheet', () => {
         fireEvent.press(editButton);
 
         await waitFor(() => {
-            expect(mockNavigation.navigate).toHaveBeenCalledWith('Settings', { source: 'edit_game' });
+            expect(mockNavigate).toHaveBeenCalledWith('Settings', { source: 'edit_game' });
             expect(logEvent).toHaveBeenCalledWith('edit_game', {
                 game_id: 'game-1',
             });

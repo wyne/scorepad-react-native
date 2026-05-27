@@ -5,6 +5,7 @@ import { StatusBar } from 'expo-status-bar';
 import { View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { MenuProvider } from 'react-native-popup-menu';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
 
@@ -20,20 +21,22 @@ if (process.env.EXPO_PUBLIC_FIREBASE_ANALYTICS == 'false') {
 export default function App() {
     return (
         <View style={{ flex: 1, backgroundColor: '#000' }}>
-            <GestureHandlerRootView style={{ flex: 1 }}>
-                <Provider store={store}>
-                    <GameSheetContextProvider>
-                        <MenuProvider>
-                            <AddendModalContextProvider>
-                                <PersistGate loading={null} persistor={persistor}>
-                                    <StatusBar />
-                                    <Navigation />
-                                </PersistGate>
-                            </AddendModalContextProvider>
-                        </MenuProvider>
-                    </GameSheetContextProvider>
-                </Provider>
-            </GestureHandlerRootView>
+            <SafeAreaProvider>
+                <GestureHandlerRootView style={{ flex: 1 }}>
+                    <Provider store={store}>
+                        <GameSheetContextProvider>
+                            <MenuProvider>
+                                <AddendModalContextProvider>
+                                    <PersistGate loading={null} persistor={persistor}>
+                                        <StatusBar />
+                                        <Navigation />
+                                    </PersistGate>
+                                </AddendModalContextProvider>
+                            </MenuProvider>
+                        </GameSheetContextProvider>
+                    </Provider>
+                </GestureHandlerRootView>
+            </SafeAreaProvider>
         </View>
     );
 };
