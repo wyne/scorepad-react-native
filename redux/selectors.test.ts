@@ -20,6 +20,7 @@ const mockState: Partial<RootState> = {
     installId: 'test-install-id',
     keepScreenAwake: false,
     seenFeatureNotifications: [],
+    colorScheme: 'system',
   },
   games: {
     entities: {

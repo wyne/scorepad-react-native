@@ -22,6 +22,7 @@ export interface SettingsState {
     rollingGameCounter?: number;
     keepScreenAwake: boolean;
     seenFeatureNotifications: string[];
+    colorScheme: 'system' | 'light' | 'dark';
 };
 
 export const initialState: SettingsState = {
@@ -40,6 +41,7 @@ export const initialState: SettingsState = {
     rollingGameCounter: 0,
     keepScreenAwake: false,
     seenFeatureNotifications: [],
+    colorScheme: 'system',
 };
 
 const settingsSlice = createSlice({
@@ -108,6 +110,9 @@ const settingsSlice = createSlice({
         resetOnboarding(state) {
             state.onboarded = undefined;
         },
+        setColorScheme(state, action: PayloadAction<'system' | 'light' | 'dark'>) {
+            state.colorScheme = action.payload;
+        },
         restoreSettings(_state, action: PayloadAction<SettingsState>) {
             return action.payload;
         },
@@ -134,6 +139,7 @@ export const {
     markFeatureNotificationSeen,
     resetSeenFeatureNotifications,
     resetOnboarding,
+    setColorScheme,
     restoreSettings,
 } = settingsSlice.actions;
 

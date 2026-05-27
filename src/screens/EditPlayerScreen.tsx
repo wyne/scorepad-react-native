@@ -18,6 +18,7 @@ import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { updatePlayer } from '../../redux/PlayersSlice';
 import { selectCurrentGame } from '../../redux/selectors';
 import ColorSelector from '../components/ColorPalettes/ColorSelector';
+import { useTheme } from '../theme';
 
 type RouteParams = {
     EditPlayer: {
@@ -35,6 +36,7 @@ const EditPlayerScreen: React.FC<EditPlayerScreenProps> = ({
     route,
 }) => {
 
+    const theme = useTheme();
     const dispatch = useAppDispatch();
     const currentGame = useAppSelector(selectCurrentGame);
     const { index, playerId } = route.params;
@@ -124,7 +126,7 @@ const EditPlayerScreen: React.FC<EditPlayerScreenProps> = ({
                         style: { padding: 8 },
                         disabled: localPlayerName == '',
                         disabledStyle: { display: 'none' },
-                        color: '#555',
+                        color: theme.textTertiary,
                         size: 15,
                         name: 'close',
                         onPress: () => {
@@ -134,7 +136,7 @@ const EditPlayerScreen: React.FC<EditPlayerScreenProps> = ({
                     }}
                     containerStyle={{ flex: 1 }}
                     inputContainerStyle={{
-                        backgroundColor: '#222',
+                        backgroundColor: theme.inputBackground,
                         borderBottomWidth: 0,
                         borderRadius: 10,
                         paddingHorizontal: 10,
@@ -147,16 +149,16 @@ const EditPlayerScreen: React.FC<EditPlayerScreenProps> = ({
                     placeholder='Player Name'
                     renderErrorMessage={false}
                     selectTextOnFocus={true}
-                    style={styles.input}
+                    style={[styles.input, { color: theme.textSecondary }]}
                     value={localPlayerName}
                 />
 
                 {suggestions.length > 0 && (
-                    <View style={styles.suggestionsContainer} testID="suggestions-list">
+                    <View style={[styles.suggestionsContainer, { backgroundColor: theme.backgroundTertiary }]} testID="suggestions-list">
                         {suggestions.map((name, idx) => (
                             <TouchableOpacity key={name} activeOpacity={0.6} onPress={() => onSuggestionSelect(name)}>
-                                <View style={[styles.suggestionItem, idx < suggestions.length - 1 && styles.suggestionBorder]}>
-                                    <Text style={styles.suggestionText}>{name}</Text>
+                                <View style={[styles.suggestionItem, idx < suggestions.length - 1 && { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: theme.textTertiary }]}>
+                                    <Text style={[styles.suggestionText, { color: theme.textSecondary }]}>{name}</Text>
                                 </View>
                             </TouchableOpacity>
                         ))}
@@ -175,41 +177,13 @@ const EditPlayerScreen: React.FC<EditPlayerScreenProps> = ({
 export default EditPlayerScreen;
 
 const styles = StyleSheet.create({
-    playerContainer: {
-        alignItems: 'center',
-        flexDirection: 'row',
-        justifyContent: 'flex-start',
-        backgroundColor: '#222',
-        borderRadius: 10,
-        padding: 2,
-        paddingHorizontal: 10,
-        marginVertical: 5,
-        marginHorizontal: 10,
-    },
-    playerNumber: {
-        color: '#eee',
-        fontSize: 25,
-        fontVariant: ['tabular-nums'],
-        fontWeight: 'bold',
-        padding: 5,
-    },
-    colorBadge: {
-        borderColor: '#eee',
-        borderRadius: 25,
-        height: 25,
-        marginHorizontal: 5,
-        padding: 5,
-        width: 25,
-    },
     input: {
-        color: '#eee',
     },
     suggestionsContainer: {
         position: 'absolute',
         top: '100%',
         left: 0,
         right: 0,
-        backgroundColor: '#333',
         borderRadius: 10,
         marginHorizontal: 20,
         overflow: 'hidden',
@@ -218,12 +192,7 @@ const styles = StyleSheet.create({
         paddingVertical: 12,
         paddingHorizontal: 16,
     },
-    suggestionBorder: {
-        borderBottomWidth: StyleSheet.hairlineWidth,
-        borderBottomColor: '#555',
-    },
     suggestionText: {
-        color: '#eee',
         fontSize: 16,
     },
 });

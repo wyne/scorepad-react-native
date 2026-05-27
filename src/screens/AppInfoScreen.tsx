@@ -7,42 +7,43 @@ import { Alert, Linking, Platform, ScrollView, StyleSheet, Switch, Text, Touchab
 
 import { exportBackup, importBackup } from '../../redux/backup';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
-import { markFeatureNotificationSeen, resetOnboarding, resetSeenFeatureNotifications, setKeepScreenAwake, toggleShowPlayerIndex, toggleShowPointParticles } from '../../redux/SettingsSlice';
+import { markFeatureNotificationSeen, resetOnboarding, resetSeenFeatureNotifications, setColorScheme, setKeepScreenAwake, toggleShowPlayerIndex, toggleShowPointParticles } from '../../redux/SettingsSlice';
 import { logEvent } from '../Analytics';
 import RotatingIcon from '../components/AppInfo/RotatingIcon';
 import { FEATURE_KEEP_SCREEN_AWAKE } from '../constants';
+import { useTheme } from '../theme';
 
 interface Props {
     navigation: NativeStackNavigationProp<ParamListBase, string, undefined>;
 }
 
-const Section = ({ children, title }: { children: React.ReactNode, title: string; }) => (
-    <>
-        <Text style={styles.sectionHeader}>{title}</Text>
-        <View style={styles.section}>
+const AppInfoScreen: React.FunctionComponent<Props> = ({ navigation }) => {
+    const theme = useTheme();
+    const Section = ({ children, title }: { children: React.ReactNode, title: string; }) => (
+        <>
+            <Text style={[styles.sectionHeader, { color: theme.textTertiary }]}>{title}</Text>
+            <View style={[styles.section, { backgroundColor: theme.backgroundSecondary }]}>
+                {children}
+            </View>
+        </>
+    );
+    const SectionItem = ({ children }: { children: React.ReactNode; }) => (
+        <View style={styles.sectionItem}>
             {children}
         </View>
-    </>
-);
-const SectionItem = ({ children }: { children: React.ReactNode; }) => (
-    <View style={styles.sectionItem}>
-        {children}
-    </View>
-);
-const SectionItemText = ({ text }: { text: string; }) => (
-    <Text style={styles.sectionItemText}>{text}</Text>
-);
-const SectionSeparator = () => (
-    <View style={{ height: 1, backgroundColor: '#EFEFF4' }} />
-);
-const DisclosureRow = ({ label, onPress }: { label: string; onPress: () => void; }) => (
-    <TouchableOpacity style={styles.disclosureRow} onPress={onPress}>
-        <Text style={styles.disclosureLabel}>{label}</Text>
-        <Text style={styles.disclosureArrow}>›</Text>
-    </TouchableOpacity>
-);
-
-const AppInfoScreen: React.FunctionComponent<Props> = ({ navigation }) => {
+    );
+    const SectionItemText = ({ text }: { text: string; }) => (
+        <Text style={[styles.sectionItemText, { color: theme.text }]}>{text}</Text>
+    );
+    const SectionSeparator = () => (
+        <View style={{ height: 1, backgroundColor: theme.separator }} />
+    );
+    const DisclosureRow = ({ label, onPress }: { label: string; onPress: () => void; }) => (
+        <TouchableOpacity style={styles.disclosureRow} onPress={onPress}>
+            <Text style={[styles.disclosureLabel, { color: theme.text }]}>{label}</Text>
+            <Text style={[styles.disclosureArrow, { color: theme.separator }]}>›</Text>
+        </TouchableOpacity>
+    );
     const buildNumber = Application.nativeBuildVersion;
     const appVersion = Application.nativeApplicationVersion;
 
@@ -52,6 +53,7 @@ const AppInfoScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     const installId = useAppSelector(state => state.settings.installId);
     const seenFeatureNotifications = useAppSelector(state => state.settings.seenFeatureNotifications);
     const keepScreenAwake = useAppSelector(state => state.settings.keepScreenAwake);
+    const colorScheme = useAppSelector(state => state.settings.colorScheme ?? 'system');
 
     const dispatch = useAppDispatch();
 
@@ -135,13 +137,13 @@ const AppInfoScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     };
 
     return (
-        <ScrollView style={{ backgroundColor: '#F2F2F7', flex: 1 }} contentContainerStyle={{ paddingBottom: 50 }}>
+        <ScrollView style={{ backgroundColor: theme.background, flex: 1 }} contentContainerStyle={{ paddingBottom: 50 }}>
             <View style={[styles.iconWrapper, { alignItems: 'center' }]}>
                 <RotatingIcon />
-                <Text style={{ color: '#999' }} onPress={alertWithVersion}>
+                <Text style={{ color: theme.textTertiary }} onPress={alertWithVersion}>
                     ScorePad with Rounds v{appVersion}
                 </Text>
-                <Text style={{ color: '#999', paddingVertical: 5 }}>
+                <Text style={{ color: theme.textTertiary, paddingVertical: 5 }}>
                     by Justin Wyne
                 </Text>
             </View>
@@ -149,29 +151,48 @@ const AppInfoScreen: React.FunctionComponent<Props> = ({ navigation }) => {
             <Section title="Features">
                 <SectionItem>
                     <SectionItemText text="Particle Effect (tap-only)" />
-                    <Switch onValueChange={toggleParticleSwitch} value={showPointParticles} ios_backgroundColor="#E5E5EA" />
+                    <Switch onValueChange={toggleParticleSwitch} value={showPointParticles} ios_backgroundColor={theme.separator} />
                 </SectionItem>
                 <SectionSeparator />
                 <SectionItem>
                     <View style={styles.labelRow}>
                         <SectionItemText text="Player Numbers" />
-                        <View style={styles.betaPill}>
-                            <Text style={styles.betaPillText}>Beta</Text>
+                        <View style={[styles.betaPill, { backgroundColor: theme.separator }]}>
+                            <Text style={[styles.betaPillText, { color: theme.text }]}>Beta</Text>
                         </View>
                     </View>
-                    <Switch onValueChange={togglePlayerIndexSwitch} value={showPlayerIndex} ios_backgroundColor="#E5E5EA" />
+                    <Switch onValueChange={togglePlayerIndexSwitch} value={showPlayerIndex} ios_backgroundColor={theme.separator} />
                 </SectionItem>
                 <SectionSeparator />
                 <SectionItem>
                     <View style={styles.labelRow}>
-                        {isUnseen && <View style={styles.featureDot} />}
+                        {isUnseen && <View style={[styles.featureDot, { backgroundColor: theme.warning }]} />}
                         <SectionItemText text="Keep Screen Awake" />
-                        <View style={styles.betaPill}>
-                            <Text style={styles.betaPillText}>Beta</Text>
+                            <View style={[styles.betaPill, { backgroundColor: theme.separator }]}>
+                            <Text style={[styles.betaPillText, { color: theme.text }]}>Beta</Text>
                         </View>
                     </View>
-                    <Switch onValueChange={toggleKeepAwake} value={keepScreenAwake} ios_backgroundColor="#E5E5EA" />
+                    <Switch onValueChange={toggleKeepAwake} value={keepScreenAwake} ios_backgroundColor={theme.separator} />
                 </SectionItem>
+            </Section>
+
+            <Section title="Appearance">
+                {(['system', 'light', 'dark'] as const).map((option, i, arr) => (
+                    <React.Fragment key={option}>
+                        <TouchableOpacity
+                            style={[styles.disclosureRow]}
+                            onPress={() => dispatch(setColorScheme(option))}
+                        >
+                            <Text style={[styles.disclosureLabel, { color: theme.text }]}>
+                                {option.charAt(0).toUpperCase() + option.slice(1)}
+                            </Text>
+                            {colorScheme === option && (
+                                <Text style={{ color: theme.tint, fontSize: 18 }}>✓</Text>
+                            )}
+                        </TouchableOpacity>
+                        {i < arr.length - 1 && <SectionSeparator />}
+                    </React.Fragment>
+                ))}
             </Section>
 
             {devMenuEnabled && (
@@ -253,11 +274,9 @@ const styles = StyleSheet.create({
         marginTop: 20,
         padding: 5,
         paddingHorizontal: 40,
-        color: '#93939A',
         textTransform: 'uppercase',
     },
     section: {
-        backgroundColor: 'white',
         paddingHorizontal: 20,
         marginHorizontal: 20,
         borderRadius: 10,
@@ -277,7 +296,6 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     betaPill: {
-        backgroundColor: '#E5E5EA',
         borderRadius: 4,
         paddingHorizontal: 6,
         paddingVertical: 2,
@@ -285,13 +303,11 @@ const styles = StyleSheet.create({
     },
     betaPillText: {
         fontSize: 11,
-        color: '#666',
     },
     featureDot: {
         width: 8,
         height: 8,
         borderRadius: 4,
-        backgroundColor: '#FF9500',
         marginRight: 8,
     },
     disclosureRow: {
@@ -305,7 +321,6 @@ const styles = StyleSheet.create({
     },
     disclosureArrow: {
         fontSize: 20,
-        color: '#C8C8CC',
     },
     text: {
         fontSize: 16,

@@ -5,7 +5,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { StyleSheet, Text } from 'react-native';
 
 import { logEvent } from '../../Analytics';
-import { systemBlue } from '../../constants';
+import { useTheme } from '../../theme';
 import HeaderButton from '../Buttons/HeaderButton';
 
 import CustomHeader from './CustomHeader';
@@ -23,6 +23,7 @@ interface EditPlayerScreenProps {
 }
 
 const EditPlayerHeader: React.FunctionComponent<EditPlayerScreenProps> = ({ navigation }) => {
+    const theme = useTheme();
     return (
         <CustomHeader navigation={navigation}
             headerLeft={
@@ -30,17 +31,16 @@ const EditPlayerHeader: React.FunctionComponent<EditPlayerScreenProps> = ({ navi
                     navigation.goBack();
                     await logEvent('edit_player_back');
                 }}>
-                    <Text style={{ color: systemBlue, fontSize: 20 }}>Back</Text>
+                    <Text style={{ color: theme.tint, fontSize: 20 }}>Back</Text>
                 </HeaderButton>
             }
-            headerCenter={<Text style={styles.title}>Edit Player</Text>}
+            headerCenter={<Text style={[styles.title, { color: theme.headerText }]}>Edit Player</Text>}
         />
     );
 };
 
 const styles = StyleSheet.create({
     title: {
-        color: 'white',
         fontSize: 20,
         fontVariant: ['tabular-nums'],
     },

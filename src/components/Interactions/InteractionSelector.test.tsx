@@ -155,11 +155,9 @@ describe('InteractionSelector', () => {
             </Provider>
         );
 
-        // Tap button should be white (selected)
-        expect(getByText('Color: white')).toBeTruthy();
-        // Check that tap icon is white and swipe icon is grey
-        expect(getByText('TapIcon - Color: white, Size: 40')).toBeTruthy();
-        expect(getByText('SwipeIcon - Color: grey, Size: 40')).toBeTruthy();
+        // Tap button should be active (selected) color, swipe should be dimmed
+        expect(getByText('TapIcon - Color: #000000, Size: 40')).toBeTruthy();
+        expect(getByText('SwipeIcon - Color: #999999, Size: 40')).toBeTruthy();
     });
 
     it('should highlight swipe button when SwipeVertical is selected', () => {
@@ -177,9 +175,9 @@ describe('InteractionSelector', () => {
             </Provider>
         );
 
-        // Check that swipe icon is white and tap icon is grey
-        expect(getByText('SwipeIcon - Color: white, Size: 40')).toBeTruthy();
-        expect(getByText('TapIcon - Color: grey, Size: 40')).toBeTruthy();
+        // Swipe button should be active (selected) color, tap should be dimmed
+        expect(getByText('SwipeIcon - Color: #000000, Size: 40')).toBeTruthy();
+        expect(getByText('TapIcon - Color: #999999, Size: 40')).toBeTruthy();
     });
 
     it('should display correct description for HalfTap', () => {
@@ -329,8 +327,8 @@ describe('InteractionSelector', () => {
             </Provider>
         );
 
-        expect(getByText('TapIcon - Color: white, Size: 40')).toBeTruthy();
-        expect(getByText('SwipeIcon - Color: grey, Size: 40')).toBeTruthy();
+        expect(getByText('TapIcon - Color: #000000, Size: 40')).toBeTruthy();
+        expect(getByText('SwipeIcon - Color: #999999, Size: 40')).toBeTruthy();
     });
 
     it('should update description when interaction type changes', () => {

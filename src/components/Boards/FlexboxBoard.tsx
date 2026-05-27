@@ -6,10 +6,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAppSelector } from '../../../redux/hooks';
 import { selectCurrentGame } from '../../../redux/selectors';
 import { bottomSheetHeight } from '../../components/Sheets/GameSheet';
+import { useTheme } from '../../theme';
 
 import FlexboxTile from './FlexboxTile';
 
 const FlexboxBoard: React.FC = () => {
+    const theme = useTheme();
     const fullscreen = useAppSelector(state => state.settings.home_fullscreen);
     const playerIds = useAppSelector(state => selectCurrentGame(state)?.playerIds);
 
@@ -85,6 +87,7 @@ const FlexboxBoard: React.FC = () => {
             [styles.contentStyle,
             {
                 paddingBottom: fullscreen ? 20 : bottomSheetHeight + 2, // Add 2 to account for the border
+                backgroundColor: theme.background,
             }]
         } onLayout={layoutHandler} >
             {playerIds.map((id, index) => (
@@ -111,7 +114,6 @@ const styles = StyleSheet.create({
         alignContent: 'stretch',
         flexDirection: 'row',
         maxWidth: '100%',
-        backgroundColor: '#000000',
     },
     contentContainer: {
         flex: 1,

@@ -10,7 +10,7 @@ import { Icon } from 'react-native-elements/dist/icons/Icon';
 import { roundNext, roundPrevious, selectGameById } from '../../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
 import { logEvent } from '../../Analytics';
-import { systemBlue } from '../../constants';
+import { useTheme } from '../../theme';
 import AddendButton from '../Buttons/AddendButton';
 import FullscreenButton from '../Buttons/FullscreenButton';
 import HomeButton from '../Buttons/HomeButton';
@@ -23,13 +23,14 @@ interface PrevRoundButtonProps {
 }
 
 const PrevRoundButton: React.FunctionComponent<PrevRoundButtonProps> = ({ prevRoundHandler, visible }) => {
+    const theme = useTheme();
     return (
         <TouchableOpacity style={[styles.headerButton]}
             onPress={prevRoundHandler}>
             <Icon name="chevron-left"
                 type="font-awesome-5"
                 size={20}
-                color={systemBlue}
+                color={theme.tint}
                 style={{ opacity: visible ? 0 : 1 }}
             />
         </TouchableOpacity>
@@ -42,13 +43,14 @@ interface NextRoundButtonProps {
 }
 
 const NextRoundButton: React.FunctionComponent<NextRoundButtonProps> = ({ nextRoundHandler, visible }) => {
+    const theme = useTheme();
     return (
         <TouchableOpacity style={[styles.headerButton]}
             onPress={nextRoundHandler}>
             <Icon name="chevron-right"
                 type="font-awesome-5"
                 size={20}
-                color={systemBlue}
+                color={theme.tint}
                 style={{ opacity: visible ? 0 : 1 }}
             />
         </TouchableOpacity>
@@ -71,10 +73,12 @@ const GameHeader: React.FunctionComponent<Props> = ({ navigation }) => {
     const roundCurrent = useAppSelector(state => selectGameById(state, currentGameId)?.roundCurrent || 0);
     const lastRoundIndex = useAppSelector(state => selectGameById(state, currentGameId)?.roundTotal || 0);
 
+    const theme = useTheme();
+
     if (currentGame == null) {
         return <CustomHeader navigation={navigation}
             headerLeft={<HomeButton navigation={navigation} />}
-            headerCenter={<Text style={styles.title}>Error</Text>}
+            headerCenter={<Text style={[styles.title, { color: theme.headerText }]}>Error</Text>}
         />;
     }
 
@@ -123,7 +127,7 @@ const GameHeader: React.FunctionComponent<Props> = ({ navigation }) => {
             </>}
             headerCenter={<>
                 <PrevRoundButton prevRoundHandler={prevRoundHandler} visible={isFirstRound} />
-                <Text style={styles.title} allowFontScaling={false}>Round {roundCurrent + 1}{
+                <Text style={[styles.title, { color: theme.headerText }]} allowFontScaling={false}>Round {roundCurrent + 1}{
                     isLastRound ? '' : `/${lastRoundIndex}`
                 }</Text>
                 <NextRoundButton nextRoundHandler={nextRoundHandler}
@@ -137,7 +141,6 @@ const GameHeader: React.FunctionComponent<Props> = ({ navigation }) => {
 
 const styles = StyleSheet.create({
     title: {
-        color: 'white',
         fontSize: 20,
         fontVariant: ['tabular-nums'],
     },

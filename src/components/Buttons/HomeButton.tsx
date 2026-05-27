@@ -10,7 +10,7 @@ import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
 import { selectLastStoreReviewPrompt } from '../../../redux/selectors';
 import { setLastStoreReviewPrompt } from '../../../redux/SettingsSlice';
 import { logEvent } from '../../Analytics';
-import { systemBlue } from '../../constants';
+import { useTheme } from '../../theme';
 
 import HeaderButton from './HeaderButton';
 
@@ -19,6 +19,7 @@ interface Props {
 }
 
 const HomeButton: React.FunctionComponent<Props> = ({ navigation }) => {
+    const theme = useTheme();
     const gameCount = useAppSelector((state) => state.games.ids.length);
     const installId = useAppSelector((state) => state.settings.installId);
     const lastStoreReviewPrompt = useAppSelector(selectLastStoreReviewPrompt);
@@ -62,7 +63,7 @@ const HomeButton: React.FunctionComponent<Props> = ({ navigation }) => {
             <Icon name="bars"
                 type="font-awesome-5"
                 size={20}
-                color={systemBlue} />
+                color={theme.tint} />
         </HeaderButton>
     );
 };

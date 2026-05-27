@@ -10,6 +10,7 @@ import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { removePlayer, selectPlayerById } from '../../redux/PlayersSlice';
 import { selectCurrentGame } from '../../redux/selectors';
 import { logEvent } from '../Analytics';
+import { useTheme } from '../theme';
 
 interface Props {
     playerId: string;
@@ -28,6 +29,7 @@ const PlayerListItem: React.FunctionComponent<Props> = ({
     navigation,
     edit,
 }) => {
+    const theme = useTheme();
     const currentGameId = useAppSelector(state => selectCurrentGame(state)?.id);
     const playerIds = useAppSelector(state => selectGameById(state, currentGameId || '')?.playerIds);
     const player = useAppSelector(state => selectPlayerById(state, playerId));
@@ -80,13 +82,13 @@ const PlayerListItem: React.FunctionComponent<Props> = ({
     const DeleteButton = () => {
         return <View style={{ flexDirection: 'column' }} >
             <TouchableOpacity onPress={deleteConfirmHandler}>
-                <Icon size={25} name="remove-circle" color="#ff375f" />
+                <Icon size={25} name="remove-circle" color={theme.destructive} />
             </TouchableOpacity>
         </View>;
     };
 
     return (
-        <View style={styles.playerContainer} key={player?.id}>
+        <View style={[styles.playerContainer, { backgroundColor: theme.inputBackground }]} key={player?.id}>
             <TouchableOpacity
                 onPressIn={edit ? drag : undefined}
                 onLongPress={drag}
@@ -105,16 +107,16 @@ const PlayerListItem: React.FunctionComponent<Props> = ({
                     alignItems: 'center',
                 }]}>
 
-                <Text style={styles.playerNumber}>
+                <Text style={[styles.playerNumber, { color: theme.textSecondary }]}>
                     {index + 1}
                 </Text>
 
                 <View style={[
                     styles.colorBadge,
-                    { backgroundColor: playerColors[0] }
+                    { backgroundColor: playerColors[0], borderColor: theme.textSecondary }
                 ]} />
 
-                <Text style={[styles.input]}>
+                <Text style={[styles.input, { color: theme.textSecondary }]}>
                     {player?.playerName}
                 </Text>
                 {
@@ -134,7 +136,6 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         flexDirection: 'row',
         justifyContent: 'flex-start',
-        backgroundColor: '#222',
         borderRadius: 10,
         padding: 2,
         paddingHorizontal: 10,
@@ -142,14 +143,12 @@ const styles = StyleSheet.create({
         marginHorizontal: 10,
     },
     playerNumber: {
-        color: '#eee',
         fontSize: 25,
         fontVariant: ['tabular-nums'],
         fontWeight: 'bold',
         padding: 5,
     },
     colorBadge: {
-        borderColor: '#eee',
         borderRadius: 25,
         height: 25,
         marginHorizontal: 5,
@@ -157,7 +156,6 @@ const styles = StyleSheet.create({
         width: 25,
     },
     input: {
-        color: '#eee',
         flex: 1,
         fontSize: 18,
     },

@@ -15,13 +15,14 @@ import { logEvent } from '../Analytics';
 import PlayerNameColumn from '../components/ScoreLog/PlayerNameColumn';
 import RoundScoreColumn from '../components/ScoreLog/RoundScoreColumn';
 import TotalScoreColumn from '../components/ScoreLog/TotalScoreColumn';
-import { systemBlue } from '../constants';
+import { useTheme } from '../theme';
 
 interface Props {
     navigation: NativeStackNavigationProp<ParamListBase, string, undefined>;
 }
 
 const ShareScreen: React.FunctionComponent<Props> = ({ navigation }) => {
+    const theme = useTheme();
     const currentGameId = useAppSelector(state => state.settings.currentGameId);
     if (typeof currentGameId == 'undefined') return null;
 
@@ -58,16 +59,16 @@ const ShareScreen: React.FunctionComponent<Props> = ({ navigation }) => {
 
     return (
         <SafeAreaView edges={['right', 'left']}
-            style={[styles.contentContainer, { height: 'auto' }]}>
+            style={[styles.contentContainer, { backgroundColor: theme.background }]}>
             <ScrollView>
 
-                <Text style={{ color: 'white', paddingVertical: 20 }}>
+                <Text style={{ color: theme.text, paddingVertical: 20 }}>
                     You can edit the game title or player names before sharing.
                     Note that edits will affect the game and be permanent.
                 </Text>
 
                 <Button title={' Edit before sharing'} type='clear'
-                    icon={<Icon name='edit' color={systemBlue} />}
+                    icon={<Icon name='edit' color={theme.tint} />}
                     style={{ padding: 10 }}
                     onPress={async () => {
                         navigation.navigate('Settings', { source: 'share_screen' });
@@ -76,22 +77,22 @@ const ShareScreen: React.FunctionComponent<Props> = ({ navigation }) => {
                 <View style={{
                     flexDirection: 'row',
                     borderWidth: 2,
-                    borderColor: 'white',
+                    borderColor: theme.text,
                     borderStyle: 'solid',
                 }}>
                     <ScrollView horizontal={true}
                         showsHorizontalScrollIndicator={false}
                         contentContainerStyle={{
-                            backgroundColor: 'black',
+                            backgroundColor: theme.background,
                             flexDirection: 'column',
                             padding: 20,
                         }}
                         ref={roundsScrollViewEl}>
                         <View style={{ flexDirection: 'column' }}>
-                            <Text style={{ color: 'white', fontSize: 20, fontWeight: 'bold', paddingBottom: 10 }}>
+                            <Text style={{ color: theme.text, fontSize: 20, fontWeight: 'bold', paddingBottom: 10 }}>
                                 {currentGame?.title}
                             </Text>
-                            <Text style={{ color: 'white' }}>
+                            <Text style={{ color: theme.text }}>
                                 Created: {new Date(currentGame.dateCreated).toLocaleDateString()}
                                 &nbsp; {new Date(currentGame.dateCreated).toLocaleTimeString()}
                             </Text>
@@ -113,7 +114,7 @@ const ShareScreen: React.FunctionComponent<Props> = ({ navigation }) => {
                     </ScrollView>
                 </View>
                 <Button style={{ padding: 20 }} type='clear'
-                    icon={<Icon type='evilicon' name='image' color={systemBlue} />}
+                    icon={<Icon type='evilicon' name='image' color={theme.tint} />}
                     title=" Share as image..." onPress={exportImage} />
             </ScrollView>
         </SafeAreaView>
@@ -122,7 +123,6 @@ const ShareScreen: React.FunctionComponent<Props> = ({ navigation }) => {
 
 const styles = StyleSheet.create({
     contentContainer: {
-        backgroundColor: 'black',
         flex: 1,
         padding: 10,
         alignItems: 'center',

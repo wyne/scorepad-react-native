@@ -7,6 +7,7 @@ import { updatePlayer } from '../../../redux/PlayersSlice';
 import { selectCurrentGame } from '../../../redux/selectors';
 import { logEvent } from '../../Analytics';
 import { getPalette, getPalettes } from '../../ColorPalette';
+import { useTheme } from '../../theme';
 
 interface ColorSelectorProps {
     playerId: string;
@@ -26,6 +27,7 @@ const ColorButton: React.FC<{ color: string, playerColor: string | undefined; }>
 };
 
 const ColorSelector: React.FC<ColorSelectorProps> = ({ playerId }) => {
+    const theme = useTheme();
     const colorPalettes = getPalettes();
     const currentGameId = useAppSelector(state => selectCurrentGame(state)?.id);
     const currentGame = useAppSelector(state => selectCurrentGame(state));
@@ -54,7 +56,7 @@ const ColorSelector: React.FC<ColorSelectorProps> = ({ playerId }) => {
 
 
             <View style={[styles.titleContainer]}>
-                <Text style={[styles.title]}>Current Pallete</Text>
+                <Text style={[styles.title, { color: theme.text }]}>Current Pallete</Text>
             </View>
 
             {currentPalette &&
@@ -74,7 +76,7 @@ const ColorSelector: React.FC<ColorSelectorProps> = ({ playerId }) => {
 
 
             <View style={[styles.titleContainer]}>
-                <Text style={[styles.title]}>Other Palletes</Text>
+                <Text style={[styles.title, { color: theme.text }]}>Other Palletes</Text>
             </View>
 
             {colorPalettes.map((palette, palette_index) => (
@@ -111,7 +113,6 @@ const styles = StyleSheet.create({
         width: 25,
     },
     title: {
-        color: 'white',
     },
     titleContainer: {
         flexDirection: 'column',

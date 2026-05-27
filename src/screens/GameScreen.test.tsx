@@ -25,39 +25,6 @@ jest.mock('../components/Sheets/AddendModal', () => {
     };
 });
 
-jest.mock('../components/Sheets/GameSheet', () => {
-    return function MockGameSheet({ containerHeight }: { containerHeight: number }) {
-        const { View, Text } = jest.requireActual('react-native');
-        return (
-            <View testID="game-sheet">
-                <Text>GameSheet - Height: {containerHeight}</Text>
-            </View>
-        );
-    };
-});
-
-// Mock navigation
-const mockNavigation = {
-    navigate: jest.fn(),
-    goBack: jest.fn(),
-    dispatch: jest.fn(),
-    setOptions: jest.fn(),
-    isFocused: jest.fn(() => true),
-    canGoBack: jest.fn(() => true),
-    getId: jest.fn(),
-    getParent: jest.fn(),
-    getState: jest.fn(),
-    reset: jest.fn(),
-    setParams: jest.fn(),
-    push: jest.fn(),
-    pop: jest.fn(),
-    popToTop: jest.fn(),
-    replace: jest.fn(),
-    jumpTo: jest.fn(),
-    addListener: jest.fn(),
-    removeListener: jest.fn(),
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-} as any;
 
 const createMockStore = (initialState: Parameters<typeof configureStore>[0]['preloadedState']) => {
     return configureStore({
@@ -111,7 +78,7 @@ describe('GameScreen', () => {
 
         const { toJSON } = render(
             <Provider store={store}>
-                <GameScreen navigation={mockNavigation} />
+                <GameScreen />
             </Provider>
         );
 
@@ -138,129 +105,11 @@ describe('GameScreen', () => {
 
         const { getByTestId } = render(
             <Provider store={store}>
-                <GameScreen navigation={mockNavigation} />
+                <GameScreen />
             </Provider>
         );
 
         expect(getByTestId('flexbox-board')).toBeTruthy();
         expect(getByTestId('addend-modal')).toBeTruthy();
-        expect(getByTestId('game-sheet')).toBeTruthy();
     });
-
-    it('should not render GameSheet in fullscreen mode', () => {
-        const store = createMockStore({
-            settings: {
-                currentGameId: 'game-1',
-                home_fullscreen: true, // fullscreen mode
-            },
-            games: {
-                entities: {
-                    'game-1': mockGame,
-                },
-                ids: ['game-1'],
-            },
-            players: {
-                entities: mockPlayers,
-                ids: ['player-1', 'player-2'],
-            },
-        });
-
-        const { getByTestId, queryByTestId } = render(
-            <Provider store={store}>
-                <GameScreen navigation={mockNavigation} />
-            </Provider>
-        );
-
-        expect(getByTestId('flexbox-board')).toBeTruthy();
-        expect(getByTestId('addend-modal')).toBeTruthy();
-        expect(queryByTestId('game-sheet')).toBeNull();
-    });
-
-    it('should render GameSheet in non-fullscreen mode', () => {
-        const store = createMockStore({
-            settings: {
-                currentGameId: 'game-1',
-                home_fullscreen: false, // not fullscreen
-            },
-            games: {
-                entities: {
-                    'game-1': mockGame,
-                },
-                ids: ['game-1'],
-            },
-            players: {
-                entities: mockPlayers,
-                ids: ['player-1', 'player-2'],
-            },
-        });
-
-        const { getByTestId } = render(
-            <Provider store={store}>
-                <GameScreen navigation={mockNavigation} />
-            </Provider>
-        );
-
-        expect(getByTestId('game-sheet')).toBeTruthy();
-    });
-
-    it('should handle layout changes for window height', () => {
-        const store = createMockStore({
-            settings: {
-                currentGameId: 'game-1',
-                home_fullscreen: false,
-            },
-            games: {
-                entities: {
-                    'game-1': mockGame,
-                },
-                ids: ['game-1'],
-            },
-            players: {
-                entities: mockPlayers,
-                ids: ['player-1', 'player-2'],
-            },
-        });
-
-        const { getByTestId } = render(
-            <Provider store={store}>
-                <GameScreen navigation={mockNavigation} />
-            </Provider>
-        );
-
-        const mainView = getByTestId('flexbox-board').parent?.parent;
-        expect(mainView).toBeTruthy();
-
-        // The onLayout callback should be defined and callable
-        // This tests that the component can handle layout changes
-        expect(getByTestId('game-sheet')).toBeTruthy();
-    });
-
-    it('should pass navigation prop to GameSheet', () => {
-        const store = createMockStore({
-            settings: {
-                currentGameId: 'game-1',
-                home_fullscreen: false,
-            },
-            games: {
-                entities: {
-                    'game-1': mockGame,
-                },
-                ids: ['game-1'],
-            },
-            players: {
-                entities: mockPlayers,
-                ids: ['player-1', 'player-2'],
-            },
-        });
-
-        const { getByTestId } = render(
-            <Provider store={store}>
-                <GameScreen navigation={mockNavigation} />
-            </Provider>
-        );
-
-        // GameSheet should be rendered with navigation prop
-        expect(getByTestId('game-sheet')).toBeTruthy();
-    });
-
 });

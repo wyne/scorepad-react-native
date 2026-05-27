@@ -7,12 +7,14 @@ import { Input } from 'react-native-elements';
 import { updateGame } from '../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { selectCurrentGame } from '../../redux/selectors';
+import { useTheme } from '../theme';
 
 import PaletteSelector from './ColorPalettes/PaletteSelector';
 
 const UNTITLED = 'Untitled';
 
 const EditGame = ({ }) => {
+    const theme = useTheme();
     const dispatch = useAppDispatch();
     const currentGame = useAppSelector(selectCurrentGame);
     const [localTitle, setLocalTitle] = useState(currentGame?.title ?? '');
@@ -52,7 +54,7 @@ const EditGame = ({ }) => {
 
     return (
         <>
-            <View style={styles.inputContainer}>
+            <View style={[styles.inputContainer, { backgroundColor: theme.inputBackground }]}>
                 <Input
                     defaultValue={localTitle}
                     maxLength={30}
@@ -65,12 +67,12 @@ const EditGame = ({ }) => {
                     }}
                     placeholder={UNTITLED}
                     renderErrorMessage={false}
-                    style={styles.input}
+                    style={{ color: theme.inputText }}
                     inputContainerStyle={{ borderBottomWidth: 0 }}
                 />
             </View>
             <View style={{ marginHorizontal: 20 }}>
-                <Text style={styles.creation}>
+                <Text style={{ color: theme.textTertiary }}>
                     Created: {new Date(currentGame.dateCreated).toLocaleDateString()}
                     &nbsp; {new Date(currentGame.dateCreated).toLocaleTimeString()}
                 </Text>
@@ -88,19 +90,13 @@ const styles = StyleSheet.create({
         alignItems: 'flex-start',
         flexDirection: 'column',
         justifyContent: 'flex-start',
-        backgroundColor: '#222',
         borderRadius: 10,
         padding: 2,
         paddingHorizontal: 10,
         marginVertical: 5,
         marginHorizontal: 10,
     },
-    input: {
-        color: '#EEE',
-    },
-    creation: {
-        color: '#999',
-    }
+
 });
 
 export default EditGame;

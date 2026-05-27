@@ -4,6 +4,8 @@ import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Icon } from 'react-native-elements';
 import Animated, { FadeIn, FadeOut, Layout } from 'react-native-reanimated';
 
+import { useTheme } from '../../theme';
+
 interface Props {
     onPress: () => void;
     icon: string | JSX.Element;
@@ -13,11 +15,13 @@ interface Props {
 }
 
 const BigButton: React.FunctionComponent<Props> = ({ icon, text, color, onPress, animated = true }) => {
+    const theme = useTheme();
+    const isDark = theme.background === '#000000';
 
     return (
         <Animated.View layout={Layout.duration(400)} entering={animated ? FadeIn.delay(400) : undefined} exiting={FadeOut}>
             <TouchableOpacity activeOpacity={.5} onPress={onPress}>
-                <View style={[styles.bigButton]}>
+                <View style={[styles.bigButton, { backgroundColor: isDark ? 'rgba(0,0,0,.2)' : '#FFFFFF' }]}>
                     {typeof icon === 'string' ? (<Icon name={icon}
                         type="ionicon" size={30}
                         color={color}
@@ -46,7 +50,6 @@ const styles = StyleSheet.create({
         margin: 5,
         padding: 10,
         paddingHorizontal: 20,
-        backgroundColor: 'rgba(0,0,0,.2)',
         borderRadius: 10,
         alignItems: 'center'
     },

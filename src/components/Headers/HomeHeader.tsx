@@ -4,6 +4,7 @@ import { ParamListBase } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Text, StyleSheet, View } from 'react-native';
 
+import { useTheme } from '../../theme';
 import AppInfoButton from '../Buttons/AppInfoButton';
 import NewGameButton from '../Buttons/NewGameButton';
 
@@ -14,13 +15,14 @@ interface Props {
 }
 
 const HomeHeader: React.FunctionComponent<Props> = ({ navigation }) => {
+  const theme = useTheme();
   return (
-    <View style={{ backgroundColor: 'white' }}>
+    <View style={{ backgroundColor: theme.headerBackground }}>
       <CustomHeader
         navigation={navigation}
         headerLeft={<AppInfoButton navigation={navigation} />}
         headerCenter={
-          <Text style={styles.title} allowFontScaling={false}>
+          <Text style={[styles.title, { color: theme.headerText }]} allowFontScaling={false}>
             ScorePad
           </Text>
         }
@@ -33,7 +35,6 @@ const HomeHeader: React.FunctionComponent<Props> = ({ navigation }) => {
 
 const styles = StyleSheet.create({
   title: {
-    color: 'white',
     fontSize: 20,
     fontVariant: ['tabular-nums'],
   },
