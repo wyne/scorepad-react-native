@@ -158,7 +158,7 @@ const AppInfoScreen: React.FunctionComponent<Props> = ({ navigation }) => {
                     <View style={styles.labelRow}>
                         <SectionItemText text="Player Numbers" />
                         <View style={[styles.betaPill, { backgroundColor: theme.separator }]}>
-                            <Text style={[styles.betaPillText, { color: theme.textTertiary }]}>Beta</Text>
+                            <Text style={[styles.betaPillText, { color: theme.text }]}>Beta</Text>
                         </View>
                     </View>
                     <Switch onValueChange={togglePlayerIndexSwitch} value={showPlayerIndex} ios_backgroundColor={theme.separator} />
@@ -169,7 +169,7 @@ const AppInfoScreen: React.FunctionComponent<Props> = ({ navigation }) => {
                         {isUnseen && <View style={[styles.featureDot, { backgroundColor: theme.warning }]} />}
                         <SectionItemText text="Keep Screen Awake" />
                             <View style={[styles.betaPill, { backgroundColor: theme.separator }]}>
-                            <Text style={[styles.betaPillText, { color: theme.textTertiary }]}>Beta</Text>
+                            <Text style={[styles.betaPillText, { color: theme.text }]}>Beta</Text>
                         </View>
                     </View>
                     <Switch onValueChange={toggleKeepAwake} value={keepScreenAwake} ios_backgroundColor={theme.separator} />

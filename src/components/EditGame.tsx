@@ -67,12 +67,12 @@ const EditGame = ({ }) => {
                     }}
                     placeholder={UNTITLED}
                     renderErrorMessage={false}
-                    style={[styles.input, { color: theme.inputText }]}
+                    style={{ color: theme.inputText }}
                     inputContainerStyle={{ borderBottomWidth: 0 }}
                 />
             </View>
             <View style={{ marginHorizontal: 20 }}>
-                <Text style={[styles.creation, { color: theme.textTertiary }]}>
+                <Text style={{ color: theme.textTertiary }}>
                     Created: {new Date(currentGame.dateCreated).toLocaleDateString()}
                     &nbsp; {new Date(currentGame.dateCreated).toLocaleTimeString()}
                 </Text>
@@ -96,8 +96,7 @@ const styles = StyleSheet.create({
         marginVertical: 5,
         marginHorizontal: 10,
     },
-    input: {},
-    creation: {},
+
 });
 
 export default EditGame;
