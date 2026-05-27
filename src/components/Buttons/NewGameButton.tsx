@@ -8,13 +8,15 @@ import { Icon } from 'react-native-elements';
 
 import { asyncCreateGame, selectAllGames } from '../../../redux/GamesSlice';
 import { useAppSelector, useAppDispatch } from '../../../redux/hooks';
-import { MAX_PLAYERS, systemBlue } from '../../constants';
+import { MAX_PLAYERS } from '../../constants';
+import { useTheme } from '../../theme';
 
 interface Props {
     navigation: NativeStackNavigationProp<ParamListBase, string, undefined>;
 }
 
 const NewGameButton: React.FunctionComponent<Props> = ({ navigation }) => {
+    const theme = useTheme();
     const dispatch = useAppDispatch();
 
     const gameList = useAppSelector(selectAllGames);
@@ -54,7 +56,7 @@ const NewGameButton: React.FunctionComponent<Props> = ({ navigation }) => {
                     <Icon name="plus"
                         type="font-awesome-5"
                         size={20}
-                        color={systemBlue} />
+                        color={theme.tint} />
                 </View>
             </MenuView>
         </View>

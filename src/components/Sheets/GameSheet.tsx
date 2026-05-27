@@ -12,7 +12,7 @@ import { asyncRematchGame, selectGameById, updateGame } from '../../../redux/Gam
 import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
 import { updatePlayer } from '../../../redux/PlayersSlice';
 import { logEvent } from '../../Analytics';
-import { systemBlue } from '../../constants';
+import { useTheme } from '../../theme';
 import BigButton from '../BigButtons/BigButton';
 import RematchIcon from '../Icons/RematchIcon';
 import Rounds from '../Rounds';
@@ -30,8 +30,8 @@ interface Props {
 }
 
 const GameSheet: React.FunctionComponent<Props> = ({ navigation, containerHeight }) => {
+    const theme = useTheme();
     const isFocused = useIsFocused();
-
     const currentGameId = useAppSelector(state => state.settings.currentGameId);
     const fullscreen = useAppSelector(state => state.settings.home_fullscreen);
     const gameTitle = useAppSelector(state => selectGameById(state, currentGameId || '')?.title);
@@ -222,24 +222,25 @@ const GameSheet: React.FunctionComponent<Props> = ({ navigation, containerHeight
             onChange={onSheetChange}
             snapPoints={snapPoints}
             backdropComponent={renderBackdrop}
-            backgroundStyle={{ backgroundColor: 'rgb(30,40,50)' }}
-            handleIndicatorStyle={{ backgroundColor: 'white' }}
+            backgroundStyle={{ backgroundColor: theme.sheetBackground }}
+            handleIndicatorStyle={{ backgroundColor: theme.sheetHandle }}
             animatedPosition={animatedPosition}
             enablePanDownToClose={false}
+            style={theme.background === '#000000' ? undefined : styles.sheetShadow}
         >
             <BottomSheetScrollView>
                 <SafeAreaView edges={['right', 'left']}>
                     <View style={styles.sheetHeaderContainer}>
                         <TouchableWithoutFeedback onPress={() => sheetTitlePress()}>
                             <View style={[styles.sheetTitleView]}>
-                                <Text style={[styles.sheetTitle]} numberOfLines={1}>
+                                <Text style={[styles.sheetTitle, { color: theme.text }]} numberOfLines={1}>
                                     {gameTitle}
                                 </Text>
                             </View>
                         </TouchableWithoutFeedback>
 
                         {gameLocked &&
-                            <Text style={{ color: 'gray', fontSize: 20, paddingHorizontal: 10 }}
+                            <Text style={{ color: theme.textTertiary, fontSize: 20, paddingHorizontal: 10 }}
                                 onPress={() => { gameSheetRef?.current?.snapToIndex(snapPoints.length - 1); }}
                             >
                                 Locked
@@ -255,7 +256,7 @@ const GameSheet: React.FunctionComponent<Props> = ({ navigation, containerHeight
                     <Animated.View style={[styles.sheetContent, animatedSheetStyle]}>
                         <Rounds navigation={navigation} show={!fullscreen} />
 
-                        <Text style={{ color: 'white', margin: 10, marginTop: 0 }}>
+                        <Text style={{ color: theme.text, margin: 10, marginTop: 0 }}>
                             Tap the player column or total score column to change sorting.
                         </Text>
 
@@ -265,9 +266,10 @@ const GameSheet: React.FunctionComponent<Props> = ({ navigation, containerHeight
                                 <Animated.View entering={FadeIn.delay(400)}>
                                     <Button title="Edit Game and Players"
                                         type="clear"
+                                        titleStyle={{ color: theme.tint }}
                                         style={{
                                             margin: 5, marginTop: 15,
-                                            backgroundColor: 'rgba(0,0,0,.2)', borderRadius: 10
+                                            backgroundColor: theme.background === '#000000' ? 'rgba(0,0,0,.2)' : '#FFFFFF', borderRadius: 10
                                         }}
                                         onPress={() => {
 
@@ -290,14 +292,14 @@ const GameSheet: React.FunctionComponent<Props> = ({ navigation, containerHeight
                         <Animated.View key={isFocused + 'a'} layout={Layout.delay(200)} style={{ flexDirection: 'row', justifyContent: 'space-around', paddingVertical: 10 }}>
                             {Platform.OS === 'ios' &&
                                 <BigButton text="Share"
-                                    color={systemBlue}
+                                    color={theme.tint}
                                     icon="share-outline"
                                     onPress={() => navigation.navigate('Share')}
                                 />
                             }
 
                             <BigButton text={gameLocked ? 'Unlock' : 'Lock'}
-                                color={gameLocked ? 'orange' : 'green'}
+                                color={gameLocked ? theme.warning : theme.success}
                                 icon={gameLocked ? 'lock-closed-outline' : 'lock-open-outline'}
                                 onPress={setLock}
                             />
@@ -308,7 +310,7 @@ const GameSheet: React.FunctionComponent<Props> = ({ navigation, containerHeight
                             {!gameLocked &&
                                 <Animated.View layout={Layout.delay(200)} style={{ justifyContent: 'center', alignItems: 'center' }}>
                                     <BigButton text="Reset"
-                                        color='red'
+                                        color={theme.destructive}
                                         icon="backspace-outline"
                                         onPress={resetGameHandler}
                                     />
@@ -317,8 +319,8 @@ const GameSheet: React.FunctionComponent<Props> = ({ navigation, containerHeight
 
                             <Animated.View layout={Layout.delay(200)} style={{ justifyContent: 'center', alignItems: 'center' }}>
                                 <BigButton text="Rematch"
-                                    color='yellow'
-                                    icon={<RematchIcon fill="yellow" />}
+                                    color={theme.warning}
+                                    icon={<RematchIcon fill={theme.warning} />}
                                     onPress={rematchGameHandler}
                                 />
                             </Animated.View>
@@ -343,12 +345,10 @@ const styles = StyleSheet.create({
         paddingTop: 0,
     },
     sheetTitle: {
-        color: 'white',
         fontSize: 20,
         fontWeight: 'bold',
     },
     editButton: {
-        color: systemBlue,
         fontSize: 20,
         paddingHorizontal: 10,
     },
@@ -364,6 +364,13 @@ const styles = StyleSheet.create({
         backgroundColor: 'rgba(0,0,0,.2)',
         borderRadius: 10,
         alignItems: 'center'
+    },
+    sheetShadow: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: -3 },
+        shadowOpacity: 0.12,
+        shadowRadius: 5,
+        elevation: 8,
     },
 });
 

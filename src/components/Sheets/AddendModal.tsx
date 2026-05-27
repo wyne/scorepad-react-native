@@ -9,12 +9,15 @@ import { Platform, StyleSheet, Text, View } from 'react-native';
 import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
 import { setAddendOne, setAddendTwo, setMultiplier } from '../../../redux/SettingsSlice';
 import { logEvent } from '../../Analytics';
+import { useTheme } from '../../theme';
 import InteractionSelector from '../Interactions/InteractionSelector';
 import { InteractionType } from '../Interactions/InteractionType';
+
 
 import { useAddendModalContext } from './AddendModalContext';
 
 const AddendModal: React.FunctionComponent = ({ }) => {
+    const theme = useTheme();
     const addendOne = useAppSelector(state => state.settings.addendOne);
     const addendTwo = useAppSelector(state => state.settings.addendTwo);
     const interactionType = useAppSelector(state => state.settings.interactionType);
@@ -120,8 +123,8 @@ const AddendModal: React.FunctionComponent = ({ }) => {
             snapPoints={snapPoints}
             onChange={handleSheetChanges}
             backdropComponent={renderBackdrop}
-            backgroundStyle={{ backgroundColor: 'rgb(30,40,50)' }}
-            handleIndicatorStyle={{ backgroundColor: 'white' }}
+            backgroundStyle={{ backgroundColor: theme.sheetBackground }}
+            handleIndicatorStyle={{ backgroundColor: theme.sheetHandle }}
         >
             <BottomSheetScrollView style={[
                 styles.modalContainer]}
@@ -140,7 +143,7 @@ const AddendModal: React.FunctionComponent = ({ }) => {
 
                     <View style={{ flex: 1, flexDirection: 'column', alignItems: 'center' }}>
 
-                        <Text style={{ color: 'white', fontSize: 20 }}>Point Values</Text>
+                        <Text style={{ color: theme.text, fontSize: 20 }}>Point Values</Text>
 
                         <View style={{
                             flex: 1,
@@ -149,13 +152,13 @@ const AddendModal: React.FunctionComponent = ({ }) => {
                             padding: 10,
                         }}>
                             <View>
-                                <Text style={{ color: 'white', textAlign: 'center' }}>{addendOneLabel}</Text>
-                                <View style={isAndroid ? styles.pickerContainerAndroid : styles.pickerContainer}>
+                                <Text style={{ color: theme.text, textAlign: 'center' }}>{addendOneLabel}</Text>
+                                <View style={[isAndroid ? styles.pickerContainerAndroid : styles.pickerContainer, { backgroundColor: theme.background === '#000000' ? 'rgba(0,0,0,.2)' : '#FFFFFF' }]}>
                                     <Picker
                                         selectedValue={addendOne}
                                         onValueChange={isAndroid ? debouncedTapValueChange : onTapValueChange}
                                         style={isAndroid ? styles.pickerAndroid : styles.picker}
-                                        itemStyle={styles.pickerItem}
+                                        itemStyle={[styles.pickerItem, { color: theme.text }]}
                                     >
                                         {
                                             addendOptions.map((addend) => (
@@ -167,13 +170,13 @@ const AddendModal: React.FunctionComponent = ({ }) => {
                             </View>
 
                             <View>
-                                <Text style={{ color: 'white', textAlign: 'center' }}>{addendTwoLabel}</Text>
-                                <View style={isAndroid ? styles.pickerContainerAndroid : styles.pickerContainer}>
+                                <Text style={{ color: theme.text, textAlign: 'center' }}>{addendTwoLabel}</Text>
+                                <View style={[isAndroid ? styles.pickerContainerAndroid : styles.pickerContainer, { backgroundColor: theme.background === '#000000' ? 'rgba(0,0,0,.2)' : '#FFFFFF' }]}>
                                     <Picker
                                         selectedValue={addendTwo}
                                         onValueChange={isAndroid ? debouncedLongTapValueChange : onLongTapValueChange}
                                         style={isAndroid ? styles.pickerAndroid : styles.picker}
-                                        itemStyle={styles.pickerItem}
+                                        itemStyle={[styles.pickerItem, { color: theme.text }]}
                                     >
                                         {
                                             addendOptions.map((addend) => (
@@ -204,16 +207,13 @@ const styles = StyleSheet.create({
         width: 120,
     },
     pickerItem: {
-        color: 'white',
         fontSize: 16,
     },
     pickerContainer: {
-        backgroundColor: 'rgb(20,30,40)',
         borderRadius: 10,
         margin: 10,
     },
     pickerContainerAndroid: {
-        backgroundColor: 'white',
         borderRadius: 10,
         margin: 10,
     },

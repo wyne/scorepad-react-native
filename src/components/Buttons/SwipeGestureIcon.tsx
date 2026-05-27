@@ -17,7 +17,7 @@ const SwipeGestureIcon: React.FunctionComponent<SwipeGestureIconProps> = ({
     return (
         <View style={{ paddingHorizontal: 2 }}>
             <Svg height={size} width={size} viewBox="1 1 30 44">
-                <Rect x="3" y="3" width="28" height="40" rx="7" ry="7" strokeWidth={4} stroke={color}></Rect>
+                <Rect x="3" y="3" width="28" height="40" rx="7" ry="7" strokeWidth={4} stroke={color} fill="none"></Rect>
 
                 <Polyline fill="none" stroke={color} strokeWidth="3" strokeLinecap="round" stroke-linejoin="round"
                     points="9,18 17,10 25,18 " />

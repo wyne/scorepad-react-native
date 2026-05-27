@@ -7,7 +7,7 @@ import { Text } from 'react-native';
 import { useAppSelector } from '../../../redux/hooks';
 import { selectCurrentGame } from '../../../redux/selectors';
 import { logEvent } from '../../Analytics';
-import { systemBlue } from '../../constants';
+import { useTheme } from '../../theme';
 
 import HeaderButton from './HeaderButton';
 
@@ -22,6 +22,7 @@ interface Props {
 }
 
 const CheckButton: React.FunctionComponent<Props> = ({ navigation, route }) => {
+    const theme = useTheme();
     const currentGame = useAppSelector(state => selectCurrentGame(state));
     if (typeof currentGame == 'undefined') return null;
 
@@ -44,7 +45,7 @@ const CheckButton: React.FunctionComponent<Props> = ({ navigation, route }) => {
                 navigation.goBack();
             }
         }}>
-            <Text style={{ color: systemBlue, fontSize: 20 }} allowFontScaling={false}>Done</Text>
+            <Text style={{ color: theme.tint, fontSize: 20 }} allowFontScaling={false}>Done</Text>
         </HeaderButton>
     );
 };

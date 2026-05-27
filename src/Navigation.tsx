@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { DarkTheme, NavigationContainer } from '@react-navigation/native';
+import { DarkTheme, DefaultTheme, NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator, NativeStackHeaderProps, NativeStackOptionsArgs } from '@react-navigation/native-stack';
 import { SemVer } from 'semver';
 
@@ -18,6 +18,7 @@ import EditPlayerHeader from './components/Headers/EditPlayerHeader';
 import ShareHeader from './components/Headers/ShareHeader';
 import EditPlayerScreen from './screens/EditPlayerScreen';
 import ShareScreen from './screens/ShareScreen';
+import { useTheme } from './theme';
 
 export type OnboardingScreenParamList = {
     onboarding: boolean;
@@ -42,17 +43,15 @@ export type RootStackParamList = {
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
-const MyTheme = {
-    ...DarkTheme,
-    colors: {
-        ...DarkTheme.colors,
-        background: 'black',
-    },
-};
-
 export const Navigation = () => {
+    const theme = useTheme();
+    const isDark = theme.background === '#000000';
+    const navTheme = isDark
+        ? { ...DarkTheme, colors: { ...DarkTheme.colors, background: theme.background, card: theme.background } }
+        : { ...DefaultTheme, colors: { ...DefaultTheme.colors, background: theme.background, card: theme.backgroundSecondary } };
+
     return (
-        <NavigationContainer theme={MyTheme}>
+        <NavigationContainer theme={navTheme}>
             <Stack.Navigator initialRouteName='List' >
                 <Stack.Screen name="List" component={ListScreen}
                     options={{

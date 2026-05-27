@@ -57,6 +57,7 @@ const createMockState = (
     installId: 'test-install-id',
     keepScreenAwake: false,
     seenFeatureNotifications: [],
+    colorScheme: 'system',
   },
   games: {
     entities: {

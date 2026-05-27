@@ -4,6 +4,7 @@ import { StyleSheet, Text } from 'react-native';
 
 import { useAppSelector } from '../../../redux/hooks';
 import { selectPlayerScoreByRound } from '../../../redux/PlayersSlice';
+import { useTheme } from '../../theme';
 
 interface Props {
     playerId: string;
@@ -12,12 +13,13 @@ interface Props {
 }
 
 const RoundScoreCell: React.FunctionComponent<Props> = ({ playerId, round, playerIndex }) => {
+    const theme = useTheme();
     const scoreRound = useAppSelector(state => selectPlayerScoreByRound(state, playerId, round));
 
     return (
         <Text key={playerIndex} style={[
             styles.scoreEntry,
-            { color: scoreRound == 0 ? '#555' : 'white' }]}>
+            { color: scoreRound == 0 ? theme.textTertiary : theme.text }]}>
             {scoreRound}
         </Text>
     );
@@ -25,7 +27,6 @@ const RoundScoreCell: React.FunctionComponent<Props> = ({ playerId, round, playe
 
 const styles = StyleSheet.create({
     totalHeader: {
-        color: 'white',
         fontWeight: 'bold',
         textAlign: 'center',
         fontSize: 20,
@@ -33,7 +34,6 @@ const styles = StyleSheet.create({
     scoreEntry: {
         fontVariant: ['tabular-nums'],
         textAlign: 'center',
-        color: 'white',
         fontSize: 20,
     }
 });

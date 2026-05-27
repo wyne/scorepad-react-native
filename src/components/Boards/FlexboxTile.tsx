@@ -6,6 +6,7 @@ import Animated, { Easing, FadeIn } from 'react-native-reanimated';
 import { makeSelectPlayerColors } from '../../../redux/GamesSlice';
 import { useAppSelector } from '../../../redux/hooks';
 import { selectCurrentGame, selectInteractionType } from '../../../redux/selectors';
+import { useTheme } from '../../theme';
 import { interactionComponents } from '../Interactions/InteractionComponents';
 import { InteractionType } from '../Interactions/InteractionType';
 import AdditionTile from '../PlayerTiles/AdditionTile/AdditionTile';
@@ -32,6 +33,7 @@ const FlexboxTile: React.FunctionComponent<Props> = React.memo(({
     if (!(width > 0 && height > 0)) return null;
     if (Number.isNaN(width) || Number.isNaN(height)) return null;
 
+    const theme = useTheme();
     const currentGameId = useAppSelector(state => selectCurrentGame(state)?.id);
     const playerIndexLabel = useAppSelector(state => state.settings.showPlayerIndex);
     const selectPlayerColors = makeSelectPlayerColors();
@@ -52,6 +54,7 @@ const FlexboxTile: React.FunctionComponent<Props> = React.memo(({
                 styles.playerCard,
                 {
                     backgroundColor: bg,
+                    borderColor: theme.background,
                     width: widthPerc,
                     height: heightPerc,
                     borderBottomLeftRadius: playerIndexLabel ? 7 : undefined,

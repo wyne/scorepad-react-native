@@ -100,7 +100,7 @@ export default {
     versionCode: 87,
     googleServicesFile: './google-services.json',
   },
-  userInterfaceStyle: 'dark',
+  userInterfaceStyle: 'automatic',
   web: {
     favicon: './assets/favicon.png',
   },

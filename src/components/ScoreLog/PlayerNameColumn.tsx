@@ -7,6 +7,7 @@ import { makeSelectPlayerColors } from '../../../redux/GamesSlice';
 import { useAppSelector } from '../../../redux/hooks';
 import { selectPlayerById } from '../../../redux/PlayersSlice';
 import { selectCurrentGame } from '../../../redux/selectors';
+import { useTheme } from '../../theme';
 
 import { SortDirectionKey, SortSelectorKey, sortSelectors } from './SortHelper';
 
@@ -17,6 +18,7 @@ interface CellProps {
 }
 
 const PlayerNameCell: React.FunctionComponent<CellProps> = ({ index, playerId }) => {
+    const theme = useTheme();
     const selectPlayerColors = makeSelectPlayerColors();
     const currentGameId = useAppSelector(state => selectCurrentGame(state)?.id);
     const playerColors = useAppSelector(state => selectPlayerColors(state, currentGameId, playerId));
@@ -24,7 +26,7 @@ const PlayerNameCell: React.FunctionComponent<CellProps> = ({ index, playerId })
 
     return (
         <View key={index} style={{ paddingLeft: 5, borderLeftWidth: 5, borderColor: playerColors[0] }}>
-            <Text key={index} style={{ color: 'white', maxWidth: 100, fontSize: 20, }}
+            <Text key={index} style={{ color: theme.text, maxWidth: 100, fontSize: 20 }}
                 numberOfLines={1}
             >{playerName}</Text>
         </View>
@@ -32,6 +34,7 @@ const PlayerNameCell: React.FunctionComponent<CellProps> = ({ index, playerId })
 };
 
 const PlayerHeaderCell: React.FunctionComponent = () => {
+    const theme = useTheme();
     const sortKey = useAppSelector(state => selectCurrentGame(state)?.sortSelectorKey);
     const sortDirection = useAppSelector(state => selectCurrentGame(state)?.sortDirectionKey);
 
@@ -44,12 +47,12 @@ const PlayerHeaderCell: React.FunctionComponent = () => {
 
     return (
 
-        <Text style={styles.editRow}>
+        <Text style={[styles.editRow, { color: theme.text }]}>
             &nbsp;
             <Icon name="users"
                 type="font-awesome-5"
                 size={19}
-                color='white' /> {
+                color={theme.text} /> {
                 sortLabel
             }
         </Text>
@@ -76,7 +79,6 @@ const PlayerNameColumn: React.FunctionComponent = () => {
 
 const styles = StyleSheet.create({
     editRow: {
-        color: 'white',
         fontSize: 20,
         textAlign: 'center',
     }

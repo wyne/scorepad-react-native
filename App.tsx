@@ -19,7 +19,7 @@ if (process.env.EXPO_PUBLIC_FIREBASE_ANALYTICS == 'false') {
 
 export default function App() {
     return (
-        <View style={{ flex: 1, backgroundColor: '#fff' }}>
+        <View style={{ flex: 1, backgroundColor: '#000' }}>
             <GestureHandlerRootView style={{ flex: 1 }}>
                 <Provider store={store}>
                     <GameSheetContextProvider>

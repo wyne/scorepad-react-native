@@ -11,6 +11,7 @@ import { selectGameById } from '../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { setCurrentGameId } from '../../redux/SettingsSlice';
 import { logEvent } from '../Analytics';
+import { useTheme } from '../theme';
 
 import GameListItemPlayerName from './GameListItemPlayerName';
 import AbstractPopupMenu from './PopupMenu/AbstractPopupMenu';
@@ -22,6 +23,7 @@ export type Props = {
 };
 
 const GameListItem: React.FunctionComponent<Props> = ({ navigation, gameId, index }) => {
+    const theme = useTheme();
     const dispatch = useAppDispatch();
 
     if (gameId == null) { return null; }
@@ -63,28 +65,29 @@ const GameListItem: React.FunctionComponent<Props> = ({ navigation, gameId, inde
             >
                 <ListItem key={gameId} bottomDivider
                     onPress={Platform.OS == 'android' ? undefined : chooseGameHandler}
+                    containerStyle={{ backgroundColor: theme.backgroundSecondary, borderBottomColor: theme.separator }}
                 >
                     <ListItem.Content>
-                        <ListItem.Title style={{ alignItems: 'center' }}>
+                        <ListItem.Title style={{ alignItems: 'center', color: theme.text }}>
                             {gameTitle}
-                            {locked && <Icon name="lock-closed-outline" type="ionicon" size={14} color='green' style={{ paddingHorizontal: 4 }} />}
+                            {locked && <Icon name="lock-closed-outline" type="ionicon" size={14} color={theme.success} style={{ paddingHorizontal: 4 }} />}
                         </ListItem.Title>
-                        <ListItem.Subtitle style={styles.gameSubtitle}>
+                        <ListItem.Subtitle style={{ color: theme.textTertiary }}>
                             <Text><Moment element={Text} fromNow>{dateCreated}</Moment></Text>
                         </ListItem.Subtitle>
-                        <ListItem.Subtitle style={styles.gameSubtitle}>
+                        <ListItem.Subtitle style={{ color: theme.textTertiary }}>
                             {playerIds.map((playerId, index) => (
                                 <GameListItemPlayerName key={index} playerId={playerId} last={index == playerIds.length - 1} />
                             ))}
                         </ListItem.Subtitle>
                     </ListItem.Content>
-                    <Text style={styles.badgePlayers}>
-                        {playerIds.length} <Icon color={'#01497C'} name="users" type="font-awesome-5" size={16} />
+                    <Text style={[styles.badgePlayers, { color: theme.badgeBlue }]}>
+                        {playerIds.length} <Icon color={theme.badgeBlue} name="users" type="font-awesome-5" size={16} />
                     </Text>
-                    <Text style={styles.badgeRounds}>
-                        {roundTotal} <Icon color={'#c25858'} name="circle-notch" type="font-awesome-5" size={16} />
+                    <Text style={[styles.badgeRounds, { color: theme.badgeRed }]}>
+                        {roundTotal} <Icon color={theme.badgeRed} name="circle-notch" type="font-awesome-5" size={16} />
                     </Text>
-                    <ListItem.Chevron />
+                    <ListItem.Chevron iconStyle={{ color: theme.separator }} />
                 </ListItem>
             </AbstractPopupMenu>
         </Animated.View>
@@ -92,27 +95,16 @@ const GameListItem: React.FunctionComponent<Props> = ({ navigation, gameId, inde
 };
 
 const styles = StyleSheet.create({
-    list: {
-        borderTopWidth: 1,
-        borderColor: '#eee',
-        backgroundColor: 'white',
-        flex: 1,
-    },
-    gameSubtitle: {
-        color: '#999',
-    },
     newGame: {
         margin: 20,
         width: 200,
         alignSelf: 'center',
     },
     badgePlayers: {
-        color: '#01497C',
         alignItems: 'center',
         fontSize: 20,
     },
     badgeRounds: {
-        color: '#c25858',
         alignItems: 'center',
         fontSize: 20,
     }

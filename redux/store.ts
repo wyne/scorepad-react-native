@@ -14,11 +14,14 @@ const settingsMigrations: any = {
         delete s.keepScreenAwakeDuration;
         return { ...s, keepScreenAwake, seenFeatureNotifications: [] };
     },
+    1: (state: Record<string, unknown> | undefined) => {
+        return { ...state, colorScheme: 'system' };
+    },
 };
 
 const settingsPersistConfig = {
     key: 'settings',
-    version: 1,
+    version: 2,
     storage: AsyncStorage,
     migrate: createMigrate(settingsMigrations),
     whitelist: [
@@ -38,6 +41,7 @@ const settingsPersistConfig = {
         'rollingGameCounter',
         'keepScreenAwake',
         'seenFeatureNotifications',
+        'colorScheme',
     ],
 };
 

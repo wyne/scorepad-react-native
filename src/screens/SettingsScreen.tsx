@@ -12,7 +12,8 @@ import { selectCurrentGame } from '../../redux/selectors';
 import { logEvent } from '../Analytics';
 import EditGame from '../components/EditGame';
 import PlayerListItem from '../components/PlayerListItem';
-import { MAX_PLAYERS, systemBlue } from '../constants';
+import { MAX_PLAYERS } from '../constants';
+import { useTheme } from '../theme';
 
 type RouteParams = {
     Settings: {
@@ -30,6 +31,7 @@ const SettingsScreen: React.FunctionComponent<Props> = ({ navigation }) => {
 
     const currentGameId = useAppSelector(state => state.settings.currentGameId);
     const playerIds = useAppSelector(state => selectCurrentGame(state)?.playerIds);
+    const theme = useTheme();
     const [edit, setEdit] = React.useState(false);
 
     useEffect(() => {
@@ -57,12 +59,12 @@ const SettingsScreen: React.FunctionComponent<Props> = ({ navigation }) => {
         <View style={{ margin: 10, marginBottom: 50, alignSelf: 'center' }}>
             {playerIds.length < MAX_PLAYERS &&
                 <Button title="Add Player" type="clear"
-                    icon={<Icon name="add" color={systemBlue} />}
+                    icon={<Icon name="add" color={theme.tint} />}
                     disabled={playerIds.length >= MAX_PLAYERS}
                     onPress={addPlayerHandler} />
             }
             {playerIds.length >= MAX_PLAYERS &&
-                <Text style={styles.text}>Max players reached.</Text>
+                <Text style={[styles.text, { color: theme.textSecondary }]}>Max players reached.</Text>
             }
         </View>
     );
@@ -70,10 +72,10 @@ const SettingsScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     return (
         <View style={{ flex: 1 }}>
 
-            <Text style={styles.heading}>Game Title</Text>
+            <Text style={[styles.heading, { color: theme.textSecondary }]}>Game Title</Text>
             <EditGame />
             <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                <Text style={styles.heading}>Players</Text>
+                <Text style={[styles.heading, { color: theme.textSecondary }]}>Players</Text>
                 {playerIds.length > 1 &&
                     <TouchableOpacity onPress={() => {
                         setEdit(!edit);
@@ -82,7 +84,7 @@ const SettingsScreen: React.FunctionComponent<Props> = ({ navigation }) => {
                             player_count: playerIds.length,
                         });
                     }}>
-                        <Text style={[styles.heading, { color: systemBlue }]}>{edit ? 'Done' : 'Edit'}</Text>
+                        <Text style={[styles.heading, { color: theme.tint }]}>{edit ? 'Done' : 'Edit'}</Text>
                     </TouchableOpacity>
                 }
             </View>
@@ -131,7 +133,6 @@ const styles = StyleSheet.create({
     text: {
         fontSize: 18,
         margin: 15,
-        color: '#eee',
     },
     heading: {
         fontSize: 14,
@@ -139,7 +140,6 @@ const styles = StyleSheet.create({
         marginHorizontal: 20,
         marginVertical: 5,
         marginTop: 20,
-        color: '#eee',
     }
 });
 

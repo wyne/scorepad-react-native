@@ -7,7 +7,8 @@ import { Icon } from 'react-native-elements/dist/icons/Icon';
 
 import { useAppSelector } from '../../../redux/hooks';
 import { logEvent } from '../../Analytics';
-import { FEATURE_KEEP_SCREEN_AWAKE, systemBlue } from '../../constants';
+import { FEATURE_KEEP_SCREEN_AWAKE } from '../../constants';
+import { useTheme } from '../../theme';
 
 import HeaderButton from './HeaderButton';
 
@@ -16,6 +17,7 @@ interface Props {
 }
 
 const AppInfoButton: React.FunctionComponent<Props> = ({ navigation }) => {
+    const theme = useTheme();
     const hasUnseenFeature = useAppSelector(state =>
         !state.settings.seenFeatureNotifications.includes(FEATURE_KEEP_SCREEN_AWAKE)
     );
@@ -29,7 +31,7 @@ const AppInfoButton: React.FunctionComponent<Props> = ({ navigation }) => {
                 <Icon name="gear"
                     type="font-awesome"
                     size={20}
-                    color={systemBlue} />
+                    color={theme.tint} />
                 {hasUnseenFeature && (
                     <View style={{
                         position: 'absolute',
@@ -38,9 +40,9 @@ const AppInfoButton: React.FunctionComponent<Props> = ({ navigation }) => {
                         width: 8,
                         height: 8,
                         borderRadius: 4,
-                        backgroundColor: '#FF9500',
+                        backgroundColor: theme.warning,
                         borderWidth: 1,
-                        borderColor: 'white',
+                        borderColor: theme.backgroundSecondary,
                     }} />
                 )}
             </View>

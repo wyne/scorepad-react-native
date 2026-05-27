@@ -5,11 +5,12 @@ import { Icon } from 'react-native-elements/dist/icons/Icon';
 import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
 import { toggleHomeFullscreen } from '../../../redux/SettingsSlice';
 import { logEvent } from '../../Analytics';
-import { systemBlue } from '../../constants';
+import { useTheme } from '../../theme';
 
 import HeaderButton from './HeaderButton';
 
 const FullscreenButton: React.FunctionComponent = ({ }) => {
+    const theme = useTheme();
     const dispatch = useAppDispatch();
     const fullscreen = useAppSelector(state => state.settings.home_fullscreen);
 
@@ -25,7 +26,7 @@ const FullscreenButton: React.FunctionComponent = ({ }) => {
             <Icon name={fullscreen ? 'compress-alt' : 'expand-alt'}
                 type="font-awesome-5"
                 size={20}
-                color={systemBlue} />
+                color={theme.tint} />
         </HeaderButton>
     );
 };
