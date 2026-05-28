@@ -51,6 +51,7 @@ const createMockState = (
     showPointParticles: true,
     showPlayerIndex: true,
     interactionType: InteractionType.SwipeVertical,
+    home_fullscreen: false,
     lastStoreReviewPrompt: Date.now(),
     appOpens: 1,
     installId: 'test-install-id',

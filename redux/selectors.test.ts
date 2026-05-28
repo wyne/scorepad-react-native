@@ -20,6 +20,7 @@ const mockState: Partial<RootState> = {
     keepScreenAwake: false,
     seenFeatureNotifications: [],
     colorScheme: 'system',
+    home_fullscreen: false,
   },
   games: {
     entities: {

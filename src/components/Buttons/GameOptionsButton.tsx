@@ -36,7 +36,6 @@ const GameOptionsButton: React.FunctionComponent = () => {
     const menuActions: MenuAction[] = [
         {
             id: 'gestures',
-            title: null,
             title: 'Point Gestures',
             displayInline: true,
             subactions: [
