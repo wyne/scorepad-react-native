@@ -29,6 +29,13 @@ jest.mock('../components/Sheets/AddendModal', () => {
     };
 });
 
+jest.mock('../components/Sheets/GestureInfoModal', () => {
+    return function MockGestureInfoModal() {
+        const { View, Text } = jest.requireActual('react-native');
+        return <View testID="gesture-info-modal"><Text>GestureInfoModal</Text></View>;
+    };
+});
+
 
 const createMockStore = (initialState: Parameters<typeof configureStore>[0]['preloadedState']) => {
     return configureStore({
