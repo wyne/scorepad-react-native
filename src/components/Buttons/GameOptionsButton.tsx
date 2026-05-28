@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { MenuAction, MenuView } from '@react-native-menu/menu';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, View, Text } from 'react-native';
 import { SymbolView } from 'expo-symbols';
 
 import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
@@ -21,6 +21,8 @@ const GameOptionsButton: React.FunctionComponent = () => {
     const interactionType = useAppSelector(state => state.settings.interactionType);
     const fullscreen = useAppSelector(state => state.settings.home_fullscreen);
     const installId = useAppSelector(state => state.settings.installId);
+    const addendOne = useAppSelector(state => state.settings.addendOne);
+    const addendTwo = useAppSelector(state => state.settings.addendTwo);
 
     const addendModalRef = useAddendModalContext();
     const gameSheetRef = useGameSheetContext();
@@ -59,7 +61,7 @@ const GameOptionsButton: React.FunctionComponent = () => {
         },
         {
             id: 'settings',
-            title: null,
+            title: 'Settings',
             displayInline: true,
             subactions: [
                 {
@@ -111,11 +113,17 @@ const GameOptionsButton: React.FunctionComponent = () => {
             onPressAction={({ nativeEvent }) => handleAction(nativeEvent.event)}
         >
             <View style={styles.button}>
-                <SymbolView
-                    name={isSwipe ? 'hand.draw' : 'hand.point.up'}
-                    size={20}
-                    tintColor={theme.text}
-                />
+                <View style={styles.content}>
+                    <View style={styles.addendColumn}>
+                        <Text style={[styles.addendText, { color: theme.text }]}>{addendOne}</Text>
+                        <Text style={[styles.addendText, { color: theme.text }]}>{addendTwo}</Text>
+                    </View>
+                    <SymbolView
+                        name={isSwipe ? 'hand.draw' : 'hand.point.up'}
+                        size={30}
+                        tintColor={theme.text}
+                    />
+                </View>
             </View>
         </MenuView>
     );
@@ -124,6 +132,18 @@ const GameOptionsButton: React.FunctionComponent = () => {
 const styles = StyleSheet.create({
     button: {
         padding: 8,
+    },
+    content: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    addendColumn: {
+        marginRight: 4,
+    },
+    addendText: {
+        fontSize: 10,
+        lineHeight: 11,
+        textAlign: 'center',
     },
 });
 

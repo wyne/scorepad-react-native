@@ -11,7 +11,7 @@ const GestureInfoModal: React.FunctionComponent = () => {
     const theme = useTheme();
     const gestureInfoModalRef = useGestureInfoModalContext();
 
-    const snapPoints = useMemo(() => [520], []);
+    const snapPoints = useMemo(() => ['90%'], []);
 
     const renderBackdrop = useCallback(
         (props: BottomSheetBackdropProps) => (
@@ -27,8 +27,9 @@ const GestureInfoModal: React.FunctionComponent = () => {
     return (
         <BottomSheetModal
             ref={gestureInfoModalRef}
-            index={1}
+            index={0}
             snapPoints={snapPoints}
+            enableDynamicSizing={false}
             enablePanDownToClose={true}
             backdropComponent={renderBackdrop}
             backgroundStyle={{ backgroundColor: theme.sheetBackground }}
@@ -36,7 +37,6 @@ const GestureInfoModal: React.FunctionComponent = () => {
         >
             <BottomSheetView style={styles.container}>
                 <View style={styles.content}>
-                <Text>TBD</Text>
                 </View>
             </BottomSheetView>
         </BottomSheetModal>

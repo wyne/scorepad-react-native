@@ -89,6 +89,7 @@ export const Navigation = () => {
                             options={{
                                 orientation: 'all',
                                 title: 'Edit Game',
+                                headerBackButtonDisplayMode: 'minimal',
                             }}
                         />
                         <Stack.Screen name="Share" component={ShareScreen}

@@ -169,9 +169,6 @@ const AppInfoScreen: React.FunctionComponent<Props> = ({ navigation }) => {
                 <SectionItem>
                     <View style={styles.labelRow}>
                         <SectionItemText text="Player Numbers" />
-                        <View style={[styles.betaPill, { backgroundColor: theme.separator }]}>
-                            <Text style={[styles.betaPillText, { color: theme.text }]}>Beta</Text>
-                        </View>
                     </View>
                     <Switch onValueChange={togglePlayerIndexSwitch} value={showPlayerIndex} ios_backgroundColor={theme.separator} />
                 </SectionItem>
@@ -244,12 +241,6 @@ const AppInfoScreen: React.FunctionComponent<Props> = ({ navigation }) => {
                 </Section>
             )}
 
-            <Section title="Backup">
-                <DisclosureRow label="Export Backup" onPress={handleExport} />
-                <SectionSeparator />
-                <DisclosureRow label="Restore from Backup" onPress={handleRestore} />
-            </Section>
-
             <Section title="Help">
                 <DisclosureRow label="View Tutorial" onPress={() => {
                     navigation.navigate('Onboarding', { onboarding: false });
@@ -269,6 +260,13 @@ const AppInfoScreen: React.FunctionComponent<Props> = ({ navigation }) => {
                     Linking.openURL('https://www.scorepadapp.com');
                 }} />
             </Section>
+
+            <Section title="Backup">
+                <DisclosureRow label="Export Backup" onPress={handleExport} />
+                <SectionSeparator />
+                <DisclosureRow label="Restore from Backup" onPress={handleRestore} />
+            </Section>
+
 
         </ScrollView>
     );
