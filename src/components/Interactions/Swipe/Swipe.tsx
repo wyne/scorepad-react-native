@@ -9,6 +9,7 @@ import { useAppDispatch, useAppSelector } from '../../../../redux/hooks';
 import { playerRoundScoreIncrement } from '../../../../redux/PlayersSlice';
 import { selectCurrentGame } from '../../../../redux/selectors';
 import { logEvent } from '../../../Analytics';
+import { useMenuOpen } from '../../MenuOpenContext';
 
 interface HalfTapProps {
     children: React.ReactNode;
@@ -125,7 +126,10 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
     const totalOffset = useSharedValue<number | null>(0);
     const panY = useSharedValue(0);
 
+    const { menuOpen } = useMenuOpen();
+
     const endGesture = useCallback((translationY: number) => {
+        if (menuOpen) return;
         logEvent('score_change', {
             player_index: index,
             game_id: currentGameId,
@@ -137,10 +141,10 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
             interaction: 'swipe-vertical',
         });
         powerHoldStop();
-    }, [index, currentGameId, powerHold, addendOne, addendTwo, roundCurrent]);
+    }, [index, currentGameId, powerHold, addendOne, addendTwo, roundCurrent, menuOpen]);
 
     const panGesture = Gesture.Pan()
-        .enabled(!currentGameLocked)
+        .enabled(!currentGameLocked && !menuOpen)
         .minDistance(0)
         .onBegin(() => {
             runOnJS(powerHoldStart)();
@@ -173,6 +177,7 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
 
     const scoreChangeHandler = (value: number) => {
         if (Math.abs(value) == 0) return;
+        if (menuOpen) return;
 
         const a = value * (powerHold ? addendTwo : addendOne);
 

@@ -15,6 +15,7 @@ import ListScreen from '../src/screens/ListScreen';
 import OnboardingScreen from '../src/screens/OnboardingScreen';
 import SettingsScreen from '../src/screens/SettingsScreen';
 
+import { MenuOpenContextProvider } from './components/MenuOpenContext';
 import GameSheet from './components/Sheets/GameSheet';
 import { GestureInfoModalContextProvider } from './components/Sheets/GestureInfoModalContext';
 import EditPlayerScreen from './screens/EditPlayerScreen';
@@ -66,7 +67,8 @@ export const Navigation = () => {
                 }}
             >
                 <GestureInfoModalContextProvider>
-                    <Stack.Navigator initialRouteName='List' >
+                    <MenuOpenContextProvider>
+                        <Stack.Navigator initialRouteName='List' >
                         <Stack.Screen name="List" component={ListScreen}
                             options={{
                                 orientation: 'portrait',
@@ -123,7 +125,8 @@ export const Navigation = () => {
                                 title: 'Settings',
                             }}
                         />
-                    </Stack.Navigator>
+                        </Stack.Navigator>
+                    </MenuOpenContextProvider>
                 </GestureInfoModalContextProvider>
                 {!fullscreen && currentRoute === 'Game' && <GameSheet />}
             </NavigationContainer>

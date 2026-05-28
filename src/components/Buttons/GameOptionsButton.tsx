@@ -9,6 +9,7 @@ import { toggleHomeFullscreen, setInteractionType } from '../../../redux/Setting
 import { logEvent } from '../../Analytics';
 import { useTheme } from '../../theme';
 import { InteractionType } from '../Interactions/InteractionType';
+import { useMenuOpen } from '../MenuOpenContext';
 import { useAddendModalContext } from '../Sheets/AddendModalContext';
 import { useGameSheetContext } from '../Sheets/GameSheetContext';
 import { useGestureInfoModalContext } from '../Sheets/GestureInfoModalContext';
@@ -16,6 +17,7 @@ import { useGestureInfoModalContext } from '../Sheets/GestureInfoModalContext';
 const GameOptionsButton: React.FunctionComponent = () => {
     const theme = useTheme();
     const dispatch = useAppDispatch();
+    const { setMenuOpen } = useMenuOpen();
 
     const currentGameId = useAppSelector(state => state.settings.currentGameId);
     const interactionType = useAppSelector(state => state.settings.interactionType);
@@ -43,18 +45,21 @@ const GameOptionsButton: React.FunctionComponent = () => {
                     id: 'swipe',
                     title: 'Swipe',
                     image: 'hand.draw',
+                    imageColor: theme.text,
                     state: isSwipe ? 'on' : 'off',
                 },
                 {
                     id: 'tap',
                     title: 'Tap',
                     image: 'hand.point.up',
+                    imageColor: theme.text,
                     state: isTap ? 'on' : 'off',
                 },
                 {
                     id: 'about-gestures',
                     title: 'About Gestures',
                     image: 'info.circle',
+                    imageColor: theme.text,
                 },
             ],
         },
@@ -67,6 +72,7 @@ const GameOptionsButton: React.FunctionComponent = () => {
                     id: 'point-values',
                     title: 'Point Values',
                     image: 'plusminus',
+                    imageColor: theme.text,
                 },
                 {
                     id: 'fullscreen',
@@ -74,6 +80,7 @@ const GameOptionsButton: React.FunctionComponent = () => {
                     image: fullscreen
                         ? 'arrow.down.right.and.arrow.up.left'
                         : 'arrow.up.left.and.arrow.down.right',
+                    imageColor: theme.text,
                     state: fullscreen ? 'on' : 'off',
                 },
             ],
@@ -109,7 +116,12 @@ const GameOptionsButton: React.FunctionComponent = () => {
     return (
         <MenuView
             actions={menuActions}
-            onPressAction={({ nativeEvent }) => handleAction(nativeEvent.event)}
+            onOpenMenu={() => setMenuOpen(true)}
+            onCloseMenu={() => setMenuOpen(false)}
+            onPressAction={({ nativeEvent }) => {
+                handleAction(nativeEvent.event);
+                setMenuOpen(false);
+            }}
         >
             <View style={styles.button}>
                 <View style={styles.content}>

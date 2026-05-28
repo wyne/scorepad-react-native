@@ -7,6 +7,7 @@ import { useAppDispatch, useAppSelector } from '../../../../redux/hooks';
 import { playerRoundScoreIncrement } from '../../../../redux/PlayersSlice';
 import { selectCurrentGame } from '../../../../redux/selectors';
 import { logEvent } from '../../../Analytics';
+import { useMenuOpen } from '../../MenuOpenContext';
 import { ScoreParticle } from '../../PlayerTiles/AdditionTile/ScoreParticle';
 
 type ScoreParticleProps = {
@@ -24,6 +25,7 @@ type Props = {
 export const HalfTileTouchSurface: React.FunctionComponent<Props> = (
     { playerIndex, fontColor, playerId, scoreType }: Props) => {
 
+    const { menuOpen } = useMenuOpen();
     const showPointParticles = useAppSelector(state => state.settings.showPointParticles);
     const dispatch = useAppDispatch();
 
@@ -50,6 +52,7 @@ export const HalfTileTouchSurface: React.FunctionComponent<Props> = (
 
     const scoreChangeHandler = (addend: number, powerHold = false) => {
         if (currentGame.locked) return;
+        if (menuOpen) return;
 
         if (showPointParticles) {
             addParticle(addend);
@@ -70,8 +73,8 @@ export const HalfTileTouchSurface: React.FunctionComponent<Props> = (
     return (
         <TouchableHighlight
             style={[styles.surface, scoreType == 'increment' ? styles.surfaceAdd : styles.surfaceSubtract]}
-            underlayColor={currentGame.locked ? 'transparent' : fontColor + '30'}
-            activeOpacity={1}
+            underlayColor={currentGame.locked || menuOpen ? 'transparent' : fontColor + '30'}
+            activeOpacity={menuOpen ? 1 : 1}
             onPress={() => scoreChangeHandler(addendOne)}
             onLongPress={() => scoreChangeHandler(addendTwo, true)}>
             <View style={[StyleSheet.absoluteFill]}>
