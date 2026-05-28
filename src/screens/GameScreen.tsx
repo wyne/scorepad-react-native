@@ -8,7 +8,6 @@ import { useAppSelector } from '../../redux/hooks';
 import FlexboxBoard from '../components/Boards/FlexboxBoard';
 import AddendModal from '../components/Sheets/AddendModal';
 import GestureInfoModal from '../components/Sheets/GestureInfoModal';
-import { GestureInfoModalContextProvider } from '../components/Sheets/GestureInfoModalContext';
 
 function useKeepScreenAwake(active: boolean): void {
     useEffect(() => {
@@ -39,7 +38,7 @@ const ScoreBoardScreen: React.FunctionComponent = () => {
                 <GestureInfoModal />
             </View>
         </View>
-        );
+    );
 };
 
 

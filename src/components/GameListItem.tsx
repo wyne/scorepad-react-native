@@ -57,37 +57,38 @@ const GameListItem: React.FunctionComponent<Props> = ({ navigation, gameId, inde
     return (
         <Animated.View entering={FadeInUp.duration(200).delay(100 + index * 100)}>
             <AbstractPopupMenu
+                key={'menu' + gameId}
                 gameId={gameId}
                 setCurrentGameCallback={setCurrentGameCallback}
                 chooseGameHandler={chooseGameHandler}
                 navigation={navigation}
                 index={index}
             >
-                <ListItem key={gameId} bottomDivider
+                <ListItem key={'game' + gameId} bottomDivider
                     onPress={Platform.OS == 'android' ? undefined : chooseGameHandler}
                     containerStyle={{ backgroundColor: theme.backgroundSecondary, borderBottomColor: theme.separator }}
                 >
-                    <ListItem.Content>
+                    <ListItem.Content key={'content' + gameId}>
                         <ListItem.Title style={{ alignItems: 'center', color: theme.text }}>
                             {gameTitle}
-                            {locked && <Icon name="lock-closed-outline" type="ionicon" size={14} color={theme.success} style={{ paddingHorizontal: 4 }} />}
+                            {locked && <Icon name='lock-closed-outline' type='ionicon' size={14} color={theme.success} style={{ paddingHorizontal: 4 }} />}
                         </ListItem.Title>
                         <ListItem.Subtitle style={{ color: theme.textTertiary }}>
                             <Text><Moment element={Text} fromNow>{dateCreated}</Moment></Text>
                         </ListItem.Subtitle>
                         <ListItem.Subtitle style={{ color: theme.textTertiary }}>
                             {playerIds.map((playerId, index) => (
-                                <GameListItemPlayerName key={index} playerId={playerId} last={index == playerIds.length - 1} />
+                                <GameListItemPlayerName key={playerId} playerId={playerId} last={index == playerIds.length - 1} />
                             ))}
                         </ListItem.Subtitle>
                     </ListItem.Content>
-                    <Text style={[styles.badgePlayers, { color: theme.badgeBlue }]}>
-                        {playerIds.length} <Icon color={theme.badgeBlue} name="users" type="font-awesome-5" size={16} />
+                    <Text key={'players' + gameId} style={[styles.badgePlayers, { color: theme.badgeBlue }]}>
+                        {playerIds.length} <Icon color={theme.badgeBlue} name='users' type='font-awesome-5' size={16} />
                     </Text>
-                    <Text style={[styles.badgeRounds, { color: theme.badgeRed }]}>
-                        {roundTotal} <Icon color={theme.badgeRed} name="circle-notch" type="font-awesome-5" size={16} />
+                    <Text key={'rounds' + gameId} style={[styles.badgeRounds, { color: theme.badgeRed }]}>
+                        {roundTotal} <Icon color={theme.badgeRed} name='circle-notch' type='font-awesome-5' size={16} />
                     </Text>
-                    <ListItem.Chevron iconStyle={{ color: theme.separator }} />
+                    <ListItem.Chevron key='chevron' iconStyle={{ color: theme.separator }} />
                 </ListItem>
             </AbstractPopupMenu>
         </Animated.View>

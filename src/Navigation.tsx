@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
-import { DefaultTheme, DarkTheme, NavigationContainer } from '@react-navigation/native';
+
+import { DarkTheme, DefaultTheme, NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { View } from 'react-native';
 import { SemVer } from 'semver';
+
+import { useAppSelector } from '../redux/hooks';
 import AppInfoButton from '../src/components/Buttons/AppInfoButton';
 import GameOptionsButton from '../src/components/Buttons/GameOptionsButton';
 import RoundHeaderTitle from '../src/components/Headers/RoundHeaderTitle';
@@ -11,12 +14,12 @@ import GameScreen from '../src/screens/GameScreen';
 import ListScreen from '../src/screens/ListScreen';
 import OnboardingScreen from '../src/screens/OnboardingScreen';
 import SettingsScreen from '../src/screens/SettingsScreen';
+
 import GameSheet from './components/Sheets/GameSheet';
+import { GestureInfoModalContextProvider } from './components/Sheets/GestureInfoModalContext';
 import EditPlayerScreen from './screens/EditPlayerScreen';
 import ShareScreen from './screens/ShareScreen';
-import { useAppSelector } from '../redux/hooks';
 import { useTheme } from './theme';
-import { GestureInfoModalContextProvider } from './components/Sheets/GestureInfoModalContext';
 
 export type OnboardingScreenParamList = {
     onboarding: boolean;

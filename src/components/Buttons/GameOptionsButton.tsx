@@ -1,8 +1,8 @@
 import React from 'react';
 
 import { MenuAction, MenuView } from '@react-native-menu/menu';
-import { StyleSheet, View, Text } from 'react-native';
 import { SymbolView } from 'expo-symbols';
+import { StyleSheet, View, Text } from 'react-native';
 
 import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
 import { toggleHomeFullscreen, setInteractionType } from '../../../redux/SettingsSlice';
