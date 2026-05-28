@@ -113,7 +113,6 @@ describe('ShareScreen', () => {
         const store = createMockStore({
             settings: {
                 currentGameId: undefined,
-                home_fullscreen: false,
             },
             games: {
                 entities: {},
@@ -138,7 +137,6 @@ describe('ShareScreen', () => {
         const store = createMockStore({
             settings: {
                 currentGameId: 'nonexistent-game',
-                home_fullscreen: false,
             },
             games: {
                 entities: {},
@@ -163,7 +161,6 @@ describe('ShareScreen', () => {
         const store = createMockStore({
             settings: {
                 currentGameId: 'game-1',
-                home_fullscreen: false,
             },
             games: {
                 entities: {
@@ -207,7 +204,6 @@ describe('ShareScreen', () => {
         const store = createMockStore({
             settings: {
                 currentGameId: 'game-1',
-                home_fullscreen: false,
             },
             games: {
                 entities: {
@@ -237,7 +233,6 @@ describe('ShareScreen', () => {
         const store = createMockStore({
             settings: {
                 currentGameId: 'game-1',
-                home_fullscreen: false,
             },
             games: {
                 entities: {
@@ -276,7 +271,6 @@ describe('ShareScreen', () => {
         const store = createMockStore({
             settings: {
                 currentGameId: 'game-1',
-                home_fullscreen: false,
             },
             games: {
                 entities: {
@@ -334,7 +328,6 @@ describe('ShareScreen', () => {
         const store = createMockStore({
             settings: {
                 currentGameId: 'game-1',
-                home_fullscreen: false,
             },
             games: {
                 entities: {
@@ -372,7 +365,6 @@ describe('ShareScreen', () => {
         const store = createMockStore({
             settings: {
                 currentGameId: 'game-1',
-                home_fullscreen: false,
             },
             games: {
                 entities: {
@@ -405,7 +397,6 @@ describe('ShareScreen', () => {
         const store = createMockStore({
             settings: {
                 currentGameId: 'game-1',
-                home_fullscreen: false,
             },
             games: {
                 entities: {
@@ -437,7 +428,6 @@ describe('ShareScreen', () => {
         const store = createMockStore({
             settings: {
                 currentGameId: 'game-1',
-                home_fullscreen: false,
             },
             games: {
                 entities: {

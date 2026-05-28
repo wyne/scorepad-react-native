@@ -10,6 +10,10 @@ import settingsReducer from '../../redux/SettingsSlice';
 
 import GameScreen from './GameScreen';
 
+jest.mock('@react-navigation/elements', () => ({
+    useHeaderHeight: () => 88,
+}));
+
 // Mock the components that GameScreen uses
 jest.mock('../components/Boards/FlexboxBoard', () => {
     return function MockFlexboxBoard() {
@@ -64,7 +68,6 @@ describe('GameScreen', () => {
         const store = createMockStore({
             settings: {
                 currentGameId: undefined,
-                home_fullscreen: false,
             },
             games: {
                 entities: {},
@@ -89,7 +92,6 @@ describe('GameScreen', () => {
         const store = createMockStore({
             settings: {
                 currentGameId: 'game-1',
-                home_fullscreen: false,
             },
             games: {
                 entities: {

@@ -93,7 +93,7 @@ const ListScreen: React.FunctionComponent<Props> = ({ navigation }) => {
                 keyExtractor={item => item as string}
             >
             </Animated.FlatList>
-            {gameIds.length > 0 && <FloatingActionButton navigation={navigation} />}
+            <FloatingActionButton navigation={navigation} />
         </SafeAreaView>
     );
 };

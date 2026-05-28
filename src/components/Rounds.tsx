@@ -16,7 +16,6 @@ import TotalScoreColumn from './ScoreLog/TotalScoreColumn';
 
 interface Props {
     navigation: NativeStackNavigationProp<ParamListBase, string, undefined>;
-    show: boolean;
 }
 
 interface RoundScollOffset {

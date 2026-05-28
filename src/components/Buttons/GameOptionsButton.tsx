@@ -1,0 +1,130 @@
+import React from 'react';
+
+import { MenuAction, MenuView } from '@react-native-menu/menu';
+import { StyleSheet, View } from 'react-native';
+import { SymbolView } from 'expo-symbols';
+
+import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
+import { toggleHomeFullscreen, setInteractionType } from '../../../redux/SettingsSlice';
+import { logEvent } from '../../Analytics';
+import { useTheme } from '../../theme';
+import { InteractionType } from '../Interactions/InteractionType';
+import { useAddendModalContext } from '../Sheets/AddendModalContext';
+import { useGameSheetContext } from '../Sheets/GameSheetContext';
+import { useGestureInfoModalContext } from '../Sheets/GestureInfoModalContext';
+
+const GameOptionsButton: React.FunctionComponent = () => {
+    const theme = useTheme();
+    const dispatch = useAppDispatch();
+
+    const currentGameId = useAppSelector(state => state.settings.currentGameId);
+    const interactionType = useAppSelector(state => state.settings.interactionType);
+    const fullscreen = useAppSelector(state => state.settings.home_fullscreen);
+    const installId = useAppSelector(state => state.settings.installId);
+
+    const addendModalRef = useAddendModalContext();
+    const gameSheetRef = useGameSheetContext();
+    const gestureInfoModalRef = useGestureInfoModalContext();
+
+    if (currentGameId == null) return null;
+
+    const isSwipe = interactionType === InteractionType.SwipeVertical;
+    const isTap = interactionType === InteractionType.HalfTap;
+
+    const menuActions: MenuAction[] = [
+        {
+            id: 'gestures',
+            title: null,
+            title: 'Point Gestures',
+            displayInline: true,
+            subactions: [
+                {
+                    id: 'swipe',
+                    title: 'Swipe',
+                    image: 'hand.draw',
+                    state: isSwipe ? 'on' : 'off',
+                },
+                {
+                    id: 'tap',
+                    title: 'Tap',
+                    image: 'hand.point.up',
+                    state: isTap ? 'on' : 'off',
+                },
+                {
+                    id: 'about-gestures',
+                    title: 'About Gestures',
+                    image: 'info.circle',
+                },
+            ],
+        },
+        {
+            id: 'settings',
+            title: null,
+            displayInline: true,
+            subactions: [
+                {
+                    id: 'point-values',
+                    title: 'Point Values',
+                    image: 'plusminus',
+                },
+                {
+                    id: 'fullscreen',
+                    title: 'Fullscreen',
+                    image: fullscreen
+                        ? 'arrow.down.right.and.arrow.up.left'
+                        : 'arrow.up.left.and.arrow.down.right',
+                    state: fullscreen ? 'on' : 'off',
+                },
+            ],
+        },
+    ];
+
+    const handleAction = (event: string) => {
+        switch (event) {
+            case 'swipe':
+                dispatch(setInteractionType(InteractionType.SwipeVertical));
+                logEvent('interaction_type', { interactionType: 'swipe_vertical', gameId: currentGameId });
+                break;
+            case 'tap':
+                dispatch(setInteractionType(InteractionType.HalfTap));
+                logEvent('interaction_type', { interactionType: 'half_tap', gameId: currentGameId });
+                break;
+            case 'point-values':
+                gameSheetRef?.current?.snapToIndex(0);
+                addendModalRef?.current?.present();
+                logEvent('addend_sheet', { installId });
+                break;
+            case 'fullscreen':
+                dispatch(toggleHomeFullscreen());
+                logEvent('fullscreen', { fullscreen: !fullscreen });
+                break;
+            case 'about-gestures':
+                gestureInfoModalRef?.current?.present();
+                logEvent('about_gestures');
+                break;
+        }
+    };
+
+    return (
+        <MenuView
+            actions={menuActions}
+            onPressAction={({ nativeEvent }) => handleAction(nativeEvent.event)}
+        >
+            <View style={styles.button}>
+                <SymbolView
+                    name={isSwipe ? 'hand.draw' : 'hand.point.up'}
+                    size={20}
+                    tintColor={theme.text}
+                />
+            </View>
+        </MenuView>
+    );
+};
+
+const styles = StyleSheet.create({
+    button: {
+        padding: 8,
+    },
+});
+
+export default GameOptionsButton;

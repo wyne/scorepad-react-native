@@ -30,7 +30,6 @@ describe('Redux Store Configuration', () => {
             version: 0,
             storage: mockAsyncStorage,
             whitelist: [
-                'home_fullscreen',
                 'multiplier',
                 'addendOne', 
                 'addendTwo',

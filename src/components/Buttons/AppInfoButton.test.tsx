@@ -20,7 +20,6 @@ const createTestStore = () =>
     configureStore({
         reducer: {
             settings: () => ({
-                home_fullscreen: false,
                 multiplier: 1,
                 addendOne: 1,
                 addendTwo: 10,

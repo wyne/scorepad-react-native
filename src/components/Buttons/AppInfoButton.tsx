@@ -29,7 +29,7 @@ const AppInfoButton: React.FunctionComponent = () => {
                 <Icon name="gear"
                     type="font-awesome"
                     size={20}
-                    color={theme.tint} />
+                    color={theme.text} />
                 {hasUnseenFeature && (
                     <View style={{
                         position: 'absolute',
