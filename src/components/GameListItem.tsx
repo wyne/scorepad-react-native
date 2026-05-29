@@ -68,7 +68,7 @@ const GameListItem: React.FunctionComponent<Props> = ({ navigation, gameId, inde
                     onPress={Platform.OS == 'android' ? undefined : chooseGameHandler}
                     containerStyle={{ backgroundColor: theme.backgroundSecondary, borderBottomColor: theme.separator }}
                 >
-                    <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1, gap: 16 }}>
                         <ListItem.Content style={{ flex: 1 }}>
                             <ListItem.Title style={{ alignItems: 'center', color: theme.text }}>
                                 {gameTitle}
