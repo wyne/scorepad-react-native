@@ -18,8 +18,14 @@ export const logEvent = async (eventName: string, params?: Record<string, any>) 
     const osVersion = Platform.Version;
     const appVersion = Application.nativeApplicationVersion;
 
+    const sanitized = Object.fromEntries(
+        Object.entries({ ...params }).filter(
+            ([, v]) => v != null && v !== undefined,
+        ),
+    );
+
     const fullParams = {
-        ...params,
+        ...sanitized,
         appInstanceId,
         sessionId,
         os,

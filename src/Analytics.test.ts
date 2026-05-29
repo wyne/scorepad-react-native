@@ -137,7 +137,7 @@ describe('Analytics', () => {
       await expect(logEvent(eventName)).rejects.toThrow('Firebase error');
     });
 
-    it('should handle complex parameter types', async () => {
+    it('should strip null and undefined parameter values', async () => {
       const eventName = 'complex_event';
       const params = {
         stringParam: 'test',
@@ -152,7 +152,11 @@ describe('Analytics', () => {
       await logEvent(eventName, params);
 
       expect(firebaseLogEvent).toHaveBeenCalledWith(expect.anything(), eventName, {
-        ...params,
+        stringParam: 'test',
+        numberParam: 42,
+        booleanParam: true,
+        arrayParam: [1, 2, 3],
+        objectParam: { nested: 'value' },
         appInstanceId: 'test-app-instance-id',
         sessionId: 'test-session-id',
         os: 'ios',
@@ -160,6 +164,7 @@ describe('Analytics', () => {
         osVersion: '14.0',
       });
     });
+
 
     it('should override system params if provided in custom params', async () => {
       const eventName = 'override_event';
