@@ -120,6 +120,7 @@ const AddendModal: React.FunctionComponent = ({ }) => {
             ref={addendModalRef}
             index={1}
             enablePanDownToClose={true}
+            enableContentPanningGesture={false}
             snapPoints={snapPoints}
             onChange={handleSheetChanges}
             backdropComponent={renderBackdrop}
