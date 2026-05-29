@@ -88,7 +88,7 @@ const GameListItem: React.FunctionComponent<Props> = ({ navigation, gameId, inde
                     <Text key={'rounds' + gameId} style={[styles.badgeRounds, { color: theme.badgeRed }]}>
                         {roundTotal} <Icon color={theme.badgeRed} name='circle-notch' type='font-awesome-5' size={16} />
                     </Text>
-                    <ListItem.Chevron key='chevron' iconStyle={{ color: theme.separator }} />
+                    <ListItem.Chevron key={'chevron' + gameId} iconStyle={{ color: theme.separator }} />
                 </ListItem>
             </AbstractPopupMenu>
         </Animated.View>
