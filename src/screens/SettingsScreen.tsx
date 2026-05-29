@@ -54,7 +54,7 @@ const SettingsScreen: React.FunctionComponent<Props> = ({ navigation, route }) =
                     });
 
                     if (route?.params?.source === 'new_game') {
-                        navigation.navigate('Game');
+                        navigation.replace('Game');
                     } else {
                         navigation.goBack();
                     }
