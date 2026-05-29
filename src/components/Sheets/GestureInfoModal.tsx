@@ -1,7 +1,7 @@
 import React, { useCallback, useMemo } from 'react';
 
-import { BottomSheetBackdrop, BottomSheetBackdropProps, BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet';
-import { StyleSheet, View } from 'react-native';
+import { BottomSheetBackdrop, BottomSheetBackdropProps, BottomSheetModal, BottomSheetScrollView } from '@gorhom/bottom-sheet';
+import { StyleSheet, Text, View } from 'react-native';
 
 import { useTheme } from '../../theme';
 
@@ -35,10 +35,49 @@ const GestureInfoModal: React.FunctionComponent = () => {
             backgroundStyle={{ backgroundColor: theme.sheetBackground }}
             handleIndicatorStyle={{ backgroundColor: theme.sheetHandle }}
         >
-            <BottomSheetView style={styles.container}>
-                <View style={styles.content}>
+            <BottomSheetScrollView style={styles.container} contentContainerStyle={styles.content}>
+                <Text style={[styles.title, { color: theme.text }]}>Tap Gesture</Text>
+                <Text style={[styles.paragraph, { color: theme.textSecondary }]}>
+                    Tap the top half of a player&apos;s tile to increase their score, or the bottom half
+                    to decrease it. Each tap adds or subtracts the Single Tap value (set in Point Values).
+                </Text>
+                <Text style={[styles.paragraph, { color: theme.textSecondary }]}>
+                    Long-press the top or bottom half to use the Long Press value instead. This lets
+                    you quickly add or subtract a larger amount.
+                </Text>
+
+                <View style={[styles.divider, { backgroundColor: theme.separator }]} />
+
+                <Text style={[styles.title, { color: theme.text }]}>Swipe Gesture</Text>
+                <Text style={[styles.paragraph, { color: theme.textSecondary }]}>
+                    Swipe up on a player&apos;s tile to increase their score, or swipe down to decrease it.
+                    Each notch adds or subtracts the Swipe value (set in Point Values).
+                </Text>
+                <Text style={[styles.paragraph, { color: theme.textSecondary }]}>
+                    Hold your finger still for a moment before swiping to activate Power Hold mode. The tile
+                    will vibrate and wiggle to confirm. While in this mode, each notch uses the Hold + Swipe
+                    value instead, letting you make larger adjustments.
+                </Text>
+
+                <View style={[styles.divider, { backgroundColor: theme.separator }]} />
+
+                <Text style={[styles.title, { color: theme.text }]}>Point Values</Text>
+                <Text style={[styles.paragraph, { color: theme.textSecondary }]}>
+                    You can customize the increment amounts in the Point Values sheet (tap the gesture icon again
+                    then select Point Values). Two values are available:
+                </Text>
+                <View style={styles.bulletList}>
+                    <Text style={[styles.bullet, { color: theme.textSecondary }]}>
+                        {'\u2022  '}Single Tap / Swipe — the base amount added per tap or swipe notch
+                    </Text>
+                    <Text style={[styles.bullet, { color: theme.textSecondary }]}>
+                        {'\u2022  '}Long Press / Hold + Swipe — the larger amount used when long-pressing
+                        (Tap mode) or activating Power Hold (Swipe mode)
+                    </Text>
                 </View>
-            </BottomSheetView>
+
+                <View style={[styles.divider, { backgroundColor: theme.separator }]} />
+            </BottomSheetScrollView>
         </BottomSheetModal>
     );
 };
@@ -48,7 +87,31 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     content: {
-        flex: 1,
+        padding: 24,
+        paddingBottom: 40,
+    },
+    title: {
+        fontSize: 22,
+        fontWeight: 'bold',
+        marginBottom: 12,
+    },
+    paragraph: {
+        fontSize: 16,
+        lineHeight: 24,
+        marginBottom: 12,
+    },
+    divider: {
+        height: 1,
+        marginVertical: 20,
+    },
+    bulletList: {
+        marginBottom: 12,
+    },
+    bullet: {
+        fontSize: 16,
+        lineHeight: 24,
+        paddingLeft: 8,
+        marginBottom: 6,
     },
 });
 

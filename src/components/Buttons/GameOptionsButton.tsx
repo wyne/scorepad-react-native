@@ -71,6 +71,9 @@ const GameOptionsButton: React.FunctionComponent = () => {
                 {
                     id: 'point-values',
                     title: 'Point Values',
+                    subtitle: isTap
+                        ? `Tap: ${addendOne} / Long: ${addendTwo}`
+                        : `Swipe: ${addendOne} / Hold: ${addendTwo}`,
                     image: 'plusminus',
                     imageColor: theme.text,
                 },

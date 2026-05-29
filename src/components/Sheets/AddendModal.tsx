@@ -1,8 +1,7 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 
 import { BottomSheetBackdrop, BottomSheetBackdropProps, BottomSheetModal, BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { Picker } from '@react-native-picker/picker';
-import * as ScreenOrientation from 'expo-screen-orientation';
 import { debounce } from 'lodash';
 import { Platform, StyleSheet, Text, View } from 'react-native';
 
@@ -10,7 +9,6 @@ import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
 import { setAddendOne, setAddendTwo, setMultiplier } from '../../../redux/SettingsSlice';
 import { logEvent } from '../../Analytics';
 import { useTheme } from '../../theme';
-import InteractionSelector from '../Interactions/InteractionSelector';
 import { InteractionType } from '../Interactions/InteractionType';
 
 
@@ -21,32 +19,6 @@ const AddendModal: React.FunctionComponent = ({ }) => {
     const addendOne = useAppSelector(state => state.settings.addendOne);
     const addendTwo = useAppSelector(state => state.settings.addendTwo);
     const interactionType = useAppSelector(state => state.settings.interactionType);
-
-    // Store the current orientation
-    const [isLandscape, setIsLandscape] = useState<boolean>(false);
-
-    useEffect(() => {
-        const getOrientation = async () => {
-            const orientation = await ScreenOrientation.getOrientationAsync();
-            setIsLandscape(
-                orientation === ScreenOrientation.Orientation.LANDSCAPE_LEFT ||
-                orientation === ScreenOrientation.Orientation.LANDSCAPE_RIGHT
-            );
-        };
-
-        const subscription = ScreenOrientation.addOrientationChangeListener(({ orientationInfo }) => {
-            setIsLandscape(
-                orientationInfo.orientation === ScreenOrientation.Orientation.LANDSCAPE_LEFT ||
-                orientationInfo.orientation === ScreenOrientation.Orientation.LANDSCAPE_RIGHT
-            );
-        });
-
-        getOrientation();
-
-        return () => {
-            ScreenOrientation.removeOrientationChangeListener(subscription);
-        };
-    }, []);
 
     // Array of 1 to 100
     const addendOptions = Array.from({ length: 100 }, (_, i) => i + 1);
@@ -134,17 +106,10 @@ const AddendModal: React.FunctionComponent = ({ }) => {
                 <View style={{
                     flex: 1,
                     width: '100%',
-                    justifyContent: 'space-around',
-                    flexDirection: isLandscape ? 'row' : 'column',
+                    alignItems: 'center',
                 }}>
 
-                    <View style={{ flex: 1 }}>
-                        <InteractionSelector />
-                    </View>
-
-                    <View style={{ flex: 1, flexDirection: 'column', alignItems: 'center' }}>
-
-                        <Text style={{ color: theme.text, fontSize: 20 }}>Point Values</Text>
+                    <Text style={{ color: theme.text, fontSize: 20 }}>Point Values</Text>
 
                         <View style={{
                             flex: 1,
@@ -188,8 +153,6 @@ const AddendModal: React.FunctionComponent = ({ }) => {
                                 </View>
                             </View>
                         </View>
-
-                    </View>
                 </View>
 
             </BottomSheetScrollView>
