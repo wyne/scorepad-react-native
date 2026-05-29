@@ -238,6 +238,10 @@ const AppInfoScreen: React.FunctionComponent<Props> = ({ navigation }) => {
                             ]
                         );
                     }} />
+                    <SectionSeparator />
+                    <DisclosureRow label="View Debug Log" onPress={() => {
+                        navigation.navigate('DebugLog');
+                    }} />
                 </Section>
             )}
 

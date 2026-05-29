@@ -10,6 +10,7 @@ import AppInfoButton from '../src/components/Buttons/AppInfoButton';
 import GameOptionsButton from '../src/components/Buttons/GameOptionsButton';
 import RoundHeaderTitle from '../src/components/Headers/RoundHeaderTitle';
 import AppInfoScreen from '../src/screens/AppInfoScreen';
+import DebugLogScreen from '../src/screens/DebugLogScreen';
 import GameScreen from '../src/screens/GameScreen';
 import ListScreen from '../src/screens/ListScreen';
 import OnboardingScreen from '../src/screens/OnboardingScreen';
@@ -34,6 +35,7 @@ export type RootStackParamList = {
         source?: string;
     };
     AppInfo: undefined;
+    DebugLog: undefined;
     Share: undefined;
     Onboarding: OnboardingScreenParamList;
     Tutorial: OnboardingScreenParamList;
@@ -123,6 +125,13 @@ export const Navigation = () => {
                                 presentation: 'modal',
                                 orientation: 'portrait',
                                 title: 'Settings',
+                            }}
+                        />
+                        <Stack.Screen name="DebugLog" component={DebugLogScreen}
+                            options={{
+                                presentation: 'modal',
+                                orientation: 'portrait',
+                                title: 'Debug Log',
                             }}
                         />
                         </Stack.Navigator>
