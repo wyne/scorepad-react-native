@@ -229,6 +229,8 @@ const GameSheet: React.FunctionComponent = () => {
             enablePanDownToClose={false}
             topInset={topInset}
             style={theme.background === '#000000' ? undefined : styles.sheetShadow}
+            accessible={false}
+            accessibilityViewIsModal={false}
         >
             <BottomSheetScrollView>
                 <SafeAreaView edges={['right', 'left']}>
@@ -268,6 +270,8 @@ const GameSheet: React.FunctionComponent = () => {
                                 <Animated.View entering={FadeIn.delay(400)}>
                                     <Button title="Edit Game and Players"
                                         type="clear"
+                                        testID="edit-game-and-players"
+                                        accessibilityLabel="Edit Game and Players"
                                         titleStyle={{ color: theme.tint }}
                                         style={{
                                             margin: 5, marginTop: 15,

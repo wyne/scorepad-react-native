@@ -6,4 +6,8 @@ const defaultConfig = getDefaultConfig(__dirname);
 // .cjs files as JavaScript (e.g. superstruct/dist/index.cjs gets treated as
 // a binary asset instead of a module).
 
+defaultConfig.resolver.blockList = [
+    /\.maestro\/.*/,
+];
+
 module.exports = defaultConfig;

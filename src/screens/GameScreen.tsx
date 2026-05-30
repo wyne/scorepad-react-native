@@ -30,7 +30,7 @@ const ScoreBoardScreen: React.FunctionComponent = () => {
     if (typeof currentGameId == 'undefined') return null;
 
     return (
-        <View style={{ flex: 1, paddingTop: headerHeight }}>
+        <View style={{ flex: 1, paddingTop: headerHeight }} testID="game-screen">
             <View style={{ flex: 1 }}>
                 <FlexboxBoard />
 

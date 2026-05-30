@@ -95,7 +95,7 @@ const SettingsScreen: React.FunctionComponent<Props> = ({ navigation, route }) =
     );
 
     return (
-        <View style={{ flex: 1 }}>
+        <View style={{ flex: 1 }} testID="edit-game">
 
             <Text style={[styles.heading, { color: theme.textSecondary }]}>Game Title</Text>
             <EditGame />
