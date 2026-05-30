@@ -54,7 +54,7 @@ const GestureInfoModal: React.FunctionComponent = () => {
                     Each notch adds or subtracts the Swipe value (set in Point Values).
                 </Text>
                 <Text style={[styles.paragraph, { color: theme.textSecondary }]}>
-                    Hold your finger still for a moment before swiping to activate Power Hold mode. The tile
+                    Hold your finger still for a moment before swiping to activate Hold + Swipe mode. The tile
                     will vibrate and wiggle to confirm. While in this mode, each notch uses the Hold + Swipe
                     value instead, letting you make larger adjustments.
                 </Text>
@@ -71,8 +71,7 @@ const GestureInfoModal: React.FunctionComponent = () => {
                         {'\u2022  '}Single Tap / Swipe — the base amount added per tap or swipe notch
                     </Text>
                     <Text style={[styles.bullet, { color: theme.textSecondary }]}>
-                        {'\u2022  '}Long Press / Hold + Swipe — the larger amount used when long-pressing
-                        (Tap mode) or activating Power Hold (Swipe mode)
+                        {'\u2022  '}Long Press / Hold + Swipe — the larger amount used when long-pressing first
                     </Text>
                 </View>
 
