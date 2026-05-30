@@ -1,0 +1,4 @@
+screenshots/
+*.log
+*.json
+.DS_Store

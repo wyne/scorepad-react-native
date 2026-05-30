@@ -10,6 +10,7 @@ import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { markFeatureNotificationSeen, resetOnboarding, resetSeenFeatureNotifications, setColorScheme, setKeepScreenAwake, toggleShowPlayerIndex, toggleShowPointParticles } from '../../redux/SettingsSlice';
 import { logEvent } from '../Analytics';
 import RotatingIcon from '../components/AppInfo/RotatingIcon';
+import { loadSeedData } from '../components/AppInfo/SeedData';
 import HeaderButton from '../components/Buttons/HeaderButton';
 import { FEATURE_KEEP_SCREEN_AWAKE } from '../constants';
 import { useTheme } from '../theme';
@@ -241,6 +242,22 @@ const AppInfoScreen: React.FunctionComponent<Props> = ({ navigation }) => {
                     <SectionSeparator />
                     <DisclosureRow label="View Debug Log" onPress={() => {
                         navigation.navigate('DebugLog');
+                    }} />
+                    <SectionSeparator />
+                    <DisclosureRow label="Load Sample Data" onPress={() => {
+                        Alert.alert(
+                            'Load Sample Data',
+                            'This will replace all existing games and players with sample data featuring Rick and Morty characters.',
+                            [
+                                { text: 'Cancel', style: 'cancel' },
+                                {
+                                    text: 'Load', style: 'destructive', onPress: () => {
+                                        loadSeedData(dispatch);
+                                        navigation.goBack();
+                                    }
+                                },
+                            ]
+                        );
                     }} />
                 </Section>
             )}

@@ -1,6 +1,10 @@
-appId: com.wyne.scorepad.dev
+appId: com.wyne.scorepad
 ---
 - launchApp
 - waitForAnimationToEnd:
-    timeout: 5000
+    timeout: 10000
+- extendedWaitUntil:
+    visible:
+      id: "home-screen"
+    timeout: 10000
 - takeScreenshot: "home-empty"
