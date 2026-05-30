@@ -35,11 +35,15 @@ npm run lint  # Run ESLint and TypeScript checks
 
 ### Building
 
+All iOS build scripts use `--clean` on prebuild to prevent stale native code when switching between `APP_VARIANT` values. If you only need to regenerate native code without running the full build, use `npm run prebuild` or `npm run prebuild:clean`.
+
 | Goal | Command | Type | Location |
 |------|---------|------|----------|
 | Simulator (dev) | `npm run ios:dev` | Dev client | Local only |
-| Simulator (preview) | `APP_VARIANT=preview npx expo run:ios --configuration Release` | Standalone | Local only |
-| Simulator (production) | `npm run ios` | Dev client | Local only |
+| Simulator (preview) | `npm run ios:preview` | Standalone | Local only |
+| Simulator (production) | `npm run ios` | Standalone | Local only |
+| Prebuild only | `npm run prebuild` | — | Local only |
+| Prebuild (clean) | `npm run prebuild:clean` | — | Local only |
 | Physical device (dev) | `npx eas build --profile development --platform ios` | Dev client | Local (`--local`) or Cloud |
 | Physical device (preview) | `npx eas build --profile preview --platform ios` | Standalone | Local (`--local`) or Cloud |
 | Store submission | `npx eas build --profile production --platform ios` | Release | Cloud only |
@@ -59,7 +63,7 @@ Before a production build, bump the user-facing `version` in `app.config.js`:
 
 ```bash
 npx expo-doctor
-npx expo prebuild
+npx expo prebuild --clean
 npx eas build --platform ios
 npx eas build --platform android
 ```

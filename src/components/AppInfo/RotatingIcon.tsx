@@ -1,8 +1,8 @@
-import React, { useRef } from 'react';
+import React from 'react';
 
 import * as Haptics from 'expo-haptics';
 import { Image } from 'expo-image';
-import { TouchableWithoutFeedback } from 'react-native';
+import { TouchableOpacity } from 'react-native';
 import Animated, {
     Easing,
     useAnimatedStyle,
@@ -29,40 +29,15 @@ const RotatingIcon: React.FunctionComponent = () => {
         };
     });
 
-    const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
-
-    const clearAllTimers = () => {
-        timers.current.forEach(clearTimeout);
-        timers.current = [];
-    };
-
-    const scheduleTimer = (fn: () => void, delay: number) => {
-        const id = setTimeout(fn, delay);
-        timers.current.push(id);
-    };
-
-    const onPressIn = () => {
-        scheduleTimer(() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light), 1000);
-        scheduleTimer(() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light), 2000);
-        scheduleTimer(() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium), 3000);
-        scheduleTimer(() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy), 4000);
-        scheduleTimer(() => {
-            dispatch(toggleDevMenuEnabled());
+    return <TouchableOpacity testID="app-icon"
+        onLongPress={() => {
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+            dispatch(toggleDevMenuEnabled());
             logEvent('dev_menu', {
                 installId,
             });
             rotation.value = withTiming(rotation.value + 360, { duration: 1000, easing: Easing.elastic(1) });
-        }, 5000);
-    };
-
-    const onPressOut = () => {
-        clearAllTimers();
-    };
-
-    return <TouchableWithoutFeedback
-        onPressIn={onPressIn}
-        onPressOut={onPressOut}>
+        }}>
         <Animated.View style={[animatedStyles]}>
             <Image source={icon}
                 contentFit='contain'
@@ -75,7 +50,7 @@ const RotatingIcon: React.FunctionComponent = () => {
                 }}
             />
         </Animated.View>
-    </TouchableWithoutFeedback>;
+    </TouchableOpacity>;
 };
 
 export default RotatingIcon;
