@@ -64,7 +64,7 @@ const GameListItem: React.FunctionComponent<Props> = ({ navigation, gameId, inde
                 navigation={navigation}
                 index={index}
             >
-                <ListItem bottomDivider
+                <ListItem bottomDivider testID="game-list-item"
                     onPress={Platform.OS == 'android' ? undefined : chooseGameHandler}
                     containerStyle={{ backgroundColor: theme.backgroundSecondary, borderBottomColor: theme.separator }}
                 >

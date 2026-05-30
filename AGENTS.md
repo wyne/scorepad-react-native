@@ -141,6 +141,64 @@ To pull the remote version into your local project:
 eas build:version:sync
 ```
 
+## Maestro (Screenshot Automation)
+
+Maestro is used for automated UI flows and App Store screenshot generation.
+
+### Setup
+
+```bash
+brew install maestro
+# CLI is installed separately:
+curl -Ls "https://get.maestro.mobile.dev" | bash
+export PATH="$PATH":"$HOME/.maestro/bin"
+```
+
+### Build for Maestro
+
+Build a standalone app for the simulator (dev client won't work with Maestro):
+
+```bash
+npx expo run:ios --configuration Release       # production
+APP_VARIANT=preview npx expo run:ios --configuration Release  # preview
+```
+
+### Run Flows
+
+```bash
+npm run maestro        # Run all flows, save screenshots to .maestro/screenshots/
+npm run maestro:record  # Run all flows with video recording
+```
+
+Or run individual flows:
+
+```bash
+maestro test .maestro/home_screen.yaml --test-output-dir .maestro/screenshots
+```
+
+### Flow Files
+
+Flows live in `.maestro/` as YAML files. The `appId` at the top must match the variant:
+
+| Variant | appId |
+|---------|-------|
+| production | `com.wyne.scorepad` |
+| development | `com.wyne.scorepad.dev` |
+| preview | `com.wyne.scorepad.preview` |
+
+### testID Conventions
+
+Components use `testID` props for reliable Maestro selectors:
+
+- `home-screen` — ListScreen root view
+- `add-game-button` — Floating action button
+- `game-list-item` — Game list rows
+- `game-title-input` — Game title text input
+- `add-player-button` — Add player button
+- `save-game-button` — Save game button
+- `player-tile-{playerId}` — Player score tiles
+- Add more as flows are created
+
 ## Development Notes
 
 - Use `npx expo start --dev-client` for development with React DevTools

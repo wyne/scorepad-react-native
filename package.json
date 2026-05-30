@@ -14,7 +14,9 @@
     "test:coverage": "jest --coverage --silent",
     "test:coverage-summary": "jest --coverage --coverageReporters=text-summary --silent",
     "install:ipa": "scripts/install-ipa.sh",
-    "postinstall": "patch-package"
+    "postinstall": "patch-package",
+    "maestro": "maestro test .maestro/ --test-output-dir .maestro/screenshots",
+    "maestro:record": "maestro test .maestro/ --test-output-dir .maestro/screenshots --record"
   },
   "dependencies": {
     "@babel/plugin-transform-react-jsx": "^7.22.5",
