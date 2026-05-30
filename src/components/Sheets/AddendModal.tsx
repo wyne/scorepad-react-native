@@ -1,22 +1,22 @@
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from 'react';
 
 import {
     BottomSheetBackdrop,
     BottomSheetBackdropProps,
     BottomSheetModal,
     BottomSheetScrollView
-} from "@gorhom/bottom-sheet";
-import WheelPicker from "@quidone/react-native-wheel-picker";
-import WheelPickerFeedback from "@quidone/react-native-wheel-picker-feedback";
-import { Platform, StyleSheet, Text, View } from "react-native";
+} from '@gorhom/bottom-sheet';
+import WheelPicker from '@quidone/react-native-wheel-picker';
+import WheelPickerFeedback from '@quidone/react-native-wheel-picker-feedback';
+import { Platform, StyleSheet, Text, View } from 'react-native';
 
-import { useAppDispatch, useAppSelector } from "../../../redux/hooks";
-import { setAddendOne, setAddendTwo, setMultiplier } from "../../../redux/SettingsSlice";
-import { logEvent } from "../../Analytics";
-import { useTheme } from "../../theme";
-import { InteractionType } from "../Interactions/InteractionType";
+import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
+import { setAddendOne, setAddendTwo, setMultiplier } from '../../../redux/SettingsSlice';
+import { logEvent } from '../../Analytics';
+import { useTheme } from '../../theme';
+import { InteractionType } from '../Interactions/InteractionType';
 
-import { useAddendModalContext } from "./AddendModalContext";
+import { useAddendModalContext } from './AddendModalContext';
 
 const ADDEND_OPTIONS = [...Array(100).keys()].map((index) => ({
     value: index + 1,
@@ -31,12 +31,12 @@ const AddendModal: React.FunctionComponent = () => {
 
     const dispatch = useAppDispatch();
 
-    const isAndroid = useMemo(() => Platform.OS === "android", []);
-    const isDark = theme.background === "#000000";
+    const isAndroid = useMemo(() => Platform.OS === 'android', []);
+    const isDark = theme.background === '#000000';
     const overlayItemStyle = useMemo(
         () => ({
             borderRadius: 16,
-            ...(isDark ? { backgroundColor: "rgba(255,255,255,0.12)", opacity: 1 } : {})
+            ...(isDark ? { backgroundColor: 'rgba(255,255,255,0.12)', opacity: 1 } : {})
         }),
         [isDark]
     );
@@ -53,7 +53,7 @@ const AddendModal: React.FunctionComponent = () => {
             requestAnimationFrame(() => {
                 dispatch(setMultiplier(value));
                 dispatch(setAddendOne(value));
-                logEvent("addend_one_change", { addendOne: value });
+                logEvent('addend_one_change', { addendOne: value });
             });
         },
         [dispatch]
@@ -66,7 +66,7 @@ const AddendModal: React.FunctionComponent = () => {
             requestAnimationFrame(() => {
                 dispatch(setMultiplier(value));
                 dispatch(setAddendTwo(value));
-                logEvent("addend_one_change", { addendTwo: value });
+                logEvent('addend_one_change', { addendTwo: value });
             });
         },
         [dispatch]
@@ -93,18 +93,18 @@ const AddendModal: React.FunctionComponent = () => {
     const addendOneLabel = useMemo(() => {
         switch (interactionType) {
             case InteractionType.HalfTap:
-                return "Single Tap";
+                return 'Single Tap';
             case InteractionType.SwipeVertical:
-                return "Swipe";
+                return 'Swipe';
         }
     }, [interactionType]);
 
     const addendTwoLabel = useMemo(() => {
         switch (interactionType) {
             case InteractionType.HalfTap:
-                return "Long Press";
+                return 'Long Press';
             case InteractionType.SwipeVertical:
-                return "Hold + Swipe";
+                return 'Hold + Swipe';
         }
     }, [interactionType]);
 
@@ -119,16 +119,16 @@ const AddendModal: React.FunctionComponent = () => {
             backdropComponent={renderBackdrop}
             backgroundStyle={{ backgroundColor: theme.sheetBackground }}
             handleIndicatorStyle={{ backgroundColor: theme.sheetHandle }}>
-            <BottomSheetScrollView style={styles.modalContainer} contentContainerStyle={{ alignItems: "center" }}>
-                <View style={{ flex: 1, width: "100%", alignItems: "center" }}>
+            <BottomSheetScrollView style={styles.modalContainer} contentContainerStyle={{ alignItems: 'center' }}>
+                <View style={{ flex: 1, width: '100%', alignItems: 'center' }}>
                     <Text style={{ color: theme.text, fontSize: 20 }}>Point Values</Text>
-                    <View style={{ flex: 1, flexDirection: "row", justifyContent: "space-around", padding: 10 }}>
+                    <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-around', padding: 10 }}>
                         <View>
-                            <Text style={{ color: theme.text, textAlign: "center" }}>{addendOneLabel}</Text>
+                            <Text style={{ color: theme.text, textAlign: 'center' }}>{addendOneLabel}</Text>
                             <View
                                 style={[
                                     isAndroid ? styles.pickerContainerAndroid : styles.pickerContainer,
-                                    { backgroundColor: theme.background === "#000000" ? "rgba(0,0,0,.2)" : "#FFFFFF" }
+                                    { backgroundColor: theme.background === '#000000' ? 'rgba(0,0,0,.2)' : '#FFFFFF' }
                                 ]}>
                                 <WheelPicker
                                     onValueChanging={() => {
@@ -146,11 +146,11 @@ const AddendModal: React.FunctionComponent = () => {
                             </View>
                         </View>
                         <View>
-                            <Text style={{ color: theme.text, textAlign: "center" }}>{addendTwoLabel}</Text>
+                            <Text style={{ color: theme.text, textAlign: 'center' }}>{addendTwoLabel}</Text>
                             <View
                                 style={[
                                     isAndroid ? styles.pickerContainerAndroid : styles.pickerContainer,
-                                    { backgroundColor: theme.background === "#000000" ? "rgba(0,0,0,.2)" : "#FFFFFF" }
+                                    { backgroundColor: theme.background === '#000000' ? 'rgba(0,0,0,.2)' : '#FFFFFF' }
                                 ]}>
                                 <WheelPicker
                                     onValueChanging={() => {
@@ -176,7 +176,7 @@ const AddendModal: React.FunctionComponent = () => {
 
 const styles = StyleSheet.create({
     modalContainer: { flex: 1 },
-    wheelPicker: { padding: 0, margin: "auto" },
+    wheelPicker: { padding: 0, margin: 'auto' },
     wheelPickerAndroid: { width: 200 },
     pickerContainer: { borderRadius: 10, margin: 10, width: 80 },
     pickerContainerAndroid: { borderRadius: 10, margin: 10 }
