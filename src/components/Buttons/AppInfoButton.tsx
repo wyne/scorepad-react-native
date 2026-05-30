@@ -1,7 +1,8 @@
 import React from 'react';
 
-import { ParamListBase } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { ParamListBase } from '@react-navigation/routers';
 import { View } from 'react-native';
 import { Icon } from 'react-native-elements/dist/icons/Icon';
 
@@ -12,12 +13,9 @@ import { useTheme } from '../../theme';
 
 import HeaderButton from './HeaderButton';
 
-interface Props {
-    navigation: NativeStackNavigationProp<ParamListBase, string, undefined>;
-}
-
-const AppInfoButton: React.FunctionComponent<Props> = ({ navigation }) => {
+const AppInfoButton: React.FunctionComponent = () => {
     const theme = useTheme();
+    const navigation = useNavigation<NativeStackNavigationProp<ParamListBase>>();
     const hasUnseenFeature = useAppSelector(state =>
         !state.settings.seenFeatureNotifications.includes(FEATURE_KEEP_SCREEN_AWAKE)
     );
@@ -31,7 +29,7 @@ const AppInfoButton: React.FunctionComponent<Props> = ({ navigation }) => {
                 <Icon name="gear"
                     type="font-awesome"
                     size={20}
-                    color={theme.tint} />
+                    color={theme.text} />
                 {hasUnseenFeature && (
                     <View style={{
                         position: 'absolute',

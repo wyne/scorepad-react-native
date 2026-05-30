@@ -6,7 +6,6 @@ import { RootState } from './store';
 // Mock data for testing
 const mockState: Partial<RootState> = {
   settings: {
-    home_fullscreen: false,
     multiplier: 1,
     addendOne: 1,
     addendTwo: 10,
@@ -21,6 +20,7 @@ const mockState: Partial<RootState> = {
     keepScreenAwake: false,
     seenFeatureNotifications: [],
     colorScheme: 'system',
+    home_fullscreen: false,
   },
   games: {
     entities: {

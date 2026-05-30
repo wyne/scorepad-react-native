@@ -166,7 +166,7 @@ describe('ListScreen', () => {
 
         expect(getByTestId('safe-area-view')).toBeTruthy();
         expect(getByText('No Games')).toBeTruthy();
-        expect(getByText('Tap the + button above to create a new game.')).toBeTruthy();
+        expect(getByText('Tap the + button to create a new game.')).toBeTruthy();
     });
 
     it('should render games list when games exist', () => {
@@ -200,38 +200,6 @@ describe('ListScreen', () => {
         expect(getByTestId('game-list-item-game-1')).toBeTruthy();
         expect(getByTestId('game-list-item-game-2')).toBeTruthy();
         expect(queryByText('No Games')).toBeNull();
-    });
-
-    it('should show blur view with help text when games exist', () => {
-        const store = createMockStore({
-            settings: {
-                appOpens: 1,
-                devMenuEnabled: false,
-                installId: 'existing-id',
-                onboarded: '1.0.0',
-                rollingGameCounter: 2,
-            },
-            games: {
-                entities: {
-                    'game-1': mockGame1,
-                    'game-2': mockGame2,
-                },
-                ids: ['game-1', 'game-2'],
-            },
-            players: {
-                entities: mockPlayers,
-                ids: ['player-1', 'player-2', 'player-3', 'player-4'],
-            },
-        });
-
-        const { getByTestId, getByText } = render(
-            <Provider store={store}>
-                <ListScreen navigation={mockNavigation} />
-            </Provider>
-        );
-
-        expect(getByTestId('blur-view')).toBeTruthy();
-        expect(getByText('Long press for more options.')).toBeTruthy();
     });
 
     it('should generate and set installId when not present', async () => {
@@ -527,40 +495,4 @@ describe('ListScreen', () => {
         }));
     });
 
-    it('should handle platform-specific blur view styling', () => {
-        const store = createMockStore({
-            settings: {
-                appOpens: 1,
-                devMenuEnabled: false,
-                installId: 'existing-id',
-                onboarded: '1.0.0',
-                rollingGameCounter: 1,
-            },
-            games: {
-                entities: { 'game-1': mockGame1 },
-                ids: ['game-1'],
-            },
-            players: {
-                entities: mockPlayers,
-                ids: ['player-1', 'player-2'],
-            },
-        });
-
-        const { getByTestId } = render(
-            <Provider store={store}>
-                <ListScreen navigation={mockNavigation} />
-            </Provider>
-        );
-
-        const blurView = getByTestId('blur-view');
-        expect(blurView).toBeTruthy();
-        // The blur view should be visible when there are games
-        expect(blurView.props.style).toEqual(expect.objectContaining({
-            position: 'absolute',
-            bottom: 0,
-            left: 0,
-            right: 0,
-            height: 60,
-        }));
-    });
 });

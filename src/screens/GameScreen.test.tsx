@@ -10,6 +10,10 @@ import settingsReducer from '../../redux/SettingsSlice';
 
 import GameScreen from './GameScreen';
 
+jest.mock('@react-navigation/elements', () => ({
+    useHeaderHeight: () => 88,
+}));
+
 // Mock the components that GameScreen uses
 jest.mock('../components/Boards/FlexboxBoard', () => {
     return function MockFlexboxBoard() {
@@ -22,6 +26,13 @@ jest.mock('../components/Sheets/AddendModal', () => {
     return function MockAddendModal() {
         const { View, Text } = jest.requireActual('react-native');
         return <View testID="addend-modal"><Text>AddendModal</Text></View>;
+    };
+});
+
+jest.mock('../components/Sheets/GestureInfoModal', () => {
+    return function MockGestureInfoModal() {
+        const { View, Text } = jest.requireActual('react-native');
+        return <View testID="gesture-info-modal"><Text>GestureInfoModal</Text></View>;
     };
 });
 
@@ -64,7 +75,6 @@ describe('GameScreen', () => {
         const store = createMockStore({
             settings: {
                 currentGameId: undefined,
-                home_fullscreen: false,
             },
             games: {
                 entities: {},
@@ -89,7 +99,6 @@ describe('GameScreen', () => {
         const store = createMockStore({
             settings: {
                 currentGameId: 'game-1',
-                home_fullscreen: false,
             },
             games: {
                 entities: {

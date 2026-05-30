@@ -64,7 +64,7 @@ const renderSwipe = () => {
   const store = configureStore({
     reducer: { settings: stub, games: stub, players: stub },
     preloadedState: {
-      settings: { addendOne: 1, addendTwo: 10, currentGameId: 'game-1', home_fullscreen: false, multiplier: '1', onboarded: null, interactionType: null, showPointParticles: true, _persist: { version: 0, rehydrated: true } },
+      settings: { addendOne: 1, addendTwo: 10, currentGameId: 'game-1', multiplier: '1', onboarded: null, interactionType: null, showPointParticles: true, _persist: { version: 0, rehydrated: true } },
       games: { ids: ['game-1'], entities: { 'game-1': { id: 'game-1', title: 'Test', dateCreated: Date.now(), roundCurrent: 0, roundTotal: 1, locked: false, playerIds: ['player-1'] } }, _persist: { version: 0, rehydrated: true } },
       players: { ids: ['player-1'], entities: { 'player-1': { id: 'player-1', playerName: 'Test', scores: [0] } }, _persist: { version: 0, rehydrated: true } },
     },

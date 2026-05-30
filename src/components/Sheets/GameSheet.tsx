@@ -29,7 +29,6 @@ const GameSheet: React.FunctionComponent = () => {
     const navigation = useNavigation<NativeStackNavigationProp<ParamListBase>>();
     const { height: containerHeight } = useWindowDimensions();
     const currentGameId = useAppSelector(state => state.settings.currentGameId);
-    const fullscreen = useAppSelector(state => state.settings.home_fullscreen);
     const gameTitle = useAppSelector(state => selectGameById(state, currentGameId || '')?.title);
     const gameLocked = useAppSelector(state => selectGameById(state, currentGameId || '')?.locked);
     const playerIds = useAppSelector(state => selectGameById(state, currentGameId || '')?.playerIds);
@@ -257,7 +256,7 @@ const GameSheet: React.FunctionComponent = () => {
                     </View>
 
                     <Animated.View style={[styles.sheetContent, animatedSheetStyle]}>
-                        <Rounds navigation={navigation} show={!fullscreen} />
+                        <Rounds navigation={navigation} />
 
                         <Text style={{ color: theme.text, margin: 10, marginTop: 0 }}>
                             Tap the player column or total score column to change sorting.

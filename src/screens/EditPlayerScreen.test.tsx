@@ -82,7 +82,6 @@ describe('EditPlayerScreen', () => {
     const mockStore = createMockStore({
         settings: {
             currentGameId: 'game-1',
-            home_fullscreen: false,
         },
         games: {
             entities: {
@@ -191,7 +190,6 @@ describe('EditPlayerScreen', () => {
         const storeWithoutGame = createMockStore({
             settings: {
                 currentGameId: undefined,
-                home_fullscreen: false,
             },
             games: {
                 entities: {},
@@ -266,7 +264,6 @@ describe('EditPlayerScreen', () => {
         const store = createMockStore({
             settings: {
                 currentGameId: 'game-1',
-                home_fullscreen: false,
             },
             games: {
                 entities: {
@@ -307,7 +304,6 @@ describe('EditPlayerScreen', () => {
         const store = createMockStore({
             settings: {
                 currentGameId: 'game-1',
-                home_fullscreen: false,
             },
             games: {
                 entities: {
@@ -348,7 +344,6 @@ describe('EditPlayerScreen', () => {
         const store = createMockStore({
             settings: {
                 currentGameId: 'game-1',
-                home_fullscreen: false,
             },
             games: {
                 entities: {
@@ -395,7 +390,6 @@ describe('EditPlayerScreen', () => {
         const store = createMockStore({
             settings: {
                 currentGameId: 'game-1',
-                home_fullscreen: false,
             },
             games: {
                 entities: {
@@ -436,7 +430,6 @@ describe('EditPlayerScreen', () => {
         const store = createMockStore({
             settings: {
                 currentGameId: 'game-1',
-                home_fullscreen: false,
             },
             games: {
                 entities: {
@@ -474,7 +467,6 @@ describe('EditPlayerScreen', () => {
         const store = createMockStore({
             settings: {
                 currentGameId: 'game-1',
-                home_fullscreen: false,
             },
             games: {
                 entities: {
@@ -513,7 +505,6 @@ describe('EditPlayerScreen', () => {
         const store = createMockStore({
             settings: {
                 currentGameId: 'game-1',
-                home_fullscreen: false,
             },
             games: {
                 entities: {
@@ -575,7 +566,6 @@ describe('EditPlayerScreen', () => {
         const storeWithEmptyName = createMockStore({
             settings: {
                 currentGameId: 'game-1',
-                home_fullscreen: false,
             },
             games: {
                 entities: {
@@ -617,7 +607,6 @@ describe('EditPlayerScreen', () => {
         const storeWithEmptyName = createMockStore({
             settings: {
                 currentGameId: 'game-1',
-                home_fullscreen: false,
             },
             games: {
                 entities: {
@@ -662,7 +651,7 @@ describe('EditPlayerScreen', () => {
         };
 
         const createSuggestionStore = () => createMockStore({
-            settings: { currentGameId: 'game-1', home_fullscreen: false },
+            settings: { currentGameId: 'game-1' },
             games: {
                 entities: {
                     'game-1': {
@@ -811,7 +800,7 @@ describe('EditPlayerScreen', () => {
 
         it('should save selected suggestion name to Redux', async () => {
             const store = createMockStore({
-                settings: { currentGameId: 'game-1', home_fullscreen: false },
+                settings: { currentGameId: 'game-1' },
                 games: {
                     entities: {
                         'game-1': { ...mockGame, playerIds: ['player-1', 'player-2'] },
@@ -911,7 +900,7 @@ describe('EditPlayerScreen', () => {
             }
 
             const storeWithMany = createMockStore({
-                settings: { currentGameId: 'game-1', home_fullscreen: false },
+                settings: { currentGameId: 'game-1' },
                 games: {
                     entities: {
                         'game-1': {

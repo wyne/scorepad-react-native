@@ -153,7 +153,7 @@ describe('Rounds', () => {
 
         const { toJSON } = render(
             <Provider store={store}>
-                <Rounds navigation={mockNavigation} show={true} />
+                <Rounds navigation={mockNavigation} />
             </Provider>
         );
 
@@ -179,7 +179,7 @@ describe('Rounds', () => {
 
         const { getByTestId } = render(
             <Provider store={store}>
-                <Rounds navigation={mockNavigation} show={true} />
+                <Rounds navigation={mockNavigation} />
             </Provider>
         );
 
@@ -207,7 +207,7 @@ describe('Rounds', () => {
 
         const { getByTestId } = render(
             <Provider store={store}>
-                <Rounds navigation={mockNavigation} show={true} />
+                <Rounds navigation={mockNavigation} />
             </Provider>
         );
 
@@ -238,7 +238,7 @@ describe('Rounds', () => {
 
         const { getByText } = render(
             <Provider store={store}>
-                <Rounds navigation={mockNavigation} show={true} />
+                <Rounds navigation={mockNavigation} />
             </Provider>
         );
 
@@ -272,7 +272,7 @@ describe('Rounds', () => {
         const { logEvent } = require('../Analytics');
         const { getByTestId } = render(
             <Provider store={store}>
-                <Rounds navigation={mockNavigation} show={true} />
+                <Rounds navigation={mockNavigation} />
             </Provider>
         );
 
@@ -308,7 +308,7 @@ describe('Rounds', () => {
         const { logEvent } = require('../Analytics');
         const { getByTestId } = render(
             <Provider store={store}>
-                <Rounds navigation={mockNavigation} show={true} />
+                <Rounds navigation={mockNavigation} />
             </Provider>
         );
 
@@ -343,7 +343,7 @@ describe('Rounds', () => {
 
         const { getByTestId, queryByTestId } = render(
             <Provider store={store}>
-                <Rounds navigation={mockNavigation} show={true} />
+                <Rounds navigation={mockNavigation} />
             </Provider>
         );
 
@@ -373,7 +373,7 @@ describe('Rounds', () => {
 
         const { getByTestId } = render(
             <Provider store={store}>
-                <Rounds navigation={mockNavigation} show={true} />
+                <Rounds navigation={mockNavigation} />
             </Provider>
         );
 
@@ -422,7 +422,7 @@ describe('Rounds', () => {
 
         const { getByTestId } = render(
             <Provider store={store}>
-                <Rounds navigation={mockNavigation} show={true} />
+                <Rounds navigation={mockNavigation} />
             </Provider>
         );
 
@@ -450,7 +450,7 @@ describe('Rounds', () => {
 
         const { getByTestId } = render(
             <Provider store={store}>
-                <Rounds navigation={mockNavigation} show={false} />
+                <Rounds navigation={mockNavigation} />
             </Provider>
         );
 
@@ -483,7 +483,7 @@ describe('Rounds', () => {
 
         const { getByText } = render(
             <Provider store={store}>
-                <Rounds navigation={mockNavigation} show={true} />
+                <Rounds navigation={mockNavigation} />
             </Provider>
         );
 
@@ -510,7 +510,7 @@ describe('Rounds', () => {
 
         const { getByTestId } = render(
             <Provider store={store}>
-                <Rounds navigation={mockNavigation} show={true} />
+                <Rounds navigation={mockNavigation} />
             </Provider>
         );
 

@@ -148,14 +148,13 @@ jest.mock('../Icons/RematchIcon', () => {
 
 jest.mock('../Rounds', () => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    return function MockRounds({ navigation, show }: {
+    return function MockRounds({ navigation }: {
         navigation: object;
-        show: boolean;
     }) {
         const { View, Text } = jest.requireActual('react-native');
         return (
             <View testID="rounds">
-                <Text>Rounds - Show: {show.toString()}</Text>
+                <Text>Rounds</Text>
             </View>
         );
     };
@@ -244,7 +243,6 @@ describe('GameSheet', () => {
         const store = createMockStore({
             settings: {
                 currentGameId: undefined,
-                home_fullscreen: false,
             },
             games: {
                 entities: {},
@@ -269,7 +267,6 @@ describe('GameSheet', () => {
         const store = createMockStore({
             settings: {
                 currentGameId: 'game-1',
-                home_fullscreen: false,
             },
             games: {
                 entities: {
@@ -299,7 +296,6 @@ describe('GameSheet', () => {
         const store = createMockStore({
             settings: {
                 currentGameId: 'game-1',
-                home_fullscreen: false,
             },
             games: {
                 entities: {
@@ -328,7 +324,6 @@ describe('GameSheet', () => {
         const store = createMockStore({
             settings: {
                 currentGameId: 'game-1',
-                home_fullscreen: false,
             },
             games: {
                 entities: {
@@ -355,7 +350,6 @@ describe('GameSheet', () => {
         const store = createMockStore({
             settings: {
                 currentGameId: 'game-1',
-                home_fullscreen: false,
             },
             games: {
                 entities: {
@@ -382,7 +376,6 @@ describe('GameSheet', () => {
         const store = createMockStore({
             settings: {
                 currentGameId: 'game-1',
-                home_fullscreen: false,
             },
             games: {
                 entities: {
@@ -417,7 +410,6 @@ describe('GameSheet', () => {
         const store = createMockStore({
             settings: {
                 currentGameId: 'game-1',
-                home_fullscreen: false,
             },
             games: {
                 entities: {
@@ -445,7 +437,6 @@ describe('GameSheet', () => {
         const store = createMockStore({
             settings: {
                 currentGameId: 'game-1',
-                home_fullscreen: false,
             },
             games: {
                 entities: {
@@ -472,7 +463,6 @@ describe('GameSheet', () => {
         const store = createMockStore({
             settings: {
                 currentGameId: 'game-1',
-                home_fullscreen: false,
             },
             games: {
                 entities: {
@@ -499,7 +489,6 @@ describe('GameSheet', () => {
         const store = createMockStore({
             settings: {
                 currentGameId: 'game-1',
-                home_fullscreen: false,
             },
             games: {
                 entities: {
@@ -538,7 +527,6 @@ describe('GameSheet', () => {
         const store = createMockStore({
             settings: {
                 currentGameId: 'game-1',
-                home_fullscreen: false,
             },
             games: {
                 entities: {
@@ -577,7 +565,6 @@ describe('GameSheet', () => {
         const store = createMockStore({
             settings: {
                 currentGameId: 'game-1',
-                home_fullscreen: false,
             },
             games: {
                 entities: {
@@ -613,7 +600,6 @@ describe('GameSheet', () => {
         const store = createMockStore({
             settings: {
                 currentGameId: 'game-1',
-                home_fullscreen: false,
             },
             games: {
                 entities: {
@@ -636,38 +622,10 @@ describe('GameSheet', () => {
         expect(queryByText('Edit Game and Players')).toBeNull();
     });
 
-    it('should pass fullscreen state to Rounds component', () => {
-        const store = createMockStore({
-            settings: {
-                currentGameId: 'game-1',
-                home_fullscreen: true,
-            },
-            games: {
-                entities: {
-                    'game-1': mockGame,
-                },
-                ids: ['game-1'],
-            },
-            players: {
-                entities: mockPlayers,
-                ids: ['player-1', 'player-2'],
-            },
-        });
-
-        const { getByText } = render(
-            <Provider store={store}>
-                <GameSheet {...defaultProps} />
-            </Provider>
-        );
-
-        expect(getByText('Rounds - Show: false')).toBeTruthy();
-    });
-
     it('should show sorting instruction text', () => {
         const store = createMockStore({
             settings: {
                 currentGameId: 'game-1',
-                home_fullscreen: false,
             },
             games: {
                 entities: {

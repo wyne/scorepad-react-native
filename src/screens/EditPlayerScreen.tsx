@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useLayoutEffect, useMemo, useRef, useState } from 'react';
 
 import { ParamListBase, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -17,6 +17,8 @@ import { Input } from 'react-native-elements';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { updatePlayer } from '../../redux/PlayersSlice';
 import { selectCurrentGame } from '../../redux/selectors';
+import { logEvent } from '../Analytics';
+import HeaderButton from '../components/Buttons/HeaderButton';
 import ColorSelector from '../components/ColorPalettes/ColorSelector';
 import { useTheme } from '../theme';
 
@@ -33,10 +35,24 @@ export interface EditPlayerScreenProps {
 }
 
 const EditPlayerScreen: React.FC<EditPlayerScreenProps> = ({
+    navigation,
     route,
 }) => {
 
     const theme = useTheme();
+
+    useLayoutEffect(() => {
+        navigation.setOptions({
+            headerLeft: ({ tintColor }) => (
+                <HeaderButton accessibilityLabel='EditPlayerBack' onPress={async () => {
+                    navigation.goBack();
+                    await logEvent('edit_player_back');
+                }}>
+                    <Text style={{ color: tintColor ?? theme.tint, fontSize: 20 }}>Back</Text>
+                </HeaderButton>
+            ),
+        });
+    }, [navigation, theme.tint]);
     const dispatch = useAppDispatch();
     const currentGame = useAppSelector(selectCurrentGame);
     const { index, playerId } = route.params;

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useLayoutEffect, useRef } from 'react';
 
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ParamListBase } from '@react-navigation/routers';
@@ -10,6 +10,7 @@ import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { markFeatureNotificationSeen, resetOnboarding, resetSeenFeatureNotifications, setColorScheme, setKeepScreenAwake, toggleShowPlayerIndex, toggleShowPointParticles } from '../../redux/SettingsSlice';
 import { logEvent } from '../Analytics';
 import RotatingIcon from '../components/AppInfo/RotatingIcon';
+import HeaderButton from '../components/Buttons/HeaderButton';
 import { FEATURE_KEEP_SCREEN_AWAKE } from '../constants';
 import { useTheme } from '../theme';
 
@@ -19,6 +20,17 @@ interface Props {
 
 const AppInfoScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     const theme = useTheme();
+
+    useLayoutEffect(() => {
+        navigation.setOptions({
+            headerRight: () => (
+                <HeaderButton accessibilityLabel='Done'
+                    onPress={() => { navigation.goBack(); }}>
+                    <Text style={{ color: theme.tint, fontSize: 20 }} allowFontScaling={false}>Done</Text>
+                </HeaderButton>
+            ),
+        });
+    }, [navigation, theme.tint]);
     const Section = ({ children, title }: { children: React.ReactNode, title: string; }) => (
         <>
             <Text style={[styles.sectionHeader, { color: theme.textTertiary }]}>{title}</Text>
@@ -157,9 +169,6 @@ const AppInfoScreen: React.FunctionComponent<Props> = ({ navigation }) => {
                 <SectionItem>
                     <View style={styles.labelRow}>
                         <SectionItemText text="Player Numbers" />
-                        <View style={[styles.betaPill, { backgroundColor: theme.separator }]}>
-                            <Text style={[styles.betaPillText, { color: theme.text }]}>Beta</Text>
-                        </View>
                     </View>
                     <Switch onValueChange={togglePlayerIndexSwitch} value={showPlayerIndex} ios_backgroundColor={theme.separator} />
                 </SectionItem>
@@ -229,14 +238,12 @@ const AppInfoScreen: React.FunctionComponent<Props> = ({ navigation }) => {
                             ]
                         );
                     }} />
+                    <SectionSeparator />
+                    <DisclosureRow label="View Debug Log" onPress={() => {
+                        navigation.navigate('DebugLog');
+                    }} />
                 </Section>
             )}
-
-            <Section title="Backup">
-                <DisclosureRow label="Export Backup" onPress={handleExport} />
-                <SectionSeparator />
-                <DisclosureRow label="Restore from Backup" onPress={handleRestore} />
-            </Section>
 
             <Section title="Help">
                 <DisclosureRow label="View Tutorial" onPress={() => {
@@ -257,6 +264,13 @@ const AppInfoScreen: React.FunctionComponent<Props> = ({ navigation }) => {
                     Linking.openURL('https://www.scorepadapp.com');
                 }} />
             </Section>
+
+            <Section title="Backup">
+                <DisclosureRow label="Export Backup" onPress={handleExport} />
+                <SectionSeparator />
+                <DisclosureRow label="Restore from Backup" onPress={handleRestore} />
+            </Section>
+
 
         </ScrollView>
     );

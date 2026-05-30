@@ -43,7 +43,6 @@ const createMockState = (
   currentGameId = 'game-1'
 ): RootState => ({
   settings: {
-    home_fullscreen: false,
     multiplier: 1,
     addendOne: 1,
     addendTwo: 10,
@@ -52,6 +51,7 @@ const createMockState = (
     showPointParticles: true,
     showPlayerIndex: true,
     interactionType: InteractionType.SwipeVertical,
+    home_fullscreen: false,
     lastStoreReviewPrompt: Date.now(),
     appOpens: 1,
     installId: 'test-install-id',

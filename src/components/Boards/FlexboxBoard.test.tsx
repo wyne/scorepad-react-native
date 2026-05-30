@@ -117,7 +117,6 @@ describe('FlexboxBoard', () => {
         const store = createMockStore({
             settings: {
                 currentGameId: 'game-1',
-                home_fullscreen: false,
             },
             games: {
                 entities: {
@@ -147,7 +146,6 @@ describe('FlexboxBoard', () => {
         const store = createMockStore({
             settings: {
                 currentGameId: 'game-1',
-                home_fullscreen: false,
             },
             games: {
                 entities: {
@@ -177,7 +175,6 @@ describe('FlexboxBoard', () => {
         const store = createMockStore({
             settings: {
                 currentGameId: 'game-1',
-                home_fullscreen: false,
             },
             games: {
                 entities: {
@@ -204,7 +201,6 @@ describe('FlexboxBoard', () => {
         const store = createMockStore({
             settings: {
                 currentGameId: 'game-1',
-                home_fullscreen: false,
             },
             games: {
                 entities: {
@@ -232,7 +228,6 @@ describe('FlexboxBoard', () => {
         const store = createMockStore({
             settings: {
                 currentGameId: 'game-1',
-                home_fullscreen: false,
             },
             games: {
                 entities: {
@@ -279,7 +274,6 @@ describe('FlexboxBoard', () => {
         const store = createMockStore({
             settings: {
                 currentGameId: 'game-1',
-                home_fullscreen: false,
             },
             games: {
                 entities: {
@@ -320,7 +314,6 @@ describe('FlexboxBoard', () => {
         const store = createMockStore({
             settings: {
                 currentGameId: 'game-1',
-                home_fullscreen: false,
             },
             games: {
                 entities: {
@@ -371,7 +364,6 @@ describe('FlexboxBoard', () => {
         const store = createMockStore({
             settings: {
                 currentGameId: 'game-1',
-                home_fullscreen: false,
             },
             games: {
                 entities: {
@@ -413,45 +405,10 @@ describe('FlexboxBoard', () => {
         expect(getByText('Height: 400')).toBeTruthy();
     });
 
-    it('should adjust padding based on fullscreen mode', () => {
+    it('should adjust padding for bottom sheet', () => {
         const store = createMockStore({
             settings: {
                 currentGameId: 'game-1',
-                home_fullscreen: true, // fullscreen mode
-            },
-            games: {
-                entities: {
-                    'game-1': mockGame,
-                },
-                ids: ['game-1'],
-            },
-            players: {
-                entities: mockPlayers,
-                ids: ['player-1', 'player-2'],
-            },
-        });
-
-        const { getByTestId } = render(
-            <Provider store={store}>
-                <FlexboxBoard />
-            </Provider>
-        );
-
-        const safeAreaView = getByTestId('safe-area-view');
-        expect(safeAreaView.props.style).toEqual(
-            expect.arrayContaining([
-                expect.objectContaining({
-                    paddingBottom: 20, // fullscreen padding
-                }),
-            ])
-        );
-    });
-
-    it('should adjust padding for non-fullscreen mode', () => {
-        const store = createMockStore({
-            settings: {
-                currentGameId: 'game-1',
-                home_fullscreen: false, // not fullscreen
             },
             games: {
                 entities: {
@@ -485,7 +442,6 @@ describe('FlexboxBoard', () => {
         const store = createMockStore({
             settings: {
                 currentGameId: 'game-1',
-                home_fullscreen: false,
             },
             games: {
                 entities: {
@@ -527,7 +483,6 @@ describe('FlexboxBoard', () => {
         const store = createMockStore({
             settings: {
                 currentGameId: 'game-1',
-                home_fullscreen: false,
             },
             games: {
                 entities: {

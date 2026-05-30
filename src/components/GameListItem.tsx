@@ -3,7 +3,7 @@ import React, { useCallback } from 'react';
 import { ParamListBase } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Moment from 'react-moment';
-import { Platform, StyleSheet, Text } from 'react-native';
+import { Platform, StyleSheet, Text, View } from 'react-native';
 import { Icon, ListItem } from 'react-native-elements';
 import Animated, { FadeInUp } from 'react-native-reanimated';
 
@@ -57,37 +57,40 @@ const GameListItem: React.FunctionComponent<Props> = ({ navigation, gameId, inde
     return (
         <Animated.View entering={FadeInUp.duration(200).delay(100 + index * 100)}>
             <AbstractPopupMenu
+                key={'menu' + gameId}
                 gameId={gameId}
                 setCurrentGameCallback={setCurrentGameCallback}
                 chooseGameHandler={chooseGameHandler}
                 navigation={navigation}
                 index={index}
             >
-                <ListItem key={gameId} bottomDivider
+                <ListItem bottomDivider
                     onPress={Platform.OS == 'android' ? undefined : chooseGameHandler}
                     containerStyle={{ backgroundColor: theme.backgroundSecondary, borderBottomColor: theme.separator }}
                 >
-                    <ListItem.Content>
-                        <ListItem.Title style={{ alignItems: 'center', color: theme.text }}>
-                            {gameTitle}
-                            {locked && <Icon name="lock-closed-outline" type="ionicon" size={14} color={theme.success} style={{ paddingHorizontal: 4 }} />}
-                        </ListItem.Title>
-                        <ListItem.Subtitle style={{ color: theme.textTertiary }}>
-                            <Text><Moment element={Text} fromNow>{dateCreated}</Moment></Text>
-                        </ListItem.Subtitle>
-                        <ListItem.Subtitle style={{ color: theme.textTertiary }}>
-                            {playerIds.map((playerId, index) => (
-                                <GameListItemPlayerName key={index} playerId={playerId} last={index == playerIds.length - 1} />
-                            ))}
-                        </ListItem.Subtitle>
-                    </ListItem.Content>
-                    <Text style={[styles.badgePlayers, { color: theme.badgeBlue }]}>
-                        {playerIds.length} <Icon color={theme.badgeBlue} name="users" type="font-awesome-5" size={16} />
-                    </Text>
-                    <Text style={[styles.badgeRounds, { color: theme.badgeRed }]}>
-                        {roundTotal} <Icon color={theme.badgeRed} name="circle-notch" type="font-awesome-5" size={16} />
-                    </Text>
-                    <ListItem.Chevron iconStyle={{ color: theme.separator }} />
+                    <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1, gap: 16 }}>
+                        <ListItem.Content style={{ flex: 1 }}>
+                            <ListItem.Title style={{ alignItems: 'center', color: theme.text }}>
+                                {gameTitle}
+                                {locked && <Icon name='lock-closed-outline' type='ionicon' size={14} color={theme.success} style={{ paddingHorizontal: 4 }} />}
+                            </ListItem.Title>
+                            <ListItem.Subtitle style={{ color: theme.textTertiary }}>
+                                <Text><Moment element={Text} fromNow>{dateCreated}</Moment></Text>
+                            </ListItem.Subtitle>
+                            <ListItem.Subtitle style={{ color: theme.textTertiary }}>
+                                {playerIds.map((playerId, index) => (
+                                    <GameListItemPlayerName key={playerId} playerId={playerId} last={index == playerIds.length - 1} />
+                                ))}
+                            </ListItem.Subtitle>
+                        </ListItem.Content>
+                        <Text style={[styles.badgePlayers, { color: theme.badgeBlue }]}>
+                            {playerIds.length} <Icon color={theme.badgeBlue} name='users' type='font-awesome-5' size={16} />
+                        </Text>
+                        <Text style={[styles.badgeRounds, { color: theme.badgeRed }]}>
+                            {roundTotal} <Icon color={theme.badgeRed} name='circle-notch' type='font-awesome-5' size={16} />
+                        </Text>
+                        <ListItem.Chevron iconStyle={{ color: theme.separator }} />
+                    </View>
                 </ListItem>
             </AbstractPopupMenu>
         </Animated.View>

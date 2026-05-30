@@ -1,3 +1,4 @@
+import { useNavigation } from '@react-navigation/native';
 import { configureStore } from '@reduxjs/toolkit';
 import { fireEvent, render, waitFor } from '@testing-library/react-native';
 import { Provider } from 'react-redux';
@@ -7,6 +8,11 @@ import { logEvent } from '../../Analytics';
 
 import AppInfoButton from './AppInfoButton';
 
+jest.mock('@react-navigation/native', () => ({
+    ...jest.requireActual('@react-navigation/native'),
+    useNavigation: jest.fn(),
+}));
+
 jest.mock('../../Analytics');
 jest.mock('expo-font'); // https://github.com/callstack/react-native-paper/issues/4561
 
@@ -14,7 +20,6 @@ const createTestStore = () =>
     configureStore({
         reducer: {
             settings: () => ({
-                home_fullscreen: false,
                 multiplier: 1,
                 addendOne: 1,
                 addendTwo: 10,
@@ -35,11 +40,15 @@ const createTestStore = () =>
 describe('AppInfoButton', () => {
   const navigation = useNavigationMock();
 
+  beforeEach(() => {
+    (useNavigation as jest.Mock).mockReturnValue(navigation);
+  });
+
   const renderComponent = () => {
     const store = createTestStore();
     return render(
       <Provider store={store}>
-        <AppInfoButton navigation={navigation} />
+        <AppInfoButton />
       </Provider>
     );
   };

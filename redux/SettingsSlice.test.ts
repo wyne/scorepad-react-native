@@ -3,10 +3,9 @@ import { Store } from 'redux';
 
 import settingsReducer, {
     setCurrentGameId,
-    toggleHomeFullscreen,
     setMultiplier,
     setOnboardedVersion,
- SettingsState } from './SettingsSlice';
+    SettingsState } from './SettingsSlice';
 
 
 describe('settings reducer', () => {
@@ -20,11 +19,6 @@ describe('settings reducer', () => {
         const gameId = '123';
         store.dispatch(setCurrentGameId(gameId));
         expect(store.getState().currentGameId).toEqual(gameId);
-    });
-
-    it('should handle toggleHomeFullscreen', () => {
-        store.dispatch(toggleHomeFullscreen());
-        expect(store.getState().home_fullscreen).toEqual(true);
     });
 
     it('should handle setMultiplier', () => {
