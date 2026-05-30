@@ -21,7 +21,7 @@ const AppInfoButton: React.FunctionComponent = () => {
     );
 
     return (
-        <HeaderButton accessibilityLabel='App Info' onPress={async () => {
+        <HeaderButton testID='app-info-button' accessibilityLabel='App Info' onPress={async () => {
             navigation.navigate('AppInfo');
             await logEvent('app_info');
         }}>

@@ -134,5 +134,12 @@ export default {
         },
       },
     ],
+    [
+      'expo-dev-client',
+      {
+        launchMode: 'most-recent',
+        skipOnboarding: 'true',
+      },
+    ],
   ],
 };

@@ -1,60 +1,56 @@
-appId: com.wyne.scorepad
 ---
 # Launch app
 - launchApp
 
-# Wait for either home screen or onboarding to appear
-- extendedWaitUntil:
-    anyOf:
-      - visible:
-          id: "home-screen"
-      - visible: "Get started"
-    timeout: 20000
+# Let the app finish loading
+- waitForAnimationToEnd:
+      timeout: 15000
 
 # Dismiss onboarding if it's showing
 - runFlow:
-    when:
-      visible: "Get started"
-    file: subflows/dismiss_onboarding.yaml
+      when:
+          visible: Get started
+      file: subflows/dismiss_onboarding.yaml
 
 # Confirm we're on home screen
 - extendedWaitUntil:
-    visible:
-      id: "home-screen"
-    timeout: 10000
+      visible:
+          id: home-screen
+      timeout: 20000
 
 # Open AppInfo screen (gear icon in header)
 - tapOn:
-    label: "App Info"
+      id: app-info-button
 
 # Wait for AppInfo to fully render
 - extendedWaitUntil:
-    visible: "FEATURES"
-    timeout: 10000
+      visible:
+          id: scorepad-title
+      timeout: 10000
 
-# Scroll to Data section at the bottom
-- repeat:
-    times: 5
-    commands:
-      - swipe:
-          direction: DOWN
+# Open dev menu if the DEVELOPER section isn't visible yet
+- runFlow:
+      when:
+          notVisible: DEVELOPER
+      file: subflows/open_dev_menu.yaml
 
-# Load sample data
-- tapOn: "Load Sample Data"
+# Scroll down to reveal the Developer section items
+- swipe:
+      direction: UP
 
-# Confirm the destructive alert
-- extendedWaitUntil:
-    visible: "This will replace all existing"
-    timeout: 5000
-- tapOn: "Load"
-
-# Wait for navigation back to home screen
-- extendedWaitUntil:
-    visible:
-      id: "home-screen"
-    timeout: 15000
+# Wait for scroll animation to finish
 - waitForAnimationToEnd:
-    timeout: 5000
+      timeout: 5000
 
-# Take screenshot
-- takeScreenshot: "home-with-games"
+# Wait for and tap Load Sample Data
+- extendedWaitUntil:
+      visible:
+          id: load-sample-data
+      timeout: 10000
+- tapOn:
+      id: load-sample-data
+
+# Confirm the destructive alert (wait for animation then tap Load)
+- waitForAnimationToEnd:
+      timeout: 5000
+- tapOn: Load

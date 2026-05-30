@@ -7,33 +7,19 @@ import { AppDispatch } from '../../../redux/store';
 import { getPalette } from '../../ColorPalette';
 import { SortDirectionKey, SortSelectorKey } from '../ScoreLog/SortHelper';
 
-const RICK_AND_MORTY_CHARACTERS = [
-    'Rick Sanchez',
-    'Morty Smith',
-    'Summer Smith',
-    'Jerry Smith',
-    'Beth Smith',
-    'Birdperson',
-    'Squanchy',
-    'Mr. Meeseeks',
-    'Mr. Poopybutthole',
-    'King Flippy Nips',
-    'Krombopulos Michael',
-    'Scary Terry',
-    'Abrodolph Lincoler',
-    'Gearhead',
-    'Revolio Clockberg Jr.',
-    'Tammy Guetermann',
-    'Bradford',
-    'Jessica',
-    'Frank Palicky',
-    'Dr. Xenon Bloom',
+const SHORT_NAMES = [
+    'Rick', 'Morty', 'Summer', 'Jerry', 'Beth',
+    'Birdperson', 'Squanchy', 'Meeseeks', 'Mr. Poop', 'Flippy',
+    'Krombopulos', 'Terry', 'Abrodolph', 'Gearhead', 'Revolio',
+    'Tammy', 'Brad', 'Jessica', 'Frank', 'Dr. Bloom',
 ];
 
 const GAMES_SEED_DATA: Array<{ title: string; players: number; seed: number; }> = [
-    { title: 'Council of Ricks', players: 5, seed: 42 },
-    { title: 'Smith Family Game Night', players: 4, seed: 17 },
-    { title: 'Interdimensional Customs', players: 6, seed: 99 },
+    { title: 'Catan', players: 5, seed: 42 },
+    { title: 'Poker Night', players: 4, seed: 17 },
+    { title: 'Cribbage', players: 2, seed: 99 },
+    { title: 'Spades', players: 4, seed: 55 },
+    { title: 'Dominion', players: 3, seed: 88 },
 ];
 
 function seededShuffle<T>(array: T[], seed: number): T[] {
@@ -65,7 +51,7 @@ export function loadSeedData(dispatch: AppDispatch) {
     GAMES_SEED_DATA.forEach((gameSpec, gameIndex) => {
         const gameId = Crypto.randomUUID();
         const playerIds: string[] = [];
-        const shuffled = seededShuffle(RICK_AND_MORTY_CHARACTERS, gameSpec.seed);
+        const shuffled = seededShuffle(SHORT_NAMES, gameSpec.seed);
         const selectedPlayers = shuffled.slice(0, gameSpec.players);
 
         selectedPlayers.forEach((name, playerIndex) => {

@@ -17,8 +17,9 @@
     "test:coverage-summary": "jest --coverage --coverageReporters=text-summary --silent",
     "install:ipa": "scripts/install-ipa.sh",
     "postinstall": "patch-package",
-    "maestro": "maestro test .maestro/ --test-output-dir .maestro/screenshots",
-    "maestro:record": "maestro test .maestro/ --test-output-dir .maestro/screenshots --record"
+    "maestro": "PATH=\"$PATH\":\"$HOME/.maestro/bin\" maestro test .maestro/seed_and_screenshot.yaml --test-output-dir .maestro/screenshots",
+    "maestro:all": "PATH=\"$PATH\":\"$HOME/.maestro/bin\" maestro test .maestro/ --test-output-dir .maestro/screenshots",
+    "maestro:record": "PATH=\"$PATH\":\"$HOME/.maestro/bin\" maestro test .maestro/seed_and_screenshot.yaml --test-output-dir .maestro/screenshots --record"
   },
   "dependencies": {
     "@babel/plugin-transform-react-jsx": "^7.22.5",

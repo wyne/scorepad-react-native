@@ -1,0 +1,5 @@
+appId: com.wyne.scorepad.dev
+---
+# Long press the app icon to show the Developer section
+- longPressOn:
+    id: "app-icon"

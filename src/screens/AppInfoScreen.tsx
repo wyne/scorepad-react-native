@@ -51,8 +51,8 @@ const AppInfoScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     const SectionSeparator = () => (
         <View style={{ height: 1, backgroundColor: theme.separator }} />
     );
-    const DisclosureRow = ({ label, onPress }: { label: string; onPress: () => void; }) => (
-        <TouchableOpacity style={styles.disclosureRow} onPress={onPress}>
+    const DisclosureRow = ({ label, onPress, testID }: { label: string; onPress: () => void; testID?: string; }) => (
+        <TouchableOpacity testID={testID} style={styles.disclosureRow} onPress={onPress}>
             <Text style={[styles.disclosureLabel, { color: theme.text }]}>{label}</Text>
             <Text style={[styles.disclosureArrow, { color: theme.separator }]}>›</Text>
         </TouchableOpacity>
@@ -153,7 +153,7 @@ const AppInfoScreen: React.FunctionComponent<Props> = ({ navigation }) => {
         <ScrollView style={{ backgroundColor: theme.background, flex: 1 }} contentContainerStyle={{ paddingBottom: 50 }}>
             <View style={[styles.iconWrapper, { alignItems: 'center' }]}>
                 <RotatingIcon />
-                <Text style={{ color: theme.textTertiary }} onPress={alertWithVersion}>
+                <Text testID="scorepad-title" style={{ color: theme.textTertiary }} onPress={alertWithVersion}>
                     ScorePad with Rounds v{appVersion}
                 </Text>
                 <Text style={{ color: theme.textTertiary, paddingVertical: 5 }}>
@@ -244,7 +244,7 @@ const AppInfoScreen: React.FunctionComponent<Props> = ({ navigation }) => {
                         navigation.navigate('DebugLog');
                     }} />
                     <SectionSeparator />
-                    <DisclosureRow label="Load Sample Data" onPress={() => {
+                    <DisclosureRow testID="load-sample-data" label="Load Sample Data" onPress={() => {
                         Alert.alert(
                             'Load Sample Data',
                             'This will replace all existing games and players with sample data featuring Rick and Morty characters.',

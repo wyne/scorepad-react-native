@@ -1,4 +1,4 @@
-appId: com.wyne.scorepad
+appId: com.wyne.scorepad.dev
 ---
 - extendedWaitUntil:
     visible:
