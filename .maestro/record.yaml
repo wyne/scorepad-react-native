@@ -2,72 +2,18 @@
 appId: ${APP_ID}
 ---
 
-# Instructions:
-# npm run ios
-# npm run maestro
-
-# Launch app
+# Launch app (sample data assumed already loaded via seed.yaml)
 - launchApp
-
 
 # Let the app finish loading
 - waitForAnimationToEnd:
       timeout: 15000
-
-# Dismiss onboarding if it's showing
-- runFlow:
-      when:
-          visible: Get started
-      file: subflows/dismiss_onboarding.yaml
 
 # Confirm we're on home screen
 - extendedWaitUntil:
       visible:
           id: home-screen
       timeout: 20000
-
-# Open AppInfo screen (gear icon in header)
-- tapOn:
-      id: app-info-button
-
-# Wait for AppInfo to fully render
-- extendedWaitUntil:
-      visible:
-          id: scorepad-title
-      timeout: 10000
-
-# Open dev menu if the DEVELOPER section isn't visible yet
-- runFlow:
-      when:
-          notVisible: DEVELOPER
-      file: subflows/open_dev_menu.yaml
-
-# Scroll down to reveal the Developer section items
-- swipe:
-      direction: UP
-
-# Wait for scroll animation to finish
-- waitForAnimationToEnd:
-      timeout: 5000
-
-# Wait for and tap Load Sample Data
-- extendedWaitUntil:
-      visible:
-          id: load-sample-data
-      timeout: 10000
-- tapOn:
-      id: load-sample-data
-
-# Confirm the destructive alert (wait for animation then tap Load)
-- waitForAnimationToEnd:
-      timeout: 5000
-- tapOn: Load
-
-# Wait for the home screen to be fully visible (settings screen dismissed)
-- extendedWaitUntil:
-      visible:
-          id: home-screen
-      timeout: 15000
 
 - startRecording: 'Flow'
 
@@ -166,6 +112,10 @@ appId: ${APP_ID}
 # Wait for modal to dismiss
 - waitForAnimationToEnd:
       timeout: 5000
+
+# Dismiss the game sheet by tapping the top third of the screen
+- tapOn:
+    point: 50%,25%
 
 - tapOn:
     id: "BackButton"

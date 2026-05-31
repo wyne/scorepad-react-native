@@ -169,10 +169,14 @@ APP_VARIANT=preview npx expo run:ios --configuration Release  # preview
 
 ### Run Flows
 
+Seeding and recording are split into separate flows so you can re-run recording without re-seeding:
+
 ```bash
-npm run maestro        # Run seed_and_screenshot flow against production build
-npm run maestro:dev    # Run seed_and_screenshot flow against dev build
-npm run maestro:record  # Run seed_and_screenshot flow with video recording (production)
+npm run maestro:seed    # Load sample data (run once)
+npm run maestro         # Record/screenshot flow against production build
+npm run maestro:dev     # Record/screenshot flow against dev build
+npm run maestro:all     # Seed then record in one shot (production)
+npm run maestro:record  # Record flow with video recording (production)
 ```
 
 Or run individual flows:
