@@ -12,15 +12,16 @@ interface Props {
     text: string;
     color: string;
     animated?: boolean;
+    testID?: string;
 }
 
-const BigButton: React.FunctionComponent<Props> = ({ icon, text, color, onPress, animated = true }) => {
+const BigButton: React.FunctionComponent<Props> = ({ icon, text, color, onPress, animated = true, testID }) => {
     const theme = useTheme();
     const isDark = theme.background === '#000000';
 
     return (
         <Animated.View layout={Layout.duration(400)} entering={animated ? FadeIn.delay(400) : undefined} exiting={FadeOut}>
-            <TouchableOpacity activeOpacity={.5} onPress={onPress}>
+            <TouchableOpacity activeOpacity={.5} onPress={onPress} testID={testID}>
                 <View style={[styles.bigButton, { backgroundColor: isDark ? 'rgba(0,0,0,.2)' : '#FFFFFF' }]}>
                     {typeof icon === 'string' ? (<Icon name={icon}
                         type="ionicon" size={30}

@@ -123,6 +123,8 @@ const ChooseWinnersModal: React.FunctionComponent = () => {
             handleIndicatorStyle={{ backgroundColor: theme.sheetHandle }}
             topInset={topInset}
             style={theme.background === '#000000' ? undefined : styles.sheetShadow}
+            accessible={false}
+            accessibilityViewIsModal={false}
         >
             {/* Fixed header — does not scroll */}
             <View style={styles.topBar}>
@@ -149,6 +151,7 @@ const ChooseWinnersModal: React.FunctionComponent = () => {
                     style={[styles.glassButton, styles.glassButtonBlue]}
                     activeOpacity={0.7}
                     accessibilityLabel="Lock Game"
+                    testID="lock-game-button"
                 >
                     <BlurView
                         intensity={60}
@@ -178,6 +181,7 @@ const ChooseWinnersModal: React.FunctionComponent = () => {
                                         style={styles.playerRow}
                                         onPress={() => togglePlayer(playerId)}
                                         activeOpacity={0.6}
+                                        testID="winner-player-row"
                                     >
                                         <Icon
                                             name={isSelected ? 'checkmark-circle' : 'ellipse-outline'}
