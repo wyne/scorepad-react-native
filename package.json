@@ -74,7 +74,7 @@
     "react-native": "0.83.6",
     "react-native-animated-pagination-dots": "^0.1.73",
     "react-native-context-menu-view": "^1.21.0",
-    "react-native-draggable-flatlist": "^4.0.1",
+    "react-native-draggable-flatlist": "^4.0.3",
     "react-native-elements": "^3.4.2",
     "react-native-gesture-handler": "~2.30.0",
     "react-native-get-random-values": "~1.11.0",
