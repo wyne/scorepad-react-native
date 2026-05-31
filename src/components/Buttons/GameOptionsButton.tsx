@@ -34,6 +34,13 @@ const GameOptionsButton: React.FunctionComponent = () => {
 
     const isSwipe = interactionType === InteractionType.SwipeVertical;
     const isTap = interactionType === InteractionType.HalfTap;
+    const isDial = interactionType === InteractionType.RadialGesture;
+
+    const pointValuesSubtitle = isTap
+        ? `Tap: ${addendOne} / Long: ${addendTwo}`
+        : isDial
+            ? `Drag: ${addendOne} / Hold: ${addendTwo}`
+            : `Swipe: ${addendOne} / Hold: ${addendTwo}`;
 
     const menuActions: MenuAction[] = [
         {
@@ -56,6 +63,13 @@ const GameOptionsButton: React.FunctionComponent = () => {
                     state: isTap ? 'on' : 'off',
                 },
                 {
+                    id: 'dial',
+                    title: 'Dial',
+                    image: 'dial.min',
+                    imageColor: theme.text,
+                    state: isDial ? 'on' : 'off',
+                },
+                {
                     id: 'about-gestures',
                     title: 'About Gestures',
                     image: 'info.circle',
@@ -71,9 +85,7 @@ const GameOptionsButton: React.FunctionComponent = () => {
                 {
                     id: 'point-values',
                     title: 'Point Values',
-                    subtitle: isTap
-                        ? `Tap: ${addendOne} / Long: ${addendTwo}`
-                        : `Swipe: ${addendOne} / Hold: ${addendTwo}`,
+                    subtitle: pointValuesSubtitle,
                     image: 'plusminus',
                     imageColor: theme.text,
                 },
@@ -99,6 +111,10 @@ const GameOptionsButton: React.FunctionComponent = () => {
             case 'tap':
                 dispatch(setInteractionType(InteractionType.HalfTap));
                 logEvent('interaction_type', { interactionType: 'half_tap', gameId: currentGameId });
+                break;
+            case 'dial':
+                dispatch(setInteractionType(InteractionType.RadialGesture));
+                logEvent('interaction_type', { interactionType: 'radial_gesture', gameId: currentGameId });
                 break;
             case 'point-values':
                 gameSheetRef?.current?.snapToIndex(0);
@@ -134,7 +150,7 @@ const GameOptionsButton: React.FunctionComponent = () => {
                         <Text style={[styles.addendText, { color: theme.text }]}>{addendTwo}</Text>
                     </View>
                     <SymbolView
-                        name={isSwipe ? 'hand.draw' : 'hand.point.up'}
+                        name={isDial ? 'dial.min' : isSwipe ? 'hand.draw' : 'hand.point.up'}
                         size={30}
                         tintColor={theme.text}
                     />

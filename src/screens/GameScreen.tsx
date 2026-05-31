@@ -6,8 +6,11 @@ import { View } from 'react-native';
 
 import { useAppSelector } from '../../redux/hooks';
 import FlexboxBoard from '../components/Boards/FlexboxBoard';
+import RowsBoard from '../components/Boards/RowsBoard';
+import { InteractionType } from '../components/Interactions/InteractionType';
 import AddendModal from '../components/Sheets/AddendModal';
 import GestureInfoModal from '../components/Sheets/GestureInfoModal';
+import { selectInteractionType } from '../../redux/selectors';
 
 function useKeepScreenAwake(active: boolean): void {
     useEffect(() => {
@@ -24,6 +27,7 @@ function useKeepScreenAwake(active: boolean): void {
 const ScoreBoardScreen: React.FunctionComponent = () => {
     const currentGameId = useAppSelector(state => state.settings.currentGameId);
     const keepScreenAwake = useAppSelector(state => state.settings.keepScreenAwake);
+    const interactionType = useAppSelector(selectInteractionType);
     const headerHeight = useHeaderHeight();
     useKeepScreenAwake(keepScreenAwake);
 
@@ -32,7 +36,10 @@ const ScoreBoardScreen: React.FunctionComponent = () => {
     return (
         <View style={{ flex: 1, paddingTop: headerHeight }} testID="game-screen">
             <View style={{ flex: 1 }}>
-                <FlexboxBoard />
+                {interactionType === InteractionType.RadialGesture
+                    ? <RowsBoard />
+                    : <FlexboxBoard />
+                }
 
                 <AddendModal />
                 <GestureInfoModal />

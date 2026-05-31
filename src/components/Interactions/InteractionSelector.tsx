@@ -7,6 +7,7 @@ import { setInteractionType } from '../../../redux/SettingsSlice';
 import { logEvent } from '../../Analytics';
 import { useTheme } from '../../theme';
 import BigButton from '../BigButtons/BigButton';
+import RadialGestureIcon from '../Buttons/RadialGestureIcon';
 import SwipeGestureIcon from '../Buttons/SwipeGestureIcon';
 import TapGestureIcon from '../Buttons/TapGestureIcon';
 
@@ -26,6 +27,8 @@ const InteractionSelector: React.FunctionComponent = () => {
                 return 'Tap the top or bottom of each player\'s tile.';
             case InteractionType.SwipeVertical:
                 return 'Swipe up or down on the player\'s tile.';
+            case InteractionType.RadialGesture:
+                return 'Tap a player row to open the radial dial and set their score.';
         }
     })();
 
@@ -61,6 +64,21 @@ const InteractionSelector: React.FunctionComponent = () => {
                         text="Swipe"
                         icon={<SwipeGestureIcon color={interactionType === InteractionType.SwipeVertical ? theme.text : theme.textTertiary} size={40} />}
                         color={interactionType == InteractionType.SwipeVertical ? theme.text : theme.textTertiary}
+                    />
+                </View>
+                <View>
+                    <BigButton
+                        animated={false}
+                        onPress={() => {
+                            dispatch(setInteractionType(InteractionType.RadialGesture));
+                            logEvent('interaction_type', {
+                                interactionType: 'radial_gesture',
+                                gameId,
+                            });
+                        }}
+                        text="Dial"
+                        icon={<RadialGestureIcon color={interactionType === InteractionType.RadialGesture ? theme.text : theme.textTertiary} size={40} />}
+                        color={interactionType == InteractionType.RadialGesture ? theme.text : theme.textTertiary}
                     />
                 </View>
             </View>

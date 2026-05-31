@@ -54,7 +54,24 @@ const scoresSlice = createSlice({
             prepare(payload: string, round: RoundIndex, multiplier: number) {
                 return { payload, meta: { round, multiplier } };
             },
-        }
+        },
+        playerRoundScoreSet: {
+            reducer(
+                state,
+                action: PayloadAction<string, string, { round: RoundIndex; value: number; }>
+            ) {
+                try {
+                    const scores = state?.entities[action.payload]?.scores || [];
+                    scores[action.meta.round] = action.meta.value;
+                } catch (error) {
+                    const err = error as Error;
+                    crashlytics().recordError(err);
+                }
+            },
+            prepare(payload: string, round: RoundIndex, value: number) {
+                return { payload, meta: { round, value } };
+            },
+        },
     }
 });
 
@@ -68,6 +85,7 @@ export const {
     playerAdd,
     restoreAllPlayers,
     playerRoundScoreIncrement,
+    playerRoundScoreSet,
 } = scoresSlice.actions;
 
 export default scoresSlice.reducer;
