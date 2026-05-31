@@ -227,6 +227,7 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
 
             <GestureDetector gesture={panGesture}>
                 <ReAnimated.View
+                    testID={`swipe-overlay-${index}`}
                     style={[
                         StyleSheet.absoluteFillObject,
                         overlayAnimatedStyle,

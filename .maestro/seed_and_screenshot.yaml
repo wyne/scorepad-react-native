@@ -1,10 +1,14 @@
 ---
-appId: com.wyne.scorepad.dev
+appId: com.wyne.scorepad
 ---
+
+# Instructions:
+# npm run ios
+# npm run maestro
+
 # Launch app
 - launchApp
 
-- startRecording: "Flow"
 
 # Let the app finish loading
 - waitForAnimationToEnd:
@@ -65,13 +69,15 @@ appId: com.wyne.scorepad.dev
           id: home-screen
       timeout: 15000
 
+- startRecording: 'Flow'
+
 # Take a screenshot of the home screen with sample data
 - takeScreenshot: home
 
 # Tap the first game in the list
 - tapOn:
       id: game-list-item
-      index: 4
+      index: 2
 
 # Wait for the game screen to load
 - extendedWaitUntil:
@@ -82,11 +88,8 @@ appId: com.wyne.scorepad.dev
 # Take a screenshot of the game screen
 - takeScreenshot: game
 
-# Pull up the game sheet from the bottom of the screen
-- swipe:
-      start: 50%, 92%
-      end: 50%, 40%
-      duration: 500
+# Pull up the game sheet by tapping the game title in the sheet handle
+- tapOn: 'Smith Family Rummy'
 
 # Wait for the sheet animation to complete
 - waitForAnimationToEnd:
@@ -96,7 +99,8 @@ appId: com.wyne.scorepad.dev
 - takeScreenshot: game-sheet
 
 # Tap Edit Game and Players
-- tapOn: "Edit Game and Players"
+- tapOn:
+      id: edit-game-and-players
 
 # Wait for the settings screen to load
 - extendedWaitUntil:
@@ -107,4 +111,33 @@ appId: com.wyne.scorepad.dev
 # Take a screenshot of the edit game screen
 - takeScreenshot: edit-game
 
+# Save game
+- tapOn: "Save Game"
+
+# Increase score
+- swipe:
+    from:
+        id: "swipe-overlay-1"
+    direction: UP
+    waitToSettleTimeoutMs: 500
+
+# Next round
+- tapOn:
+    id: "next-round-button"
+
+# Option games menu
+- tapOn:
+    id: "game-options-menu"
+
+# Show Addend Modal
+- tapOn: "Point Values, Swipe: 1 / Hold: 10"
+
+# Close Addend Modal
+- tapOn:
+    point: 50%,37%
+
+- tapOn:
+    id: "BackButton"
+
+# Stop recording
 - stopRecording

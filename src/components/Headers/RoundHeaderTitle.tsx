@@ -60,6 +60,7 @@ const RoundHeaderTitle: React.FunctionComponent = () => {
                 style={[styles.chevron, { opacity: isFirstRound ? 0 : 1 }]}
                 onPress={prevRoundHandler}
                 disabled={isFirstRound}
+                testID="previous-round-button"
             >
                 <Icon name="arrow-left" type="font-awesome-5" size={18} color={theme.tint} />
             </TouchableOpacity>
@@ -70,6 +71,7 @@ const RoundHeaderTitle: React.FunctionComponent = () => {
                 style={[styles.chevron, { opacity: isLastRound && currentGame?.locked ? 0 : 1 }]}
                 onPress={nextRoundHandler}
                 disabled={isLastRound && (currentGame?.locked ?? false)}
+                testID="next-round-button"
             >
                 <Icon name="arrow-right" type="font-awesome-5" size={18} color={theme.tint} />
             </TouchableOpacity>

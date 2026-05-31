@@ -125,6 +125,7 @@ const GameOptionsButton: React.FunctionComponent = () => {
                 handleAction(nativeEvent.event);
                 setMenuOpen(false);
             }}
+            testID="game-options-menu"
         >
             <View style={styles.button}>
                 <View style={styles.content}>

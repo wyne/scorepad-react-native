@@ -5,45 +5,48 @@ import { restoreAllPlayers, ScoreState } from '../../../redux/PlayersSlice';
 import { incrementRollingGameCounter, setCurrentGameId } from '../../../redux/SettingsSlice';
 import { AppDispatch } from '../../../redux/store';
 import { getPalette } from '../../ColorPalette';
-import { SortDirectionKey, SortSelectorKey } from '../ScoreLog/SortHelper';
 
-const SHORT_NAMES = [
-    'Rick', 'Morty', 'Summer', 'Jerry', 'Beth',
-    'Birdperson', 'Squanchy', 'Meeseeks', 'Mr. Poop', 'Flippy',
-    'Krombopulos', 'Terry', 'Abrodolph', 'Gearhead', 'Revolio',
-    'Tammy', 'Brad', 'Jessica', 'Frank', 'Dr. Bloom',
-];
-
-const GAMES_SEED_DATA: Array<{ title: string; players: number; seed: number; }> = [
-    { title: 'Catan', players: 5, seed: 42 },
-    { title: 'Poker Night', players: 4, seed: 17 },
-    { title: 'Cribbage', players: 2, seed: 99 },
-    { title: 'Spades', players: 4, seed: 55 },
-    { title: 'Dominion', players: 3, seed: 88 },
-];
-
-function seededShuffle<T>(array: T[], seed: number): T[] {
-    const result = [...array];
-    let m = result.length;
-    while (m) {
-        m -= 1;
-        seed = (seed * 1103515245 + 12345) & 0x7fffffff;
-        const i = seed % (m + 1);
-        [result[m], result[i]] = [result[i], result[m]];
-    }
-    return result;
+interface GameSeed {
+    title: string;
+    players: Array<{
+        name: string;
+        scores: number[];
+    }>;
 }
 
-function seededRandom(seed: number): number {
-    seed = (seed * 1103515245 + 12345) & 0x7fffffff;
-    return seed / 0x7fffffff;
-}
+const GAMES_SEED_DATA: GameSeed[] = [
+    {
+        title: 'Smith Family Rummy',
+        players: [
+            { name: 'Morty', scores: [25, 0, 25, 43] },
+            { name: 'Beth', scores: [0, 31, 0, 0] },
+            { name: 'Summer', scores: [0, 0, 17, 22] },
+            { name: 'Jerry', scores: [14, 18, 0, 12] },
+        ],
+    },
+    {
+        title: "Gertrude's Parlour Scrabble",
+        players: [
+            { name: 'Carmen', scores: [28, 44, 19, 36, 52, 31] },
+            { name: 'Gertrude', scores: [38, 57, 74, 22, 41, 66] },
+            { name: 'Penelope', scores: [45, 18, 33, 61, 29, 48] },
+        ],
+    },
+    {
+        title: 'Dunder Mifflin Spades Night',
+        players: [
+            { name: 'Michael', scores: [110, -50, 120, 80] },
+            { name: 'Dwight', scores: [150, 130, 120, 110] },
+            { name: 'Jim', scores: [80, 100, -100, 90] },
+            { name: 'Pam', scores: [90, 110, 70, 60] },
+        ],
+    },
+];
 
 export function loadSeedData(dispatch: AppDispatch) {
     const paletteColors = getPalette('original');
 
     const players: Record<string, ScoreState> = {};
-
     const games: Record<string, GameState> = {};
 
     const baseTime = Date.now() - GAMES_SEED_DATA.length * 86400000;
@@ -51,25 +54,15 @@ export function loadSeedData(dispatch: AppDispatch) {
     GAMES_SEED_DATA.forEach((gameSpec, gameIndex) => {
         const gameId = Crypto.randomUUID();
         const playerIds: string[] = [];
-        const shuffled = seededShuffle(SHORT_NAMES, gameSpec.seed);
-        const selectedPlayers = shuffled.slice(0, gameSpec.players);
 
-        selectedPlayers.forEach((name, playerIndex) => {
+        gameSpec.players.forEach((playerData, playerIndex) => {
             const playerId = Crypto.randomUUID();
             const color = paletteColors[playerIndex % paletteColors.length];
 
-            const scores: number[] = [];
-            const numRounds = 3;
-            for (let round = 0; round < numRounds; round++) {
-                const base = seededRandom(gameSpec.seed + playerIndex * 10 + round);
-                const score = Math.round(base * 4 + 1);
-                scores.push(score);
-            }
-
             players[playerId] = {
                 id: playerId,
-                playerName: name,
-                scores,
+                playerName: playerData.name,
+                scores: [...playerData.scores],
                 color,
             };
             playerIds.push(playerId);
@@ -80,8 +73,8 @@ export function loadSeedData(dispatch: AppDispatch) {
             id: gameId,
             title: gameSpec.title,
             dateCreated: baseTime + gameIndex * 86400000,
-            roundCurrent: 2,
-            roundTotal: 3,
+            roundCurrent: gameSpec.players[0].scores.length - 1,
+            roundTotal: gameSpec.players[0].scores.length,
             playerIds,
         };
     });
