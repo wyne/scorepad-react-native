@@ -343,7 +343,7 @@ describe('GameSheet', () => {
             </Provider>
         );
 
-        expect(getByTestId('big-button-unlock')).toBeTruthy();
+        expect(getByTestId('unlock-button')).toBeTruthy();
     });
 
     it('should show choose winners button when game is unlocked', () => {
@@ -369,7 +369,7 @@ describe('GameSheet', () => {
             </Provider>
         );
 
-        expect(getByTestId('big-button-choose winners')).toBeTruthy();
+        expect(getByTestId('choose-winners-button')).toBeTruthy();
     });
 
     it('should toggle lock when unlock button is pressed', async () => {
@@ -396,7 +396,7 @@ describe('GameSheet', () => {
             </Provider>
         );
 
-        const unlockButton = getByTestId('big-button-unlock');
+        const unlockButton = getByTestId('unlock-button');
         fireEvent.press(unlockButton);
 
         await waitFor(() => {
@@ -647,7 +647,7 @@ describe('GameSheet', () => {
             </Provider>
         );
 
-        const unlockButton = getByTestId('big-button-unlock');
+        const unlockButton = getByTestId('unlock-button');
         fireEvent.press(unlockButton);
 
         // Wait for Redux dispatch to be reflected

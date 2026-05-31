@@ -306,7 +306,7 @@ const GameSheet: React.FunctionComponent = () => {
                                 color={gameLocked ? theme.warning : theme.success}
                                 icon={gameLocked ? 'lock-closed-outline' : 'lock-open-outline'}
                                 onPress={gameLocked ? unlockGame : () => chooseWinnersModalRef?.current?.present()}
-                                testID="choose-winners-button"
+                                testID={gameLocked ? 'unlock-button' : 'choose-winners-button'}
                             />
 
                         </Animated.View>
