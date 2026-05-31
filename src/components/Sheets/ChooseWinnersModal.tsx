@@ -6,6 +6,7 @@ import {
     BottomSheetModal,
     BottomSheetScrollView
 } from '@gorhom/bottom-sheet';
+import { BlurView } from 'expo-blur';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Icon } from 'react-native-elements';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -14,7 +15,6 @@ import { selectGameById, updateGame } from '../../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
 import { logEvent } from '../../Analytics';
 import { useTheme } from '../../theme';
-import HeaderButton from '../Buttons/HeaderButton';
 
 import { useChooseWinnersModalContext } from './ChooseWinnersModalContext';
 
@@ -124,30 +124,44 @@ const ChooseWinnersModal: React.FunctionComponent = () => {
             topInset={topInset}
             style={theme.background === '#000000' ? undefined : styles.sheetShadow}
         >
+            {/* Fixed header — does not scroll */}
+            <View style={styles.topBar}>
+                <TouchableOpacity
+                    onPress={handleClose}
+                    style={styles.glassButton}
+                    activeOpacity={0.7}
+                    accessibilityLabel="Cancel"
+                >
+                    <BlurView
+                        intensity={60}
+                        tint="systemUltraThinMaterial"
+                        style={styles.absoluteFill}
+                    />
+                    <Icon name="close" type="ionicon" size={18} color={theme.text} />
+                </TouchableOpacity>
+
+                <Text style={[styles.topBarTitle, { color: theme.text }]}>
+                    Choose Winner(s)
+                </Text>
+
+                <TouchableOpacity
+                    onPress={handleLock}
+                    style={[styles.glassButton, styles.glassButtonBlue]}
+                    activeOpacity={0.7}
+                    accessibilityLabel="Lock Game"
+                >
+                    <BlurView
+                        intensity={60}
+                        tint="systemUltraThinMaterial"
+                        style={styles.absoluteFill}
+                    />
+                    <View style={[styles.absoluteFill, styles.glassButtonBlueOverlay]} />
+                    <Icon name="checkmark" type="ionicon" size={20} color="#007AFF" />
+                </TouchableOpacity>
+            </View>
+
             <BottomSheetScrollView contentContainerStyle={styles.scrollContent}>
                 <SafeAreaView edges={['right', 'left']}>
-                    <View style={styles.topBar}>
-                        <HeaderButton accessibilityLabel="Cancel" onPress={handleClose}>
-                            <Text style={[styles.topBarButtonText, { color: theme.tint }]}>
-                                Cancel
-                            </Text>
-                        </HeaderButton>
-                        <Text style={[styles.topBarTitle, { color: theme.text }]}>
-                            Choose Winner(s)
-                        </Text>
-                        <HeaderButton accessibilityLabel="Lock Game" onPress={handleLock}>
-                            <Icon
-                                name="lock-closed-outline"
-                                type="ionicon"
-                                size={20}
-                                color={theme.tint}
-                            />
-                            <Text style={[styles.topBarButtonText, { color: theme.tint }]}>
-                                {' Lock Game'}
-                            </Text>
-                        </HeaderButton>
-                    </View>
-
                     <Text style={[styles.subtitle, { color: theme.textTertiary }]}>
                         Select one or more players as winners
                     </Text>
@@ -205,14 +219,35 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        paddingVertical: 4,
+        paddingHorizontal: 24,
+        paddingVertical: 8,
     },
     topBarTitle: {
         fontSize: 17,
         fontWeight: '600',
     },
-    topBarButtonText: {
-        fontSize: 16,
+    glassButton: {
+        width: 44,
+        height: 44,
+        borderRadius: 22,
+        overflow: 'hidden',
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderWidth: 0.5,
+        borderColor: 'rgba(255, 255, 255, 0.3)',
+    },
+    glassButtonBlue: {
+        borderColor: 'rgba(0, 122, 255, 0.4)',
+    },
+    glassButtonBlueOverlay: {
+        backgroundColor: 'rgba(0, 122, 255, 0.2)',
+    },
+    absoluteFill: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
     },
     subtitle: {
         fontSize: 14,
