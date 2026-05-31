@@ -72,7 +72,7 @@ switch (variant) {
 export default {
   name: 'ScorePad with Rounds',
   slug: 'scorepad',
-  version: '2.6.0',
+  version: '3.0.0',
   orientation: 'default',
   icon: icon,
   assetBundlePatterns: ['assets/*'],
