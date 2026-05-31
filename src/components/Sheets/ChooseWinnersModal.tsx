@@ -166,41 +166,36 @@ const ChooseWinnersModal: React.FunctionComponent = () => {
                         Select one or more players as winners
                     </Text>
 
-                    <View style={styles.playerList}>
-                        {sortedPlayerIds.map((playerId) => {
+                    <View style={[styles.playerList, { backgroundColor: theme.backgroundSecondary }]}>
+                        {sortedPlayerIds.map((playerId, index) => {
                             const info = playerInfo[playerId];
                             const isSelected = selectedIds.has(playerId);
+                            const isLast = index === sortedPlayerIds.length - 1;
 
                             return (
-                                <TouchableOpacity
-                                    key={playerId}
-                                    style={[
-                                        styles.playerRow,
-                                        {
-                                            backgroundColor: isSelected
-                                                ? theme.tint + '20'
-                                                : theme.backgroundTertiary,
-                                            borderColor: isSelected ? theme.tint : 'transparent',
-                                        },
-                                    ]}
-                                    onPress={() => togglePlayer(playerId)}
-                                    activeOpacity={0.7}
-                                >
-                                    <Text style={[styles.playerName, { color: theme.text }]} numberOfLines={1}>
-                                        {info?.name}
-                                    </Text>
-                                    <View style={styles.playerRowRight}>
+                                <React.Fragment key={playerId}>
+                                    <TouchableOpacity
+                                        style={styles.playerRow}
+                                        onPress={() => togglePlayer(playerId)}
+                                        activeOpacity={0.6}
+                                    >
+                                        <Icon
+                                            name={isSelected ? 'checkmark-circle' : 'ellipse-outline'}
+                                            type="ionicon"
+                                            color={isSelected ? theme.tint : theme.textTertiary}
+                                            size={22}
+                                        />
+                                        <Text style={[styles.playerName, { color: theme.text }]} numberOfLines={1}>
+                                            {info?.name}
+                                        </Text>
                                         <Text style={[styles.playerScore, { color: theme.textSecondary }]}>
                                             {info?.totalScore}
                                         </Text>
-                                        <Icon
-                                            name={isSelected ? 'trophy' : 'trophy-outline'}
-                                            type="ionicon"
-                                            color={isSelected ? theme.warning : theme.textTertiary}
-                                            size={24}
-                                        />
-                                    </View>
-                                </TouchableOpacity>
+                                    </TouchableOpacity>
+                                    {!isLast && (
+                                        <View style={[styles.rowSeparator, { backgroundColor: theme.separator }]} />
+                                    )}
+                                </React.Fragment>
                             );
                         })}
                     </View>
@@ -254,31 +249,28 @@ const styles = StyleSheet.create({
         marginBottom: 20,
     },
     playerList: {
-        gap: 8,
+        borderRadius: 10,
+        overflow: 'hidden',
         marginBottom: 40,
     },
     playerRow: {
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: 14,
-        borderRadius: 12,
-        borderWidth: 2,
+        paddingVertical: 13,
+        paddingHorizontal: 16,
+        gap: 12,
+    },
+    rowSeparator: {
+        height: StyleSheet.hairlineWidth,
+        marginLeft: 50,
     },
     playerName: {
         fontSize: 16,
-        fontWeight: '600',
         flex: 1,
-        marginRight: 12,
-    },
-    playerRowRight: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 8,
     },
     playerScore: {
         fontSize: 16,
-        fontWeight: '700',
+        fontWeight: '600',
     },
     sheetShadow: {
         shadowColor: '#000',
