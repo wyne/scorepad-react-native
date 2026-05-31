@@ -25,7 +25,7 @@ const GAMES_SEED_DATA: GameSeed[] = [
         ],
     },
     {
-        title: "Gertrude's Parlour Scrabble",
+        title: 'Gertrude\'s Parlour Scrabble',
         players: [
             { name: 'Carmen', scores: [28, 44, 19, 36, 52, 31] },
             { name: 'Gertrude', scores: [38, 57, 74, 22, 41, 66] },
