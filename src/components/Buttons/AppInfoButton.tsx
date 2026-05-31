@@ -21,11 +21,11 @@ const AppInfoButton: React.FunctionComponent = () => {
     );
 
     return (
-        <HeaderButton testID='app-info-button' accessibilityLabel='App Info' onPress={async () => {
+        <HeaderButton accessibilityLabel='App Info' onPress={async () => {
             navigation.navigate('AppInfo');
             await logEvent('app_info');
         }}>
-            <View>
+            <View testID='app-info-button'>
                 <Icon name="gear"
                     type="font-awesome"
                     size={20}
