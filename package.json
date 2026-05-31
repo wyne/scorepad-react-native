@@ -17,9 +17,10 @@
     "test:coverage-summary": "jest --coverage --coverageReporters=text-summary --silent",
     "install:ipa": "scripts/install-ipa.sh",
     "postinstall": "patch-package",
-    "maestro": "PATH=\"$PATH\":\"$HOME/.maestro/bin\" maestro test .maestro/seed_and_screenshot.yaml --test-output-dir .maestro/runs",
-    "maestro:all": "PATH=\"$PATH\":\"$HOME/.maestro/bin\" maestro test .maestro/ --test-output-dir .maestro/runs",
-    "maestro:record": "PATH=\"$PATH\":\"$HOME/.maestro/bin\" maestro record --local .maestro/seed_and_screenshot.yaml"
+    "maestro": "PATH=\"$PATH\":\"$HOME/.maestro/bin\" maestro test .maestro/seed_and_screenshot.yaml --env APP_ID=com.wyne.scorepad --test-output-dir .maestro/runs",
+    "maestro:dev": "PATH=\"$PATH\":\"$HOME/.maestro/bin\" maestro test .maestro/seed_and_screenshot.yaml --env APP_ID=com.wyne.scorepad.dev --test-output-dir .maestro/runs",
+    "maestro:all": "PATH=\"$PATH\":\"$HOME/.maestro/bin\" maestro test .maestro/ --env APP_ID=com.wyne.scorepad --test-output-dir .maestro/runs",
+    "maestro:record": "PATH=\"$PATH\":\"$HOME/.maestro/bin\" maestro record --local .maestro/seed_and_screenshot.yaml --env APP_ID=com.wyne.scorepad"
   },
   "dependencies": {
     "@babel/plugin-transform-react-jsx": "^7.22.5",

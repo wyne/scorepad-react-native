@@ -1,5 +1,5 @@
 ---
-appId: com.wyne.scorepad
+appId: ${APP_ID}
 ---
 
 # Instructions:
@@ -135,6 +135,37 @@ appId: com.wyne.scorepad
 # Close Addend Modal
 - tapOn:
     point: 50%,37%
+
+# Re-open game sheet
+- tapOn: 'Smith Family Rummy'
+
+# Wait for sheet animation
+- waitForAnimationToEnd:
+      timeout: 5000
+
+# Open Choose Winners modal
+- tapOn:
+    id: "choose-winners-button"
+
+# Wait for modal animation
+- waitForAnimationToEnd:
+      timeout: 5000
+
+# Take screenshot of winners modal
+- takeScreenshot: choose-winners
+
+# Select the top-scoring player (index 0 = highest score)
+- tapOn:
+    id: "winner-player-row"
+    index: 0
+
+# Confirm and lock the game
+- tapOn:
+    id: "lock-game-button"
+
+# Wait for modal to dismiss
+- waitForAnimationToEnd:
+      timeout: 5000
 
 - tapOn:
     id: "BackButton"
