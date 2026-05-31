@@ -32,6 +32,7 @@ const GameListItem: React.FunctionComponent<Props> = ({ navigation, gameId, inde
     const playerIds = useAppSelector(state => selectGameById(state, gameId)?.playerIds);
     const gameTitle = useAppSelector(state => selectGameById(state, gameId)?.title);
     const locked = useAppSelector(state => selectGameById(state, gameId)?.locked);
+    const winnerIds = useAppSelector(state => selectGameById(state, gameId)?.winnerIds);
     const dateCreated = useAppSelector(state => selectGameById(state, gameId)?.dateCreated);
     if (roundTotal == null || playerIds == null) { return null; }
 
@@ -77,11 +78,11 @@ const GameListItem: React.FunctionComponent<Props> = ({ navigation, gameId, inde
                             <ListItem.Subtitle style={{ color: theme.textTertiary }}>
                                 <Text><Moment element={Text} fromNow>{dateCreated}</Moment></Text>
                             </ListItem.Subtitle>
-                            <ListItem.Subtitle style={{ color: theme.textTertiary }}>
+                            <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
                                 {playerIds.map((playerId, index) => (
-                                    <GameListItemPlayerName key={playerId} playerId={playerId} last={index == playerIds.length - 1} />
+                                    <GameListItemPlayerName key={playerId} playerId={playerId} last={index == playerIds.length - 1} isWinner={winnerIds?.includes(playerId) === true} />
                                 ))}
-                            </ListItem.Subtitle>
+                            </View>
                         </ListItem.Content>
                         <Text style={[styles.badgePlayers, { color: theme.badgeBlue }]}>
                             {playerIds.length} <Icon color={theme.badgeBlue} name='users' type='font-awesome-5' size={16} />

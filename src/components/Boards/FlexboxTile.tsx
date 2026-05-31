@@ -11,6 +11,7 @@ import { interactionComponents } from '../Interactions/InteractionComponents';
 import { InteractionType } from '../Interactions/InteractionType';
 import AdditionTile from '../PlayerTiles/AdditionTile/AdditionTile';
 import PlayerIndexLabel from '../PlayerTiles/PlayerIndexLabel';
+import PlayerWinnerLabel from '../PlayerTiles/PlayerWinnerLabel';
 
 interface Props {
     index: number;
@@ -34,11 +35,13 @@ const FlexboxTile: React.FunctionComponent<Props> = React.memo(({
     if (Number.isNaN(width) || Number.isNaN(height)) return null;
 
     const theme = useTheme();
-    const currentGameId = useAppSelector(state => selectCurrentGame(state)?.id);
+    const currentGame = useAppSelector(selectCurrentGame);
+    const currentGameId = currentGame?.id;
     const playerIndexLabel = useAppSelector(state => state.settings.showPlayerIndex);
     const selectPlayerColors = makeSelectPlayerColors();
     const playerColors = useAppSelector(state => selectPlayerColors(state, currentGameId, playerId));
     const [bg, fg] = playerColors;
+    const isWinner = !!(currentGame?.locked && currentGame?.winnerIds?.includes(playerId));
 
     const widthPerc: DimensionValue = `${(100 / cols)}%`;
     const heightPerc: DimensionValue = `${(100 / rows)}%`;
@@ -60,6 +63,7 @@ const FlexboxTile: React.FunctionComponent<Props> = React.memo(({
                     borderBottomLeftRadius: playerIndexLabel ? 7 : undefined,
                 }]}>
             <PlayerIndexLabel index={index} fontColor={fg} enabled={playerIndexLabel} />
+            <PlayerWinnerLabel fontColor={fg} enabled={isWinner} />
             <InteractionComponent index={index} fontColor={fg} playerId={playerId}>
                 <AdditionTile
                     playerId={playerId}
