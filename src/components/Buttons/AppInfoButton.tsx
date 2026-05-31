@@ -25,7 +25,7 @@ const AppInfoButton: React.FunctionComponent = () => {
             navigation.navigate('AppInfo');
             await logEvent('app_info');
         }}>
-            <View>
+            <View testID='app-info-button'>
                 <Icon name="gear"
                     type="font-awesome"
                     size={20}

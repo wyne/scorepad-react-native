@@ -47,7 +47,7 @@ const FloatingActionButton: React.FunctionComponent<Props> = ({ navigation }) =>
                 }}
                 actions={menuActions}
             >
-                <View style={[styles.fab, { backgroundColor: theme.tint }]}>
+                <View style={[styles.fab, { backgroundColor: theme.tint }]} testID="add-game-button">
                     <Icon name="plus" type="font-awesome-5" size={24} color="#FFFFFF" />
                 </View>
             </MenuView>

@@ -89,7 +89,7 @@ jest.mock('react-native-draggable-flatlist', () => {
 jest.mock('../components/EditGame', () => {
     return function MockEditGame() {
         const { View, Text } = jest.requireActual('react-native');
-        return <View testID="edit-game"><Text>Edit Game</Text></View>;
+        return <View><Text>Edit Game</Text></View>;
     };
 });
 

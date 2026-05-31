@@ -2,9 +2,11 @@
   "scripts": {
     "start": "expo start --dev-client",
     "android": "expo run:android",
-    "ios": "npx expo prebuild && expo run:ios",
-    "ios:dev": "APP_VARIANT=development npx expo prebuild && APP_VARIANT=development expo run:ios",
-    "ios:preview": "APP_VARIANT=preview npx expo prebuild && APP_VARIANT=preview expo run:ios --configuration Release",
+    "prebuild": "npx expo prebuild",
+    "prebuild:clean": "npx expo prebuild --clean",
+    "ios": "npx expo prebuild --clean && expo run:ios --configuration Release",
+    "ios:dev": "APP_VARIANT=development npx expo prebuild --clean && APP_VARIANT=development expo run:ios",
+    "ios:preview": "APP_VARIANT=preview npx expo prebuild --clean && APP_VARIANT=preview expo run:ios --configuration Release",
     "web": "expo start --web",
     "eject": "expo eject",
     "dev": "APP_VARIANT=development expo start",
@@ -14,7 +16,10 @@
     "test:coverage": "jest --coverage --silent",
     "test:coverage-summary": "jest --coverage --coverageReporters=text-summary --silent",
     "install:ipa": "scripts/install-ipa.sh",
-    "postinstall": "patch-package"
+    "postinstall": "patch-package",
+    "maestro": "PATH=\"$PATH\":\"$HOME/.maestro/bin\" maestro test .maestro/seed_and_screenshot.yaml --test-output-dir .maestro/runs",
+    "maestro:all": "PATH=\"$PATH\":\"$HOME/.maestro/bin\" maestro test .maestro/ --test-output-dir .maestro/runs",
+    "maestro:record": "PATH=\"$PATH\":\"$HOME/.maestro/bin\" maestro record --local .maestro/seed_and_screenshot.yaml"
   },
   "dependencies": {
     "@babel/plugin-transform-react-jsx": "^7.22.5",

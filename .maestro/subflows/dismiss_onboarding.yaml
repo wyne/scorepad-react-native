@@ -1,0 +1,12 @@
+appId: com.wyne.scorepad
+---
+- extendedWaitUntil:
+    visible:
+      id: "onboarding"
+    timeout: 10000
+- tapOn:
+    text: "Skip"
+- extendedWaitUntil:
+    notVisible:
+      id: "onboarding"
+    timeout: 10000

@@ -2,7 +2,7 @@ import React, { useRef } from 'react';
 
 import * as Haptics from 'expo-haptics';
 import { Image } from 'expo-image';
-import { TouchableWithoutFeedback } from 'react-native';
+import { TouchableOpacity } from 'react-native';
 import Animated, {
     Easing,
     useAnimatedStyle,
@@ -15,8 +15,13 @@ import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
 import { toggleDevMenuEnabled } from '../../../redux/SettingsSlice';
 import { logEvent } from '../../Analytics';
 
+const TAP_COUNT_REQUIRED = 10;
+const TAP_RESET_TIMEOUT = 2000;
+
 const RotatingIcon: React.FunctionComponent = () => {
     const dispatch = useAppDispatch();
+    const tapCountRef = useRef(0);
+    const resetTimerRef = useRef<ReturnType<typeof setTimeout>>();
 
     const installId = useAppSelector(state => state.settings.installId);
 
@@ -29,40 +34,30 @@ const RotatingIcon: React.FunctionComponent = () => {
         };
     });
 
-    const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
+    const handleTap = () => {
+        tapCountRef.current += 1;
 
-    const clearAllTimers = () => {
-        timers.current.forEach(clearTimeout);
-        timers.current = [];
-    };
+        if (resetTimerRef.current) {
+            clearTimeout(resetTimerRef.current);
+        }
 
-    const scheduleTimer = (fn: () => void, delay: number) => {
-        const id = setTimeout(fn, delay);
-        timers.current.push(id);
-    };
-
-    const onPressIn = () => {
-        scheduleTimer(() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light), 1000);
-        scheduleTimer(() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light), 2000);
-        scheduleTimer(() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium), 3000);
-        scheduleTimer(() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy), 4000);
-        scheduleTimer(() => {
-            dispatch(toggleDevMenuEnabled());
+        if (tapCountRef.current >= TAP_COUNT_REQUIRED) {
+            tapCountRef.current = 0;
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+            dispatch(toggleDevMenuEnabled());
             logEvent('dev_menu', {
                 installId,
             });
             rotation.value = withTiming(rotation.value + 360, { duration: 1000, easing: Easing.elastic(1) });
-        }, 5000);
+        } else {
+            resetTimerRef.current = setTimeout(() => {
+                tapCountRef.current = 0;
+            }, TAP_RESET_TIMEOUT);
+        }
     };
 
-    const onPressOut = () => {
-        clearAllTimers();
-    };
-
-    return <TouchableWithoutFeedback
-        onPressIn={onPressIn}
-        onPressOut={onPressOut}>
+    return <TouchableOpacity testID="app-icon"
+        onPress={handleTap}>
         <Animated.View style={[animatedStyles]}>
             <Image source={icon}
                 contentFit='contain'
@@ -75,7 +70,7 @@ const RotatingIcon: React.FunctionComponent = () => {
                 }}
             />
         </Animated.View>
-    </TouchableWithoutFeedback>;
+    </TouchableOpacity>;
 };
 
 export default RotatingIcon;

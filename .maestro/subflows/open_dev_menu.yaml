@@ -1,0 +1,23 @@
+appId: com.wyne.scorepad
+---
+# Tap the app icon 10 times to open the Developer section
+- tapOn:
+    id: "app-icon"
+- tapOn:
+    id: "app-icon"
+- tapOn:
+    id: "app-icon"
+- tapOn:
+    id: "app-icon"
+- tapOn:
+    id: "app-icon"
+- tapOn:
+    id: "app-icon"
+- tapOn:
+    id: "app-icon"
+- tapOn:
+    id: "app-icon"
+- tapOn:
+    id: "app-icon"
+- tapOn:
+    id: "app-icon"

@@ -73,7 +73,7 @@ const ListScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     }, [onboarded, dispatch, navigation]);
 
     return (
-        <SafeAreaView edges={['left', 'right']} style={{ backgroundColor: theme.backgroundSecondary, flex: 1 }}>
+        <SafeAreaView edges={['left', 'right']} style={{ backgroundColor: theme.backgroundSecondary, flex: 1 }} testID="home-screen">
             <Animated.FlatList
                 contentInsetAdjustmentBehavior="automatic"
                 contentInset={{ bottom: 70 }}
