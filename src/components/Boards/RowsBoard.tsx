@@ -1,6 +1,6 @@
 import React, { useCallback, useRef, useState } from 'react';
 
-import { LayoutChangeEvent, LayoutRectangle, ScrollView, StyleSheet, Text, TouchableHighlight, View } from 'react-native';
+import { LayoutChangeEvent, LayoutRectangle, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 interface ExpandRect {
     top: number;
@@ -74,10 +74,9 @@ const PlayerRow: React.FC<PlayerRowProps> = ({ playerId, roundCurrent, dimmed, o
             style={rowStyle}
             onLayout={(e: LayoutChangeEvent) => onLayout(e.nativeEvent.layout)}
         >
-            <TouchableHighlight
+            <Pressable
                 onPress={onPress}
-                underlayColor={inkA(ink, 0.12)}
-                style={[styles.row, { backgroundColor: color }]}
+                style={({ pressed }) => [styles.row, { backgroundColor: color, opacity: pressed ? 0.78 : 1 }]}
             >
                 <View style={styles.rowInner}>
                     {/* Player name */}
@@ -108,7 +107,7 @@ const PlayerRow: React.FC<PlayerRowProps> = ({ playerId, roundCurrent, dimmed, o
                         </View>
                     </View>
                 </View>
-            </TouchableHighlight>
+            </Pressable>
         </Animated.View>
     );
 };
@@ -173,7 +172,7 @@ const RowsBoard: React.FC = () => {
                         key={id}
                         playerId={id}
                         roundCurrent={roundCurrent}
-                        dimmed={selectedId !== null && selectedId !== id}
+                        dimmed={selectedId !== null}
                         onLayout={(rect) => handleRowLayout(id, rect)}
                         onPress={() => handleRowPress(id)}
                     />
