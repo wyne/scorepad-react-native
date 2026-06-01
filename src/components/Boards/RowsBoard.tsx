@@ -10,9 +10,12 @@ interface ExpandRect {
 }
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
 import { useAppSelector } from '../../../redux/hooks';
 import { selectPlayerById } from '../../../redux/PlayersSlice';
 import { selectCurrentGame } from '../../../redux/selectors';
+import { bottomSheetHeight } from '../Sheets/GameSheet';
 import InlineExpandOverlay from '../Interactions/Radial/InlineExpandOverlay';
 
 function inkFor(hex: string): string {
@@ -61,8 +64,10 @@ const PlayerRow: React.FC<PlayerRowProps> = ({ playerId, roundCurrent, dimmed, o
     const sepSign = roundScore < 0 ? '−' : '+';
     const roundAbs = Math.abs(roundScore);
 
-    const numStyle = { color: ink, fontSize: 32, fontWeight: '700' as const, lineHeight: 38 };
-    const capStyle = { color: inkA(ink, 0.65), fontSize: 10, fontWeight: '800' as const, letterSpacing: 1.2, marginTop: 1 };
+    const secNumStyle = { color: ink, fontSize: 18, fontWeight: '600' as const, lineHeight: 22 };
+    const totNumStyle = { color: ink, fontSize: 20, fontWeight: '800' as const, lineHeight: 24 };
+    const capStyle = { color: inkA(ink, 0.65), fontSize: 8, fontWeight: '800' as const, letterSpacing: 1.0, marginTop: 1 };
+    const opStyle = { color: inkA(ink, 0.5), fontSize: 16, fontWeight: '500' as const };
 
     return (
         <Animated.View
@@ -76,24 +81,29 @@ const PlayerRow: React.FC<PlayerRowProps> = ({ playerId, roundCurrent, dimmed, o
             >
                 <View style={styles.rowInner}>
                     {/* Player name */}
-                    <Text style={[styles.playerName, { color: ink }]} numberOfLines={1}>
+                    <Text
+                        style={[styles.playerName, { color: ink }]}
+                        numberOfLines={1}
+                        adjustsFontSizeToFit
+                        minimumFontScale={0.6}
+                    >
                         {player.playerName}
                     </Text>
 
                     {/* Score math: prev + round = total */}
                     <View style={styles.scoreMath}>
                         <View style={styles.scoreCol}>
-                            <Text style={numStyle}>{prevTotal}</Text>
+                            <Text style={secNumStyle}>{prevTotal}</Text>
                             <Text style={capStyle}>PREV</Text>
                         </View>
-                        <Text style={[numStyle, { opacity: 0.55, fontWeight: '500', marginBottom: 14 }]}>{sepSign}</Text>
+                        <Text style={opStyle}>{sepSign}</Text>
                         <View style={styles.scoreCol}>
-                            <Text style={numStyle}>{roundAbs}</Text>
-                            <Text style={capStyle}>THIS ROUND</Text>
+                            <Text style={secNumStyle}>{roundAbs}</Text>
+                            <Text style={capStyle}>RND</Text>
                         </View>
-                        <Text style={[numStyle, { opacity: 0.55, fontWeight: '500', marginBottom: 14 }]}>=</Text>
+                        <Text style={opStyle}>=</Text>
                         <View style={styles.scoreCol}>
-                            <Text style={[numStyle, { fontWeight: '800' }]}>{total}</Text>
+                            <Text style={totNumStyle}>{total}</Text>
                             <Text style={capStyle}>TOTAL</Text>
                         </View>
                     </View>
@@ -105,6 +115,7 @@ const PlayerRow: React.FC<PlayerRowProps> = ({ playerId, roundCurrent, dimmed, o
 
 const RowsBoard: React.FC = () => {
     const currentGame = useAppSelector(selectCurrentGame);
+    const insets = useSafeAreaInsets();
     const [selectedId, setSelectedId] = useState<string | null>(null);
     const [selectedRowRect, setSelectedRowRect] = useState<ExpandRect | null>(null);
     const [boardLayout, setBoardLayout] = useState<LayoutRectangle | null>(null);
@@ -174,7 +185,8 @@ const RowsBoard: React.FC = () => {
                     playerId={selectedId}
                     rowRect={selectedRowRect}
                     boardWidth={boardLayout.width}
-                    boardHeight={boardLayout.height}
+                    boardHeight={boardLayout.height - bottomSheetHeight}
+                    safeAreaTop={insets.top}
                     onClose={handleClose}
                 />
             )}
@@ -197,26 +209,25 @@ const styles = StyleSheet.create({
     },
     row: {
         borderRadius: 22,
-        minHeight: 80,
         overflow: 'hidden',
     },
     rowInner: {
         flexDirection: 'row',
         alignItems: 'center',
-        paddingHorizontal: 20,
-        paddingVertical: 14,
-        gap: 10,
+        paddingHorizontal: 14,
+        paddingVertical: 8,
+        gap: 8,
     },
     playerName: {
         flex: 1,
-        fontSize: 30,
+        fontSize: 24,
         fontWeight: '800',
         letterSpacing: -0.3,
     },
     scoreMath: {
         flexDirection: 'row',
-        alignItems: 'flex-end',
-        gap: 8,
+        alignItems: 'center',
+        gap: 6,
         flexShrink: 0,
     },
     scoreCol: {

@@ -12,7 +12,7 @@ import Animated, {
     withSequence,
     withTiming,
 } from 'react-native-reanimated';
-import Svg, { Circle, G, Line } from 'react-native-svg';
+import Svg, { Circle, Line, Path } from 'react-native-svg';
 
 const STEP_DEG = 30;
 const ACCENT = '#3a86ff';
@@ -25,6 +25,14 @@ function inkA(ink: string, a: number): string {
 function fmtSigned(v: number): string {
     if (v > 0) return '+' + v;
     return String(v);
+}
+
+// Wrap angle delta to [-180, 180]
+function wrapDelta(delta: number): number {
+    'worklet';
+    if (delta > 180) return delta - 360;
+    if (delta < -180) return delta + 360;
+    return delta;
 }
 
 interface Props {
@@ -51,27 +59,33 @@ const DialControl: React.FC<Props> = ({
     dialSize: D,
 }) => {
     const C = D / 2;
-    const R = D * 0.378;
-    const SW = D * 0.077;
-    const circ = 2 * Math.PI * R;
+    const R = D * 0.36;    // ring centre radius
+    const SW = D * 0.13;   // ring stroke width
 
-    // Visual angle tracks the finger; value updates per detent
+    // Pip colour (contrasts with the ink on the ring)
+    const pipColor = ink === '#000' ? 'rgba(255,255,255,0.75)' : 'rgba(0,0,0,0.75)';
+
+    // Visual state (React state — drives SVG re-renders)
     const [handleAngleDeg, setHandleAngleDeg] = useState(0);
+    const [trailStartDeg, setTrailStartDeg] = useState(0);
+    const [accDegrees, setAccDegrees] = useState(0);   // accumulated rotation since drag start
+    const [isDragging, setIsDragging] = useState(false);
     const [pulseKey, setPulseKey] = useState(0);
 
     // Shared values for worklet access
-    const svStartValue = useSharedValue(value);
     const svInc = useSharedValue(addendOne);
     const svAccDeg = useSharedValue(0);
     const svLastAngle = useSharedValue(0);
     const svStartX = useSharedValue(0);
     const svStartY = useSharedValue(0);
     const svHasMoved = useSharedValue(false);
+    const svStartValue = useSharedValue(value);
 
     useEffect(() => { svInc.value = isSecondary ? addendTwo : addendOne; }, [isSecondary, addendOne, addendTwo]);
 
     const lpTimer = useRef<ReturnType<typeof setTimeout>>();
 
+    // Pill pulse animation
     const pillScale = useSharedValue(1);
     const pillOpacity = useSharedValue(1);
 
@@ -81,15 +95,13 @@ const DialControl: React.FC<Props> = ({
                 withSequence(
                     withTiming(0.88, { duration: 800, easing: Easing.inOut(Easing.sin) }),
                     withTiming(1, { duration: 800, easing: Easing.inOut(Easing.sin) }),
-                ),
-                -1, true,
+                ), -1, true,
             );
             pillOpacity.value = withRepeat(
                 withSequence(
                     withTiming(0.55, { duration: 800, easing: Easing.inOut(Easing.sin) }),
                     withTiming(1, { duration: 800, easing: Easing.inOut(Easing.sin) }),
-                ),
-                -1, true,
+                ), -1, true,
             );
         } else {
             pillScale.value = withTiming(1, { duration: 150 });
@@ -102,6 +114,7 @@ const DialControl: React.FC<Props> = ({
         opacity: pillOpacity.value,
     }));
 
+    // JS-thread callbacks called via runOnJS
     const startLongPress = useCallback(() => {
         lpTimer.current = setTimeout(() => {
             if (!svHasMoved.value) {
@@ -133,6 +146,21 @@ const DialControl: React.FC<Props> = ({
         setHandleAngleDeg(deg);
     }, []);
 
+    const handleAccUpdate = useCallback((acc: number) => {
+        setAccDegrees(acc);
+    }, []);
+
+    const handleDragStart = useCallback((startDeg: number) => {
+        setTrailStartDeg(startDeg);
+        setIsDragging(true);
+        setAccDegrees(0);
+    }, []);
+
+    const handleDragEnd = useCallback(() => {
+        setIsDragging(false);
+        setAccDegrees(0);
+    }, []);
+
     const panGesture = Gesture.Pan()
         .minDistance(0)
         .onBegin((e) => {
@@ -146,6 +174,8 @@ const DialControl: React.FC<Props> = ({
             const dy = e.y - C;
             const angle = Math.atan2(dx, -dy) * 180 / Math.PI;
             svLastAngle.value = angle;
+
+            runOnJS(handleDragStart)(angle);
             runOnJS(handleAngleUpdate)(angle);
             runOnJS(startLongPress)();
         })
@@ -161,13 +191,12 @@ const DialControl: React.FC<Props> = ({
             const dy = e.y - C;
             const angle = Math.atan2(dx, -dy) * 180 / Math.PI;
 
-            let delta = angle - svLastAngle.value;
-            if (delta > 180) delta -= 360;
-            if (delta < -180) delta += 360;
-
+            const delta = wrapDelta(angle - svLastAngle.value);
             svAccDeg.value += delta;
             svLastAngle.value = angle;
+
             runOnJS(handleAngleUpdate)(angle);
+            runOnJS(handleAccUpdate)(svAccDeg.value);
 
             const steps = Math.round(svAccDeg.value / STEP_DEG);
             const newVal = svStartValue.value + steps * svInc.value;
@@ -176,42 +205,65 @@ const DialControl: React.FC<Props> = ({
         .onEnd(() => {
             runOnJS(stopLongPress)();
             runOnJS(handleDeactivate)();
+            runOnJS(handleDragEnd)();
         })
         .onFinalize(() => {
             runOnJS(stopLongPress)();
             runOnJS(handleDeactivate)();
+            runOnJS(handleDragEnd)();
         });
 
     function nudge(d: number) {
-        const newVal = value + d * addendOne;
-        onChange(newVal);
+        onChange(value + d * addendOne);
         setPulseKey(k => k + 1);
         setHandleAngleDeg(a => a + d * STEP_DEG);
     }
 
-    // SVG geometry from current handle angle
-    const rad = handleAngleDeg * Math.PI / 180;
-    const hx = C + R * Math.sin(rad);
-    const hy = C - R * Math.cos(rad);
-    const frac = (((handleAngleDeg % 360) + 360) % 360) / 360;
-    const dashArray = `${frac * circ} ${circ}`;
+    // --- SVG geometry ---
+    const ringColor = isSecondary ? ACCENT : ink;
+    const trackColor = inkA(ink, 0.18);
 
+    // Notch indicator: short radial line at handleAngleDeg on the ring
+    const notchRad = handleAngleDeg * Math.PI / 180;
+    const notchInner = R - SW / 2 + 6;
+    const notchOuter = R + SW / 2 - 6;
+    const notchX1 = C + notchInner * Math.sin(notchRad);
+    const notchY1 = C - notchInner * Math.cos(notchRad);
+    const notchX2 = C + notchOuter * Math.sin(notchRad);
+    const notchY2 = C - notchOuter * Math.cos(notchRad);
+
+    // Tick marks on the ring
     const ticks = Array.from({ length: 12 }, (_, i) => {
         const t = (i * 30) * Math.PI / 180;
-        const r1 = R - SW / 2 - D * 0.021;
-        const r2 = R - SW / 2 - D * 0.046;
+        const tickInner = R - SW * 0.18;
+        const tickOuter = R + SW * 0.18;
         return {
-            x1: C + r1 * Math.sin(t), y1: C - r1 * Math.cos(t),
-            x2: C + r2 * Math.sin(t), y2: C - r2 * Math.cos(t),
+            x1: C + tickInner * Math.sin(t), y1: C - tickInner * Math.cos(t),
+            x2: C + tickOuter * Math.sin(t), y2: C - tickOuter * Math.cos(t),
         };
     });
 
-    const trackColor = inkA(ink, 0.16);
-    const arcColor = isSecondary ? ACCENT : ink;
-    const handleStrokeColor = isSecondary ? ACCENT : 'transparent';
-    const handleR = isSecondary ? D * 0.08 : D * 0.066;
-    const pipR = isSecondary ? D * 0.031 : D * 0.024;
-    const pipColor = ink === '#000' ? 'rgba(255,255,255,0.9)' : 'rgba(0,0,0,0.9)';
+    // Trail arc — use explicit SVG Path so there's no seam/reset artifact at 0°.
+    // strokeDasharray on a circle resets at the path's join point (top after
+    // our rotate(-90) transform); a Path arc avoids that entirely.
+    const absAcc = Math.abs(accDegrees);
+    const isFullCircle = isDragging && absAcc >= 360;
+
+    let trailPathD = '';
+    if (isDragging && absAcc > 1 && !isFullCircle) {
+        const isCW = accDegrees >= 0;
+        // Cap just under 360 so the arc command stays valid (360° = degenerate)
+        const sweepDeg = Math.min(absAcc, 359.9);
+        const endDeg = isCW ? trailStartDeg + sweepDeg : trailStartDeg - sweepDeg;
+        const toRad = (d: number) => d * Math.PI / 180;
+        const sx = C + R * Math.sin(toRad(trailStartDeg));
+        const sy = C - R * Math.cos(toRad(trailStartDeg));
+        const ex = C + R * Math.sin(toRad(endDeg));
+        const ey = C - R * Math.cos(toRad(endDeg));
+        const largeArc = sweepDeg > 180 ? 1 : 0;
+        const sweep = isCW ? 1 : 0;
+        trailPathD = `M ${sx} ${sy} A ${R} ${R} 0 ${largeArc} ${sweep} ${ex} ${ey}`;
+    }
 
     return (
         <View style={styles.container}>
@@ -223,7 +275,7 @@ const DialControl: React.FC<Props> = ({
             ]}>
                 <View style={[styles.pillDot, { backgroundColor: isSecondary ? '#fff' : inkA(ink, 0.4) }]} />
                 <Text style={[styles.pillText, { color: isSecondary ? '#fff' : ink }]}>
-                    STEP ×{isSecondary ? addendTwo : addendOne}
+                    STEP +{isSecondary ? addendTwo : addendOne}
                 </Text>
             </Animated.View>
 
@@ -231,36 +283,57 @@ const DialControl: React.FC<Props> = ({
             <GestureDetector gesture={panGesture}>
                 <View style={{ width: D, height: D, position: 'relative' }}>
                     <Svg width={D} height={D} viewBox={`0 0 ${D} ${D}`} style={StyleSheet.absoluteFill}>
-                        {/* Track */}
+                        {/* Base track ring */}
                         <Circle cx={C} cy={C} r={R} fill="none" stroke={trackColor} strokeWidth={SW} />
-                        {/* Ticks */}
+
+                        {/* Filled ring (the "handle") */}
+                        <Circle cx={C} cy={C} r={R} fill="none"
+                            stroke={ringColor} strokeWidth={SW}
+                            strokeOpacity={0.85}
+                        />
+
+                        {/* Tick marks inside the ring */}
                         {ticks.map((t, i) => (
                             <Line
                                 key={i}
                                 x1={t.x1} y1={t.y1} x2={t.x2} y2={t.y2}
-                                stroke={inkA(ink, 0.28)} strokeWidth={2.5} strokeLinecap="round"
+                                stroke={pipColor} strokeWidth={2} strokeLinecap="round"
+                                strokeOpacity={0.45}
                             />
                         ))}
-                        {/* Progress arc */}
-                        <Circle
-                            cx={C} cy={C} r={R} fill="none"
-                            stroke={arcColor} strokeWidth={SW}
-                            strokeLinecap="round"
-                            strokeDasharray={dashArray}
-                            transform={`rotate(-90, ${C}, ${C})`}
-                        />
-                        {/* Handle */}
-                        <G>
-                            <Circle cx={hx} cy={hy} r={handleR} fill={ink}
-                                stroke={handleStrokeColor} strokeWidth={isSecondary ? 4 : 0} />
-                            <Circle cx={hx} cy={hy} r={pipR} fill={pipColor} />
-                        </G>
+
+                        {/* Full-circle trail when rotation ≥ 360° — solid/bold */}
+                        {isFullCircle && (
+                            <Circle cx={C} cy={C} r={R} fill="none"
+                                stroke={pipColor} strokeWidth={SW * 0.55}
+                                strokeOpacity={0.9}
+                            />
+                        )}
+
+                        {/* Partial trail arc — lighter while building up to a full circle */}
+                        {trailPathD !== '' && (
+                            <Path
+                                d={trailPathD}
+                                fill="none"
+                                stroke={pipColor} strokeWidth={SW * 0.55}
+                                strokeOpacity={0.45}
+                                strokeLinecap="round"
+                            />
+                        )}
+
+                        {/* Notch indicator — only visible while dragging */}
+                        {isDragging && (
+                            <Line
+                                x1={notchX1} y1={notchY1} x2={notchX2} y2={notchY2}
+                                stroke={pipColor} strokeWidth={3.5} strokeLinecap="round"
+                            />
+                        )}
                     </Svg>
 
                     {/* Centre value */}
                     <View style={StyleSheet.absoluteFill} pointerEvents="none">
                         <View style={styles.centerValue}>
-                            <Text key={pulseKey} style={[styles.centerNumber, { color: ink, fontSize: D * 0.28 }]}>
+                            <Text key={pulseKey} style={[styles.centerNumber, { color: ink, fontSize: D * 0.20 }]}>
                                 {fmtSigned(value)}
                             </Text>
                             <Text style={[styles.centerLabel, { color: inkA(ink, 0.62), fontSize: D * 0.049 }]}>
@@ -272,7 +345,7 @@ const DialControl: React.FC<Props> = ({
             </GestureDetector>
 
             {/* Fine-tune row */}
-            <View style={styles.fineTuneRow}>
+            <View style={[styles.fineTuneRow, { width: D }]}>
                 <Pressable
                     onPress={() => nudge(-1)}
                     style={({ pressed }) => [
@@ -321,7 +394,7 @@ const DialControl: React.FC<Props> = ({
 const styles = StyleSheet.create({
     container: {
         alignItems: 'center',
-        gap: 14,
+        gap: 10,
     },
     pill: {
         flexDirection: 'row',
@@ -348,6 +421,7 @@ const styles = StyleSheet.create({
     },
     centerNumber: {
         fontWeight: '800',
+        fontVariant: ['tabular-nums'],
     },
     centerLabel: {
         fontWeight: '800',
@@ -359,7 +433,6 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         gap: 16,
-        width: '100%',
     },
     stepBtn: {
         borderRadius: 14,
@@ -368,6 +441,7 @@ const styles = StyleSheet.create({
     },
     stepBtnText: {
         fontWeight: '700',
+        fontVariant: ['tabular-nums'],
     },
     newTotalCol: {
         alignItems: 'center',
@@ -375,6 +449,7 @@ const styles = StyleSheet.create({
     },
     newTotalNumber: {
         fontWeight: '800',
+        fontVariant: ['tabular-nums'],
     },
     newTotalLabel: {
         fontWeight: '800',

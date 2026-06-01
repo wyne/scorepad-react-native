@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import * as Haptics from 'expo-haptics';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
     Easing,
     runOnJS,
@@ -12,13 +13,16 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { useAppDispatch, useAppSelector } from '../../../../redux/hooks';
-import { playerRoundScoreSet } from '../../../../redux/PlayersSlice';
-import { selectPlayerById } from '../../../../redux/PlayersSlice';
+import { playerRoundScoreSet, selectPlayerById } from '../../../../redux/PlayersSlice';
 import { selectCurrentGame } from '../../../../redux/selectors';
 import DialControl from './DialControl';
 
 const EXPAND_DURATION = 380;
 const COLLAPSE_DURATION = 300;
+const SWIPE_DISMISS_DISTANCE = 50;
+const SWIPE_DISMISS_VELOCITY = 400;
+const MARGIN_BOTTOM = 12;
+const MARGIN_H = 12;
 
 function inkFor(hex: string): string {
     const h = hex.replace('#', '');
@@ -46,6 +50,7 @@ interface Props {
     rowRect: RowRect;
     boardWidth: number;
     boardHeight: number;
+    safeAreaTop: number;
     onClose: () => void;
 }
 
@@ -54,6 +59,7 @@ const InlineExpandOverlay: React.FC<Props> = ({
     rowRect,
     boardWidth,
     boardHeight,
+    safeAreaTop,
     onClose,
 }) => {
     const dispatch = useAppDispatch();
@@ -72,12 +78,15 @@ const InlineExpandOverlay: React.FC<Props> = ({
     const [localScore, setLocalScore] = useState(roundScore);
     const [isSecondary, setIsSecondary] = useState(false);
 
-    // Animated geometry
-    const MARGIN = 16;
-    const targetTop = MARGIN;
-    const targetLeft = MARGIN;
-    const targetWidth = boardWidth - MARGIN * 2;
-    const targetHeight = boardHeight - MARGIN * 2;
+    // safeAreaTop is the inset reported by the OS (notch/dynamic island height).
+    // The board container already starts below the navigation header, but if the
+    // header is transparent or hidden (fullscreen mode) the inset is needed to
+    // keep the panel below the status bar.
+    const marginTop = Math.max(12, safeAreaTop);
+    const targetTop = marginTop;
+    const targetLeft = MARGIN_H;
+    const targetWidth = boardWidth - MARGIN_H * 2;
+    const targetHeight = boardHeight - marginTop - MARGIN_BOTTOM;
 
     const animTop = useSharedValue(rowRect.top);
     const animLeft = useSharedValue(rowRect.left);
@@ -130,13 +139,28 @@ const InlineExpandOverlay: React.FC<Props> = ({
         }, () => runOnJS(onClose)());
     }, [localScore, onClose, playerId, roundCurrent, dispatch, rowRect]);
 
+    const dismissOnSwipe = useCallback(() => {
+        handleClose(false);
+    }, [handleClose]);
+
+    const makeSwipeDismissGesture = () =>
+        Gesture.Pan()
+            .onEnd((e) => {
+                if (e.translationY > SWIPE_DISMISS_DISTANCE || e.velocityY > SWIPE_DISMISS_VELOCITY) {
+                    runOnJS(dismissOnSwipe)();
+                }
+            });
+
+    const topSwipeGesture = makeSwipeDismissGesture();
+    const bottomSwipeGesture = makeSwipeDismissGesture();
+
     if (!player || !currentGame) return null;
     const ink = inkFor(player.color ?? '#444');
     const playerColor = player.color ?? '#444';
     const newTotal = prevTotal + localScore;
 
-    // Dial size: use 65% of the target height for the dial to leave room for name/total/done
-    const dialSize = Math.min(Math.round(targetHeight * 0.52), Math.round(targetWidth * 0.9));
+    const dialSize = Math.min(Math.round(targetHeight * 0.38), Math.round(targetWidth * 0.9), 240);
+    const swipeZoneHeight = Math.round(targetHeight * 0.25);
 
     return (
         <>
@@ -146,15 +170,21 @@ const InlineExpandOverlay: React.FC<Props> = ({
             <Animated.View style={[panelStyle, { backgroundColor: playerColor }]}>
                 <Animated.View style={contentStyle}>
                     <View style={styles.inner}>
-                        {/* Player name */}
-                        <Text style={[styles.name, { color: ink }]} numberOfLines={1} adjustsFontSizeToFit>
-                            {player?.playerName}
-                        </Text>
-
-                        {/* Previous total */}
-                        <View style={styles.prevBlock}>
-                            <Text style={[styles.prevNumber, { color: ink }]}>{prevTotal}</Text>
-                            <Text style={[styles.prevLabel, { color: inkA(ink, 0.6) }]}>PREVIOUS TOTAL</Text>
+                        {/* Top group: drag handle + name + prev total */}
+                        <View style={styles.topGroup}>
+                            <View style={[styles.dragHandle, { backgroundColor: inkA(ink, 0.3) }]} />
+                            <Text
+                                style={[styles.name, { color: ink }]}
+                                numberOfLines={1}
+                                adjustsFontSizeToFit
+                                minimumFontScale={0.7}
+                            >
+                                {player.playerName}
+                            </Text>
+                            <View style={styles.prevBlock}>
+                                <Text style={[styles.prevNumber, { color: ink }]}>{prevTotal}</Text>
+                                <Text style={[styles.prevLabel, { color: inkA(ink, 0.6) }]}>PREVIOUS TOTAL</Text>
+                            </View>
                         </View>
 
                         {/* Dial */}
@@ -183,6 +213,22 @@ const InlineExpandOverlay: React.FC<Props> = ({
                             <Text style={[styles.doneBtnText, { color: ink }]}>Done</Text>
                         </Pressable>
                     </View>
+
+                    {/* Top swipe-to-dismiss zone (covers drag handle + name + prev total area) */}
+                    <GestureDetector gesture={topSwipeGesture}>
+                        <View
+                            style={[styles.swipeZone, { top: 0, height: swipeZoneHeight }]}
+                            pointerEvents="box-only"
+                        />
+                    </GestureDetector>
+
+                    {/* Bottom swipe-to-dismiss zone (covers done button area) */}
+                    <GestureDetector gesture={bottomSwipeGesture}>
+                        <View
+                            style={[styles.swipeZone, { bottom: 0, height: swipeZoneHeight }]}
+                            pointerEvents="box-none"
+                        />
+                    </GestureDetector>
                 </Animated.View>
             </Animated.View>
         </>
@@ -193,46 +239,62 @@ const styles = StyleSheet.create({
     inner: {
         flex: 1,
         alignItems: 'center',
+        justifyContent: 'flex-start',
+        gap: 16,
         paddingHorizontal: 24,
-        paddingTop: 28,
-        paddingBottom: 20,
-        gap: 10,
+        paddingTop: 14,
+        paddingBottom: 16,
+    },
+    topGroup: {
+        alignItems: 'center',
+        gap: 8,
+        width: '100%',
+    },
+    dragHandle: {
+        width: 36,
+        height: 4,
+        borderRadius: 2,
     },
     name: {
-        fontSize: 42,
+        fontSize: 32,
         fontWeight: '800',
-        lineHeight: 46,
+        lineHeight: 36,
     },
     prevBlock: {
         alignItems: 'center',
         gap: 2,
     },
     prevNumber: {
-        fontSize: 26,
+        fontSize: 22,
         fontWeight: '800',
-        lineHeight: 30,
+        lineHeight: 26,
+        fontVariant: ['tabular-nums'],
     },
     prevLabel: {
-        fontSize: 11,
+        fontSize: 10,
         fontWeight: '800',
         letterSpacing: 1.4,
     },
     dialWrap: {
-        flex: 1,
-        justifyContent: 'center',
         alignItems: 'center',
     },
     doneBtn: {
         width: '74%',
         maxWidth: 300,
-        height: 54,
-        borderRadius: 15,
+        height: 48,
+        borderRadius: 14,
         alignItems: 'center',
         justifyContent: 'center',
+        marginTop: 'auto',
     },
     doneBtnText: {
-        fontSize: 22,
+        fontSize: 20,
         fontWeight: '700',
+    },
+    swipeZone: {
+        position: 'absolute',
+        left: 0,
+        right: 0,
     },
 });
 
