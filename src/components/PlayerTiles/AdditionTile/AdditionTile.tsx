@@ -8,6 +8,7 @@ import { selectPlayerById } from '../../../../redux/PlayersSlice';
 import { selectCurrentGame } from '../../../../redux/selectors';
 
 import { calculateFontSize } from './Helpers';
+import { scoreStyles } from './scoreStyles';
 import ScoreAfter from './ScoreAfter';
 import ScoreBefore from './ScoreBefore';
 import ScoreRound from './ScoreRound';
@@ -64,7 +65,7 @@ const AdditionTile: React.FunctionComponent<Props> = ({
                     {playerName}
                 </Animated.Text>
                 <Animated.Text
-                    style={[styles.finalScore, { fontSize: finalScoreFontSize, color: fontColor }]}
+                    style={[scoreStyles.scoreText, { fontSize: finalScoreFontSize, color: fontColor }]}
                     allowFontScaling={false}
                 >
                     {finalScoreTotal}
@@ -96,11 +97,6 @@ const styles = StyleSheet.create({
     name: {
         fontWeight: 'bold',
         textAlign: 'center',
-    },
-    finalScore: {
-        fontWeight: 'bold',
-        textAlign: 'center',
-        fontVariant: ['tabular-nums'],
     },
     scoreLineOne: {
         flexDirection: 'row',
