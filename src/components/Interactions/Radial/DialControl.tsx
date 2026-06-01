@@ -6,13 +6,19 @@ import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
     Easing,
     runOnJS,
+    useAnimatedProps,
     useAnimatedStyle,
     useSharedValue,
+    withDelay,
     withRepeat,
     withSequence,
     withTiming,
 } from 'react-native-reanimated';
 import Svg, { Circle, Line, Path } from 'react-native-svg';
+
+import { POWER_HOLD_ACTIVATION_MS, POWER_HOLD_INDICATOR_DELAY_MS } from '../interactionConstants';
+
+const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
 const STEP_DEG = 30;
 const ACCENT = '#3a86ff';
@@ -70,7 +76,21 @@ const DialControl: React.FC<Props> = ({
     const [trailStartDeg, setTrailStartDeg] = useState(0);
     const [accDegrees, setAccDegrees] = useState(0);   // accumulated rotation since drag start
     const [isDragging, setIsDragging] = useState(false);
-    const [pulseKey, setPulseKey] = useState(0);
+
+    const numScale = useSharedValue(1);
+    const numScaleStyle = useAnimatedStyle(() => ({
+        transform: [{ scale: numScale.value }],
+    }));
+
+    const popNumber = useCallback(() => {
+        numScale.value = withSequence(
+            withTiming(1.15, { duration: 55 }),
+            withTiming(1, { duration: 140, easing: Easing.out(Easing.cubic) }),
+        );
+    }, []);
+
+    const isSecondaryRef = useRef(isSecondary);
+    isSecondaryRef.current = isSecondary;
 
     // Shared values for worklet access
     const svInc = useSharedValue(addendOne);
@@ -114,29 +134,48 @@ const DialControl: React.FC<Props> = ({
         opacity: pillOpacity.value,
     }));
 
+    // Ring grow animation during long-press build-up
+    const holdProgress = useSharedValue(0);
+    const ringAnimProps = useAnimatedProps(() => ({
+        strokeWidth: SW * (1 + holdProgress.value * 0.35),
+    }));
+    const trackAnimProps = useAnimatedProps(() => ({
+        strokeWidth: SW * (1 + holdProgress.value * 0.35),
+    }));
+
     // JS-thread callbacks called via runOnJS
     const startLongPress = useCallback(() => {
+        holdProgress.value = withDelay(
+            POWER_HOLD_INDICATOR_DELAY_MS,
+            withTiming(1, {
+                duration: POWER_HOLD_ACTIVATION_MS - POWER_HOLD_INDICATOR_DELAY_MS,
+                easing: Easing.out(Easing.quad),
+            }),
+        );
         lpTimer.current = setTimeout(() => {
             if (!svHasMoved.value) {
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
                 onToggleMode(true);
                 svStartValue.value = value;
                 svAccDeg.value = 0;
+                // Snap ring back on activation
+                holdProgress.value = withTiming(0, { duration: 120, easing: Easing.out(Easing.cubic) });
             }
-        }, 420);
+        }, POWER_HOLD_ACTIVATION_MS);
     }, [onToggleMode, value]);
 
     const stopLongPress = useCallback(() => {
         clearTimeout(lpTimer.current);
+        holdProgress.value = withTiming(0, { duration: 200, easing: Easing.out(Easing.cubic) });
     }, []);
 
     const handleBump = useCallback((newVal: number) => {
         if (newVal !== value) {
             onChange(newVal);
-            setPulseKey(k => k + 1);
+            if (isSecondaryRef.current) popNumber();
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
         }
-    }, [onChange, value]);
+    }, [onChange, value, popNumber]);
 
     const handleDeactivate = useCallback(() => {
         onToggleMode(false);
@@ -215,7 +254,6 @@ const DialControl: React.FC<Props> = ({
 
     function nudge(d: number) {
         onChange(value + d * addendOne);
-        setPulseKey(k => k + 1);
         setHandleAngleDeg(a => a + d * STEP_DEG);
     }
 
@@ -283,13 +321,17 @@ const DialControl: React.FC<Props> = ({
             <GestureDetector gesture={panGesture}>
                 <View style={{ width: D, height: D, position: 'relative' }}>
                     <Svg width={D} height={D} viewBox={`0 0 ${D} ${D}`} style={StyleSheet.absoluteFill}>
-                        {/* Base track ring */}
-                        <Circle cx={C} cy={C} r={R} fill="none" stroke={trackColor} strokeWidth={SW} />
+                        {/* Base track ring — grows with holdProgress */}
+                        <AnimatedCircle cx={C} cy={C} r={R} fill="none"
+                            stroke={trackColor}
+                            animatedProps={trackAnimProps}
+                        />
 
-                        {/* Filled ring (the "handle") */}
-                        <Circle cx={C} cy={C} r={R} fill="none"
-                            stroke={ringColor} strokeWidth={SW}
+                        {/* Filled ring (the "handle") — grows with holdProgress */}
+                        <AnimatedCircle cx={C} cy={C} r={R} fill="none"
+                            stroke={ringColor}
                             strokeOpacity={0.85}
+                            animatedProps={ringAnimProps}
                         />
 
                         {/* Tick marks inside the ring */}
@@ -333,9 +375,11 @@ const DialControl: React.FC<Props> = ({
                     {/* Centre value */}
                     <View style={StyleSheet.absoluteFill} pointerEvents="none">
                         <View style={styles.centerValue}>
-                            <Text key={pulseKey} style={[styles.centerNumber, { color: ink, fontSize: D * 0.20 }]}>
-                                {fmtSigned(value)}
-                            </Text>
+                            <Animated.View style={numScaleStyle}>
+                                <Text style={[styles.centerNumber, { color: ink, fontSize: D * 0.20 }]}>
+                                    {fmtSigned(value)}
+                                </Text>
+                            </Animated.View>
                             <Text style={[styles.centerLabel, { color: inkA(ink, 0.62), fontSize: D * 0.049 }]}>
                                 THIS ROUND
                             </Text>
