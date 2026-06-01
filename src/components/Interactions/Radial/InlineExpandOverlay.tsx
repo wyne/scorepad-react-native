@@ -216,9 +216,10 @@ const InlineExpandOverlay: React.FC<Props> = ({
 
     const marginTop = Math.max(12, safeAreaTop);
     const targetTop = marginTop;
-    const targetLeft = MARGIN_H;
-    const targetWidth = boardWidth - MARGIN_H * 2;
+    const targetLeft = 0;
+    const targetWidth = boardWidth;
     const targetHeight = boardHeight - marginTop - MARGIN_BOTTOM;
+    const pageWidth = boardWidth - MARGIN_H * 2;
 
     const animTop = useSharedValue(rowRect.top);
     const animLeft = useSharedValue(rowRect.left);
@@ -334,18 +335,20 @@ const InlineExpandOverlay: React.FC<Props> = ({
                             index,
                         })}
                         renderItem={({ item: pid }) => (
-                            <PlayerDialPage
-                                playerId={pid}
-                                pageWidth={targetWidth}
-                                pageHeight={targetHeight}
-                                addendOne={addendOne}
-                                addendTwo={addendTwo}
-                                roundCurrent={roundCurrent}
-                                swipeDragY={swipeDragY}
-                                onScoreChange={(score) => { localScores.current[pid] = score; }}
-                                onDone={() => handleDone(pid)}
-                                onDismiss={handleDismiss}
-                            />
+                            <View style={{ width: targetWidth, paddingHorizontal: MARGIN_H }}>
+                                <PlayerDialPage
+                                    playerId={pid}
+                                    pageWidth={pageWidth}
+                                    pageHeight={targetHeight}
+                                    addendOne={addendOne}
+                                    addendTwo={addendTwo}
+                                    roundCurrent={roundCurrent}
+                                    swipeDragY={swipeDragY}
+                                    onScoreChange={(score) => { localScores.current[pid] = score; }}
+                                    onDone={() => handleDone(pid)}
+                                    onDismiss={handleDismiss}
+                                />
+                            </View>
                         )}
                         onMomentumScrollEnd={handleScrollEnd}
                     />
