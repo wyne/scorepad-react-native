@@ -63,10 +63,8 @@ interface PlayerDialPageProps {
     boardHeight: number;
     addendOne: number;
     addendTwo: number;
-    roundCurrent: number;
     swipeDragY: SharedValue<number>;
     swipeDragX: SharedValue<number>;
-    onScoreChange: (score: number) => void;
     onDone: () => void;
     onDismiss: () => void;
 }
@@ -78,31 +76,33 @@ const PlayerDialPage: React.FC<PlayerDialPageProps> = ({
     boardHeight,
     addendOne,
     addendTwo,
-    roundCurrent,
     swipeDragY,
     swipeDragX,
-    onScoreChange,
     onDone,
     onDismiss,
 }) => {
+    const dispatch = useAppDispatch();
     const player = useAppSelector(state => selectPlayerById(state, playerId));
+    const roundCurrent = useAppSelector(state => selectCurrentGame(state)?.roundCurrent ?? 0);
 
-    const roundScore = player?.scores[roundCurrent] ?? 0;
-    const prevTotal = (player?.scores ?? []).reduce(
-        (sum, s, i) => i < roundCurrent ? sum + (s || 0) : sum,
+    // Mirror AdditionTile: derive everything from Redux, no local score state
+    const scoreTotal = (player?.scores ?? []).reduce(
+        (sum, s, round) => round <= roundCurrent ? sum + (s || 0) : sum,
         0,
     );
+    const roundScore = player?.scores[roundCurrent] ?? 0;
+    const prevTotal = scoreTotal - roundScore;
 
-    const [localScore, setLocalScore] = useState(roundScore);
     const [isSecondary, setIsSecondary] = useState(false);
 
-    // Keep callback ref to avoid stale closure issues
-    const onScoreChangeRef = useRef(onScoreChange);
-    onScoreChangeRef.current = onScoreChange;
-
+    // Reset dial mode when the active round changes
     useEffect(() => {
-        onScoreChangeRef.current(localScore);
-    }, [localScore]);
+        setIsSecondary(false);
+    }, [roundCurrent]);
+
+    const handleChange = useCallback((v: number) => {
+        dispatch(playerRoundScoreSet(playerId, roundCurrent, v));
+    }, [dispatch, playerId, roundCurrent]);
 
     const isDismissing = useSharedValue(false);
 
@@ -141,7 +141,6 @@ const PlayerDialPage: React.FC<PlayerDialPageProps> = ({
 
     const ink = inkFor(player.color ?? '#444');
     const playerColor = player.color ?? '#444';
-    const newTotal = prevTotal + localScore;
     const dialSize = Math.min(Math.round(pageHeight * 0.38), Math.round(pageWidth * 0.9), 240);
 
     return (
@@ -169,12 +168,12 @@ const PlayerDialPage: React.FC<PlayerDialPageProps> = ({
                 {/* Dial */}
                 <View style={styles.dialWrap}>
                     <DialControl
-                        value={localScore}
-                        onChange={setLocalScore}
+                        value={roundScore}
+                        onChange={handleChange}
                         onToggleMode={setIsSecondary}
                         isSecondary={isSecondary}
                         ink={ink}
-                        newTotal={newTotal}
+                        newTotal={scoreTotal}
                         addendOne={addendOne}
                         addendTwo={addendTwo}
                         dialSize={dialSize}
@@ -217,20 +216,15 @@ const InlineExpandOverlay: React.FC<Props> = ({
     safeAreaTop,
     onClose,
 }) => {
-    const dispatch = useAppDispatch();
     const currentGame = useAppSelector(selectCurrentGame);
     const addendOne = useAppSelector(state => state.settings.addendOne);
     const addendTwo = useAppSelector(state => state.settings.addendTwo);
-
-    const roundCurrent = currentGame?.roundCurrent ?? 0;
 
     const [activeIndex, setActiveIndex] = useState(initialIndex);
     const activeIndexRef = useRef(initialIndex);
     activeIndexRef.current = activeIndex;
 
     const flatListRef = useRef<FlatList>(null);
-    // localScores[playerId] = current uncommitted local score for that player
-    const localScores = useRef<Record<string, number>>({});
     const closing = useRef(false);
 
     const marginTop = Math.max(12, safeAreaTop);
@@ -283,52 +277,40 @@ const InlineExpandOverlay: React.FC<Props> = ({
         }, () => runOnJS(onClose)());
     }, [onClose, rowRect]);
 
-    // Commit a specific player's local score to Redux
-    const commitPlayer = useCallback((pid: string) => {
-        const score = localScores.current[pid];
-        if (score !== undefined) {
-            dispatch(playerRoundScoreSet(pid, roundCurrent, score));
-        }
-    }, [dispatch, roundCurrent]);
-
-    // Done button: commit this player's score and close
-    const handleDone = useCallback((pid: string) => {
+    // Done button: close with collapse animation
+    const handleDone = useCallback(() => {
         if (closing.current) return;
         closing.current = true;
-        commitPlayer(pid);
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
         collapseAndClose();
-    }, [commitPlayer, collapseAndClose]);
+    }, [collapseAndClose]);
 
-    // Called by the worklet after withDecay completes — animation already done
+    // Called by the worklet after exit animation completes
     const handleDismiss = useCallback(() => {
         if (closing.current) return;
         closing.current = true;
-        commitPlayer(playerIds[activeIndexRef.current]);
         onClose();
-    }, [commitPlayer, playerIds, onClose]);
+    }, [onClose]);
 
     // Backdrop tap: no gesture velocity, so drive a withTiming slide-out from JS
     const handleBackdropPress = useCallback(() => {
         if (closing.current) return;
         closing.current = true;
-        commitPlayer(playerIds[activeIndexRef.current]);
         swipeDragY.value = withTiming(
             boardHeight,
             { duration: 320, easing: Easing.in(Easing.cubic) },
             () => runOnJS(onClose)(),
         );
-    }, [commitPlayer, playerIds, boardHeight, onClose]);
+    }, [boardHeight, onClose]);
 
-    // FlatList paged scroll: auto-commit outgoing player, track active index
+    // FlatList paged scroll: track active index
     const handleScrollEnd = useCallback((e: NativeSyntheticEvent<NativeScrollEvent>) => {
         swipeDragY.value = 0;
         swipeDragX.value = 0;
         const newIndex = Math.round(e.nativeEvent.contentOffset.x / targetWidth);
         if (newIndex === activeIndexRef.current) return;
-        commitPlayer(playerIds[activeIndexRef.current]);
         setActiveIndex(newIndex);
-    }, [commitPlayer, playerIds, targetWidth]);
+    }, [targetWidth]);
 
     if (!currentGame) return null;
 
@@ -362,11 +344,9 @@ const InlineExpandOverlay: React.FC<Props> = ({
                                     boardHeight={boardHeight}
                                     addendOne={addendOne}
                                     addendTwo={addendTwo}
-                                    roundCurrent={roundCurrent}
                                     swipeDragY={swipeDragY}
                                     swipeDragX={swipeDragX}
-                                    onScoreChange={(score) => { localScores.current[pid] = score; }}
-                                    onDone={() => handleDone(pid)}
+                                    onDone={handleDone}
                                     onDismiss={handleDismiss}
                                 />
                             </View>
