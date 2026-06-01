@@ -8,10 +8,10 @@ import { selectPlayerById } from '../../../../redux/PlayersSlice';
 import { selectCurrentGame } from '../../../../redux/selectors';
 
 import { calculateFontSize } from './Helpers';
-import { scoreStyles } from './scoreStyles';
 import ScoreAfter from './ScoreAfter';
 import ScoreBefore from './ScoreBefore';
 import ScoreRound from './ScoreRound';
+import { scoreStyles } from './scoreStyles';
 
 interface Props {
     fontColor: string;

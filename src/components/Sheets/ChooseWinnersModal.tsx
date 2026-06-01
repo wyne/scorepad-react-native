@@ -8,8 +8,6 @@ import {
 } from '@gorhom/bottom-sheet';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Icon } from 'react-native-elements';
-
-import GlassButton from './GlassButton';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { selectGameById, updateGame } from '../../../redux/GamesSlice';
@@ -18,6 +16,7 @@ import { logEvent } from '../../Analytics';
 import { useTheme } from '../../theme';
 
 import { useChooseWinnersModalContext } from './ChooseWinnersModalContext';
+import GlassButton from './GlassButton';
 
 const ChooseWinnersModal: React.FunctionComponent = () => {
     const theme = useTheme();
