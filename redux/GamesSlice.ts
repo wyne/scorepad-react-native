@@ -19,6 +19,7 @@ export interface GameState {
     roundTotal: number; // 1-indexed
     playerIds: string[];
     locked?: boolean;
+    winnerIds?: string[];
     sortSelectorKey?: SortSelectorKey;
     sortDirectionKey?: SortDirectionKey;
     palette?: string;
@@ -35,6 +36,7 @@ export const gameDefaults = {
     roundCurrent: 0,
     roundTotal: 1,
     locked: false,
+    winnerIds: [],
     sortSelectorKey: SortSelectorKey.ByScore,
     sortDirectionKey: SortDirectionKey.Normal,
     palette: 'original',

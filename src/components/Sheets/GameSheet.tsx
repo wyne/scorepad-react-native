@@ -17,6 +17,7 @@ import BigButton from '../BigButtons/BigButton';
 import RematchIcon from '../Icons/RematchIcon';
 import Rounds from '../Rounds';
 
+import { useChooseWinnersModalContext } from './ChooseWinnersModalContext';
 import { useGameSheetContext } from './GameSheetContext';
 
 /**
@@ -32,6 +33,7 @@ const GameSheet: React.FunctionComponent = () => {
     const gameTitle = useAppSelector(state => selectGameById(state, currentGameId || '')?.title);
     const gameLocked = useAppSelector(state => selectGameById(state, currentGameId || '')?.locked);
     const playerIds = useAppSelector(state => selectGameById(state, currentGameId || '')?.playerIds);
+    const chooseWinnersModalRef = useChooseWinnersModalContext();
 
     if (currentGameId == undefined) return null;
 
@@ -50,20 +52,21 @@ const GameSheet: React.FunctionComponent = () => {
     const mountKey = useRef(Date.now()).current;
 
     /**
-     * Lock the game
+     * Unlock the game and clear winners
      */
-    const setLock = () => {
+    const unlockGame = () => {
         dispatch(
             updateGame({
                 id: currentGameId,
                 changes: {
-                    locked: !gameLocked,
+                    locked: false,
+                    winnerIds: [],
                 }
             })
         );
         logEvent('lock_game', {
             game_id: currentGameId,
-            locked: !gameLocked
+            locked: false,
         });
     };
 
@@ -299,10 +302,11 @@ const GameSheet: React.FunctionComponent = () => {
                                 />
                             }
 
-                            <BigButton text={gameLocked ? 'Unlock' : 'Lock'}
+                            <BigButton text={gameLocked ? 'Unlock' : 'Choose Winners'}
                                 color={gameLocked ? theme.warning : theme.success}
                                 icon={gameLocked ? 'lock-closed-outline' : 'lock-open-outline'}
-                                onPress={setLock}
+                                onPress={gameLocked ? unlockGame : () => chooseWinnersModalRef?.current?.present()}
+                                testID={gameLocked ? 'unlock-button' : 'choose-winners-button'}
                             />
 
                         </Animated.View>
@@ -330,6 +334,7 @@ const GameSheet: React.FunctionComponent = () => {
                     </Animated.View>
                 </SafeAreaView>
             </BottomSheetScrollView>
+
         </BottomSheet>
     );
 };

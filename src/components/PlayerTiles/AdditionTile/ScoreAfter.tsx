@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react';
 
-import { StyleSheet } from 'react-native';
 import Animated, {
     useSharedValue,
     useAnimatedStyle,
@@ -8,6 +7,7 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { calculateFontSize, animationDuration, enteringAnimation, ZoomOutFadeOut } from './Helpers';
+import { scoreStyles } from './scoreStyles';
 
 interface Props {
     roundScore: number;
@@ -42,19 +42,12 @@ const ScoreAfter: React.FunctionComponent<Props> = ({ containerWidth, roundScore
         <Animated.View entering={enteringAnimation} exiting={ZoomOutFadeOut}>
             <Animated.Text
                 allowFontScaling={false}
-                style={[animatedStyles, styles.scoreTotal, { color: fontColor }]}>
+                style={[animatedStyles, scoreStyles.scoreText, { color: fontColor }]}>
                 {totalScore}
             </Animated.Text>
         </Animated.View>
     );
 };
 
-const styles = StyleSheet.create({
-    scoreTotal: {
-        fontVariant: ['tabular-nums'],
-        fontWeight: 'bold',
-        textAlign: 'center',
-    },
-});
 
 export default ScoreAfter;

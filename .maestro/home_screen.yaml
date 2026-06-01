@@ -1,4 +1,4 @@
-appId: com.wyne.scorepad
+appId: ${APP_ID}
 ---
 - launchApp
 - waitForAnimationToEnd:

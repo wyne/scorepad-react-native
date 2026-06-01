@@ -11,6 +11,7 @@ import FlexboxBoard from '../components/Boards/FlexboxBoard';
 import RowsBoard from '../components/Boards/RowsBoard';
 import { InteractionType } from '../components/Interactions/InteractionType';
 import AddendModal from '../components/Sheets/AddendModal';
+import ChooseWinnersModal from '../components/Sheets/ChooseWinnersModal';
 import GestureInfoModal from '../components/Sheets/GestureInfoModal';
 
 function useKeepScreenAwake(active: boolean): void {
@@ -47,6 +48,7 @@ const ScoreBoardScreen: React.FunctionComponent = () => {
                 }
 
                 <AddendModal />
+                <ChooseWinnersModal />
                 <GestureInfoModal />
             </View>
         </View>
