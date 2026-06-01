@@ -2,7 +2,8 @@ import React, { useEffect } from 'react';
 
 import { useHeaderHeight } from '@react-navigation/elements';
 import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake';
-import { View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
+import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 
 import { useAppSelector } from '../../redux/hooks';
 import FlexboxBoard from '../components/Boards/FlexboxBoard';
@@ -37,8 +38,12 @@ const ScoreBoardScreen: React.FunctionComponent = () => {
         <View style={{ flex: 1, paddingTop: headerHeight }} testID="game-screen">
             <View style={{ flex: 1 }}>
                 {interactionType === InteractionType.RadialGesture
-                    ? <RowsBoard />
-                    : <FlexboxBoard />
+                    ? <Animated.View key="rows" entering={FadeIn.duration(220)} exiting={FadeOut.duration(180)} style={StyleSheet.absoluteFill}>
+                        <RowsBoard />
+                    </Animated.View>
+                    : <Animated.View key="flex" entering={FadeIn.duration(220)} exiting={FadeOut.duration(180)} style={StyleSheet.absoluteFill}>
+                        <FlexboxBoard />
+                    </Animated.View>
                 }
 
                 <AddendModal />
