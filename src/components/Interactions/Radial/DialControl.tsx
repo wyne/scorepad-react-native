@@ -375,8 +375,13 @@ const DialControl: React.FC<Props> = ({
                     {/* Centre value */}
                     <View style={StyleSheet.absoluteFill} pointerEvents="none">
                         <View style={styles.centerValue}>
-                            <Animated.View style={numScaleStyle}>
-                                <Text style={[styles.centerNumber, { color: ink, fontSize: D * 0.20 }]}>
+                            <Animated.View style={[numScaleStyle, { width: D * 0.54 }]}>
+                                <Text
+                                    style={[styles.centerNumber, { color: ink, fontSize: D * 0.20 }]}
+                                    numberOfLines={1}
+                                    adjustsFontSizeToFit
+                                    minimumFontScale={0.4}
+                                >
                                     {fmtSigned(value)}
                                 </Text>
                             </Animated.View>
@@ -466,6 +471,7 @@ const styles = StyleSheet.create({
     centerNumber: {
         fontWeight: '800',
         fontVariant: ['tabular-nums'],
+        textAlign: 'center',
     },
     centerLabel: {
         fontWeight: '800',
