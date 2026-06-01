@@ -25,7 +25,13 @@ const SWIPE_DISMISS_DISTANCE = 50;
 const SWIPE_DISMISS_VELOCITY = 400;
 const MARGIN_BOTTOM = 12;
 const MARGIN_H = 12;
-const DRAG_SCALE_MAX = 260; // swipeDragY at which scale/opacity reach their floor
+const MIN_DISMISS_VELOCITY = 600; // px/s floor so slow releases still exit cleanly
+
+function resistedDrag(t: number): number {
+    'worklet';
+    if (t <= 0) return 0;
+    return t / (1 + t / 400); // nearly 1:1 at small pulls, strong resistance beyond ~150 px
+}
 
 function inkFor(hex: string): string {
     const h = hex.replace('#', '');
@@ -54,10 +60,12 @@ interface PlayerDialPageProps {
     playerId: string;
     pageWidth: number;
     pageHeight: number;
+    boardHeight: number;
     addendOne: number;
     addendTwo: number;
     roundCurrent: number;
     swipeDragY: SharedValue<number>;
+    swipeDragX: SharedValue<number>;
     onScoreChange: (score: number) => void;
     onDone: () => void;
     onDismiss: () => void;
@@ -67,10 +75,12 @@ const PlayerDialPage: React.FC<PlayerDialPageProps> = ({
     playerId,
     pageWidth,
     pageHeight,
+    boardHeight,
     addendOne,
     addendTwo,
     roundCurrent,
     swipeDragY,
+    swipeDragX,
     onScoreChange,
     onDone,
     onDismiss,
@@ -101,19 +111,28 @@ const PlayerDialPage: React.FC<PlayerDialPageProps> = ({
         .activeOffsetY([-10, 10])
         .failOffsetX([-8, 8])
         .onUpdate((e) => {
-            swipeDragY.value = Math.max(0, e.translationY);
+            swipeDragY.value = resistedDrag(e.translationY);
+            swipeDragX.value = e.translationX * 0.35;
         })
         .onEnd((e) => {
             if (e.translationY > SWIPE_DISMISS_DISTANCE || e.velocityY > SWIPE_DISMISS_VELOCITY) {
                 isDismissing.value = true;
-                runOnJS(onDismiss)();
+                // Duration scales with velocity: fast throw exits quickly, slow release still exits
+                const exitVelocity = Math.max(e.velocityY, MIN_DISMISS_VELOCITY);
+                const duration = Math.max(150, 400 - exitVelocity / 5);
+                swipeDragY.value = withTiming(boardHeight, { duration, easing: Easing.in(Easing.cubic) },
+                    () => runOnJS(onDismiss)(),
+                );
+                swipeDragX.value = withTiming(0, { duration, easing: Easing.out(Easing.quad) });
             } else {
-                swipeDragY.value = withSpring(0, { damping: 20, stiffness: 200 });
+                swipeDragY.value = withSpring(0, { velocity: e.velocityY, damping: 26, stiffness: 300 });
+                swipeDragX.value = withSpring(0, { velocity: e.velocityX, damping: 26, stiffness: 300 });
             }
         })
         .onFinalize(() => {
             if (!isDismissing.value) {
-                swipeDragY.value = withSpring(0, { damping: 20, stiffness: 200 });
+                swipeDragY.value = withSpring(0, { velocity: 0, damping: 26, stiffness: 300 });
+                swipeDragX.value = withSpring(0, { velocity: 0, damping: 26, stiffness: 300 });
             }
             isDismissing.value = false;
         });
@@ -227,6 +246,7 @@ const InlineExpandOverlay: React.FC<Props> = ({
     const animHeight = useSharedValue(rowRect.height);
     const contentOpacity = useSharedValue(0);
     const swipeDragY = useSharedValue(0);
+    const swipeDragX = useSharedValue(0);
 
     const easing = Easing.out(Easing.cubic);
 
@@ -238,18 +258,14 @@ const InlineExpandOverlay: React.FC<Props> = ({
         contentOpacity.value = withDelay(160, withTiming(1, { duration: 200 }));
     }, []);
 
-    const panelStyle = useAnimatedStyle(() => {
-        const p = Math.min(1, Math.max(0, swipeDragY.value / DRAG_SCALE_MAX));
-        return {
-            position: 'absolute',
-            top: animTop.value,
-            left: animLeft.value,
-            width: animWidth.value,
-            height: animHeight.value,
-            transform: [{ translateY: swipeDragY.value }, { scale: 1 - p * 0.18 }],
-            opacity: 1 - p,
-        };
-    });
+    const panelStyle = useAnimatedStyle(() => ({
+        position: 'absolute',
+        top: animTop.value,
+        left: animLeft.value,
+        width: animWidth.value,
+        height: animHeight.value,
+        transform: [{ translateY: swipeDragY.value }, { translateX: swipeDragX.value }],
+    }));
 
     const contentStyle = useAnimatedStyle(() => ({
         flex: 1,
@@ -257,7 +273,6 @@ const InlineExpandOverlay: React.FC<Props> = ({
     }));
 
     const collapseAndClose = useCallback(() => {
-        swipeDragY.value = withTiming(0, { duration: 80 });
         contentOpacity.value = withTiming(0, { duration: 120 });
         animTop.value = withTiming(rowRect.top, { duration: COLLAPSE_DURATION, easing: Easing.in(Easing.cubic) });
         animLeft.value = withTiming(rowRect.left, { duration: COLLAPSE_DURATION, easing: Easing.in(Easing.cubic) });
@@ -285,26 +300,30 @@ const InlineExpandOverlay: React.FC<Props> = ({
         collapseAndClose();
     }, [commitPlayer, collapseAndClose]);
 
-    // Swipe-down dismiss: commit active player, continue shrinking/fading to completion
+    // Called by the worklet after withDecay completes — animation already done
     const handleDismiss = useCallback(() => {
         if (closing.current) return;
         closing.current = true;
         commitPlayer(playerIds[activeIndexRef.current]);
-        swipeDragY.value = withTiming(
-            DRAG_SCALE_MAX + 40,
-            { duration: 260, easing: Easing.in(Easing.cubic) },
-            () => runOnJS(onClose)(),
-        );
+        onClose();
     }, [commitPlayer, playerIds, onClose]);
 
-    // Backdrop tap: same as dismiss
+    // Backdrop tap: no gesture velocity, so drive a withTiming slide-out from JS
     const handleBackdropPress = useCallback(() => {
-        handleDismiss();
-    }, [handleDismiss]);
+        if (closing.current) return;
+        closing.current = true;
+        commitPlayer(playerIds[activeIndexRef.current]);
+        swipeDragY.value = withTiming(
+            boardHeight,
+            { duration: 320, easing: Easing.in(Easing.cubic) },
+            () => runOnJS(onClose)(),
+        );
+    }, [commitPlayer, playerIds, boardHeight, onClose]);
 
     // FlatList paged scroll: auto-commit outgoing player, track active index
     const handleScrollEnd = useCallback((e: NativeSyntheticEvent<NativeScrollEvent>) => {
         swipeDragY.value = 0;
+        swipeDragX.value = 0;
         const newIndex = Math.round(e.nativeEvent.contentOffset.x / targetWidth);
         if (newIndex === activeIndexRef.current) return;
         commitPlayer(playerIds[activeIndexRef.current]);
@@ -340,10 +359,12 @@ const InlineExpandOverlay: React.FC<Props> = ({
                                     playerId={pid}
                                     pageWidth={pageWidth}
                                     pageHeight={targetHeight}
+                                    boardHeight={boardHeight}
                                     addendOne={addendOne}
                                     addendTwo={addendTwo}
                                     roundCurrent={roundCurrent}
                                     swipeDragY={swipeDragY}
+                                    swipeDragX={swipeDragX}
                                     onScoreChange={(score) => { localScores.current[pid] = score; }}
                                     onDone={() => handleDone(pid)}
                                     onDismiss={handleDismiss}
