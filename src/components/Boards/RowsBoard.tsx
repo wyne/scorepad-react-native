@@ -64,7 +64,7 @@ const PlayerRow: React.FC<PlayerRowProps> = ({ playerId, roundCurrent, dimmed, o
     const sepSign = roundScore < 0 ? '−' : '+';
     const roundAbs = Math.abs(roundScore);
 
-    const secNumStyle = { color: ink, fontSize: 18, fontWeight: '600' as const, lineHeight: 22 };
+    const secNumStyle = { color: inkA(ink, 0.45), fontSize: 18, fontWeight: '600' as const, lineHeight: 22 };
     const totNumStyle = { color: ink, fontSize: 20, fontWeight: '800' as const, lineHeight: 24 };
     const capStyle = { color: inkA(ink, 0.65), fontSize: 8, fontWeight: '800' as const, letterSpacing: 1.0, marginTop: 1 };
     const opStyle = { color: inkA(ink, 0.5), fontSize: 16, fontWeight: '500' as const };
@@ -204,7 +204,8 @@ const styles = StyleSheet.create({
     },
     scrollContent: {
         gap: 10,
-        paddingVertical: 10,
+        paddingTop: 10,
+        paddingBottom: bottomSheetHeight + 10,
         paddingHorizontal: 12,
     },
     row: {
