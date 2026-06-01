@@ -182,7 +182,8 @@ const RowsBoard: React.FC = () => {
 
             {selectedId !== null && selectedRowRect !== null && boardLayout !== null && (
                 <InlineExpandOverlay
-                    playerId={selectedId}
+                    playerIds={playerIds}
+                    initialIndex={playerIds.indexOf(selectedId)}
                     rowRect={selectedRowRect}
                     boardWidth={boardLayout.width}
                     boardHeight={boardLayout.height - bottomSheetHeight}

@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import * as Haptics from 'expo-haptics';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { FlatList, NativeScrollEvent, NativeSyntheticEvent, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
     Easing,
@@ -45,30 +45,33 @@ interface RowRect {
     height: number;
 }
 
-interface Props {
+// ─── PlayerDialPage ───────────────────────────────────────────────────────────
+
+interface PlayerDialPageProps {
     playerId: string;
-    rowRect: RowRect;
-    boardWidth: number;
-    boardHeight: number;
-    safeAreaTop: number;
-    onClose: () => void;
+    pageWidth: number;
+    pageHeight: number;
+    addendOne: number;
+    addendTwo: number;
+    roundCurrent: number;
+    onScoreChange: (score: number) => void;
+    onDone: () => void;
+    onDismiss: () => void;
 }
 
-const InlineExpandOverlay: React.FC<Props> = ({
+const PlayerDialPage: React.FC<PlayerDialPageProps> = ({
     playerId,
-    rowRect,
-    boardWidth,
-    boardHeight,
-    safeAreaTop,
-    onClose,
+    pageWidth,
+    pageHeight,
+    addendOne,
+    addendTwo,
+    roundCurrent,
+    onScoreChange,
+    onDone,
+    onDismiss,
 }) => {
-    const dispatch = useAppDispatch();
-    const currentGame = useAppSelector(selectCurrentGame);
     const player = useAppSelector(state => selectPlayerById(state, playerId));
-    const addendOne = useAppSelector(state => state.settings.addendOne);
-    const addendTwo = useAppSelector(state => state.settings.addendTwo);
 
-    const roundCurrent = currentGame?.roundCurrent ?? 0;
     const roundScore = player?.scores[roundCurrent] ?? 0;
     const prevTotal = (player?.scores ?? []).reduce(
         (sum, s, i) => i < roundCurrent ? sum + (s || 0) : sum,
@@ -78,10 +81,120 @@ const InlineExpandOverlay: React.FC<Props> = ({
     const [localScore, setLocalScore] = useState(roundScore);
     const [isSecondary, setIsSecondary] = useState(false);
 
-    // safeAreaTop is the inset reported by the OS (notch/dynamic island height).
-    // The board container already starts below the navigation header, but if the
-    // header is transparent or hidden (fullscreen mode) the inset is needed to
-    // keep the panel below the status bar.
+    // Keep callback ref to avoid stale closure issues
+    const onScoreChangeRef = useRef(onScoreChange);
+    onScoreChangeRef.current = onScoreChange;
+
+    useEffect(() => {
+        onScoreChangeRef.current(localScore);
+    }, [localScore]);
+
+    // Vertical-only dismiss gesture: fails on horizontal so FlatList keeps scroll
+    const dismissGesture = Gesture.Pan()
+        .activeOffsetY([-10, 10])
+        .failOffsetX([-8, 8])
+        .onEnd((e) => {
+            if (e.translationY > SWIPE_DISMISS_DISTANCE || e.velocityY > SWIPE_DISMISS_VELOCITY) {
+                runOnJS(onDismiss)();
+            }
+        });
+
+    if (!player) return null;
+
+    const ink = inkFor(player.color ?? '#444');
+    const playerColor = player.color ?? '#444';
+    const newTotal = prevTotal + localScore;
+    const dialSize = Math.min(Math.round(pageHeight * 0.38), Math.round(pageWidth * 0.9), 240);
+
+    return (
+        <View style={{ width: pageWidth, height: pageHeight, backgroundColor: playerColor, borderRadius: 26, overflow: 'hidden' }}>
+            <View style={styles.inner}>
+                {/* Top group: drag handle + name + prev total — also the swipe-to-dismiss zone */}
+                <GestureDetector gesture={dismissGesture}>
+                    <View style={styles.topGroup}>
+                        <View style={[styles.dragHandle, { backgroundColor: inkA(ink, 0.3) }]} />
+                        <Text
+                            style={[styles.name, { color: ink }]}
+                            numberOfLines={1}
+                            adjustsFontSizeToFit
+                            minimumFontScale={0.7}
+                        >
+                            {player.playerName}
+                        </Text>
+                        <View style={styles.prevBlock}>
+                            <Text style={[styles.prevNumber, { color: ink }]}>{prevTotal}</Text>
+                            <Text style={[styles.prevLabel, { color: inkA(ink, 0.6) }]}>PREVIOUS TOTAL</Text>
+                        </View>
+                    </View>
+                </GestureDetector>
+
+                {/* Dial */}
+                <View style={styles.dialWrap}>
+                    <DialControl
+                        value={localScore}
+                        onChange={setLocalScore}
+                        onToggleMode={setIsSecondary}
+                        isSecondary={isSecondary}
+                        ink={ink}
+                        newTotal={newTotal}
+                        addendOne={addendOne}
+                        addendTwo={addendTwo}
+                        dialSize={dialSize}
+                    />
+                </View>
+
+                {/* Done */}
+                <Pressable
+                    onPress={onDone}
+                    style={({ pressed }) => [
+                        styles.doneBtn,
+                        { backgroundColor: inkA(ink, pressed ? 0.28 : 0.16) },
+                    ]}
+                >
+                    <Text style={[styles.doneBtnText, { color: ink }]}>Done</Text>
+                </Pressable>
+            </View>
+        </View>
+    );
+};
+
+// ─── InlineExpandOverlay ──────────────────────────────────────────────────────
+
+interface Props {
+    playerIds: string[];
+    initialIndex: number;
+    rowRect: RowRect;
+    boardWidth: number;
+    boardHeight: number;
+    safeAreaTop: number;
+    onClose: () => void;
+}
+
+const InlineExpandOverlay: React.FC<Props> = ({
+    playerIds,
+    initialIndex,
+    rowRect,
+    boardWidth,
+    boardHeight,
+    safeAreaTop,
+    onClose,
+}) => {
+    const dispatch = useAppDispatch();
+    const currentGame = useAppSelector(selectCurrentGame);
+    const addendOne = useAppSelector(state => state.settings.addendOne);
+    const addendTwo = useAppSelector(state => state.settings.addendTwo);
+
+    const roundCurrent = currentGame?.roundCurrent ?? 0;
+
+    const [activeIndex, setActiveIndex] = useState(initialIndex);
+    const activeIndexRef = useRef(initialIndex);
+    activeIndexRef.current = activeIndex;
+
+    const flatListRef = useRef<FlatList>(null);
+    // localScores[playerId] = current uncommitted local score for that player
+    const localScores = useRef<Record<string, number>>({});
+    const closing = useRef(false);
+
     const marginTop = Math.max(12, safeAreaTop);
     const targetTop = marginTop;
     const targetLeft = MARGIN_H;
@@ -93,7 +206,6 @@ const InlineExpandOverlay: React.FC<Props> = ({
     const animWidth = useSharedValue(rowRect.width);
     const animHeight = useSharedValue(rowRect.height);
     const contentOpacity = useSharedValue(0);
-    const closing = useRef(false);
 
     const easing = Easing.out(Easing.cubic);
 
@@ -111,8 +223,6 @@ const InlineExpandOverlay: React.FC<Props> = ({
         left: animLeft.value,
         width: animWidth.value,
         height: animHeight.value,
-        borderRadius: 26,
-        overflow: 'hidden',
     }));
 
     const contentStyle = useAnimatedStyle(() => ({
@@ -120,15 +230,7 @@ const InlineExpandOverlay: React.FC<Props> = ({
         opacity: contentOpacity.value,
     }));
 
-    const handleClose = useCallback((save: boolean) => {
-        if (closing.current) return;
-        closing.current = true;
-
-        if (save) {
-            dispatch(playerRoundScoreSet(playerId, roundCurrent, localScore));
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-        }
-
+    const collapseAndClose = useCallback(() => {
         contentOpacity.value = withTiming(0, { duration: 120 });
         animTop.value = withTiming(rowRect.top, { duration: COLLAPSE_DURATION, easing: Easing.in(Easing.cubic) });
         animLeft.value = withTiming(rowRect.left, { duration: COLLAPSE_DURATION, easing: Easing.in(Easing.cubic) });
@@ -137,98 +239,84 @@ const InlineExpandOverlay: React.FC<Props> = ({
             duration: COLLAPSE_DURATION,
             easing: Easing.in(Easing.cubic),
         }, () => runOnJS(onClose)());
-    }, [localScore, onClose, playerId, roundCurrent, dispatch, rowRect]);
+    }, [onClose, rowRect]);
 
-    const dismissOnSwipe = useCallback(() => {
-        handleClose(false);
-    }, [handleClose]);
+    // Commit a specific player's local score to Redux
+    const commitPlayer = useCallback((pid: string) => {
+        const score = localScores.current[pid];
+        if (score !== undefined) {
+            dispatch(playerRoundScoreSet(pid, roundCurrent, score));
+        }
+    }, [dispatch, roundCurrent]);
 
-    const makeSwipeDismissGesture = () =>
-        Gesture.Pan()
-            .onEnd((e) => {
-                if (e.translationY > SWIPE_DISMISS_DISTANCE || e.velocityY > SWIPE_DISMISS_VELOCITY) {
-                    runOnJS(dismissOnSwipe)();
-                }
-            });
+    // Done button: commit this player's score and close
+    const handleDone = useCallback((pid: string) => {
+        if (closing.current) return;
+        closing.current = true;
+        commitPlayer(pid);
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        collapseAndClose();
+    }, [commitPlayer, collapseAndClose]);
 
-    const topSwipeGesture = makeSwipeDismissGesture();
-    const bottomSwipeGesture = makeSwipeDismissGesture();
+    // Swipe-down dismiss: commit active player and close
+    const handleDismiss = useCallback(() => {
+        if (closing.current) return;
+        closing.current = true;
+        commitPlayer(playerIds[activeIndexRef.current]);
+        collapseAndClose();
+    }, [commitPlayer, playerIds, collapseAndClose]);
 
-    if (!player || !currentGame) return null;
-    const ink = inkFor(player.color ?? '#444');
-    const playerColor = player.color ?? '#444';
-    const newTotal = prevTotal + localScore;
+    // Backdrop tap: same as dismiss
+    const handleBackdropPress = useCallback(() => {
+        handleDismiss();
+    }, [handleDismiss]);
 
-    const dialSize = Math.min(Math.round(targetHeight * 0.38), Math.round(targetWidth * 0.9), 240);
-    const swipeZoneHeight = Math.round(targetHeight * 0.25);
+    // FlatList paged scroll: auto-commit outgoing player, track active index
+    const handleScrollEnd = useCallback((e: NativeSyntheticEvent<NativeScrollEvent>) => {
+        const newIndex = Math.round(e.nativeEvent.contentOffset.x / targetWidth);
+        if (newIndex === activeIndexRef.current) return;
+        commitPlayer(playerIds[activeIndexRef.current]);
+        setActiveIndex(newIndex);
+    }, [commitPlayer, playerIds, targetWidth]);
+
+    if (!currentGame) return null;
 
     return (
         <>
-            {/* Backdrop — tap to discard */}
-            <Pressable style={StyleSheet.absoluteFillObject} onPress={() => handleClose(false)} />
+            {/* Backdrop — tap to dismiss */}
+            <Pressable style={StyleSheet.absoluteFillObject} onPress={handleBackdropPress} />
 
-            <Animated.View style={[panelStyle, { backgroundColor: playerColor }]}>
+            <Animated.View style={panelStyle}>
                 <Animated.View style={contentStyle}>
-                    <View style={styles.inner}>
-                        {/* Top group: drag handle + name + prev total */}
-                        <View style={styles.topGroup}>
-                            <View style={[styles.dragHandle, { backgroundColor: inkA(ink, 0.3) }]} />
-                            <Text
-                                style={[styles.name, { color: ink }]}
-                                numberOfLines={1}
-                                adjustsFontSizeToFit
-                                minimumFontScale={0.7}
-                            >
-                                {player.playerName}
-                            </Text>
-                            <View style={styles.prevBlock}>
-                                <Text style={[styles.prevNumber, { color: ink }]}>{prevTotal}</Text>
-                                <Text style={[styles.prevLabel, { color: inkA(ink, 0.6) }]}>PREVIOUS TOTAL</Text>
-                            </View>
-                        </View>
-
-                        {/* Dial */}
-                        <View style={styles.dialWrap}>
-                            <DialControl
-                                value={localScore}
-                                onChange={setLocalScore}
-                                onToggleMode={setIsSecondary}
-                                isSecondary={isSecondary}
-                                ink={ink}
-                                newTotal={newTotal}
+                    <FlatList
+                        ref={flatListRef}
+                        data={playerIds}
+                        keyExtractor={(id) => id}
+                        horizontal
+                        pagingEnabled
+                        showsHorizontalScrollIndicator={false}
+                        decelerationRate="fast"
+                        initialScrollIndex={initialIndex}
+                        getItemLayout={(_, index) => ({
+                            length: targetWidth,
+                            offset: targetWidth * index,
+                            index,
+                        })}
+                        renderItem={({ item: pid }) => (
+                            <PlayerDialPage
+                                playerId={pid}
+                                pageWidth={targetWidth}
+                                pageHeight={targetHeight}
                                 addendOne={addendOne}
                                 addendTwo={addendTwo}
-                                dialSize={dialSize}
+                                roundCurrent={roundCurrent}
+                                onScoreChange={(score) => { localScores.current[pid] = score; }}
+                                onDone={() => handleDone(pid)}
+                                onDismiss={handleDismiss}
                             />
-                        </View>
-
-                        {/* Done */}
-                        <Pressable
-                            onPress={() => handleClose(true)}
-                            style={({ pressed }) => [
-                                styles.doneBtn,
-                                { backgroundColor: inkA(ink, pressed ? 0.28 : 0.16) },
-                            ]}
-                        >
-                            <Text style={[styles.doneBtnText, { color: ink }]}>Done</Text>
-                        </Pressable>
-                    </View>
-
-                    {/* Top swipe-to-dismiss zone (covers drag handle + name + prev total area) */}
-                    <GestureDetector gesture={topSwipeGesture}>
-                        <View
-                            style={[styles.swipeZone, { top: 0, height: swipeZoneHeight }]}
-                            pointerEvents="box-only"
-                        />
-                    </GestureDetector>
-
-                    {/* Bottom swipe-to-dismiss zone (covers done button area) */}
-                    <GestureDetector gesture={bottomSwipeGesture}>
-                        <View
-                            style={[styles.swipeZone, { bottom: 0, height: swipeZoneHeight }]}
-                            pointerEvents="box-none"
-                        />
-                    </GestureDetector>
+                        )}
+                        onMomentumScrollEnd={handleScrollEnd}
+                    />
                 </Animated.View>
             </Animated.View>
         </>
@@ -290,11 +378,6 @@ const styles = StyleSheet.create({
     doneBtnText: {
         fontSize: 20,
         fontWeight: '700',
-    },
-    swipeZone: {
-        position: 'absolute',
-        left: 0,
-        right: 0,
     },
 });
 
