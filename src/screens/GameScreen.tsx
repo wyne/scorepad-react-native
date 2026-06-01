@@ -6,12 +6,12 @@ import { StyleSheet, View } from 'react-native';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 
 import { useAppSelector } from '../../redux/hooks';
+import { selectInteractionType } from '../../redux/selectors';
 import FlexboxBoard from '../components/Boards/FlexboxBoard';
 import RowsBoard from '../components/Boards/RowsBoard';
 import { InteractionType } from '../components/Interactions/InteractionType';
 import AddendModal from '../components/Sheets/AddendModal';
 import GestureInfoModal from '../components/Sheets/GestureInfoModal';
-import { selectInteractionType } from '../../redux/selectors';
 
 function useKeepScreenAwake(active: boolean): void {
     useEffect(() => {

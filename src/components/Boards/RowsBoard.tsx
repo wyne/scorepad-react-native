@@ -1,7 +1,6 @@
 import React, { useCallback, useRef, useState } from 'react';
 
 import { LayoutChangeEvent, LayoutRectangle, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-
 interface ExpandRect {
     top: number;
     left: number;
@@ -9,21 +8,20 @@ interface ExpandRect {
     height: number;
 }
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
-
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useAppSelector } from '../../../redux/hooks';
 import { selectPlayerById } from '../../../redux/PlayersSlice';
 import { selectCurrentGame } from '../../../redux/selectors';
-import { bottomSheetHeight } from '../Sheets/GameSheet';
 import InlineExpandOverlay from '../Interactions/Radial/InlineExpandOverlay';
+import { bottomSheetHeight } from '../Sheets/GameSheet';
 
 function inkFor(hex: string): string {
     const h = hex.replace('#', '');
     const r = parseInt(h.slice(0, 2), 16) / 255;
     const g = parseInt(h.slice(2, 4), 16) / 255;
     const b = parseInt(h.slice(4, 6), 16) / 255;
-    const lin = (c: number) => c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+    const lin = (c: number) => (c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4));
     const L = 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b);
     return L > 0.42 ? '#000' : '#fff';
 }
@@ -41,7 +39,7 @@ interface PlayerRowProps {
 }
 
 const PlayerRow: React.FC<PlayerRowProps> = ({ playerId, roundCurrent, dimmed, onLayout, onPress }) => {
-    const player = useAppSelector(state => selectPlayerById(state, playerId));
+    const player = useAppSelector((state) => selectPlayerById(state, playerId));
     const dimOpacity = useSharedValue(1);
     const breakdownOpacity = useSharedValue(1);
 
@@ -62,37 +60,47 @@ const PlayerRow: React.FC<PlayerRowProps> = ({ playerId, roundCurrent, dimmed, o
 
     const color = player.color ?? '#555';
     const ink = inkFor(color);
-    const prevTotal = player.scores.reduce(
-        (sum, s, i) => i < roundCurrent ? sum + (s || 0) : sum,
-        0,
-    );
+    const prevTotal = player.scores.reduce((sum, s, i) => (i < roundCurrent ? sum + (s || 0) : sum), 0);
     const total = prevTotal + roundScore;
 
     const sepSign = roundScore < 0 ? '−' : '+';
     const roundAbs = Math.abs(roundScore);
 
-    const secNumStyle = { color: inkA(ink, 0.45), fontSize: 18, fontWeight: '600' as const, lineHeight: 22, fontVariant: ['tabular-nums' as const] };
-    const totNumStyle = { color: ink, fontSize: 20, fontWeight: '800' as const, lineHeight: 24, fontVariant: ['tabular-nums' as const] };
-    const capStyle = { color: inkA(ink, 0.65), fontSize: 8, fontWeight: '800' as const, letterSpacing: 1.0, marginTop: 1 };
+    const secNumStyle = {
+        color: inkA(ink, 0.45),
+        fontSize: 18,
+        fontWeight: '600' as const,
+        lineHeight: 22,
+        fontVariant: ['tabular-nums' as const]
+    };
+    const totNumStyle = {
+        color: ink,
+        fontSize: 20,
+        fontWeight: '800' as const,
+        lineHeight: 24,
+        fontVariant: ['tabular-nums' as const]
+    };
+    const capStyle = {
+        color: inkA(ink, 0.65),
+        fontSize: 8,
+        fontWeight: '800' as const,
+        letterSpacing: 1.0,
+        marginTop: 1
+    };
     const opStyle = { color: inkA(ink, 0.5), fontSize: 16, fontWeight: '500' as const };
 
     return (
-        <Animated.View
-            style={rowStyle}
-            onLayout={(e: LayoutChangeEvent) => onLayout(e.nativeEvent.layout)}
-        >
+        <Animated.View style={rowStyle} onLayout={(e: LayoutChangeEvent) => onLayout(e.nativeEvent.layout)}>
             <Pressable
                 onPress={onPress}
-                style={({ pressed }) => [styles.row, { backgroundColor: color, opacity: pressed ? 0.78 : 1 }]}
-            >
+                style={({ pressed }) => [styles.row, { backgroundColor: color, opacity: pressed ? 0.78 : 1 }]}>
                 <View style={styles.rowInner}>
                     {/* Player name */}
                     <Text
                         style={[styles.playerName, { color: ink }]}
                         numberOfLines={1}
                         adjustsFontSizeToFit
-                        minimumFontScale={0.6}
-                    >
+                        minimumFontScale={0.6}>
                         {player.playerName}
                     </Text>
 
@@ -140,21 +148,24 @@ const RowsBoard: React.FC = () => {
         rowLayouts.current[id] = layout;
     }, []);
 
-    const handleRowPress = useCallback((id: string) => {
-        const layout = rowLayouts.current[id];
-        if (!layout || !boardLayout) return;
+    const handleRowPress = useCallback(
+        (id: string) => {
+            const layout = rowLayouts.current[id];
+            if (!layout || !boardLayout) return;
 
-        // Adjust for scroll offset to get position relative to the board container
-        const adjustedRect: ExpandRect = {
-            top: layout.y - scrollY.current,
-            left: layout.x,
-            width: layout.width,
-            height: layout.height,
-        };
+            // Adjust for scroll offset to get position relative to the board container
+            const adjustedRect: ExpandRect = {
+                top: layout.y - scrollY.current,
+                left: layout.x,
+                width: layout.width,
+                height: layout.height
+            };
 
-        setSelectedRowRect(adjustedRect);
-        setSelectedId(id);
-    }, [boardLayout]);
+            setSelectedRowRect(adjustedRect);
+            setSelectedId(id);
+        },
+        [boardLayout]
+    );
 
     const handleClose = useCallback(() => {
         setSelectedId(null);
@@ -173,9 +184,10 @@ const RowsBoard: React.FC = () => {
                 contentContainerStyle={styles.scrollContent}
                 showsVerticalScrollIndicator={false}
                 scrollEnabled={selectedId === null}
-                onScroll={(e) => { scrollY.current = e.nativeEvent.contentOffset.y; }}
-                scrollEventThrottle={16}
-            >
+                onScroll={(e) => {
+                    scrollY.current = e.nativeEvent.contentOffset.y;
+                }}
+                scrollEventThrottle={16}>
                 {playerIds.map((id) => (
                     <PlayerRow
                         key={id}
@@ -206,48 +218,48 @@ const RowsBoard: React.FC = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        position: 'relative',
+        position: 'relative'
     },
     scroll: {
-        flex: 1,
+        flex: 1
     },
     scrollContent: {
         gap: 10,
         paddingTop: 10,
         paddingBottom: bottomSheetHeight + 10,
-        paddingHorizontal: 12,
+        paddingHorizontal: 12
     },
     row: {
         borderRadius: 22,
-        overflow: 'hidden',
+        overflow: 'hidden'
     },
     rowInner: {
         flexDirection: 'row',
         alignItems: 'center',
         paddingHorizontal: 14,
         paddingVertical: 8,
-        gap: 8,
+        gap: 8
     },
     playerName: {
         flex: 1,
         fontSize: 24,
         fontWeight: '800',
-        letterSpacing: -0.3,
+        letterSpacing: -0.3
     },
     scoreMath: {
         flexDirection: 'row',
         alignItems: 'center',
         gap: 6,
-        flexShrink: 0,
+        flexShrink: 0
     },
     breakdown: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 6,
+        gap: 6
     },
     scoreCol: {
-        alignItems: 'center',
-    },
+        alignItems: 'center'
+    }
 });
 
 export default RowsBoard;
