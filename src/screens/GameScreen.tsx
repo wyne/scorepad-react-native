@@ -7,6 +7,7 @@ import { View } from 'react-native';
 import { useAppSelector } from '../../redux/hooks';
 import FlexboxBoard from '../components/Boards/FlexboxBoard';
 import AddendModal from '../components/Sheets/AddendModal';
+import ChooseWinnersModal from '../components/Sheets/ChooseWinnersModal';
 import GestureInfoModal from '../components/Sheets/GestureInfoModal';
 
 function useKeepScreenAwake(active: boolean): void {
@@ -35,6 +36,7 @@ const ScoreBoardScreen: React.FunctionComponent = () => {
                 <FlexboxBoard />
 
                 <AddendModal />
+                <ChooseWinnersModal />
                 <GestureInfoModal />
             </View>
         </View>

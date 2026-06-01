@@ -54,23 +54,25 @@ const RoundHeaderTitle: React.FunctionComponent = () => {
         });
     };
 
+    const isLocked = currentGame?.locked === true;
+
     return (
         <View style={styles.container}>
             <TouchableOpacity
-                style={[styles.chevron, { opacity: isFirstRound ? 0 : 1 }]}
+                style={[styles.chevron, { opacity: isLocked || isFirstRound ? 0 : 1 }]}
                 onPress={prevRoundHandler}
-                disabled={isFirstRound}
+                disabled={isLocked || isFirstRound}
                 testID="previous-round-button"
             >
                 <Icon name="arrow-left" type="font-awesome-5" size={18} color={theme.tint} />
             </TouchableOpacity>
             <Text style={[styles.title, { color: theme.headerText }]} allowFontScaling={false}>
-                Round {roundCurrent + 1}{isLastRound ? '' : `/${lastRoundIndex}`}
+                {isLocked ? 'Final' : `Round ${roundCurrent + 1}${isLastRound ? '' : `/${lastRoundIndex}`}`}
             </Text>
             <TouchableOpacity
-                style={[styles.chevron, { opacity: isLastRound && currentGame?.locked ? 0 : 1 }]}
+                style={[styles.chevron, { opacity: isLocked || isLastRound && currentGame?.locked ? 0 : 1 }]}
                 onPress={nextRoundHandler}
-                disabled={isLastRound && (currentGame?.locked ?? false)}
+                disabled={isLocked || isLastRound && (currentGame?.locked ?? false)}
                 testID="next-round-button"
             >
                 <Icon name="arrow-right" type="font-awesome-5" size={18} color={theme.tint} />

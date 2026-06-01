@@ -343,10 +343,10 @@ describe('GameSheet', () => {
             </Provider>
         );
 
-        expect(getByTestId('big-button-unlock')).toBeTruthy();
+        expect(getByTestId('unlock-button')).toBeTruthy();
     });
 
-    it('should show lock button when game is unlocked', () => {
+    it('should show choose winners button when game is unlocked', () => {
         const store = createMockStore({
             settings: {
                 currentGameId: 'game-1',
@@ -369,17 +369,18 @@ describe('GameSheet', () => {
             </Provider>
         );
 
-        expect(getByTestId('big-button-lock')).toBeTruthy();
+        expect(getByTestId('choose-winners-button')).toBeTruthy();
     });
 
-    it('should toggle lock when lock button is pressed', async () => {
+    it('should toggle lock when unlock button is pressed', async () => {
+        const lockedGame = { ...mockGame, locked: true };
         const store = createMockStore({
             settings: {
                 currentGameId: 'game-1',
             },
             games: {
                 entities: {
-                    'game-1': mockGame,
+                    'game-1': lockedGame,
                 },
                 ids: ['game-1'],
             },
@@ -395,13 +396,13 @@ describe('GameSheet', () => {
             </Provider>
         );
 
-        const lockButton = getByTestId('big-button-lock');
-        fireEvent.press(lockButton);
+        const unlockButton = getByTestId('unlock-button');
+        fireEvent.press(unlockButton);
 
         await waitFor(() => {
             expect(logEvent).toHaveBeenCalledWith('lock_game', {
                 game_id: 'game-1',
-                locked: true,
+                locked: false,
             });
         });
     });
@@ -620,6 +621,42 @@ describe('GameSheet', () => {
         );
 
         expect(queryByText('Edit Game and Players')).toBeNull();
+    });
+
+    it('should clear winnerIds when unlocking', async () => {
+        const lockedGame = { ...mockGame, locked: true, winnerIds: ['player-1'] };
+        const store = createMockStore({
+            settings: {
+                currentGameId: 'game-1',
+            },
+            games: {
+                entities: {
+                    'game-1': lockedGame,
+                },
+                ids: ['game-1'],
+            },
+            players: {
+                entities: mockPlayers,
+                ids: ['player-1', 'player-2'],
+            },
+        });
+
+        const { getByTestId } = render(
+            <Provider store={store}>
+                <GameSheet {...defaultProps} />
+            </Provider>
+        );
+
+        const unlockButton = getByTestId('unlock-button');
+        fireEvent.press(unlockButton);
+
+        // Wait for Redux dispatch to be reflected
+        await waitFor(() => {
+            const state = store.getState();
+            const game = state.games.entities['game-1'];
+            expect(game?.locked).toBe(false);
+            expect(game?.winnerIds).toEqual([]);
+        });
     });
 
     it('should show sorting instruction text', () => {

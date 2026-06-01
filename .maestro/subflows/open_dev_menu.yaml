@@ -1,4 +1,4 @@
-appId: com.wyne.scorepad
+appId: ${APP_ID}
 ---
 # Tap the app icon 10 times to open the Developer section
 - tapOn:

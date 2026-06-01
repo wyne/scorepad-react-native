@@ -169,9 +169,14 @@ APP_VARIANT=preview npx expo run:ios --configuration Release  # preview
 
 ### Run Flows
 
+Seeding and recording are split into separate flows so you can re-run recording without re-seeding:
+
 ```bash
-npm run maestro        # Run all flows, save screenshots to .maestro/screenshots/
-npm run maestro:record  # Run all flows with video recording
+npm run maestro:seed    # Load sample data (run once)
+npm run maestro         # Record/screenshot flow against production build
+npm run maestro:dev     # Record/screenshot flow against dev build
+npm run maestro:all     # Seed then record in one shot (production)
+npm run maestro:record  # Record flow with video recording (production)
 ```
 
 Or run individual flows:
@@ -182,13 +187,13 @@ maestro test .maestro/home_screen.yaml --test-output-dir .maestro/screenshots
 
 ### Flow Files
 
-Flows live in `.maestro/` as YAML files. The `appId` at the top must match the variant:
+Flows live in `.maestro/` as YAML files. The `appId` uses `${APP_ID}` and is passed via `--env` in the npm scripts — no manual editing needed to switch variants:
 
-| Variant | appId |
-|---------|-------|
-| production | `com.wyne.scorepad` |
-| development | `com.wyne.scorepad.dev` |
-| preview | `com.wyne.scorepad.preview` |
+| npm script | APP_ID |
+|------------|--------|
+| `npm run maestro` | `com.wyne.scorepad` |
+| `npm run maestro:dev` | `com.wyne.scorepad.dev` |
+| manual `--env APP_ID=com.wyne.scorepad.preview` | `com.wyne.scorepad.preview` |
 
 ### testID Conventions
 

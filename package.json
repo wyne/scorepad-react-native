@@ -17,9 +17,12 @@
     "test:coverage-summary": "jest --coverage --coverageReporters=text-summary --silent",
     "install:ipa": "scripts/install-ipa.sh",
     "postinstall": "patch-package",
-    "maestro": "PATH=\"$PATH\":\"$HOME/.maestro/bin\" maestro test .maestro/seed_and_screenshot.yaml --test-output-dir .maestro/runs",
-    "maestro:all": "PATH=\"$PATH\":\"$HOME/.maestro/bin\" maestro test .maestro/ --test-output-dir .maestro/runs",
-    "maestro:record": "PATH=\"$PATH\":\"$HOME/.maestro/bin\" maestro record --local .maestro/seed_and_screenshot.yaml"
+    "maestro:seed": "PATH=\"$PATH\":\"$HOME/.maestro/bin\" maestro test .maestro/seed.yaml --env APP_ID=com.wyne.scorepad --test-output-dir .maestro/runs",
+    "maestro:seed:dev": "PATH=\"$PATH\":\"$HOME/.maestro/bin\" maestro test .maestro/seed.yaml --env APP_ID=com.wyne.scorepad.dev --test-output-dir .maestro/runs",
+    "maestro": "PATH=\"$PATH\":\"$HOME/.maestro/bin\" maestro test .maestro/record.yaml --env APP_ID=com.wyne.scorepad --test-output-dir .maestro/runs",
+    "maestro:dev": "PATH=\"$PATH\":\"$HOME/.maestro/bin\" maestro test .maestro/record.yaml --env APP_ID=com.wyne.scorepad.dev --test-output-dir .maestro/runs",
+    "maestro:all": "npm run maestro:seed && npm run maestro",
+    "maestro:record": "PATH=\"$PATH\":\"$HOME/.maestro/bin\" maestro record --local .maestro/record.yaml --env APP_ID=com.wyne.scorepad"
   },
   "dependencies": {
     "@babel/plugin-transform-react-jsx": "^7.22.5",
@@ -74,7 +77,7 @@
     "react-native": "0.83.6",
     "react-native-animated-pagination-dots": "^0.1.73",
     "react-native-context-menu-view": "^1.21.0",
-    "react-native-draggable-flatlist": "^4.0.1",
+    "react-native-draggable-flatlist": "^4.0.3",
     "react-native-elements": "^3.4.2",
     "react-native-gesture-handler": "~2.30.0",
     "react-native-get-random-values": "~1.11.0",

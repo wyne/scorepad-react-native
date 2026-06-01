@@ -14,6 +14,30 @@ jest.mock('@react-navigation/elements', () => ({
     useHeaderHeight: () => 88,
 }));
 
+jest.mock('@gorhom/bottom-sheet', () => {
+    const { forwardRef, useImperativeHandle } = jest.requireActual('react');
+    const RN = jest.requireActual('react-native');
+    const View = RN.View;
+
+    const MockBottomSheetModal = forwardRef((_: Record<string, unknown>, ref: React.Ref<{ present: () => void; close: () => void; dismiss: () => void }>) => {
+        useImperativeHandle(ref, () => ({
+            present: jest.fn(),
+            close: jest.fn(),
+            dismiss: jest.fn(),
+        }));
+
+        return <View />;
+    });
+
+    return {
+        __esModule: true,
+        default: MockBottomSheetModal,
+        BottomSheetModal: MockBottomSheetModal,
+        BottomSheetScrollView: RN.ScrollView,
+        BottomSheetBackdrop: () => <View />,
+    };
+});
+
 // Mock the components that GameScreen uses
 jest.mock('../components/Boards/FlexboxBoard', () => {
     return function MockFlexboxBoard() {
@@ -33,6 +57,13 @@ jest.mock('../components/Sheets/GestureInfoModal', () => {
     return function MockGestureInfoModal() {
         const { View, Text } = jest.requireActual('react-native');
         return <View testID="gesture-info-modal"><Text>GestureInfoModal</Text></View>;
+    };
+});
+
+jest.mock('../components/Sheets/ChooseWinnersModal', () => {
+    return function MockChooseWinnersModal() {
+        const { View, Text } = jest.requireActual('react-native');
+        return <View testID="choose-winners-modal"><Text>ChooseWinnersModal</Text></View>;
     };
 });
 

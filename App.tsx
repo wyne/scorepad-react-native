@@ -11,6 +11,7 @@ import { PersistGate } from 'redux-persist/integration/react';
 
 import { persistor, store } from './redux/store';
 import { AddendModalContextProvider } from './src/components/Sheets/AddendModalContext';
+import { ChooseWinnersModalContextProvider } from './src/components/Sheets/ChooseWinnersModalContext';
 import { GameSheetContextProvider } from './src/components/Sheets/GameSheetContext';
 import { Navigation } from './src/Navigation';
 
@@ -27,10 +28,12 @@ export default function App() {
                         <GameSheetContextProvider>
                             <MenuProvider>
                                 <AddendModalContextProvider>
+                                    <ChooseWinnersModalContextProvider>
                                     <PersistGate loading={null} persistor={persistor}>
                                         <StatusBar />
                                         <Navigation />
                                     </PersistGate>
+                                    </ChooseWinnersModalContextProvider>
                                 </AddendModalContextProvider>
                             </MenuProvider>
                         </GameSheetContextProvider>
