@@ -66,6 +66,17 @@ jest.mock('../Buttons/SwipeGestureIcon', () => {
     };
 });
 
+jest.mock('../Buttons/RadialGestureIcon', () => {
+    return function MockRadialGestureIcon({ color, size }: { color: string; size: number }) {
+        const { View, Text } = jest.requireActual('react-native');
+        return (
+            <View testID="radial-gesture-icon">
+                <Text>RadialIcon - Color: {color}, Size: {size}</Text>
+            </View>
+        );
+    };
+});
+
 const createMockStore = (initialState: Parameters<typeof configureStore>[0]['preloadedState']) => {
     return configureStore({
         reducer: {
@@ -112,7 +123,7 @@ describe('InteractionSelector', () => {
         expect(getByText('Point Gesture')).toBeTruthy();
     });
 
-    it('should render both tap and swipe buttons', () => {
+    it('should render tap, swipe, and dial buttons', () => {
         const store = createMockStore(mockInitialState);
 
         const { getByTestId, getByText } = render(
@@ -123,11 +134,13 @@ describe('InteractionSelector', () => {
 
         expect(getByTestId('big-button-tap')).toBeTruthy();
         expect(getByTestId('big-button-swipe')).toBeTruthy();
+        expect(getByTestId('big-button-dial')).toBeTruthy();
         expect(getByText('Tap')).toBeTruthy();
         expect(getByText('Swipe')).toBeTruthy();
+        expect(getByText('Dial')).toBeTruthy();
     });
 
-    it('should render correct icons for both buttons', () => {
+    it('should render correct icons for all buttons', () => {
         const store = createMockStore(mockInitialState);
 
         const { getByTestId } = render(
@@ -138,6 +151,7 @@ describe('InteractionSelector', () => {
 
         expect(getByTestId('tap-gesture-icon')).toBeTruthy();
         expect(getByTestId('swipe-gesture-icon')).toBeTruthy();
+        expect(getByTestId('radial-gesture-icon')).toBeTruthy();
     });
 
     it('should highlight tap button when HalfTap is selected', () => {
@@ -214,6 +228,70 @@ describe('InteractionSelector', () => {
         );
 
         expect(getByText('Swipe up or down on the player\'s tile.')).toBeTruthy();
+    });
+
+    it('should display correct description for RadialGesture', () => {
+        const store = createMockStore({
+            ...mockInitialState,
+            settings: {
+                ...mockInitialState.settings,
+                interactionType: InteractionType.RadialGesture,
+            },
+        });
+
+        const { getByText } = render(
+            <Provider store={store}>
+                <InteractionSelector />
+            </Provider>
+        );
+
+        expect(getByText('Tap a player row to open the radial dial and set their score.')).toBeTruthy();
+    });
+
+    it('should highlight dial button when RadialGesture is selected', () => {
+        const store = createMockStore({
+            ...mockInitialState,
+            settings: {
+                ...mockInitialState.settings,
+                interactionType: InteractionType.RadialGesture,
+            },
+        });
+
+        const { getByText } = render(
+            <Provider store={store}>
+                <InteractionSelector />
+            </Provider>
+        );
+
+        expect(getByText('RadialIcon - Color: #000000, Size: 40')).toBeTruthy();
+        expect(getByText('TapIcon - Color: #999999, Size: 40')).toBeTruthy();
+        expect(getByText('SwipeIcon - Color: #999999, Size: 40')).toBeTruthy();
+    });
+
+    it('should dispatch setInteractionType and log analytics when dial button is pressed', () => {
+        const store = createMockStore({
+            ...mockInitialState,
+            settings: {
+                ...mockInitialState.settings,
+                interactionType: InteractionType.HalfTap,
+            },
+        });
+
+        const mockLogEvent = jest.mocked(Analytics.logEvent);
+
+        const { getByTestId } = render(
+            <Provider store={store}>
+                <InteractionSelector />
+            </Provider>
+        );
+
+        fireEvent.press(getByTestId('big-button-dial'));
+
+        expect(store.getState().settings.interactionType).toBe(InteractionType.RadialGesture);
+        expect(mockLogEvent).toHaveBeenCalledWith('interaction_type', {
+            interactionType: 'radial_gesture',
+            gameId: 'game-1',
+        });
     });
 
     it('should dispatch setInteractionType and log analytics when tap button is pressed', () => {
@@ -315,7 +393,7 @@ describe('InteractionSelector', () => {
         );
 
         const animatedTexts = getAllByText('Animated: false');
-        expect(animatedTexts).toHaveLength(2); // Both buttons should have animated: false
+        expect(animatedTexts).toHaveLength(3); // All three buttons should have animated: false
     });
 
     it('should pass correct size to icons', () => {
@@ -329,6 +407,7 @@ describe('InteractionSelector', () => {
 
         expect(getByText('TapIcon - Color: #000000, Size: 40')).toBeTruthy();
         expect(getByText('SwipeIcon - Color: #999999, Size: 40')).toBeTruthy();
+        expect(getByText('RadialIcon - Color: #999999, Size: 40')).toBeTruthy();
     });
 
     it('should update description when interaction type changes', () => {
