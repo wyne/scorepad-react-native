@@ -43,18 +43,25 @@ interface PlayerRowProps {
 const PlayerRow: React.FC<PlayerRowProps> = ({ playerId, roundCurrent, dimmed, onLayout, onPress }) => {
     const player = useAppSelector(state => selectPlayerById(state, playerId));
     const dimOpacity = useSharedValue(1);
+    const breakdownOpacity = useSharedValue(1);
 
     React.useEffect(() => {
         dimOpacity.value = withTiming(dimmed ? 0.28 : 1, { duration: 280 });
     }, [dimmed]);
 
+    const roundScore = player?.scores[roundCurrent] ?? 0;
+
+    React.useEffect(() => {
+        breakdownOpacity.value = withTiming(roundScore !== 0 ? 1 : 0, { duration: 220 });
+    }, [roundScore]);
+
     const rowStyle = useAnimatedStyle(() => ({ opacity: dimOpacity.value }));
+    const breakdownStyle = useAnimatedStyle(() => ({ opacity: breakdownOpacity.value }));
 
     if (!player) return null;
 
     const color = player.color ?? '#555';
     const ink = inkFor(color);
-    const roundScore = player.scores[roundCurrent] ?? 0;
     const prevTotal = player.scores.reduce(
         (sum, s, i) => i < roundCurrent ? sum + (s || 0) : sum,
         0,
@@ -64,8 +71,8 @@ const PlayerRow: React.FC<PlayerRowProps> = ({ playerId, roundCurrent, dimmed, o
     const sepSign = roundScore < 0 ? '−' : '+';
     const roundAbs = Math.abs(roundScore);
 
-    const secNumStyle = { color: inkA(ink, 0.45), fontSize: 18, fontWeight: '600' as const, lineHeight: 22 };
-    const totNumStyle = { color: ink, fontSize: 20, fontWeight: '800' as const, lineHeight: 24 };
+    const secNumStyle = { color: inkA(ink, 0.45), fontSize: 18, fontWeight: '600' as const, lineHeight: 22, fontVariant: ['tabular-nums' as const] };
+    const totNumStyle = { color: ink, fontSize: 20, fontWeight: '800' as const, lineHeight: 24, fontVariant: ['tabular-nums' as const] };
     const capStyle = { color: inkA(ink, 0.65), fontSize: 8, fontWeight: '800' as const, letterSpacing: 1.0, marginTop: 1 };
     const opStyle = { color: inkA(ink, 0.5), fontSize: 16, fontWeight: '500' as const };
 
@@ -89,18 +96,20 @@ const PlayerRow: React.FC<PlayerRowProps> = ({ playerId, roundCurrent, dimmed, o
                         {player.playerName}
                     </Text>
 
-                    {/* Score math: prev + round = total */}
+                    {/* Score: breakdown fades out when round score is 0, total always visible */}
                     <View style={styles.scoreMath}>
-                        <View style={styles.scoreCol}>
-                            <Text style={secNumStyle}>{prevTotal}</Text>
-                            <Text style={capStyle}>PREV</Text>
-                        </View>
-                        <Text style={opStyle}>{sepSign}</Text>
-                        <View style={styles.scoreCol}>
-                            <Text style={secNumStyle}>{roundAbs}</Text>
-                            <Text style={capStyle}>RND</Text>
-                        </View>
-                        <Text style={opStyle}>=</Text>
+                        <Animated.View style={[styles.breakdown, breakdownStyle]}>
+                            <View style={styles.scoreCol}>
+                                <Text style={secNumStyle}>{prevTotal}</Text>
+                                <Text style={capStyle}>PREV</Text>
+                            </View>
+                            <Text style={opStyle}>{sepSign}</Text>
+                            <View style={styles.scoreCol}>
+                                <Text style={secNumStyle}>{roundAbs}</Text>
+                                <Text style={capStyle}>RND</Text>
+                            </View>
+                            <Text style={opStyle}>=</Text>
+                        </Animated.View>
                         <View style={styles.scoreCol}>
                             <Text style={totNumStyle}>{total}</Text>
                             <Text style={capStyle}>TOTAL</Text>
@@ -230,6 +239,11 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         gap: 6,
         flexShrink: 0,
+    },
+    breakdown: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 6,
     },
     scoreCol: {
         alignItems: 'center',
