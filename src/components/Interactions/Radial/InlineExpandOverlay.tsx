@@ -6,9 +6,11 @@ import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
     Easing,
     runOnJS,
+    SharedValue,
     useAnimatedStyle,
     useSharedValue,
     withDelay,
+    withSpring,
     withTiming,
 } from 'react-native-reanimated';
 
@@ -23,6 +25,7 @@ const SWIPE_DISMISS_DISTANCE = 50;
 const SWIPE_DISMISS_VELOCITY = 400;
 const MARGIN_BOTTOM = 12;
 const MARGIN_H = 12;
+const DRAG_SCALE_MAX = 260; // swipeDragY at which scale/opacity reach their floor
 
 function inkFor(hex: string): string {
     const h = hex.replace('#', '');
@@ -54,6 +57,7 @@ interface PlayerDialPageProps {
     addendOne: number;
     addendTwo: number;
     roundCurrent: number;
+    swipeDragY: SharedValue<number>;
     onScoreChange: (score: number) => void;
     onDone: () => void;
     onDismiss: () => void;
@@ -66,6 +70,7 @@ const PlayerDialPage: React.FC<PlayerDialPageProps> = ({
     addendOne,
     addendTwo,
     roundCurrent,
+    swipeDragY,
     onScoreChange,
     onDone,
     onDismiss,
@@ -89,14 +94,28 @@ const PlayerDialPage: React.FC<PlayerDialPageProps> = ({
         onScoreChangeRef.current(localScore);
     }, [localScore]);
 
+    const isDismissing = useSharedValue(false);
+
     // Vertical-only dismiss gesture: fails on horizontal so FlatList keeps scroll
     const dismissGesture = Gesture.Pan()
         .activeOffsetY([-10, 10])
         .failOffsetX([-8, 8])
+        .onUpdate((e) => {
+            swipeDragY.value = Math.max(0, e.translationY);
+        })
         .onEnd((e) => {
             if (e.translationY > SWIPE_DISMISS_DISTANCE || e.velocityY > SWIPE_DISMISS_VELOCITY) {
+                isDismissing.value = true;
                 runOnJS(onDismiss)();
+            } else {
+                swipeDragY.value = withSpring(0, { damping: 20, stiffness: 200 });
             }
+        })
+        .onFinalize(() => {
+            if (!isDismissing.value) {
+                swipeDragY.value = withSpring(0, { damping: 20, stiffness: 200 });
+            }
+            isDismissing.value = false;
         });
 
     if (!player) return null;
@@ -206,6 +225,7 @@ const InlineExpandOverlay: React.FC<Props> = ({
     const animWidth = useSharedValue(rowRect.width);
     const animHeight = useSharedValue(rowRect.height);
     const contentOpacity = useSharedValue(0);
+    const swipeDragY = useSharedValue(0);
 
     const easing = Easing.out(Easing.cubic);
 
@@ -217,13 +237,18 @@ const InlineExpandOverlay: React.FC<Props> = ({
         contentOpacity.value = withDelay(160, withTiming(1, { duration: 200 }));
     }, []);
 
-    const panelStyle = useAnimatedStyle(() => ({
-        position: 'absolute',
-        top: animTop.value,
-        left: animLeft.value,
-        width: animWidth.value,
-        height: animHeight.value,
-    }));
+    const panelStyle = useAnimatedStyle(() => {
+        const p = Math.min(1, Math.max(0, swipeDragY.value / DRAG_SCALE_MAX));
+        return {
+            position: 'absolute',
+            top: animTop.value,
+            left: animLeft.value,
+            width: animWidth.value,
+            height: animHeight.value,
+            transform: [{ translateY: swipeDragY.value }, { scale: 1 - p * 0.18 }],
+            opacity: 1 - p,
+        };
+    });
 
     const contentStyle = useAnimatedStyle(() => ({
         flex: 1,
@@ -231,6 +256,7 @@ const InlineExpandOverlay: React.FC<Props> = ({
     }));
 
     const collapseAndClose = useCallback(() => {
+        swipeDragY.value = withTiming(0, { duration: 80 });
         contentOpacity.value = withTiming(0, { duration: 120 });
         animTop.value = withTiming(rowRect.top, { duration: COLLAPSE_DURATION, easing: Easing.in(Easing.cubic) });
         animLeft.value = withTiming(rowRect.left, { duration: COLLAPSE_DURATION, easing: Easing.in(Easing.cubic) });
@@ -258,13 +284,17 @@ const InlineExpandOverlay: React.FC<Props> = ({
         collapseAndClose();
     }, [commitPlayer, collapseAndClose]);
 
-    // Swipe-down dismiss: commit active player and close
+    // Swipe-down dismiss: commit active player, continue shrinking/fading to completion
     const handleDismiss = useCallback(() => {
         if (closing.current) return;
         closing.current = true;
         commitPlayer(playerIds[activeIndexRef.current]);
-        collapseAndClose();
-    }, [commitPlayer, playerIds, collapseAndClose]);
+        swipeDragY.value = withTiming(
+            DRAG_SCALE_MAX + 40,
+            { duration: 260, easing: Easing.in(Easing.cubic) },
+            () => runOnJS(onClose)(),
+        );
+    }, [commitPlayer, playerIds, onClose]);
 
     // Backdrop tap: same as dismiss
     const handleBackdropPress = useCallback(() => {
@@ -273,6 +303,7 @@ const InlineExpandOverlay: React.FC<Props> = ({
 
     // FlatList paged scroll: auto-commit outgoing player, track active index
     const handleScrollEnd = useCallback((e: NativeSyntheticEvent<NativeScrollEvent>) => {
+        swipeDragY.value = 0;
         const newIndex = Math.round(e.nativeEvent.contentOffset.x / targetWidth);
         if (newIndex === activeIndexRef.current) return;
         commitPlayer(playerIds[activeIndexRef.current]);
@@ -310,6 +341,7 @@ const InlineExpandOverlay: React.FC<Props> = ({
                                 addendOne={addendOne}
                                 addendTwo={addendTwo}
                                 roundCurrent={roundCurrent}
+                                swipeDragY={swipeDragY}
                                 onScoreChange={(score) => { localScores.current[pid] = score; }}
                                 onDone={() => handleDone(pid)}
                                 onDismiss={handleDismiss}
