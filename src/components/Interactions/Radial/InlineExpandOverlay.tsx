@@ -27,6 +27,7 @@ const SWIPE_DISMISS_VELOCITY = 400;
 const MARGIN_BOTTOM = 12;
 const MARGIN_H = 12;
 const MIN_DISMISS_VELOCITY = 600; // px/s floor so slow releases still exit cleanly
+const LS_ACCENT = '#3a86ff'; // matches DialControl's ACCENT for the landscape step pill
 
 function resistedDrag(t: number): number {
     'worklet';
@@ -142,10 +143,86 @@ const PlayerDialPage: React.FC<PlayerDialPageProps> = ({
 
     const ink = inkFor(player.color ?? '#444');
     const playerColor = player.color ?? '#444';
+    const isLandscape = pageWidth > pageHeight;
+
+    const cardStyle = { width: pageWidth, height: pageHeight, backgroundColor: playerColor, borderRadius: 26, overflow: 'hidden' as const };
+
+    if (isLandscape) {
+        const lsDialSize = Math.min(Math.round((pageHeight - 52) / 1.25), 200);
+        const stepBg = isSecondary ? LS_ACCENT : inkA(ink, 0.12);
+        const stepDotBg = isSecondary ? '#fff' : inkA(ink, 0.4);
+        const stepTextColor = isSecondary ? '#fff' : ink;
+
+        return (
+            <View style={cardStyle}>
+                {/* Header: drag handle + name — swipe-to-dismiss zone */}
+                <GestureDetector gesture={dismissGesture}>
+                    <View style={styles.lsHeader}>
+                        <View style={[styles.dragHandle, { backgroundColor: inkA(ink, 0.3) }]} />
+                        <Text style={[styles.name, { color: ink, fontSize: 22, lineHeight: 26 }]}
+                            numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.6}>
+                            {player.playerName}
+                        </Text>
+                    </View>
+                </GestureDetector>
+
+                {/* Three-column body */}
+                <View style={styles.lsBody}>
+                    {/* Left: previous total + step pill */}
+                    <View style={styles.lsCol}>
+                        <View style={styles.prevBlock}>
+                            <Text style={[styles.prevNumber, { color: ink }]}>{prevTotal}</Text>
+                            <Text style={[styles.prevLabel, { color: inkA(ink, 0.6) }]}>PREVIOUS TOTAL</Text>
+                        </View>
+                        <View style={[styles.lsPill, { backgroundColor: stepBg }]}>
+                            <View style={[styles.lsPillDot, { backgroundColor: stepDotBg }]} />
+                            <Text style={[styles.lsPillText, { color: stepTextColor }]}>
+                                STEP +{isSecondary ? addendTwo : addendOne}
+                            </Text>
+                        </View>
+                    </View>
+
+                    {/* Center: dial */}
+                    <View style={styles.lsCenter}>
+                        <DialControl
+                            value={roundScore}
+                            onChange={handleChange}
+                            onToggleMode={setIsSecondary}
+                            isSecondary={isSecondary}
+                            ink={ink}
+                            newTotal={scoreTotal}
+                            addendOne={addendOne}
+                            addendTwo={addendTwo}
+                            dialSize={lsDialSize}
+                            landscape
+                        />
+                    </View>
+
+                    {/* Right: new total + Done */}
+                    <View style={styles.lsCol}>
+                        <View style={styles.prevBlock}>
+                            <Text style={[styles.prevNumber, { color: ink }]}>{scoreTotal}</Text>
+                            <Text style={[styles.prevLabel, { color: inkA(ink, 0.6) }]}>NEW TOTAL</Text>
+                        </View>
+                        <Pressable
+                            onPress={onDone}
+                            style={({ pressed }) => [
+                                styles.lsDoneBtn,
+                                { backgroundColor: inkA(ink, pressed ? 0.28 : 0.16) },
+                            ]}
+                        >
+                            <Text style={[styles.doneBtnText, { color: ink }]}>Done</Text>
+                        </Pressable>
+                    </View>
+                </View>
+            </View>
+        );
+    }
+
     const dialSize = Math.min(Math.round(pageHeight * 0.38), Math.round(pageWidth * 0.9), 240);
 
     return (
-        <View style={{ width: pageWidth, height: pageHeight, backgroundColor: playerColor, borderRadius: 26, overflow: 'hidden' }}>
+        <View style={cardStyle}>
             <View style={styles.inner}>
                 {/* Top group: drag handle + name + prev total — also the swipe-to-dismiss zone */}
                 <GestureDetector gesture={dismissGesture}>
@@ -415,6 +492,56 @@ const styles = StyleSheet.create({
     doneBtnText: {
         fontSize: 20,
         fontWeight: '700',
+    },
+    // ── Landscape layout ────────────────────────────────────────────────────────
+    lsHeader: {
+        alignItems: 'center',
+        gap: 4,
+        paddingTop: 10,
+        paddingHorizontal: 20,
+        paddingBottom: 6,
+    },
+    lsBody: {
+        flex: 1,
+        flexDirection: 'row',
+        paddingHorizontal: 16,
+        paddingBottom: 12,
+        gap: 8,
+    },
+    lsCol: {
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 16,
+    },
+    lsCenter: {
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    lsPill: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+        paddingVertical: 6,
+        paddingHorizontal: 14,
+        borderRadius: 999,
+    },
+    lsPillDot: {
+        width: 8,
+        height: 8,
+        borderRadius: 4,
+    },
+    lsPillText: {
+        fontWeight: '700',
+        fontSize: 13,
+        letterSpacing: 0.8,
+    },
+    lsDoneBtn: {
+        width: '90%',
+        height: 44,
+        borderRadius: 14,
+        alignItems: 'center',
+        justifyContent: 'center',
     },
 });
 

@@ -51,6 +51,7 @@ interface Props {
     addendOne: number;
     addendTwo: number;
     dialSize: number;
+    landscape?: boolean;
 }
 
 const DialControl: React.FC<Props> = ({
@@ -63,6 +64,7 @@ const DialControl: React.FC<Props> = ({
     addendOne,
     addendTwo,
     dialSize: D,
+    landscape = false,
 }) => {
     const C = D / 2;
     const R = D * 0.36;    // ring centre radius
@@ -305,17 +307,19 @@ const DialControl: React.FC<Props> = ({
 
     return (
         <View style={styles.container}>
-            {/* Step-mode pill */}
-            <Animated.View style={[
-                styles.pill,
-                { backgroundColor: isSecondary ? ACCENT : inkA(ink, 0.12) },
-                pillStyle,
-            ]}>
-                <View style={[styles.pillDot, { backgroundColor: isSecondary ? '#fff' : inkA(ink, 0.4) }]} />
-                <Text style={[styles.pillText, { color: isSecondary ? '#fff' : ink }]}>
-                    STEP +{isSecondary ? addendTwo : addendOne}
-                </Text>
-            </Animated.View>
+            {/* Step-mode pill — hidden in landscape (rendered externally in left column) */}
+            {!landscape && (
+                <Animated.View style={[
+                    styles.pill,
+                    { backgroundColor: isSecondary ? ACCENT : inkA(ink, 0.12) },
+                    pillStyle,
+                ]}>
+                    <View style={[styles.pillDot, { backgroundColor: isSecondary ? '#fff' : inkA(ink, 0.4) }]} />
+                    <Text style={[styles.pillText, { color: isSecondary ? '#fff' : ink }]}>
+                        STEP +{isSecondary ? addendTwo : addendOne}
+                    </Text>
+                </Animated.View>
+            )}
 
             {/* Dial */}
             <GestureDetector gesture={panGesture}>
@@ -411,14 +415,16 @@ const DialControl: React.FC<Props> = ({
                     </Text>
                 </Pressable>
 
-                <View style={styles.newTotalCol}>
-                    <Text style={[styles.newTotalNumber, { color: ink, fontSize: D * 0.18 }]}>
-                        {newTotal}
-                    </Text>
-                    <Text style={[styles.newTotalLabel, { color: inkA(ink, 0.62), fontSize: D * 0.044 }]}>
-                        NEW TOTAL
-                    </Text>
-                </View>
+                {!landscape && (
+                    <View style={styles.newTotalCol}>
+                        <Text style={[styles.newTotalNumber, { color: ink, fontSize: D * 0.18 }]}>
+                            {newTotal}
+                        </Text>
+                        <Text style={[styles.newTotalLabel, { color: inkA(ink, 0.62), fontSize: D * 0.044 }]}>
+                            NEW TOTAL
+                        </Text>
+                    </View>
+                )}
 
                 <Pressable
                     onPress={() => nudge(1)}
