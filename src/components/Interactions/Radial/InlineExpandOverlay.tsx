@@ -23,6 +23,7 @@ import DialControl from './DialControl';
 
 const EXPAND_DURATION = 380;
 const COLLAPSE_DURATION = 300;
+const EXPAND_EASING = Easing.out(Easing.cubic);
 const SWIPE_DISMISS_DISTANCE = 50;
 const SWIPE_DISMISS_VELOCITY = 400;
 const MARGIN_BOTTOM = 12;
@@ -327,15 +328,19 @@ const InlineExpandOverlay: React.FC<Props> = ({
     const swipeDragY = useSharedValue(0);
     const swipeDragX = useSharedValue(0);
 
-    const easing = Easing.out(Easing.cubic);
+    const didOpenAnimate = useRef(false);
 
     useEffect(() => {
-        animTop.value = withTiming(targetTop, { duration: EXPAND_DURATION, easing });
-        animLeft.value = withTiming(targetLeft, { duration: EXPAND_DURATION, easing });
-        animWidth.value = withTiming(targetWidth, { duration: EXPAND_DURATION, easing });
-        animHeight.value = withTiming(targetHeight, { duration: EXPAND_DURATION, easing });
-        contentOpacity.value = withDelay(160, withTiming(1, { duration: 200 }));
-    }, []);
+        animTop.value = withTiming(targetTop, { duration: EXPAND_DURATION, easing: EXPAND_EASING });
+        animLeft.value = withTiming(targetLeft, { duration: EXPAND_DURATION, easing: EXPAND_EASING });
+        animWidth.value = withTiming(targetWidth, { duration: EXPAND_DURATION, easing: EXPAND_EASING });
+        animHeight.value = withTiming(targetHeight, { duration: EXPAND_DURATION, easing: EXPAND_EASING });
+        if (!didOpenAnimate.current) {
+            didOpenAnimate.current = true;
+            contentOpacity.value = withDelay(160, withTiming(1, { duration: 200 }));
+        }
+    }, [targetTop, targetLeft, targetWidth, targetHeight]);
+
 
     const panelStyle = useAnimatedStyle(() => ({
         position: 'absolute',
@@ -412,6 +417,7 @@ const InlineExpandOverlay: React.FC<Props> = ({
             <Animated.View style={panelStyle}>
                 <Animated.View style={contentStyle}>
                     <FlatList
+                        key={targetWidth}
                         ref={flatListRef}
                         data={playerIds}
                         keyExtractor={(id) => id}
@@ -420,7 +426,12 @@ const InlineExpandOverlay: React.FC<Props> = ({
                         scrollEnabled={!menuOpen}
                         showsHorizontalScrollIndicator={false}
                         decelerationRate="fast"
-                        initialScrollIndex={initialIndex}
+                        onLayout={() => {
+                            flatListRef.current?.scrollToOffset({
+                                offset: targetWidth * activeIndexRef.current,
+                                animated: false,
+                            });
+                        }}
                         getItemLayout={(_, index) => ({
                             length: targetWidth,
                             offset: targetWidth * index,

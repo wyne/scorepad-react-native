@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import { LayoutChangeEvent, LayoutRectangle, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Icon } from 'react-native-elements';
@@ -185,6 +185,20 @@ const RowsBoard: React.FC = () => {
         },
         [boardLayout, currentGame?.locked, menuOpen]
     );
+
+    // When the board re-layouts (orientation change), refresh the selected row rect
+    // so the collapse animation targets the correct post-rotation row position.
+    useEffect(() => {
+        if (selectedId === null) return;
+        const layout = rowLayouts.current[selectedId];
+        if (!layout) return;
+        setSelectedRowRect({
+            top: layout.y - scrollY.current,
+            left: layout.x,
+            width: layout.width,
+            height: layout.height,
+        });
+    }, [boardLayout, selectedId]);
 
     const handleClose = useCallback(() => {
         setSelectedId(null);
