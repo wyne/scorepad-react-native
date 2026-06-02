@@ -17,6 +17,7 @@ import Animated, {
 import { useAppDispatch, useAppSelector } from '../../../../redux/hooks';
 import { playerRoundScoreSet, selectPlayerById } from '../../../../redux/PlayersSlice';
 import { selectCurrentGame } from '../../../../redux/selectors';
+import { useMenuOpen } from '../../MenuOpenContext';
 
 import DialControl from './DialControl';
 
@@ -65,6 +66,7 @@ interface PlayerDialPageProps {
     boardHeight: number;
     addendOne: number;
     addendTwo: number;
+    menuOpen: boolean;
     swipeDragY: SharedValue<number>;
     swipeDragX: SharedValue<number>;
     onDone: () => void;
@@ -78,6 +80,7 @@ const PlayerDialPage: React.FC<PlayerDialPageProps> = ({
     boardHeight,
     addendOne,
     addendTwo,
+    menuOpen,
     swipeDragY,
     swipeDragX,
     onDone,
@@ -110,6 +113,7 @@ const PlayerDialPage: React.FC<PlayerDialPageProps> = ({
 
     // Vertical-only dismiss gesture: fails on horizontal so FlatList keeps scroll
     const dismissGesture = Gesture.Pan()
+        .enabled(!menuOpen)
         .activeOffsetY([-10, 10])
         .failOffsetX([-8, 8])
         .onUpdate((e) => {
@@ -195,6 +199,7 @@ const PlayerDialPage: React.FC<PlayerDialPageProps> = ({
                             addendTwo={addendTwo}
                             dialSize={lsDialSize}
                             landscape
+                            menuOpen={menuOpen}
                         />
                     </View>
 
@@ -255,6 +260,7 @@ const PlayerDialPage: React.FC<PlayerDialPageProps> = ({
                         addendOne={addendOne}
                         addendTwo={addendTwo}
                         dialSize={dialSize}
+                        menuOpen={menuOpen}
                     />
                 </View>
 
@@ -295,6 +301,7 @@ const InlineExpandOverlay: React.FC<Props> = ({
     onClose,
 }) => {
     const currentGame = useAppSelector(selectCurrentGame);
+    const { menuOpen } = useMenuOpen();
     const addendOne = useAppSelector(state => state.settings.addendOne);
     const addendTwo = useAppSelector(state => state.settings.addendTwo);
 
@@ -355,6 +362,11 @@ const InlineExpandOverlay: React.FC<Props> = ({
         }, () => runOnJS(onClose)());
     }, [onClose, rowRect]);
 
+    // Close if the game becomes locked while the overlay is open
+    useEffect(() => {
+        if (currentGame?.locked && !closing.current) collapseAndClose();
+    }, [currentGame?.locked]);
+
     // Done button: close with collapse animation
     const handleDone = useCallback(() => {
         if (closing.current) return;
@@ -395,7 +407,7 @@ const InlineExpandOverlay: React.FC<Props> = ({
     return (
         <>
             {/* Backdrop — tap to dismiss */}
-            <Pressable style={StyleSheet.absoluteFillObject} onPress={handleBackdropPress} />
+            <Pressable testID="overlay-backdrop" style={StyleSheet.absoluteFillObject} onPress={handleBackdropPress} disabled={menuOpen} />
 
             <Animated.View style={panelStyle}>
                 <Animated.View style={contentStyle}>
@@ -405,6 +417,7 @@ const InlineExpandOverlay: React.FC<Props> = ({
                         keyExtractor={(id) => id}
                         horizontal
                         pagingEnabled
+                        scrollEnabled={!menuOpen}
                         showsHorizontalScrollIndicator={false}
                         decelerationRate="fast"
                         initialScrollIndex={initialIndex}
@@ -422,6 +435,7 @@ const InlineExpandOverlay: React.FC<Props> = ({
                                     boardHeight={boardHeight}
                                     addendOne={addendOne}
                                     addendTwo={addendTwo}
+                                    menuOpen={menuOpen}
                                     swipeDragY={swipeDragY}
                                     swipeDragX={swipeDragX}
                                     onDone={handleDone}

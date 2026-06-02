@@ -52,6 +52,7 @@ interface Props {
     addendTwo: number;
     dialSize: number;
     landscape?: boolean;
+    menuOpen?: boolean;
 }
 
 const DialControl: React.FC<Props> = ({
@@ -65,6 +66,7 @@ const DialControl: React.FC<Props> = ({
     addendTwo,
     dialSize: D,
     landscape = false,
+    menuOpen = false,
 }) => {
     const C = D / 2;
     const R = D * 0.36;    // ring centre radius
@@ -94,6 +96,14 @@ const DialControl: React.FC<Props> = ({
     useEffect(() => () => {
         clearTimeout(btnHoldTimer.current);
     }, []);
+
+    // Cancel any in-progress button hold or dial long-press when the menu opens
+    useEffect(() => {
+        if (menuOpen) {
+            cancelButtonHold();
+            stopLongPress();
+        }
+    }, [menuOpen]);
 
     const isSecondaryRef = useRef(isSecondary);
     isSecondaryRef.current = isSecondary;
@@ -184,8 +194,15 @@ const DialControl: React.FC<Props> = ({
         }, POWER_HOLD_ACTIVATION_MS);
     }, []);
 
-    const stopButtonHold = useCallback(() => {
+    const cancelButtonHold = useCallback(() => {
         clearTimeout(btnHoldTimer.current);
+        const progressOnStop = btnDirRef.current === -1 ? btnHoldProgressNeg : btnHoldProgressPos;
+        progressOnStop.value = withTiming(0, { duration: 200, easing: Easing.out(Easing.cubic) });
+        setPowerHoldDir(0);
+        btnActivatedRef.current = false;
+    }, []);
+
+    const stopButtonHold = useCallback(() => {
         if (!btnActivatedRef.current) {
             // Released before threshold — treat as a quick tap with addendOne
             const d = btnDirRef.current;
@@ -193,12 +210,8 @@ const DialControl: React.FC<Props> = ({
             setHandleAngleDeg(a => a + d * STEP_DEG);
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
         }
-        // Cancels any in-flight grow animation, breaking the repeat chain
-        const progressOnStop = btnDirRef.current === -1 ? btnHoldProgressNeg : btnHoldProgressPos;
-        progressOnStop.value = withTiming(0, { duration: 200, easing: Easing.out(Easing.cubic) });
-        setPowerHoldDir(0);
-        btnActivatedRef.current = false;
-    }, []);
+        cancelButtonHold();
+    }, [cancelButtonHold]);
 
     // Pill pulse animation
     const pillScale = useSharedValue(1);
@@ -298,6 +311,7 @@ const DialControl: React.FC<Props> = ({
     }, []);
 
     const panGesture = Gesture.Pan()
+        .enabled(!menuOpen)
         .minDistance(0)
         .onBegin((e) => {
             svStartValue.value = value;
@@ -496,6 +510,8 @@ const DialControl: React.FC<Props> = ({
             <View style={[styles.fineTuneRow, { width: D }]}>
                 <Animated.View style={btnGrowStyleNeg}>
                     <Pressable
+                        testID="btn-decrement"
+                        disabled={menuOpen}
                         onPressIn={() => startButtonHold(-1)}
                         onPressOut={stopButtonHold}
                         style={({ pressed }) => [
@@ -526,6 +542,8 @@ const DialControl: React.FC<Props> = ({
 
                 <Animated.View style={btnGrowStylePos}>
                     <Pressable
+                        testID="btn-increment"
+                        disabled={menuOpen}
                         onPressIn={() => startButtonHold(1)}
                         onPressOut={stopButtonHold}
                         style={({ pressed }) => [

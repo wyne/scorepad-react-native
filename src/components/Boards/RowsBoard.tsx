@@ -14,6 +14,7 @@ import { useAppSelector } from '../../../redux/hooks';
 import { selectPlayerById } from '../../../redux/PlayersSlice';
 import { selectCurrentGame } from '../../../redux/selectors';
 import InlineExpandOverlay from '../Interactions/Radial/InlineExpandOverlay';
+import { useMenuOpen } from '../MenuOpenContext';
 import { bottomSheetHeight } from '../Sheets/GameSheet';
 
 function inkFor(hex: string): string {
@@ -90,7 +91,7 @@ const PlayerRow: React.FC<PlayerRowProps> = ({ playerId, roundCurrent, dimmed, o
     const opStyle = { color: inkA(ink, 0.5), fontSize: 16, fontWeight: '500' as const };
 
     return (
-        <Animated.View style={rowStyle} onLayout={(e: LayoutChangeEvent) => onLayout(e.nativeEvent.layout)}>
+        <Animated.View style={rowStyle} onLayout={(e: LayoutChangeEvent) => onLayout(e.nativeEvent.layout)} testID={`player-row-${playerId}`}>
             <Pressable
                 onPress={onPress}
                 style={({ pressed }) => [styles.row, { backgroundColor: color, opacity: pressed ? 0.78 : 1 }]}>
@@ -131,6 +132,7 @@ const PlayerRow: React.FC<PlayerRowProps> = ({ playerId, roundCurrent, dimmed, o
 
 const RowsBoard: React.FC = () => {
     const currentGame = useAppSelector(selectCurrentGame);
+    const { menuOpen } = useMenuOpen();
     const insets = useSafeAreaInsets();
     const [selectedId, setSelectedId] = useState<string | null>(null);
     const [selectedRowRect, setSelectedRowRect] = useState<ExpandRect | null>(null);
@@ -150,6 +152,7 @@ const RowsBoard: React.FC = () => {
 
     const handleRowPress = useCallback(
         (id: string) => {
+            if (currentGame?.locked || menuOpen) return;
             const layout = rowLayouts.current[id];
             if (!layout || !boardLayout) return;
 
@@ -178,7 +181,7 @@ const RowsBoard: React.FC = () => {
     const roundCurrent = currentGame.roundCurrent;
 
     return (
-        <View style={styles.container} onLayout={handleBoardLayout}>
+        <View style={styles.container} onLayout={handleBoardLayout} testID="rows-board-container">
             <ScrollView
                 style={styles.scroll}
                 contentContainerStyle={styles.scrollContent}
@@ -230,7 +233,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 12
     },
     row: {
-        borderRadius: 22,
+        borderRadius: 12,
         overflow: 'hidden'
     },
     rowInner: {
