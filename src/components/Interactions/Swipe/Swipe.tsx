@@ -10,7 +10,6 @@ import { playerRoundScoreIncrement } from '../../../../redux/PlayersSlice';
 import { selectCurrentGame } from '../../../../redux/selectors';
 import { logEvent } from '../../../Analytics';
 import { useMenuOpen } from '../../MenuOpenContext';
-import { POWER_HOLD_ACTIVATION_MS, POWER_HOLD_INDICATOR_DELAY_MS } from '../interactionConstants';
 
 interface HalfTapProps {
     children: React.ReactNode;
@@ -41,7 +40,7 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
 
     //#region Power Hold
 
-    const powerHoldTime = POWER_HOLD_ACTIVATION_MS + POWER_HOLD_INDICATOR_DELAY_MS; // 500ms total animation duration
+    const powerHoldTime = 500;
     const holdDuration = useRef(new Animated.Value(0)).current;
     let powerHoldTimer: ReturnType<typeof setTimeout>;
     const [powerHold, setPowerHold] = useState<boolean>(false);
@@ -54,7 +53,7 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
     }, []);
 
     const scale = holdDuration.interpolate({
-        inputRange: [0, POWER_HOLD_INDICATOR_DELAY_MS, powerHoldTime * .9, powerHoldTime],
+        inputRange: [0, powerHoldTime * .2, powerHoldTime * .9, powerHoldTime],
         outputRange: [1, 1, 1.1, 1.05],
         extrapolate: 'clamp',
     });
@@ -95,7 +94,7 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
                 ])
             );
             animationRef.current.start();
-        }, POWER_HOLD_ACTIVATION_MS);
+        }, powerHoldTime * .8);
     };
 
     const powerHoldStop = () => {
