@@ -1,9 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React from 'react';
 
-import { act, fireEvent, render } from '@testing-library/react-native';
-
-import { POWER_HOLD_ACTIVATION_MS } from '../interactionConstants';
+import { fireEvent, render } from '@testing-library/react-native';
 
 jest.mock('react-native-reanimated', () => {
     const { View } = jest.requireActual('react-native');
@@ -124,67 +122,26 @@ describe('DialControl — rendering', () => {
     });
 });
 
-describe('DialControl — button quick taps', () => {
-    it('calls onChange with value + addendOne on quick + tap', () => {
+describe('DialControl — button taps', () => {
+    it('calls onChange with value + addendOne on + tap', () => {
         const onChange = jest.fn();
         const { getByTestId } = render(<DialControl {...defaultProps} value={5} addendOne={1} onChange={onChange} />);
-        fireEvent(getByTestId('btn-increment'), 'pressIn');
-        fireEvent(getByTestId('btn-increment'), 'pressOut');
+        fireEvent.press(getByTestId('btn-increment'));
         expect(onChange).toHaveBeenCalledWith(6);
     });
 
-    it('calls onChange with value - addendOne on quick − tap', () => {
+    it('calls onChange with value - addendOne on − tap', () => {
         const onChange = jest.fn();
         const { getByTestId } = render(<DialControl {...defaultProps} value={5} addendOne={1} onChange={onChange} />);
-        fireEvent(getByTestId('btn-decrement'), 'pressIn');
-        fireEvent(getByTestId('btn-decrement'), 'pressOut');
+        fireEvent.press(getByTestId('btn-decrement'));
         expect(onChange).toHaveBeenCalledWith(4);
     });
 
-    it('respects a custom addendOne on quick tap', () => {
+    it('respects a custom addendOne', () => {
         const onChange = jest.fn();
         const { getByTestId } = render(<DialControl {...defaultProps} value={0} addendOne={5} onChange={onChange} />);
-        fireEvent(getByTestId('btn-increment'), 'pressIn');
-        fireEvent(getByTestId('btn-increment'), 'pressOut');
+        fireEvent.press(getByTestId('btn-increment'));
         expect(onChange).toHaveBeenCalledWith(5);
-    });
-});
-
-describe('DialControl — long press (power hold)', () => {
-    it('fires onChange with addendTwo after POWER_HOLD_ACTIVATION_MS on + hold', () => {
-        jest.useFakeTimers();
-        const onChange = jest.fn();
-        const { getByTestId } = render(
-            <DialControl {...defaultProps} value={0} addendOne={1} addendTwo={10} onChange={onChange} />
-        );
-        fireEvent(getByTestId('btn-increment'), 'pressIn');
-        act(() => { jest.advanceTimersByTime(POWER_HOLD_ACTIVATION_MS); });
-        expect(onChange).toHaveBeenCalledWith(10);
-    });
-
-    it('fires onChange with -addendTwo after POWER_HOLD_ACTIVATION_MS on − hold', () => {
-        jest.useFakeTimers();
-        const onChange = jest.fn();
-        const { getByTestId } = render(
-            <DialControl {...defaultProps} value={0} addendOne={1} addendTwo={10} onChange={onChange} />
-        );
-        fireEvent(getByTestId('btn-decrement'), 'pressIn');
-        act(() => { jest.advanceTimersByTime(POWER_HOLD_ACTIVATION_MS); });
-        expect(onChange).toHaveBeenCalledWith(-10);
-    });
-
-    it('does not fire addendTwo when released before POWER_HOLD_ACTIVATION_MS', () => {
-        jest.useFakeTimers();
-        const onChange = jest.fn();
-        const { getByTestId } = render(
-            <DialControl {...defaultProps} value={0} addendOne={1} addendTwo={10} onChange={onChange} />
-        );
-        fireEvent(getByTestId('btn-increment'), 'pressIn');
-        act(() => { jest.advanceTimersByTime(POWER_HOLD_ACTIVATION_MS - 1); });
-        fireEvent(getByTestId('btn-increment'), 'pressOut');
-        // Released before threshold → addendOne only
-        expect(onChange).toHaveBeenCalledWith(1);
-        expect(onChange).not.toHaveBeenCalledWith(10);
     });
 });
 
