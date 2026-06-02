@@ -35,11 +35,12 @@ interface PlayerRowProps {
     playerId: string;
     roundCurrent: number;
     dimmed: boolean;
+    disabled: boolean;
     onLayout: (rect: LayoutRectangle) => void;
     onPress: () => void;
 }
 
-const PlayerRow: React.FC<PlayerRowProps> = ({ playerId, roundCurrent, dimmed, onLayout, onPress }) => {
+const PlayerRow: React.FC<PlayerRowProps> = ({ playerId, roundCurrent, dimmed, disabled, onLayout, onPress }) => {
     const player = useAppSelector((state) => selectPlayerById(state, playerId));
     const dimOpacity = useSharedValue(1);
     const breakdownOpacity = useSharedValue(1);
@@ -94,6 +95,7 @@ const PlayerRow: React.FC<PlayerRowProps> = ({ playerId, roundCurrent, dimmed, o
         <Animated.View style={rowStyle} onLayout={(e: LayoutChangeEvent) => onLayout(e.nativeEvent.layout)} testID={`player-row-${playerId}`}>
             <Pressable
                 onPress={onPress}
+                disabled={disabled}
                 style={({ pressed }) => [styles.row, { backgroundColor: color, opacity: pressed ? 0.78 : 1 }]}>
                 <View style={styles.rowInner}>
                     {/* Player name */}
@@ -167,7 +169,7 @@ const RowsBoard: React.FC = () => {
             setSelectedRowRect(adjustedRect);
             setSelectedId(id);
         },
-        [boardLayout]
+        [boardLayout, currentGame?.locked, menuOpen]
     );
 
     const handleClose = useCallback(() => {
@@ -197,6 +199,7 @@ const RowsBoard: React.FC = () => {
                         playerId={id}
                         roundCurrent={roundCurrent}
                         dimmed={selectedId !== null}
+                        disabled={!!(currentGame?.locked || menuOpen)}
                         onLayout={(rect) => handleRowLayout(id, rect)}
                         onPress={() => handleRowPress(id)}
                     />
