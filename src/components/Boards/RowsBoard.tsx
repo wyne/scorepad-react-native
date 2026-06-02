@@ -15,6 +15,7 @@ import { selectPlayerById } from '../../../redux/PlayersSlice';
 import { selectCurrentGame } from '../../../redux/selectors';
 import InlineExpandOverlay from '../Interactions/Radial/InlineExpandOverlay';
 import { useMenuOpen } from '../MenuOpenContext';
+import PlayerWinnerLabel from '../PlayerTiles/PlayerWinnerLabel';
 import { bottomSheetHeight } from '../Sheets/GameSheet';
 
 function inkFor(hex: string): string {
@@ -42,6 +43,8 @@ interface PlayerRowProps {
 
 const PlayerRow: React.FC<PlayerRowProps> = ({ playerId, roundCurrent, dimmed, disabled, onLayout, onPress }) => {
     const player = useAppSelector((state) => selectPlayerById(state, playerId));
+    const currentGame = useAppSelector(selectCurrentGame);
+    const isWinner = !!(currentGame?.locked && currentGame?.winnerIds?.includes(playerId));
     const dimOpacity = useSharedValue(1);
     const breakdownOpacity = useSharedValue(1);
 
@@ -97,6 +100,7 @@ const PlayerRow: React.FC<PlayerRowProps> = ({ playerId, roundCurrent, dimmed, d
                 onPress={onPress}
                 disabled={disabled}
                 style={({ pressed }) => [styles.row, { backgroundColor: color, opacity: pressed ? 0.78 : 1 }]}>
+                <PlayerWinnerLabel fontColor={ink} enabled={isWinner} />
                 <View style={styles.rowInner}>
                     {/* Player name */}
                     <Text
