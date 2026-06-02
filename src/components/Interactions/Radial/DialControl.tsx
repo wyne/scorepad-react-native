@@ -91,6 +91,10 @@ const DialControl: React.FC<Props> = ({
         );
     }, []);
 
+    useEffect(() => () => {
+        clearTimeout(btnHoldTimer.current);
+    }, []);
+
     const isSecondaryRef = useRef(isSecondary);
     isSecondaryRef.current = isSecondary;
 
@@ -107,12 +111,103 @@ const DialControl: React.FC<Props> = ({
 
     const lpTimer = useRef<ReturnType<typeof setTimeout>>();
 
+    // Button long-press / repeat refs — kept in refs so interval callbacks
+    // always see the latest value and onChange without stale closures.
+    const valueRef = useRef(value);
+    useEffect(() => { valueRef.current = value; }, [value]);
+    const onChangeRef = useRef(onChange);
+    useEffect(() => { onChangeRef.current = onChange; }, [onChange]);
+    const addendTwoRef = useRef(addendTwo);
+    useEffect(() => { addendTwoRef.current = addendTwo; }, [addendTwo]);
+    const addendOneRef = useRef(addendOne);
+    useEffect(() => { addendOneRef.current = addendOne; }, [addendOne]);
+
+    const btnHoldTimer = useRef<ReturnType<typeof setTimeout>>();
+    const [powerHoldDir, setPowerHoldDir] = useState<0 | 1 | -1>(0);
+    const btnActivatedRef = useRef(false);
+    const btnDirRef = useRef<1 | -1>(1);
+
+    // Separate shared values so only the pressed button grows
+    const btnHoldProgressNeg = useSharedValue(0);
+    const btnHoldProgressPos = useSharedValue(0);
+    const btnGrowStyleNeg = useAnimatedStyle(() => ({
+        transform: [{ scale: 1 + btnHoldProgressNeg.value * 0.1 }],
+    }));
+    const btnGrowStylePos = useAnimatedStyle(() => ({
+        transform: [{ scale: 1 + btnHoldProgressPos.value * 0.1 }],
+    }));
+
+    const startButtonHold = useCallback((d: 1 | -1) => {
+        btnDirRef.current = d;
+        btnActivatedRef.current = false;
+        const progress = d === -1 ? btnHoldProgressNeg : btnHoldProgressPos;
+
+        // Begin visual build-up after indicator delay on the pressed button only
+        progress.value = withDelay(
+            POWER_HOLD_INDICATOR_DELAY_MS,
+            withTiming(1, {
+                duration: POWER_HOLD_ACTIVATION_MS - POWER_HOLD_INDICATOR_DELAY_MS,
+                easing: Easing.out(Easing.quad),
+            }),
+        );
+
+        btnHoldTimer.current = setTimeout(() => {
+            btnActivatedRef.current = true;
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+            setPowerHoldDir(d);
+
+            // Animation-driven repeat: grow → fire → snap → grow → …
+            // withTiming callbacks run on the UI thread in Reanimated 4, so every
+            // call back into plain JS must go through runOnJS.
+            // Cancelling `progress` from stopButtonHold fires the callback with
+            // finished=false, which breaks the chain without extra cleanup.
+            let scheduleRepeat: () => void;
+
+            const onRepeatPeak = () => {
+                onChangeRef.current(valueRef.current + d * addendTwoRef.current);
+                progress.value = withTiming(0, { duration: 120, easing: Easing.out(Easing.cubic) },
+                    (finished2) => { if (finished2) runOnJS(scheduleRepeat)(); },
+                );
+            };
+
+            scheduleRepeat = () => {
+                progress.value = withTiming(1, { duration: POWER_HOLD_ACTIVATION_MS, easing: Easing.out(Easing.quad) },
+                    (finished) => { if (finished) runOnJS(onRepeatPeak)(); },
+                );
+            };
+
+            // First addendTwo fires immediately; snap then kick off the chain
+            onChangeRef.current(valueRef.current + d * addendTwoRef.current);
+            progress.value = withTiming(0, { duration: 120, easing: Easing.out(Easing.cubic) },
+                (finished) => { if (finished) runOnJS(scheduleRepeat)(); },
+            );
+        }, POWER_HOLD_ACTIVATION_MS);
+    }, []);
+
+    const stopButtonHold = useCallback(() => {
+        clearTimeout(btnHoldTimer.current);
+        if (!btnActivatedRef.current) {
+            // Released before threshold — treat as a quick tap with addendOne
+            const d = btnDirRef.current;
+            onChangeRef.current(valueRef.current + d * addendOneRef.current);
+            setHandleAngleDeg(a => a + d * STEP_DEG);
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        }
+        // Cancels any in-flight grow animation, breaking the repeat chain
+        const progressOnStop = btnDirRef.current === -1 ? btnHoldProgressNeg : btnHoldProgressPos;
+        progressOnStop.value = withTiming(0, { duration: 200, easing: Easing.out(Easing.cubic) });
+        setPowerHoldDir(0);
+        btnActivatedRef.current = false;
+    }, []);
+
     // Pill pulse animation
     const pillScale = useSharedValue(1);
     const pillOpacity = useSharedValue(1);
 
+    const pillActive = isSecondary || powerHoldDir !== 0;
+
     useEffect(() => {
-        if (isSecondary) {
+        if (pillActive) {
             pillScale.value = withRepeat(
                 withSequence(
                     withTiming(0.88, { duration: 800, easing: Easing.inOut(Easing.sin) }),
@@ -129,7 +224,7 @@ const DialControl: React.FC<Props> = ({
             pillScale.value = withTiming(1, { duration: 150 });
             pillOpacity.value = withTiming(1, { duration: 150 });
         }
-    }, [isSecondary]);
+    }, [isSecondary, powerHoldDir]);
 
     const pillStyle = useAnimatedStyle(() => ({
         transform: [{ scale: pillScale.value }],
@@ -311,12 +406,12 @@ const DialControl: React.FC<Props> = ({
             {!landscape && (
                 <Animated.View style={[
                     styles.pill,
-                    { backgroundColor: isSecondary ? ACCENT : inkA(ink, 0.12) },
+                    { backgroundColor: pillActive ? ACCENT : inkA(ink, 0.12) },
                     pillStyle,
                 ]}>
-                    <View style={[styles.pillDot, { backgroundColor: isSecondary ? '#fff' : inkA(ink, 0.4) }]} />
-                    <Text style={[styles.pillText, { color: isSecondary ? '#fff' : ink }]}>
-                        STEP +{isSecondary ? addendTwo : addendOne}
+                    <View style={[styles.pillDot, { backgroundColor: pillActive ? '#fff' : inkA(ink, 0.4) }]} />
+                    <Text style={[styles.pillText, { color: pillActive ? '#fff' : ink }]}>
+                        STEP +{pillActive ? addendTwo : addendOne}
                     </Text>
                 </Animated.View>
             )}
@@ -399,21 +494,24 @@ const DialControl: React.FC<Props> = ({
 
             {/* Fine-tune row */}
             <View style={[styles.fineTuneRow, { width: D }]}>
-                <Pressable
-                    onPress={() => nudge(-1)}
-                    style={({ pressed }) => [
-                        styles.stepBtn,
-                        {
-                            backgroundColor: inkA(ink, pressed ? 0.26 : 0.15),
-                            width: D * 0.265,
-                            height: D * 0.224,
-                        },
-                    ]}
-                >
-                    <Text style={[styles.stepBtnText, { color: ink, fontSize: D * 0.12 }]}>
-                        −{addendOne}
-                    </Text>
-                </Pressable>
+                <Animated.View style={btnGrowStyleNeg}>
+                    <Pressable
+                        onPressIn={() => startButtonHold(-1)}
+                        onPressOut={stopButtonHold}
+                        style={({ pressed }) => [
+                            styles.stepBtn,
+                            {
+                                backgroundColor: powerHoldDir === -1 ? ACCENT : inkA(ink, pressed ? 0.26 : 0.15),
+                                width: D * 0.265,
+                                height: D * 0.224,
+                            },
+                        ]}
+                    >
+                        <Text style={[styles.stepBtnText, { color: powerHoldDir === -1 ? '#fff' : ink, fontSize: D * 0.12 }]}>
+                            −{powerHoldDir === -1 ? addendTwo : addendOne}
+                        </Text>
+                    </Pressable>
+                </Animated.View>
 
                 {!landscape && (
                     <View style={styles.newTotalCol}>
@@ -426,21 +524,24 @@ const DialControl: React.FC<Props> = ({
                     </View>
                 )}
 
-                <Pressable
-                    onPress={() => nudge(1)}
-                    style={({ pressed }) => [
-                        styles.stepBtn,
-                        {
-                            backgroundColor: inkA(ink, pressed ? 0.26 : 0.15),
-                            width: D * 0.265,
-                            height: D * 0.224,
-                        },
-                    ]}
-                >
-                    <Text style={[styles.stepBtnText, { color: ink, fontSize: D * 0.12 }]}>
-                        +{addendOne}
-                    </Text>
-                </Pressable>
+                <Animated.View style={btnGrowStylePos}>
+                    <Pressable
+                        onPressIn={() => startButtonHold(1)}
+                        onPressOut={stopButtonHold}
+                        style={({ pressed }) => [
+                            styles.stepBtn,
+                            {
+                                backgroundColor: powerHoldDir === 1 ? ACCENT : inkA(ink, pressed ? 0.26 : 0.15),
+                                width: D * 0.265,
+                                height: D * 0.224,
+                            },
+                        ]}
+                    >
+                        <Text style={[styles.stepBtnText, { color: powerHoldDir === 1 ? '#fff' : ink, fontSize: D * 0.12 }]}>
+                            +{powerHoldDir === 1 ? addendTwo : addendOne}
+                        </Text>
+                    </Pressable>
+                </Animated.View>
             </View>
         </View>
     );
