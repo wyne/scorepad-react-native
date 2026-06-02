@@ -148,6 +148,7 @@ const PlayerRow: React.FC<PlayerRowProps> = ({ playerId, roundCurrent, dimmed, d
 
 const RowsBoard: React.FC = () => {
     const currentGame = useAppSelector(selectCurrentGame);
+    const fullscreen = useAppSelector(state => state.settings.home_fullscreen);
     const { menuOpen } = useMenuOpen();
     const insets = useSafeAreaInsets();
     const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -214,7 +215,7 @@ const RowsBoard: React.FC = () => {
         <View style={styles.container} onLayout={handleBoardLayout} testID="rows-board-container">
             <ScrollView
                 style={styles.scroll}
-                contentContainerStyle={styles.scrollContent}
+                contentContainerStyle={[styles.scrollContent, { paddingBottom: fullscreen ? 10 : bottomSheetHeight + 10 }]}
                 showsVerticalScrollIndicator={false}
                 scrollEnabled={selectedId === null}
                 onScroll={(e) => {
@@ -240,7 +241,7 @@ const RowsBoard: React.FC = () => {
                     initialIndex={playerIds.indexOf(selectedId)}
                     rowRect={selectedRowRect}
                     boardWidth={boardLayout.width}
-                    boardHeight={boardLayout.height - bottomSheetHeight}
+                    boardHeight={boardLayout.height - (fullscreen ? 0 : bottomSheetHeight)}
                     safeAreaTop={insets.top}
                     onClose={handleClose}
                 />
