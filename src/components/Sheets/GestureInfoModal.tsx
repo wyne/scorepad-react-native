@@ -61,6 +61,24 @@ const GestureInfoModal: React.FunctionComponent = () => {
 
                 <View style={[styles.divider, { backgroundColor: theme.separator }]} />
 
+                <Text style={[styles.title, { color: theme.text }]}>Dial Gesture</Text>
+                <Text style={[styles.paragraph, { color: theme.textSecondary }]}>
+                    Tap a player&apos;s row to open their score card. Rotate the dial ring left or right to
+                    adjust their score — each step adds or subtracts the base amount.
+                </Text>
+                <Text style={[styles.paragraph, { color: theme.textSecondary }]}>
+                    Tap the − or + buttons below the dial for single-step adjustments. Long-press either
+                    button to activate Power Hold mode, which fires the larger amount continuously until
+                    you release.
+                </Text>
+                <Text style={[styles.paragraph, { color: theme.textSecondary }]}>
+                    Hold your finger still on the dial for a moment to activate Hold mode. The ring turns
+                    blue to confirm — while active, each rotation step uses the larger amount instead.
+                    Swipe down on the card or tap Done to close.
+                </Text>
+
+                <View style={[styles.divider, { backgroundColor: theme.separator }]} />
+
                 <Text style={[styles.title, { color: theme.text }]}>Point Values</Text>
                 <Text style={[styles.paragraph, { color: theme.textSecondary }]}>
                     You can customize the increment amounts in the Point Values sheet (tap the gesture icon again
@@ -68,10 +86,10 @@ const GestureInfoModal: React.FunctionComponent = () => {
                 </Text>
                 <View style={styles.bulletList}>
                     <Text style={[styles.bullet, { color: theme.textSecondary }]}>
-                        {'\u2022  '}Single Tap / Swipe — the base amount added per tap or swipe notch
+                        {'•  '}Single Tap / Swipe / Dial — the base amount added per interaction
                     </Text>
                     <Text style={[styles.bullet, { color: theme.textSecondary }]}>
-                        {'\u2022  '}Long Press / Hold + Swipe — the larger amount used when long-pressing first
+                        {'•  '}Long Press / Hold + Swipe / Dial Hold — the larger amount used when holding
                     </Text>
                 </View>
 
