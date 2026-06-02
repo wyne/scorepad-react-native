@@ -1,12 +1,13 @@
 import React, { memo, useEffect } from 'react';
 
+import { useHeaderHeight } from '@react-navigation/elements';
 import { ParamListBase } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import * as Application from 'expo-application';
 import * as Crypto from 'expo-crypto';
 import { StyleSheet, Text } from 'react-native';
 import Animated, { Easing, LinearTransition } from 'react-native-reanimated';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { SemVer, parse } from 'semver';
 
 import { selectGameIds } from '../../redux/GamesSlice';
@@ -37,6 +38,8 @@ const ListScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     const pendingOnboardingVer = getPendingOnboardingSemVer(onboardedSemVer);
     const onboarded = pendingOnboardingVer === undefined;
     const rollingGameCounter = useAppSelector(state => state.settings.rollingGameCounter);
+    const headerHeight = useHeaderHeight();
+    const insets = useSafeAreaInsets();
 
     useEffect(() => {
         if (installId === undefined) {
@@ -75,9 +78,10 @@ const ListScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     return (
         <SafeAreaView edges={['left', 'right']} style={{ backgroundColor: theme.backgroundSecondary, flex: 1 }} testID="home-screen">
             <Animated.FlatList
-                contentInsetAdjustmentBehavior="automatic"
-                contentInset={{ bottom: 70 }}
-                scrollIndicatorInsets={{ bottom: 70 }}
+                alwaysBounceVertical
+                contentContainerStyle={{ flexGrow: 1, paddingTop: headerHeight, paddingBottom: insets.bottom + 70 }}
+                contentInsetAdjustmentBehavior="never"
+                scrollIndicatorInsets={{ top: headerHeight, bottom: insets.bottom + 70 }}
                 itemLayoutAnimation={LinearTransition.easing(Easing.ease)}
                 ListEmptyComponent={
                     <>
