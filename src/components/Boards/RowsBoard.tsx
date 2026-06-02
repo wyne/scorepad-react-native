@@ -1,6 +1,7 @@
 import React, { useCallback, useRef, useState } from 'react';
 
 import { LayoutChangeEvent, LayoutRectangle, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Icon } from 'react-native-elements';
 interface ExpandRect {
     top: number;
     left: number;
@@ -15,7 +16,6 @@ import { selectPlayerById } from '../../../redux/PlayersSlice';
 import { selectCurrentGame } from '../../../redux/selectors';
 import InlineExpandOverlay from '../Interactions/Radial/InlineExpandOverlay';
 import { useMenuOpen } from '../MenuOpenContext';
-import PlayerWinnerLabel from '../PlayerTiles/PlayerWinnerLabel';
 import { bottomSheetHeight } from '../Sheets/GameSheet';
 
 function inkFor(hex: string): string {
@@ -100,7 +100,6 @@ const PlayerRow: React.FC<PlayerRowProps> = ({ playerId, roundCurrent, dimmed, d
                 onPress={onPress}
                 disabled={disabled}
                 style={({ pressed }) => [styles.row, { backgroundColor: color, opacity: pressed ? 0.78 : 1 }]}>
-                <PlayerWinnerLabel fontColor={ink} enabled={isWinner} />
                 <View style={styles.rowInner}>
                     {/* Player name */}
                     <Text
@@ -111,20 +110,31 @@ const PlayerRow: React.FC<PlayerRowProps> = ({ playerId, roundCurrent, dimmed, d
                         {player.playerName}
                     </Text>
 
-                    {/* Score: breakdown fades out when round score is 0, total always visible */}
+                    {/* Score section */}
                     <View style={styles.scoreMath}>
-                        <Animated.View style={[styles.breakdown, breakdownStyle]}>
-                            <View style={styles.scoreCol}>
-                                <Text style={secNumStyle}>{prevTotal}</Text>
-                                <Text style={capStyle}>PREV</Text>
-                            </View>
-                            <Text style={opStyle}>{sepSign}</Text>
-                            <View style={styles.scoreCol}>
-                                <Text style={secNumStyle}>{roundAbs}</Text>
-                                <Text style={capStyle}>RND</Text>
-                            </View>
-                            <Text style={opStyle}>=</Text>
-                        </Animated.View>
+                        {currentGame?.locked ? (
+                            /* Locked: hide PREV/RND, show winner pill in that slot */
+                            isWinner && (
+                                <View style={styles.winnerBadge}>
+                                    <Icon name="trophy" type="ionicon" color={inkA(ink, 0.75)} size={11} />
+                                    <Text style={[styles.winnerText, { color: inkA(ink, 0.75) }]}>WINNER</Text>
+                                </View>
+                            )
+                        ) : (
+                            /* Unlocked: PREV/RND breakdown fades out when round score is 0 */
+                            <Animated.View style={[styles.breakdown, breakdownStyle]}>
+                                <View style={styles.scoreCol}>
+                                    <Text style={secNumStyle}>{prevTotal}</Text>
+                                    <Text style={capStyle}>PREV</Text>
+                                </View>
+                                <Text style={opStyle}>{sepSign}</Text>
+                                <View style={styles.scoreCol}>
+                                    <Text style={secNumStyle}>{roundAbs}</Text>
+                                    <Text style={capStyle}>RND</Text>
+                                </View>
+                                <Text style={opStyle}>=</Text>
+                            </Animated.View>
+                        )}
                         <View style={styles.scoreCol}>
                             <Text style={totNumStyle}>{total}</Text>
                             <Text style={capStyle}>TOTAL</Text>
@@ -255,6 +265,16 @@ const styles = StyleSheet.create({
         fontSize: 24,
         fontWeight: '800',
         letterSpacing: -0.3
+    },
+    winnerBadge: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 3,
+    },
+    winnerText: {
+        fontSize: 10,
+        fontWeight: '800',
+        letterSpacing: 0.8,
     },
     scoreMath: {
         flexDirection: 'row',
