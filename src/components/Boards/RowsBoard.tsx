@@ -216,6 +216,7 @@ const RowsBoard: React.FC = () => {
             <ScrollView
                 style={styles.scroll}
                 contentContainerStyle={[styles.scrollContent, { paddingBottom: fullscreen ? 10 : bottomSheetHeight + 10 }]}
+                alwaysBounceVertical
                 showsVerticalScrollIndicator={false}
                 scrollEnabled={selectedId === null}
                 onScroll={(e) => {
@@ -259,6 +260,7 @@ const styles = StyleSheet.create({
         flex: 1
     },
     scrollContent: {
+        flexGrow: 1,
         gap: 10,
         paddingTop: 10,
         paddingBottom: bottomSheetHeight + 10,
