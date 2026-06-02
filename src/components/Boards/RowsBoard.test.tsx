@@ -32,6 +32,10 @@ jest.mock('react-native-safe-area-context', () => ({
     useSafeAreaInsets: () => ({ top: 0, bottom: 0, left: 0, right: 0 }),
 }));
 
+jest.mock('react-native-elements', () => ({
+    Icon: () => null,
+}));
+
 let mockMenuOpen = false;
 jest.mock('../MenuOpenContext', () => ({
     useMenuOpen: () => ({ menuOpen: mockMenuOpen, setMenuOpen: jest.fn() }),
@@ -114,5 +118,40 @@ describe('RowsBoard', () => {
         fireLayouts(getByTestId);
         fireEvent.press(getByText('Player 1'));
         expect(queryByTestId('inline-expand-overlay')).toBeNull();
+    });
+});
+
+describe('RowsBoard — winner pill', () => {
+    it('shows WINNER for a winner when the game is locked', () => {
+        const store = createStore({ locked: true, winnerIds: ['player-1'] });
+        const { getAllByText } = render(<Provider store={store}><RowsBoard /></Provider>);
+        expect(getAllByText('WINNER').length).toBeGreaterThanOrEqual(1);
+    });
+
+    it('does not show WINNER for a non-winner when the game is locked', () => {
+        // player-1 is NOT a winner; only player-2 is
+        const store = createStore({ locked: true, winnerIds: ['player-2'] }, ['player-1']);
+        const { queryByText } = render(<Provider store={store}><RowsBoard /></Provider>);
+        expect(queryByText('WINNER')).toBeNull();
+    });
+
+    it('does not show WINNER when the game is unlocked', () => {
+        const store = createStore({ locked: false, winnerIds: ['player-1'] });
+        const { queryByText } = render(<Provider store={store}><RowsBoard /></Provider>);
+        expect(queryByText('WINNER')).toBeNull();
+    });
+
+    it('hides PREV and RND labels when the game is locked', () => {
+        const store = createStore({ locked: true });
+        const { queryByText } = render(<Provider store={store}><RowsBoard /></Provider>);
+        expect(queryByText('PREV')).toBeNull();
+        expect(queryByText('RND')).toBeNull();
+    });
+
+    it('shows PREV and RND labels when the game is unlocked', () => {
+        const store = createStore({ locked: false });
+        const { getAllByText } = render(<Provider store={store}><RowsBoard /></Provider>);
+        expect(getAllByText('PREV').length).toBeGreaterThanOrEqual(1);
+        expect(getAllByText('RND').length).toBeGreaterThanOrEqual(1);
     });
 });
