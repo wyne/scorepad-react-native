@@ -171,18 +171,18 @@ const DialControl: React.FC<Props> = ({
             // call back into plain JS must go through runOnJS.
             // Cancelling `progress` from stopButtonHold fires the callback with
             // finished=false, which breaks the chain without extra cleanup.
-            let scheduleRepeat: () => void;
+            // scheduleRepeat is defined first so onRepeatPeak can close over it.
+            // Both are only ever called after both consts are initialized.
+            const scheduleRepeat = () => {
+                progress.value = withTiming(1, { duration: POWER_HOLD_ACTIVATION_MS, easing: Easing.out(Easing.quad) },
+                    (finished) => { if (finished) runOnJS(onRepeatPeak)(); },
+                );
+            };
 
             const onRepeatPeak = () => {
                 onChangeRef.current(valueRef.current + d * addendTwoRef.current);
                 progress.value = withTiming(0, { duration: 120, easing: Easing.out(Easing.cubic) },
                     (finished2) => { if (finished2) runOnJS(scheduleRepeat)(); },
-                );
-            };
-
-            scheduleRepeat = () => {
-                progress.value = withTiming(1, { duration: POWER_HOLD_ACTIVATION_MS, easing: Easing.out(Easing.quad) },
-                    (finished) => { if (finished) runOnJS(onRepeatPeak)(); },
                 );
             };
 
@@ -362,11 +362,6 @@ const DialControl: React.FC<Props> = ({
             runOnJS(handleDeactivate)();
             runOnJS(handleDragEnd)();
         });
-
-    function nudge(d: number) {
-        onChange(value + d * addendOne);
-        setHandleAngleDeg(a => a + d * STEP_DEG);
-    }
 
     // --- SVG geometry ---
     const ringColor = isSecondary ? ACCENT : ink;

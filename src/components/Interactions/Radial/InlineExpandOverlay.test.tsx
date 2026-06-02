@@ -4,8 +4,7 @@ import { configureStore } from '@reduxjs/toolkit';
 import { act, fireEvent, render } from '@testing-library/react-native';
 import { Provider } from 'react-redux';
 
-import { gameSave } from '../../../../redux/GamesSlice';
-import gamesReducer from '../../../../redux/GamesSlice';
+import gamesReducer, { gameSave } from '../../../../redux/GamesSlice';
 import playersReducer from '../../../../redux/PlayersSlice';
 import settingsReducer from '../../../../redux/SettingsSlice';
 
