@@ -3,7 +3,7 @@
     "strict": true,
     "module": "commonjs",
     "target": "es2019",
-    "types": ["node", "webdriverio/build/@types/async", "@wdio/types", "@types/mocha"],
+    "types": ["node", "@wdio/globals/types", "@wdio/types", "@types/mocha"],
     "skipLibCheck": true,
     "esModuleInterop": true,
     "resolveJsonModule": true,
