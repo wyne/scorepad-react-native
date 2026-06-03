@@ -1,6 +1,7 @@
-import { $, $$, browser } from '@wdio/globals';
 import * as fs from 'fs';
 import * as path from 'path';
+
+import { $, $$, browser } from '@wdio/globals';
 
 const RECORDINGS_DIR = path.join(__dirname, '../recordings');
 const SCREENSHOTS_DIR = path.join(RECORDINGS_DIR, 'screenshots');

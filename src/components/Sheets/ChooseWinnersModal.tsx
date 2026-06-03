@@ -9,10 +9,9 @@ import {
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Icon } from 'react-native-elements';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-
-import { selectGameById, updateGame } from '../../../redux/GamesSlice';
 import { shallowEqual } from 'react-redux';
 
+import { selectGameById, updateGame } from '../../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
 import { logEvent } from '../../Analytics';
 import { useTheme } from '../../theme';

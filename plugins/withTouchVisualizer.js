@@ -1,6 +1,7 @@
-const { withAppDelegate, withDangerousMod } = require('@expo/config-plugins');
-const path = require('path');
 const fs = require('fs');
+const path = require('path');
+
+const { withAppDelegate, withDangerousMod } = require('@expo/config-plugins');
 
 const withTouchVisualizerPod = (config) =>
   withDangerousMod(config, [
@@ -9,10 +10,10 @@ const withTouchVisualizerPod = (config) =>
       const podfilePath = path.join(config.modRequest.platformProjectRoot, 'Podfile');
       let contents = fs.readFileSync(podfilePath, 'utf8');
 
-      if (!contents.includes("pod 'TouchVisualizer'")) {
+      if (!contents.includes('pod \'TouchVisualizer\'')) {
         contents = contents.replace(
           '  use_expo_modules!\n',
-          "  use_expo_modules!\n  pod 'TouchVisualizer', :configurations => ['Debug']\n"
+          '  use_expo_modules!\n  pod \'TouchVisualizer\', :configurations => [\'Debug\']\n'
         );
         fs.writeFileSync(podfilePath, contents);
       }
