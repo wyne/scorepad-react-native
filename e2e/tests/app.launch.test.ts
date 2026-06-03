@@ -1,4 +1,4 @@
-import { $, $$, browser, expect } from '@wdio/globals';
+import { $, $$, browser } from '@wdio/globals';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -30,7 +30,7 @@ async function tapAt(xPercent: number, yPercent: number) {
 }
 
 async function swipeUp(selector: string) {
-  const el = await $(selector);
+  const el = $(selector);
   const loc = await el.getLocation();
   const size = await el.getSize();
   const x = Math.round(loc.x + size.width / 2);
@@ -43,11 +43,15 @@ async function swipeUp(selector: string) {
   });
 }
 
-async function swipeRight(selector: string) {
-  const el = await $(selector);
-  const loc = await el.getLocation();
-  const size = await el.getSize();
-  const y = Math.round(loc.y + size.height / 2);
+// Swipes right across the top of the dial for the given player index.
+// Uses index into the FlatList of dials (all players rendered, most off-screen).
+// Waits for the InlineExpandOverlay entrance animation before querying position.
+async function swipeDialRight(playerIndex: number) {
+  await browser.pause(800);
+  const dialArea = $$('~dial-gesture-area')[playerIndex];
+  const loc = await dialArea.getLocation();
+  const size = await dialArea.getSize();
+  const y = Math.round(loc.y + size.height * 0.175); // upper 35% midpoint
   await browser.execute('mobile: dragFromToForDuration', {
     fromX: Math.round(loc.x + size.width * 0.25),
     fromY: y,
@@ -99,7 +103,7 @@ describe('App Flow', () => {
     await browser.saveScreenshot(path.join(SCREENSHOTS_DIR, 'home.png'));
 
     console.log('→ tap game (index 2)');
-    const thirdGame = await $$('~game-list-item')[2];
+    const thirdGame = $$('~game-list-item')[2];
     const gameLoc = await thirdGame.getLocation();
     const gameSize = await thirdGame.getSize();
     await browser.execute('mobile: tap', {
@@ -139,25 +143,7 @@ describe('App Flow', () => {
 
     console.log('→ swipe dial (increase score)');
     await tap('~player-row-2');
-    // InlineExpandOverlay is a horizontal FlatList of all players' dials.
-    // Player 0's dial sits at x≈-786 (2 pages off-screen). We need index [2]
-    // to get the visible dial for the selected player. Also wait for the 380ms
-    // expand animation before querying coordinates.
-    await browser.pause(800);
-    const dialAreas = await $$('~dial-gesture-area');
-    const dialArea = dialAreas[2];
-    const dialAreaLoc = await dialArea.getLocation();
-    const dialAreaSize = await dialArea.getSize();
-    console.log(`  dial-gesture-area[2] loc:  x=${dialAreaLoc.x} y=${dialAreaLoc.y}`);
-    console.log(`  dial-gesture-area[2] size: w=${dialAreaSize.width} h=${dialAreaSize.height}`);
-    const swipeY = Math.round(dialAreaLoc.y + dialAreaSize.height * 0.175);
-    await browser.execute('mobile: dragFromToForDuration', {
-      fromX: Math.round(dialAreaLoc.x + dialAreaSize.width * 0.25),
-      fromY: swipeY,
-      toX: Math.round(dialAreaLoc.x + dialAreaSize.width * 0.75),
-      toY: swipeY,
-      duration: 0.5,
-    });
+    await swipeDialRight(2);
     await browser.pause(500);
 
     console.log('→ open addend modal');
