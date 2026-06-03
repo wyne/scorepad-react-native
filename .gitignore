@@ -59,3 +59,6 @@ yarn-error.*
 coverage/
 
 # @end expo-cli
+
+# e2e recordings
+e2e/recordings/

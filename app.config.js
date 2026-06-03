@@ -120,6 +120,7 @@ export default {
   githubUrl: 'https://github.com/wyne/scorepad-react-native',
   owner: 'wyne',
   plugins: [
+    './plugins/withTouchVisualizer',
     'expo-font',
     '@react-native-firebase/app',
     '@react-native-firebase/crashlytics',

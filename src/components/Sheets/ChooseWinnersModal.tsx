@@ -11,6 +11,8 @@ import { Icon } from 'react-native-elements';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { selectGameById, updateGame } from '../../../redux/GamesSlice';
+import { shallowEqual } from 'react-redux';
+
 import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
 import { logEvent } from '../../Analytics';
 import { useTheme } from '../../theme';
@@ -27,7 +29,8 @@ const ChooseWinnersModal: React.FunctionComponent = () => {
     const currentGameId = useAppSelector(state => state.settings.currentGameId);
     const playerIds = useAppSelector(state => selectGameById(state, currentGameId || '')?.playerIds);
     const allPlayers = useAppSelector((state) =>
-        (playerIds || []).map((id) => state.players.entities[id])
+        (playerIds || []).map((id) => state.players.entities[id]),
+        shallowEqual
     );
     const sortedPlayerIds = useMemo(() => {
         const withScores = (playerIds || []).map((id) => {
@@ -171,7 +174,7 @@ const ChooseWinnersModal: React.FunctionComponent = () => {
                                         style={styles.playerRow}
                                         onPress={() => togglePlayer(playerId)}
                                         activeOpacity={0.6}
-                                        testID="winner-player-row"
+                                        testID={`winner-player-row-${index}`}
                                     >
                                         <Icon
                                             name={isSelected ? 'checkmark-circle' : 'ellipse-outline'}

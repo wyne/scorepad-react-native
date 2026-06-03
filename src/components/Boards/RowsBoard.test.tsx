@@ -75,7 +75,7 @@ function fireLayouts(getByTestId: ReturnType<typeof render>['getByTestId']) {
     fireEvent(getByTestId('rows-board-container'), 'layout', {
         nativeEvent: { layout: { x: 0, y: 0, width: 400, height: 600 } },
     });
-    fireEvent(getByTestId('player-row-player-1'), 'layout', {
+    fireEvent(getByTestId('player-row-0'), 'layout', {
         nativeEvent: { layout: { x: 0, y: 0, width: 400, height: 60 } },
     });
 }

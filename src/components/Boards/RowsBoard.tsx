@@ -34,6 +34,7 @@ function inkA(ink: string, a: number): string {
 
 interface PlayerRowProps {
     playerId: string;
+    index: number;
     roundCurrent: number;
     dimmed: boolean;
     disabled: boolean;
@@ -41,7 +42,7 @@ interface PlayerRowProps {
     onPress: () => void;
 }
 
-const PlayerRow: React.FC<PlayerRowProps> = ({ playerId, roundCurrent, dimmed, disabled, onLayout, onPress }) => {
+const PlayerRow: React.FC<PlayerRowProps> = ({ playerId, index, roundCurrent, dimmed, disabled, onLayout, onPress }) => {
     const player = useAppSelector((state) => selectPlayerById(state, playerId));
     const currentGame = useAppSelector(selectCurrentGame);
     const isWinner = !!(currentGame?.locked && currentGame?.winnerIds?.includes(playerId));
@@ -95,7 +96,7 @@ const PlayerRow: React.FC<PlayerRowProps> = ({ playerId, roundCurrent, dimmed, d
     const opStyle = { color: inkA(ink, 0.5), fontSize: 16, fontWeight: '500' as const };
 
     return (
-        <Animated.View style={rowStyle} onLayout={(e: LayoutChangeEvent) => onLayout(e.nativeEvent.layout)} testID={`player-row-${playerId}`}>
+        <Animated.View style={rowStyle} onLayout={(e: LayoutChangeEvent) => onLayout(e.nativeEvent.layout)} testID={`player-row-${index}`}>
             <Pressable
                 onPress={onPress}
                 disabled={disabled}
@@ -223,10 +224,11 @@ const RowsBoard: React.FC = () => {
                     scrollY.current = e.nativeEvent.contentOffset.y;
                 }}
                 scrollEventThrottle={16}>
-                {playerIds.map((id) => (
+                {playerIds.map((id, index) => (
                     <PlayerRow
                         key={id}
                         playerId={id}
+                        index={index}
                         roundCurrent={roundCurrent}
                         dimmed={selectedId !== null}
                         disabled={!!(currentGame?.locked || menuOpen)}

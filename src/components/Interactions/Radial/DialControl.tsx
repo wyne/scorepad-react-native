@@ -328,7 +328,9 @@ const DialControl: React.FC<Props> = ({
 
             {/* Dial */}
             <GestureDetector gesture={panGesture}>
-                <View style={{ width: D, height: D, position: 'relative' }}>
+                <View testID="dial-gesture-area" style={{ width: D, height: D, position: 'relative' }}>
+                    <View testID="dial-top" style={{ position: 'absolute', top: 0, left: 0, right: 0, height: D * 0.35 }} pointerEvents="none" />
+                    <View testID="dial-bottom" style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: D * 0.35 }} pointerEvents="none" />
                     <Svg width={D} height={D} viewBox={`0 0 ${D} ${D}`} style={StyleSheet.absoluteFill}>
                         {/* Base track ring — grows with holdProgress */}
                         <AnimatedCircle cx={C} cy={C} r={R} fill="none"
