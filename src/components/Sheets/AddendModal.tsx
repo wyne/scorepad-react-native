@@ -97,7 +97,7 @@ const AddendModal: React.FunctionComponent = () => {
             case InteractionType.SwipeVertical:
                 return 'Swipe';
             case InteractionType.Dial:
-                return 'Drag';
+                return 'Spin';
         }
     }, [interactionType]);
 
