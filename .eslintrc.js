@@ -36,4 +36,20 @@ module.exports = {
         'import/no-duplicates': 'error',
     },
     ignorePatterns: ['web-build', '__mocks__'],
+    overrides: [
+        {
+            // Expo config plugins must be CommonJS
+            files: ['plugins/**/*.js'],
+            rules: {
+                '@typescript-eslint/no-require-imports': 'off',
+            },
+        },
+        {
+            // e2e tests use mocha, not jest — no expect() assertions required
+            files: ['e2e/**/*.ts'],
+            rules: {
+                'jest/expect-expect': 'off',
+            },
+        },
+    ],
 };

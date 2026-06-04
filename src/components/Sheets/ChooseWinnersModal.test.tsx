@@ -147,7 +147,7 @@ describe('ChooseWinnersModal', () => {
         const store = createMockStore(mockPlayers, 'game-1', ['player-1', 'player-2', 'player-3']);
         const { getAllByTestId } = render(<Provider store={store}><ChooseWinnersModal /></Provider>);
 
-        const rows = getAllByTestId('winner-player-row');
+        const rows = getAllByTestId(/^winner-player-row-\d+$/);
         expect(within(rows[0]).getByText('Bob')).toBeTruthy();    // 15
         expect(within(rows[1]).getByText('Alice')).toBeTruthy();  // 10
         expect(within(rows[2]).getByText('Charlie')).toBeTruthy(); // 8

@@ -4,3 +4,4 @@ export const STORAGE_KEY = {
 };
 export const MAX_PLAYERS = 20;
 export const FEATURE_KEEP_SCREEN_AWAKE = 'keep_screen_awake';
+export const FEATURE_DIAL_GESTURE = 'dial_gesture';

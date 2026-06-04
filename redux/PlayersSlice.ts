@@ -54,7 +54,24 @@ const scoresSlice = createSlice({
             prepare(payload: string, round: RoundIndex, multiplier: number) {
                 return { payload, meta: { round, multiplier } };
             },
-        }
+        },
+        playerRoundScoreSet: {
+            reducer(
+                state,
+                action: PayloadAction<string, string, { round: RoundIndex; value: number; }>
+            ) {
+                try {
+                    const scores = state?.entities[action.payload]?.scores || [];
+                    scores[action.meta.round] = action.meta.value;
+                } catch (error) {
+                    const err = error as Error;
+                    crashlytics().recordError(err);
+                }
+            },
+            prepare(payload: string, round: RoundIndex, value: number) {
+                return { payload, meta: { round, value } };
+            },
+        },
     }
 });
 
@@ -68,6 +85,7 @@ export const {
     playerAdd,
     restoreAllPlayers,
     playerRoundScoreIncrement,
+    playerRoundScoreSet,
 } = scoresSlice.actions;
 
 export default scoresSlice.reducer;
@@ -93,4 +111,21 @@ export const selectPlayerScoreByRound = createSelector(
         (state: RootState, playerId: string, round: number) => round,
     ],
     (entities, playerId, round) => entities[playerId]?.scores[round] || 0
+);
+
+export const selectPlayerRoundStats = createSelector(
+    [
+        (state: RootState, playerId: string) => state.players.entities[playerId],
+        (state: RootState, playerId: string, roundCurrent: number) => roundCurrent,
+    ],
+    (player, roundCurrent) => {
+        const scores = player?.scores ?? [];
+        const roundScore = scores[roundCurrent] ?? 0;
+        const previousTotal = scores.reduce(
+            (sum, s, i) => (i < roundCurrent ? sum + (s || 0) : sum), 0
+        );
+        const currentTotal = previousTotal + roundScore;
+        const grandTotal = scores.reduce((sum, s) => sum + (s || 0), 0);
+        return { roundScore, previousTotal, currentTotal, grandTotal };
+    }
 );

@@ -13,6 +13,10 @@ import settingsReducer from '../../redux/SettingsSlice';
 import ListScreen from './ListScreen';
 
 // Mock dependencies
+jest.mock('@react-navigation/elements', () => ({
+    useHeaderHeight: () => 0,
+}));
+
 jest.mock('expo-application', () => ({
     nativeApplicationVersion: '1.0.0',
 }));
@@ -52,6 +56,7 @@ jest.mock('react-native-safe-area-context', () => ({
         const { View } = jest.requireActual('react-native');
         return <View style={style} testID="safe-area-view">{children}</View>;
     },
+    useSafeAreaInsets: () => ({ top: 0, bottom: 0, left: 0, right: 0 }),
 }));
 
 jest.mock('../Analytics', () => ({

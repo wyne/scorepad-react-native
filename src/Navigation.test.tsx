@@ -27,6 +27,15 @@ jest.mock('react-native-reanimated', () => ({
 
 jest.mock('expo-font'); // https://github.com/callstack/react-native-paper/issues/4561
 
+jest.mock('@react-navigation/elements', () => ({
+  useHeaderHeight: () => 0,
+}));
+
+jest.mock('react-native-safe-area-context', () => ({
+  SafeAreaView: ({ children }: { children: React.ReactNode }) => children,
+  useSafeAreaInsets: () => ({ top: 0, bottom: 0, left: 0, right: 0 }),
+}));
+
 const mockStore = () => {
   return configureStore({
     reducer: {

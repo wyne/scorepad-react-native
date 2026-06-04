@@ -14,6 +14,18 @@ jest.mock('@react-navigation/elements', () => ({
     useHeaderHeight: () => 88,
 }));
 
+jest.mock('react-native-reanimated', () => {
+    const View = jest.requireActual('react-native').View;
+    const builder = { duration: jest.fn() };
+    builder.duration.mockReturnValue(builder);
+    return {
+        __esModule: true,
+        default: { View },
+        FadeIn: builder,
+        FadeOut: builder,
+    };
+});
+
 jest.mock('@gorhom/bottom-sheet', () => {
     const { forwardRef, useImperativeHandle } = jest.requireActual('react');
     const RN = jest.requireActual('react-native');
@@ -43,6 +55,13 @@ jest.mock('../components/Boards/FlexboxBoard', () => {
     return function MockFlexboxBoard() {
         const { View, Text } = jest.requireActual('react-native');
         return <View testID="flexbox-board"><Text>FlexboxBoard</Text></View>;
+    };
+});
+
+jest.mock('../components/Boards/RowsBoard', () => {
+    return function MockRowsBoard() {
+        const { View, Text } = jest.requireActual('react-native');
+        return <View testID="rows-board"><Text>RowsBoard</Text></View>;
     };
 });
 
@@ -151,5 +170,30 @@ describe('GameScreen', () => {
 
         expect(getByTestId('flexbox-board')).toBeTruthy();
         expect(getByTestId('addend-modal')).toBeTruthy();
+    });
+
+    it('should render RowsBoard when interactionType is RadialGesture', () => {
+        const store = createMockStore({
+            settings: {
+                currentGameId: 'game-1',
+                interactionType: 'dial',
+            },
+            games: {
+                entities: { 'game-1': mockGame },
+                ids: ['game-1'],
+            },
+            players: {
+                entities: mockPlayers,
+                ids: ['player-1', 'player-2'],
+            },
+        });
+
+        const { getByTestId } = render(
+            <Provider store={store}>
+                <GameScreen />
+            </Provider>
+        );
+
+        expect(getByTestId('rows-board')).toBeTruthy();
     });
 });

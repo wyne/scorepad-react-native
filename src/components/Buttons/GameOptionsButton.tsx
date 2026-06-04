@@ -5,8 +5,9 @@ import { SymbolView } from 'expo-symbols';
 import { StyleSheet, View, Text } from 'react-native';
 
 import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
-import { toggleHomeFullscreen, setInteractionType } from '../../../redux/SettingsSlice';
+import { toggleHomeFullscreen, setInteractionType, markFeatureNotificationSeen } from '../../../redux/SettingsSlice';
 import { logEvent } from '../../Analytics';
+import { FEATURE_DIAL_GESTURE } from '../../constants';
 import { useTheme } from '../../theme';
 import { InteractionType } from '../Interactions/InteractionType';
 import { useMenuOpen } from '../MenuOpenContext';
@@ -25,6 +26,9 @@ const GameOptionsButton: React.FunctionComponent = () => {
     const installId = useAppSelector(state => state.settings.installId);
     const addendOne = useAppSelector(state => state.settings.addendOne);
     const addendTwo = useAppSelector(state => state.settings.addendTwo);
+    const showDialDot = useAppSelector(state =>
+        !state.settings.seenFeatureNotifications.includes(FEATURE_DIAL_GESTURE)
+    );
 
     const addendModalRef = useAddendModalContext();
     const gameSheetRef = useGameSheetContext();
@@ -34,6 +38,13 @@ const GameOptionsButton: React.FunctionComponent = () => {
 
     const isSwipe = interactionType === InteractionType.SwipeVertical;
     const isTap = interactionType === InteractionType.HalfTap;
+    const isDial = interactionType === InteractionType.Dial;
+
+    const pointValuesSubtitle = isTap
+        ? `Tap: ${addendOne} / Hold: ${addendTwo}`
+        : isDial
+            ? `Spin: ${addendOne} / Hold: ${addendTwo}`
+            : `Swipe: ${addendOne} / Hold: ${addendTwo}`;
 
     const menuActions: MenuAction[] = [
         {
@@ -56,6 +67,14 @@ const GameOptionsButton: React.FunctionComponent = () => {
                     state: isTap ? 'on' : 'off',
                 },
                 {
+                    id: 'dial',
+                    title: 'Dial',
+                    subtitle: showDialDot ? 'New' : undefined,
+                    image: 'dial.min',
+                    imageColor: theme.text,
+                    state: isDial ? 'on' : 'off',
+                },
+                {
                     id: 'about-gestures',
                     title: 'About Gestures',
                     image: 'info.circle',
@@ -71,9 +90,7 @@ const GameOptionsButton: React.FunctionComponent = () => {
                 {
                     id: 'point-values',
                     title: 'Point Values',
-                    subtitle: isTap
-                        ? `Tap: ${addendOne} / Long: ${addendTwo}`
-                        : `Swipe: ${addendOne} / Hold: ${addendTwo}`,
+                    subtitle: pointValuesSubtitle,
                     image: 'plusminus',
                     imageColor: theme.text,
                 },
@@ -100,6 +117,10 @@ const GameOptionsButton: React.FunctionComponent = () => {
                 dispatch(setInteractionType(InteractionType.HalfTap));
                 logEvent('interaction_type', { interactionType: 'half_tap', gameId: currentGameId });
                 break;
+            case 'dial':
+                dispatch(setInteractionType(InteractionType.Dial));
+                logEvent('interaction_type', { interactionType: 'radial_gesture', gameId: currentGameId });
+                break;
             case 'point-values':
                 gameSheetRef?.current?.snapToIndex(0);
                 addendModalRef?.current?.present();
@@ -120,7 +141,10 @@ const GameOptionsButton: React.FunctionComponent = () => {
         <MenuView
             actions={menuActions}
             onOpenMenu={() => setMenuOpen(true)}
-            onCloseMenu={() => setMenuOpen(false)}
+            onCloseMenu={() => {
+                setMenuOpen(false);
+                if (showDialDot) dispatch(markFeatureNotificationSeen(FEATURE_DIAL_GESTURE));
+            }}
             onPressAction={({ nativeEvent }) => {
                 handleAction(nativeEvent.event);
                 setMenuOpen(false);
@@ -133,11 +157,26 @@ const GameOptionsButton: React.FunctionComponent = () => {
                         <Text style={[styles.addendText, { color: theme.text }]}>{addendOne}</Text>
                         <Text style={[styles.addendText, { color: theme.text }]}>{addendTwo}</Text>
                     </View>
-                    <SymbolView
-                        name={isSwipe ? 'hand.draw' : 'hand.point.up'}
-                        size={30}
-                        tintColor={theme.text}
-                    />
+                    <View>
+                        <SymbolView
+                            name={isDial ? 'dial.min' : isSwipe ? 'hand.draw' : 'hand.point.up'}
+                            size={30}
+                            tintColor={theme.text}
+                        />
+                        {showDialDot && (
+                            <View testID="dial-notification-dot" style={{
+                                position: 'absolute',
+                                top: -2,
+                                right: -4,
+                                width: 8,
+                                height: 8,
+                                borderRadius: 4,
+                                backgroundColor: theme.warning,
+                                borderWidth: 1,
+                                borderColor: theme.backgroundSecondary,
+                            }} />
+                        )}
+                    </View>
                 </View>
             </View>
         </MenuView>

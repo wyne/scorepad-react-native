@@ -96,6 +96,8 @@ const AddendModal: React.FunctionComponent = () => {
                 return 'Single Tap';
             case InteractionType.SwipeVertical:
                 return 'Swipe';
+            case InteractionType.Dial:
+                return 'Spin';
         }
     }, [interactionType]);
 
@@ -105,6 +107,8 @@ const AddendModal: React.FunctionComponent = () => {
                 return 'Long Press';
             case InteractionType.SwipeVertical:
                 return 'Hold + Swipe';
+            case InteractionType.Dial:
+                return 'Hold';
         }
     }, [interactionType]);
 

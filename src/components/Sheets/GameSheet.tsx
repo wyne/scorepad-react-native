@@ -239,7 +239,7 @@ const GameSheet: React.FunctionComponent = () => {
                 <SafeAreaView edges={['right', 'left']}>
                     <View style={styles.sheetHeaderContainer}>
                         <TouchableWithoutFeedback onPress={() => sheetTitlePress()}>
-                            <View style={[styles.sheetTitleView]}>
+                            <View testID="game-title-button" style={[styles.sheetTitleView]}>
                                 <Text style={[styles.sheetTitle, { color: theme.text }]} numberOfLines={1}>
                                     {gameTitle}
                                 </Text>

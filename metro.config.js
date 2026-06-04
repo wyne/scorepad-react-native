@@ -8,6 +8,7 @@ const defaultConfig = getDefaultConfig(__dirname);
 
 defaultConfig.resolver.blockList = [
     /\.maestro\/.*/,
+    /\/e2e\/.*/,
 ];
 
 module.exports = defaultConfig;
