@@ -46,10 +46,14 @@ async function swipeUp(selector: string) {
 
 // Swipes right across the top of the dial for the given player index.
 // Uses index into the FlatList of dials (all players rendered, most off-screen).
-// Waits for the InlineExpandOverlay entrance animation before querying position.
+// Waits until the target dial has a positive x coordinate, meaning the overlay
+// animation has settled and the correct page is on screen.
 async function swipeDialRight(playerIndex: number) {
-  await browser.pause(800);
   const dialArea = $$('~dial-gesture-area')[playerIndex];
+  await browser.waitUntil(
+    async () => (await dialArea.getLocation()).x >= 0,
+    { timeout: 5000, timeoutMsg: `dial-gesture-area[${playerIndex}] did not reach a positive x position within 5s` }
+  );
   const loc = await dialArea.getLocation();
   const size = await dialArea.getSize();
   const y = Math.round(loc.y + size.height * 0.175); // upper 35% midpoint
@@ -105,6 +109,7 @@ describe('App Flow', () => {
 
     console.log('→ tap game (index 2)');
     const thirdGame = $$('~game-list-item')[2];
+    await thirdGame.waitForDisplayed({ timeout: 10000 });
     const gameLoc = await thirdGame.getLocation();
     const gameSize = await thirdGame.getSize();
     await browser.execute('mobile: tap', {
