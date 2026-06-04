@@ -24,6 +24,7 @@ const STEP_DEG = 30;
 const ACCENT = '#3a86ff';
 const MOVE_THRESHOLD_SQ = 100;
 
+// TODO: see RowsBoard.tsx — consolidate inkFor/inkA into shared colorUtils module
 function inkA(ink: string, a: number): string {
     return ink === '#000' ? `rgba(0,0,0,${a})` : `rgba(255,255,255,${a})`;
 }

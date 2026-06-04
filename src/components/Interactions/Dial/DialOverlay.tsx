@@ -33,6 +33,7 @@ function resistedDrag(t: number): number {
     return t / (1 + t / 400); // nearly 1:1 at small pulls, strong resistance beyond ~150 px
 }
 
+// TODO: see RowsBoard.tsx — consolidate inkFor/inkA into shared colorUtils module
 function inkFor(hex: string): string {
     const h = hex.replace('#', '');
     const r = parseInt(h.slice(0, 2), 16) / 255;

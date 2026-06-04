@@ -12,6 +12,11 @@ import DialOverlay from '../Interactions/Dial/DialOverlay';
 import { useMenuOpen } from '../MenuOpenContext';
 import { bottomSheetHeight } from '../Sheets/GameSheet';
 
+// TODO: consolidate inkFor/inkA into a shared src/colorUtils.ts module and rename:
+//   inkFor → readableColor (use getContrastRatio from 'colorsheet', add data migration
+//   to backfill player colors, then introduce usePlayerColors hook)
+//   inkA → withOpacity
+//   Same change needed in DialOverlay.tsx and DialControl.tsx.
 function inkFor(hex: string): string {
     const h = hex.replace('#', '');
     const r = parseInt(h.slice(0, 2), 16) / 255;
