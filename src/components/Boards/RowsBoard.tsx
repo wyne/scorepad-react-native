@@ -69,31 +69,31 @@ const PlayerRow: React.FC<PlayerRowProps> = ({ playerId, index, roundCurrent, di
     const prevTotal = player.scores.reduce((sum, s, i) => (i < roundCurrent ? sum + (s || 0) : sum), 0);
     const total = prevTotal + roundScore;
 
-    const sepSign = roundScore < 0 ? '−' : '+';
+    const separatorSign = roundScore < 0 ? '−' : '+';
     const roundAbs = Math.abs(roundScore);
 
-    const secNumStyle = {
+    const secondaryNumberStyle = {
         color: inkA(ink, 0.45),
         fontSize: 18,
         fontWeight: '600' as const,
         lineHeight: 22,
         fontVariant: ['tabular-nums' as const]
     };
-    const totNumStyle = {
+    const totalNumberStyle = {
         color: ink,
         fontSize: 20,
         fontWeight: '800' as const,
         lineHeight: 24,
         fontVariant: ['tabular-nums' as const]
     };
-    const capStyle = {
+    const captionStyle = {
         color: inkA(ink, 0.65),
         fontSize: 8,
         fontWeight: '800' as const,
         letterSpacing: 1.0,
         marginTop: 1
     };
-    const opStyle = { color: inkA(ink, 0.5), fontSize: 16, fontWeight: '500' as const };
+    const operatorStyle = { color: inkA(ink, 0.5), fontSize: 16, fontWeight: '500' as const };
 
     return (
         <Animated.View style={rowStyle} onLayout={(e: LayoutChangeEvent) => onLayout(e.nativeEvent.layout)} testID={`player-row-${index}`}>
@@ -125,20 +125,20 @@ const PlayerRow: React.FC<PlayerRowProps> = ({ playerId, index, roundCurrent, di
                             /* Unlocked: PREV/RND breakdown fades out when round score is 0 */
                             <Animated.View style={[styles.breakdown, breakdownStyle]}>
                                 <View style={styles.scoreCol}>
-                                    <Text style={secNumStyle}>{prevTotal}</Text>
-                                    <Text style={capStyle}>PREV</Text>
+                                    <Text style={secondaryNumberStyle}>{prevTotal}</Text>
+                                    <Text style={captionStyle}>PREV</Text>
                                 </View>
-                                <Text style={opStyle}>{sepSign}</Text>
+                                <Text style={operatorStyle}>{separatorSign}</Text>
                                 <View style={styles.scoreCol}>
-                                    <Text style={secNumStyle}>{roundAbs}</Text>
-                                    <Text style={capStyle}>RND</Text>
+                                    <Text style={secondaryNumberStyle}>{roundAbs}</Text>
+                                    <Text style={captionStyle}>RND</Text>
                                 </View>
-                                <Text style={opStyle}>=</Text>
+                                <Text style={operatorStyle}>=</Text>
                             </Animated.View>
                         )}
                         <View style={styles.scoreCol}>
-                            <Text style={totNumStyle}>{total}</Text>
-                            <Text style={capStyle}>TOTAL</Text>
+                            <Text style={totalNumberStyle}>{total}</Text>
+                            <Text style={captionStyle}>TOTAL</Text>
                         </View>
                     </View>
                 </View>
