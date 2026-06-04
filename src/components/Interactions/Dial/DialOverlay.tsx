@@ -14,7 +14,7 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { useAppDispatch, useAppSelector } from '../../../../redux/hooks';
-import { playerRoundScoreSet, selectPlayerById } from '../../../../redux/PlayersSlice';
+import { playerRoundScoreSet, selectPlayerById, selectPlayerRoundStats } from '../../../../redux/PlayersSlice';
 import { selectCurrentGame } from '../../../../redux/selectors';
 import { useMenuOpen } from '../../MenuOpenContext';
 
@@ -79,14 +79,9 @@ const PlayerDialPage: React.FC<PlayerDialPageProps> = ({
     const dispatch = useAppDispatch();
     const player = useAppSelector(state => selectPlayerById(state, playerId));
     const roundCurrent = useAppSelector(state => selectCurrentGame(state)?.roundCurrent ?? 0);
-
-    // Mirror AdditionTile: derive everything from Redux, no local score state
-    const scoreTotal = (player?.scores ?? []).reduce(
-        (sum, s, round) => round <= roundCurrent ? sum + (s || 0) : sum,
-        0,
+    const { roundScore, previousTotal, currentTotal: scoreTotal } = useAppSelector(
+        state => selectPlayerRoundStats(state, playerId, roundCurrent)
     );
-    const roundScore = player?.scores[roundCurrent] ?? 0;
-    const prevTotal = scoreTotal - roundScore;
 
     const [isSecondary, setIsSecondary] = useState(false);
 
@@ -165,7 +160,7 @@ const PlayerDialPage: React.FC<PlayerDialPageProps> = ({
                     {/* Left: previous total + step pill */}
                     <View style={styles.lsCol}>
                         <View style={styles.prevBlock}>
-                            <Text style={[styles.prevNumber, { color: ink }]}>{prevTotal}</Text>
+                            <Text style={[styles.prevNumber, { color: ink }]}>{previousTotal}</Text>
                             <Text style={[styles.prevLabel, { color: inkA(ink, 0.6) }]}>PREVIOUS TOTAL</Text>
                         </View>
                         <View style={[styles.lsPill, { backgroundColor: stepBg }]}>
@@ -232,7 +227,7 @@ const PlayerDialPage: React.FC<PlayerDialPageProps> = ({
                             {player.playerName}
                         </Text>
                         <View style={styles.prevBlock}>
-                            <Text style={[styles.prevNumber, { color: ink }]}>{prevTotal}</Text>
+                            <Text style={[styles.prevNumber, { color: ink }]}>{previousTotal}</Text>
                             <Text style={[styles.prevLabel, { color: inkA(ink, 0.6) }]}>PREVIOUS TOTAL</Text>
                         </View>
                     </View>

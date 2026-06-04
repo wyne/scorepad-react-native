@@ -112,3 +112,20 @@ export const selectPlayerScoreByRound = createSelector(
     ],
     (entities, playerId, round) => entities[playerId]?.scores[round] || 0
 );
+
+export const selectPlayerRoundStats = createSelector(
+    [
+        (state: RootState, playerId: string) => state.players.entities[playerId],
+        (state: RootState, playerId: string, roundCurrent: number) => roundCurrent,
+    ],
+    (player, roundCurrent) => {
+        const scores = player?.scores ?? [];
+        const roundScore = scores[roundCurrent] ?? 0;
+        const previousTotal = scores.reduce(
+            (sum, s, i) => (i < roundCurrent ? sum + (s || 0) : sum), 0
+        );
+        const currentTotal = previousTotal + roundScore;
+        const grandTotal = scores.reduce((sum, s) => sum + (s || 0), 0);
+        return { roundScore, previousTotal, currentTotal, grandTotal };
+    }
+);

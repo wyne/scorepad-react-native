@@ -6,7 +6,7 @@ import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-na
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useAppSelector } from '../../../redux/hooks';
-import { selectPlayerById } from '../../../redux/PlayersSlice';
+import { selectPlayerById, selectPlayerRoundStats } from '../../../redux/PlayersSlice';
 import { selectCurrentGame } from '../../../redux/selectors';
 import DialOverlay from '../Interactions/Dial/DialOverlay';
 import { useMenuOpen } from '../MenuOpenContext';
@@ -39,14 +39,15 @@ const PlayerRow: React.FC<PlayerRowProps> = ({ playerId, index, roundCurrent, di
     const player = useAppSelector((state) => selectPlayerById(state, playerId));
     const currentGame = useAppSelector(selectCurrentGame);
     const isWinner = !!(currentGame?.locked && currentGame?.winnerIds?.includes(playerId));
+    const { roundScore, previousTotal, currentTotal } = useAppSelector(
+        (state) => selectPlayerRoundStats(state, playerId, roundCurrent)
+    );
     const dimOpacity = useSharedValue(1);
     const breakdownOpacity = useSharedValue(1);
 
     React.useEffect(() => {
         dimOpacity.value = withTiming(dimmed ? 0.28 : 1, { duration: 280 });
     }, [dimmed]);
-
-    const roundScore = player?.scores[roundCurrent] ?? 0;
 
     React.useEffect(() => {
         breakdownOpacity.value = withTiming(roundScore !== 0 ? 1 : 0, { duration: 220 });
@@ -59,8 +60,6 @@ const PlayerRow: React.FC<PlayerRowProps> = ({ playerId, index, roundCurrent, di
 
     const color = player.color ?? '#555';
     const ink = inkFor(color);
-    const prevTotal = player.scores.reduce((sum, s, i) => (i < roundCurrent ? sum + (s || 0) : sum), 0);
-    const total = prevTotal + roundScore;
 
     const separatorSign = roundScore < 0 ? '−' : '+';
     const roundAbs = Math.abs(roundScore);
@@ -118,7 +117,7 @@ const PlayerRow: React.FC<PlayerRowProps> = ({ playerId, index, roundCurrent, di
                             /* Unlocked: PREV/RND breakdown fades out when round score is 0 */
                             <Animated.View style={[styles.breakdown, breakdownStyle]}>
                                 <View style={styles.scoreCol}>
-                                    <Text style={secondaryNumberStyle}>{prevTotal}</Text>
+                                    <Text style={secondaryNumberStyle}>{previousTotal}</Text>
                                     <Text style={captionStyle}>PREV</Text>
                                 </View>
                                 <Text style={operatorStyle}>{separatorSign}</Text>
@@ -130,7 +129,7 @@ const PlayerRow: React.FC<PlayerRowProps> = ({ playerId, index, roundCurrent, di
                             </Animated.View>
                         )}
                         <View style={styles.scoreCol}>
-                            <Text style={totalNumberStyle}>{total}</Text>
+                            <Text style={totalNumberStyle}>{currentTotal}</Text>
                             <Text style={captionStyle}>TOTAL</Text>
                         </View>
                     </View>

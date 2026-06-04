@@ -4,7 +4,7 @@ import { StyleSheet } from 'react-native';
 import Animated from 'react-native-reanimated';
 
 import { useAppSelector } from '../../../../redux/hooks';
-import { selectPlayerById } from '../../../../redux/PlayersSlice';
+import { selectPlayerById, selectPlayerRoundStats } from '../../../../redux/PlayersSlice';
 import { selectCurrentGame } from '../../../../redux/selectors';
 
 import { calculateFontSize } from './Helpers';
@@ -36,15 +36,9 @@ const AdditionTile: React.FunctionComponent<Props> = ({
     const player = useAppSelector(state => selectPlayerById(state, playerId));
     if (typeof player == 'undefined') return null;
     const playerName = player.playerName;
-    const scoreTotal = player.scores.reduce(
-        (sum, current, round) => {
-            if (round > roundCurrent) { return sum; }
-            return sum + (current || 0);
-        },
-        0
+    const { currentTotal: scoreTotal, grandTotal: finalScoreTotal, roundScore: scoreRound } = useAppSelector(
+        state => selectPlayerRoundStats(state, playerId, roundCurrent)
     );
-    const finalScoreTotal = player.scores.reduce((sum, s) => sum + (s || 0), 0);
-    const scoreRound = player.scores[roundCurrent] || 0;
 
     if (maxWidth == null || maxHeight == null) return null;
 
