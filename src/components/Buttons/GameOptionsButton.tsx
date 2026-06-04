@@ -41,9 +41,9 @@ const GameOptionsButton: React.FunctionComponent = () => {
     const isDial = interactionType === InteractionType.RadialGesture;
 
     const pointValuesSubtitle = isTap
-        ? `Tap: ${addendOne} / Long: ${addendTwo}`
+        ? `Tap: ${addendOne} / Hold: ${addendTwo}`
         : isDial
-            ? `Drag: ${addendOne} / Hold: ${addendTwo}`
+            ? `Spin: ${addendOne} / Hold: ${addendTwo}`
             : `Swipe: ${addendOne} / Hold: ${addendTwo}`;
 
     const menuActions: MenuAction[] = [
