@@ -14,9 +14,9 @@ const RadialGestureIcon: React.FunctionComponent<Props> = ({
     color = systemBlue,
     size = 20,
 }) => {
-    const C = 22;
-    const R = 15;
-    const SW = 3.5;
+    const C = 22;   // center of the 44×44 viewBox
+    const R = 15;   // ring radius
+    const SW = 3.5; // ring stroke width
     // Handle at ~45° (top-right)
     const angle = 45 * Math.PI / 180;
     const hx = C + R * Math.sin(angle);
