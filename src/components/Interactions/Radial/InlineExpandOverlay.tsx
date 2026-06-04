@@ -370,7 +370,7 @@ const InlineExpandOverlay: React.FC<Props> = ({
     // Close if the game becomes locked while the overlay is open
     useEffect(() => {
         if (currentGame?.locked && !closing.current) collapseAndClose();
-    }, [currentGame?.locked]);
+    }, [currentGame?.locked, collapseAndClose]);
 
     // Done button: close with collapse animation
     const handleDone = useCallback(() => {
