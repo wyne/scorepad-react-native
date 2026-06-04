@@ -9,7 +9,6 @@ import Animated, {
     SharedValue,
     useAnimatedStyle,
     useSharedValue,
-    withDelay,
     withSpring,
     withTiming,
 } from 'react-native-reanimated';
@@ -21,9 +20,6 @@ import { useMenuOpen } from '../../MenuOpenContext';
 
 import DialControl from './DialControl';
 
-const EXPAND_DURATION = 380;
-const COLLAPSE_DURATION = 300;
-const EXPAND_EASING = Easing.out(Easing.cubic);
 const SWIPE_DISMISS_DISTANCE = 50;
 const SWIPE_DISMISS_VELOCITY = 400;
 const MARGIN_BOTTOM = 12;
@@ -49,13 +45,6 @@ function inkFor(hex: string): string {
 
 function inkA(ink: string, a: number): string {
     return ink === '#000' ? `rgba(0,0,0,${a})` : `rgba(255,255,255,${a})`;
-}
-
-interface RowRect {
-    top: number;
-    left: number;
-    width: number;
-    height: number;
 }
 
 // ─── PlayerDialPage ───────────────────────────────────────────────────────────
@@ -280,12 +269,11 @@ const PlayerDialPage: React.FC<PlayerDialPageProps> = ({
     );
 };
 
-// ─── DialOverlay ────────────────────────────────────────────────────────────
+// ─── DialOverlay ──────────────────────────────────────────────────────────────
 
 interface Props {
     playerIds: string[];
     initialIndex: number;
-    rowRect: RowRect;
     boardWidth: number;
     boardHeight: number;
     safeAreaTop: number;
@@ -295,7 +283,6 @@ interface Props {
 const DialOverlay: React.FC<Props> = ({
     playerIds,
     initialIndex,
-    rowRect,
     boardWidth,
     boardHeight,
     safeAreaTop,
@@ -315,88 +302,72 @@ const DialOverlay: React.FC<Props> = ({
 
     const marginTop = Math.max(12, safeAreaTop);
     const targetTop = marginTop;
-    const targetLeft = 0;
     const targetWidth = boardWidth;
     const targetHeight = boardHeight - marginTop - MARGIN_BOTTOM;
     const pageWidth = boardWidth - MARGIN_H * 2;
 
-    const animTop = useSharedValue(rowRect.top);
-    const animLeft = useSharedValue(rowRect.left);
-    const animWidth = useSharedValue(rowRect.width);
-    const animHeight = useSharedValue(rowRect.height);
-    const contentOpacity = useSharedValue(0);
+    const opacity = useSharedValue(0);
+    const slideY = useSharedValue(20);
     const swipeDragY = useSharedValue(0);
     const swipeDragX = useSharedValue(0);
 
-    const didOpenAnimate = useRef(false);
-
+    // Fade in + slide up on mount
     useEffect(() => {
-        animTop.value = withTiming(targetTop, { duration: EXPAND_DURATION, easing: EXPAND_EASING });
-        animLeft.value = withTiming(targetLeft, { duration: EXPAND_DURATION, easing: EXPAND_EASING });
-        animWidth.value = withTiming(targetWidth, { duration: EXPAND_DURATION, easing: EXPAND_EASING });
-        animHeight.value = withTiming(targetHeight, { duration: EXPAND_DURATION, easing: EXPAND_EASING });
-        if (!didOpenAnimate.current) {
-            didOpenAnimate.current = true;
-            contentOpacity.value = withDelay(160, withTiming(1, { duration: 200 }));
-        }
-    }, [targetTop, targetLeft, targetWidth, targetHeight]);
-
+        opacity.value = withTiming(1, { duration: 200 });
+        slideY.value = withTiming(0, { duration: 250, easing: Easing.out(Easing.cubic) });
+    }, []);
 
     const panelStyle = useAnimatedStyle(() => ({
         position: 'absolute',
-        top: animTop.value,
-        left: animLeft.value,
-        width: animWidth.value,
-        height: animHeight.value,
-        transform: [{ translateY: swipeDragY.value }, { translateX: swipeDragX.value }],
+        top: targetTop,
+        left: 0,
+        width: targetWidth,
+        height: targetHeight,
+        opacity: opacity.value,
+        transform: [
+            { translateY: swipeDragY.value + slideY.value },
+            { translateX: swipeDragX.value },
+        ],
     }));
 
-    const contentStyle = useAnimatedStyle(() => ({
-        flex: 1,
-        opacity: contentOpacity.value,
-    }));
-
-    const collapseAndClose = useCallback(() => {
-        contentOpacity.value = withTiming(0, { duration: 120 });
-        animTop.value = withTiming(rowRect.top, { duration: COLLAPSE_DURATION, easing: Easing.in(Easing.cubic) });
-        animLeft.value = withTiming(rowRect.left, { duration: COLLAPSE_DURATION, easing: Easing.in(Easing.cubic) });
-        animWidth.value = withTiming(rowRect.width, { duration: COLLAPSE_DURATION, easing: Easing.in(Easing.cubic) });
-        animHeight.value = withTiming(rowRect.height, {
-            duration: COLLAPSE_DURATION,
-            easing: Easing.in(Easing.cubic),
-        }, () => runOnJS(onClose)());
-    }, [onClose, rowRect]);
+    const slideOut = useCallback((then: () => void) => {
+        opacity.value = withTiming(0, { duration: 150 });
+        swipeDragY.value = withTiming(
+            boardHeight,
+            { duration: 250, easing: Easing.in(Easing.cubic) },
+            () => runOnJS(then)(),
+        );
+    }, [boardHeight]);
 
     // Close if the game becomes locked while the overlay is open
     useEffect(() => {
-        if (currentGame?.locked && !closing.current) collapseAndClose();
-    }, [currentGame?.locked, collapseAndClose]);
+        if (currentGame?.locked && !closing.current) {
+            closing.current = true;
+            onClose();
+        }
+    }, [currentGame?.locked]);
 
-    // Done button: close with collapse animation
+    // Done button: animate out then close
     const handleDone = useCallback(() => {
         if (closing.current) return;
         closing.current = true;
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-        collapseAndClose();
-    }, [collapseAndClose]);
+        slideOut(onClose);
+    }, [slideOut, onClose]);
 
-    // Called by the worklet after exit animation completes
+    // Called by the worklet after swipe-down animation completes
     const handleDismiss = useCallback(() => {
         if (closing.current) return;
         closing.current = true;
         onClose();
     }, [onClose]);
 
-    // Backdrop tap: no gesture velocity, so drive a withTiming slide-out from JS
+    // Backdrop tap: slide out
     const handleBackdropPress = useCallback(() => {
         if (closing.current) return;
         closing.current = true;
-        swipeDragY.value = withTiming(
-            boardHeight,
-            { duration: 320, easing: Easing.in(Easing.cubic) },
-            () => runOnJS(onClose)(),
-        );
-    }, [boardHeight, onClose]);
+        slideOut(onClose);
+    }, [slideOut, onClose]);
 
     // FlatList paged scroll: track active index
     const handleScrollEnd = useCallback((e: NativeSyntheticEvent<NativeScrollEvent>) => {
@@ -415,48 +386,45 @@ const DialOverlay: React.FC<Props> = ({
             <Pressable testID="overlay-backdrop" style={StyleSheet.absoluteFillObject} onPress={handleBackdropPress} disabled={menuOpen} />
 
             <Animated.View style={panelStyle}>
-                <Animated.View style={contentStyle}>
-                    <FlatList
-                        key={targetWidth}
-                        ref={flatListRef}
-                        data={playerIds}
-                        keyExtractor={(id) => id}
-                        horizontal
-                        pagingEnabled
-                        scrollEnabled={!menuOpen}
-                        showsHorizontalScrollIndicator={false}
-                        decelerationRate="fast"
-                        onLayout={() => {
-                            flatListRef.current?.scrollToOffset({
-                                offset: targetWidth * activeIndexRef.current,
-                                animated: false,
-                            });
-                        }}
-                        getItemLayout={(_, index) => ({
-                            length: targetWidth,
-                            offset: targetWidth * index,
-                            index,
-                        })}
-                        renderItem={({ item: pid }) => (
-                            <View style={{ width: targetWidth, paddingHorizontal: MARGIN_H }}>
-                                <PlayerDialPage
-                                    playerId={pid}
-                                    pageWidth={pageWidth}
-                                    pageHeight={targetHeight}
-                                    boardHeight={boardHeight}
-                                    addendOne={addendOne}
-                                    addendTwo={addendTwo}
-                                    menuOpen={menuOpen}
-                                    swipeDragY={swipeDragY}
-                                    swipeDragX={swipeDragX}
-                                    onDone={handleDone}
-                                    onDismiss={handleDismiss}
-                                />
-                            </View>
-                        )}
-                        onMomentumScrollEnd={handleScrollEnd}
-                    />
-                </Animated.View>
+                <FlatList
+                    ref={flatListRef}
+                    data={playerIds}
+                    keyExtractor={(id) => id}
+                    horizontal
+                    pagingEnabled
+                    scrollEnabled={!menuOpen}
+                    showsHorizontalScrollIndicator={false}
+                    decelerationRate="fast"
+                    onLayout={() => {
+                        flatListRef.current?.scrollToOffset({
+                            offset: targetWidth * activeIndexRef.current,
+                            animated: false,
+                        });
+                    }}
+                    getItemLayout={(_, index) => ({
+                        length: targetWidth,
+                        offset: targetWidth * index,
+                        index,
+                    })}
+                    renderItem={({ item: pid }) => (
+                        <View style={{ width: targetWidth, paddingHorizontal: MARGIN_H }}>
+                            <PlayerDialPage
+                                playerId={pid}
+                                pageWidth={pageWidth}
+                                pageHeight={targetHeight}
+                                boardHeight={boardHeight}
+                                addendOne={addendOne}
+                                addendTwo={addendTwo}
+                                menuOpen={menuOpen}
+                                swipeDragY={swipeDragY}
+                                swipeDragX={swipeDragX}
+                                onDone={handleDone}
+                                onDismiss={handleDismiss}
+                            />
+                        </View>
+                    )}
+                    onMomentumScrollEnd={handleScrollEnd}
+                />
             </Animated.View>
         </>
     );

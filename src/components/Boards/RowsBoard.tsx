@@ -1,13 +1,7 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 
 import { LayoutChangeEvent, LayoutRectangle, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Icon } from 'react-native-elements';
-interface ExpandRect {
-    top: number;
-    left: number;
-    width: number;
-    height: number;
-}
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -38,11 +32,10 @@ interface PlayerRowProps {
     roundCurrent: number;
     dimmed: boolean;
     disabled: boolean;
-    onLayout: (rect: LayoutRectangle) => void;
     onPress: () => void;
 }
 
-const PlayerRow: React.FC<PlayerRowProps> = ({ playerId, index, roundCurrent, dimmed, disabled, onLayout, onPress }) => {
+const PlayerRow: React.FC<PlayerRowProps> = ({ playerId, index, roundCurrent, dimmed, disabled, onPress }) => {
     const player = useAppSelector((state) => selectPlayerById(state, playerId));
     const currentGame = useAppSelector(selectCurrentGame);
     const isWinner = !!(currentGame?.locked && currentGame?.winnerIds?.includes(playerId));
@@ -96,7 +89,7 @@ const PlayerRow: React.FC<PlayerRowProps> = ({ playerId, index, roundCurrent, di
     const operatorStyle = { color: inkA(ink, 0.5), fontSize: 16, fontWeight: '500' as const };
 
     return (
-        <Animated.View style={rowStyle} onLayout={(e: LayoutChangeEvent) => onLayout(e.nativeEvent.layout)} testID={`player-row-${index}`}>
+        <Animated.View style={rowStyle} testID={`player-row-${index}`}>
             <Pressable
                 onPress={onPress}
                 disabled={disabled}
@@ -153,58 +146,23 @@ const RowsBoard: React.FC = () => {
     const { menuOpen } = useMenuOpen();
     const insets = useSafeAreaInsets();
     const [selectedId, setSelectedId] = useState<string | null>(null);
-    const [selectedRowRect, setSelectedRowRect] = useState<ExpandRect | null>(null);
     const [boardLayout, setBoardLayout] = useState<LayoutRectangle | null>(null);
-
-    // Track each row's last-known layout (relative to ScrollView content, adjusted for scroll)
-    const rowLayouts = useRef<Record<string, LayoutRectangle>>({});
-    const scrollY = useRef(0);
 
     const handleBoardLayout = useCallback((e: LayoutChangeEvent) => {
         setBoardLayout(e.nativeEvent.layout);
     }, []);
 
-    const handleRowLayout = useCallback((id: string, layout: LayoutRectangle) => {
-        rowLayouts.current[id] = layout;
-    }, []);
-
     const handleRowPress = useCallback(
         (id: string) => {
             if (currentGame?.locked || menuOpen) return;
-            const layout = rowLayouts.current[id];
-            if (!layout || !boardLayout) return;
-
-            // Adjust for scroll offset to get position relative to the board container
-            const adjustedRect: ExpandRect = {
-                top: layout.y - scrollY.current,
-                left: layout.x,
-                width: layout.width,
-                height: layout.height
-            };
-
-            setSelectedRowRect(adjustedRect);
+            if (!boardLayout) return;
             setSelectedId(id);
         },
         [boardLayout, currentGame?.locked, menuOpen]
     );
 
-    // When the board re-layouts (orientation change), refresh the selected row rect
-    // so the collapse animation targets the correct post-rotation row position.
-    useEffect(() => {
-        if (selectedId === null) return;
-        const layout = rowLayouts.current[selectedId];
-        if (!layout) return;
-        setSelectedRowRect({
-            top: layout.y - scrollY.current,
-            left: layout.x,
-            width: layout.width,
-            height: layout.height,
-        });
-    }, [boardLayout, selectedId]);
-
     const handleClose = useCallback(() => {
         setSelectedId(null);
-        setSelectedRowRect(null);
     }, []);
 
     if (!currentGame) return null;
@@ -219,11 +177,7 @@ const RowsBoard: React.FC = () => {
                 contentContainerStyle={[styles.scrollContent, { paddingBottom: fullscreen ? 10 : bottomSheetHeight + 10 }]}
                 alwaysBounceVertical
                 showsVerticalScrollIndicator={false}
-                scrollEnabled={selectedId === null}
-                onScroll={(e) => {
-                    scrollY.current = e.nativeEvent.contentOffset.y;
-                }}
-                scrollEventThrottle={16}>
+                scrollEnabled={selectedId === null}>
                 {playerIds.map((id, index) => (
                     <PlayerRow
                         key={id}
@@ -232,17 +186,15 @@ const RowsBoard: React.FC = () => {
                         roundCurrent={roundCurrent}
                         dimmed={selectedId !== null}
                         disabled={!!(currentGame?.locked || menuOpen)}
-                        onLayout={(rect) => handleRowLayout(id, rect)}
                         onPress={() => handleRowPress(id)}
                     />
                 ))}
             </ScrollView>
 
-            {selectedId !== null && selectedRowRect !== null && boardLayout !== null && (
+            {selectedId !== null && boardLayout !== null && (
                 <DialOverlay
                     playerIds={playerIds}
                     initialIndex={playerIds.indexOf(selectedId)}
-                    rowRect={selectedRowRect}
                     boardWidth={boardLayout.width}
                     boardHeight={boardLayout.height - (fullscreen ? 0 : bottomSheetHeight)}
                     safeAreaTop={insets.top}
