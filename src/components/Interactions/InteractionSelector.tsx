@@ -48,7 +48,7 @@ const InteractionSelector: React.FunctionComponent = () => {
                         }}
                         text="Tap"
                         icon={<TapGestureIcon color={interactionType === InteractionType.HalfTap ? theme.text : theme.textTertiary} size={40} />}
-                        color={interactionType == InteractionType.HalfTap ? theme.text : theme.textTertiary}
+                        color={interactionType === InteractionType.HalfTap ? theme.text : theme.textTertiary}
                     />
                 </View>
                 <View>
@@ -63,7 +63,7 @@ const InteractionSelector: React.FunctionComponent = () => {
                         }}
                         text="Swipe"
                         icon={<SwipeGestureIcon color={interactionType === InteractionType.SwipeVertical ? theme.text : theme.textTertiary} size={40} />}
-                        color={interactionType == InteractionType.SwipeVertical ? theme.text : theme.textTertiary}
+                        color={interactionType === InteractionType.SwipeVertical ? theme.text : theme.textTertiary}
                     />
                 </View>
                 <View>
@@ -78,7 +78,7 @@ const InteractionSelector: React.FunctionComponent = () => {
                         }}
                         text="Dial"
                         icon={<RadialGestureIcon color={interactionType === InteractionType.RadialGesture ? theme.text : theme.textTertiary} size={40} />}
-                        color={interactionType == InteractionType.RadialGesture ? theme.text : theme.textTertiary}
+                        color={interactionType === InteractionType.RadialGesture ? theme.text : theme.textTertiary}
                     />
                 </View>
             </View>
