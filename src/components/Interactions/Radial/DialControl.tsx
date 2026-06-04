@@ -113,6 +113,7 @@ const DialControl: React.FC<Props> = ({
     useEffect(() => { svInc.value = isSecondary ? addendTwo : addendOne; }, [isSecondary, addendOne, addendTwo]);
 
     const lpTimer = useRef<ReturnType<typeof setTimeout>>();
+    useEffect(() => () => clearTimeout(lpTimer.current), []);
 
     // Pill pulse animation
     const pillScale = useSharedValue(1);
@@ -167,7 +168,6 @@ const DialControl: React.FC<Props> = ({
             if (!svHasMoved.value) {
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
                 onToggleMode(true);
-                svStartValue.value = value;
                 svAccDeg.value = 0;
                 // Snap ring back on activation
                 holdProgress.value = withTiming(0, { duration: 120, easing: Easing.out(Easing.cubic) });
