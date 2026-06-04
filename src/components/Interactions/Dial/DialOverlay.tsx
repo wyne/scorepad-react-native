@@ -280,7 +280,7 @@ const PlayerDialPage: React.FC<PlayerDialPageProps> = ({
     );
 };
 
-// ─── InlineExpandOverlay ──────────────────────────────────────────────────────
+// ─── DialOverlay ────────────────────────────────────────────────────────────
 
 interface Props {
     playerIds: string[];
@@ -292,7 +292,7 @@ interface Props {
     onClose: () => void;
 }
 
-const InlineExpandOverlay: React.FC<Props> = ({
+const DialOverlay: React.FC<Props> = ({
     playerIds,
     initialIndex,
     rowRect,
@@ -570,4 +570,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default InlineExpandOverlay;
+export default DialOverlay;

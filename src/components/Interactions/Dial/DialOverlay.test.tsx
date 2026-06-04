@@ -64,7 +64,7 @@ jest.mock('../../MenuOpenContext', () => ({
     useMenuOpen: () => ({ menuOpen: mockMenuOpen, setMenuOpen: jest.fn() }),
 }));
 
-import InlineExpandOverlay from './InlineExpandOverlay';
+import DialOverlay from './DialOverlay';
 
 // ─── shared fixtures ──────────────────────────────────────────────────────────
 
@@ -106,13 +106,13 @@ const defaultProps = {
 
 const wrap = (store: ReturnType<typeof createStore>, onClose = jest.fn()) => (
     <Provider store={store}>
-        <InlineExpandOverlay {...defaultProps} onClose={onClose} />
+        <DialOverlay {...defaultProps} onClose={onClose} />
     </Provider>
 );
 
 // ─── tests ────────────────────────────────────────────────────────────────────
 
-describe('InlineExpandOverlay', () => {
+describe('DialOverlay', () => {
     beforeEach(() => {
         jest.clearAllMocks();
         mockMenuOpen = false;

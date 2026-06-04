@@ -7,10 +7,10 @@ interface Props {
     playerId: string;
 }
 
-// Stub — RowsBoard renders when RadialGesture is active, so this component
+// Stub — RowsBoard renders when Dial is active, so this component
 // is never actually mounted. It exists only for the InteractionComponents map.
-const RadialGesture: React.FC<Props> = ({ children }) => {
+const Dial: React.FC<Props> = ({ children }) => {
     return <>{children}</>;
 };
 
-export default RadialGesture;
+export default Dial;

@@ -176,7 +176,7 @@ describe('GameScreen', () => {
         const store = createMockStore({
             settings: {
                 currentGameId: 'game-1',
-                interactionType: 'radial-gesture',
+                interactionType: 'dial',
             },
             games: {
                 entities: { 'game-1': mockGame },

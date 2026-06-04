@@ -27,7 +27,7 @@ const InteractionSelector: React.FunctionComponent = () => {
                 return 'Tap the top or bottom of each player\'s tile.';
             case InteractionType.SwipeVertical:
                 return 'Swipe up or down on the player\'s tile.';
-            case InteractionType.RadialGesture:
+            case InteractionType.Dial:
                 return 'Tap a player row to open the radial dial and set their score.';
         }
     })();
@@ -70,15 +70,15 @@ const InteractionSelector: React.FunctionComponent = () => {
                     <BigButton
                         animated={false}
                         onPress={() => {
-                            dispatch(setInteractionType(InteractionType.RadialGesture));
+                            dispatch(setInteractionType(InteractionType.Dial));
                             logEvent('interaction_type', {
                                 interactionType: 'radial_gesture',
                                 gameId,
                             });
                         }}
                         text="Dial"
-                        icon={<RadialGestureIcon color={interactionType === InteractionType.RadialGesture ? theme.text : theme.textTertiary} size={40} />}
-                        color={interactionType === InteractionType.RadialGesture ? theme.text : theme.textTertiary}
+                        icon={<RadialGestureIcon color={interactionType === InteractionType.Dial ? theme.text : theme.textTertiary} size={40} />}
+                        color={interactionType === InteractionType.Dial ? theme.text : theme.textTertiary}
                     />
                 </View>
             </View>

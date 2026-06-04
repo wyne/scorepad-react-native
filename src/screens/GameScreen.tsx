@@ -38,7 +38,7 @@ const ScoreBoardScreen: React.FunctionComponent = () => {
     return (
         <View style={{ flex: 1, paddingTop: headerHeight }} testID="game-screen">
             <View style={{ flex: 1 }}>
-                {interactionType === InteractionType.RadialGesture
+                {interactionType === InteractionType.Dial
                     ? <Animated.View key="rows" entering={FadeIn.duration(220)} exiting={FadeOut.duration(180)} style={StyleSheet.absoluteFill}>
                         <RowsBoard />
                     </Animated.View>

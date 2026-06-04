@@ -10,8 +10,8 @@ import settingsReducer from '../../../redux/SettingsSlice';
 
 jest.mock('../Sheets/GameSheet', () => ({ bottomSheetHeight: 80 }));
 
-jest.mock('../Interactions/Radial/InlineExpandOverlay', () => {
-    return function MockInlineExpandOverlay() {
+jest.mock('../Interactions/Dial/DialOverlay', () => {
+    return function MockDialOverlay() {
         const { View } = jest.requireActual('react-native');
         return <View testID="inline-expand-overlay" />;
     };

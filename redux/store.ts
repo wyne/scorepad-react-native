@@ -17,11 +17,17 @@ const settingsMigrations: any = {
     1: (state: Record<string, unknown> | undefined) => {
         return { ...state, colorScheme: 'system' };
     },
+    2: (state: Record<string, unknown> | undefined) => {
+        const validTypes = ['half-tap', 'swipe-vertical', 'dial'];
+        const stored = state?.interactionType as string | undefined;
+        const interactionType = stored && validTypes.includes(stored) ? stored : 'swipe-vertical';
+        return { ...state, interactionType };
+    },
 };
 
 const settingsPersistConfig = {
     key: 'settings',
-    version: 2,
+    version: 3,
     storage: AsyncStorage,
     migrate: createMigrate(settingsMigrations),
     whitelist: [

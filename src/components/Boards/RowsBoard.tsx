@@ -14,7 +14,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAppSelector } from '../../../redux/hooks';
 import { selectPlayerById } from '../../../redux/PlayersSlice';
 import { selectCurrentGame } from '../../../redux/selectors';
-import InlineExpandOverlay from '../Interactions/Radial/InlineExpandOverlay';
+import DialOverlay from '../Interactions/Dial/DialOverlay';
 import { useMenuOpen } from '../MenuOpenContext';
 import { bottomSheetHeight } from '../Sheets/GameSheet';
 
@@ -239,7 +239,7 @@ const RowsBoard: React.FC = () => {
             </ScrollView>
 
             {selectedId !== null && selectedRowRect !== null && boardLayout !== null && (
-                <InlineExpandOverlay
+                <DialOverlay
                     playerIds={playerIds}
                     initialIndex={playerIds.indexOf(selectedId)}
                     rowRect={selectedRowRect}

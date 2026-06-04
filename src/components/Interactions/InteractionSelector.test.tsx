@@ -235,7 +235,7 @@ describe('InteractionSelector', () => {
             ...mockInitialState,
             settings: {
                 ...mockInitialState.settings,
-                interactionType: InteractionType.RadialGesture,
+                interactionType: InteractionType.Dial,
             },
         });
 
@@ -253,7 +253,7 @@ describe('InteractionSelector', () => {
             ...mockInitialState,
             settings: {
                 ...mockInitialState.settings,
-                interactionType: InteractionType.RadialGesture,
+                interactionType: InteractionType.Dial,
             },
         });
 
@@ -287,7 +287,7 @@ describe('InteractionSelector', () => {
 
         fireEvent.press(getByTestId('big-button-dial'));
 
-        expect(store.getState().settings.interactionType).toBe(InteractionType.RadialGesture);
+        expect(store.getState().settings.interactionType).toBe(InteractionType.Dial);
         expect(mockLogEvent).toHaveBeenCalledWith('interaction_type', {
             interactionType: 'radial_gesture',
             gameId: 'game-1',

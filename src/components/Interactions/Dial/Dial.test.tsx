@@ -3,23 +3,23 @@ import React from 'react';
 import { render } from '@testing-library/react-native';
 import { Text } from 'react-native';
 
-import RadialGesture from './RadialGesture';
+import Dial from './Dial';
 
-describe('RadialGesture', () => {
+describe('Dial', () => {
     it('renders children', () => {
         const { getByText } = render(
-            <RadialGesture fontColor="white" index={0} playerId="player-1">
+            <Dial fontColor="white" index={0} playerId="player-1">
                 <Text>child content</Text>
-            </RadialGesture>
+            </Dial>
         );
         expect(getByText('child content')).toBeTruthy();
     });
 
     it('renders without crashing when children is an empty fragment', () => {
         const { toJSON } = render(
-            <RadialGesture fontColor="#abc" index={2} playerId="player-2">
+            <Dial fontColor="#abc" index={2} playerId="player-2">
                 <></>
-            </RadialGesture>
+            </Dial>
         );
         expect(toJSON()).toBeNull();
     });
