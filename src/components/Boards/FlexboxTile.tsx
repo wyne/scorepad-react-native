@@ -5,8 +5,9 @@ import Animated, { Easing, FadeIn } from 'react-native-reanimated';
 
 import { makeSelectPlayerColors } from '../../../redux/GamesSlice';
 import { useAppSelector } from '../../../redux/hooks';
-import { selectCurrentGame, selectGameHasScores, selectInteractionType } from '../../../redux/selectors';
+import { selectCurrentGame, selectInteractionType } from '../../../redux/selectors';
 import { useTheme } from '../../theme';
+import { useGestureHint } from '../../hooks/useGestureHint';
 import { interactionComponents } from '../Interactions/InteractionComponents';
 import { InteractionType } from '../Interactions/InteractionType';
 import AdditionTile from '../PlayerTiles/AdditionTile/AdditionTile';
@@ -49,7 +50,7 @@ const FlexboxTile: React.FunctionComponent<Props> = React.memo(({
     // Dynamic InteractionComponent
     const interactionType: InteractionType = useAppSelector(selectInteractionType);
     const InteractionComponent = interactionComponents[interactionType];
-    const hasScores = useAppSelector(selectGameHasScores);
+    const showHint = useGestureHint();
 
     return (
         <Animated.View
@@ -65,7 +66,7 @@ const FlexboxTile: React.FunctionComponent<Props> = React.memo(({
                 }]}>
             <PlayerIndexLabel index={index} fontColor={fg} enabled={playerIndexLabel} />
             <PlayerWinnerLabel fontColor={fg} enabled={isWinner} />
-            <InteractionComponent index={index} fontColor={fg} playerId={playerId} showHint={!hasScores}>
+            <InteractionComponent index={index} fontColor={fg} playerId={playerId} showHint={showHint}>
                 <AdditionTile
                     playerId={playerId}
                     fontColor={fg}

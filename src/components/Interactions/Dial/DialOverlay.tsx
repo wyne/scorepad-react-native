@@ -15,7 +15,7 @@ import Animated, {
 
 import { useAppDispatch, useAppSelector } from '../../../../redux/hooks';
 import { playerRoundScoreSet, selectPlayerById, selectPlayerRoundStats } from '../../../../redux/PlayersSlice';
-import { selectCurrentGame, selectGameHasScores } from '../../../../redux/selectors';
+import { selectCurrentGame } from '../../../../redux/selectors';
 import { useMenuOpen } from '../../MenuOpenContext';
 
 import DialControl from './DialControl';
@@ -277,6 +277,7 @@ interface Props {
     boardWidth: number;
     boardHeight: number;
     safeAreaTop: number;
+    showHint: boolean;
     onClose: () => void;
 }
 
@@ -286,13 +287,13 @@ const DialOverlay: React.FC<Props> = ({
     boardWidth,
     boardHeight,
     safeAreaTop,
+    showHint,
     onClose,
 }) => {
     const currentGame = useAppSelector(selectCurrentGame);
     const { menuOpen } = useMenuOpen();
     const addendOne = useAppSelector(state => state.settings.addendOne);
     const addendTwo = useAppSelector(state => state.settings.addendTwo);
-    const hasScores = useAppSelector(selectGameHasScores);
 
     const [activeIndex, setActiveIndex] = useState(initialIndex);
     const activeIndexRef = useRef(initialIndex);
@@ -421,7 +422,7 @@ const DialOverlay: React.FC<Props> = ({
                                 swipeDragX={swipeDragX}
                                 onDone={handleDone}
                                 onDismiss={handleDismiss}
-                                showHint={!hasScores}
+                                showHint={showHint}
                             />
                         </View>
                     )}
