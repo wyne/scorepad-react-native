@@ -101,6 +101,7 @@ const defaultProps = {
     boardWidth: 400,
     boardHeight: 700,
     safeAreaTop: 0,
+    showHint: false,
     onClose: jest.fn(),
 };
 

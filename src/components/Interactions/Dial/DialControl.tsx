@@ -54,6 +54,7 @@ interface Props {
     dialSize: number;
     landscape?: boolean;
     menuOpen?: boolean;
+    showHint?: boolean;
 }
 
 const DialControl: React.FC<Props> = ({
@@ -68,6 +69,7 @@ const DialControl: React.FC<Props> = ({
     dialSize: D,
     landscape = false,
     menuOpen = false,
+    showHint = false,
 }) => {
     const C = D / 2;
     const R = D * 0.36;    // ring centre radius
@@ -85,6 +87,34 @@ const DialControl: React.FC<Props> = ({
     const numScale = useSharedValue(1);
     const numScaleStyle = useAnimatedStyle(() => ({
         transform: [{ scale: numScale.value }],
+    }));
+
+    const arrowBob = useSharedValue(0);
+    const arrowOpacity = useSharedValue(0.4);
+
+    useEffect(() => {
+        if (!showHint) return;
+        arrowBob.value = withRepeat(
+            withSequence(
+                withTiming(-7, { duration: 750, easing: Easing.inOut(Easing.quad) }),
+                withTiming(0, { duration: 750, easing: Easing.inOut(Easing.quad) }),
+            ), -1, false,
+        );
+        arrowOpacity.value = withRepeat(
+            withSequence(
+                withTiming(0.9, { duration: 750, easing: Easing.inOut(Easing.quad) }),
+                withTiming(0.4, { duration: 750, easing: Easing.inOut(Easing.quad) }),
+            ), -1, false,
+        );
+    }, [showHint]);
+
+    const leftArrowStyle = useAnimatedStyle(() => ({
+        opacity: arrowOpacity.value,
+        transform: [{ rotate: '-145deg' }, { translateY: arrowBob.value }],
+    }));
+    const rightArrowStyle = useAnimatedStyle(() => ({
+        opacity: arrowOpacity.value,
+        transform: [{ rotate: '145deg' }, { translateY: arrowBob.value }],
     }));
 
     const popNumber = useCallback(() => {
@@ -402,6 +432,22 @@ const DialControl: React.FC<Props> = ({
                             </Text>
                         </View>
                     </View>
+
+                    {/* Rotation hint arrows — top-left (CCW) and top-right (CW) */}
+                    {showHint && (
+                        <View style={StyleSheet.absoluteFill} pointerEvents="none">
+                            <Animated.View style={[styles.rotHint, {
+                                top: D * 0.18, left: D * 0.06,
+                            }, leftArrowStyle]}>
+                                <Text style={{ color: ink, fontSize: D * 0.1 }}>▲</Text>
+                            </Animated.View>
+                            <Animated.View style={[styles.rotHint, {
+                                top: D * 0.18, right: D * 0.06,
+                            }, rightArrowStyle]}>
+                                <Text style={{ color: ink, fontSize: D * 0.1 }}>▲</Text>
+                            </Animated.View>
+                        </View>
+                    )}
                 </View>
             </GestureDetector>
 
@@ -523,6 +569,9 @@ const styles = StyleSheet.create({
         fontWeight: '800',
         letterSpacing: 1.5,
         marginTop: 4,
+    },
+    rotHint: {
+        position: 'absolute',
     },
 });
 

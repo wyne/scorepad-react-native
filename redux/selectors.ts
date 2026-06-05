@@ -1,7 +1,7 @@
 import { InteractionType } from '../src/components/Interactions/InteractionType';
 
 import { selectGameById } from './GamesSlice';
-import { RootState } from './store'; // Import your RootState type
+import { RootState } from './store';
 
 export const selectInteractionType = (state: RootState) => {
     const interactionType: InteractionType = state.settings.interactionType;

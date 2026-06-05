@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import * as Haptics from 'expo-haptics';
-import { Animated, StyleSheet, View } from 'react-native';
+import { Animated, StyleSheet, Text, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import ReAnimated, { runOnJS, useAnimatedReaction, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 
@@ -16,6 +16,7 @@ interface HalfTapProps {
     fontColor: string;
     index: number;
     playerId: string;
+    showHint?: boolean;
 }
 
 const notchSize = 50;
@@ -24,6 +25,8 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
     children,
     index,
     playerId,
+    fontColor,
+    showHint,
 }) => {
     //#region Selector setup
 
@@ -225,6 +228,13 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
                 {children}
             </Animated.View>
 
+            {showHint && (
+                <View style={StyleSheet.absoluteFillObject} pointerEvents="none">
+                    <Text style={[styles.swipeHintTop, { color: fontColor }]}>▲</Text>
+                    <Text style={[styles.swipeHintBottom, { color: fontColor }]}>▼</Text>
+                </View>
+            )}
+
             <GestureDetector gesture={panGesture}>
                 <ReAnimated.View
                     testID={`swipe-overlay-${index}`}
@@ -257,5 +267,19 @@ const styles = StyleSheet.create({
     sliderBottom: {
         top: '100%',
         backgroundColor: 'rgba(0,0,0,0.15)',
+    },
+    swipeHintTop: {
+        position: 'absolute',
+        top: 6,
+        alignSelf: 'center',
+        fontSize: 16,
+        opacity: 0.2,
+    },
+    swipeHintBottom: {
+        position: 'absolute',
+        bottom: 6,
+        alignSelf: 'center',
+        fontSize: 16,
+        opacity: 0.2,
     },
 });

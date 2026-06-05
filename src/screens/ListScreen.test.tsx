@@ -17,10 +17,6 @@ jest.mock('@react-navigation/elements', () => ({
     useHeaderHeight: () => 0,
 }));
 
-jest.mock('expo-application', () => ({
-    nativeApplicationVersion: '1.0.0',
-}));
-
 jest.mock('expo-blur', () => ({
     BlurView: ({ children, style }: { children: React.ReactNode; style: object }) => {
         const { View } = jest.requireActual('react-native');
@@ -35,7 +31,7 @@ jest.mock('expo-crypto', () => ({
 jest.mock('react-native-reanimated', () => {
     const View = jest.requireActual('react-native').View;
     const FlatList = jest.requireActual('react-native').FlatList;
-    
+
     return {
         __esModule: true,
         default: {
@@ -65,10 +61,6 @@ jest.mock('../Analytics', () => ({
 
 jest.mock('../Logger', () => ({
     info: jest.fn(),
-}));
-
-jest.mock('../components/Onboarding/Onboarding', () => ({
-    getPendingOnboardingSemVer: jest.fn(),
 }));
 
 jest.mock('../components/GameListItem', () => {
@@ -139,9 +131,6 @@ describe('ListScreen', () => {
 
     beforeEach(() => {
         jest.clearAllMocks();
-        // eslint-disable-next-line @typescript-eslint/no-require-imports
-        const { getPendingOnboardingSemVer } = require('../components/Onboarding/Onboarding');
-        getPendingOnboardingSemVer.mockReturnValue(undefined); // Default to onboarded
     });
 
     it('should render safely with no games', () => {
@@ -150,17 +139,10 @@ describe('ListScreen', () => {
                 appOpens: 1,
                 devMenuEnabled: false,
                 installId: 'existing-id',
-                onboarded: '1.0.0',
                 rollingGameCounter: 0,
             },
-            games: {
-                entities: {},
-                ids: [],
-            },
-            players: {
-                entities: {},
-                ids: [],
-            },
+            games: { entities: {}, ids: [] },
+            players: { entities: {}, ids: [] },
         });
 
         const { getByTestId, getByText } = render(
@@ -180,14 +162,10 @@ describe('ListScreen', () => {
                 appOpens: 1,
                 devMenuEnabled: false,
                 installId: 'existing-id',
-                onboarded: '1.0.0',
                 rollingGameCounter: 2,
             },
             games: {
-                entities: {
-                    'game-1': mockGame1,
-                    'game-2': mockGame2,
-                },
+                entities: { 'game-1': mockGame1, 'game-2': mockGame2 },
                 ids: ['game-1', 'game-2'],
             },
             players: {
@@ -213,17 +191,10 @@ describe('ListScreen', () => {
                 appOpens: 1,
                 devMenuEnabled: false,
                 installId: undefined,
-                onboarded: '1.0.0',
                 rollingGameCounter: 0,
             },
-            games: {
-                entities: {},
-                ids: [],
-            },
-            players: {
-                entities: {},
-                ids: [],
-            },
+            games: { entities: {}, ids: [] },
+            players: { entities: {}, ids: [] },
         });
 
         render(
@@ -244,17 +215,10 @@ describe('ListScreen', () => {
                 appOpens: 5,
                 devMenuEnabled: false,
                 installId: 'existing-id',
-                onboarded: '1.0.0',
                 rollingGameCounter: 0,
             },
-            games: {
-                entities: {},
-                ids: [],
-            },
-            players: {
-                entities: {},
-                ids: [],
-            },
+            games: { entities: {}, ids: [] },
+            players: { entities: {}, ids: [] },
         });
 
         render(
@@ -275,17 +239,10 @@ describe('ListScreen', () => {
                 appOpens: 3,
                 devMenuEnabled: true,
                 installId: 'test-install-id',
-                onboarded: '1.0.0',
                 rollingGameCounter: 1,
             },
-            games: {
-                entities: { 'game-1': mockGame1 },
-                ids: ['game-1'],
-            },
-            players: {
-                entities: mockPlayers,
-                ids: ['player-1', 'player-2'],
-            },
+            games: { entities: { 'game-1': mockGame1 }, ids: ['game-1'] },
+            players: { entities: mockPlayers, ids: ['player-1', 'player-2'] },
         });
 
         // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -298,52 +255,11 @@ describe('ListScreen', () => {
         );
 
         expect(logEvent).toHaveBeenCalledWith('game_list', {
-            onboarded: true,
             gameCount: 1,
             appOpens: 3,
-            appVersion: '1.0.0',
             devMenuEnabled: true,
-            onboardedVersion: '1.0.0',
-            pendingOnboardingVersion: undefined,
             installId: 'test-install-id',
             rollingGameCounter: 1,
-        });
-    });
-
-    it('should navigate to onboarding when not onboarded', async () => {
-        // eslint-disable-next-line @typescript-eslint/no-require-imports
-        const { getPendingOnboardingSemVer } = require('../components/Onboarding/Onboarding');
-        getPendingOnboardingSemVer.mockReturnValue('1.1.0');
-
-        const store = createMockStore({
-            settings: {
-                appOpens: 1,
-                devMenuEnabled: false,
-                installId: 'existing-id',
-                onboarded: '1.0.0',
-                rollingGameCounter: 0,
-            },
-            games: {
-                entities: {},
-                ids: [],
-            },
-            players: {
-                entities: {},
-                ids: [],
-            },
-        });
-
-        render(
-            <Provider store={store}>
-                <ListScreen navigation={mockNavigation} />
-            </Provider>
-        );
-
-        await waitFor(() => {
-            expect(mockNavigation.navigate).toHaveBeenCalledWith('Onboarding', {
-                onboarding: true,
-                version: expect.objectContaining({ version: '1.0.0' }),
-            });
         });
     });
 
@@ -353,14 +269,10 @@ describe('ListScreen', () => {
                 appOpens: 1,
                 devMenuEnabled: false,
                 installId: 'existing-id',
-                onboarded: '1.0.0',
-                rollingGameCounter: 0, // Less than games length (2)
+                rollingGameCounter: 0,
             },
             games: {
-                entities: {
-                    'game-1': mockGame1,
-                    'game-2': mockGame2,
-                },
+                entities: { 'game-1': mockGame1, 'game-2': mockGame2 },
                 ids: ['game-1', 'game-2'],
             },
             players: {
@@ -375,8 +287,6 @@ describe('ListScreen', () => {
             </Provider>
         );
 
-        // Note: setRollingGameCounter should be called but the mock store won't reflect this
-        // since it's called as a function, not dispatched as an action
         expect(getByTestId('safe-area-view')).toBeTruthy();
     });
 
@@ -386,45 +296,10 @@ describe('ListScreen', () => {
                 appOpens: 1,
                 devMenuEnabled: false,
                 installId: 'existing-id',
-                onboarded: '1.0.0',
                 rollingGameCounter: undefined,
             },
-            games: {
-                entities: { 'game-1': mockGame1 },
-                ids: ['game-1'],
-            },
-            players: {
-                entities: mockPlayers,
-                ids: ['player-1', 'player-2'],
-            },
-        });
-
-        const { getByTestId } = render(
-            <Provider store={store}>
-                <ListScreen navigation={mockNavigation} />
-            </Provider>
-        );
-
-        expect(getByTestId('safe-area-view')).toBeTruthy();
-    });
-
-    it('should handle null onboarded version', () => {
-        const store = createMockStore({
-            settings: {
-                appOpens: 1,
-                devMenuEnabled: false,
-                installId: 'existing-id',
-                onboarded: '', // Empty string, will parse to null
-                rollingGameCounter: 0,
-            },
-            games: {
-                entities: {},
-                ids: [],
-            },
-            players: {
-                entities: {},
-                ids: [],
-            },
+            games: { entities: { 'game-1': mockGame1 }, ids: ['game-1'] },
+            players: { entities: mockPlayers, ids: ['player-1', 'player-2'] },
         });
 
         const { getByTestId } = render(
@@ -442,17 +317,10 @@ describe('ListScreen', () => {
                 appOpens: 1,
                 devMenuEnabled: false,
                 installId: 'existing-id',
-                onboarded: '1.0.0',
                 rollingGameCounter: 1,
             },
-            games: {
-                entities: { 'game-1': mockGame1 },
-                ids: ['game-1'],
-            },
-            players: {
-                entities: mockPlayers,
-                ids: ['player-1', 'player-2'],
-            },
+            games: { entities: { 'game-1': mockGame1 }, ids: ['game-1'] },
+            players: { entities: mockPlayers, ids: ['player-1', 'player-2'] },
         });
 
         const { getByText } = render(
@@ -473,17 +341,10 @@ describe('ListScreen', () => {
                 appOpens: 1,
                 devMenuEnabled: true,
                 installId: 'existing-id',
-                onboarded: '1.0.0',
                 rollingGameCounter: 0,
             },
-            games: {
-                entities: {},
-                ids: [],
-            },
-            players: {
-                entities: {},
-                ids: [],
-            },
+            games: { entities: {}, ids: [] },
+            players: { entities: {}, ids: [] },
         });
 
         // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -499,5 +360,4 @@ describe('ListScreen', () => {
             devMenuEnabled: true,
         }));
     });
-
 });

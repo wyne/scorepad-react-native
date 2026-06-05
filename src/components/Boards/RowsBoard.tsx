@@ -8,6 +8,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAppSelector } from '../../../redux/hooks';
 import { selectPlayerById, selectPlayerRoundStats } from '../../../redux/PlayersSlice';
 import { selectCurrentGame } from '../../../redux/selectors';
+import { useGestureHint } from '../../hooks/useGestureHint';
 import DialOverlay from '../Interactions/Dial/DialOverlay';
 import { useMenuOpen } from '../MenuOpenContext';
 import { bottomSheetHeight } from '../Sheets/GameSheet';
@@ -148,6 +149,7 @@ const RowsBoard: React.FC = () => {
     const currentGame = useAppSelector(selectCurrentGame);
     const fullscreen = useAppSelector(state => state.settings.home_fullscreen);
     const { menuOpen } = useMenuOpen();
+    const showHint = useGestureHint();
     const insets = useSafeAreaInsets();
     const [selectedId, setSelectedId] = useState<string | null>(null);
     const [boardLayout, setBoardLayout] = useState<LayoutRectangle | null>(null);
@@ -202,6 +204,7 @@ const RowsBoard: React.FC = () => {
                     boardWidth={boardLayout.width}
                     boardHeight={boardLayout.height - (fullscreen ? 0 : bottomSheetHeight)}
                     safeAreaTop={insets.top}
+                    showHint={showHint}
                     onClose={handleClose}
                 />
             )}

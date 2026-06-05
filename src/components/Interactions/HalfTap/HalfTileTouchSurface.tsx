@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
 import * as Haptics from 'expo-haptics';
-import { StyleSheet, TouchableHighlight, View } from 'react-native';
+import { StyleSheet, Text, TouchableHighlight, View } from 'react-native';
 
 import { useAppDispatch, useAppSelector } from '../../../../redux/hooks';
 import { playerRoundScoreIncrement } from '../../../../redux/PlayersSlice';
@@ -20,10 +20,11 @@ type Props = {
     playerId: string;
     fontColor: string;
     scoreType: 'increment' | 'decrement';
+    showHint?: boolean;
 };
 
 export const HalfTileTouchSurface: React.FunctionComponent<Props> = (
-    { playerIndex, fontColor, playerId, scoreType }: Props) => {
+    { playerIndex, fontColor, playerId, scoreType, showHint }: Props) => {
 
     const { menuOpen } = useMenuOpen();
     const showPointParticles = useAppSelector(state => state.settings.showPointParticles);
@@ -77,7 +78,14 @@ export const HalfTileTouchSurface: React.FunctionComponent<Props> = (
             activeOpacity={menuOpen ? 1 : 1}
             onPress={() => scoreChangeHandler(addendOne)}
             onLongPress={() => scoreChangeHandler(addendTwo, true)}>
-            <View style={[StyleSheet.absoluteFill]}>
+            <View style={[StyleSheet.absoluteFill,
+                scoreType === 'increment' ? styles.hintContainerTop : styles.hintContainerBottom
+            ]}>
+                {showHint && (
+                    <Text style={[styles.hintLabel, { color: fontColor }]}>
+                        {scoreType === 'increment' ? '+' : '−'}
+                    </Text>
+                )}
                 {particles.map((particle) => (
                     <ScoreParticle key={particle.key} id={particle.key} value={particle.value} />
                 ))}
@@ -87,16 +95,9 @@ export const HalfTileTouchSurface: React.FunctionComponent<Props> = (
 };
 
 const styles = StyleSheet.create({
-    playerCard: {
-        flexGrow: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        overflow: 'hidden',
-    },
     surface: {
         position: 'absolute',
         width: '100%',
-        borderColor: 'red',
     },
     surfaceAdd: {
         top: 0,
@@ -105,5 +106,20 @@ const styles = StyleSheet.create({
     surfaceSubtract: {
         top: '50%',
         bottom: 0,
+    },
+    hintContainerTop: {
+        alignItems: 'center',
+        justifyContent: 'flex-start',
+        paddingTop: 8,
+    },
+    hintContainerBottom: {
+        alignItems: 'center',
+        justifyContent: 'flex-end',
+        paddingBottom: 8,
+    },
+    hintLabel: {
+        fontSize: 42,
+        fontWeight: '200',
+        opacity: 0.2,
     },
 });

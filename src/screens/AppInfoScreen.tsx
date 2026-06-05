@@ -7,7 +7,7 @@ import { Alert, Linking, Platform, ScrollView, StyleSheet, Switch, Text, Touchab
 
 import { exportBackup, importBackup } from '../../redux/backup';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
-import { markFeatureNotificationSeen, resetOnboarding, resetSeenFeatureNotifications, setColorScheme, setKeepScreenAwake, toggleShowPlayerIndex, toggleShowPointParticles } from '../../redux/SettingsSlice';
+import { markFeatureNotificationSeen, resetSeenFeatureNotifications, setColorScheme, setKeepScreenAwake, toggleShowPlayerIndex, toggleShowPointParticles } from '../../redux/SettingsSlice';
 import { logEvent } from '../Analytics';
 import RotatingIcon from '../components/AppInfo/RotatingIcon';
 import { loadSeedData } from '../components/AppInfo/SeedData';
@@ -224,22 +224,6 @@ const AppInfoScreen: React.FunctionComponent<Props> = ({ navigation }) => {
                         );
                     }} />
                     <SectionSeparator />
-                    <DisclosureRow label="Reset Onboarding" onPress={() => {
-                        Alert.alert(
-                            'Reset Onboarding',
-                            'Your onboarding progress will be reset. Return to the home screen to trigger the onboarding flow.',
-                            [
-                                { text: 'Cancel', style: 'cancel' },
-                                {
-                                    text: 'Reset', style: 'destructive', onPress: () => {
-                                        dispatch(resetOnboarding());
-                                        navigation.goBack();
-                                    }
-                                },
-                            ]
-                        );
-                    }} />
-                    <SectionSeparator />
                     <DisclosureRow label="View Debug Log" onPress={() => {
                         navigation.navigate('DebugLog');
                     }} />
@@ -261,12 +245,6 @@ const AppInfoScreen: React.FunctionComponent<Props> = ({ navigation }) => {
                     }} />
                 </Section>
             )}
-
-            <Section title="Help">
-                <DisclosureRow label="View Tutorial" onPress={() => {
-                    navigation.navigate('Onboarding', { onboarding: false });
-                }} />
-            </Section>
 
             <Section title="Contact">
                 <SectionItem>

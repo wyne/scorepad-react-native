@@ -62,6 +62,7 @@ interface PlayerDialPageProps {
     swipeDragX: SharedValue<number>;
     onDone: () => void;
     onDismiss: () => void;
+    showHint: boolean;
 }
 
 const PlayerDialPage: React.FC<PlayerDialPageProps> = ({
@@ -76,6 +77,7 @@ const PlayerDialPage: React.FC<PlayerDialPageProps> = ({
     swipeDragX,
     onDone,
     onDismiss,
+    showHint,
 }) => {
     const dispatch = useAppDispatch();
     const player = useAppSelector(state => selectPlayerById(state, playerId));
@@ -186,6 +188,7 @@ const PlayerDialPage: React.FC<PlayerDialPageProps> = ({
                             dialSize={lsDialSize}
                             landscape
                             menuOpen={menuOpen}
+                            showHint={showHint}
                         />
                     </View>
 
@@ -247,6 +250,7 @@ const PlayerDialPage: React.FC<PlayerDialPageProps> = ({
                         addendTwo={addendTwo}
                         dialSize={dialSize}
                         menuOpen={menuOpen}
+                        showHint={showHint}
                     />
                 </View>
 
@@ -273,6 +277,7 @@ interface Props {
     boardWidth: number;
     boardHeight: number;
     safeAreaTop: number;
+    showHint: boolean;
     onClose: () => void;
 }
 
@@ -282,6 +287,7 @@ const DialOverlay: React.FC<Props> = ({
     boardWidth,
     boardHeight,
     safeAreaTop,
+    showHint,
     onClose,
 }) => {
     const currentGame = useAppSelector(selectCurrentGame);
@@ -416,6 +422,7 @@ const DialOverlay: React.FC<Props> = ({
                                 swipeDragX={swipeDragX}
                                 onDone={handleDone}
                                 onDismiss={handleDismiss}
+                                showHint={showHint}
                             />
                         </View>
                     )}

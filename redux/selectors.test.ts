@@ -10,7 +10,6 @@ const mockState: Partial<RootState> = {
     addendOne: 1,
     addendTwo: 10,
     currentGameId: 'game-1',
-    onboarded: undefined,
     showPointParticles: true,
     showPlayerIndex: true,
     interactionType: InteractionType.SwipeVertical,

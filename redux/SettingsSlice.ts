@@ -1,9 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import * as Application from 'expo-application';
-import { SemVer, valid } from 'semver';
 
 import { InteractionType } from '../src/components/Interactions/InteractionType';
-import logger from '../src/Logger';
 
 export interface SettingsState {
     home_fullscreen: boolean;
@@ -11,7 +8,6 @@ export interface SettingsState {
     addendOne: number;
     addendTwo: number;
     currentGameId: string | undefined;
-    onboarded: string | undefined;
     showPointParticles: boolean;
     showPlayerIndex: boolean;
     interactionType: InteractionType;
@@ -31,7 +27,6 @@ export const initialState: SettingsState = {
     addendOne: 1,
     addendTwo: 10,
     currentGameId: undefined,
-    onboarded: undefined,
     showPointParticles: false,
     showPlayerIndex: false,
     interactionType: InteractionType.SwipeVertical,
@@ -73,11 +68,6 @@ const settingsSlice = createSlice({
         setInteractionType(state, action: PayloadAction<InteractionType>) {
             state.interactionType = action.payload;
         },
-        setOnboardedVersion(state) {
-            const appVersion = new SemVer(Application.nativeApplicationVersion || '0.0.0');
-            logger.info(`Setting Onboarded Version: ${appVersion}`);
-            state.onboarded = valid(appVersion) || '0.0.0';
-        },
         setLastStoreReviewPrompt(state, action: PayloadAction<number>) {
             state.lastStoreReviewPrompt = action.payload;
         },
@@ -107,9 +97,6 @@ const settingsSlice = createSlice({
         resetSeenFeatureNotifications(state) {
             state.seenFeatureNotifications = [];
         },
-        resetOnboarding(state) {
-            state.onboarded = undefined;
-        },
         setColorScheme(state, action: PayloadAction<'system' | 'light' | 'dark'>) {
             state.colorScheme = action.payload;
         },
@@ -125,7 +112,6 @@ export const {
     setMultiplier,
     setAddendOne,
     setAddendTwo,
-    setOnboardedVersion,
     toggleShowPointParticles,
     toggleShowPlayerIndex,
     setInteractionType,
@@ -138,7 +124,6 @@ export const {
     setKeepScreenAwake,
     markFeatureNotificationSeen,
     resetSeenFeatureNotifications,
-    resetOnboarding,
     setColorScheme,
     restoreSettings,
 } = settingsSlice.actions;

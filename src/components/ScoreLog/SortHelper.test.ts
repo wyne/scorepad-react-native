@@ -47,7 +47,6 @@ const createMockState = (
     addendOne: 1,
     addendTwo: 10,
     currentGameId,
-    onboarded: undefined,
     showPointParticles: true,
     showPlayerIndex: true,
     interactionType: InteractionType.SwipeVertical,
