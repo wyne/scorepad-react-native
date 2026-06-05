@@ -1,6 +1,6 @@
 import React from 'react';
 
-import analytics from '@react-native-firebase/analytics';
+import { getAnalytics, setAnalyticsCollectionEnabled } from '@react-native-firebase/analytics';
 import { StatusBar } from 'expo-status-bar';
 import { View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -16,7 +16,7 @@ import { GameSheetContextProvider } from './src/components/Sheets/GameSheetConte
 import { Navigation } from './src/Navigation';
 
 if (process.env.EXPO_PUBLIC_FIREBASE_ANALYTICS == 'false') {
-    analytics().setAnalyticsCollectionEnabled(false);
+    setAnalyticsCollectionEnabled(getAnalytics(), false);
 }
 
 export default function App() {
