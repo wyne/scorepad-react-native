@@ -264,22 +264,6 @@ const AppInfoScreen: React.FunctionComponent<Props> = ({ navigation }) => {
                 <DisclosureRow label="Export Backup" onPress={handleExport} />
                 <SectionSeparator />
                 <DisclosureRow label="Restore from Backup" onPress={handleRestore} />
-                <SectionSeparator />
-                <DisclosureRow label="Load Sample Data" onPress={() => {
-                    Alert.alert(
-                        'Load Sample Data',
-                        'This will replace all existing games and players with sample data featuring Rick and Morty characters.',
-                        [
-                            { text: 'Cancel', style: 'cancel' },
-                            {
-                                text: 'Load', style: 'destructive', onPress: () => {
-                                    loadSeedData(dispatch);
-                                    navigation.goBack();
-                                }
-                            },
-                        ]
-                    );
-                }} />
             </Section>
 
 
