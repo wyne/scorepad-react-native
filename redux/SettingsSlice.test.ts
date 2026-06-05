@@ -4,7 +4,6 @@ import { Store } from 'redux';
 import settingsReducer, {
     setCurrentGameId,
     setMultiplier,
-    setOnboardedVersion,
     SettingsState } from './SettingsSlice';
 
 
@@ -27,8 +26,4 @@ describe('settings reducer', () => {
         expect(store.getState().multiplier).toEqual(multiplier);
     });
 
-    it('should handle setOnboardedVersion', () => {
-        store.dispatch(setOnboardedVersion());
-        expect(store.getState().onboarded).toBeDefined();
-    });
 });

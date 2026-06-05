@@ -3,21 +3,17 @@ import React, { memo, useEffect } from 'react';
 import { useHeaderHeight } from '@react-navigation/elements';
 import { ParamListBase } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import * as Application from 'expo-application';
 import * as Crypto from 'expo-crypto';
 import { StyleSheet, Text } from 'react-native';
 import Animated, { Easing, LinearTransition } from 'react-native-reanimated';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { SemVer, parse } from 'semver';
 
 import { selectGameIds } from '../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
-import { increaseAppOpens, setInstallId, setOnboardedVersion, setRollingGameCounter } from '../../redux/SettingsSlice';
+import { increaseAppOpens, setInstallId, setRollingGameCounter } from '../../redux/SettingsSlice';
 import { logEvent } from '../Analytics';
 import FloatingActionButton from '../components/FloatingActionButton';
 import GameListItem from '../components/GameListItem';
-import { getPendingOnboardingSemVer } from '../components/Onboarding/Onboarding';
-import logger from '../Logger';
 import { useTheme } from '../theme';
 
 interface Props {
@@ -32,11 +28,6 @@ const ListScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     const gameIds = useAppSelector(state => selectGameIds(state));
     const dispatch = useAppDispatch();
 
-    const onboardedStr = useAppSelector(state => state.settings.onboarded);
-    const onboardedSemVer = parse(onboardedStr);
-    const appVersion = new SemVer(Application.nativeApplicationVersion || '0.0.0');
-    const pendingOnboardingVer = getPendingOnboardingSemVer(onboardedSemVer);
-    const onboarded = pendingOnboardingVer === undefined;
     const rollingGameCounter = useAppSelector(state => state.settings.rollingGameCounter);
     const headerHeight = useHeaderHeight();
     const insets = useSafeAreaInsets();
@@ -53,27 +44,15 @@ const ListScreen: React.FunctionComponent<Props> = ({ navigation }) => {
         }
 
         logEvent('game_list', {
-            onboarded,
             gameCount: gameIds.length,
             appOpens,
-            appVersion: appVersion.version,
             devMenuEnabled,
-            onboardedVersion: onboardedSemVer?.version,
-            pendingOnboardingVersion: pendingOnboardingVer,
             installId,
             rollingGameCounter,
         });
 
         dispatch(increaseAppOpens());
     }, []);
-
-    useEffect(() => {
-        if (!onboarded) {
-            logger.info('Show onboarding!');
-            navigation.navigate('Onboarding', { onboarding: true, version: onboardedSemVer });
-            dispatch(setOnboardedVersion());
-        }
-    }, [onboarded, dispatch, navigation]);
 
     return (
         <SafeAreaView edges={['left', 'right']} style={{ backgroundColor: theme.backgroundSecondary, flex: 1 }} testID="home-screen">

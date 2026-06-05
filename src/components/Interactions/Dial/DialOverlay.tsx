@@ -15,7 +15,7 @@ import Animated, {
 
 import { useAppDispatch, useAppSelector } from '../../../../redux/hooks';
 import { playerRoundScoreSet, selectPlayerById, selectPlayerRoundStats } from '../../../../redux/PlayersSlice';
-import { selectCurrentGame } from '../../../../redux/selectors';
+import { selectCurrentGame, selectGameHasScores } from '../../../../redux/selectors';
 import { useMenuOpen } from '../../MenuOpenContext';
 
 import DialControl from './DialControl';
@@ -62,6 +62,7 @@ interface PlayerDialPageProps {
     swipeDragX: SharedValue<number>;
     onDone: () => void;
     onDismiss: () => void;
+    showHint: boolean;
 }
 
 const PlayerDialPage: React.FC<PlayerDialPageProps> = ({
@@ -76,6 +77,7 @@ const PlayerDialPage: React.FC<PlayerDialPageProps> = ({
     swipeDragX,
     onDone,
     onDismiss,
+    showHint,
 }) => {
     const dispatch = useAppDispatch();
     const player = useAppSelector(state => selectPlayerById(state, playerId));
@@ -186,6 +188,7 @@ const PlayerDialPage: React.FC<PlayerDialPageProps> = ({
                             dialSize={lsDialSize}
                             landscape
                             menuOpen={menuOpen}
+                            showHint={showHint}
                         />
                     </View>
 
@@ -247,6 +250,7 @@ const PlayerDialPage: React.FC<PlayerDialPageProps> = ({
                         addendTwo={addendTwo}
                         dialSize={dialSize}
                         menuOpen={menuOpen}
+                        showHint={showHint}
                     />
                 </View>
 
@@ -288,6 +292,7 @@ const DialOverlay: React.FC<Props> = ({
     const { menuOpen } = useMenuOpen();
     const addendOne = useAppSelector(state => state.settings.addendOne);
     const addendTwo = useAppSelector(state => state.settings.addendTwo);
+    const hasScores = useAppSelector(selectGameHasScores);
 
     const [activeIndex, setActiveIndex] = useState(initialIndex);
     const activeIndexRef = useRef(initialIndex);
@@ -416,6 +421,7 @@ const DialOverlay: React.FC<Props> = ({
                                 swipeDragX={swipeDragX}
                                 onDone={handleDone}
                                 onDismiss={handleDismiss}
+                                showHint={!hasScores}
                             />
                         </View>
                     )}

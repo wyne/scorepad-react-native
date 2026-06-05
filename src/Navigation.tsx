@@ -3,8 +3,6 @@ import React, { useState } from 'react';
 import { DarkTheme, DefaultTheme, NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { View } from 'react-native';
-import { SemVer } from 'semver';
-
 import { useAppSelector } from '../redux/hooks';
 import AppInfoButton from '../src/components/Buttons/AppInfoButton';
 import GameOptionsButton from '../src/components/Buttons/GameOptionsButton';
@@ -13,7 +11,6 @@ import AppInfoScreen from '../src/screens/AppInfoScreen';
 import DebugLogScreen from '../src/screens/DebugLogScreen';
 import GameScreen from '../src/screens/GameScreen';
 import ListScreen from '../src/screens/ListScreen';
-import OnboardingScreen from '../src/screens/OnboardingScreen';
 import SettingsScreen from '../src/screens/SettingsScreen';
 
 import { MenuOpenContextProvider } from './components/MenuOpenContext';
@@ -22,11 +19,6 @@ import { GestureInfoModalContextProvider } from './components/Sheets/GestureInfo
 import EditPlayerScreen from './screens/EditPlayerScreen';
 import ShareScreen from './screens/ShareScreen';
 import { useTheme } from './theme';
-
-export type OnboardingScreenParamList = {
-    onboarding: boolean;
-    version: SemVer;
-};
 
 export type RootStackParamList = {
     List: undefined;
@@ -37,8 +29,6 @@ export type RootStackParamList = {
     AppInfo: undefined;
     DebugLog: undefined;
     Share: undefined;
-    Onboarding: OnboardingScreenParamList;
-    Tutorial: OnboardingScreenParamList;
     EditPlayer: {
         index: number | undefined;
         playerId: string | undefined;
@@ -110,14 +100,6 @@ export const Navigation = () => {
                             options={{
                                 orientation: 'portrait',
                                 title: 'Edit Player',
-                            }}
-                        />
-                        <Stack.Screen name="Onboarding" component={OnboardingScreen}
-                            options={{
-                                presentation: 'modal',
-                                orientation: 'portrait',
-                                title: 'Onboarding',
-                                headerShown: false,
                             }}
                         />
                         <Stack.Screen name="AppInfo" component={AppInfoScreen}

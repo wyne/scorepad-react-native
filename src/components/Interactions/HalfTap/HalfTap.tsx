@@ -11,13 +11,15 @@ interface HalfTapProps {
     index: number;
     playerId: string;
     fontColor: string;
+    showHint?: boolean;
 }
 
 const HalfTap: React.FC<HalfTapProps> = ({
     children,
     index,
     fontColor,
-    playerId
+    playerId,
+    showHint,
 }) => {
     const currentGame = useAppSelector(selectCurrentGame);
     if (typeof currentGame == 'undefined') return null;
@@ -33,13 +35,15 @@ const HalfTap: React.FC<HalfTapProps> = ({
                 scoreType='increment'
                 fontColor={fontColor}
                 playerId={playerId}
-                playerIndex={index} />
+                playerIndex={index}
+                showHint={showHint} />
 
             <HalfTileTouchSurface
                 scoreType='decrement'
                 fontColor={fontColor}
                 playerId={playerId}
-                playerIndex={index} />
+                playerIndex={index}
+                showHint={showHint} />
         </>
     );
 };
