@@ -66,7 +66,7 @@ const FlexboxTile: React.FunctionComponent<Props> = React.memo(({
                 }]}>
             <PlayerIndexLabel index={index} fontColor={fg} enabled={playerIndexLabel} />
             <PlayerWinnerLabel fontColor={fg} enabled={isWinner} />
-            <InteractionComponent index={index} fontColor={fg} playerId={playerId} showHint={showHint}>
+            <InteractionComponent index={index} fontColor={fg} playerId={playerId} showHint={showHint} tileHeight={height}>
                 <AdditionTile
                     playerId={playerId}
                     fontColor={fg}
