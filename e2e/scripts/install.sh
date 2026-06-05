@@ -1,6 +1,6 @@
 #!/bin/bash
-# Finds the most recently built dev .app in DerivedData and installs it
-# on all simulators configured for e2e. Run this after `npm run ios:dev`.
+# Finds the most recently built release .app in DerivedData and installs it
+# on all simulators configured for e2e. Run this after `npm run ios`.
 set -e
 
 UDIDS=(
@@ -12,21 +12,30 @@ UDIDS=(
 
 APP=$(find "$HOME/Library/Developer/Xcode/DerivedData" \
   -name "ScorePadwithRounds.app" \
-  -path "*/Debug-iphonesimulator/*" \
+  -path "*/Release-iphonesimulator/*" \
   -print0 2>/dev/null \
   | xargs -0 ls -dt \
   | head -1)
 
 if [ -z "$APP" ]; then
-  echo "Error: no ScorePadwithRounds.app found in DerivedData. Run 'npm run ios:dev' first." >&2
+  echo "Error: no ScorePadwithRounds.app found in DerivedData. Run 'npm run ios' first." >&2
   exit 1
 fi
 
 echo "Installing: $APP"
 
 for UDID in "${UDIDS[@]}"; do
-  echo "  → $UDID"
+  echo "  → booting $UDID"
   xcrun simctl boot "$UDID" 2>/dev/null || true
+done
+
+echo "  → waiting for all simulators to finish booting..."
+for UDID in "${UDIDS[@]}"; do
+  xcrun simctl bootstatus "$UDID" -b > /dev/null
+done
+
+for UDID in "${UDIDS[@]}"; do
+  echo "  → installing on $UDID"
   xcrun simctl install "$UDID" "$APP"
 done
 

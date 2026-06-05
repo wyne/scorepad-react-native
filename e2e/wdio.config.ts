@@ -15,6 +15,7 @@ export const config: WebdriverIO.Config = {
       'appium:newCommandTimeout': 240,
       'appium:noReset': true,
       'appium:simulatorTracePointer': true,
+      'appium:wdaLocalPort': 8100,
     },
     {
       platformName: 'iOS',
@@ -26,6 +27,7 @@ export const config: WebdriverIO.Config = {
       'appium:newCommandTimeout': 240,
       'appium:noReset': true,
       'appium:simulatorTracePointer': true,
+      'appium:wdaLocalPort': 8101,
     },
     {
       platformName: 'iOS',
@@ -37,6 +39,7 @@ export const config: WebdriverIO.Config = {
       'appium:newCommandTimeout': 240,
       'appium:noReset': true,
       'appium:simulatorTracePointer': true,
+      'appium:wdaLocalPort': 8102,
     },
     {
       platformName: 'iOS',
@@ -48,6 +51,7 @@ export const config: WebdriverIO.Config = {
       'appium:newCommandTimeout': 240,
       'appium:noReset': true,
       'appium:simulatorTracePointer': true,
+      'appium:wdaLocalPort': 8103,
     },
   ],
 
