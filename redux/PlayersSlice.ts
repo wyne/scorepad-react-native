@@ -1,4 +1,4 @@
-import crashlytics from '@react-native-firebase/crashlytics';
+import { getCrashlytics, recordError } from '@react-native-firebase/crashlytics';
 import { PayloadAction, createEntityAdapter, createSelector, createSlice } from '@reduxjs/toolkit';
 
 import { RootState } from './store';
@@ -48,7 +48,7 @@ const scoresSlice = createSlice({
                     scores[round] += Number(multiplier);
                 } catch (error) {
                     const err = error as Error;
-                    crashlytics().recordError(err);
+                    recordError(getCrashlytics(), err);
                 }
             },
             prepare(payload: string, round: RoundIndex, multiplier: number) {
@@ -65,7 +65,7 @@ const scoresSlice = createSlice({
                     scores[action.meta.round] = action.meta.value;
                 } catch (error) {
                     const err = error as Error;
-                    crashlytics().recordError(err);
+                    recordError(getCrashlytics(), err);
                 }
             },
             prepare(payload: string, round: RoundIndex, value: number) {
