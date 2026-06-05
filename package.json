@@ -17,13 +17,8 @@
     "test:coverage-summary": "jest --coverage --coverageReporters=text-summary --silent",
     "install:ipa": "scripts/install-ipa.sh",
     "postinstall": "patch-package",
-    "maestro:seed": "PATH=\"$PATH\":\"$HOME/.maestro/bin\" maestro test .maestro/seed.yaml --env APP_ID=com.wyne.scorepad --test-output-dir .maestro/runs",
-    "maestro:seed:dev": "PATH=\"$PATH\":\"$HOME/.maestro/bin\" maestro test .maestro/seed.yaml --env APP_ID=com.wyne.scorepad.dev --test-output-dir .maestro/runs",
-    "maestro": "PATH=\"$PATH\":\"$HOME/.maestro/bin\" maestro test .maestro/record.yaml --env APP_ID=com.wyne.scorepad --test-output-dir .maestro/runs",
-    "maestro:dev": "PATH=\"$PATH\":\"$HOME/.maestro/bin\" maestro test .maestro/record.yaml --env APP_ID=com.wyne.scorepad.dev --test-output-dir .maestro/runs",
-    "maestro:all": "npm run maestro:seed && npm run maestro",
-    "maestro:record": "PATH=\"$PATH\":\"$HOME/.maestro/bin\" maestro record --local .maestro/record.yaml --env APP_ID=com.wyne.scorepad",
     "e2e": "wdio run e2e/wdio.config.ts",
+    "e2e:install": "e2e/scripts/install.sh",
     "e2e:record": "e2e/scripts/record.sh"
   },
   "dependencies": {
