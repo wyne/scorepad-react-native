@@ -11,8 +11,11 @@ import logger from './Logger';
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const logEvent = async (eventName: string, params?: Record<string, any>) => {
+    const appVersion = Application.nativeApplicationVersion;
+    const buildNumber = Application.nativeBuildVersion;
+
     if (process.env.EXPO_PUBLIC_FIREBASE_ANALYTICS == 'false') {
-        logger.info('\x1b[34m', 'EVENT', eventName, JSON.stringify(params ?? {}, null, 2), '\x1b[0m');
+        logger.info('\x1b[34m', 'EVENT', eventName, JSON.stringify({ ...params, appVersion, buildNumber }, null, 2), '\x1b[0m');
         return;
     }
 
@@ -21,7 +24,6 @@ export const logEvent = async (eventName: string, params?: Record<string, any>) 
     const sessionId = await getSessionId(analytics);
     const os = Platform.OS;
     const osVersion = Platform.Version;
-    const appVersion = Application.nativeApplicationVersion;
 
     const fullParams = Object.fromEntries(
         Object.entries({
@@ -30,6 +32,7 @@ export const logEvent = async (eventName: string, params?: Record<string, any>) 
             sessionId,
             os,
             appVersion,
+            buildNumber,
             osVersion,
         }).filter(([, v]) => v != null && v !== undefined),
     );
