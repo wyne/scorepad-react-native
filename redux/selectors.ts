@@ -22,9 +22,3 @@ export const selectCurrentGame = (state: RootState) => {
     return selectGameById(state, currentGameId);
 };
 export const selectLastStoreReviewPrompt = (state: RootState) => state.settings.lastStoreReviewPrompt;
-
-export const selectGameHasScores = (state: RootState): boolean => {
-    const game = selectCurrentGame(state);
-    if (!game) return false;
-    return game.playerIds.some(id => state.players.entities[id]?.scores.some(s => s !== 0));
-};
