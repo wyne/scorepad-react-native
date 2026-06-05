@@ -12,7 +12,10 @@ interface HalfTapProps {
     playerId: string;
     fontColor: string;
     showHint?: boolean;
+    tileHeight?: number;
 }
+
+const HINT_MIN_HEIGHT = 200;
 
 const HalfTap: React.FC<HalfTapProps> = ({
     children,
@@ -20,7 +23,9 @@ const HalfTap: React.FC<HalfTapProps> = ({
     fontColor,
     playerId,
     showHint,
+    tileHeight,
 }) => {
+    const hintVisible = showHint && (!tileHeight || tileHeight >= HINT_MIN_HEIGHT);
     const currentGame = useAppSelector(selectCurrentGame);
     if (typeof currentGame == 'undefined') return null;
 
@@ -36,14 +41,14 @@ const HalfTap: React.FC<HalfTapProps> = ({
                 fontColor={fontColor}
                 playerId={playerId}
                 playerIndex={index}
-                showHint={showHint} />
+                showHint={hintVisible} />
 
             <HalfTileTouchSurface
                 scoreType='decrement'
                 fontColor={fontColor}
                 playerId={playerId}
                 playerIndex={index}
-                showHint={showHint} />
+                showHint={hintVisible} />
         </>
     );
 };

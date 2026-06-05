@@ -17,9 +17,12 @@ interface HalfTapProps {
     index: number;
     playerId: string;
     showHint?: boolean;
+    tileHeight?: number;
 }
 
 const notchSize = 50;
+
+const HINT_MIN_HEIGHT = 200;
 
 const SwipeVertical: React.FC<HalfTapProps> = ({
     children,
@@ -27,7 +30,9 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
     playerId,
     fontColor,
     showHint,
+    tileHeight,
 }) => {
+    const hintVisible = showHint && (!tileHeight || tileHeight >= HINT_MIN_HEIGHT);
     //#region Selector setup
 
     const currentGameId = useAppSelector(state => state.settings.currentGameId);
@@ -228,7 +233,7 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
                 {children}
             </Animated.View>
 
-            {showHint && (
+            {hintVisible && (
                 <View style={StyleSheet.absoluteFillObject} pointerEvents="none">
                     <Text style={[styles.swipeHintTop, { color: fontColor }]}>▲</Text>
                     <Text style={[styles.swipeHintBottom, { color: fontColor }]}>▼</Text>
