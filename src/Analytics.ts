@@ -11,6 +11,11 @@ import logger from './Logger';
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const logEvent = async (eventName: string, params?: Record<string, any>) => {
+    if (process.env.EXPO_PUBLIC_FIREBASE_ANALYTICS == 'false') {
+        logger.info('\x1b[34m', 'EVENT', eventName, JSON.stringify(params ?? {}, null, 2), '\x1b[0m');
+        return;
+    }
+
     const analytics = getAnalytics();
     const appInstanceId = await getAppInstanceId(analytics);
     const sessionId = await getSessionId(analytics);
@@ -18,29 +23,24 @@ export const logEvent = async (eventName: string, params?: Record<string, any>) 
     const osVersion = Platform.Version;
     const appVersion = Application.nativeApplicationVersion;
 
-    const sanitized = Object.fromEntries(
-        Object.entries({ ...params }).filter(
-            ([, v]) => v != null && v !== undefined,
-        ),
+    const fullParams = Object.fromEntries(
+        Object.entries({
+            ...params,
+            appInstanceId,
+            sessionId,
+            os,
+            appVersion,
+            osVersion,
+        }).filter(([, v]) => v != null && v !== undefined),
     );
 
-    const fullParams = {
-        ...sanitized,
-        appInstanceId,
-        sessionId,
-        os,
-        appVersion,
-        osVersion,
-    };
-
     logger.info(
-        '\x1b[34m', // Set the color to blue
+        '\x1b[34m',
         'EVENT',
         eventName,
         JSON.stringify(fullParams, null, 2),
-        '\x1b[0m' // Reset the color
+        '\x1b[0m'
     );
 
-    // Log the event to Firebase Analytics
     await firebaseLogEvent(analytics, eventName, fullParams);
 };
