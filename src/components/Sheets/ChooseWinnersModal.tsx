@@ -158,7 +158,7 @@ const ChooseWinnersModal: React.FunctionComponent = () => {
             <BottomSheetScrollView contentContainerStyle={styles.scrollContent}>
                 <SafeAreaView edges={['right', 'left']}>
                     <Text style={[styles.subtitle, { color: theme.textTertiary }]}>
-                        Select one or more players as winners
+                        Select winners (optional) to end the game.
                     </Text>
 
                     <View style={[styles.playerList, { backgroundColor: theme.backgroundSecondary }]}>
