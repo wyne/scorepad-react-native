@@ -6,7 +6,7 @@ import { $, $$, browser } from '@wdio/globals';
 const RECORDINGS_DIR = path.join(__dirname, '../recordings');
 
 function getDeviceSlug(): string {
-  const caps = browser.capabilities as any;
+  const caps = browser.capabilities as Record<string, unknown>;
   const name = (caps['deviceName'] ?? caps['appium:deviceName'] ?? 'unknown') as string;
   return name.toLowerCase().replace(/[\s()]/g, '-').replace(/-+/g, '-');
 }
