@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 
 import { StyleSheet, Text, View } from 'react-native';
 
@@ -44,4 +44,4 @@ const styles = StyleSheet.create({
     }
 });
 
-export default TotalScoreColumn;
+export default memo(TotalScoreColumn);

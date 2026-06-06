@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 
 import { DimensionValue, StyleSheet } from 'react-native';
 import Animated, { Easing, FadeIn } from 'react-native-reanimated';
@@ -39,7 +39,7 @@ const FlexboxTile: React.FunctionComponent<Props> = React.memo(({
     const currentGame = useAppSelector(selectCurrentGame);
     const currentGameId = currentGame?.id;
     const playerIndexLabel = useAppSelector(state => state.settings.showPlayerIndex);
-    const selectPlayerColors = makeSelectPlayerColors();
+    const selectPlayerColors = useMemo(() => makeSelectPlayerColors(), []);
     const playerColors = useAppSelector(state => selectPlayerColors(state, currentGameId, playerId));
     const [bg, fg] = playerColors;
     const isWinner = !!(currentGame?.locked && currentGame?.winnerIds?.includes(playerId));
