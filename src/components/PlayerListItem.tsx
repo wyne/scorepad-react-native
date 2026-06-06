@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo, useMemo } from 'react';
 
 import { ParamListBase } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -33,7 +33,7 @@ const PlayerListItem: React.FunctionComponent<Props> = ({
     const currentGameId = useAppSelector(state => selectCurrentGame(state)?.id);
     const playerIds = useAppSelector(state => selectGameById(state, currentGameId || '')?.playerIds);
     const player = useAppSelector(state => selectPlayerById(state, playerId));
-    const selectPlayerColors = makeSelectPlayerColors();
+    const selectPlayerColors = useMemo(() => makeSelectPlayerColors(), []);
     const playerColors = useAppSelector(state => selectPlayerColors(state, currentGameId, playerId));
     const dispatch = useAppDispatch();
 
@@ -161,4 +161,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default PlayerListItem;
+export default memo(PlayerListItem);
