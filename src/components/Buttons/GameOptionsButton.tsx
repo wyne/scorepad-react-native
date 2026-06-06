@@ -1,8 +1,9 @@
 import React from 'react';
 
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { MenuAction, MenuView } from '@react-native-menu/menu';
 import { SymbolView } from 'expo-symbols';
-import { StyleSheet, View, Text } from 'react-native';
+import { StyleSheet, View, Text, Platform } from 'react-native';
 
 import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
 import { toggleHomeFullscreen, setInteractionType, markFeatureNotificationSeen } from '../../../redux/SettingsSlice';
@@ -158,11 +159,19 @@ const GameOptionsButton: React.FunctionComponent = () => {
                         <Text style={[styles.addendText, { color: theme.text }]}>{addendTwo}</Text>
                     </View>
                     <View>
-                        <SymbolView
-                            name={isDial ? 'dial.min' : isSwipe ? 'hand.draw' : 'hand.point.up'}
-                            size={30}
-                            tintColor={theme.text}
-                        />
+                        {Platform.OS === 'ios' ? (
+                            <SymbolView
+                                name={isDial ? 'dial.min' : isSwipe ? 'hand.draw' : 'hand.point.up'}
+                                size={30}
+                                tintColor={theme.text}
+                            />
+                        ) : (
+                            <MaterialCommunityIcons
+                                name={isDial ? 'knob' : isSwipe ? 'gesture-swipe-up' : 'gesture-tap'}
+                                size={30}
+                                color={theme.text}
+                            />
+                        )}
                         {showDialDot && (
                             <View testID="dial-notification-dot" style={{
                                 position: 'absolute',
