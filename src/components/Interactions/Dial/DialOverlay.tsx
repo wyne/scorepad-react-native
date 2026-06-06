@@ -86,6 +86,13 @@ const PlayerDialPage: React.FC<PlayerDialPageProps> = ({
         state => selectPlayerRoundStats(state, playerId, roundCurrent)
     );
 
+    // Stable SharedValue refs — same object identity every render, so React.memo(DialControl)
+    // skips re-renders when score changes. The displayed numbers update via Reanimated on the UI thread.
+    const svRoundScore = useSharedValue(roundScore);
+    const svScoreTotal = useSharedValue(scoreTotal);
+    svRoundScore.value = roundScore;
+    svScoreTotal.value = scoreTotal;
+
     const [isSecondary, setIsSecondary] = useState(false);
 
     // Reset dial mode when the active round changes
@@ -177,12 +184,12 @@ const PlayerDialPage: React.FC<PlayerDialPageProps> = ({
                     {/* Center: dial */}
                     <View style={styles.lsCenter}>
                         <DialControl
-                            value={roundScore}
+                            svValue={svRoundScore}
                             onChange={handleChange}
                             onToggleMode={setIsSecondary}
                             isSecondary={isSecondary}
                             ink={ink}
-                            newTotal={scoreTotal}
+                            svNewTotal={svScoreTotal}
                             addendOne={addendOne}
                             addendTwo={addendTwo}
                             dialSize={lsDialSize}
@@ -240,12 +247,12 @@ const PlayerDialPage: React.FC<PlayerDialPageProps> = ({
                 {/* Dial */}
                 <View style={styles.dialWrap}>
                     <DialControl
-                        value={roundScore}
+                        svValue={svRoundScore}
                         onChange={handleChange}
                         onToggleMode={setIsSecondary}
                         isSecondary={isSecondary}
                         ink={ink}
-                        newTotal={scoreTotal}
+                        svNewTotal={svScoreTotal}
                         addendOne={addendOne}
                         addendTwo={addendTwo}
                         dialSize={dialSize}

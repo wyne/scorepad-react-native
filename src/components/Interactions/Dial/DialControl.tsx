@@ -1,11 +1,12 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import * as Haptics from 'expo-haptics';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
     Easing,
     runOnJS,
+    SharedValue,
     useAnimatedProps,
     useAnimatedStyle,
     useSharedValue,
@@ -15,6 +16,8 @@ import Animated, {
     withTiming,
 } from 'react-native-reanimated';
 import Svg, { Circle, Line, Path } from 'react-native-svg';
+
+const AnimatedTextInput = Animated.createAnimatedComponent(TextInput);
 
 import { POWER_HOLD_ACTIVATION_MS, POWER_HOLD_INDICATOR_DELAY_MS } from '../interactionConstants';
 
@@ -30,6 +33,7 @@ function inkA(ink: string, a: number): string {
 }
 
 function fmtSigned(v: number): string {
+    'worklet';
     if (v > 0) return '+' + v;
     return String(v);
 }
@@ -43,12 +47,12 @@ function wrapDelta(delta: number): number {
 }
 
 interface Props {
-    value: number;
+    svValue: SharedValue<number>;
     onChange: (v: number) => void;
     onToggleMode: (active: boolean) => void;
     isSecondary: boolean;
     ink: string;
-    newTotal: number;
+    svNewTotal: SharedValue<number>;
     addendOne: number;
     addendTwo: number;
     dialSize: number;
@@ -58,12 +62,12 @@ interface Props {
 }
 
 const DialControl: React.FC<Props> = ({
-    value,
+    svValue,
     onChange,
     onToggleMode,
     isSecondary,
     ink,
-    newTotal,
+    svNewTotal,
     addendOne,
     addendTwo,
     dialSize: D,
@@ -139,7 +143,7 @@ const DialControl: React.FC<Props> = ({
     const svStartX = useSharedValue(0);
     const svStartY = useSharedValue(0);
     const svHasMoved = useSharedValue(false);
-    const svStartValue = useSharedValue(value);
+    const svStartValue = useSharedValue(0);
 
     useEffect(() => { svInc.value = isSecondary ? addendTwo : addendOne; }, [isSecondary, addendOne, addendTwo]);
 
@@ -204,7 +208,7 @@ const DialControl: React.FC<Props> = ({
                 holdProgress.value = withTiming(0, { duration: 120, easing: Easing.out(Easing.cubic) });
             }
         }, POWER_HOLD_ACTIVATION_MS);
-    }, [onToggleMode, value]);
+    }, [onToggleMode]);
 
     const stopLongPress = useCallback(() => {
         clearTimeout(lpTimer.current);
@@ -212,12 +216,22 @@ const DialControl: React.FC<Props> = ({
     }, []);
 
     const handleBump = useCallback((newVal: number) => {
-        if (newVal !== value) {
+        if (newVal !== svValue.value) {
             onChange(newVal);
             if (isSecondaryRef.current) popNumber();
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
         }
-    }, [onChange, value, popNumber]);
+    }, [onChange, svValue, popNumber]);
+
+    const centerValueAnimProps = useAnimatedProps(() => ({
+        text: fmtSigned(svValue.value),
+        defaultValue: fmtSigned(svValue.value),
+    }));
+
+    const newTotalAnimProps = useAnimatedProps(() => ({
+        text: String(svNewTotal.value),
+        defaultValue: String(svNewTotal.value),
+    }));
 
     const handleDeactivate = useCallback(() => {
         onToggleMode(false);
@@ -246,7 +260,7 @@ const DialControl: React.FC<Props> = ({
         .enabled(!menuOpen)
         .minDistance(0)
         .onBegin((e) => {
-            svStartValue.value = value;
+            svStartValue.value = svValue.value;
             svAccDeg.value = 0;
             svHasMoved.value = false;
             svStartX.value = e.x;
@@ -418,14 +432,14 @@ const DialControl: React.FC<Props> = ({
                     <View style={StyleSheet.absoluteFill} pointerEvents="none">
                         <View style={styles.centerValue}>
                             <Animated.View style={[numScaleStyle, { width: D * 0.54 }]}>
-                                <Text
-                                    style={[styles.centerNumber, { color: ink, fontSize: D * 0.20 }]}
-                                    numberOfLines={1}
-                                    adjustsFontSizeToFit
-                                    minimumFontScale={0.4}
-                                >
-                                    {fmtSigned(value)}
-                                </Text>
+                                <AnimatedTextInput
+                                    animatedProps={centerValueAnimProps}
+                                    defaultValue={fmtSigned(svValue.value)}
+                                    style={[styles.centerNumber, { color: ink, fontSize: D * 0.20, padding: 0, backgroundColor: 'transparent' }]}
+                                    editable={false}
+                                    caretHidden={true}
+                                    underlineColorAndroid="transparent"
+                                />
                             </Animated.View>
                             <Text style={[styles.centerLabel, { color: inkA(ink, 0.62), fontSize: D * 0.049 }]}>
                                 THIS ROUND
@@ -457,7 +471,7 @@ const DialControl: React.FC<Props> = ({
                     testID="btn-decrement"
                     disabled={menuOpen}
                     onPress={() => {
-                        onChange(value - addendOne);
+                        onChange(svValue.value - addendOne);
                         setHandleAngleDeg(a => a - STEP_DEG);
                         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                     }}
@@ -472,10 +486,15 @@ const DialControl: React.FC<Props> = ({
                 </Pressable>
 
                 {!landscape && (
-                    <View style={styles.newTotalCol}>
-                        <Text style={[styles.newTotalNumber, { color: ink, fontSize: D * 0.18 }]}>
-                            {newTotal}
-                        </Text>
+                    <View style={styles.newTotalCol} pointerEvents="none">
+                        <AnimatedTextInput
+                            animatedProps={newTotalAnimProps}
+                            defaultValue={String(svNewTotal.value)}
+                            style={[styles.newTotalNumber, { color: ink, fontSize: D * 0.18, padding: 0, backgroundColor: 'transparent', textAlign: 'center' }]}
+                            editable={false}
+                            caretHidden={true}
+                            underlineColorAndroid="transparent"
+                        />
                         <Text style={[styles.newTotalLabel, { color: inkA(ink, 0.62), fontSize: D * 0.044 }]}>
                             NEW TOTAL
                         </Text>
@@ -486,7 +505,7 @@ const DialControl: React.FC<Props> = ({
                     testID="btn-increment"
                     disabled={menuOpen}
                     onPress={() => {
-                        onChange(value + addendOne);
+                        onChange(svValue.value + addendOne);
                         setHandleAngleDeg(a => a + STEP_DEG);
                         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                     }}
@@ -575,4 +594,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default DialControl;
+export default React.memo(DialControl);
