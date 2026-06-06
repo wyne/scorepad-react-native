@@ -1,7 +1,5 @@
 import React from 'react';
 
-import type { ParamListBase } from '@react-navigation/native';
-import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { configureStore } from '@reduxjs/toolkit';
 import { fireEvent, render } from '@testing-library/react-native';
 import { ScrollView } from 'react-native';
@@ -92,21 +90,6 @@ const createMockStore = (initialState: Parameters<typeof configureStore>[0]['pre
     });
 };
 
-const mockNavigation = {
-    navigate: jest.fn(),
-    goBack: jest.fn(),
-    reset: jest.fn(),
-    setParams: jest.fn(),
-    setOptions: jest.fn(),
-    dispatch: jest.fn(),
-    isFocused: jest.fn(() => true),
-    canGoBack: jest.fn(() => false),
-    getId: jest.fn(() => 'test-id'),
-    getParent: jest.fn(),
-    getState: jest.fn(),
-    addListener: jest.fn(),
-    removeListener: jest.fn(),
-} as unknown as NativeStackNavigationProp<ParamListBase, string, undefined>;
 
 describe('Rounds', () => {
     const mockGame = {
@@ -153,7 +136,7 @@ describe('Rounds', () => {
 
         const { toJSON } = render(
             <Provider store={store}>
-                <Rounds navigation={mockNavigation} />
+                <Rounds />
             </Provider>
         );
 
@@ -179,7 +162,7 @@ describe('Rounds', () => {
 
         const { getByTestId } = render(
             <Provider store={store}>
-                <Rounds navigation={mockNavigation} />
+                <Rounds />
             </Provider>
         );
 
@@ -207,7 +190,7 @@ describe('Rounds', () => {
 
         const { getByTestId } = render(
             <Provider store={store}>
-                <Rounds navigation={mockNavigation} />
+                <Rounds />
             </Provider>
         );
 
@@ -238,7 +221,7 @@ describe('Rounds', () => {
 
         const { getByText } = render(
             <Provider store={store}>
-                <Rounds navigation={mockNavigation} />
+                <Rounds />
             </Provider>
         );
 
@@ -272,7 +255,7 @@ describe('Rounds', () => {
         const { logEvent } = require('../Analytics');
         const { getByTestId } = render(
             <Provider store={store}>
-                <Rounds navigation={mockNavigation} />
+                <Rounds />
             </Provider>
         );
 
@@ -308,7 +291,7 @@ describe('Rounds', () => {
         const { logEvent } = require('../Analytics');
         const { getByTestId } = render(
             <Provider store={store}>
-                <Rounds navigation={mockNavigation} />
+                <Rounds />
             </Provider>
         );
 
@@ -343,7 +326,7 @@ describe('Rounds', () => {
 
         const { getByTestId, queryByTestId } = render(
             <Provider store={store}>
-                <Rounds navigation={mockNavigation} />
+                <Rounds />
             </Provider>
         );
 
@@ -373,7 +356,7 @@ describe('Rounds', () => {
 
         const { getByTestId } = render(
             <Provider store={store}>
-                <Rounds navigation={mockNavigation} />
+                <Rounds />
             </Provider>
         );
 
@@ -422,7 +405,7 @@ describe('Rounds', () => {
 
         const { getByTestId } = render(
             <Provider store={store}>
-                <Rounds navigation={mockNavigation} />
+                <Rounds />
             </Provider>
         );
 
@@ -450,7 +433,7 @@ describe('Rounds', () => {
 
         const { getByTestId } = render(
             <Provider store={store}>
-                <Rounds navigation={mockNavigation} />
+                <Rounds />
             </Provider>
         );
 
@@ -483,7 +466,7 @@ describe('Rounds', () => {
 
         const { getByText } = render(
             <Provider store={store}>
-                <Rounds navigation={mockNavigation} />
+                <Rounds />
             </Provider>
         );
 
@@ -510,7 +493,7 @@ describe('Rounds', () => {
 
         const { getByTestId } = render(
             <Provider store={store}>
-                <Rounds navigation={mockNavigation} />
+                <Rounds />
             </Provider>
         );
 

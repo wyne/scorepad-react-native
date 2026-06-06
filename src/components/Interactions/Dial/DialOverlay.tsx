@@ -545,4 +545,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default DialOverlay;
+export default React.memo(DialOverlay);
