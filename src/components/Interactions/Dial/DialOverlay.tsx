@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 import * as Haptics from 'expo-haptics';
 import { FlatList, NativeScrollEvent, NativeSyntheticEvent, Pressable, StyleSheet, Text, View } from 'react-native';
@@ -90,8 +90,10 @@ const PlayerDialPage: React.FC<PlayerDialPageProps> = ({
     // skips re-renders when score changes. The displayed numbers update via Reanimated on the UI thread.
     const svRoundScore = useSharedValue(roundScore);
     const svScoreTotal = useSharedValue(scoreTotal);
-    svRoundScore.value = roundScore;
-    svScoreTotal.value = scoreTotal;
+    useLayoutEffect(() => {
+        svRoundScore.value = roundScore;
+        svScoreTotal.value = scoreTotal;
+    }, [roundScore, scoreTotal]);
 
     const [isSecondary, setIsSecondary] = useState(false);
 

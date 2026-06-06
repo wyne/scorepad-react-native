@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import * as Haptics from 'expo-haptics';
-import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Pressable, StyleSheet, Text, TextInput, TextInputProps, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
     Easing,
@@ -17,7 +17,9 @@ import Animated, {
 } from 'react-native-reanimated';
 import Svg, { Circle, Line, Path } from 'react-native-svg';
 
-const AnimatedTextInput = Animated.createAnimatedComponent(TextInput);
+// Extend TextInputProps to include Reanimated's animated text content prop
+type AnimatedTextInputProps = TextInputProps & { text?: string };
+const AnimatedTextInput = Animated.createAnimatedComponent(TextInput as React.ComponentType<AnimatedTextInputProps>);
 
 import { POWER_HOLD_ACTIVATION_MS, POWER_HOLD_INDICATOR_DELAY_MS } from '../interactionConstants';
 
@@ -225,12 +227,10 @@ const DialControl: React.FC<Props> = ({
 
     const centerValueAnimProps = useAnimatedProps(() => ({
         text: fmtSigned(svValue.value),
-        defaultValue: fmtSigned(svValue.value),
     }));
 
     const newTotalAnimProps = useAnimatedProps(() => ({
         text: String(svNewTotal.value),
-        defaultValue: String(svNewTotal.value),
     }));
 
     const handleDeactivate = useCallback(() => {
@@ -434,7 +434,7 @@ const DialControl: React.FC<Props> = ({
                             <Animated.View style={[numScaleStyle, { width: D * 0.54 }]}>
                                 <AnimatedTextInput
                                     animatedProps={centerValueAnimProps}
-                                    defaultValue={fmtSigned(svValue.value)}
+                                    defaultValue=""
                                     style={[styles.centerNumber, { color: ink, fontSize: D * 0.20, padding: 0, backgroundColor: 'transparent' }]}
                                     editable={false}
                                     caretHidden={true}
@@ -489,7 +489,7 @@ const DialControl: React.FC<Props> = ({
                     <View style={styles.newTotalCol} pointerEvents="none">
                         <AnimatedTextInput
                             animatedProps={newTotalAnimProps}
-                            defaultValue={String(svNewTotal.value)}
+                            defaultValue=""
                             style={[styles.newTotalNumber, { color: ink, fontSize: D * 0.18, padding: 0, backgroundColor: 'transparent', textAlign: 'center' }]}
                             editable={false}
                             caretHidden={true}

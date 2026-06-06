@@ -5,15 +5,30 @@ import { fireEvent, render } from '@testing-library/react-native';
 import { SharedValue } from 'react-native-reanimated';
 
 jest.mock('react-native-reanimated', () => {
+    const React = jest.requireActual('react');
     const { View } = jest.requireActual('react-native');
     return {
         __esModule: true,
         // withTiming must NOT invoke callbacks — the repeat-chain uses callbacks and
         // would loop infinitely with a synchronous-callback mock.
-        default: { View, createAnimatedComponent: (c: unknown) => c },
+        default: {
+            View,
+            // Spread animatedProps onto the wrapped component; map `text` → `value` so
+            // getByDisplayValue works in tests (mirrors Reanimated's native TextInput handling).
+            createAnimatedComponent: (Component: React.ComponentType<Record<string, unknown>>) => {
+                return ({ animatedProps, ...rest }: { animatedProps?: Record<string, unknown> }) => {
+                    const { text, ...animatedRest } = animatedProps ?? {};
+                    return React.createElement(Component, {
+                        ...rest,
+                        ...animatedRest,
+                        ...(text !== undefined ? { value: String(text) } : {}),
+                    });
+                };
+            },
+        },
         useSharedValue: (v: unknown) => ({ value: v }),
         useAnimatedStyle: () => ({}),
-        useAnimatedProps: () => ({}),
+        useAnimatedProps: (fn: () => Record<string, unknown>) => fn(),
         withTiming: (v: unknown) => v,
         withDelay: (_ms: number, v: unknown) => v,
         withSequence: (...vals: unknown[]) => vals[0],
