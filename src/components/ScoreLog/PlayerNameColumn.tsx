@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 
 import { StyleSheet, Text, View } from 'react-native';
 import { Icon } from 'react-native-elements/dist/icons/Icon';
@@ -19,7 +19,7 @@ interface CellProps {
 
 const PlayerNameCell: React.FunctionComponent<CellProps> = ({ index, playerId }) => {
     const theme = useTheme();
-    const selectPlayerColors = makeSelectPlayerColors();
+    const selectPlayerColors = useMemo(() => makeSelectPlayerColors(), []);
     const currentGameId = useAppSelector(state => selectCurrentGame(state)?.id);
     const playerColors = useAppSelector(state => selectPlayerColors(state, currentGameId, playerId));
     const playerName = useAppSelector(state => selectPlayerById(state, playerId)?.playerName);
