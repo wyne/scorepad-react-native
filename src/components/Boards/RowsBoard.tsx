@@ -38,10 +38,10 @@ interface PlayerRowProps {
     roundCurrent: number;
     dimmed: boolean;
     disabled: boolean;
-    onPress: () => void;
+    onRowPress: (id: string) => void;
 }
 
-const PlayerRow: React.FC<PlayerRowProps> = ({ playerId, index, roundCurrent, dimmed, disabled, onPress }) => {
+const PlayerRow: React.FC<PlayerRowProps> = ({ playerId, index, roundCurrent, dimmed, disabled, onRowPress }) => {
     const player = useAppSelector((state) => selectPlayerById(state, playerId));
     const currentGame = useAppSelector(selectCurrentGame);
     const isWinner = !!(currentGame?.locked && currentGame?.winnerIds?.includes(playerId));
@@ -96,7 +96,7 @@ const PlayerRow: React.FC<PlayerRowProps> = ({ playerId, index, roundCurrent, di
     return (
         <Animated.View style={rowStyle} testID={`player-row-${index}`}>
             <Pressable
-                onPress={onPress}
+                onPress={() => onRowPress(playerId)}
                 disabled={disabled}
                 style={({ pressed }) => [styles.row, { backgroundColor: color, opacity: pressed ? 0.78 : 1 }]}>
                 <View style={styles.rowInner}>
@@ -145,6 +145,8 @@ const PlayerRow: React.FC<PlayerRowProps> = ({ playerId, index, roundCurrent, di
     );
 };
 
+const MemoizedPlayerRow = React.memo(PlayerRow);
+
 const RowsBoard: React.FC = () => {
     const currentGame = useAppSelector(selectCurrentGame);
     const fullscreen = useAppSelector(state => state.settings.home_fullscreen);
@@ -185,14 +187,14 @@ const RowsBoard: React.FC = () => {
                 showsVerticalScrollIndicator={false}
                 scrollEnabled={selectedId === null}>
                 {playerIds.map((id, index) => (
-                    <PlayerRow
+                    <MemoizedPlayerRow
                         key={id}
                         playerId={id}
                         index={index}
                         roundCurrent={roundCurrent}
                         dimmed={selectedId !== null}
                         disabled={!!(currentGame?.locked || menuOpen)}
-                        onPress={() => handleRowPress(id)}
+                        onRowPress={handleRowPress}
                     />
                 ))}
             </ScrollView>
