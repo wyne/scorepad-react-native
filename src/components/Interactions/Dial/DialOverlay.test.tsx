@@ -64,7 +64,11 @@ jest.mock('../../MenuOpenContext', () => ({
     useMenuOpen: () => ({ menuOpen: mockMenuOpen, setMenuOpen: jest.fn() }),
 }));
 
+import { SharedValue } from 'react-native-reanimated';
+
 import DialOverlay from './DialOverlay';
+
+const mkSv = <T,>(v: T) => ({ value: v }) as unknown as SharedValue<T>;
 
 // ─── shared fixtures ──────────────────────────────────────────────────────────
 
@@ -97,12 +101,13 @@ const createStore = (gameOverrides: Record<string, unknown> = {}) =>
 const defaultProps = {
     playerIds: ['player-1'],
     initialIndex: 0,
-    rowRect: { top: 100, left: 0, width: 400, height: 60 },
     boardWidth: 400,
     boardHeight: 700,
     safeAreaTop: 0,
     showHint: false,
     onClose: jest.fn(),
+    svOpacity: mkSv(1),
+    svSlideY: mkSv(0),
 };
 
 const wrap = (store: ReturnType<typeof createStore>, onClose = jest.fn()) => (

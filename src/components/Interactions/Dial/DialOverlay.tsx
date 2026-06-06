@@ -13,6 +13,7 @@ import Animated, {
     withTiming,
 } from 'react-native-reanimated';
 
+
 import { useAppDispatch, useAppSelector } from '../../../../redux/hooks';
 import { playerRoundScoreSet, selectPlayerById, selectPlayerRoundStats } from '../../../../redux/PlayersSlice';
 import { selectCurrentGame } from '../../../../redux/selectors';
@@ -290,6 +291,8 @@ interface Props {
     safeAreaTop: number;
     showHint: boolean;
     onClose: () => void;
+    svOpacity: SharedValue<number>;
+    svSlideY: SharedValue<number>;
 }
 
 const DialOverlay: React.FC<Props> = ({
@@ -300,6 +303,8 @@ const DialOverlay: React.FC<Props> = ({
     safeAreaTop,
     showHint,
     onClose,
+    svOpacity,
+    svSlideY,
 }) => {
     const currentGame = useAppSelector(selectCurrentGame);
     const { menuOpen } = useMenuOpen();
@@ -319,16 +324,8 @@ const DialOverlay: React.FC<Props> = ({
     const targetHeight = boardHeight - marginTop - MARGIN_BOTTOM;
     const pageWidth = boardWidth - MARGIN_H * 2;
 
-    const opacity = useSharedValue(0);
-    const slideY = useSharedValue(20);
     const swipeDragY = useSharedValue(0);
     const swipeDragX = useSharedValue(0);
-
-    // Fade in + slide up on mount
-    useEffect(() => {
-        opacity.value = withTiming(1, { duration: 200 });
-        slideY.value = withTiming(0, { duration: 250, easing: Easing.out(Easing.cubic) });
-    }, []);
 
     const panelStyle = useAnimatedStyle(() => ({
         position: 'absolute',
@@ -336,21 +333,21 @@ const DialOverlay: React.FC<Props> = ({
         left: 0,
         width: targetWidth,
         height: targetHeight,
-        opacity: opacity.value,
+        opacity: svOpacity.value,
         transform: [
-            { translateY: swipeDragY.value + slideY.value },
+            { translateY: swipeDragY.value + svSlideY.value },
             { translateX: swipeDragX.value },
         ],
     }));
 
     const slideOut = useCallback((then: () => void) => {
-        opacity.value = withTiming(0, { duration: 150 });
+        svOpacity.value = withTiming(0, { duration: 150 });
         swipeDragY.value = withTiming(
             boardHeight,
             { duration: 250, easing: Easing.in(Easing.cubic) },
             () => runOnJS(then)(),
         );
-    }, [boardHeight]);
+    }, [svOpacity, boardHeight]);
 
     // Close if the game becomes locked while the overlay is open
     useEffect(() => {

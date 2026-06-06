@@ -2,7 +2,7 @@ import React, { useCallback, useLayoutEffect, useState } from 'react';
 
 import { LayoutChangeEvent, LayoutRectangle, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Icon } from 'react-native-elements';
-import Animated, { SharedValue, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
+import Animated, { Easing, SharedValue, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useAppSelector } from '../../../redux/hooks';
@@ -153,6 +153,8 @@ const RowsBoard: React.FC = () => {
     const [selectedId, setSelectedId] = useState<string | null>(null);
     const [boardLayout, setBoardLayout] = useState<LayoutRectangle | null>(null);
     const svDimmed = useSharedValue(false);
+    const svOverlayOpacity = useSharedValue(0);
+    const svOverlaySlideY = useSharedValue(20);
 
     useLayoutEffect(() => {
         svDimmed.value = selectedId !== null;
@@ -166,6 +168,12 @@ const RowsBoard: React.FC = () => {
         (id: string) => {
             if (currentGame?.locked || menuOpen) return;
             if (!boardLayout) return;
+            // Start entrance animation before React schedules the re-render so the
+            // overlay is already mid-animation by the time it first paints.
+            svOverlayOpacity.value = 0;
+            svOverlaySlideY.value = 20;
+            svOverlayOpacity.value = withTiming(1, { duration: 160 });
+            svOverlaySlideY.value = withTiming(0, { duration: 200, easing: Easing.out(Easing.cubic) });
             setSelectedId(id);
         },
         [boardLayout, currentGame?.locked, menuOpen]
@@ -210,6 +218,8 @@ const RowsBoard: React.FC = () => {
                     safeAreaTop={insets.top}
                     showHint={showHint}
                     onClose={handleClose}
+                    svOpacity={svOverlayOpacity}
+                    svSlideY={svOverlaySlideY}
                 />
             )}
         </View>
