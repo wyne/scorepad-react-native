@@ -40,10 +40,10 @@ const Rounds: React.FunctionComponent<Props> = ({ }) => {
     const onLayoutHandler = useCallback((event: LayoutChangeEvent, round: number) => {
         const offset = event.nativeEvent.layout.x;
 
-        setRoundScrollOffset({
-            ...roundScollOffset,
+        setRoundScrollOffset(prev => ({
+            ...prev,
             [round]: offset
-        });
+        }));
     }, []);
 
     // Scroll to the current round
@@ -61,15 +61,15 @@ const Rounds: React.FunctionComponent<Props> = ({ }) => {
 
     const dispatch = useAppDispatch();
 
-    const sortByPlayerIndex = () => {
+    const sortByPlayerIndex = useCallback(() => {
         dispatch(setSortSelector({ gameId: currentGameId, sortSelector: SortSelectorKey.ByIndex }));
         logEvent('sort_by_index', { gameId: currentGameId });
-    };
+    }, [dispatch, currentGameId]);
 
-    const sortByTotalScore = () => {
+    const sortByTotalScore = useCallback(() => {
         dispatch(setSortSelector({ gameId: currentGameId, sortSelector: SortSelectorKey.ByScore }));
         logEvent('sort_by_score', { gameId: currentGameId });
-    };
+    }, [dispatch, currentGameId]);
 
     return (
         <View style={[styles.scoreTableContainer]}>
