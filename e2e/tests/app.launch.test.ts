@@ -149,6 +149,7 @@ describe('App Flow', () => {
     console.log('→ swipe up (increase score)');
     await swipeUp('~swipe-overlay-1');
     await browser.pause(500);
+    await browser.saveScreenshot(path.join(screenshotsDir, 'swipe.png'));
 
     console.log('→ next round');
     await tap('~next-round-button');
@@ -161,10 +162,14 @@ describe('App Flow', () => {
     await tap('~player-row-2');
     await swipeDialRight(2);
     await browser.pause(500);
+    await browser.saveScreenshot(path.join(screenshotsDir, 'dial.png'));
 
     console.log('→ open addend modal');
     await tap('~game-options-menu');
+    await browser.saveScreenshot(path.join(screenshotsDir, 'game-options-menu.png'));
     await tap('-ios predicate string:label CONTAINS "Point Values"');
+    await browser.pause(500);
+    await browser.saveScreenshot(path.join(screenshotsDir, 'point-values.png'));
 
     console.log('→ dismiss addend modal');
     await tapAt(0.5, 0.37);
