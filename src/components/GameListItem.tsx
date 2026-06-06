@@ -15,9 +15,9 @@ import { useTheme } from '../theme';
 import GameListItemPlayerName from './GameListItemPlayerName';
 import AbstractPopupMenu from './PopupMenu/AbstractPopupMenu';
 
-function timeAgo(dateStr: string | undefined): string {
-    if (!dateStr) return '';
-    const diff = Date.now() - new Date(dateStr).getTime();
+function timeAgo(dateMs: number | undefined): string {
+    if (!dateMs) return '';
+    const diff = Date.now() - dateMs;
     const mins = Math.floor(diff / 60000);
     if (mins < 1) return 'just now';
     if (mins < 60) return `${mins}m ago`;
