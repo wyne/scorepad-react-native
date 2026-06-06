@@ -140,6 +140,8 @@ const PlayerDialPage: React.FC<PlayerDialPageProps> = ({
             isDismissing.value = false;
         });
 
+    console.log('[DialCard render]', player?.playerName);
+
     if (!player) return null;
 
     const ink = inkFor(player.color ?? '#444');
@@ -430,6 +432,7 @@ const DialOverlay: React.FC<Props> = ({
                     windowSize={3}
                     initialNumToRender={1}
                     maxToRenderPerBatch={2}
+                    initialScrollIndex={initialIndex}
                     onLayout={() => {
                         flatListRef.current?.scrollToOffset({
                             offset: targetWidth * activeIndexRef.current,
