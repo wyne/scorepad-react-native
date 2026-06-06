@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { memo, useEffect, useState } from 'react';
 
 import { LayoutChangeEvent, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -120,4 +120,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default FlexboxBoard;
+export default memo(FlexboxBoard);

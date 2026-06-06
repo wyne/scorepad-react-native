@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 
 import { ParamListBase } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -161,4 +161,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default PlayerListItem;
+export default memo(PlayerListItem);

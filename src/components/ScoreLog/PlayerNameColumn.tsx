@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 
 import { StyleSheet, Text, View } from 'react-native';
 import { Icon } from 'react-native-elements/dist/icons/Icon';
@@ -84,4 +84,4 @@ const styles = StyleSheet.create({
     }
 });
 
-export default PlayerNameColumn;
+export default memo(PlayerNameColumn);
