@@ -434,7 +434,7 @@ const DialControl: React.FC<Props> = ({
                             <Animated.View style={[numScaleStyle, { width: D * 0.54 }]}>
                                 <AnimatedTextInput
                                     animatedProps={centerValueAnimProps}
-                                    defaultValue=""
+                                    defaultValue={fmtSigned(svValue.value)}
                                     style={[styles.centerNumber, { color: ink, fontSize: D * 0.20, padding: 0, backgroundColor: 'transparent' }]}
                                     editable={false}
                                     caretHidden={true}
@@ -489,7 +489,7 @@ const DialControl: React.FC<Props> = ({
                     <View style={styles.newTotalCol} pointerEvents="none">
                         <AnimatedTextInput
                             animatedProps={newTotalAnimProps}
-                            defaultValue=""
+                            defaultValue={String(svNewTotal.value)}
                             style={[styles.newTotalNumber, { color: ink, fontSize: D * 0.18, padding: 0, backgroundColor: 'transparent', textAlign: 'center' }]}
                             editable={false}
                             caretHidden={true}

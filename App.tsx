@@ -5,9 +5,14 @@ import { StatusBar } from 'expo-status-bar';
 import { View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { MenuProvider } from 'react-native-popup-menu';
+import { configureReanimatedLogger, ReanimatedLogLevel } from 'react-native-reanimated';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
+
+// AnimatedTextInput uses `defaultValue={sv.value}` for initial render (harmless one-time read).
+// Disable strict mode to suppress the false-positive "reading value during render" warning.
+configureReanimatedLogger({ level: ReanimatedLogLevel.warn, strict: false });
 
 import { persistor, store } from './redux/store';
 import { AddendModalContextProvider } from './src/components/Sheets/AddendModalContext';
