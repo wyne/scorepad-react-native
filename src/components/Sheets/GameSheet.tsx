@@ -143,6 +143,7 @@ const GameSheet: React.FunctionComponent = () => {
 
     // State variable for the current snap point index
     const [snapPointIndex, setSnapPointIndex] = useState(0);
+    const [shouldRenderContent, setShouldRenderContent] = useState(false);
     const hasMountedRef = useRef(false);
 
     useEffect(() => {
@@ -161,11 +162,16 @@ const GameSheet: React.FunctionComponent = () => {
         }
     }, [snapPointIndex]);
 
+    const onAnimate = useCallback((_fromIndex: number, toIndex: number) => {
+        if (toIndex > 0) setShouldRenderContent(true);
+    }, []);
+
     /**
      * Function to handle changes in the bottom sheet
      */
     const onSheetChange = useCallback((index: number) => {
         setSnapPointIndex(index);
+        if (index === 0) setShouldRenderContent(false);
     }, []);
 
     /**
@@ -224,6 +230,7 @@ const GameSheet: React.FunctionComponent = () => {
             ref={gameSheetRef}
             index={0}
             onChange={onSheetChange}
+            onAnimate={onAnimate}
             snapPoints={snapPoints}
             backdropComponent={renderBackdrop}
             backgroundStyle={{ backgroundColor: theme.sheetBackground }}
@@ -261,7 +268,7 @@ const GameSheet: React.FunctionComponent = () => {
                     </View>
 
                     <Animated.View style={[styles.sheetContent, animatedSheetStyle]}>
-                        <Rounds navigation={navigation} />
+                        {shouldRenderContent && <Rounds navigation={navigation} />}
 
                         <Text style={{ color: theme.text, margin: 10, marginTop: 0 }}>
                             Tap the player column or total score column to change sorting.
