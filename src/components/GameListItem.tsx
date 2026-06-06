@@ -2,7 +2,6 @@ import React, { useCallback } from 'react';
 
 import { ParamListBase } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import Moment from 'react-moment';
 import { Platform, StyleSheet, Text, View } from 'react-native';
 import { Icon, ListItem } from 'react-native-elements';
 import Animated, { FadeInUp } from 'react-native-reanimated';
@@ -15,6 +14,21 @@ import { useTheme } from '../theme';
 
 import GameListItemPlayerName from './GameListItemPlayerName';
 import AbstractPopupMenu from './PopupMenu/AbstractPopupMenu';
+
+function timeAgo(dateStr: string | undefined): string {
+    if (!dateStr) return '';
+    const diff = Date.now() - new Date(dateStr).getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 1) return 'just now';
+    if (mins < 60) return `${mins}m ago`;
+    const hours = Math.floor(mins / 60);
+    if (hours < 24) return `${hours}h ago`;
+    const days = Math.floor(hours / 24);
+    if (days < 30) return `${days}d ago`;
+    const months = Math.floor(days / 30);
+    if (months < 12) return `${months}mo ago`;
+    return `${Math.floor(months / 12)}y ago`;
+}
 
 export type Props = {
     navigation: NativeStackNavigationProp<ParamListBase, string, undefined>;
@@ -76,7 +90,7 @@ const GameListItem: React.FunctionComponent<Props> = ({ navigation, gameId, inde
                                 {locked && <Icon name='lock-closed-outline' type='ionicon' size={14} color={theme.success} style={{ paddingHorizontal: 4 }} />}
                             </ListItem.Title>
                             <ListItem.Subtitle style={{ color: theme.textTertiary }}>
-                                <Text><Moment element={Text} fromNow>{dateCreated}</Moment></Text>
+                                <Text>{timeAgo(dateCreated)}</Text>
                             </ListItem.Subtitle>
                             <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
                                 {playerIds.map((playerId, index) => (
