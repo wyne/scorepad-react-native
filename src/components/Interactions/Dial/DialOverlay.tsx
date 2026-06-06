@@ -269,6 +269,8 @@ const PlayerDialPage: React.FC<PlayerDialPageProps> = ({
     );
 };
 
+const MemoizedPlayerDialPage = React.memo(PlayerDialPage);
+
 // ─── DialOverlay ──────────────────────────────────────────────────────────────
 
 interface Props {
@@ -380,6 +382,25 @@ const DialOverlay: React.FC<Props> = ({
         setActiveIndex(newIndex);
     }, [targetWidth]);
 
+    const renderItem = useCallback(({ item: pid }: { item: string }) => (
+        <View style={{ width: targetWidth, paddingHorizontal: MARGIN_H }}>
+            <MemoizedPlayerDialPage
+                playerId={pid}
+                pageWidth={pageWidth}
+                pageHeight={targetHeight}
+                boardHeight={boardHeight}
+                addendOne={addendOne}
+                addendTwo={addendTwo}
+                menuOpen={menuOpen}
+                swipeDragY={swipeDragY}
+                swipeDragX={swipeDragX}
+                onDone={handleDone}
+                onDismiss={handleDismiss}
+                showHint={showHint}
+            />
+        </View>
+    ), [pageWidth, targetHeight, boardHeight, addendOne, addendTwo, menuOpen, swipeDragY, swipeDragX, handleDone, handleDismiss, showHint]);
+
     if (!currentGame) return null;
 
     return (
@@ -408,24 +429,7 @@ const DialOverlay: React.FC<Props> = ({
                         offset: targetWidth * index,
                         index,
                     })}
-                    renderItem={({ item: pid }) => (
-                        <View style={{ width: targetWidth, paddingHorizontal: MARGIN_H }}>
-                            <PlayerDialPage
-                                playerId={pid}
-                                pageWidth={pageWidth}
-                                pageHeight={targetHeight}
-                                boardHeight={boardHeight}
-                                addendOne={addendOne}
-                                addendTwo={addendTwo}
-                                menuOpen={menuOpen}
-                                swipeDragY={swipeDragY}
-                                swipeDragX={swipeDragX}
-                                onDone={handleDone}
-                                onDismiss={handleDismiss}
-                                showHint={showHint}
-                            />
-                        </View>
-                    )}
+                    renderItem={renderItem}
                     onMomentumScrollEnd={handleScrollEnd}
                 />
             </Animated.View>
