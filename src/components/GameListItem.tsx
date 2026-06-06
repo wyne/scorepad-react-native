@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { memo, useCallback } from 'react';
 
 import { ParamListBase } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -114,4 +114,4 @@ const styles = StyleSheet.create({
     }
 });
 
-export default GameListItem;
+export default memo(GameListItem);
