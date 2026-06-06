@@ -1,8 +1,8 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useLayoutEffect, useState } from 'react';
 
 import { LayoutChangeEvent, LayoutRectangle, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Icon } from 'react-native-elements';
-import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
+import Animated, { SharedValue, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useAppSelector } from '../../../redux/hooks';
@@ -36,30 +36,27 @@ interface PlayerRowProps {
     playerId: string;
     index: number;
     roundCurrent: number;
-    dimmed: boolean;
+    svDimmed: SharedValue<boolean>;
     disabled: boolean;
     onRowPress: (id: string) => void;
 }
 
-const PlayerRow: React.FC<PlayerRowProps> = ({ playerId, index, roundCurrent, dimmed, disabled, onRowPress }) => {
+const PlayerRow: React.FC<PlayerRowProps> = ({ playerId, index, roundCurrent, svDimmed, disabled, onRowPress }) => {
     const player = useAppSelector((state) => selectPlayerById(state, playerId));
     const currentGame = useAppSelector(selectCurrentGame);
     const isWinner = !!(currentGame?.locked && currentGame?.winnerIds?.includes(playerId));
     const { roundScore, previousTotal, currentTotal } = useAppSelector(
         (state) => selectPlayerRoundStats(state, playerId, roundCurrent)
     );
-    const dimOpacity = useSharedValue(1);
     const breakdownOpacity = useSharedValue(1);
-
-    React.useEffect(() => {
-        dimOpacity.value = withTiming(dimmed ? 0.28 : 1, { duration: 280 });
-    }, [dimmed]);
 
     React.useEffect(() => {
         breakdownOpacity.value = withTiming(roundScore !== 0 ? 1 : 0, { duration: 220 });
     }, [roundScore]);
 
-    const rowStyle = useAnimatedStyle(() => ({ opacity: dimOpacity.value }));
+    const rowStyle = useAnimatedStyle(() => ({
+        opacity: withTiming(svDimmed.value ? 0.28 : 1, { duration: 280 }),
+    }));
     const breakdownStyle = useAnimatedStyle(() => ({ opacity: breakdownOpacity.value }));
 
     if (!player) return null;
@@ -155,6 +152,11 @@ const RowsBoard: React.FC = () => {
     const insets = useSafeAreaInsets();
     const [selectedId, setSelectedId] = useState<string | null>(null);
     const [boardLayout, setBoardLayout] = useState<LayoutRectangle | null>(null);
+    const svDimmed = useSharedValue(false);
+
+    useLayoutEffect(() => {
+        svDimmed.value = selectedId !== null;
+    }, [selectedId]);
 
     const handleBoardLayout = useCallback((e: LayoutChangeEvent) => {
         setBoardLayout(e.nativeEvent.layout);
@@ -192,7 +194,7 @@ const RowsBoard: React.FC = () => {
                         playerId={id}
                         index={index}
                         roundCurrent={roundCurrent}
-                        dimmed={selectedId !== null}
+                        svDimmed={svDimmed}
                         disabled={!!(currentGame?.locked || menuOpen)}
                         onRowPress={handleRowPress}
                     />
