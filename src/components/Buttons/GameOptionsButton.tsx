@@ -47,66 +47,72 @@ const GameOptionsButton: React.FunctionComponent = () => {
             ? `Spin: ${addendOne} / Hold: ${addendTwo}`
             : `Swipe: ${addendOne} / Hold: ${addendTwo}`;
 
-    const menuActions: MenuAction[] = [
+    const gestureActions: MenuAction[] = [
         {
-            id: 'gestures',
-            title: 'Point Gestures',
-            displayInline: true,
-            subactions: [
-                {
-                    id: 'swipe',
-                    title: 'Swipe',
-                    image: 'hand.draw',
-                    imageColor: theme.text,
-                    state: isSwipe ? 'on' : 'off',
-                },
-                {
-                    id: 'tap',
-                    title: 'Tap',
-                    image: 'hand.point.up',
-                    imageColor: theme.text,
-                    state: isTap ? 'on' : 'off',
-                },
-                {
-                    id: 'dial',
-                    title: 'Dial',
-                    subtitle: showDialDot ? 'New' : undefined,
-                    image: 'dial.min',
-                    imageColor: theme.text,
-                    state: isDial ? 'on' : 'off',
-                },
-                {
-                    id: 'about-gestures',
-                    title: 'About Gestures',
-                    image: 'info.circle',
-                    imageColor: theme.text,
-                },
-            ],
+            id: 'swipe',
+            title: 'Swipe',
+            image: 'hand.draw',
+            imageColor: theme.text,
+            state: isSwipe ? 'on' : 'off',
         },
         {
-            id: 'settings',
-            title: 'Settings',
-            displayInline: true,
-            subactions: [
-                {
-                    id: 'point-values',
-                    title: 'Point Values',
-                    subtitle: pointValuesSubtitle,
-                    image: 'plusminus',
-                    imageColor: theme.text,
-                },
-                {
-                    id: 'fullscreen',
-                    title: 'Fullscreen',
-                    image: fullscreen
-                        ? 'arrow.down.right.and.arrow.up.left'
-                        : 'arrow.up.left.and.arrow.down.right',
-                    imageColor: theme.text,
-                    state: fullscreen ? 'on' : 'off',
-                },
-            ],
+            id: 'tap',
+            title: 'Tap',
+            image: 'hand.point.up',
+            imageColor: theme.text,
+            state: isTap ? 'on' : 'off',
+        },
+        {
+            id: 'dial',
+            title: 'Dial',
+            subtitle: showDialDot ? 'New' : undefined,
+            image: 'dial.min',
+            imageColor: theme.text,
+            state: isDial ? 'on' : 'off',
+        },
+        {
+            id: 'about-gestures',
+            title: 'About Gestures',
+            image: 'info.circle',
+            imageColor: theme.text,
         },
     ];
+
+    const settingsActions: MenuAction[] = [
+        {
+            id: 'point-values',
+            title: 'Point Values',
+            subtitle: pointValuesSubtitle,
+            image: 'plusminus',
+            imageColor: theme.text,
+        },
+        {
+            id: 'fullscreen',
+            title: 'Fullscreen',
+            image: fullscreen
+                ? 'arrow.down.right.and.arrow.up.left'
+                : 'arrow.up.left.and.arrow.down.right',
+            imageColor: theme.text,
+            state: fullscreen ? 'on' : 'off',
+        },
+    ];
+
+    const menuActions: MenuAction[] = Platform.OS === 'android'
+        ? [...gestureActions, ...settingsActions]
+        : [
+            {
+                id: 'gestures',
+                title: 'Point Gestures',
+                displayInline: true,
+                subactions: gestureActions,
+            },
+            {
+                id: 'settings',
+                title: 'Settings',
+                displayInline: true,
+                subactions: settingsActions,
+            },
+        ];
 
     const handleAction = (event: string) => {
         switch (event) {
