@@ -427,6 +427,9 @@ const DialOverlay: React.FC<Props> = ({
                     scrollEnabled={!menuOpen}
                     showsHorizontalScrollIndicator={false}
                     decelerationRate="fast"
+                    windowSize={3}
+                    initialNumToRender={1}
+                    maxToRenderPerBatch={2}
                     onLayout={() => {
                         flatListRef.current?.scrollToOffset({
                             offset: targetWidth * activeIndexRef.current,
