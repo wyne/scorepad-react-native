@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 
 import * as Haptics from 'expo-haptics';
 import { Pressable, StyleSheet, Text, TextInput, TextInputProps, View } from 'react-native';
@@ -24,6 +24,8 @@ const AnimatedTextInput = Animated.createAnimatedComponent(TextInput as React.Co
 import { POWER_HOLD_ACTIVATION_MS, POWER_HOLD_INDICATOR_DELAY_MS } from '../interactionConstants';
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
+const AnimatedLine = Animated.createAnimatedComponent(Line);
+const AnimatedPath = Animated.createAnimatedComponent(Path);
 
 const STEP_DEG = 30;
 const ACCENT = '#3a86ff';
@@ -84,11 +86,10 @@ const DialControl: React.FC<Props> = ({
     // Pip colour (contrasts with the ink on the ring)
     const pipColor = ink === '#000' ? 'rgba(255,255,255,0.75)' : 'rgba(0,0,0,0.75)';
 
-    // Visual state (React state — drives SVG re-renders)
-    const [handleAngleDeg, setHandleAngleDeg] = useState(0);
-    const [trailStartDeg, setTrailStartDeg] = useState(0);
-    const [accDegrees, setAccDegrees] = useState(0);   // accumulated rotation since drag start
-    const [isDragging, setIsDragging] = useState(false);
+    // Drag visual state — SharedValues on UI thread, drives SVG via useAnimatedProps
+    const svIsDragging = useSharedValue(false);
+    const svTrailStartDeg = useSharedValue(0);
+    // svLastAngle and svAccDeg (below) are reused for notch position and trail arc
 
     const numScale = useSharedValue(1);
     const numScaleStyle = useAnimatedStyle(() => ({
@@ -233,28 +234,54 @@ const DialControl: React.FC<Props> = ({
         text: String(svNewTotal.value),
     }));
 
+    // Notch indicator — position and visibility driven by UI-thread SharedValues
+    const notchAnimProps = useAnimatedProps(() => {
+        const rad = svLastAngle.value * Math.PI / 180;
+        const inner = R - SW / 2 + 6;
+        const outer = R + SW / 2 - 6;
+        return {
+            x1: C + inner * Math.sin(rad),
+            y1: C - inner * Math.cos(rad),
+            x2: C + outer * Math.sin(rad),
+            y2: C - outer * Math.cos(rad),
+            strokeOpacity: svIsDragging.value ? 1 : 0,
+        };
+    });
+
+    // Trail arc path — computed on UI thread from accumulated rotation
+    const trailAnimProps = useAnimatedProps(() => {
+        'worklet';
+        const dragging = svIsDragging.value;
+        const acc = svAccDeg.value;
+        const absAcc = Math.abs(acc);
+        if (!dragging || absAcc <= 1 || absAcc >= 360) {
+            return { d: 'M 0 0', strokeOpacity: 0 };
+        }
+        const isCW = acc >= 0;
+        const sweepDeg = Math.min(absAcc, 359.9);
+        const startDeg = svTrailStartDeg.value;
+        const endDeg = isCW ? startDeg + sweepDeg : startDeg - sweepDeg;
+        const toRad = (d: number) => d * Math.PI / 180;
+        const sx = C + R * Math.sin(toRad(startDeg));
+        const sy = C - R * Math.cos(toRad(startDeg));
+        const ex = C + R * Math.sin(toRad(endDeg));
+        const ey = C - R * Math.cos(toRad(endDeg));
+        const largeArc = sweepDeg > 180 ? 1 : 0;
+        const sweep = isCW ? 1 : 0;
+        return {
+            d: `M ${sx} ${sy} A ${R} ${R} 0 ${largeArc} ${sweep} ${ex} ${ey}`,
+            strokeOpacity: 0.45,
+        };
+    });
+
+    // Full-circle indicator — visible when a complete rotation is accumulated
+    const fullCircleAnimProps = useAnimatedProps(() => ({
+        strokeOpacity: svIsDragging.value && Math.abs(svAccDeg.value) >= 360 ? 0.9 : 0,
+    }));
+
     const handleDeactivate = useCallback(() => {
         onToggleMode(false);
     }, [onToggleMode]);
-
-    const handleAngleUpdate = useCallback((deg: number) => {
-        setHandleAngleDeg(deg);
-    }, []);
-
-    const handleAccUpdate = useCallback((acc: number) => {
-        setAccDegrees(acc);
-    }, []);
-
-    const handleDragStart = useCallback((startDeg: number) => {
-        setTrailStartDeg(startDeg);
-        setIsDragging(true);
-        setAccDegrees(0);
-    }, []);
-
-    const handleDragEnd = useCallback(() => {
-        setIsDragging(false);
-        setAccDegrees(0);
-    }, []);
 
     const panGesture = Gesture.Pan()
         .enabled(!menuOpen)
@@ -270,9 +297,9 @@ const DialControl: React.FC<Props> = ({
             const dy = e.y - C;
             const angle = Math.atan2(dx, -dy) * 180 / Math.PI;
             svLastAngle.value = angle;
+            svTrailStartDeg.value = angle;
+            svIsDragging.value = true;
 
-            runOnJS(handleDragStart)(angle);
-            runOnJS(handleAngleUpdate)(angle);
             runOnJS(startLongPress)();
         })
         .onUpdate((e) => {
@@ -291,39 +318,29 @@ const DialControl: React.FC<Props> = ({
             svAccDeg.value += delta;
             svLastAngle.value = angle;
 
-            runOnJS(handleAngleUpdate)(angle);
-            runOnJS(handleAccUpdate)(svAccDeg.value);
-
             const steps = Math.round(svAccDeg.value / STEP_DEG);
             const newVal = svStartValue.value + steps * svInc.value;
             runOnJS(handleBump)(newVal);
         })
         .onEnd(() => {
+            svIsDragging.value = false;
+            svAccDeg.value = 0;
             runOnJS(stopLongPress)();
             runOnJS(handleDeactivate)();
-            runOnJS(handleDragEnd)();
         })
         .onFinalize(() => {
+            svIsDragging.value = false;
+            svAccDeg.value = 0;
             runOnJS(stopLongPress)();
             runOnJS(handleDeactivate)();
-            runOnJS(handleDragEnd)();
         });
 
     // --- SVG geometry ---
     const ringColor = isSecondary ? ACCENT : ink;
     const trackColor = inkA(ink, 0.18);
 
-    // Notch indicator: short radial line at handleAngleDeg on the ring
-    const notchRad = handleAngleDeg * Math.PI / 180;
-    const notchInner = R - SW / 2 + 6;
-    const notchOuter = R + SW / 2 - 6;
-    const notchX1 = C + notchInner * Math.sin(notchRad);
-    const notchY1 = C - notchInner * Math.cos(notchRad);
-    const notchX2 = C + notchOuter * Math.sin(notchRad);
-    const notchY2 = C - notchOuter * Math.cos(notchRad);
-
-    // Tick marks on the ring
-    const ticks = Array.from({ length: 12 }, (_, i) => {
+    // Tick marks — memoized, only recomputed when dial size changes
+    const ticks = useMemo(() => Array.from({ length: 12 }, (_, i) => {
         const t = (i * 30) * Math.PI / 180;
         const tickInner = R - SW * 0.18;
         const tickOuter = R + SW * 0.18;
@@ -331,29 +348,7 @@ const DialControl: React.FC<Props> = ({
             x1: C + tickInner * Math.sin(t), y1: C - tickInner * Math.cos(t),
             x2: C + tickOuter * Math.sin(t), y2: C - tickOuter * Math.cos(t),
         };
-    });
-
-    // Trail arc — use explicit SVG Path so there's no seam/reset artifact at 0°.
-    // strokeDasharray on a circle resets at the path's join point (top after
-    // our rotate(-90) transform); a Path arc avoids that entirely.
-    const absAcc = Math.abs(accDegrees);
-    const isFullCircle = isDragging && absAcc >= 360;
-
-    let trailPathD = '';
-    if (isDragging && absAcc > 1 && !isFullCircle) {
-        const isCW = accDegrees >= 0;
-        // Cap just under 360 so the arc command stays valid (360° = degenerate)
-        const sweepDeg = Math.min(absAcc, 359.9);
-        const endDeg = isCW ? trailStartDeg + sweepDeg : trailStartDeg - sweepDeg;
-        const toRad = (d: number) => d * Math.PI / 180;
-        const sx = C + R * Math.sin(toRad(trailStartDeg));
-        const sy = C - R * Math.cos(toRad(trailStartDeg));
-        const ex = C + R * Math.sin(toRad(endDeg));
-        const ey = C - R * Math.cos(toRad(endDeg));
-        const largeArc = sweepDeg > 180 ? 1 : 0;
-        const sweep = isCW ? 1 : 0;
-        trailPathD = `M ${sx} ${sy} A ${R} ${R} 0 ${largeArc} ${sweep} ${ex} ${ey}`;
-    }
+    }), [C, R, SW]);
 
     return (
         <View style={styles.container}>
@@ -400,32 +395,25 @@ const DialControl: React.FC<Props> = ({
                             />
                         ))}
 
-                        {/* Full-circle trail when rotation ≥ 360° — solid/bold */}
-                        {isFullCircle && (
-                            <Circle cx={C} cy={C} r={R} fill="none"
-                                stroke={pipColor} strokeWidth={SW * 0.55}
-                                strokeOpacity={0.9}
-                            />
-                        )}
+                        {/* Full-circle trail when rotation ≥ 360° — opacity driven by worklet */}
+                        <AnimatedCircle cx={C} cy={C} r={R} fill="none"
+                            stroke={pipColor} strokeWidth={SW * 0.55}
+                            animatedProps={fullCircleAnimProps}
+                        />
 
-                        {/* Partial trail arc — lighter while building up to a full circle */}
-                        {trailPathD !== '' && (
-                            <Path
-                                d={trailPathD}
-                                fill="none"
-                                stroke={pipColor} strokeWidth={SW * 0.55}
-                                strokeOpacity={0.45}
-                                strokeLinecap="round"
-                            />
-                        )}
+                        {/* Partial trail arc — d and opacity driven by worklet */}
+                        <AnimatedPath
+                            animatedProps={trailAnimProps}
+                            fill="none"
+                            stroke={pipColor} strokeWidth={SW * 0.55}
+                            strokeLinecap="round"
+                        />
 
-                        {/* Notch indicator — only visible while dragging */}
-                        {isDragging && (
-                            <Line
-                                x1={notchX1} y1={notchY1} x2={notchX2} y2={notchY2}
-                                stroke={pipColor} strokeWidth={3.5} strokeLinecap="round"
-                            />
-                        )}
+                        {/* Notch indicator — position and opacity driven by worklet */}
+                        <AnimatedLine
+                            animatedProps={notchAnimProps}
+                            stroke={pipColor} strokeWidth={3.5} strokeLinecap="round"
+                        />
                     </Svg>
 
                     {/* Centre value */}
@@ -472,7 +460,6 @@ const DialControl: React.FC<Props> = ({
                     disabled={menuOpen}
                     onPress={() => {
                         onChange(svValue.value - addendOne);
-                        setHandleAngleDeg(a => a - STEP_DEG);
                         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                     }}
                     style={({ pressed }) => [
@@ -506,7 +493,6 @@ const DialControl: React.FC<Props> = ({
                     disabled={menuOpen}
                     onPress={() => {
                         onChange(svValue.value + addendOne);
-                        setHandleAngleDeg(a => a + STEP_DEG);
                         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                     }}
                     style={({ pressed }) => [

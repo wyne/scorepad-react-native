@@ -140,8 +140,6 @@ const PlayerDialPage: React.FC<PlayerDialPageProps> = ({
             isDismissing.value = false;
         });
 
-    console.log('[DialCard render]', player?.playerName);
-
     if (!player) return null;
 
     const ink = inkFor(player.color ?? '#444');
