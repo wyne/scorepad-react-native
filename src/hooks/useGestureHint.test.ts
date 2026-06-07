@@ -31,7 +31,7 @@ const createStore = (scores: number[] = [0]) =>
 
 const wrap = (store: ReturnType<typeof createStore>) =>
     ({ children }: { children: React.ReactNode }) =>
-        React.createElement(Provider, { store }, children);
+        React.createElement(Provider, { store, children });
 
 describe('useGestureHint', () => {
     // req 1: new game with no scores → show hint
