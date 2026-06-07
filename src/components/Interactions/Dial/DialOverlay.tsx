@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 import * as Haptics from 'expo-haptics';
 import { FlatList, NativeScrollEvent, NativeSyntheticEvent, Pressable, StyleSheet, Text, View } from 'react-native';
@@ -12,6 +12,7 @@ import Animated, {
     withSpring,
     withTiming,
 } from 'react-native-reanimated';
+
 
 import { useAppDispatch, useAppSelector } from '../../../../redux/hooks';
 import { playerRoundScoreSet, selectPlayerById, selectPlayerRoundStats } from '../../../../redux/PlayersSlice';
@@ -85,6 +86,15 @@ const PlayerDialPage: React.FC<PlayerDialPageProps> = ({
     const { roundScore, previousTotal, currentTotal: scoreTotal } = useAppSelector(
         state => selectPlayerRoundStats(state, playerId, roundCurrent)
     );
+
+    // Stable SharedValue refs — same object identity every render, so React.memo(DialControl)
+    // skips re-renders when score changes. The displayed numbers update via Reanimated on the UI thread.
+    const svRoundScore = useSharedValue(roundScore);
+    const svScoreTotal = useSharedValue(scoreTotal);
+    useLayoutEffect(() => {
+        svRoundScore.value = roundScore;
+        svScoreTotal.value = scoreTotal;
+    }, [roundScore, scoreTotal]);
 
     const [isSecondary, setIsSecondary] = useState(false);
 
@@ -177,12 +187,12 @@ const PlayerDialPage: React.FC<PlayerDialPageProps> = ({
                     {/* Center: dial */}
                     <View style={styles.lsCenter}>
                         <DialControl
-                            value={roundScore}
+                            svValue={svRoundScore}
                             onChange={handleChange}
                             onToggleMode={setIsSecondary}
                             isSecondary={isSecondary}
                             ink={ink}
-                            newTotal={scoreTotal}
+                            svNewTotal={svScoreTotal}
                             addendOne={addendOne}
                             addendTwo={addendTwo}
                             dialSize={lsDialSize}
@@ -240,12 +250,12 @@ const PlayerDialPage: React.FC<PlayerDialPageProps> = ({
                 {/* Dial */}
                 <View style={styles.dialWrap}>
                     <DialControl
-                        value={roundScore}
+                        svValue={svRoundScore}
                         onChange={handleChange}
                         onToggleMode={setIsSecondary}
                         isSecondary={isSecondary}
                         ink={ink}
-                        newTotal={scoreTotal}
+                        svNewTotal={svScoreTotal}
                         addendOne={addendOne}
                         addendTwo={addendTwo}
                         dialSize={dialSize}
@@ -269,6 +279,8 @@ const PlayerDialPage: React.FC<PlayerDialPageProps> = ({
     );
 };
 
+const MemoizedPlayerDialPage = React.memo(PlayerDialPage);
+
 // ─── DialOverlay ──────────────────────────────────────────────────────────────
 
 interface Props {
@@ -279,6 +291,8 @@ interface Props {
     safeAreaTop: number;
     showHint: boolean;
     onClose: () => void;
+    svOpacity: SharedValue<number>;
+    svSlideY: SharedValue<number>;
 }
 
 const DialOverlay: React.FC<Props> = ({
@@ -289,6 +303,8 @@ const DialOverlay: React.FC<Props> = ({
     safeAreaTop,
     showHint,
     onClose,
+    svOpacity,
+    svSlideY,
 }) => {
     const currentGame = useAppSelector(selectCurrentGame);
     const { menuOpen } = useMenuOpen();
@@ -308,16 +324,8 @@ const DialOverlay: React.FC<Props> = ({
     const targetHeight = boardHeight - marginTop - MARGIN_BOTTOM;
     const pageWidth = boardWidth - MARGIN_H * 2;
 
-    const opacity = useSharedValue(0);
-    const slideY = useSharedValue(20);
     const swipeDragY = useSharedValue(0);
     const swipeDragX = useSharedValue(0);
-
-    // Fade in + slide up on mount
-    useEffect(() => {
-        opacity.value = withTiming(1, { duration: 200 });
-        slideY.value = withTiming(0, { duration: 250, easing: Easing.out(Easing.cubic) });
-    }, []);
 
     const panelStyle = useAnimatedStyle(() => ({
         position: 'absolute',
@@ -325,21 +333,21 @@ const DialOverlay: React.FC<Props> = ({
         left: 0,
         width: targetWidth,
         height: targetHeight,
-        opacity: opacity.value,
+        opacity: svOpacity.value,
         transform: [
-            { translateY: swipeDragY.value + slideY.value },
+            { translateY: swipeDragY.value + svSlideY.value },
             { translateX: swipeDragX.value },
         ],
     }));
 
     const slideOut = useCallback((then: () => void) => {
-        opacity.value = withTiming(0, { duration: 150 });
+        svOpacity.value = withTiming(0, { duration: 150 });
         swipeDragY.value = withTiming(
             boardHeight,
             { duration: 250, easing: Easing.in(Easing.cubic) },
             () => runOnJS(then)(),
         );
-    }, [boardHeight]);
+    }, [svOpacity, boardHeight]);
 
     // Close if the game becomes locked while the overlay is open
     useEffect(() => {
@@ -380,6 +388,25 @@ const DialOverlay: React.FC<Props> = ({
         setActiveIndex(newIndex);
     }, [targetWidth]);
 
+    const renderItem = useCallback(({ item: pid }: { item: string }) => (
+        <View style={{ width: targetWidth, paddingHorizontal: MARGIN_H }}>
+            <MemoizedPlayerDialPage
+                playerId={pid}
+                pageWidth={pageWidth}
+                pageHeight={targetHeight}
+                boardHeight={boardHeight}
+                addendOne={addendOne}
+                addendTwo={addendTwo}
+                menuOpen={menuOpen}
+                swipeDragY={swipeDragY}
+                swipeDragX={swipeDragX}
+                onDone={handleDone}
+                onDismiss={handleDismiss}
+                showHint={showHint}
+            />
+        </View>
+    ), [pageWidth, targetHeight, boardHeight, addendOne, addendTwo, menuOpen, swipeDragY, swipeDragX, handleDone, handleDismiss, showHint]);
+
     if (!currentGame) return null;
 
     return (
@@ -397,6 +424,10 @@ const DialOverlay: React.FC<Props> = ({
                     scrollEnabled={!menuOpen}
                     showsHorizontalScrollIndicator={false}
                     decelerationRate="fast"
+                    windowSize={3}
+                    initialNumToRender={1}
+                    maxToRenderPerBatch={2}
+                    initialScrollIndex={initialIndex}
                     onLayout={() => {
                         flatListRef.current?.scrollToOffset({
                             offset: targetWidth * activeIndexRef.current,
@@ -408,24 +439,7 @@ const DialOverlay: React.FC<Props> = ({
                         offset: targetWidth * index,
                         index,
                     })}
-                    renderItem={({ item: pid }) => (
-                        <View style={{ width: targetWidth, paddingHorizontal: MARGIN_H }}>
-                            <PlayerDialPage
-                                playerId={pid}
-                                pageWidth={pageWidth}
-                                pageHeight={targetHeight}
-                                boardHeight={boardHeight}
-                                addendOne={addendOne}
-                                addendTwo={addendTwo}
-                                menuOpen={menuOpen}
-                                swipeDragY={swipeDragY}
-                                swipeDragX={swipeDragX}
-                                onDone={handleDone}
-                                onDismiss={handleDismiss}
-                                showHint={showHint}
-                            />
-                        </View>
-                    )}
+                    renderItem={renderItem}
                     onMomentumScrollEnd={handleScrollEnd}
                 />
             </Animated.View>
@@ -541,4 +555,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default DialOverlay;
+export default React.memo(DialOverlay);

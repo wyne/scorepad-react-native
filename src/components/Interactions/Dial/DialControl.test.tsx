@@ -2,17 +2,33 @@
 import React from 'react';
 
 import { fireEvent, render } from '@testing-library/react-native';
+import { SharedValue } from 'react-native-reanimated';
 
 jest.mock('react-native-reanimated', () => {
+    const React = jest.requireActual('react');
     const { View } = jest.requireActual('react-native');
     return {
         __esModule: true,
         // withTiming must NOT invoke callbacks — the repeat-chain uses callbacks and
         // would loop infinitely with a synchronous-callback mock.
-        default: { View, createAnimatedComponent: (c: unknown) => c },
+        default: {
+            View,
+            // Spread animatedProps onto the wrapped component; map `text` → `value` so
+            // getByDisplayValue works in tests (mirrors Reanimated's native TextInput handling).
+            createAnimatedComponent: (Component: React.ComponentType<Record<string, unknown>>) => {
+                return ({ animatedProps, ...rest }: { animatedProps?: Record<string, unknown> }) => {
+                    const { text, ...animatedRest } = animatedProps ?? {};
+                    return React.createElement(Component, {
+                        ...rest,
+                        ...animatedRest,
+                        ...(text !== undefined ? { value: String(text) } : {}),
+                    });
+                };
+            },
+        },
         useSharedValue: (v: unknown) => ({ value: v }),
         useAnimatedStyle: () => ({}),
-        useAnimatedProps: () => ({}),
+        useAnimatedProps: (fn: () => Record<string, unknown>) => fn(),
         withTiming: (v: unknown) => v,
         withDelay: (_ms: number, v: unknown) => v,
         withSequence: (...vals: unknown[]) => vals[0],
@@ -59,13 +75,16 @@ jest.mock('expo-haptics', () => ({
 
 import DialControl from './DialControl';
 
+// Creates a mock SharedValue matching the shape returned by the Reanimated mock
+const mkSv = <T,>(v: T) => ({ value: v }) as unknown as SharedValue<T>;
+
 const defaultProps = {
-    value: 0,
+    svValue: mkSv(0),
     onChange: jest.fn(),
     onToggleMode: jest.fn(),
     isSecondary: false,
     ink: '#000',
-    newTotal: 10,
+    svNewTotal: mkSv(10),
     addendOne: 1,
     addendTwo: 10,
     dialSize: 200,
@@ -78,13 +97,13 @@ beforeEach(() => {
 
 describe('DialControl — rendering', () => {
     it('shows the current round score in the dial center', () => {
-        const { getByText } = render(<DialControl {...defaultProps} value={5} />);
-        expect(getByText('+5')).toBeTruthy();
+        const { getByDisplayValue } = render(<DialControl {...defaultProps} svValue={mkSv(5)} />);
+        expect(getByDisplayValue('+5')).toBeTruthy();
     });
 
     it('shows a negative value correctly', () => {
-        const { getByText } = render(<DialControl {...defaultProps} value={-3} />);
-        expect(getByText('-3')).toBeTruthy();
+        const { getByDisplayValue } = render(<DialControl {...defaultProps} svValue={mkSv(-3)} />);
+        expect(getByDisplayValue('-3')).toBeTruthy();
     });
 
     it('shows addendOne on both buttons', () => {
@@ -94,8 +113,8 @@ describe('DialControl — rendering', () => {
     });
 
     it('shows NEW TOTAL value', () => {
-        const { getByText } = render(<DialControl {...defaultProps} newTotal={42} />);
-        expect(getByText('42')).toBeTruthy();
+        const { getByDisplayValue, getByText } = render(<DialControl {...defaultProps} svNewTotal={mkSv(42)} />);
+        expect(getByDisplayValue('42')).toBeTruthy();
         expect(getByText('NEW TOTAL')).toBeTruthy();
     });
 
@@ -125,21 +144,21 @@ describe('DialControl — rendering', () => {
 describe('DialControl — button taps', () => {
     it('calls onChange with value + addendOne on + tap', () => {
         const onChange = jest.fn();
-        const { getByTestId } = render(<DialControl {...defaultProps} value={5} addendOne={1} onChange={onChange} />);
+        const { getByTestId } = render(<DialControl {...defaultProps} svValue={mkSv(5)} addendOne={1} onChange={onChange} />);
         fireEvent.press(getByTestId('btn-increment'));
         expect(onChange).toHaveBeenCalledWith(6);
     });
 
     it('calls onChange with value - addendOne on − tap', () => {
         const onChange = jest.fn();
-        const { getByTestId } = render(<DialControl {...defaultProps} value={5} addendOne={1} onChange={onChange} />);
+        const { getByTestId } = render(<DialControl {...defaultProps} svValue={mkSv(5)} addendOne={1} onChange={onChange} />);
         fireEvent.press(getByTestId('btn-decrement'));
         expect(onChange).toHaveBeenCalledWith(4);
     });
 
     it('respects a custom addendOne', () => {
         const onChange = jest.fn();
-        const { getByTestId } = render(<DialControl {...defaultProps} value={0} addendOne={5} onChange={onChange} />);
+        const { getByTestId } = render(<DialControl {...defaultProps} svValue={mkSv(0)} addendOne={5} onChange={onChange} />);
         fireEvent.press(getByTestId('btn-increment'));
         expect(onChange).toHaveBeenCalledWith(5);
     });

@@ -6,7 +6,6 @@ import Animated, { Easing, FadeIn } from 'react-native-reanimated';
 import { makeSelectPlayerColors } from '../../../redux/GamesSlice';
 import { useAppSelector } from '../../../redux/hooks';
 import { selectCurrentGame, selectInteractionType } from '../../../redux/selectors';
-import { useGestureHint } from '../../hooks/useGestureHint';
 import { useTheme } from '../../theme';
 import { interactionComponents } from '../Interactions/InteractionComponents';
 import { InteractionType } from '../Interactions/InteractionType';
@@ -21,6 +20,7 @@ interface Props {
     rows: number;
     width: number;
     height: number;
+    showHint: boolean;
 }
 
 const FlexboxTile: React.FunctionComponent<Props> = React.memo(({
@@ -29,7 +29,8 @@ const FlexboxTile: React.FunctionComponent<Props> = React.memo(({
     height,
     cols,
     rows,
-    playerId
+    playerId,
+    showHint,
 }) => {
     // Short circuit if width or height is not yet defined
     if (!(width > 0 && height > 0)) return null;
@@ -50,7 +51,6 @@ const FlexboxTile: React.FunctionComponent<Props> = React.memo(({
     // Dynamic InteractionComponent
     const interactionType: InteractionType = useAppSelector(selectInteractionType);
     const InteractionComponent = interactionComponents[interactionType];
-    const showHint = useGestureHint();
 
     return (
         <Animated.View

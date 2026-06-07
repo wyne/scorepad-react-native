@@ -25,6 +25,11 @@ jest.mock('react-native-reanimated', () => {
         useSharedValue: (v: unknown) => ({ value: v }),
         useAnimatedStyle: () => ({}),
         withTiming: (v: unknown) => v,
+        Easing: {
+            out: () => () => 0,
+            in: () => () => 0,
+            cubic: () => 0,
+        },
     };
 });
 
@@ -88,7 +93,7 @@ describe('RowsBoard', () => {
     it('opens the overlay when the game is unlocked and menu is closed', () => {
         const store = createStore();
         const { getByTestId, queryByTestId, getByText } = render(
-            <Provider store={store}><RowsBoard /></Provider>
+            <Provider store={store}><RowsBoard showHint={false} /></Provider>
         );
 
         expect(queryByTestId('inline-expand-overlay')).toBeNull();
@@ -100,7 +105,7 @@ describe('RowsBoard', () => {
     it('does not open the overlay when the game is locked', () => {
         const store = createStore({ locked: true });
         const { getByTestId, queryByTestId, getByText } = render(
-            <Provider store={store}><RowsBoard /></Provider>
+            <Provider store={store}><RowsBoard showHint={false} /></Provider>
         );
 
         fireLayouts(getByTestId);
@@ -112,7 +117,7 @@ describe('RowsBoard', () => {
         mockMenuOpen = true;
         const store = createStore();
         const { getByTestId, queryByTestId, getByText } = render(
-            <Provider store={store}><RowsBoard /></Provider>
+            <Provider store={store}><RowsBoard showHint={false} /></Provider>
         );
 
         fireLayouts(getByTestId);
@@ -124,33 +129,33 @@ describe('RowsBoard', () => {
 describe('RowsBoard — winner pill', () => {
     it('shows WINNER for a winner when the game is locked', () => {
         const store = createStore({ locked: true, winnerIds: ['player-1'] });
-        const { getAllByText } = render(<Provider store={store}><RowsBoard /></Provider>);
+        const { getAllByText } = render(<Provider store={store}><RowsBoard showHint={false} /></Provider>);
         expect(getAllByText('WINNER').length).toBeGreaterThanOrEqual(1);
     });
 
     it('does not show WINNER for a non-winner when the game is locked', () => {
         // player-1 is NOT a winner; only player-2 is
         const store = createStore({ locked: true, winnerIds: ['player-2'] }, ['player-1']);
-        const { queryByText } = render(<Provider store={store}><RowsBoard /></Provider>);
+        const { queryByText } = render(<Provider store={store}><RowsBoard showHint={false} /></Provider>);
         expect(queryByText('WINNER')).toBeNull();
     });
 
     it('does not show WINNER when the game is unlocked', () => {
         const store = createStore({ locked: false, winnerIds: ['player-1'] });
-        const { queryByText } = render(<Provider store={store}><RowsBoard /></Provider>);
+        const { queryByText } = render(<Provider store={store}><RowsBoard showHint={false} /></Provider>);
         expect(queryByText('WINNER')).toBeNull();
     });
 
     it('hides PREV and RND labels when the game is locked', () => {
         const store = createStore({ locked: true });
-        const { queryByText } = render(<Provider store={store}><RowsBoard /></Provider>);
+        const { queryByText } = render(<Provider store={store}><RowsBoard showHint={false} /></Provider>);
         expect(queryByText('PREV')).toBeNull();
         expect(queryByText('RND')).toBeNull();
     });
 
     it('shows PREV and RND labels when the game is unlocked', () => {
         const store = createStore({ locked: false });
-        const { getAllByText } = render(<Provider store={store}><RowsBoard /></Provider>);
+        const { getAllByText } = render(<Provider store={store}><RowsBoard showHint={false} /></Provider>);
         expect(getAllByText('PREV').length).toBeGreaterThanOrEqual(1);
         expect(getAllByText('RND').length).toBeGreaterThanOrEqual(1);
     });
