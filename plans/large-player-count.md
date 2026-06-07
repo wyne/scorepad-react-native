@@ -34,19 +34,35 @@ Currently the app supports up to 20 players (`MAX_PLAYERS` in `src/constants.ts`
 - The threshold itself should be a named constant (e.g., `MAX_PLAYERS_FLEXBOX = 12`)
 
 ### 4. Performance with large player counts
-**Known gaps** (from codebase analysis):
-- `AdditionTile` (`src/components/PlayerTiles/AdditionTile/AdditionTile.tsx:24`) is **not memoized** — every score change re-renders all N tiles
-- `PlayerListItem` (`src/components/PlayerListItem.tsx:24`) is **not memoized** — re-renders all rows on drag reorder
-- `selectSortedPlayerIdsByScore` in `src/components/ScoreLog/SortHelper.ts:30` reduces all scores on every call — O(N) per player = O(N²) total per render
-- `FlexboxTile` IS memoized (`src/components/Boards/FlexboxTile.tsx:26`) — this is the right layer; the fix is ensuring props passed to it are stable
-- Score update actions (`playerRoundScoreIncrement`, `playerRoundScoreSet`) fire one at a time — fine for interactive gestures
 
-**Recommendations**:
-- Wrap `AdditionTile` in `React.memo`
-- Wrap `PlayerListItem` in `React.memo`; memoize `renderItem` and `addPlayerHandler` in `SettingsScreen.tsx:121–132` with `useCallback`
-- Ensure interaction component dispatch callbacks use `useCallback` (check Swipe, HalfTap, Dial handlers)
-- `selectSortedPlayerIdsByScore` already uses `createSelector` — verify the input selectors are granular enough to only recompute when scores actually change
-- For RowsBoard (Dial mode, which is the required mode above threshold) — verify each row component subscribes only to its own player's selector, not the full player list
+**✅ Completed in [PR #621](https://github.com/wyne/scorepad-react-native/pull/621) (merged 2026-06-07)** — Dial/RowsBoard path is now large-player-count ready:
+
+| Metric | Before | After |
+|--------|--------|-------|
+| Score commit cost | ~2,500ms | ~5ms (~500×) |
+| React renders during drag | ~2 per frame | 0 |
+| Players mounted in FlatList | All N | 3 (windowSize=3) |
+| `PlayerRow` re-renders per score | 20 | 1 |
+| `PlayerDialPage` re-renders per score | 20 | 1 |
+| `DialControl` re-renders per score | 20 | **0** |
+| RowsBoard commit on overlay open | 63ms (all rows) | 37ms (rows bail out) |
+| Overlay visible at first paint | ~172ms post-tap | ~0ms (mid-animation) |
+
+Specific changes merged:
+- `PlayerRow`, `PlayerDialPage`, `DialOverlay` wrapped in `React.memo` with stable `useCallback` references
+- `DialControl` score text driven by `SharedValue<number>` + `useAnimatedProps` — bypasses React reconciliation entirely
+- `dimmed` boolean prop replaced with `SharedValue<boolean>` — all rows bail out on overlay open
+- `FlatList` capped to `windowSize=3` + `initialScrollIndex` — eliminates player-count proportional lag
+- All drag visual state (notch, trail arc, full-circle) moved to Reanimated UI thread via `useAnimatedProps` worklets
+- `GameSheet` conditionally renders score columns — eliminates all ScoreLog Redux subscriptions when sheet is collapsed
+- `useGestureHint` fixed to use `useHasAnyScore` (stable boolean) instead of score fingerprint sum
+- `useGestureHint` lifted to `GameScreen` so state survives gesture-type switches
+
+**Still pending** (FlexboxBoard path and SettingsScreen):
+- `AdditionTile` (`src/components/PlayerTiles/AdditionTile/AdditionTile.tsx:24`) is **not memoized** — every score change re-renders all N tiles (less critical now that Dial is enforced above threshold)
+- `PlayerListItem` (`src/components/PlayerListItem.tsx:24`) is **not memoized** — re-renders all rows on drag reorder
+- `SettingsScreen.tsx:121–132` — `renderItem` and `addPlayerHandler` not wrapped in `useCallback`
+- `selectSortedPlayerIdsByScore` in `src/components/ScoreLog/SortHelper.ts:30` — audit input selector granularity for O(N²) risk
 
 ---
 
@@ -116,10 +132,12 @@ With 50 players × many rounds of scores, the serialized state size grows. Unlik
 
 ## Suggested implementation order
 1. Define constants: `MAX_PLAYERS_FLEXBOX` threshold, new `MAX_PLAYERS` ceiling
-2. **Profile baseline**: extend `SeedData.ts` to generate a 50-player game, then use React DevTools Profiler (via Flipper or standalone) to measure render counts and timing during a score update, a ScoreLog open, and a SettingsScreen drag-reorder. Capture these numbers before any fixes as a baseline.
+2. **Profile baseline**: extend `SeedData.ts` to generate a 50-player game, then use React DevTools Profiler (via Flipper or standalone) to measure render counts and timing during a score update, a ScoreLog open, and a SettingsScreen drag-reorder. Capture these numbers before any fixes as a baseline. *(Baseline captured as part of PR #621 work — see metrics in section 4 above)*
 3. Add `interactionType` to `GameState`, migrate selector, update `GameOptionsButton`
 4. Gesture threshold enforcement in add/remove player flows + `GameOptionsButton` UI
-5. Performance: memoize `AdditionTile` and `PlayerListItem`; add `useCallback` to `renderItem` and interaction handlers; audit `selectSortedPlayerIdsByScore` input granularity; re-profile to validate improvement
+5. **Performance** (partially complete):
+   - ✅ **Done (PR #621)**: Dial/RowsBoard path — `PlayerRow`, `PlayerDialPage`, `DialOverlay` memoized; `DialControl` score display via Reanimated SharedValues; FlatList windowed to 3 pages; drag state on UI thread; overlay entrance animation pre-fired; `useGestureHint` fixed and lifted
+   - 🔲 **Remaining**: memoize `AdditionTile`; memoize `PlayerListItem` + `useCallback` for `renderItem`/`addPlayerHandler` in `SettingsScreen`; audit `selectSortedPlayerIdsByScore` input selectors; re-profile to validate
 6. Fix `GameListItem` player name truncation (`GameListItem.tsx:95–106`)
 7. *(Deferred)* New game player count picker UI
 8. *(Deferred, if profiling shows need)* ScoreLog virtualization
