@@ -48,7 +48,7 @@ const FlexboxTile: React.FunctionComponent<Props> = React.memo(({
     const heightPerc: DimensionValue = `${(100 / rows)}%`;
 
     // Dynamic InteractionComponent
-    const interactionType: InteractionType = useAppSelector(selectInteractionType);
+    const interactionType: InteractionType = useAppSelector(state => selectInteractionType(state, currentGameId));
     const InteractionComponent = interactionComponents[interactionType];
     const showHint = useGestureHint();
 

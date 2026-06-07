@@ -29,7 +29,7 @@ function useKeepScreenAwake(active: boolean): void {
 const ScoreBoardScreen: React.FunctionComponent = () => {
     const currentGameId = useAppSelector(state => state.settings.currentGameId);
     const keepScreenAwake = useAppSelector(state => state.settings.keepScreenAwake);
-    const interactionType = useAppSelector(selectInteractionType);
+    const interactionType = useAppSelector(state => selectInteractionType(state, currentGameId));
     const headerHeight = useHeaderHeight();
     useKeepScreenAwake(keepScreenAwake);
 

@@ -30,6 +30,7 @@ const mockState: Partial<RootState> = {
         roundCurrent: 0,
         roundTotal: 1,
         playerIds: ['player-1'],
+        interactionType: InteractionType.Dial,
       },
     },
     ids: ['game-1'],
@@ -70,10 +71,39 @@ describe('Redux selectors', () => {
             interactionType,
           },
         } as RootState;
-        
+
         const result = selectInteractionType(state);
         expect(result).toBe(interactionType);
       });
+    });
+
+    it('should return game-level interactionType when gameId provided', () => {
+      const state = mockState as RootState;
+      const result = selectInteractionType(state, 'game-1');
+      expect(result).toBe(InteractionType.Dial);
+    });
+
+    it('should fall back to global when game has no interactionType', () => {
+      const state = {
+        ...mockState,
+        games: {
+          entities: {
+            'game-1': {
+              ...mockState.games!.entities['game-1']!,
+              interactionType: undefined,
+            },
+          },
+          ids: ['game-1'],
+        },
+      } as RootState;
+      const result = selectInteractionType(state, 'game-1');
+      expect(result).toBe(InteractionType.SwipeVertical);
+    });
+
+    it('should fall back to global when gameId does not exist', () => {
+      const state = mockState as RootState;
+      const result = selectInteractionType(state, 'non-existent-game');
+      expect(result).toBe(InteractionType.SwipeVertical);
     });
   });
 
@@ -89,6 +119,7 @@ describe('Redux selectors', () => {
         roundCurrent: 0,
         roundTotal: 1,
         playerIds: ['player-1'],
+        interactionType: InteractionType.Dial,
       });
     });
 

@@ -3,16 +3,16 @@ import { InteractionType } from '../src/components/Interactions/InteractionType'
 import { selectGameById } from './GamesSlice';
 import { RootState } from './store';
 
-export const selectInteractionType = (state: RootState) => {
-    const interactionType: InteractionType = state.settings.interactionType;
+const validInteractionTypes = new Set(Object.values(InteractionType));
 
-    // Check if interactionType is a valid InteractionType
-    const isValidInteractionType = Object.values(InteractionType).includes(interactionType);
+export const selectInteractionType = (state: RootState, gameId?: string) => {
+    if (gameId) {
+        const gameType = selectGameById(state, gameId)?.interactionType;
+        if (gameType && validInteractionTypes.has(gameType)) return gameType;
+    }
 
-    // If interactionType is not valid, fall back to a default value
-    const safeInteractionType = isValidInteractionType ? interactionType : InteractionType.SwipeVertical;
-
-    return safeInteractionType;
+    const globalType: InteractionType = state.settings.interactionType;
+    return validInteractionTypes.has(globalType) ? globalType : InteractionType.SwipeVertical;
 };
 
 export const selectCurrentGame = (state: RootState) => {

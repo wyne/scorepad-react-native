@@ -5,8 +5,10 @@ import { MenuAction, MenuView } from '@react-native-menu/menu';
 import { SymbolView } from 'expo-symbols';
 import { StyleSheet, View, Text, Platform } from 'react-native';
 
+import { setGameInteractionType } from '../../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
-import { toggleHomeFullscreen, setInteractionType, markFeatureNotificationSeen } from '../../../redux/SettingsSlice';
+import { toggleHomeFullscreen, markFeatureNotificationSeen } from '../../../redux/SettingsSlice';
+import { selectInteractionType } from '../../../redux/selectors';
 import { logEvent } from '../../Analytics';
 import { FEATURE_DIAL_GESTURE } from '../../constants';
 import { useTheme } from '../../theme';
@@ -22,7 +24,7 @@ const GameOptionsButton: React.FunctionComponent = () => {
     const { setMenuOpen } = useMenuOpen();
 
     const currentGameId = useAppSelector(state => state.settings.currentGameId);
-    const interactionType = useAppSelector(state => state.settings.interactionType);
+    const interactionType = useAppSelector(state => selectInteractionType(state, currentGameId ?? undefined));
     const fullscreen = useAppSelector(state => state.settings.home_fullscreen);
     const installId = useAppSelector(state => state.settings.installId);
     const addendOne = useAppSelector(state => state.settings.addendOne);
@@ -117,15 +119,15 @@ const GameOptionsButton: React.FunctionComponent = () => {
     const handleAction = (event: string) => {
         switch (event) {
             case 'swipe':
-                dispatch(setInteractionType(InteractionType.SwipeVertical));
+                dispatch(setGameInteractionType({ gameId: currentGameId!, interactionType: InteractionType.SwipeVertical }));
                 logEvent('interaction_type', { interactionType: 'swipe_vertical', gameId: currentGameId });
                 break;
             case 'tap':
-                dispatch(setInteractionType(InteractionType.HalfTap));
+                dispatch(setGameInteractionType({ gameId: currentGameId!, interactionType: InteractionType.HalfTap }));
                 logEvent('interaction_type', { interactionType: 'half_tap', gameId: currentGameId });
                 break;
             case 'dial':
-                dispatch(setInteractionType(InteractionType.Dial));
+                dispatch(setGameInteractionType({ gameId: currentGameId!, interactionType: InteractionType.Dial }));
                 logEvent('interaction_type', { interactionType: 'radial_gesture', gameId: currentGameId });
                 break;
             case 'point-values':

@@ -4,6 +4,7 @@ import * as Crypto from 'expo-crypto';
 
 import { logEvent } from '../src/Analytics';
 import { getPalette } from '../src/ColorPalette';
+import { InteractionType } from '../src/components/Interactions/InteractionType';
 import { SortDirectionKey, SortSelectorKey } from '../src/components/ScoreLog/SortHelper';
 import logger from '../src/Logger';
 
@@ -23,6 +24,7 @@ export interface GameState {
     sortSelectorKey?: SortSelectorKey;
     sortDirectionKey?: SortDirectionKey;
     palette?: string;
+    interactionType?: InteractionType;
 }
 
 const gamesAdapter = createEntityAdapter({
@@ -103,6 +105,15 @@ const gamesSlice = createSlice({
                 changes: {
                     playerIds: action.payload.playerIds,
                 }
+            });
+        },
+        setGameInteractionType(state, action: PayloadAction<{ gameId: string, interactionType: InteractionType; }>) {
+            const game = state.entities[action.payload.gameId];
+            if (!game) { return; }
+
+            gamesAdapter.updateOne(state, {
+                id: action.payload.gameId,
+                changes: { interactionType: action.payload.interactionType }
             });
         },
         restoreAllGames(state, action: PayloadAction<Record<string, GameState>>) {
@@ -324,6 +335,7 @@ export const {
     gameDelete,
     setSortSelector,
     reorderPlayers,
+    setGameInteractionType,
     restoreAllGames,
 } = gamesSlice.actions;
 
