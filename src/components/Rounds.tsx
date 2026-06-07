@@ -1,7 +1,5 @@
 import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
 
-import { ParamListBase } from '@react-navigation/native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { LayoutChangeEvent, Platform, StyleSheet, View } from 'react-native';
 import { TouchableOpacity, ScrollView } from 'react-native-gesture-handler';
 
@@ -15,7 +13,7 @@ import { SortSelectorKey } from './ScoreLog/SortHelper';
 import TotalScoreColumn from './ScoreLog/TotalScoreColumn';
 
 interface Props {
-    navigation: NativeStackNavigationProp<ParamListBase, string, undefined>;
+    showScores?: boolean;
 }
 
 interface RoundScollOffset {
@@ -24,7 +22,7 @@ interface RoundScollOffset {
 
 const MemoizedRoundScoreColumn = React.memo(RoundScoreColumn);
 
-const Rounds: React.FunctionComponent<Props> = ({ }) => {
+const Rounds: React.FunctionComponent<Props> = ({ showScores = true }) => {
     const [roundScollOffset, setRoundScrollOffset] = useState<RoundScollOffset>({});
 
     const currentGameId = useAppSelector(state => state.settings.currentGameId);
@@ -77,24 +75,28 @@ const Rounds: React.FunctionComponent<Props> = ({ }) => {
                 <PlayerNameColumn />
             </TouchableOpacity>
 
-            <TouchableOpacity onPress={sortByTotalScore}>
-                <TotalScoreColumn />
-            </TouchableOpacity>
+            {showScores && (
+                <TouchableOpacity onPress={sortByTotalScore}>
+                    <TotalScoreColumn />
+                </TouchableOpacity>
+            )}
 
-            <ScrollView horizontal={true}
-                nestedScrollEnabled={true}
-                contentContainerStyle={{ flexDirection: 'row' }}
-                ref={roundsScrollViewEl}>
-                {roundsIterator.map((item, round) => (
-                    <View key={round} onLayout={e => onLayoutHandler(e, round)}>
-                        <MemoizedRoundScoreColumn
-                            round={round}
-                            key={round}
-                            isCurrentRound={round == roundCurrent}
-                        />
-                    </View>
-                ))}
-            </ScrollView>
+            {showScores && (
+                <ScrollView horizontal={true}
+                    nestedScrollEnabled={true}
+                    contentContainerStyle={{ flexDirection: 'row' }}
+                    ref={roundsScrollViewEl}>
+                    {roundsIterator.map((item, round) => (
+                        <View key={round} onLayout={e => onLayoutHandler(e, round)}>
+                            <MemoizedRoundScoreColumn
+                                round={round}
+                                key={round}
+                                isCurrentRound={round == roundCurrent}
+                            />
+                        </View>
+                    ))}
+                </ScrollView>
+            )}
         </View>
     );
 };

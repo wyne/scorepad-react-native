@@ -2,10 +2,12 @@ import { useEffect, useRef, useState } from 'react';
 
 import { useAppSelector } from '../../redux/hooks';
 import { selectCurrentGame, selectInteractionType } from '../../redux/selectors';
-import { InteractionType } from '../components/Interactions/InteractionType';
 
-function useScoreFingerprint(): number {
-    return useAppSelector(state => {
+export function useGestureHint(): boolean {
+    const interactionType = useAppSelector(selectInteractionType);
+    const gameLocked = useAppSelector(state => selectCurrentGame(state)?.locked ?? false);
+
+    const fingerprint = useAppSelector(state => {
         const game = selectCurrentGame(state);
         if (!game) return 0;
         return game.playerIds.reduce((sum, id) => {
@@ -13,27 +15,27 @@ function useScoreFingerprint(): number {
             return sum + scores.reduce((s, v) => s + Math.abs(v), 0);
         }, 0);
     });
-}
 
-export function useGestureHint(): boolean {
-    const interactionType = useAppSelector(selectInteractionType);
-    const fingerprint = useScoreFingerprint();
-    const gameLocked = useAppSelector(state => selectCurrentGame(state)?.locked ?? false);
-    const [lastScoredGesture, setLastScoredGesture] = useState<InteractionType | null>(null);
+    // Initialize false when scores exist — no flash on reopen with existing scores.
+    const [showHint, setShowHint] = useState(() => fingerprint === 0);
+    const isFirstRun = useRef(true);
 
-    // Reset hint when gesture type changes
+    // Re-enable hint on gesture switch. Skip on mount so initialization holds.
     useEffect(() => {
-        setLastScoredGesture(null);
+        if (isFirstRun.current) {
+            isFirstRun.current = false;
+            return;
+        }
+        setShowHint(true);
     }, [interactionType]);
 
-    // Dismiss hint once the user scores with the current gesture
-    const prevFingerprint = useRef(fingerprint);
+    // Dismiss hint whenever scores exist.
+    // interactionType intentionally omitted: gesture switches must not re-trigger dismissal.
     useEffect(() => {
-        if (fingerprint !== prevFingerprint.current) {
-            prevFingerprint.current = fingerprint;
-            setLastScoredGesture(interactionType);
+        if (fingerprint > 0) {
+            setShowHint(false);
         }
-    }, [fingerprint, interactionType]);
+    }, [fingerprint]);
 
-    return !gameLocked && lastScoredGesture !== interactionType;
+    return !gameLocked && showHint;
 }

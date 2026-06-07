@@ -13,6 +13,7 @@ import { InteractionType } from '../components/Interactions/InteractionType';
 import AddendModal from '../components/Sheets/AddendModal';
 import ChooseWinnersModal from '../components/Sheets/ChooseWinnersModal';
 import GestureInfoModal from '../components/Sheets/GestureInfoModal';
+import { useGestureHint } from '../hooks/useGestureHint';
 
 function useKeepScreenAwake(active: boolean): void {
     useEffect(() => {
@@ -31,6 +32,7 @@ const ScoreBoardScreen: React.FunctionComponent = () => {
     const keepScreenAwake = useAppSelector(state => state.settings.keepScreenAwake);
     const interactionType = useAppSelector(selectInteractionType);
     const headerHeight = useHeaderHeight();
+    const showHint = useGestureHint();
     useKeepScreenAwake(keepScreenAwake);
 
     if (typeof currentGameId == 'undefined') return null;
@@ -40,10 +42,10 @@ const ScoreBoardScreen: React.FunctionComponent = () => {
             <View style={{ flex: 1 }}>
                 {interactionType === InteractionType.Dial
                     ? <Animated.View key="rows" entering={FadeIn.duration(220)} exiting={FadeOut.duration(180)} style={StyleSheet.absoluteFill}>
-                        <RowsBoard />
+                        <RowsBoard showHint={showHint} />
                     </Animated.View>
                     : <Animated.View key="flex" entering={FadeIn.duration(220)} exiting={FadeOut.duration(180)} style={StyleSheet.absoluteFill}>
-                        <FlexboxBoard />
+                        <FlexboxBoard showHint={showHint} />
                     </Animated.View>
                 }
 

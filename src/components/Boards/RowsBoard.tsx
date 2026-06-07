@@ -1,14 +1,13 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useLayoutEffect, useState } from 'react';
 
 import { LayoutChangeEvent, LayoutRectangle, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Icon } from 'react-native-elements';
-import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
+import Animated, { Easing, SharedValue, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useAppSelector } from '../../../redux/hooks';
 import { selectPlayerById, selectPlayerRoundStats } from '../../../redux/PlayersSlice';
 import { selectCurrentGame } from '../../../redux/selectors';
-import { useGestureHint } from '../../hooks/useGestureHint';
 import DialOverlay from '../Interactions/Dial/DialOverlay';
 import { useMenuOpen } from '../MenuOpenContext';
 import { bottomSheetHeight } from '../Sheets/GameSheet';
@@ -36,30 +35,27 @@ interface PlayerRowProps {
     playerId: string;
     index: number;
     roundCurrent: number;
-    dimmed: boolean;
+    svDimmed: SharedValue<boolean>;
     disabled: boolean;
-    onPress: () => void;
+    onRowPress: (id: string) => void;
 }
 
-const PlayerRow: React.FC<PlayerRowProps> = ({ playerId, index, roundCurrent, dimmed, disabled, onPress }) => {
+const PlayerRow: React.FC<PlayerRowProps> = ({ playerId, index, roundCurrent, svDimmed, disabled, onRowPress }) => {
     const player = useAppSelector((state) => selectPlayerById(state, playerId));
     const currentGame = useAppSelector(selectCurrentGame);
     const isWinner = !!(currentGame?.locked && currentGame?.winnerIds?.includes(playerId));
     const { roundScore, previousTotal, currentTotal } = useAppSelector(
         (state) => selectPlayerRoundStats(state, playerId, roundCurrent)
     );
-    const dimOpacity = useSharedValue(1);
     const breakdownOpacity = useSharedValue(1);
-
-    React.useEffect(() => {
-        dimOpacity.value = withTiming(dimmed ? 0.28 : 1, { duration: 280 });
-    }, [dimmed]);
 
     React.useEffect(() => {
         breakdownOpacity.value = withTiming(roundScore !== 0 ? 1 : 0, { duration: 220 });
     }, [roundScore]);
 
-    const rowStyle = useAnimatedStyle(() => ({ opacity: dimOpacity.value }));
+    const rowStyle = useAnimatedStyle(() => ({
+        opacity: withTiming(svDimmed.value ? 0.28 : 1, { duration: 280 }),
+    }));
     const breakdownStyle = useAnimatedStyle(() => ({ opacity: breakdownOpacity.value }));
 
     if (!player) return null;
@@ -96,7 +92,7 @@ const PlayerRow: React.FC<PlayerRowProps> = ({ playerId, index, roundCurrent, di
     return (
         <Animated.View style={rowStyle} testID={`player-row-${index}`}>
             <Pressable
-                onPress={onPress}
+                onPress={() => onRowPress(playerId)}
                 disabled={disabled}
                 style={({ pressed }) => [styles.row, { backgroundColor: color, opacity: pressed ? 0.78 : 1 }]}>
                 <View style={styles.rowInner}>
@@ -145,14 +141,22 @@ const PlayerRow: React.FC<PlayerRowProps> = ({ playerId, index, roundCurrent, di
     );
 };
 
-const RowsBoard: React.FC = () => {
+const MemoizedPlayerRow = React.memo(PlayerRow);
+
+const RowsBoard: React.FC<{ showHint: boolean }> = ({ showHint }) => {
     const currentGame = useAppSelector(selectCurrentGame);
     const fullscreen = useAppSelector(state => state.settings.home_fullscreen);
     const { menuOpen } = useMenuOpen();
-    const showHint = useGestureHint();
     const insets = useSafeAreaInsets();
     const [selectedId, setSelectedId] = useState<string | null>(null);
     const [boardLayout, setBoardLayout] = useState<LayoutRectangle | null>(null);
+    const svDimmed = useSharedValue(false);
+    const svOverlayOpacity = useSharedValue(0);
+    const svOverlaySlideY = useSharedValue(20);
+
+    useLayoutEffect(() => {
+        svDimmed.value = selectedId !== null;
+    }, [selectedId]);
 
     const handleBoardLayout = useCallback((e: LayoutChangeEvent) => {
         setBoardLayout(e.nativeEvent.layout);
@@ -162,6 +166,12 @@ const RowsBoard: React.FC = () => {
         (id: string) => {
             if (currentGame?.locked || menuOpen) return;
             if (!boardLayout) return;
+            // Start entrance animation before React schedules the re-render so the
+            // overlay is already mid-animation by the time it first paints.
+            svOverlayOpacity.value = 0;
+            svOverlaySlideY.value = 20;
+            svOverlayOpacity.value = withTiming(1, { duration: 160 });
+            svOverlaySlideY.value = withTiming(0, { duration: 200, easing: Easing.out(Easing.cubic) });
             setSelectedId(id);
         },
         [boardLayout, currentGame?.locked, menuOpen]
@@ -185,14 +195,14 @@ const RowsBoard: React.FC = () => {
                 showsVerticalScrollIndicator={false}
                 scrollEnabled={selectedId === null}>
                 {playerIds.map((id, index) => (
-                    <PlayerRow
+                    <MemoizedPlayerRow
                         key={id}
                         playerId={id}
                         index={index}
                         roundCurrent={roundCurrent}
-                        dimmed={selectedId !== null}
+                        svDimmed={svDimmed}
                         disabled={!!(currentGame?.locked || menuOpen)}
-                        onPress={() => handleRowPress(id)}
+                        onRowPress={handleRowPress}
                     />
                 ))}
             </ScrollView>
@@ -206,6 +216,8 @@ const RowsBoard: React.FC = () => {
                     safeAreaTop={insets.top}
                     showHint={showHint}
                     onClose={handleClose}
+                    svOpacity={svOverlayOpacity}
+                    svSlideY={svOverlaySlideY}
                 />
             )}
         </View>

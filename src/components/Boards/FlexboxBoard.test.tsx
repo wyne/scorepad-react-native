@@ -135,7 +135,7 @@ describe('FlexboxBoard', () => {
 
         const { toJSON } = render(
             <Provider store={store}>
-                <FlexboxBoard />
+                <FlexboxBoard showHint={false} />
             </Provider>
         );
 
@@ -164,7 +164,7 @@ describe('FlexboxBoard', () => {
 
         const { toJSON } = render(
             <Provider store={store}>
-                <FlexboxBoard />
+                <FlexboxBoard showHint={false} />
             </Provider>
         );
 
@@ -190,7 +190,7 @@ describe('FlexboxBoard', () => {
 
         const { getByTestId } = render(
             <Provider store={store}>
-                <FlexboxBoard />
+                <FlexboxBoard showHint={false} />
             </Provider>
         );
 
@@ -216,7 +216,7 @@ describe('FlexboxBoard', () => {
 
         const { queryByTestId } = render(
             <Provider store={store}>
-                <FlexboxBoard />
+                <FlexboxBoard showHint={false} />
             </Provider>
         );
 
@@ -243,7 +243,7 @@ describe('FlexboxBoard', () => {
 
         const { getByTestId, getAllByText } = render(
             <Provider store={store}>
-                <FlexboxBoard />
+                <FlexboxBoard showHint={false} />
             </Provider>
         );
 
@@ -289,7 +289,7 @@ describe('FlexboxBoard', () => {
 
         const { getByTestId, getAllByText } = render(
             <Provider store={store}>
-                <FlexboxBoard />
+                <FlexboxBoard showHint={false} />
             </Provider>
         );
 
@@ -332,7 +332,7 @@ describe('FlexboxBoard', () => {
 
         const { getByTestId, getAllByText } = render(
             <Provider store={store}>
-                <FlexboxBoard />
+                <FlexboxBoard showHint={false} />
             </Provider>
         );
 
@@ -382,7 +382,7 @@ describe('FlexboxBoard', () => {
 
         const { getByTestId, getByText } = render(
             <Provider store={store}>
-                <FlexboxBoard />
+                <FlexboxBoard showHint={false} />
             </Provider>
         );
 
@@ -424,7 +424,7 @@ describe('FlexboxBoard', () => {
 
         const { getByTestId } = render(
             <Provider store={store}>
-                <FlexboxBoard />
+                <FlexboxBoard showHint={false} />
             </Provider>
         );
 
@@ -457,7 +457,7 @@ describe('FlexboxBoard', () => {
 
         const { getByTestId, getByText } = render(
             <Provider store={store}>
-                <FlexboxBoard />
+                <FlexboxBoard showHint={false} />
             </Provider>
         );
 
@@ -501,7 +501,7 @@ describe('FlexboxBoard', () => {
 
         const { getByTestId, getAllByText } = render(
             <Provider store={store}>
-                <FlexboxBoard />
+                <FlexboxBoard showHint={false} />
             </Provider>
         );
 

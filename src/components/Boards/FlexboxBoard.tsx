@@ -10,7 +10,7 @@ import { useTheme } from '../../theme';
 
 import FlexboxTile from './FlexboxTile';
 
-const FlexboxBoard: React.FC = () => {
+const FlexboxBoard: React.FC<{ showHint: boolean }> = ({ showHint }) => {
     const theme = useTheme();
     const fullscreen = useAppSelector(state => state.settings.home_fullscreen);
     const playerIds = useAppSelector(state => selectCurrentGame(state)?.playerIds);
@@ -100,6 +100,7 @@ const FlexboxBoard: React.FC = () => {
                     width={calculateTileDimensions(rows, cols).width}
                     height={calculateTileDimensions(rows, cols).height}
                     index={index}
+                    showHint={showHint}
                 />
             ))}
         </SafeAreaView>
