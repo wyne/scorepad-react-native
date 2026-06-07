@@ -1,39 +1,41 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { useAppSelector } from '../../redux/hooks';
 import { selectCurrentGame, selectInteractionType } from '../../redux/selectors';
-import { InteractionType } from '../components/Interactions/InteractionType';
-
-// Returns true once any player has a non-zero score, then stays true.
-// This selector changes exactly once per game, preventing repeated re-renders.
-function useHasAnyScore(): boolean {
-    return useAppSelector(state => {
-        const game = selectCurrentGame(state);
-        if (!game) return false;
-        return game.playerIds.some(id => {
-            const scores = state.players.entities[id]?.scores ?? [];
-            return scores.some(s => s !== 0);
-        });
-    });
-}
 
 export function useGestureHint(): boolean {
     const interactionType = useAppSelector(selectInteractionType);
-    const hasAnyScore = useHasAnyScore();
     const gameLocked = useAppSelector(state => selectCurrentGame(state)?.locked ?? false);
-    const [lastScoredGesture, setLastScoredGesture] = useState<InteractionType | null>(null);
 
-    // Reset hint when gesture type changes
+    const fingerprint = useAppSelector(state => {
+        const game = selectCurrentGame(state);
+        if (!game) return 0;
+        return game.playerIds.reduce((sum, id) => {
+            const scores = state.players.entities[id]?.scores ?? [];
+            return sum + scores.reduce((s, v) => s + Math.abs(v), 0);
+        }, 0);
+    });
+
+    // Initialize false when scores exist — no flash on reopen with existing scores.
+    const [showHint, setShowHint] = useState(() => fingerprint === 0);
+    const isFirstRun = useRef(true);
+
+    // Re-enable hint on gesture switch. Skip on mount so initialization holds.
     useEffect(() => {
-        setLastScoredGesture(null);
+        if (isFirstRun.current) {
+            isFirstRun.current = false;
+            return;
+        }
+        setShowHint(true);
     }, [interactionType]);
 
-    // Dismiss hint once any score exists
+    // Dismiss hint whenever scores exist.
+    // interactionType intentionally omitted: gesture switches must not re-trigger dismissal.
     useEffect(() => {
-        if (hasAnyScore) {
-            setLastScoredGesture(interactionType);
+        if (fingerprint > 0) {
+            setShowHint(false);
         }
-    }, [hasAnyScore, interactionType]);
+    }, [fingerprint]); // eslint-disable-line react-hooks/exhaustive-deps
 
-    return !gameLocked && lastScoredGesture !== interactionType;
+    return !gameLocked && showHint;
 }
