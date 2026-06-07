@@ -35,7 +35,7 @@ export function useGestureHint(): boolean {
         if (fingerprint > 0) {
             setShowHint(false);
         }
-    }, [fingerprint]); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [fingerprint]);
 
     return !gameLocked && showHint;
 }

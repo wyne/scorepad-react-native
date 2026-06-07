@@ -9,11 +9,11 @@ import { useAppSelector } from '../../redux/hooks';
 import { selectInteractionType } from '../../redux/selectors';
 import FlexboxBoard from '../components/Boards/FlexboxBoard';
 import RowsBoard from '../components/Boards/RowsBoard';
-import { useGestureHint } from '../hooks/useGestureHint';
 import { InteractionType } from '../components/Interactions/InteractionType';
 import AddendModal from '../components/Sheets/AddendModal';
 import ChooseWinnersModal from '../components/Sheets/ChooseWinnersModal';
 import GestureInfoModal from '../components/Sheets/GestureInfoModal';
+import { useGestureHint } from '../hooks/useGestureHint';
 
 function useKeepScreenAwake(active: boolean): void {
     useEffect(() => {

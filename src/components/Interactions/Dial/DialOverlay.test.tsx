@@ -2,6 +2,7 @@ import React from 'react';
 
 import { configureStore } from '@reduxjs/toolkit';
 import { act, fireEvent, render } from '@testing-library/react-native';
+import { SharedValue } from 'react-native-reanimated';
 import { Provider } from 'react-redux';
 
 import gamesReducer, { gameSave } from '../../../../redux/GamesSlice';
@@ -64,7 +65,6 @@ jest.mock('../../MenuOpenContext', () => ({
     useMenuOpen: () => ({ menuOpen: mockMenuOpen, setMenuOpen: jest.fn() }),
 }));
 
-import { SharedValue } from 'react-native-reanimated';
 
 import DialOverlay from './DialOverlay';
 
