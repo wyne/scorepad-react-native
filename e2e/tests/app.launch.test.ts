@@ -4,9 +4,14 @@ import * as path from 'path';
 import { $, $$, browser } from '@wdio/globals';
 
 const RECORDINGS_DIR = path.join(__dirname, '../recordings');
-const SCREENSHOTS_DIR = path.join(RECORDINGS_DIR, 'screenshots');
 
-const BUNDLE_ID = 'com.wyne.scorepad.dev';
+function getDeviceSlug(): string {
+  const caps = browser.capabilities as Record<string, unknown>;
+  const name = (caps['deviceName'] ?? caps['appium:deviceName'] ?? 'unknown') as string;
+  return name.toLowerCase().replace(/[\s()]/g, '-').replace(/-+/g, '-');
+}
+
+const BUNDLE_ID = 'com.wyne.scorepad';
 
 // Use mobile: commands so gestures route through XCTest's native layer,
 // which is required for simulatorTracePointer traces to appear.
@@ -76,8 +81,12 @@ async function dismissOnboardingIfPresent() {
 }
 
 describe('App Flow', () => {
+  let screenshotsDir: string;
+
   before(async () => {
-    fs.mkdirSync(SCREENSHOTS_DIR, { recursive: true });
+    const slug = getDeviceSlug();
+    screenshotsDir = path.join(RECORDINGS_DIR, 'screenshots', slug);
+    fs.mkdirSync(screenshotsDir, { recursive: true });
     await browser.terminateApp(BUNDLE_ID);
     await browser.activateApp(BUNDLE_ID);
     await browser.startRecordingScreen();
@@ -85,8 +94,9 @@ describe('App Flow', () => {
 
   after(async () => {
     const videoBase64 = await browser.stopRecordingScreen();
+    const slug = getDeviceSlug();
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
-    const videoPath = path.join(RECORDINGS_DIR, `run_${timestamp}.mp4`);
+    const videoPath = path.join(RECORDINGS_DIR, `${slug}_run_${timestamp}.mp4`);
     fs.writeFileSync(videoPath, videoBase64, 'base64');
     console.log(`Video saved: ${videoPath}`);
   });
@@ -105,7 +115,7 @@ describe('App Flow', () => {
 
     console.log('→ home screen');
     await $('~home-screen').waitForDisplayed({ timeout: 15000 });
-    await browser.saveScreenshot(path.join(SCREENSHOTS_DIR, 'home.png'));
+    await browser.saveScreenshot(path.join(screenshotsDir, 'home.png'));
 
     console.log('→ tap game (index 2)');
     const thirdGame = $$('~game-list-item')[2];
@@ -116,18 +126,18 @@ describe('App Flow', () => {
       x: Math.round(gameLoc.x + gameSize.width / 2),
       y: Math.round(gameLoc.y + gameSize.height / 2),
     });
-    await browser.saveScreenshot(path.join(SCREENSHOTS_DIR, 'game.png'));
+    await browser.saveScreenshot(path.join(screenshotsDir, 'game.png'));
 
     console.log('→ open game sheet');
     await browser.pause(2000);
     await tap('~game-title-button');
     await browser.pause(2000);
-    await browser.saveScreenshot(path.join(SCREENSHOTS_DIR, 'game-sheet.png'));
+    await browser.saveScreenshot(path.join(screenshotsDir, 'game-sheet.png'));
 
     console.log('→ edit game');
     await tap('~edit-game-and-players');
     await $('~edit-game').waitForDisplayed({ timeout: 15000 });
-    await browser.saveScreenshot(path.join(SCREENSHOTS_DIR, 'edit-game.png'));
+    await browser.saveScreenshot(path.join(screenshotsDir, 'edit-game.png'));
 
     console.log('→ save game');
     await tap('-ios predicate string:label == "Save Game"');
@@ -139,6 +149,7 @@ describe('App Flow', () => {
     console.log('→ swipe up (increase score)');
     await swipeUp('~swipe-overlay-1');
     await browser.pause(500);
+    await browser.saveScreenshot(path.join(screenshotsDir, 'swipe.png'));
 
     console.log('→ next round');
     await tap('~next-round-button');
@@ -151,10 +162,14 @@ describe('App Flow', () => {
     await tap('~player-row-2');
     await swipeDialRight(2);
     await browser.pause(500);
+    await browser.saveScreenshot(path.join(screenshotsDir, 'dial.png'));
 
     console.log('→ open addend modal');
     await tap('~game-options-menu');
+    await browser.saveScreenshot(path.join(screenshotsDir, 'game-options-menu.png'));
     await tap('-ios predicate string:label CONTAINS "Point Values"');
+    await browser.pause(500);
+    await browser.saveScreenshot(path.join(screenshotsDir, 'point-values.png'));
 
     console.log('→ dismiss addend modal');
     await tapAt(0.5, 0.37);
@@ -166,7 +181,7 @@ describe('App Flow', () => {
     console.log('→ choose winners');
     await tap('~choose-winners-button');
     await browser.pause(1000);
-    await browser.saveScreenshot(path.join(SCREENSHOTS_DIR, 'choose-winners.png'));
+    await browser.saveScreenshot(path.join(screenshotsDir, 'choose-winners.png'));
 
     console.log('→ select top player');
     await tap('~winner-player-row-0');

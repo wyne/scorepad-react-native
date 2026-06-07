@@ -65,6 +65,47 @@ xcrun simctl launch "iPhone 8" com.wyne.scorepad.dev -FIRAnalyticsDebugEnabled
 xcrun simctl launch "iPhone 14 Pro Max" com.wyne.scorepad.dev -FIRDebugEnabled
 ```
 
+## App Store Screenshots (E2E Recording)
+
+Screenshots are captured automatically across four simulators using WebdriverIO + Appium.
+
+### Prerequisites
+
+```zsh
+npm install -g appium
+appium driver install xcuitest
+```
+
+### Workflow
+
+```zsh
+# 1. Build and install the production app on one simulator
+npm run ios
+
+# 2. Push the built .app to all four e2e simulators
+npm run e2e:install
+
+# 3. Run the recording (all four devices in parallel)
+npm run e2e
+```
+
+Screenshots land in `e2e/recordings/screenshots/<device-slug>/` and videos in `e2e/recordings/`.
+
+### Devices
+
+| Simulator | Role |
+|-----------|------|
+| iPhone 17 Pro | Development / baseline |
+| iPhone 17 Pro Max | 6.9" App Store slot |
+| iPhone 17e | Small phone slot |
+| iPad Pro 13-inch (M5) | iPad App Store slot |
+
+### Notes
+
+- `e2e:install` finds the most recently built `ScorePadwithRounds.app` in DerivedData automatically — re-run it after each `ios:dev` build.
+- Simulators must have the app pre-loaded with game data before recording. Load sample data via the dev menu inside the app after installing.
+- `npm run e2e` runs all four devices in parallel; each writes its own screenshot set independently.
+
 ## Submit to App Store
 
 ```zsh

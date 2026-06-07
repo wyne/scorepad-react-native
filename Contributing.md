@@ -95,6 +95,10 @@ Coverage reports are generated in the `coverage/` directory and include:
 - HTML report (`coverage/lcov-report/index.html`)
 - LCOV format for CI integration
 
+### App Store Screenshot Recording
+
+See [`docs/build-ios.md`](./docs/build-ios.md#app-store-screenshots-e2e-recording) for the full workflow using WebdriverIO + Appium across four simulators.
+
 ### Writing Tests
 
 - Use React Native Testing Library for component tests
