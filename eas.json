@@ -30,11 +30,11 @@
     "production": {
       "android": {
         "changesNotSentForReview": false
+      },
+      "ios": {
+        "ascAppId": "1577906063",
+        "appleId": "justinwyne@gmail.com"
       }
-    },
-    "ios": {
-      "ascAppId": "1577906063",
-      "appleId": "justinwyne@gmail.com"
     }
   }
 }
