@@ -16,14 +16,14 @@ interface Props {
     showScores?: boolean;
 }
 
-interface RoundScollOffset {
+interface RoundScrollOffset {
     [key: number]: number;
 }
 
 const MemoizedRoundScoreColumn = React.memo(RoundScoreColumn);
 
 const Rounds: React.FunctionComponent<Props> = ({ showScores = true }) => {
-    const [roundScollOffset, setRoundScrollOffset] = useState<RoundScollOffset>({});
+    const [roundScrollOffset, setRoundScrollOffset] = useState<RoundScrollOffset>({});
 
     const currentGameId = useAppSelector(state => state.settings.currentGameId);
 
@@ -46,14 +46,14 @@ const Rounds: React.FunctionComponent<Props> = ({ showScores = true }) => {
 
     // Scroll to the current round
     useEffect(() => {
-        const offset = roundScollOffset[roundCurrent];
+        const offset = roundScrollOffset[roundCurrent];
         if (roundsScrollViewEl.current == null || typeof offset == 'undefined') return;
 
         roundsScrollViewEl.current.scrollTo({
             x: offset,
             animated: Platform.OS == 'ios' ? true : false
         });
-    }, [roundCurrent, roundScollOffset]);
+    }, [roundCurrent, roundScrollOffset]);
 
     const roundsIterator = [...Array(roundTotal).keys()];
 

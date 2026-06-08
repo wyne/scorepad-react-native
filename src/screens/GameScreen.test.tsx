@@ -172,7 +172,7 @@ describe('GameScreen', () => {
         expect(getByTestId('addend-modal')).toBeTruthy();
     });
 
-    it('should render RowsBoard when interactionType is RadialGesture', () => {
+    it('should render RowsBoard when interactionType is Dial', () => {
         const store = createMockStore({
             settings: {
                 currentGameId: 'game-1',

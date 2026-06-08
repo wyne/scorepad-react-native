@@ -27,7 +27,7 @@ function useKeepScreenAwake(active: boolean): void {
     }, [active]);
 }
 
-const ScoreBoardScreen: React.FunctionComponent = () => {
+const GameScreen: React.FunctionComponent = () => {
     const currentGameId = useAppSelector(state => state.settings.currentGameId);
     const keepScreenAwake = useAppSelector(state => state.settings.keepScreenAwake);
     const interactionType = useAppSelector(selectInteractionType);
@@ -58,4 +58,4 @@ const ScoreBoardScreen: React.FunctionComponent = () => {
 };
 
 
-export default ScoreBoardScreen;
+export default GameScreen;

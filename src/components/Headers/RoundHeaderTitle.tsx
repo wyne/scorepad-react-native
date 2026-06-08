@@ -19,10 +19,10 @@ const RoundHeaderTitle: React.FunctionComponent = () => {
 
     const currentGame = useAppSelector(state => selectGameById(state, currentGameId));
     const roundCurrent = currentGame?.roundCurrent ?? 0;
-    const lastRoundIndex = currentGame?.roundTotal ?? 0;
+    const roundCount = currentGame?.roundTotal ?? 0;
 
     const isFirstRound = roundCurrent === 0;
-    const isLastRound = roundCurrent + 1 >= lastRoundIndex;
+    const isLastRound = roundCurrent + 1 >= roundCount;
 
     const nextRoundHandler = async () => {
         if (isLastRound && currentGame?.locked) return;
@@ -67,7 +67,7 @@ const RoundHeaderTitle: React.FunctionComponent = () => {
                 <Icon name="arrow-left" type="font-awesome-5" size={18} color={theme.tint} />
             </TouchableOpacity>
             <Text style={[styles.title, { color: theme.headerText }]} allowFontScaling={false}>
-                {isLocked ? 'Final' : `Round ${roundCurrent + 1}${isLastRound ? '' : `/${lastRoundIndex}`}`}
+                {isLocked ? 'Final' : `Round ${roundCurrent + 1}${isLastRound ? '' : `/${roundCount}`}`}
             </Text>
             <TouchableOpacity
                 style={[styles.chevron, { opacity: isLocked || isLastRound && currentGame?.locked ? 0 : 1 }]}
