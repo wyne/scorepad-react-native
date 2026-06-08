@@ -372,6 +372,34 @@ describe('GameSheet', () => {
         expect(getByTestId('choose-winners-button')).toBeTruthy();
     });
 
+    it('should navigate to Share when share button is pressed', () => {
+        const store = createMockStore({
+            settings: {
+                currentGameId: 'game-1',
+            },
+            games: {
+                entities: {
+                    'game-1': mockGame,
+                },
+                ids: ['game-1'],
+            },
+            players: {
+                entities: mockPlayers,
+                ids: ['player-1', 'player-2'],
+            },
+        });
+
+        const { getByTestId } = render(
+            <Provider store={store}>
+                <GameSheet {...defaultProps} />
+            </Provider>
+        );
+
+        fireEvent.press(getByTestId('share-button'));
+
+        expect(mockNavigate).toHaveBeenCalledWith('Share');
+    });
+
     it('should toggle lock when unlock button is pressed', async () => {
         const lockedGame = { ...mockGame, locked: true };
         const store = createMockStore({

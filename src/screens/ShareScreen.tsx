@@ -3,9 +3,9 @@ import React, { useRef } from 'react';
 import { ParamListBase } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import * as Sharing from 'expo-sharing';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Button, Icon } from 'react-native-elements';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { captureRef } from 'react-native-view-shot';
 
 import { selectGameById } from '../../redux/GamesSlice';
@@ -23,6 +23,7 @@ interface Props {
 
 const ShareScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     const theme = useTheme();
+    const insets = useSafeAreaInsets();
     const currentGameId = useAppSelector(state => state.settings.currentGameId);
     if (typeof currentGameId == 'undefined') return null;
 
@@ -30,19 +31,19 @@ const ShareScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     const currentGame = useAppSelector(selectCurrentGame);
     if (typeof currentGame == 'undefined') return null;
 
-    const roundsScrollViewEl = useRef<ScrollView>(null);
+    const scoreboardImageEl = useRef<View>(null);
 
     const roundsIterator = [...Array(roundTotal).keys()];
 
     const exportImage = async () => {
-        if (roundsScrollViewEl.current == null) return;
+        if (scoreboardImageEl.current == null) return;
 
         try {
-            const uri = await captureRef(roundsScrollViewEl, {
+            const uri = await captureRef(scoreboardImageEl.current, {
                 result: 'tmpfile',
                 quality: 1,
                 format: 'png',
-                snapshotContentContainer: true,
+                fileName: Platform.OS === 'android' ? 'scorepad-scoreboard' : undefined,
             });
 
             await Sharing.shareAsync(uri, {
@@ -60,7 +61,9 @@ const ShareScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     return (
         <SafeAreaView edges={['right', 'left']}
             style={[styles.contentContainer, { backgroundColor: theme.background }]}>
-            <ScrollView>
+            <ScrollView
+                testID="share-screen-scroll"
+                contentContainerStyle={{ paddingBottom: insets.bottom + 80 }}>
 
                 <Text style={{ color: theme.text, paddingVertical: 20 }}>
                     You can edit the game title or player names before sharing.
@@ -85,31 +88,38 @@ const ShareScreen: React.FunctionComponent<Props> = ({ navigation }) => {
                         contentContainerStyle={{
                             backgroundColor: theme.background,
                             flexDirection: 'column',
-                            padding: 20,
-                        }}
-                        ref={roundsScrollViewEl}>
-                        <View style={{ flexDirection: 'column' }}>
-                            <Text style={{ color: theme.text, fontSize: 20, fontWeight: 'bold', paddingBottom: 10 }}>
-                                {currentGame?.title}
-                            </Text>
-                            <Text style={{ color: theme.text }}>
-                                Created: {new Date(currentGame.dateCreated).toLocaleDateString()}
-                                &nbsp; {new Date(currentGame.dateCreated).toLocaleTimeString()}
-                            </Text>
-                        </View>
-                        <View style={{ flexDirection: 'row' }}>
-                            <PlayerNameColumn />
-                            <TotalScoreColumn />
-                            {roundsIterator.map((item, round) => (
-                                <View key={round}>
-                                    <RoundScoreColumn
-                                        round={round}
-                                        key={round}
-                                        isCurrentRound={false}
-                                        disabled={true}
-                                    />
-                                </View>
-                            ))}
+                        }}>
+                        <View
+                            collapsable={false}
+                            ref={scoreboardImageEl}
+                            style={{
+                                backgroundColor: theme.background,
+                                flexDirection: 'column',
+                                padding: 20,
+                            }}>
+                            <View style={{ flexDirection: 'column' }}>
+                                <Text style={{ color: theme.text, fontSize: 20, fontWeight: 'bold', paddingBottom: 10 }}>
+                                    {currentGame?.title}
+                                </Text>
+                                <Text style={{ color: theme.text }}>
+                                    Created: {new Date(currentGame.dateCreated).toLocaleDateString()}
+                                    &nbsp; {new Date(currentGame.dateCreated).toLocaleTimeString()}
+                                </Text>
+                            </View>
+                            <View style={{ flexDirection: 'row' }}>
+                                <PlayerNameColumn />
+                                <TotalScoreColumn />
+                                {roundsIterator.map((item, round) => (
+                                    <View key={round}>
+                                        <RoundScoreColumn
+                                            round={round}
+                                            key={round}
+                                            isCurrentRound={false}
+                                            disabled={true}
+                                        />
+                                    </View>
+                                ))}
+                            </View>
                         </View>
                     </ScrollView>
                 </View>
