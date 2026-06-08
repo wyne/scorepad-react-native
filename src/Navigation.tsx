@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 
 import { DarkTheme, DefaultTheme, NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { View } from 'react-native';
+import { Platform, View } from 'react-native';
 
 import { useAppSelector } from '../redux/hooks';
 import AppInfoButton from '../src/components/Buttons/AppInfoButton';
@@ -40,6 +40,11 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export const Navigation = () => {
     const theme = useTheme();
+    const isAndroid = Platform.OS === 'android';
+    const isIOS = Platform.OS === 'ios';
+    const listHeaderStyle = isAndroid
+        ? { backgroundColor: theme.backgroundSecondary }
+        : undefined;
     const isDark = theme.background === '#000000';
     const navTheme = isDark
         ? { ...DarkTheme, colors: { ...DarkTheme.colors, background: theme.background, card: theme.background } }
@@ -66,9 +71,10 @@ export const Navigation = () => {
                             options={{
                                 orientation: 'portrait',
                                 title: 'ScorePad',
-                                headerTransparent: true,
-                                headerBlurEffect: 'systemChromeMaterial',
-                                headerShadowVisible: false,
+                                headerTransparent: isIOS,
+                                headerBlurEffect: isIOS ? 'systemChromeMaterial' : undefined,
+                                headerShadowVisible: isAndroid,
+                                headerStyle: listHeaderStyle,
                                 headerLeft: () => <AppInfoButton />,
                             }}
                         />
