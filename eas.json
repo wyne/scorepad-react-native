@@ -24,10 +24,6 @@
     "production": {
       "autoIncrement": true,
       "channel": "production",
-      "ios": {
-        "ascAppId": "1577906063",
-        "appleId": "justinwyne@gmail.com"
-      }
     }
   },
   "submit": {
@@ -35,6 +31,10 @@
       "android": {
         "changesNotSentForReview": false
       }
+    },
+    "ios": {
+      "ascAppId": "1577906063",
+      "appleId": "justinwyne@gmail.com"
     }
   }
 }
