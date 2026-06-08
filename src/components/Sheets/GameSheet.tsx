@@ -3,7 +3,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import BottomSheet, { BottomSheetBackdrop, BottomSheetBackdropProps, BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { ParamListBase, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { Alert, Platform, StyleSheet, Text, TouchableWithoutFeedback, View, useWindowDimensions } from 'react-native';
+import { Alert, StyleSheet, Text, TouchableWithoutFeedback, View, useWindowDimensions } from 'react-native';
 import { Button } from 'react-native-elements';
 import Animated, { Extrapolate, FadeIn, interpolate, Layout, useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -301,13 +301,12 @@ const GameSheet: React.FunctionComponent = () => {
                         </Animated.View>
 
                         <Animated.View key={mountKey + 'a'} layout={Layout.delay(200)} style={{ flexDirection: 'row', justifyContent: 'space-around', paddingVertical: 10 }}>
-                            {Platform.OS === 'ios' &&
-                                <BigButton text="Share"
-                                    color={theme.tint}
-                                    icon="share-outline"
-                                    onPress={() => navigation.navigate('Share')}
-                                />
-                            }
+                            <BigButton text="Share"
+                                color={theme.tint}
+                                icon="share-outline"
+                                onPress={() => navigation.navigate('Share')}
+                                testID="share-button"
+                            />
 
                             <BigButton text={gameLocked ? 'Unlock' : 'Choose Winners'}
                                 color={gameLocked ? theme.warning : theme.success}

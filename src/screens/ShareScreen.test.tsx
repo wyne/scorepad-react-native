@@ -17,6 +17,13 @@ import ShareScreen from './ShareScreen';
 jest.mock('expo-sharing');
 jest.mock('react-native-view-shot');
 jest.mock('../Analytics');
+jest.mock('react-native-safe-area-context', () => ({
+    SafeAreaView: ({ children }: { children: React.ReactNode }) => {
+        const { View } = jest.requireActual('react-native');
+        return <View>{children}</View>;
+    },
+    useSafeAreaInsets: jest.fn(() => ({ top: 0, bottom: 34, left: 0, right: 0 })),
+}));
 jest.mock('expo-font', () => ({
     isLoaded: () => true,
     loadAsync: () => Promise.resolve(),
@@ -200,6 +207,34 @@ describe('ShareScreen', () => {
         expect(getByTestId('total-score-column')).toBeTruthy();
     });
 
+    it('should add bottom scroll padding below the share button', () => {
+        const store = createMockStore({
+            settings: {
+                currentGameId: 'game-1',
+            },
+            games: {
+                entities: {
+                    'game-1': mockGame,
+                },
+                ids: ['game-1'],
+            },
+            players: {
+                entities: mockPlayers,
+                ids: ['player-1', 'player-2'],
+            },
+        });
+
+        const { getByTestId } = render(
+            <Provider store={store}>
+                <ShareScreen navigation={mockNavigation} />
+            </Provider>
+        );
+
+        expect(getByTestId('share-screen-scroll').props.contentContainerStyle).toEqual({
+            paddingBottom: 114,
+        });
+    });
+
     it('should render correct number of round columns based on roundTotal', () => {
         const store = createMockStore({
             settings: {
@@ -300,7 +335,7 @@ describe('ShareScreen', () => {
                     result: 'tmpfile',
                     quality: 1,
                     format: 'png',
-                    snapshotContentContainer: true,
+                    fileName: undefined,
                 }
             );
         });
