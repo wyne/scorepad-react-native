@@ -4,7 +4,7 @@ This file provides guidance to AI coding agents when working with code in this r
 
 ## Project Overview
 
-ScorePad with Rounds is a React Native app built with Expo SDK 52 for tracking game scores with round-by-round history. The app is cross-platform (iOS, Android, Web) and uses TypeScript throughout.
+ScorePad with Rounds is a React Native app built with Expo SDK 55 for tracking game scores with round-by-round history. The app is cross-platform (iOS, Android, Web) and uses TypeScript throughout.
 
 ## Development Commands
 
@@ -72,10 +72,8 @@ npx eas build --platform android
 
 ### State Management
 
-- **Redux Toolkit** with RTK Query for state management
-- **Redux Persist** for data persistence with platform-specific storage:
-  - iOS: iCloud storage via custom `iCloudStorage` utility
-  - Android/Web: AsyncStorage
+- **Redux Toolkit** for state management
+- **Redux Persist** for data persistence using AsyncStorage
 - Three main slices:
   - `GamesSlice`: Game entities with rounds, players, and metadata
   - `PlayersSlice`: Player entities with scores per round
@@ -83,8 +81,8 @@ npx eas build --platform android
 
 ### Navigation
 
-- **React Navigation v6** with native stack navigator
-- Main screens: List (Home), Game, Settings, Share, EditPlayer, Onboarding, AppInfo
+- **React Navigation v7** with native stack navigator
+- Main screens: List (Home), Game, Settings, Share, EditPlayer, AppInfo, DebugLog
 - Custom headers for each screen using dedicated header components
 
 ### Key Components Structure
@@ -93,15 +91,14 @@ npx eas build --platform android
   - `PlayerTiles/AdditionTile/`: Complex score display with animations
   - `Sheets/`: Bottom sheet modals with context providers
   - `Headers/`: Custom navigation headers
-  - `Interactions/`: Touch interaction handling (HalfTap, Swipe)
+  - `Interactions/`: Touch interaction handling (HalfTap, Swipe, Dial)
 - `src/screens/`: Main screen components
 - `redux/`: State management with typed hooks and selectors
 
 ### Platform-Specific Features
 
 - App variants for development/preview/production with different bundle IDs
-- Firebase Analytics and Crashlytics integration
-- iCloud document storage on iOS
+- Firebase Analytics, Auth, and Crashlytics integration
 - Gesture handling with react-native-gesture-handler and react-native-reanimated
 
 ### Testing
@@ -145,67 +142,50 @@ To pull the remote version into your local project:
 eas build:version:sync
 ```
 
-## Maestro (Screenshot Automation)
+## E2E and Screenshot Automation
 
-Maestro is used for automated UI flows and App Store screenshot generation.
+WebdriverIO and Appium are used for automated UI flows and App Store screenshot generation.
 
 ### Setup
 
 ```bash
-brew install maestro
-# CLI is installed separately:
-curl -Ls "https://get.maestro.mobile.dev" | bash
-export PATH="$PATH":"$HOME/.maestro/bin"
+npm install -g appium
+appium driver install xcuitest
 ```
 
-### Build for Maestro
+### Build for E2E Recording
 
-Build a standalone app for the simulator (dev client won't work with Maestro):
+Build a standalone app for the simulator:
 
 ```bash
-npx expo run:ios --configuration Release       # production
-APP_VARIANT=preview npx expo run:ios --configuration Release  # preview
+npm run ios
 ```
 
 ### Run Flows
 
-Seeding and recording are split into separate flows so you can re-run recording without re-seeding:
+Install the built app on the e2e simulators, then run the recording flow:
 
 ```bash
-npm run maestro:seed    # Load sample data (run once)
-npm run maestro         # Record/screenshot flow against production build
-npm run maestro:dev     # Record/screenshot flow against dev build
-npm run maestro:all     # Seed then record in one shot (production)
-npm run maestro:record  # Record flow with video recording (production)
+npm run e2e:install  # Install latest built .app on e2e simulators
+npm run e2e          # Run Appium/WebdriverIO screenshot flow
+npm run e2e:record   # Record the e2e flow
 ```
 
-Or run individual flows:
-
-```bash
-maestro test .maestro/home_screen.yaml --test-output-dir .maestro/screenshots
-```
-
-### Flow Files
-
-Flows live in `.maestro/` as YAML files. The `appId` uses `${APP_ID}` and is passed via `--env` in the npm scripts — no manual editing needed to switch variants:
-
-| npm script | APP_ID |
-|------------|--------|
-| `npm run maestro` | `com.wyne.scorepad` |
-| `npm run maestro:dev` | `com.wyne.scorepad.dev` |
-| manual `--env APP_ID=com.wyne.scorepad.preview` | `com.wyne.scorepad.preview` |
+Screenshots are written to `e2e/recordings/screenshots/<device-slug>/`, and videos are written to `e2e/recordings/`.
 
 ### testID Conventions
 
-Components use `testID` props for reliable Maestro selectors:
+Components use `testID` props for reliable test selectors:
 
 - `home-screen` — ListScreen root view
 - `add-game-button` — Floating action button
 - `game-list-item` — Game list rows
 - `game-title-input` — Game title text input
-- `add-player-button` — Add player button
-- `save-game-button` — Save game button
-- `player-tile-{playerId}` — Player score tiles
+- `game-screen` — GameScreen root view
+- `game-options-menu` — Game options menu button
+- `edit-game-and-players` — Edit game and players button
+- `choose-winners-button` — Choose winners button
+- `lock-game-button` — Lock game button
 - Add more as flows are created
 
 ## Development Notes
