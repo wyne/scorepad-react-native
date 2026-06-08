@@ -412,7 +412,7 @@ const DialOverlay: React.FC<Props> = ({
     return (
         <>
             {/* Backdrop — tap to dismiss */}
-            <Pressable testID="overlay-backdrop" style={StyleSheet.absoluteFillObject} onPress={handleBackdropPress} disabled={menuOpen} />
+            <Pressable testID="overlay-backdrop" style={StyleSheet.absoluteFill} onPress={handleBackdropPress} disabled={menuOpen} />
 
             <Animated.View style={panelStyle}>
                 <FlatList

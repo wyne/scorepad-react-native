@@ -4,7 +4,7 @@ This file provides guidance to AI coding agents when working with code in this r
 
 ## Project Overview
 
-ScorePad with Rounds is a React Native app built with Expo SDK 52 for tracking game scores with round-by-round history. The app is cross-platform (iOS, Android, Web) and uses TypeScript throughout.
+ScorePad with Rounds is a React Native app built with Expo SDK 56 for tracking game scores with round-by-round history. The app is cross-platform (iOS, Android, Web) and uses TypeScript throughout.
 
 ## Development Commands
 

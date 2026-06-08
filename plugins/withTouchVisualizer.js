@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const { withAppDelegate, withDangerousMod } = require('@expo/config-plugins');
+const { withAppDelegate, withDangerousMod } = require('expo/config-plugins');
 
 const withTouchVisualizerPod = (config) =>
   withDangerousMod(config, [
