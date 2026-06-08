@@ -4,7 +4,7 @@ import { useHeaderHeight } from '@react-navigation/elements';
 import { ParamListBase } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import * as Crypto from 'expo-crypto';
-import { StyleSheet, Text } from 'react-native';
+import { Platform, StyleSheet, Text } from 'react-native';
 import Animated, { Easing, LinearTransition } from 'react-native-reanimated';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -30,6 +30,7 @@ const ListScreen: React.FunctionComponent<Props> = ({ navigation }) => {
 
     const rollingGameCounter = useAppSelector(state => state.settings.rollingGameCounter);
     const headerHeight = useHeaderHeight();
+    const listHeaderInset = Platform.OS === 'ios' ? headerHeight : 0;
     const insets = useSafeAreaInsets();
 
     useEffect(() => {
@@ -58,9 +59,9 @@ const ListScreen: React.FunctionComponent<Props> = ({ navigation }) => {
         <SafeAreaView edges={['left', 'right']} style={{ backgroundColor: theme.backgroundSecondary, flex: 1 }} testID="home-screen">
             <Animated.FlatList
                 alwaysBounceVertical
-                contentContainerStyle={{ flexGrow: 1, paddingTop: headerHeight, paddingBottom: insets.bottom + 70 }}
+                contentContainerStyle={{ flexGrow: 1, paddingTop: listHeaderInset, paddingBottom: insets.bottom + 70 }}
                 contentInsetAdjustmentBehavior="never"
-                scrollIndicatorInsets={{ top: headerHeight, bottom: insets.bottom + 70 }}
+                scrollIndicatorInsets={{ top: listHeaderInset, bottom: insets.bottom + 70 }}
                 itemLayoutAnimation={LinearTransition.easing(Easing.ease)}
                 ListEmptyComponent={
                     <>
