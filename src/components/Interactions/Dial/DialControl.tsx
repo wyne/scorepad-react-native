@@ -20,8 +20,6 @@ import Svg, { Circle, Line, Path } from 'react-native-svg';
 // Extend TextInputProps to include Reanimated's animated text content prop
 type AnimatedTextInputProps = TextInputProps & {
     text?: string;
-    adjustsFontSizeToFit?: boolean;
-    minimumFontScale?: number;
 };
 const AnimatedTextInput = Animated.createAnimatedComponent(TextInput as React.ComponentType<AnimatedTextInputProps>);
 
@@ -34,6 +32,15 @@ const AnimatedPath = Animated.createAnimatedComponent(Path);
 const STEP_DEG = 30;
 const ACCENT = '#3a86ff';
 const MOVE_THRESHOLD_SQ = 100;
+const CENTER_VALUE_BASE_FONT_RATIO = 0.20;
+const CENTER_VALUE_MIN_SCALE = 0.62;
+const CENTER_VALUE_TARGET_CHARS = 4;
+
+export function getCenterValueFontScale(value: number): number {
+    'worklet';
+    const textLength = value > 0 ? String(value).length + 1 : String(value).length;
+    return Math.max(CENTER_VALUE_MIN_SCALE, Math.min(1, CENTER_VALUE_TARGET_CHARS / textLength));
+}
 
 // TODO: see RowsBoard.tsx — consolidate inkFor/inkA into shared colorUtils module
 function inkA(ink: string, a: number): string {
@@ -98,6 +105,9 @@ const DialControl: React.FC<Props> = ({
     const numScale = useSharedValue(1);
     const numScaleStyle = useAnimatedStyle(() => ({
         transform: [{ scale: numScale.value }],
+    }));
+    const centerNumberFitStyle = useAnimatedStyle(() => ({
+        fontSize: D * CENTER_VALUE_BASE_FONT_RATIO * getCenterValueFontScale(svValue.value),
     }));
 
     const arrowBob = useSharedValue(0);
@@ -455,13 +465,11 @@ const DialControl: React.FC<Props> = ({
                     {/* Centre value */}
                     <View style={StyleSheet.absoluteFill} pointerEvents="none">
                         <View style={styles.centerValue}>
-                            <Animated.View style={[numScaleStyle, { width: D * 0.54 }]}>
+                            <Animated.View style={[numScaleStyle, { width: D * 0.62 }]}>
                                 <AnimatedTextInput
                                     animatedProps={centerValueAnimProps}
                                     defaultValue={fmtSigned(svValue.value)}
-                                    style={[styles.centerNumber, { color: ink, fontSize: D * 0.20, padding: 0, backgroundColor: 'transparent' }]}
-                                    adjustsFontSizeToFit
-                                    minimumFontScale={0.65}
+                                    style={[styles.centerNumber, centerNumberFitStyle, { color: ink, padding: 0, backgroundColor: 'transparent' }]}
                                     editable={false}
                                     caretHidden={true}
                                     underlineColorAndroid="transparent"

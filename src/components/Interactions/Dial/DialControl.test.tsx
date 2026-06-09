@@ -73,7 +73,7 @@ jest.mock('expo-haptics', () => ({
     ImpactFeedbackStyle: { Light: 'Light', Medium: 'Medium', Heavy: 'Heavy' },
 }));
 
-import DialControl from './DialControl';
+import DialControl, { getCenterValueFontScale } from './DialControl';
 
 // Creates a mock SharedValue matching the shape returned by the Reanimated mock
 const mkSv = <T,>(v: T) => ({ value: v }) as unknown as SharedValue<T>;
@@ -93,6 +93,22 @@ const defaultProps = {
 beforeEach(() => {
     jest.clearAllMocks();
     jest.useRealTimers();
+});
+
+describe('getCenterValueFontScale', () => {
+    it('keeps short signed values at full size', () => {
+        expect(getCenterValueFontScale(5)).toBe(1);
+        expect(getCenterValueFontScale(-3)).toBe(1);
+        expect(getCenterValueFontScale(999)).toBe(1);
+    });
+
+    it('shrinks positive four-digit values so the sign and digits fit', () => {
+        expect(getCenterValueFontScale(1000)).toBeLessThan(1);
+    });
+
+    it('does not shrink below the minimum scale for very long values', () => {
+        expect(getCenterValueFontScale(123456789)).toBe(0.62);
+    });
 });
 
 describe('DialControl — rendering', () => {
