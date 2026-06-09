@@ -35,7 +35,7 @@ Currently the app supports up to 20 players (`MAX_PLAYERS` in `src/constants.ts`
 
 ### 4. Performance with large player counts
 
-**✅ Completed in [PR #621](https://github.com/wyne/scorepad-react-native/pull/621) (merged 2026-06-07)** — Dial/RowsBoard path is now large-player-count ready:
+**✅ Completed across [PR #621](https://github.com/wyne/scorepad-react-native/pull/621) (merged 2026-06-07) and [PR #633](https://github.com/wyne/scorepad-react-native/pull/633) (merged 2026-06-09)** — Dial/RowsBoard path is now large-player-count ready:
 
 | Metric | Before | After |
 |--------|--------|-------|
@@ -45,6 +45,7 @@ Currently the app supports up to 20 players (`MAX_PLAYERS` in `src/constants.ts`
 | `PlayerRow` re-renders per score | 20 | 1 |
 | `PlayerDialPage` re-renders per score | 20 | 1 |
 | `DialControl` re-renders per score | 20 | **0** |
+| Redux writes during dial drag | 1 per notch | **0 until gesture end** |
 | RowsBoard commit on overlay open | 63ms (all rows) | 37ms (rows bail out) |
 | Overlay visible at first paint | ~172ms post-tap | ~0ms (mid-animation) |
 
@@ -54,6 +55,9 @@ Specific changes merged:
 - `dimmed` boolean prop replaced with `SharedValue<boolean>` — all rows bail out on overlay open
 - `FlatList` capped to `windowSize=3` + `initialScrollIndex` — eliminates player-count proportional lag
 - All drag visual state (notch, trail arc, full-circle) moved to Reanimated UI thread via `useAnimatedProps` worklets
+- [PR #633](https://github.com/wyne/scorepad-react-native/pull/633) moved live dial score and total updates to shared values during fast spins, then flushes the final pending round score to Redux once on gesture end/finalize
+- `playerRoundScoreSet` now bails out when the requested round score already matches the stored score, avoiding unchanged writes from forcing downstream selector/re-render work
+- Dial center value text now scales for larger signed values so fast score changes do not overflow the control
 - `GameSheet` conditionally renders score columns — eliminates all ScoreLog Redux subscriptions when sheet is collapsed
 - `useGestureHint` fixed to use `useHasAnyScore` (stable boolean) instead of score fingerprint sum
 - `useGestureHint` lifted to `GameScreen` so state survives gesture-type switches
@@ -137,6 +141,7 @@ With 50 players × many rounds of scores, the serialized state size grows. Unlik
 4. Gesture threshold enforcement in add/remove player flows + `GameOptionsButton` UI
 5. **Performance** (partially complete):
    - ✅ **Done (PR #621)**: Dial/RowsBoard path — `PlayerRow`, `PlayerDialPage`, `DialOverlay` memoized; `DialControl` score display via Reanimated SharedValues; FlatList windowed to 3 pages; drag state on UI thread; overlay entrance animation pre-fired; `useGestureHint` fixed and lifted
+   - ✅ **Done (PR #633)**: Dial drag no longer dispatches Redux updates for every notch; visible round score/new total stay on shared values during the gesture and only the final score is committed at gesture end/finalize. Unchanged round score writes are skipped in `PlayersSlice`.
    - 🔲 **Remaining**: memoize `AdditionTile`; memoize `PlayerListItem` + `useCallback` for `renderItem`/`addPlayerHandler` in `SettingsScreen`; audit `selectSortedPlayerIdsByScore` input selectors; re-profile to validate
 6. Fix `GameListItem` player name truncation (`GameListItem.tsx:95–106`)
 7. *(Deferred)* New game player count picker UI
@@ -151,5 +156,6 @@ With 50 players × many rounds of scores, the serialized state size grows. Unlik
 - Add players past threshold mid-game → verify gesture auto-switches with user feedback
 - Remove players below threshold → verify option to switch back is offered
 - Score changes with 50 players → verify no visible lag on gesture interaction
+- Fast dial spins with 50 players → verify the dial value/total update smoothly during the gesture and Redux receives only the final score after release
 - Open ScoreLog with 50 players × 10 rounds → verify no jank
 - View game list with 50-player game → verify list item does not overflow
