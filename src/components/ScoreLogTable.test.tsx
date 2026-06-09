@@ -9,7 +9,7 @@ import gamesReducer from '../../redux/GamesSlice';
 import playersReducer from '../../redux/PlayersSlice';
 import settingsReducer from '../../redux/SettingsSlice';
 
-import Rounds from './Rounds';
+import ScoreLogTable from './ScoreLogTable';
 
 // Mock dependencies
 jest.mock('react-native-gesture-handler', () => {
@@ -33,7 +33,7 @@ jest.mock('react-native-gesture-handler', () => {
                 horizontal,
                 contentContainerStyle,
                 nestedScrollEnabled,
-                testID: 'rounds-scroll-view'
+                testID: 'score-log-scroll-view'
             }, children);
         }),
     };
@@ -91,7 +91,7 @@ const createMockStore = (initialState: Parameters<typeof configureStore>[0]['pre
 };
 
 
-describe('Rounds', () => {
+describe('ScoreLogTable', () => {
     const mockGame = {
         id: 'game-1',
         title: 'Test Game',
@@ -136,7 +136,7 @@ describe('Rounds', () => {
 
         const { toJSON } = render(
             <Provider store={store}>
-                <Rounds />
+                <ScoreLogTable />
             </Provider>
         );
 
@@ -162,13 +162,13 @@ describe('Rounds', () => {
 
         const { getByTestId } = render(
             <Provider store={store}>
-                <Rounds />
+                <ScoreLogTable />
             </Provider>
         );
 
         expect(getByTestId('player-name-column')).toBeTruthy();
         expect(getByTestId('total-score-column')).toBeTruthy();
-        expect(getByTestId('rounds-scroll-view')).toBeTruthy();
+        expect(getByTestId('score-log-scroll-view')).toBeTruthy();
     });
 
     it('should render all round score columns based on roundTotal', () => {
@@ -190,7 +190,7 @@ describe('Rounds', () => {
 
         const { getByTestId } = render(
             <Provider store={store}>
-                <Rounds />
+                <ScoreLogTable />
             </Provider>
         );
 
@@ -221,7 +221,7 @@ describe('Rounds', () => {
 
         const { getByText } = render(
             <Provider store={store}>
-                <Rounds />
+                <ScoreLogTable />
             </Provider>
         );
 
@@ -255,7 +255,7 @@ describe('Rounds', () => {
         const { logEvent } = require('../Analytics');
         const { getByTestId } = render(
             <Provider store={store}>
-                <Rounds />
+                <ScoreLogTable />
             </Provider>
         );
 
@@ -291,7 +291,7 @@ describe('Rounds', () => {
         const { logEvent } = require('../Analytics');
         const { getByTestId } = render(
             <Provider store={store}>
-                <Rounds />
+                <ScoreLogTable />
             </Provider>
         );
 
@@ -326,7 +326,7 @@ describe('Rounds', () => {
 
         const { getByTestId, queryByTestId } = render(
             <Provider store={store}>
-                <Rounds />
+                <ScoreLogTable />
             </Provider>
         );
 
@@ -356,7 +356,7 @@ describe('Rounds', () => {
 
         const { getByTestId } = render(
             <Provider store={store}>
-                <Rounds />
+                <ScoreLogTable />
             </Provider>
         );
 
@@ -405,7 +405,7 @@ describe('Rounds', () => {
 
         const { getByTestId } = render(
             <Provider store={store}>
-                <Rounds />
+                <ScoreLogTable />
             </Provider>
         );
 
@@ -433,7 +433,7 @@ describe('Rounds', () => {
 
         const { getByTestId } = render(
             <Provider store={store}>
-                <Rounds />
+                <ScoreLogTable />
             </Provider>
         );
 
@@ -466,7 +466,7 @@ describe('Rounds', () => {
 
         const { getByText } = render(
             <Provider store={store}>
-                <Rounds />
+                <ScoreLogTable />
             </Provider>
         );
 
@@ -493,11 +493,11 @@ describe('Rounds', () => {
 
         const { getByTestId } = render(
             <Provider store={store}>
-                <Rounds />
+                <ScoreLogTable />
             </Provider>
         );
 
-        const scrollView = getByTestId('rounds-scroll-view');
+        const scrollView = getByTestId('score-log-scroll-view');
         expect(scrollView.props.horizontal).toBe(true);
         expect(scrollView.props.nestedScrollEnabled).toBe(true);
         expect(scrollView.props.contentContainerStyle).toEqual({ flexDirection: 'row' });

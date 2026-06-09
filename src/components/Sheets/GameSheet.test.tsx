@@ -146,15 +146,15 @@ jest.mock('../Icons/RematchIcon', () => {
     };
 });
 
-jest.mock('../Rounds', () => {
+jest.mock('../ScoreLogTable', () => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    return function MockRounds({ navigation }: {
+    return function MockScoreLogTable({ navigation }: {
         navigation: object;
     }) {
         const { View, Text } = jest.requireActual('react-native');
         return (
-            <View testID="rounds">
-                <Text>Rounds</Text>
+            <View testID="score-log-table">
+                <Text>ScoreLogTable</Text>
             </View>
         );
     };
@@ -288,7 +288,7 @@ describe('GameSheet', () => {
 
         expect(getByTestId('bottom-sheet')).toBeTruthy();
         expect(getByText('Test Game')).toBeTruthy();
-        expect(getByTestId('rounds')).toBeTruthy();
+        expect(getByTestId('score-log-table')).toBeTruthy();
     });
 
     it('should show locked text when game is locked', () => {

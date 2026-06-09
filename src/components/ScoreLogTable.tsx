@@ -22,7 +22,7 @@ interface RoundScrollOffset {
 
 const MemoizedRoundScoreColumn = React.memo(RoundScoreColumn);
 
-const Rounds: React.FunctionComponent<Props> = ({ showScores = true }) => {
+const ScoreLogTable: React.FunctionComponent<Props> = ({ showScores = true }) => {
     const [roundScrollOffset, setRoundScrollOffset] = useState<RoundScrollOffset>({});
 
     const currentGameId = useAppSelector(state => state.settings.currentGameId);
@@ -32,7 +32,7 @@ const Rounds: React.FunctionComponent<Props> = ({ showScores = true }) => {
     const currentRoundIndex = useAppSelector(state => selectGameById(state, currentGameId)?.roundCurrent || 0);
     const roundCount = useAppSelector(state => selectGameById(state, currentGameId)?.roundTotal || 1);
 
-    const roundsScrollViewEl = useRef<ScrollView>(null);
+    const scoreLogScrollViewEl = useRef<ScrollView>(null);
 
     // Remember the round offset when the round changes
     const onLayoutHandler = useCallback((event: LayoutChangeEvent, round: number) => {
@@ -47,9 +47,9 @@ const Rounds: React.FunctionComponent<Props> = ({ showScores = true }) => {
     // Scroll to the current round
     useEffect(() => {
         const offset = roundScrollOffset[currentRoundIndex];
-        if (roundsScrollViewEl.current == null || typeof offset == 'undefined') return;
+        if (scoreLogScrollViewEl.current == null || typeof offset == 'undefined') return;
 
-        roundsScrollViewEl.current.scrollTo({
+        scoreLogScrollViewEl.current.scrollTo({
             x: offset,
             animated: Platform.OS == 'ios' ? true : false
         });
@@ -85,7 +85,7 @@ const Rounds: React.FunctionComponent<Props> = ({ showScores = true }) => {
                 <ScrollView horizontal={true}
                     nestedScrollEnabled={true}
                     contentContainerStyle={{ flexDirection: 'row' }}
-                    ref={roundsScrollViewEl}>
+                    ref={scoreLogScrollViewEl}>
                     {roundsIterator.map((item, round) => (
                         <View key={round} onLayout={e => onLayoutHandler(e, round)}>
                             <MemoizedRoundScoreColumn
@@ -107,4 +107,4 @@ const styles = StyleSheet.create({
     }
 });
 
-export default memo(Rounds);
+export default memo(ScoreLogTable);

@@ -15,7 +15,7 @@ import { logEvent } from '../../Analytics';
 import { useTheme } from '../../theme';
 import BigButton from '../BigButtons/BigButton';
 import RematchIcon from '../Icons/RematchIcon';
-import Rounds from '../Rounds';
+import ScoreLogTable from '../ScoreLogTable';
 
 import { useChooseWinnersModalContext } from './ChooseWinnersModalContext';
 import { useGameSheetContext } from './GameSheetContext';
@@ -268,7 +268,7 @@ const GameSheet: React.FunctionComponent = () => {
                     </View>
 
                     <Animated.View style={[styles.sheetContent, animatedSheetStyle]}>
-                        <Rounds showScores={shouldRenderContent} />
+                        <ScoreLogTable showScores={shouldRenderContent} />
 
                         <Text style={{ color: theme.text, margin: 10, marginTop: 0 }}>
                             Tap the player column or total score column to change sorting.
