@@ -18,7 +18,11 @@ import Animated, {
 import Svg, { Circle, Line, Path } from 'react-native-svg';
 
 // Extend TextInputProps to include Reanimated's animated text content prop
-type AnimatedTextInputProps = TextInputProps & { text?: string };
+type AnimatedTextInputProps = TextInputProps & {
+    text?: string;
+    adjustsFontSizeToFit?: boolean;
+    minimumFontScale?: number;
+};
 const AnimatedTextInput = Animated.createAnimatedComponent(TextInput as React.ComponentType<AnimatedTextInputProps>);
 
 import { POWER_HOLD_ACTIVATION_MS, POWER_HOLD_INDICATOR_DELAY_MS } from '../interactionConstants';
@@ -147,6 +151,12 @@ const DialControl: React.FC<Props> = ({
     const svStartY = useSharedValue(0);
     const svHasMoved = useSharedValue(false);
     const svStartValue = useSharedValue(0);
+    // Optimistic drag state: update visible shared values during the gesture,
+    // then commit only the final pending score to Redux once the gesture closes.
+    const svStartNewTotal = useSharedValue(0);
+    const svPendingValue = useSharedValue(0);
+    const svLastStep = useSharedValue(0);
+    const svDidFlush = useSharedValue(true);
 
     useEffect(() => { svInc.value = isSecondary ? addendTwo : addendOne; }, [isSecondary, addendOne, addendTwo]);
 
@@ -218,13 +228,10 @@ const DialControl: React.FC<Props> = ({
         holdProgress.value = withTiming(0, { duration: 200, easing: Easing.out(Easing.cubic) });
     }, []);
 
-    const handleBump = useCallback((newVal: number) => {
-        if (newVal !== svValue.value) {
-            onChange(newVal);
-            if (isSecondaryRef.current) popNumber();
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-        }
-    }, [onChange, svValue, popNumber]);
+    const handleBumpFeedback = useCallback(() => {
+        if (isSecondaryRef.current) popNumber();
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }, [popNumber]);
 
     const centerValueAnimProps = useAnimatedProps(() => ({
         text: fmtSigned(svValue.value),
@@ -283,15 +290,24 @@ const DialControl: React.FC<Props> = ({
         onToggleMode(false);
     }, [onToggleMode]);
 
+    const flushPendingChange = useCallback((newVal: number) => {
+        onChange(newVal);
+    }, [onChange]);
+
     const panGesture = Gesture.Pan()
         .enabled(!menuOpen)
         .minDistance(0)
         .onBegin((e) => {
-            svStartValue.value = svValue.value;
-            svAccDeg.value = 0;
-            svHasMoved.value = false;
-            svStartX.value = e.x;
-            svStartY.value = e.y;
+            svStartValue.value = svValue.value; // round score at gesture start, before optimistic dial updates
+            // Capture the gesture baseline so live total = start total + round delta.
+            svStartNewTotal.value = svNewTotal.value; // total score at gesture start, before optimistic dial updates
+            svPendingValue.value = svValue.value; // latest optimistic round score waiting to be flushed to Redux
+            svLastStep.value = 0; // last emitted notch offset from svStartValue
+            svDidFlush.value = false; // reset one-shot guard for the eventual Redux flush
+            svAccDeg.value = 0; // accumulated rotation degrees since gesture start
+            svHasMoved.value = false; // long-press hold is still possible until movement passes threshold
+            svStartX.value = e.x; // touch start x, used to detect movement beyond hold threshold
+            svStartY.value = e.y; // touch start y, used to detect movement beyond hold threshold
 
             const dx = e.x - C;
             const dy = e.y - C;
@@ -319,16 +335,36 @@ const DialControl: React.FC<Props> = ({
             svLastAngle.value = angle;
 
             const steps = Math.round(svAccDeg.value / STEP_DEG);
+            if (steps === svLastStep.value) return;
+
+            svLastStep.value = steps;
             const newVal = svStartValue.value + steps * svInc.value;
-            runOnJS(handleBump)(newVal);
+            svPendingValue.value = newVal;
+            svValue.value = newVal;
+            svNewTotal.value = svStartNewTotal.value + newVal - svStartValue.value;
+            runOnJS(handleBumpFeedback)();
         })
         .onEnd(() => {
+            // onFinalize can run after onEnd, so guard the JS/Redux commit.
+            if (!svDidFlush.value) {
+                svDidFlush.value = true;
+                if (svPendingValue.value !== svStartValue.value) {
+                    runOnJS(flushPendingChange)(svPendingValue.value);
+                }
+            }
             svIsDragging.value = false;
             svAccDeg.value = 0;
             runOnJS(stopLongPress)();
             runOnJS(handleDeactivate)();
         })
         .onFinalize(() => {
+            // onEnd can run before onFinalize, so guard the JS/Redux commit.
+            if (!svDidFlush.value) {
+                svDidFlush.value = true;
+                if (svPendingValue.value !== svStartValue.value) {
+                    runOnJS(flushPendingChange)(svPendingValue.value);
+                }
+            }
             svIsDragging.value = false;
             svAccDeg.value = 0;
             runOnJS(stopLongPress)();
@@ -424,6 +460,8 @@ const DialControl: React.FC<Props> = ({
                                     animatedProps={centerValueAnimProps}
                                     defaultValue={fmtSigned(svValue.value)}
                                     style={[styles.centerNumber, { color: ink, fontSize: D * 0.20, padding: 0, backgroundColor: 'transparent' }]}
+                                    adjustsFontSizeToFit
+                                    minimumFontScale={0.65}
                                     editable={false}
                                     caretHidden={true}
                                     underlineColorAndroid="transparent"
