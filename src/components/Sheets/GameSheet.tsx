@@ -261,7 +261,7 @@ const GameSheet: React.FunctionComponent = () => {
                             </Text>
                         }
                         {false &&
-                            <Text style={styles.editButton} onPress={() => navigation.navigate('Settings')}>
+                            <Text style={styles.editButton} onPress={() => navigation.navigate('EditGame')}>
                                 Edit
                             </Text>
                         }
@@ -292,7 +292,7 @@ const GameSheet: React.FunctionComponent = () => {
                                             logEvent('edit_game', {
                                                 game_id: currentGameId
                                             });
-                                            navigation.navigate('Settings', { source: 'edit_game' });
+                                            navigation.navigate('EditGame', { source: 'edit_game' });
                                         }
                                         }
                                     />

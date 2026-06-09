@@ -7,8 +7,8 @@ import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 
 import { useAppSelector } from '../../redux/hooks';
 import { selectInteractionType } from '../../redux/selectors';
-import FlexboxBoard from '../components/Boards/FlexboxBoard';
-import RowsBoard from '../components/Boards/RowsBoard';
+import ListBoard from '../components/Boards/ListBoard';
+import TileBoard from '../components/Boards/TileBoard';
 import { InteractionType } from '../components/Interactions/InteractionType';
 import AddendModal from '../components/Sheets/AddendModal';
 import ChooseWinnersModal from '../components/Sheets/ChooseWinnersModal';
@@ -42,10 +42,10 @@ const GameScreen: React.FunctionComponent = () => {
             <View style={{ flex: 1 }}>
                 {interactionType === InteractionType.Dial
                     ? <Animated.View key="rows" entering={FadeIn.duration(220)} exiting={FadeOut.duration(180)} style={StyleSheet.absoluteFill}>
-                        <RowsBoard showHint={showHint} />
+                        <ListBoard showHint={showHint} />
                     </Animated.View>
                     : <Animated.View key="flex" entering={FadeIn.duration(220)} exiting={FadeOut.duration(180)} style={StyleSheet.absoluteFill}>
-                        <FlexboxBoard showHint={showHint} />
+                        <TileBoard showHint={showHint} />
                     </Animated.View>
                 }
 

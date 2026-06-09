@@ -32,14 +32,14 @@ export const HalfTileTouchSurface: React.FunctionComponent<Props> = (
 
     const [particles, setParticles] = useState<ScoreParticleProps[]>([]);
 
-    const addendOne = useAppSelector(state => state.settings.addendOne);
-    const addendTwo = useAppSelector(state => state.settings.addendTwo);
+    const primaryPointStep = useAppSelector(state => state.settings.addendOne);
+    const secondaryPointStep = useAppSelector(state => state.settings.addendTwo);
 
     const currentGameId = useAppSelector(state => state.settings.currentGameId);
     const currentGame = useAppSelector(selectCurrentGame);
     if (typeof currentGame == 'undefined') return null;
 
-    const roundCurrent = currentGame.roundCurrent;
+    const currentRoundIndex = currentGame.roundCurrent;
 
     const addParticle = (addend: number) => {
         const key = Math.random().toString(36).substring(7);
@@ -63,12 +63,12 @@ export const HalfTileTouchSurface: React.FunctionComponent<Props> = (
             player_index: playerIndex,
             game_id: currentGameId,
             addend: addend,
-            round: roundCurrent,
+            round: currentRoundIndex,
             type: scoreType,
             power_hold: powerHold,
             interaction: 'half-tap',
         });
-        dispatch(playerRoundScoreIncrement(playerId, roundCurrent, scoreType == 'increment' ? addend : -addend));
+        dispatch(playerRoundScoreIncrement(playerId, currentRoundIndex, scoreType == 'increment' ? addend : -addend));
     };
 
     return (
@@ -76,8 +76,8 @@ export const HalfTileTouchSurface: React.FunctionComponent<Props> = (
             style={[styles.surface, scoreType == 'increment' ? styles.surfaceAdd : styles.surfaceSubtract]}
             underlayColor={currentGame.locked || menuOpen ? 'transparent' : fontColor + '30'}
             activeOpacity={menuOpen ? 1 : 1}
-            onPress={() => scoreChangeHandler(addendOne)}
-            onLongPress={() => scoreChangeHandler(addendTwo, true)}>
+            onPress={() => scoreChangeHandler(primaryPointStep)}
+            onLongPress={() => scoreChangeHandler(secondaryPointStep, true)}>
             <View style={[StyleSheet.absoluteFill,
                 scoreType === 'increment' ? styles.hintContainerTop : styles.hintContainerBottom
             ]}>

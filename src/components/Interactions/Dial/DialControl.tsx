@@ -31,7 +31,7 @@ const STEP_DEG = 30;
 const ACCENT = '#3a86ff';
 const MOVE_THRESHOLD_SQ = 100;
 
-// TODO: see RowsBoard.tsx — consolidate inkFor/inkA into shared colorUtils module
+// TODO: see ListBoard.tsx — consolidate inkFor/inkA into shared colorUtils module
 function inkA(ink: string, a: number): string {
     return ink === '#000' ? `rgba(0,0,0,${a})` : `rgba(255,255,255,${a})`;
 }
@@ -72,8 +72,8 @@ const DialControl: React.FC<Props> = ({
     isSecondary,
     ink,
     svNewTotal,
-    addendOne,
-    addendTwo,
+    addendOne: primaryPointStep,
+    addendTwo: secondaryPointStep,
     dialSize: D,
     landscape = false,
     menuOpen = false,
@@ -140,7 +140,7 @@ const DialControl: React.FC<Props> = ({
     isSecondaryRef.current = isSecondary;
 
     // Shared values for worklet access
-    const svInc = useSharedValue(addendOne);
+    const svInc = useSharedValue(primaryPointStep);
     const svAccDeg = useSharedValue(0);
     const svLastAngle = useSharedValue(0);
     const svStartX = useSharedValue(0);
@@ -148,7 +148,7 @@ const DialControl: React.FC<Props> = ({
     const svHasMoved = useSharedValue(false);
     const svStartValue = useSharedValue(0);
 
-    useEffect(() => { svInc.value = isSecondary ? addendTwo : addendOne; }, [isSecondary, addendOne, addendTwo]);
+    useEffect(() => { svInc.value = isSecondary ? secondaryPointStep : primaryPointStep; }, [isSecondary, primaryPointStep, secondaryPointStep]);
 
     const lpTimer = useRef<ReturnType<typeof setTimeout>>();
     useEffect(() => () => clearTimeout(lpTimer.current), []);
@@ -361,7 +361,7 @@ const DialControl: React.FC<Props> = ({
                 ]}>
                     <View style={[styles.pillDot, { backgroundColor: pillActive ? '#fff' : inkA(ink, 0.4) }]} />
                     <Text style={[styles.pillText, { color: pillActive ? '#fff' : ink }]}>
-                        STEP +{pillActive ? addendTwo : addendOne}
+                        STEP +{pillActive ? secondaryPointStep : primaryPointStep}
                     </Text>
                 </Animated.View>
             )}
@@ -459,7 +459,7 @@ const DialControl: React.FC<Props> = ({
                     testID="btn-decrement"
                     disabled={menuOpen}
                     onPress={() => {
-                        onChange(svValue.value - addendOne);
+                        onChange(svValue.value - primaryPointStep);
                         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                     }}
                     style={({ pressed }) => [
@@ -468,7 +468,7 @@ const DialControl: React.FC<Props> = ({
                     ]}
                 >
                     <Text style={[styles.stepBtnText, { color: ink, fontSize: D * 0.12 }]}>
-                        −{addendOne}
+                        −{primaryPointStep}
                     </Text>
                 </Pressable>
 
@@ -492,7 +492,7 @@ const DialControl: React.FC<Props> = ({
                     testID="btn-increment"
                     disabled={menuOpen}
                     onPress={() => {
-                        onChange(svValue.value + addendOne);
+                        onChange(svValue.value + primaryPointStep);
                         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                     }}
                     style={({ pressed }) => [
@@ -501,7 +501,7 @@ const DialControl: React.FC<Props> = ({
                     ]}
                 >
                     <Text style={[styles.stepBtnText, { color: ink, fontSize: D * 0.12 }]}>
-                        +{addendOne}
+                        +{primaryPointStep}
                     </Text>
                 </Pressable>
             </View>

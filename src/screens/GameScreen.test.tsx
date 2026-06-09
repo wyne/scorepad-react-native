@@ -51,17 +51,17 @@ jest.mock('@gorhom/bottom-sheet', () => {
 });
 
 // Mock the components that GameScreen uses
-jest.mock('../components/Boards/FlexboxBoard', () => {
-    return function MockFlexboxBoard() {
+jest.mock('../components/Boards/TileBoard', () => {
+    return function MockTileBoard() {
         const { View, Text } = jest.requireActual('react-native');
-        return <View testID="flexbox-board"><Text>FlexboxBoard</Text></View>;
+        return <View testID="tile-board"><Text>TileBoard</Text></View>;
     };
 });
 
-jest.mock('../components/Boards/RowsBoard', () => {
-    return function MockRowsBoard() {
+jest.mock('../components/Boards/ListBoard', () => {
+    return function MockListBoard() {
         const { View, Text } = jest.requireActual('react-native');
-        return <View testID="rows-board"><Text>RowsBoard</Text></View>;
+        return <View testID="list-board"><Text>ListBoard</Text></View>;
     };
 });
 
@@ -168,11 +168,11 @@ describe('GameScreen', () => {
             </Provider>
         );
 
-        expect(getByTestId('flexbox-board')).toBeTruthy();
+        expect(getByTestId('tile-board')).toBeTruthy();
         expect(getByTestId('addend-modal')).toBeTruthy();
     });
 
-    it('should render RowsBoard when interactionType is Dial', () => {
+    it('should render ListBoard when interactionType is Dial', () => {
         const store = createMockStore({
             settings: {
                 currentGameId: 'game-1',
@@ -194,6 +194,6 @@ describe('GameScreen', () => {
             </Provider>
         );
 
-        expect(getByTestId('rows-board')).toBeTruthy();
+        expect(getByTestId('list-board')).toBeTruthy();
     });
 });

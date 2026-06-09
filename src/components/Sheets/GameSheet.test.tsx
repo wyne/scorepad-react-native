@@ -590,7 +590,7 @@ describe('GameSheet', () => {
         });
     });
 
-    it('should navigate to Settings when edit game button is pressed', async () => {
+    it('should navigate to EditGame when edit game button is pressed', async () => {
         const store = createMockStore({
             settings: {
                 currentGameId: 'game-1',
@@ -617,7 +617,7 @@ describe('GameSheet', () => {
         fireEvent.press(editButton);
 
         await waitFor(() => {
-            expect(mockNavigate).toHaveBeenCalledWith('Settings', { source: 'edit_game' });
+            expect(mockNavigate).toHaveBeenCalledWith('EditGame', { source: 'edit_game' });
             expect(logEvent).toHaveBeenCalledWith('edit_game', {
                 game_id: 'game-1',
             });

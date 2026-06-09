@@ -8,9 +8,9 @@ import { selectCurrentGame } from '../../../redux/selectors';
 import { bottomSheetHeight } from '../../components/Sheets/GameSheet';
 import { useTheme } from '../../theme';
 
-import FlexboxTile from './FlexboxTile';
+import PlayerTile from './PlayerTile';
 
-const FlexboxBoard: React.FC<{ showHint: boolean }> = ({ showHint }) => {
+const TileBoard: React.FC<{ showHint: boolean }> = ({ showHint }) => {
     const theme = useTheme();
     const fullscreen = useAppSelector(state => state.settings.home_fullscreen);
     const playerIds = useAppSelector(state => selectCurrentGame(state)?.playerIds);
@@ -92,7 +92,7 @@ const FlexboxBoard: React.FC<{ showHint: boolean }> = ({ showHint }) => {
         } onLayout={layoutHandler} >
             {playerIds.map((id, index) => (
                 width != null && height != null && rows != 0 && cols != 0 &&
-                <FlexboxTile
+                <PlayerTile
                     key={id}
                     playerId={id}
                     cols={cols}
@@ -121,4 +121,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default memo(FlexboxBoard);
+export default memo(TileBoard);

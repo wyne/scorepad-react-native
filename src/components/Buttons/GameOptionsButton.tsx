@@ -25,8 +25,8 @@ const GameOptionsButton: React.FunctionComponent = () => {
     const interactionType = useAppSelector(state => state.settings.interactionType);
     const fullscreen = useAppSelector(state => state.settings.home_fullscreen);
     const installId = useAppSelector(state => state.settings.installId);
-    const addendOne = useAppSelector(state => state.settings.addendOne);
-    const addendTwo = useAppSelector(state => state.settings.addendTwo);
+    const primaryPointStep = useAppSelector(state => state.settings.addendOne);
+    const secondaryPointStep = useAppSelector(state => state.settings.addendTwo);
     const showDialDot = useAppSelector(state =>
         !state.settings.seenFeatureNotifications.includes(FEATURE_DIAL_GESTURE)
     );
@@ -42,10 +42,10 @@ const GameOptionsButton: React.FunctionComponent = () => {
     const isDial = interactionType === InteractionType.Dial;
 
     const pointValuesSubtitle = isTap
-        ? `Tap: ${addendOne} / Hold: ${addendTwo}`
+        ? `Tap: ${primaryPointStep} / Hold: ${secondaryPointStep}`
         : isDial
-            ? `Spin: ${addendOne} / Hold: ${addendTwo}`
-            : `Swipe: ${addendOne} / Hold: ${addendTwo}`;
+            ? `Spin: ${primaryPointStep} / Hold: ${secondaryPointStep}`
+            : `Swipe: ${primaryPointStep} / Hold: ${secondaryPointStep}`;
 
     const gestureActions: MenuAction[] = [
         {
@@ -161,8 +161,8 @@ const GameOptionsButton: React.FunctionComponent = () => {
             <View style={styles.button}>
                 <View style={styles.content}>
                     <View style={styles.addendColumn}>
-                        <Text style={[styles.addendText, { color: theme.text }]}>{addendOne}</Text>
-                        <Text style={[styles.addendText, { color: theme.text }]}>{addendTwo}</Text>
+                        <Text style={[styles.addendText, { color: theme.text }]}>{primaryPointStep}</Text>
+                        <Text style={[styles.addendText, { color: theme.text }]}>{secondaryPointStep}</Text>
                     </View>
                     <View>
                         {Platform.OS === 'ios' ? (

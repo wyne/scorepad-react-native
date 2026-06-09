@@ -19,7 +19,7 @@ interface Props {
     navigation: NativeStackNavigationProp<ParamListBase, string, undefined>;
 }
 
-const AppInfoScreen: React.FunctionComponent<Props> = ({ navigation }) => {
+const AppSettingsScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     const theme = useTheme();
 
     useLayoutEffect(() => {
@@ -337,4 +337,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default AppInfoScreen;
+export default AppSettingsScreen;

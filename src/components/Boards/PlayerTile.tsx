@@ -23,7 +23,7 @@ interface Props {
     showHint: boolean;
 }
 
-const FlexboxTile: React.FunctionComponent<Props> = React.memo(({
+const PlayerTile: React.FunctionComponent<Props> = React.memo(({
     index,
     width,
     height,
@@ -103,4 +103,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default FlexboxTile;
+export default PlayerTile;

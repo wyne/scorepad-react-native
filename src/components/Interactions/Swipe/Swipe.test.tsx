@@ -143,7 +143,7 @@ describe('SwipeVertical', () => {
     );
   });
 
-  it('uses addendTwo when powerHold is active', () => {
+  it('uses the secondary point step when powerHold is active', () => {
     const { dispatch } = renderSwipe();
     const ph = (globalThis as any).__ph;
     jest.useFakeTimers();

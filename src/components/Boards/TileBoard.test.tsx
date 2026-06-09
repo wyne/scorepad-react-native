@@ -13,7 +13,7 @@ jest.mock('../Sheets/GameSheet', () => ({
     bottomSheetHeight: 80,
 }));
 
-import FlexboxBoard from './FlexboxBoard';
+import TileBoard from './TileBoard';
 
 // Mock react-native-safe-area-context
 jest.mock('react-native-safe-area-context', () => ({
@@ -45,9 +45,9 @@ jest.mock('react-native-reanimated', () => {
     };
 });
 
-// Mock FlexboxTile component
-jest.mock('./FlexboxTile', () => {
-    return function MockFlexboxTile({ playerId, cols, rows, width, height, index }: {
+// Mock PlayerTile component
+jest.mock('./PlayerTile', () => {
+    return function MockPlayerTile({ playerId, cols, rows, width, height, index }: {
         playerId: string;
         cols: number;
         rows: number;
@@ -57,7 +57,7 @@ jest.mock('./FlexboxTile', () => {
     }) {
         const { View, Text } = jest.requireActual('react-native');
         return (
-            <View testID={`flexbox-tile-${playerId}`}>
+            <View testID={`player-tile-${playerId}`}>
                 <Text>Player: {playerId}</Text>
                 <Text>Cols: {cols}</Text>
                 <Text>Rows: {rows}</Text>
@@ -80,7 +80,7 @@ const createMockStore = (initialState: Parameters<typeof configureStore>[0]['pre
     });
 };
 
-describe('FlexboxBoard', () => {
+describe('TileBoard', () => {
     const mockGame = {
         id: 'game-1',
         title: 'Test Game',
@@ -135,7 +135,7 @@ describe('FlexboxBoard', () => {
 
         const { toJSON } = render(
             <Provider store={store}>
-                <FlexboxBoard showHint={false} />
+                <TileBoard showHint={false} />
             </Provider>
         );
 
@@ -164,7 +164,7 @@ describe('FlexboxBoard', () => {
 
         const { toJSON } = render(
             <Provider store={store}>
-                <FlexboxBoard showHint={false} />
+                <TileBoard showHint={false} />
             </Provider>
         );
 
@@ -190,7 +190,7 @@ describe('FlexboxBoard', () => {
 
         const { getByTestId } = render(
             <Provider store={store}>
-                <FlexboxBoard showHint={false} />
+                <TileBoard showHint={false} />
             </Provider>
         );
 
@@ -216,12 +216,12 @@ describe('FlexboxBoard', () => {
 
         const { queryByTestId } = render(
             <Provider store={store}>
-                <FlexboxBoard showHint={false} />
+                <TileBoard showHint={false} />
             </Provider>
         );
 
         // Before layout event, no tiles should be rendered
-        expect(queryByTestId('flexbox-tile-player-1')).toBeNull();
+        expect(queryByTestId('player-tile-player-1')).toBeNull();
     });
 
     it('should render tiles after layout event with calculated grid', () => {
@@ -243,7 +243,7 @@ describe('FlexboxBoard', () => {
 
         const { getByTestId, getAllByText } = render(
             <Provider store={store}>
-                <FlexboxBoard showHint={false} />
+                <TileBoard showHint={false} />
             </Provider>
         );
 
@@ -260,10 +260,10 @@ describe('FlexboxBoard', () => {
         });
 
         // After layout, tiles should be rendered
-        expect(getByTestId('flexbox-tile-player-1')).toBeTruthy();
-        expect(getByTestId('flexbox-tile-player-2')).toBeTruthy();
-        expect(getByTestId('flexbox-tile-player-3')).toBeTruthy();
-        expect(getByTestId('flexbox-tile-player-4')).toBeTruthy();
+        expect(getByTestId('player-tile-player-1')).toBeTruthy();
+        expect(getByTestId('player-tile-player-2')).toBeTruthy();
+        expect(getByTestId('player-tile-player-3')).toBeTruthy();
+        expect(getByTestId('player-tile-player-4')).toBeTruthy();
 
         // Check that grid calculations are passed to tiles
         expect(getAllByText('Cols: 2')).toHaveLength(4); // 4 players in 2x2 grid
@@ -289,7 +289,7 @@ describe('FlexboxBoard', () => {
 
         const { getByTestId, getAllByText } = render(
             <Provider store={store}>
-                <FlexboxBoard showHint={false} />
+                <TileBoard showHint={false} />
             </Provider>
         );
 
@@ -332,7 +332,7 @@ describe('FlexboxBoard', () => {
 
         const { getByTestId, getAllByText } = render(
             <Provider store={store}>
-                <FlexboxBoard showHint={false} />
+                <TileBoard showHint={false} />
             </Provider>
         );
 
@@ -349,9 +349,9 @@ describe('FlexboxBoard', () => {
         });
 
         // For 3 players, should calculate optimal grid (likely 3x1 or 1x3)
-        expect(getByTestId('flexbox-tile-player-1')).toBeTruthy();
-        expect(getByTestId('flexbox-tile-player-2')).toBeTruthy();
-        expect(getByTestId('flexbox-tile-player-3')).toBeTruthy();
+        expect(getByTestId('player-tile-player-1')).toBeTruthy();
+        expect(getByTestId('player-tile-player-2')).toBeTruthy();
+        expect(getByTestId('player-tile-player-3')).toBeTruthy();
 
         // Check that all tiles have the same grid configuration
         const colsTexts = getAllByText(/Cols: \d+/);
@@ -382,7 +382,7 @@ describe('FlexboxBoard', () => {
 
         const { getByTestId, getByText } = render(
             <Provider store={store}>
-                <FlexboxBoard showHint={false} />
+                <TileBoard showHint={false} />
             </Provider>
         );
 
@@ -397,7 +397,7 @@ describe('FlexboxBoard', () => {
             },
         });
 
-        expect(getByTestId('flexbox-tile-player-1')).toBeTruthy();
+        expect(getByTestId('player-tile-player-1')).toBeTruthy();
         // Single player should be 1x1 grid
         expect(getByText('Cols: 1')).toBeTruthy();
         expect(getByText('Rows: 1')).toBeTruthy();
@@ -424,7 +424,7 @@ describe('FlexboxBoard', () => {
 
         const { getByTestId } = render(
             <Provider store={store}>
-                <FlexboxBoard showHint={false} />
+                <TileBoard showHint={false} />
             </Provider>
         );
 
@@ -457,7 +457,7 @@ describe('FlexboxBoard', () => {
 
         const { getByTestId, getByText } = render(
             <Provider store={store}>
-                <FlexboxBoard showHint={false} />
+                <TileBoard showHint={false} />
             </Provider>
         );
 
@@ -501,7 +501,7 @@ describe('FlexboxBoard', () => {
 
         const { getByTestId, getAllByText } = render(
             <Provider store={store}>
-                <FlexboxBoard showHint={false} />
+                <TileBoard showHint={false} />
             </Provider>
         );
 

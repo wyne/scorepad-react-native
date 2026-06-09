@@ -106,7 +106,7 @@ describe('DialControl — rendering', () => {
         expect(getByDisplayValue('-3')).toBeTruthy();
     });
 
-    it('shows addendOne on both buttons', () => {
+    it('shows the primary point step on both buttons', () => {
         const { getByText } = render(<DialControl {...defaultProps} addendOne={3} />);
         expect(getByText('−3')).toBeTruthy();
         expect(getByText('+3')).toBeTruthy();
@@ -118,12 +118,12 @@ describe('DialControl — rendering', () => {
         expect(getByText('NEW TOTAL')).toBeTruthy();
     });
 
-    it('shows the STEP pill with addendOne by default', () => {
+    it('shows the STEP pill with the primary point step by default', () => {
         const { getByText } = render(<DialControl {...defaultProps} addendOne={2} />);
         expect(getByText('STEP +2')).toBeTruthy();
     });
 
-    it('shows addendTwo in the pill when isSecondary=true', () => {
+    it('shows the secondary point step in the pill when isSecondary=true', () => {
         const { getByText } = render(
             <DialControl {...defaultProps} isSecondary addendOne={1} addendTwo={10} />
         );
@@ -142,21 +142,21 @@ describe('DialControl — rendering', () => {
 });
 
 describe('DialControl — button taps', () => {
-    it('calls onChange with value + addendOne on + tap', () => {
+    it('calls onChange with value + the primary point step on + tap', () => {
         const onChange = jest.fn();
         const { getByTestId } = render(<DialControl {...defaultProps} svValue={mkSv(5)} addendOne={1} onChange={onChange} />);
         fireEvent.press(getByTestId('btn-increment'));
         expect(onChange).toHaveBeenCalledWith(6);
     });
 
-    it('calls onChange with value - addendOne on − tap', () => {
+    it('calls onChange with value - the primary point step on − tap', () => {
         const onChange = jest.fn();
         const { getByTestId } = render(<DialControl {...defaultProps} svValue={mkSv(5)} addendOne={1} onChange={onChange} />);
         fireEvent.press(getByTestId('btn-decrement'));
         expect(onChange).toHaveBeenCalledWith(4);
     });
 
-    it('respects a custom addendOne', () => {
+    it('respects a custom primary point step', () => {
         const onChange = jest.fn();
         const { getByTestId } = render(<DialControl {...defaultProps} svValue={mkSv(0)} addendOne={5} onChange={onChange} />);
         fireEvent.press(getByTestId('btn-increment'));

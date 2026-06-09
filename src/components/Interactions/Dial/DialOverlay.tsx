@@ -34,7 +34,7 @@ function resistedDrag(t: number): number {
     return t / (1 + t / 400); // nearly 1:1 at small pulls, strong resistance beyond ~150 px
 }
 
-// TODO: see RowsBoard.tsx — consolidate inkFor/inkA into shared colorUtils module
+// TODO: see ListBoard.tsx — consolidate inkFor/inkA into shared colorUtils module
 function inkFor(hex: string): string {
     const h = hex.replace('#', '');
     const r = parseInt(h.slice(0, 2), 16) / 255;
@@ -71,8 +71,8 @@ const PlayerDialPage: React.FC<PlayerDialPageProps> = ({
     pageWidth,
     pageHeight,
     boardHeight,
-    addendOne,
-    addendTwo,
+    addendOne: primaryPointStep,
+    addendTwo: secondaryPointStep,
     menuOpen,
     swipeDragY,
     swipeDragX,
@@ -82,30 +82,30 @@ const PlayerDialPage: React.FC<PlayerDialPageProps> = ({
 }) => {
     const dispatch = useAppDispatch();
     const player = useAppSelector(state => selectPlayerById(state, playerId));
-    const roundCurrent = useAppSelector(state => selectCurrentGame(state)?.roundCurrent ?? 0);
-    const { roundScore, previousTotal, currentTotal: scoreTotal } = useAppSelector(
-        state => selectPlayerRoundStats(state, playerId, roundCurrent)
+    const currentRoundIndex = useAppSelector(state => selectCurrentGame(state)?.roundCurrent ?? 0);
+    const { roundScore, previousTotal, currentTotal: currentRoundTotal } = useAppSelector(
+        state => selectPlayerRoundStats(state, playerId, currentRoundIndex)
     );
 
     // Stable SharedValue refs — same object identity every render, so React.memo(DialControl)
     // skips re-renders when score changes. The displayed numbers update via Reanimated on the UI thread.
     const svRoundScore = useSharedValue(roundScore);
-    const svScoreTotal = useSharedValue(scoreTotal);
+    const svScoreTotal = useSharedValue(currentRoundTotal);
     useLayoutEffect(() => {
         svRoundScore.value = roundScore;
-        svScoreTotal.value = scoreTotal;
-    }, [roundScore, scoreTotal]);
+        svScoreTotal.value = currentRoundTotal;
+    }, [roundScore, currentRoundTotal]);
 
     const [isSecondary, setIsSecondary] = useState(false);
 
     // Reset dial mode when the active round changes
     useEffect(() => {
         setIsSecondary(false);
-    }, [roundCurrent]);
+    }, [currentRoundIndex]);
 
     const handleChange = useCallback((v: number) => {
-        dispatch(playerRoundScoreSet(playerId, roundCurrent, v));
-    }, [dispatch, playerId, roundCurrent]);
+        dispatch(playerRoundScoreSet(playerId, currentRoundIndex, v));
+    }, [dispatch, playerId, currentRoundIndex]);
 
     const isDismissing = useSharedValue(false);
 
@@ -179,7 +179,7 @@ const PlayerDialPage: React.FC<PlayerDialPageProps> = ({
                         <View style={[styles.lsPill, { backgroundColor: stepBg }]}>
                             <View style={[styles.lsPillDot, { backgroundColor: stepDotBg }]} />
                             <Text style={[styles.lsPillText, { color: stepTextColor }]}>
-                                STEP +{isSecondary ? addendTwo : addendOne}
+                                STEP +{isSecondary ? secondaryPointStep : primaryPointStep}
                             </Text>
                         </View>
                     </View>
@@ -193,8 +193,8 @@ const PlayerDialPage: React.FC<PlayerDialPageProps> = ({
                             isSecondary={isSecondary}
                             ink={ink}
                             svNewTotal={svScoreTotal}
-                            addendOne={addendOne}
-                            addendTwo={addendTwo}
+                            addendOne={primaryPointStep}
+                            addendTwo={secondaryPointStep}
                             dialSize={lsDialSize}
                             landscape
                             menuOpen={menuOpen}
@@ -205,7 +205,7 @@ const PlayerDialPage: React.FC<PlayerDialPageProps> = ({
                     {/* Right: new total + Done */}
                     <View style={styles.lsCol}>
                         <View style={styles.prevBlock}>
-                            <Text style={[styles.prevNumber, { color: ink }]}>{scoreTotal}</Text>
+                        <Text style={[styles.prevNumber, { color: ink }]}>{currentRoundTotal}</Text>
                             <Text style={[styles.prevLabel, { color: inkA(ink, 0.6) }]}>NEW TOTAL</Text>
                         </View>
                         <Pressable
@@ -256,8 +256,8 @@ const PlayerDialPage: React.FC<PlayerDialPageProps> = ({
                         isSecondary={isSecondary}
                         ink={ink}
                         svNewTotal={svScoreTotal}
-                        addendOne={addendOne}
-                        addendTwo={addendTwo}
+                        addendOne={primaryPointStep}
+                        addendTwo={secondaryPointStep}
                         dialSize={dialSize}
                         menuOpen={menuOpen}
                         showHint={showHint}
@@ -308,8 +308,8 @@ const DialOverlay: React.FC<Props> = ({
 }) => {
     const currentGame = useAppSelector(selectCurrentGame);
     const { menuOpen } = useMenuOpen();
-    const addendOne = useAppSelector(state => state.settings.addendOne);
-    const addendTwo = useAppSelector(state => state.settings.addendTwo);
+    const primaryPointStep = useAppSelector(state => state.settings.addendOne);
+    const secondaryPointStep = useAppSelector(state => state.settings.addendTwo);
 
     const [activeIndex, setActiveIndex] = useState(initialIndex);
     const activeIndexRef = useRef(initialIndex);
@@ -395,8 +395,8 @@ const DialOverlay: React.FC<Props> = ({
                 pageWidth={pageWidth}
                 pageHeight={targetHeight}
                 boardHeight={boardHeight}
-                addendOne={addendOne}
-                addendTwo={addendTwo}
+                addendOne={primaryPointStep}
+                addendTwo={secondaryPointStep}
                 menuOpen={menuOpen}
                 swipeDragY={swipeDragY}
                 swipeDragX={swipeDragX}
@@ -405,7 +405,7 @@ const DialOverlay: React.FC<Props> = ({
                 showHint={showHint}
             />
         </View>
-    ), [pageWidth, targetHeight, boardHeight, addendOne, addendTwo, menuOpen, swipeDragY, swipeDragX, handleDone, handleDismiss, showHint]);
+    ), [pageWidth, targetHeight, boardHeight, primaryPointStep, secondaryPointStep, menuOpen, swipeDragY, swipeDragX, handleDone, handleDismiss, showHint]);
 
     if (!currentGame) return null;
 

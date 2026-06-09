@@ -46,7 +46,7 @@ jest.mock('../MenuOpenContext', () => ({
     useMenuOpen: () => ({ menuOpen: mockMenuOpen, setMenuOpen: jest.fn() }),
 }));
 
-import RowsBoard from './RowsBoard';
+import ListBoard from './ListBoard';
 
 const createStore = (gameOverrides: Record<string, unknown> = {}, playerIds = ['player-1', 'player-2']) => {
     const players = Object.fromEntries(
@@ -77,7 +77,7 @@ const createStore = (gameOverrides: Record<string, unknown> = {}, playerIds = ['
 
 /** Fire layout events so handleRowPress passes the layout guards. */
 function fireLayouts(getByTestId: ReturnType<typeof render>['getByTestId']) {
-    fireEvent(getByTestId('rows-board-container'), 'layout', {
+    fireEvent(getByTestId('list-board-container'), 'layout', {
         nativeEvent: { layout: { x: 0, y: 0, width: 400, height: 600 } },
     });
     fireEvent(getByTestId('player-row-0'), 'layout', {
@@ -85,7 +85,7 @@ function fireLayouts(getByTestId: ReturnType<typeof render>['getByTestId']) {
     });
 }
 
-describe('RowsBoard', () => {
+describe('ListBoard', () => {
     beforeEach(() => {
         mockMenuOpen = false;
     });
@@ -93,7 +93,7 @@ describe('RowsBoard', () => {
     it('opens the overlay when the game is unlocked and menu is closed', () => {
         const store = createStore();
         const { getByTestId, queryByTestId, getByText } = render(
-            <Provider store={store}><RowsBoard showHint={false} /></Provider>
+            <Provider store={store}><ListBoard showHint={false} /></Provider>
         );
 
         expect(queryByTestId('inline-expand-overlay')).toBeNull();
@@ -105,7 +105,7 @@ describe('RowsBoard', () => {
     it('does not open the overlay when the game is locked', () => {
         const store = createStore({ locked: true });
         const { getByTestId, queryByTestId, getByText } = render(
-            <Provider store={store}><RowsBoard showHint={false} /></Provider>
+            <Provider store={store}><ListBoard showHint={false} /></Provider>
         );
 
         fireLayouts(getByTestId);
@@ -117,7 +117,7 @@ describe('RowsBoard', () => {
         mockMenuOpen = true;
         const store = createStore();
         const { getByTestId, queryByTestId, getByText } = render(
-            <Provider store={store}><RowsBoard showHint={false} /></Provider>
+            <Provider store={store}><ListBoard showHint={false} /></Provider>
         );
 
         fireLayouts(getByTestId);
@@ -126,36 +126,36 @@ describe('RowsBoard', () => {
     });
 });
 
-describe('RowsBoard — winner pill', () => {
+describe('ListBoard — winner pill', () => {
     it('shows WINNER for a winner when the game is locked', () => {
         const store = createStore({ locked: true, winnerIds: ['player-1'] });
-        const { getAllByText } = render(<Provider store={store}><RowsBoard showHint={false} /></Provider>);
+        const { getAllByText } = render(<Provider store={store}><ListBoard showHint={false} /></Provider>);
         expect(getAllByText('WINNER').length).toBeGreaterThanOrEqual(1);
     });
 
     it('does not show WINNER for a non-winner when the game is locked', () => {
         // player-1 is NOT a winner; only player-2 is
         const store = createStore({ locked: true, winnerIds: ['player-2'] }, ['player-1']);
-        const { queryByText } = render(<Provider store={store}><RowsBoard showHint={false} /></Provider>);
+        const { queryByText } = render(<Provider store={store}><ListBoard showHint={false} /></Provider>);
         expect(queryByText('WINNER')).toBeNull();
     });
 
     it('does not show WINNER when the game is unlocked', () => {
         const store = createStore({ locked: false, winnerIds: ['player-1'] });
-        const { queryByText } = render(<Provider store={store}><RowsBoard showHint={false} /></Provider>);
+        const { queryByText } = render(<Provider store={store}><ListBoard showHint={false} /></Provider>);
         expect(queryByText('WINNER')).toBeNull();
     });
 
     it('hides PREV and RND labels when the game is locked', () => {
         const store = createStore({ locked: true });
-        const { queryByText } = render(<Provider store={store}><RowsBoard showHint={false} /></Provider>);
+        const { queryByText } = render(<Provider store={store}><ListBoard showHint={false} /></Provider>);
         expect(queryByText('PREV')).toBeNull();
         expect(queryByText('RND')).toBeNull();
     });
 
     it('shows PREV and RND labels when the game is unlocked', () => {
         const store = createStore({ locked: false });
-        const { getAllByText } = render(<Provider store={store}><RowsBoard showHint={false} /></Provider>);
+        const { getAllByText } = render(<Provider store={store}><ListBoard showHint={false} /></Provider>);
         expect(getAllByText('PREV').length).toBeGreaterThanOrEqual(1);
         expect(getAllByText('RND').length).toBeGreaterThanOrEqual(1);
     });

@@ -29,8 +29,8 @@ const Rounds: React.FunctionComponent<Props> = ({ showScores = true }) => {
 
     if (typeof currentGameId == 'undefined') return null;
 
-    const roundCurrent = useAppSelector(state => selectGameById(state, currentGameId)?.roundCurrent || 0);
-    const roundTotal = useAppSelector(state => selectGameById(state, currentGameId)?.roundTotal || 1);
+    const currentRoundIndex = useAppSelector(state => selectGameById(state, currentGameId)?.roundCurrent || 0);
+    const roundCount = useAppSelector(state => selectGameById(state, currentGameId)?.roundTotal || 1);
 
     const roundsScrollViewEl = useRef<ScrollView>(null);
 
@@ -46,16 +46,16 @@ const Rounds: React.FunctionComponent<Props> = ({ showScores = true }) => {
 
     // Scroll to the current round
     useEffect(() => {
-        const offset = roundScrollOffset[roundCurrent];
+        const offset = roundScrollOffset[currentRoundIndex];
         if (roundsScrollViewEl.current == null || typeof offset == 'undefined') return;
 
         roundsScrollViewEl.current.scrollTo({
             x: offset,
             animated: Platform.OS == 'ios' ? true : false
         });
-    }, [roundCurrent, roundScrollOffset]);
+    }, [currentRoundIndex, roundScrollOffset]);
 
-    const roundsIterator = [...Array(roundTotal).keys()];
+    const roundsIterator = [...Array(roundCount).keys()];
 
     const dispatch = useAppDispatch();
 
@@ -91,7 +91,7 @@ const Rounds: React.FunctionComponent<Props> = ({ showScores = true }) => {
                             <MemoizedRoundScoreColumn
                                 round={round}
                                 key={round}
-                                isCurrentRound={round == roundCurrent}
+                                isCurrentRound={round == currentRoundIndex}
                             />
                         </View>
                     ))}

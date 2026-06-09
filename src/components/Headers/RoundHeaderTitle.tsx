@@ -18,11 +18,11 @@ const RoundHeaderTitle: React.FunctionComponent = () => {
     if (currentGameId == null) return null;
 
     const currentGame = useAppSelector(state => selectGameById(state, currentGameId));
-    const roundCurrent = currentGame?.roundCurrent ?? 0;
+    const currentRoundIndex = currentGame?.roundCurrent ?? 0;
     const roundCount = currentGame?.roundTotal ?? 0;
 
-    const isFirstRound = roundCurrent === 0;
-    const isLastRound = roundCurrent + 1 >= roundCount;
+    const isFirstRound = currentRoundIndex === 0;
+    const isLastRound = currentRoundIndex + 1 >= roundCount;
 
     const nextRoundHandler = async () => {
         if (isLastRound && currentGame?.locked) return;
@@ -35,8 +35,8 @@ const RoundHeaderTitle: React.FunctionComponent = () => {
         logEvent('round_change', {
             game_id: currentGameId,
             source: 'next button',
-            round: roundCurrent,
-            next_round: roundCurrent + 1,
+            round: currentRoundIndex,
+            next_round: currentRoundIndex + 1,
             new_round: isLastRound,
         });
     };
@@ -49,8 +49,8 @@ const RoundHeaderTitle: React.FunctionComponent = () => {
         logEvent('round_change', {
             game_id: currentGameId,
             source: 'previous button',
-            round: roundCurrent,
-            next_round: roundCurrent - 1,
+            round: currentRoundIndex,
+            next_round: currentRoundIndex - 1,
         });
     };
 
@@ -67,7 +67,7 @@ const RoundHeaderTitle: React.FunctionComponent = () => {
                 <Icon name="arrow-left" type="font-awesome-5" size={18} color={theme.tint} />
             </TouchableOpacity>
             <Text style={[styles.title, { color: theme.headerText }]} allowFontScaling={false}>
-                {isLocked ? 'Final' : `Round ${roundCurrent + 1}${isLastRound ? '' : `/${roundCount}`}`}
+                {isLocked ? 'Final' : `Round ${currentRoundIndex + 1}${isLastRound ? '' : `/${roundCount}`}`}
             </Text>
             <TouchableOpacity
                 style={[styles.chevron, { opacity: isLocked || isLastRound && currentGame?.locked ? 0 : 1 }]}

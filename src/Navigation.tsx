@@ -5,14 +5,14 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Platform, View } from 'react-native';
 
 import { useAppSelector } from '../redux/hooks';
-import AppInfoButton from '../src/components/Buttons/AppInfoButton';
+import AppSettingsButton from '../src/components/Buttons/AppSettingsButton';
 import GameOptionsButton from '../src/components/Buttons/GameOptionsButton';
 import RoundHeaderTitle from '../src/components/Headers/RoundHeaderTitle';
-import AppInfoScreen from '../src/screens/AppInfoScreen';
+import AppSettingsScreen from '../src/screens/AppSettingsScreen';
 import DebugLogScreen from '../src/screens/DebugLogScreen';
+import EditGameScreen from '../src/screens/EditGameScreen';
 import GameScreen from '../src/screens/GameScreen';
 import ListScreen from '../src/screens/ListScreen';
-import SettingsScreen from '../src/screens/SettingsScreen';
 
 import { MenuOpenContextProvider } from './components/MenuOpenContext';
 import GameSheet from './components/Sheets/GameSheet';
@@ -24,10 +24,10 @@ import { useTheme } from './theme';
 export type RootStackParamList = {
     List: undefined;
     Game: undefined;
-    Settings: {
+    EditGame: {
         source?: string;
     };
-    AppInfo: undefined;
+    AppSettings: undefined;
     DebugLog: undefined;
     Share: undefined;
     EditPlayer: {
@@ -75,7 +75,7 @@ export const Navigation = () => {
                                 headerBlurEffect: isIOS ? 'systemChromeMaterial' : undefined,
                                 headerShadowVisible: isAndroid,
                                 headerStyle: listHeaderStyle,
-                                headerLeft: () => <AppInfoButton />,
+                                headerLeft: () => <AppSettingsButton />,
                             }}
                         />
                         <Stack.Screen name="Game" component={GameScreen}
@@ -89,7 +89,7 @@ export const Navigation = () => {
                                 headerBackButtonDisplayMode: 'minimal',
                             }}
                         />
-                        <Stack.Screen name="Settings" component={SettingsScreen}
+                        <Stack.Screen name="EditGame" component={EditGameScreen}
                             options={{
                                 orientation: 'all',
                                 title: 'Edit Game',
@@ -109,7 +109,7 @@ export const Navigation = () => {
                                 title: 'Edit Player',
                             }}
                         />
-                        <Stack.Screen name="AppInfo" component={AppInfoScreen}
+                        <Stack.Screen name="AppSettings" component={AppSettingsScreen}
                             options={{
                                 presentation: 'modal',
                                 orientation: 'portrait',

@@ -36,13 +36,13 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
     //#region Selector setup
 
     const currentGameId = useAppSelector(state => state.settings.currentGameId);
-    const roundCurrent = useAppSelector(state => selectCurrentGame(state)?.roundCurrent) || 0;
+    const currentRoundIndex = useAppSelector(state => selectCurrentGame(state)?.roundCurrent) || 0;
     const currentGameLocked = useAppSelector(state => selectCurrentGame(state)?.locked);
 
     const dispatch = useAppDispatch();
 
-    const addendOne = useAppSelector(state => state.settings.addendOne);
-    const addendTwo = useAppSelector(state => state.settings.addendTwo);
+    const primaryPointStep = useAppSelector(state => state.settings.addendOne);
+    const secondaryPointStep = useAppSelector(state => state.settings.addendTwo);
 
     //#endregion
 
@@ -141,15 +141,15 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
         logEvent('score_change', {
             player_index: index,
             game_id: currentGameId,
-            addend: powerHold ? addendOne : addendTwo,
-            round: roundCurrent,
+            addend: powerHold ? primaryPointStep : secondaryPointStep,
+            round: currentRoundIndex,
             type: translationY > 0 ? 'decrement' : 'increment',
             power_hold: powerHold,
             notches: -Math.round((translationY || 0) / notchSize),
             interaction: 'swipe-vertical',
         });
         powerHoldStop();
-    }, [index, currentGameId, powerHold, addendOne, addendTwo, roundCurrent, menuOpen]);
+    }, [index, currentGameId, powerHold, primaryPointStep, secondaryPointStep, currentRoundIndex, menuOpen]);
 
     const panGesture = Gesture.Pan()
         .enabled(!currentGameLocked && !menuOpen)
@@ -187,7 +187,7 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
         if (Math.abs(value) == 0) return;
         if (menuOpen) return;
 
-        const a = value * (powerHold ? addendTwo : addendOne);
+        const scoreDelta = value * (powerHold ? secondaryPointStep : primaryPointStep);
 
         if (powerHold) {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -195,7 +195,7 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
         }
 
-        dispatch(playerRoundScoreIncrement(playerId, roundCurrent, a));
+        dispatch(playerRoundScoreIncrement(playerId, currentRoundIndex, scoreDelta));
     };
 
     useAnimatedReaction(

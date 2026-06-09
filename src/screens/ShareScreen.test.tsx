@@ -264,7 +264,7 @@ describe('ShareScreen', () => {
         expect(getByTestId('round-score-column-2')).toBeTruthy();
     });
 
-    it('should navigate to Settings screen when edit button is pressed', () => {
+    it('should navigate to EditGame screen when edit button is pressed', () => {
         const store = createMockStore({
             settings: {
                 currentGameId: 'game-1',
@@ -290,7 +290,7 @@ describe('ShareScreen', () => {
         const editButton = getByText(' Edit before sharing');
         fireEvent.press(editButton);
 
-        expect(mockNavigation.navigate).toHaveBeenCalledWith('Settings', { source: 'share_screen' });
+        expect(mockNavigation.navigate).toHaveBeenCalledWith('EditGame', { source: 'share_screen' });
     });
 
     it('should capture and share image when share button is pressed', async () => {

@@ -25,8 +25,8 @@ const ADDEND_OPTIONS = [...Array(100).keys()].map((index) => ({
 
 const AddendModal: React.FunctionComponent = () => {
     const theme = useTheme();
-    const reduxAddendOne = useAppSelector((state) => state.settings.addendOne);
-    const reduxAddendTwo = useAppSelector((state) => state.settings.addendTwo);
+    const reduxPrimaryPointStep = useAppSelector((state) => state.settings.addendOne);
+    const reduxSecondaryPointStep = useAppSelector((state) => state.settings.addendTwo);
     const interactionType = useAppSelector((state) => state.settings.interactionType);
 
     const dispatch = useAppDispatch();
@@ -42,13 +42,13 @@ const AddendModal: React.FunctionComponent = () => {
     );
 
     // 1. Local state handles the immediate UI change
-    const [localAddendOne, setLocalAddendOne] = useState(reduxAddendOne);
-    const [localAddendTwo, setLocalAddendTwo] = useState(reduxAddendTwo);
+    const [localPrimaryPointStep, setLocalPrimaryPointStep] = useState(reduxPrimaryPointStep);
+    const [localSecondaryPointStep, setLocalSecondaryPointStep] = useState(reduxSecondaryPointStep);
 
     // 3. Update local state instantly, defer Redux slightly to prevent UI stutter
-    const onAddendOneChange: (value: { item: { value: number } }) => void = useCallback(
+    const onPrimaryPointStepChange: (value: { item: { value: number } }) => void = useCallback(
         ({ item: { value } }) => {
-            setLocalAddendOne(value);
+            setLocalPrimaryPointStep(value);
 
             requestAnimationFrame(() => {
                 dispatch(setMultiplier(value));
@@ -59,9 +59,9 @@ const AddendModal: React.FunctionComponent = () => {
         [dispatch]
     );
 
-    const onAddendTwoChange: (value: { item: { value: number } }) => void = useCallback(
+    const onSecondaryPointStepChange: (value: { item: { value: number } }) => void = useCallback(
         ({ item: { value } }) => {
-            setLocalAddendTwo(value);
+            setLocalSecondaryPointStep(value);
 
             requestAnimationFrame(() => {
                 dispatch(setMultiplier(value));
@@ -90,7 +90,7 @@ const AddendModal: React.FunctionComponent = () => {
         []
     );
 
-    const addendOneLabel = useMemo(() => {
+    const primaryPointStepLabel = useMemo(() => {
         switch (interactionType) {
             case InteractionType.HalfTap:
                 return 'Single Tap';
@@ -101,7 +101,7 @@ const AddendModal: React.FunctionComponent = () => {
         }
     }, [interactionType]);
 
-    const addendTwoLabel = useMemo(() => {
+    const secondaryPointStepLabel = useMemo(() => {
         switch (interactionType) {
             case InteractionType.HalfTap:
                 return 'Long Press';
@@ -128,7 +128,7 @@ const AddendModal: React.FunctionComponent = () => {
                     <Text style={{ color: theme.text, fontSize: 20 }}>Point Values</Text>
                     <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-around', padding: 10 }}>
                         <View>
-                            <Text style={{ color: theme.text, textAlign: 'center' }}>{addendOneLabel}</Text>
+                            <Text style={{ color: theme.text, textAlign: 'center' }}>{primaryPointStepLabel}</Text>
                             <View
                                 style={[
                                     isAndroid ? styles.pickerContainerAndroid : styles.pickerContainer,
@@ -139,8 +139,8 @@ const AddendModal: React.FunctionComponent = () => {
                                         WheelPickerFeedback.triggerSoundAndImpact();
                                     }}
                                     data={ADDEND_OPTIONS}
-                                    value={localAddendOne}
-                                    onValueChanged={onAddendOneChange}
+                                    value={localPrimaryPointStep}
+                                    onValueChanged={onPrimaryPointStepChange}
                                     enableScrollByTapOnItem={true}
                                     style={styles.wheelPicker}
                                     width={60}
@@ -150,7 +150,7 @@ const AddendModal: React.FunctionComponent = () => {
                             </View>
                         </View>
                         <View>
-                            <Text style={{ color: theme.text, textAlign: 'center' }}>{addendTwoLabel}</Text>
+                            <Text style={{ color: theme.text, textAlign: 'center' }}>{secondaryPointStepLabel}</Text>
                             <View
                                 style={[
                                     isAndroid ? styles.pickerContainerAndroid : styles.pickerContainer,
@@ -161,8 +161,8 @@ const AddendModal: React.FunctionComponent = () => {
                                         WheelPickerFeedback.triggerSoundAndImpact();
                                     }}
                                     data={ADDEND_OPTIONS}
-                                    value={localAddendTwo}
-                                    onValueChanged={onAddendTwoChange}
+                                    value={localSecondaryPointStep}
+                                    onValueChanged={onSecondaryPointStepChange}
                                     enableScrollByTapOnItem={true}
                                     style={styles.wheelPicker}
                                     width={60}
