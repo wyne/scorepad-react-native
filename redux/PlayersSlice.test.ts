@@ -3,6 +3,7 @@ import playersReducer, {
     removePlayer,
     playerAdd,
     playerRoundScoreIncrement,
+    playerRoundScoreSet,
 } from '../redux/PlayersSlice';
 
 describe('players reducer', () => {
@@ -93,5 +94,15 @@ describe('players reducer', () => {
         }
         expect(actual.entities['1'].scores[3]).toEqual(10);
         expect(actual.entities['1'].scores[0]).toEqual(10);
+    });
+
+    it('should not change state when setting a round score to the current value', () => {
+        const actual = playersReducer(initialState, playerAdd({
+            id: '1',
+            playerName: 'Test',
+            scores: [10, 20, 30],
+        }));
+        const next = playersReducer(actual, playerRoundScoreSet('1', 1, 20));
+        expect(next).toBe(actual);
     });
 });

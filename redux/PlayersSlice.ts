@@ -62,6 +62,7 @@ const scoresSlice = createSlice({
             ) {
                 try {
                     const scores = state?.entities[action.payload]?.scores || [];
+                    if (scores[action.meta.round] === action.meta.value) return;
                     scores[action.meta.round] = action.meta.value;
                 } catch (error) {
                     const err = error as Error;
