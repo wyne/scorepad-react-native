@@ -234,7 +234,7 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
             </Animated.View>
 
             {hintVisible && (
-                <View style={StyleSheet.absoluteFillObject} pointerEvents="none">
+                <View style={StyleSheet.absoluteFill} pointerEvents="none">
                     <Text style={[styles.swipeHintTop, { color: fontColor }]}>▲</Text>
                     <Text style={[styles.swipeHintBottom, { color: fontColor }]}>▼</Text>
                 </View>
@@ -244,7 +244,7 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
                 <ReAnimated.View
                     testID={`swipe-overlay-${index}`}
                     style={[
-                        StyleSheet.absoluteFillObject,
+                        StyleSheet.absoluteFill,
                         overlayAnimatedStyle,
                     ]}
                 >
