@@ -32,13 +32,13 @@ One player's score change for one round.
 
 A player's total before the current round.
 
-**Current total**
+**Current round total**
 
 A player's previous total plus the current round score.
 
-**Final total**
+**Total score**
 
-A player's total across all rounds. Existing selectors also call this `grandTotal`.
+A player's score across all rounds.
 
 **Winner**
 
@@ -50,51 +50,89 @@ A game whose scores are finalized. Locked games show winners and prevent normal 
 
 ## UI Concepts
 
+### Screens
+
 **Game list**
 
-The home screen list of saved games.
+The home screen that lists saved games.
 
 **Game screen**
 
 The active scoring screen for the selected game.
 
-**Scoring board**
+**Edit game screen**
 
-The active score entry surface on the game screen.
+The screen for changing a game's title, players, player order, and player membership.
 
-**Tile scoring board**
+**Edit player screen**
 
-The grid-based scoring board used by half-tap and swipe interactions.
+The screen for changing one player's name and color.
 
-**Dial scoring board**
+**Share screen**
 
-The row-based scoring board used by the dial interaction.
+The screen for previewing and sharing a game's score log.
 
-**Score log**
+**App settings screen**
 
-The round-by-round score history table. It includes player names, total score, and one column per round.
+The app-level settings, about, and data screen. This is separate from editing a game.
+
+### Sheets and Modals
 
 **Game sheet**
 
 The bottom sheet on the game screen that shows the score log and game actions such as edit, share, choose winners, reset, and rematch.
 
-**Edit game**
+**Point values sheet**
 
-The flow for changing a game's title, players, player order, and player membership.
+The sheet for changing primary and secondary point steps.
 
-**Edit player**
+**Choose winners modal**
 
-The flow for changing one player's name and color.
+The modal for selecting winners and locking a game.
 
-**App settings**
+**Gesture info modal**
 
-The app-level settings/about/data screen. This is separate from editing a game.
+The modal that explains the currently selected score entry interaction.
+
+### Boards, Tables, and Overlays
+
+**Scoring board**
+
+The active score entry surface on the game screen.
+
+**Tile grid**
+
+A grid layout for player scoring tiles. This is a board layout concept, not a score entry interaction.
+
+**Player rows**
+
+A row layout for players on the scoring board. This is a board layout concept, not a score entry interaction.
+
+**Score log**
+
+The round-by-round score history table. It includes player names, total score, and one column per round.
+
+**Dial overlay**
+
+The overlay that presents the dial control for one player at a time.
 
 ## Score Entry Concepts
 
 **Interaction type**
 
 The selected score input mode. Current values are `half-tap`, `swipe-vertical`, and `dial`.
+
+**Half-tap interaction**
+
+The score entry interaction that splits each player's scoring surface into increment and decrement tap zones.
+
+**Swipe interaction**
+
+The score entry interaction that changes score by vertical drag distance.
+
+**Dial interaction**
+
+The score entry interaction that changes score by rotating a dial control. This is independent from whether the board is arranged as tiles or rows.
 
 **Primary point step**
 
@@ -120,6 +158,7 @@ Some persisted Redux names are historically inconsistent but should not be renam
 - `roundTotal` means round count.
 - `addendOne` means primary point step.
 - `addendTwo` means secondary point step.
+- `currentTotal` means current round total.
+- `grandTotal` means total score.
 - `home_fullscreen` currently controls whether the game sheet is hidden on the game screen.
 - `ScoreState` is the persisted player entity shape.
-
