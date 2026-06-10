@@ -21,7 +21,7 @@ import Svg, { Circle, Line, Path } from 'react-native-svg';
 type AnimatedTextInputProps = TextInputProps & { text?: string };
 const AnimatedTextInput = Animated.createAnimatedComponent(TextInput as React.ComponentType<AnimatedTextInputProps>);
 
-import { POWER_HOLD_ACTIVATION_MS, POWER_HOLD_INDICATOR_DELAY_MS } from '../interactionConstants';
+import { SECONDARY_HOLD_ACTIVATION_MS, SECONDARY_HOLD_INDICATOR_DELAY_MS } from '../interactionConstants';
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 const AnimatedLine = Animated.createAnimatedComponent(Line);
@@ -196,9 +196,9 @@ const DialControl: React.FC<Props> = ({
     // JS-thread callbacks called via runOnJS
     const startLongPress = useCallback(() => {
         holdProgress.value = withDelay(
-            POWER_HOLD_INDICATOR_DELAY_MS,
+            SECONDARY_HOLD_INDICATOR_DELAY_MS,
             withTiming(1, {
-                duration: POWER_HOLD_ACTIVATION_MS - POWER_HOLD_INDICATOR_DELAY_MS,
+                duration: SECONDARY_HOLD_ACTIVATION_MS - SECONDARY_HOLD_INDICATOR_DELAY_MS,
                 easing: Easing.out(Easing.quad),
             }),
         );
@@ -210,7 +210,7 @@ const DialControl: React.FC<Props> = ({
                 // Snap ring back on activation
                 holdProgress.value = withTiming(0, { duration: 120, easing: Easing.out(Easing.cubic) });
             }
-        }, POWER_HOLD_ACTIVATION_MS);
+        }, SECONDARY_HOLD_ACTIVATION_MS);
     }, [onToggleMode]);
 
     const stopLongPress = useCallback(() => {

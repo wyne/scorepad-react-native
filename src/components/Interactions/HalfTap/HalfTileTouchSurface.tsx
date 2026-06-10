@@ -51,7 +51,7 @@ export const HalfTileTouchSurface: React.FunctionComponent<Props> = (
         setParticles((particles) => [...particles, { key, value }]);
     };
 
-    const scoreChangeHandler = (addend: number, powerHold = false) => {
+    const scoreChangeHandler = (addend: number, secondaryHold = false) => {
         if (currentGame.locked) return;
         if (menuOpen) return;
 
@@ -65,7 +65,7 @@ export const HalfTileTouchSurface: React.FunctionComponent<Props> = (
             addend: addend,
             round: currentRoundIndex,
             type: scoreType,
-            power_hold: powerHold,
+            power_hold: secondaryHold,
             interaction: 'half-tap',
         });
         dispatch(playerRoundScoreIncrement(playerId, currentRoundIndex, scoreType == 'increment' ? addend : -addend));

@@ -44,14 +44,14 @@ const PlayerRow: React.FC<PlayerRowProps> = ({ playerId, index, currentRoundInde
     const player = useAppSelector((state) => selectPlayerById(state, playerId));
     const currentGame = useAppSelector(selectCurrentGame);
     const isWinner = !!(currentGame?.locked && currentGame?.winnerIds?.includes(playerId));
-    const { roundScore, previousTotal, currentTotal: currentRoundTotal } = useAppSelector(
+    const { currentRoundScore, previousTotal, currentRoundTotalScore } = useAppSelector(
         (state) => selectPlayerRoundStats(state, playerId, currentRoundIndex)
     );
     const breakdownOpacity = useSharedValue(1);
 
     React.useEffect(() => {
-        breakdownOpacity.value = withTiming(roundScore !== 0 ? 1 : 0, { duration: 220 });
-    }, [roundScore]);
+        breakdownOpacity.value = withTiming(currentRoundScore !== 0 ? 1 : 0, { duration: 220 });
+    }, [currentRoundScore]);
 
     const rowStyle = useAnimatedStyle(() => ({
         opacity: withTiming(svDimmed.value ? 0.28 : 1, { duration: 280 }),
@@ -63,8 +63,8 @@ const PlayerRow: React.FC<PlayerRowProps> = ({ playerId, index, currentRoundInde
     const color = player.color ?? '#555';
     const ink = inkFor(color);
 
-    const separatorSign = roundScore < 0 ? '−' : '+';
-    const roundAbs = Math.abs(roundScore);
+    const separatorSign = currentRoundScore < 0 ? '−' : '+';
+    const roundAbs = Math.abs(currentRoundScore);
 
     const secondaryNumberStyle = {
         color: inkA(ink, 0.45),
@@ -131,7 +131,7 @@ const PlayerRow: React.FC<PlayerRowProps> = ({ playerId, index, currentRoundInde
                             </Animated.View>
                         )}
                         <View style={styles.scoreCol}>
-                            <Text style={totalNumberStyle}>{currentRoundTotal}</Text>
+                            <Text style={totalNumberStyle}>{currentRoundTotalScore}</Text>
                             <Text style={captionStyle}>TOTAL</Text>
                         </View>
                     </View>

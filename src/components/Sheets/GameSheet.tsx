@@ -17,7 +17,7 @@ import BigButton from '../BigButtons/BigButton';
 import RematchIcon from '../Icons/RematchIcon';
 import ScoreLogTable from '../ScoreLogTable';
 
-import { useChooseWinnersModalContext } from './ChooseWinnersModalContext';
+import { useChooseWinnersSheetContext } from './ChooseWinnersSheetContext';
 import { useGameSheetContext } from './GameSheetContext';
 
 /**
@@ -33,7 +33,7 @@ const GameSheet: React.FunctionComponent = () => {
     const gameTitle = useAppSelector(state => selectGameById(state, currentGameId || '')?.title);
     const gameLocked = useAppSelector(state => selectGameById(state, currentGameId || '')?.locked);
     const playerIds = useAppSelector(state => selectGameById(state, currentGameId || '')?.playerIds);
-    const chooseWinnersModalRef = useChooseWinnersModalContext();
+    const chooseWinnersSheetRef = useChooseWinnersSheetContext();
 
     if (currentGameId == undefined) return null;
 
@@ -311,7 +311,7 @@ const GameSheet: React.FunctionComponent = () => {
                             <BigButton text={gameLocked ? 'Unlock' : 'Choose Winners'}
                                 color={gameLocked ? theme.warning : theme.success}
                                 icon={gameLocked ? 'lock-closed-outline' : 'lock-open-outline'}
-                                onPress={gameLocked ? unlockGame : () => chooseWinnersModalRef?.current?.present()}
+                                onPress={gameLocked ? unlockGame : () => chooseWinnersSheetRef?.current?.present()}
                                 testID={gameLocked ? 'unlock-button' : 'choose-winners-button'}
                             />
 

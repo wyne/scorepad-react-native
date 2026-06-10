@@ -16,7 +16,7 @@ import ListScreen from '../src/screens/ListScreen';
 
 import { MenuOpenContextProvider } from './components/MenuOpenContext';
 import GameSheet from './components/Sheets/GameSheet';
-import { GestureInfoModalContextProvider } from './components/Sheets/GestureInfoModalContext';
+import { GestureInfoSheetContextProvider } from './components/Sheets/GestureInfoSheetContext';
 import EditPlayerScreen from './screens/EditPlayerScreen';
 import ShareScreen from './screens/ShareScreen';
 import { useTheme } from './theme';
@@ -64,7 +64,7 @@ export const Navigation = () => {
                     }
                 }}
             >
-                <GestureInfoModalContextProvider>
+                <GestureInfoSheetContextProvider>
                     <MenuOpenContextProvider>
                         <Stack.Navigator initialRouteName='List' >
                         <Stack.Screen name="List" component={ListScreen}
@@ -125,7 +125,7 @@ export const Navigation = () => {
                         />
                         </Stack.Navigator>
                     </MenuOpenContextProvider>
-                </GestureInfoModalContextProvider>
+                </GestureInfoSheetContextProvider>
                 {!fullscreen && currentRoute === 'Game' && <GameSheet />}
             </NavigationContainer>
         </View>

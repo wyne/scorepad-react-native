@@ -10,9 +10,9 @@ import { selectInteractionType } from '../../redux/selectors';
 import ListBoard from '../components/Boards/ListBoard';
 import TileBoard from '../components/Boards/TileBoard';
 import { InteractionType } from '../components/Interactions/InteractionType';
-import AddendModal from '../components/Sheets/AddendModal';
-import ChooseWinnersModal from '../components/Sheets/ChooseWinnersModal';
-import GestureInfoModal from '../components/Sheets/GestureInfoModal';
+import ChooseWinnersSheet from '../components/Sheets/ChooseWinnersSheet';
+import GestureInfoSheet from '../components/Sheets/GestureInfoSheet';
+import PointValuesSheet from '../components/Sheets/PointValuesSheet';
 import { useGestureHint } from '../hooks/useGestureHint';
 
 function useKeepScreenAwake(active: boolean): void {
@@ -49,9 +49,9 @@ const GameScreen: React.FunctionComponent = () => {
                     </Animated.View>
                 }
 
-                <AddendModal />
-                <ChooseWinnersModal />
-                <GestureInfoModal />
+                <PointValuesSheet />
+                <ChooseWinnersSheet />
+                <GestureInfoSheet />
             </View>
         </View>
     );

@@ -83,18 +83,18 @@ const PlayerDialPage: React.FC<PlayerDialPageProps> = ({
     const dispatch = useAppDispatch();
     const player = useAppSelector(state => selectPlayerById(state, playerId));
     const currentRoundIndex = useAppSelector(state => selectCurrentGame(state)?.roundCurrent ?? 0);
-    const { roundScore, previousTotal, currentTotal: currentRoundTotal } = useAppSelector(
+    const { currentRoundScore, previousTotal, currentRoundTotalScore } = useAppSelector(
         state => selectPlayerRoundStats(state, playerId, currentRoundIndex)
     );
 
     // Stable SharedValue refs — same object identity every render, so React.memo(DialControl)
     // skips re-renders when score changes. The displayed numbers update via Reanimated on the UI thread.
-    const svRoundScore = useSharedValue(roundScore);
-    const svScoreTotal = useSharedValue(currentRoundTotal);
+    const svRoundScore = useSharedValue(currentRoundScore);
+    const svScoreTotal = useSharedValue(currentRoundTotalScore);
     useLayoutEffect(() => {
-        svRoundScore.value = roundScore;
-        svScoreTotal.value = currentRoundTotal;
-    }, [roundScore, currentRoundTotal]);
+        svRoundScore.value = currentRoundScore;
+        svScoreTotal.value = currentRoundTotalScore;
+    }, [currentRoundScore, currentRoundTotalScore]);
 
     const [isSecondary, setIsSecondary] = useState(false);
 
@@ -205,7 +205,7 @@ const PlayerDialPage: React.FC<PlayerDialPageProps> = ({
                     {/* Right: new total + Done */}
                     <View style={styles.lsCol}>
                         <View style={styles.prevBlock}>
-                        <Text style={[styles.prevNumber, { color: ink }]}>{currentRoundTotal}</Text>
+                        <Text style={[styles.prevNumber, { color: ink }]}>{currentRoundTotalScore}</Text>
                             <Text style={[styles.prevLabel, { color: inkA(ink, 0.6) }]}>NEW TOTAL</Text>
                         </View>
                         <Pressable

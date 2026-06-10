@@ -18,27 +18,27 @@ One score entry per player at a shared index. Internally, rounds are represented
 
 **Current round**
 
-The round currently being edited or viewed. Existing Redux state stores this as `roundCurrent`, a zero-based index.
+The round currently being edited or viewed. Code refers to its zero-based index as `currentRoundIndex`. Persisted Redux state stores this as `roundCurrent`.
 
 **Round count**
 
-The number of rounds currently visible for a game. Existing Redux state stores this as `roundTotal`, a count value.
+The number of rounds currently visible for a game. Code refers to this as `roundCount`. Persisted Redux state stores this as `roundTotal`.
 
-**Round score**
+**Current round score**
 
-One player's score change for one round.
+One player's score change for the current round. Code name: `currentRoundScore`.
 
 **Previous total**
 
-A player's total before the current round.
+A player's total before the current round. Code name: `previousTotal`.
 
-**Current round total**
+**Current round total score**
 
-A player's previous total plus the current round score.
+A player's previous total plus the current round score. Code name: `currentRoundTotalScore`.
 
-**Total score**
+**Grand total score**
 
-A player's score across all rounds.
+A player's score across all rounds. Code name: `grandTotalScore`. This is the single term for a player's overall total; do not introduce variants such as "final total".
 
 **Winner**
 
@@ -76,7 +76,9 @@ The screen for previewing and sharing a game's score log.
 
 The app-level settings, about, and data screen. This is separate from editing a game.
 
-### Sheets and Modals
+### Sheets
+
+A sheet is a panel that slides up from the bottom of the screen. All current ScorePad sheets are bottom sheets; "modal" is reserved for centered dialog windows, and ScorePad currently has none.
 
 **Game sheet**
 
@@ -84,15 +86,15 @@ The bottom sheet on the game screen that shows the score log and game actions su
 
 **Point values sheet**
 
-The sheet for changing primary and secondary point steps.
+The sheet for changing primary and secondary point steps. Component: `PointValuesSheet`.
 
-**Choose winners modal**
+**Choose winners sheet**
 
-The modal for selecting winners and locking a game.
+The sheet for selecting winners and locking a game. Component: `ChooseWinnersSheet`.
 
-**Gesture info modal**
+**Gesture info sheet**
 
-The modal that explains the currently selected score entry interaction.
+The sheet that explains the currently selected score entry interaction. Component: `GestureInfoSheet`.
 
 ### Boards, Tables, and Overlays
 
@@ -110,7 +112,7 @@ A row layout for players on the scoring board. This is a board layout concept, n
 
 **Score log**
 
-The round-by-round score history table. It includes player names, total score, and one column per round.
+The round-by-round score history table. It includes player names, grand total score, and one column per round.
 
 **Dial overlay**
 
@@ -146,19 +148,20 @@ The alternate score increment used by long press or hold gestures. Existing Redu
 
 The user-facing label for primary and secondary point steps.
 
-**Power hold**
+**Secondary hold**
 
-A hold gesture that switches score entry from the primary point step to the secondary point step.
+A hold gesture that switches score entry from the primary point step to the secondary point step. Code name: `secondaryHold` (formerly "power hold").
 
 ## Current Compatibility Notes
 
-Some persisted Redux names are historically inconsistent but should not be renamed without a migration plan:
+Some persisted Redux names and analytics keys are historically inconsistent. They must keep their stored spelling (renaming persisted keys requires a migration plan, and renaming analytics keys breaks reporting continuity), but new code should use the glossary term on the right:
 
-- `roundCurrent` means current round index.
-- `roundTotal` means round count.
-- `addendOne` means primary point step.
-- `addendTwo` means secondary point step.
-- `currentTotal` means current round total.
-- `grandTotal` means total score.
-- `home_fullscreen` currently controls whether the game sheet is hidden on the game screen.
+- `roundCurrent` (persisted) → `currentRoundIndex`
+- `roundTotal` (persisted) → `roundCount`
+- `addendOne` (persisted) → `primaryPointStep`
+- `addendTwo` (persisted) → `secondaryPointStep`
+- `power_hold` (analytics param) and `addend_*` (analytics events) → secondary hold / point step terms
+- `home_fullscreen` (persisted) currently controls whether the game sheet is hidden on the game screen.
 - `ScoreState` is the persisted player entity shape.
+
+Non-persisted selector outputs were renamed directly: `currentTotal` → `currentRoundTotalScore`, `grandTotal` → `grandTotalScore`, `roundScore` → `currentRoundScore`.

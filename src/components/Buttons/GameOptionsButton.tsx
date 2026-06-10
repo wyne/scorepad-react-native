@@ -12,9 +12,9 @@ import { FEATURE_DIAL_GESTURE } from '../../constants';
 import { useTheme } from '../../theme';
 import { InteractionType } from '../Interactions/InteractionType';
 import { useMenuOpen } from '../MenuOpenContext';
-import { useAddendModalContext } from '../Sheets/AddendModalContext';
 import { useGameSheetContext } from '../Sheets/GameSheetContext';
-import { useGestureInfoModalContext } from '../Sheets/GestureInfoModalContext';
+import { useGestureInfoSheetContext } from '../Sheets/GestureInfoSheetContext';
+import { usePointValuesSheetContext } from '../Sheets/PointValuesSheetContext';
 
 const GameOptionsButton: React.FunctionComponent = () => {
     const theme = useTheme();
@@ -31,9 +31,9 @@ const GameOptionsButton: React.FunctionComponent = () => {
         !state.settings.seenFeatureNotifications.includes(FEATURE_DIAL_GESTURE)
     );
 
-    const addendModalRef = useAddendModalContext();
+    const pointValuesSheetRef = usePointValuesSheetContext();
     const gameSheetRef = useGameSheetContext();
-    const gestureInfoModalRef = useGestureInfoModalContext();
+    const gestureInfoSheetRef = useGestureInfoSheetContext();
 
     if (currentGameId == null) return null;
 
@@ -130,7 +130,7 @@ const GameOptionsButton: React.FunctionComponent = () => {
                 break;
             case 'point-values':
                 gameSheetRef?.current?.snapToIndex(0);
-                addendModalRef?.current?.present();
+                pointValuesSheetRef?.current?.present();
                 logEvent('addend_sheet', { installId });
                 break;
             case 'fullscreen':
@@ -138,7 +138,7 @@ const GameOptionsButton: React.FunctionComponent = () => {
                 logEvent('fullscreen', { fullscreen: !fullscreen });
                 break;
             case 'about-gestures':
-                gestureInfoModalRef?.current?.present();
+                gestureInfoSheetRef?.current?.present();
                 logEvent('about_gestures');
                 break;
         }
@@ -160,9 +160,9 @@ const GameOptionsButton: React.FunctionComponent = () => {
         >
             <View style={styles.button}>
                 <View style={styles.content}>
-                    <View style={styles.addendColumn}>
-                        <Text style={[styles.addendText, { color: theme.text }]}>{primaryPointStep}</Text>
-                        <Text style={[styles.addendText, { color: theme.text }]}>{secondaryPointStep}</Text>
+                    <View style={styles.pointStepColumn}>
+                        <Text style={[styles.pointStepText, { color: theme.text }]}>{primaryPointStep}</Text>
+                        <Text style={[styles.pointStepText, { color: theme.text }]}>{secondaryPointStep}</Text>
                     </View>
                     <View>
                         {Platform.OS === 'ios' ? (
@@ -206,10 +206,10 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
     },
-    addendColumn: {
+    pointStepColumn: {
         marginRight: 4,
     },
-    addendText: {
+    pointStepText: {
         fontSize: 10,
         lineHeight: 11,
         textAlign: 'center',

@@ -36,7 +36,7 @@ const AdditionTile: React.FunctionComponent<Props> = ({
     const player = useAppSelector(state => selectPlayerById(state, playerId));
     if (typeof player == 'undefined') return null;
     const playerName = player.playerName;
-    const { currentTotal: currentRoundTotal, grandTotal: totalScore, roundScore: scoreRound } = useAppSelector(
+    const { currentRoundScore, currentRoundTotalScore, grandTotalScore } = useAppSelector(
         state => selectPlayerRoundStats(state, playerId, currentRoundIndex)
     );
 
@@ -62,7 +62,7 @@ const AdditionTile: React.FunctionComponent<Props> = ({
                     style={[scoreStyles.scoreText, { fontSize: finalScoreFontSize, color: fontColor }]}
                     allowFontScaling={false}
                 >
-                    {totalScore}
+                    {grandTotalScore}
                 </Animated.Text>
             </Animated.View>
         );
@@ -75,13 +75,13 @@ const AdditionTile: React.FunctionComponent<Props> = ({
             </Animated.Text>
 
             <Animated.View style={styles.scoreLineOne}>
-                <ScoreBefore containerWidth={containerShortEdge} roundScore={scoreRound} totalScore={currentRoundTotal}
+                <ScoreBefore containerWidth={containerShortEdge} currentRoundScore={currentRoundScore} currentRoundTotalScore={currentRoundTotalScore}
                     fontColor={fontColor} />
-                <ScoreRound containerWidth={containerShortEdge} roundScore={scoreRound}
+                <ScoreRound containerWidth={containerShortEdge} currentRoundScore={currentRoundScore}
                     fontColor={fontColor} />
             </Animated.View>
 
-            <ScoreAfter containerWidth={containerShortEdge} roundScore={scoreRound} totalScore={currentRoundTotal}
+            <ScoreAfter containerWidth={containerShortEdge} currentRoundScore={currentRoundScore} currentRoundTotalScore={currentRoundTotalScore}
                 fontColor={fontColor} />
         </Animated.View>
     );

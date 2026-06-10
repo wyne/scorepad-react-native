@@ -46,22 +46,22 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
 
     //#endregion
 
-    //#region Power Hold
+    //#region Secondary Hold
 
-    const powerHoldTime = 500;
+    const secondaryHoldTime = 500;
     const holdDuration = useRef(new Animated.Value(0)).current;
-    let powerHoldTimer: ReturnType<typeof setTimeout>;
-    const [powerHold, setPowerHold] = useState<boolean>(false);
-    const isPowerHoldActive = useSharedValue(false);
+    let secondaryHoldTimer: ReturnType<typeof setTimeout>;
+    const [secondaryHold, setSecondaryHold] = useState<boolean>(false);
+    const isSecondaryHoldActive = useSharedValue(false);
 
     useEffect(() => {
         return () => {
-            clearTimeout(powerHoldTimer);
+            clearTimeout(secondaryHoldTimer);
         };
     }, []);
 
     const scale = holdDuration.interpolate({
-        inputRange: [0, powerHoldTime * .2, powerHoldTime * .9, powerHoldTime],
+        inputRange: [0, secondaryHoldTime * .2, secondaryHoldTime * .9, secondaryHoldTime],
         outputRange: [1, 1, 1.1, 1.05],
         extrapolate: 'clamp',
     });
@@ -70,17 +70,17 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
     const animationRef = useRef<Animated.CompositeAnimation>(
     );
 
-    const powerHoldStart = () => {
+    const secondaryHoldStart = () => {
         Animated.timing(holdDuration, {
-            toValue: powerHoldTime,
-            duration: powerHoldTime,
+            toValue: secondaryHoldTime,
+            duration: secondaryHoldTime,
             useNativeDriver: true,
         }).start();
 
-        powerHoldTimer = setTimeout(() => {
+        secondaryHoldTimer = setTimeout(() => {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-            setPowerHold(true);
-            isPowerHoldActive.value = true;
+            setSecondaryHold(true);
+            isSecondaryHoldActive.value = true;
 
             animationRef.current = Animated.loop(
                 Animated.sequence([
@@ -102,18 +102,18 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
                 ])
             );
             animationRef.current.start();
-        }, powerHoldTime * .8);
+        }, secondaryHoldTime * .8);
     };
 
-    const powerHoldStop = () => {
+    const secondaryHoldStop = () => {
         Animated.timing(holdDuration, {
             toValue: 0,
             duration: 100,
             useNativeDriver: true,
         }).start();
 
-        setPowerHold(false);
-        isPowerHoldActive.value = false;
+        setSecondaryHold(false);
+        isSecondaryHoldActive.value = false;
 
         animationRef.current?.stop();
 
@@ -124,7 +124,7 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
             useNativeDriver: true,
         }).start();
 
-        clearTimeout(powerHoldTimer);
+        clearTimeout(secondaryHoldTimer);
     };
 
     //#endregion
@@ -141,29 +141,29 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
         logEvent('score_change', {
             player_index: index,
             game_id: currentGameId,
-            addend: powerHold ? primaryPointStep : secondaryPointStep,
+            addend: secondaryHold ? secondaryPointStep : primaryPointStep,
             round: currentRoundIndex,
             type: translationY > 0 ? 'decrement' : 'increment',
-            power_hold: powerHold,
+            power_hold: secondaryHold,
             notches: -Math.round((translationY || 0) / notchSize),
             interaction: 'swipe-vertical',
         });
-        powerHoldStop();
-    }, [index, currentGameId, powerHold, primaryPointStep, secondaryPointStep, currentRoundIndex, menuOpen]);
+        secondaryHoldStop();
+    }, [index, currentGameId, secondaryHold, primaryPointStep, secondaryPointStep, currentRoundIndex, menuOpen]);
 
     const panGesture = Gesture.Pan()
         .enabled(!currentGameLocked && !menuOpen)
         .minDistance(0)
         .onBegin(() => {
-            runOnJS(powerHoldStart)();
+            runOnJS(secondaryHoldStart)();
         })
         .onUpdate((event) => {
             const y = event.translationY;
             panY.value = y;
             totalOffset.value = -y;
 
-            if (isPowerHoldActive.value == false && Math.abs(y) > 1) {
-                runOnJS(powerHoldStop)();
+            if (isSecondaryHoldActive.value == false && Math.abs(y) > 1) {
+                runOnJS(secondaryHoldStop)();
             }
         })
         .onEnd((event) => {
@@ -172,7 +172,7 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
             runOnJS(endGesture)(event.translationY);
         })
         .onFinalize(() => {
-            runOnJS(powerHoldStop)();
+            runOnJS(secondaryHoldStop)();
         });
 
     const overlayAnimatedStyle = useAnimatedStyle(() => ({
@@ -187,9 +187,9 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
         if (Math.abs(value) == 0) return;
         if (menuOpen) return;
 
-        const scoreDelta = value * (powerHold ? secondaryPointStep : primaryPointStep);
+        const scoreDelta = value * (secondaryHold ? secondaryPointStep : primaryPointStep);
 
-        if (powerHold) {
+        if (secondaryHold) {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
         } else {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
