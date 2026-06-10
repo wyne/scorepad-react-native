@@ -1,6 +1,7 @@
 import crashlytics from '@react-native-firebase/crashlytics';
 import { PayloadAction, createEntityAdapter, createSelector, createSlice } from '@reduxjs/toolkit';
 
+import { grandTotalScore, totalScoreBeforeRound } from './scoreUtils';
 import { RootState } from './store';
 
 type RoundIndex = number;
@@ -14,7 +15,8 @@ export interface ScoreState {
 
 const playersAdapter = createEntityAdapter({
     sortComparer: (a: ScoreState, b: ScoreState) => (
-        a.scores.reduce((a, b) => a + b, 0)) < b.scores.reduce((a, b) => a + b, 0) ? 1 : -1,
+        grandTotalScore(a.scores) < grandTotalScore(b.scores) ? 1 : -1
+    ),
 });
 
 const initialState = playersAdapter.getInitialState({
@@ -127,7 +129,7 @@ export const selectPlayerScoreByRound = createSelector(
 
 export const selectPlayerGrandTotalScore = createSelector(
     [(state: RootState, playerId: string) => state.players.entities[playerId]],
-    (player) => player?.scores?.reduce((sum, s) => sum + (s || 0), 0) ?? 0
+    (player) => grandTotalScore(player?.scores)
 );
 
 export const selectPlayerRoundStats = createSelector(
@@ -138,11 +140,9 @@ export const selectPlayerRoundStats = createSelector(
     (player, currentRoundIndex) => {
         const scores = player?.scores ?? [];
         const currentRoundScore = scores[currentRoundIndex] ?? 0;
-        const previousTotal = scores.reduce(
-            (sum, s, i) => (i < currentRoundIndex ? sum + (s || 0) : sum), 0
-        );
+        const previousTotal = totalScoreBeforeRound(scores, currentRoundIndex);
         const currentRoundTotalScore = previousTotal + currentRoundScore;
-        const grandTotalScore = scores.reduce((sum, s) => sum + (s || 0), 0);
-        return { currentRoundScore, previousTotal, currentRoundTotalScore, grandTotalScore };
+        const grandTotal = grandTotalScore(scores);
+        return { currentRoundScore, previousTotal, currentRoundTotalScore, grandTotalScore: grandTotal };
     }
 );
