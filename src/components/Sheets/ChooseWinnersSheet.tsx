@@ -9,10 +9,10 @@ import {
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Icon } from 'react-native-elements';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { shallowEqual } from 'react-redux';
 
-import { selectGameById, updateGame } from '../../../redux/GamesSlice';
+import { updateGame } from '../../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
+import { selectGamePlayersByScore } from '../../../redux/selectors';
 import { logEvent } from '../../Analytics';
 import { useTheme } from '../../theme';
 
@@ -26,37 +26,7 @@ const ChooseWinnersSheet: React.FunctionComponent = () => {
     const topInset = insets.top + 50;
 
     const currentGameId = useAppSelector(state => state.settings.currentGameId);
-    const playerIds = useAppSelector(state => selectGameById(state, currentGameId || '')?.playerIds);
-    const allPlayers = useAppSelector((state) =>
-        (playerIds || []).map((id) => state.players.entities[id]),
-        shallowEqual
-    );
-    const sortedPlayerIds = useMemo(() => {
-        const withScores = (playerIds || []).map((id) => {
-            const p = allPlayers.find((ap) => ap?.id === id);
-
-            return {
-                id,
-                totalScore: (p?.scores || []).reduce((a, b) => a + b, 0),
-            };
-        });
-
-        withScores.sort((a, b) => b.totalScore - a.totalScore);
-
-        return withScores.map((p) => p.id);
-    }, [allPlayers, playerIds]);
-    const playerInfo = useMemo(
-        () =>
-            Object.fromEntries(
-                allPlayers.map((p) => [
-                    p?.id,
-                    {
-                        name: p?.playerName || '',
-                        totalScore: (p?.scores || []).reduce((a, b) => a + b, 0),
-                    },
-                ])),
-        [allPlayers]
-    );
+    const playersByScore = useAppSelector(state => selectGamePlayersByScore(state, currentGameId));
 
     const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
@@ -162,16 +132,15 @@ const ChooseWinnersSheet: React.FunctionComponent = () => {
                     </Text>
 
                     <View style={[styles.playerList, { backgroundColor: theme.backgroundSecondary }]}>
-                        {sortedPlayerIds.map((playerId, index) => {
-                            const info = playerInfo[playerId];
-                            const isSelected = selectedIds.has(playerId);
-                            const isLast = index === sortedPlayerIds.length - 1;
+                        {playersByScore.map((player, index) => {
+                            const isSelected = selectedIds.has(player.id);
+                            const isLast = index === playersByScore.length - 1;
 
                             return (
-                                <React.Fragment key={playerId}>
+                                <React.Fragment key={player.id}>
                                     <TouchableOpacity
                                         style={styles.playerRow}
-                                        onPress={() => togglePlayer(playerId)}
+                                        onPress={() => togglePlayer(player.id)}
                                         activeOpacity={0.6}
                                         testID={`winner-player-row-${index}`}
                                     >
@@ -182,10 +151,10 @@ const ChooseWinnersSheet: React.FunctionComponent = () => {
                                             size={22}
                                         />
                                         <Text style={[styles.playerName, { color: theme.text }]} numberOfLines={1}>
-                                            {info?.name}
+                                            {player.name}
                                         </Text>
                                         <Text style={[styles.playerScore, { color: theme.textSecondary }]}>
-                                            {info?.totalScore}
+                                            {player.totalScore}
                                         </Text>
                                     </TouchableOpacity>
                                     {!isLast && (

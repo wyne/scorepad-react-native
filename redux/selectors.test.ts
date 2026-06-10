@@ -1,6 +1,6 @@
 import { InteractionType } from '../src/components/Interactions/InteractionType';
 
-import { selectInteractionType, selectCurrentGame, selectLastStoreReviewPrompt } from './selectors';
+import { selectCurrentGame, selectGamePlayersByScore, selectInteractionType, selectLastStoreReviewPrompt } from './selectors';
 import { RootState } from './store';
 
 // Mock data for testing
@@ -193,6 +193,45 @@ describe('Redux selectors', () => {
       
       const result = selectLastStoreReviewPrompt(state);
       expect(result).toBe(9876543210);
+    });
+  });
+
+  describe('selectGamePlayersByScore', () => {
+    it('should return game players sorted by total score descending', () => {
+      const state = {
+        ...mockState,
+        games: {
+          entities: {
+            'game-1': {
+              ...mockState.games!.entities['game-1'],
+              playerIds: ['player-1', 'player-2', 'player-3'],
+            },
+          },
+          ids: ['game-1'],
+        },
+        players: {
+          entities: {
+            'player-1': { id: 'player-1', playerName: 'Alex', scores: [2, 3] },
+            'player-2': { id: 'player-2', playerName: 'Blair', scores: [7, 1] },
+            'player-3': { id: 'player-3', playerName: 'Casey', scores: [4] },
+          },
+          ids: ['player-1', 'player-2', 'player-3'],
+        },
+      } as RootState;
+
+      expect(selectGamePlayersByScore(state, 'game-1')).toEqual([
+        { id: 'player-2', name: 'Blair', totalScore: 8 },
+        { id: 'player-1', name: 'Alex', totalScore: 5 },
+        { id: 'player-3', name: 'Casey', totalScore: 4 },
+      ]);
+    });
+
+    it('should preserve missing player ids with empty summary values', () => {
+      const state = mockState as RootState;
+
+      expect(selectGamePlayersByScore(state, 'game-1')).toEqual([
+        { id: 'player-1', name: '', totalScore: 0 },
+      ]);
     });
   });
 });
