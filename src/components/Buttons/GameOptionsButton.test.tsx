@@ -37,16 +37,16 @@ jest.mock('../MenuOpenContext', () => ({
     useMenuOpen: () => ({ menuOpen: false, setMenuOpen: jest.fn() }),
 }));
 
-jest.mock('../Sheets/AddendModalContext', () => ({
-    useAddendModalContext: () => ({ current: null }),
+jest.mock('../Sheets/PointValuesSheetContext', () => ({
+    usePointValuesSheetContext: () => ({ current: null }),
 }));
 
 jest.mock('../Sheets/GameSheetContext', () => ({
     useGameSheetContext: () => ({ current: null }),
 }));
 
-jest.mock('../Sheets/GestureInfoModalContext', () => ({
-    useGestureInfoModalContext: () => ({ current: null }),
+jest.mock('../Sheets/GestureInfoSheetContext', () => ({
+    useGestureInfoSheetContext: () => ({ current: null }),
 }));
 
 import GameOptionsButton from './GameOptionsButton';

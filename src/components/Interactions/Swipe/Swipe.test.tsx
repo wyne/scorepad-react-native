@@ -143,7 +143,7 @@ describe('SwipeVertical', () => {
     );
   });
 
-  it('uses addendTwo when powerHold is active', () => {
+  it('uses addendTwo when secondaryHold is active', () => {
     const { dispatch } = renderSwipe();
     const ph = (globalThis as any).__ph;
     jest.useFakeTimers();
@@ -163,7 +163,7 @@ describe('SwipeVertical', () => {
     );
   });
 
-  it('cancels powerHold if user swipes before timer fires', () => {
+  it('cancels secondaryHold if user swipes before timer fires', () => {
     const { dispatch } = renderSwipe();
     const ph = (globalThis as any).__ph;
     jest.useFakeTimers();

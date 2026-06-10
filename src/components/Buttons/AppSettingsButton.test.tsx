@@ -6,7 +6,7 @@ import { Provider } from 'react-redux';
 import { useNavigationMock } from '../../../test/test-helpers';
 import { logEvent } from '../../Analytics';
 
-import AppInfoButton from './AppInfoButton';
+import AppSettingsButton from './AppSettingsButton';
 
 jest.mock('@react-navigation/native', () => ({
     ...jest.requireActual('@react-navigation/native'),
@@ -37,7 +37,7 @@ const createTestStore = () =>
         },
     });
 
-describe('AppInfoButton', () => {
+describe('AppSettingsButton', () => {
   const navigation = useNavigationMock();
 
   beforeEach(() => {
@@ -48,16 +48,16 @@ describe('AppInfoButton', () => {
     const store = createTestStore();
     return render(
       <Provider store={store}>
-        <AppInfoButton />
+        <AppSettingsButton />
       </Provider>
     );
   };
 
-  it('should navigate to AppInfo screen when pressed', () => {
+  it('should navigate to AppSettings screen when pressed', () => {
     const { getByRole } = renderComponent();
     const button = getByRole('button');
     fireEvent.press(button);
-    expect(navigation.navigate).toHaveBeenCalledWith('AppInfo');
+    expect(navigation.navigate).toHaveBeenCalledWith('AppSettings');
   });
 
   it('should log an analytics event when pressed', async () => {

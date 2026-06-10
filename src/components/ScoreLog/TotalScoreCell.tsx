@@ -12,7 +12,7 @@ export type Props = {
 const TotalScoreCell: React.FunctionComponent<Props> = ({ playerId }) => {
     const theme = useTheme();
     const scores: number[] = useAppSelector(state => (selectPlayerById(state, playerId) || { scores: [] }).scores);
-    const scoreTotal = scores.reduce((sum, current, round) => {
+    const totalScore = scores.reduce((sum, current, round) => {
         if (round > round) {
             return sum;
         }
@@ -20,7 +20,7 @@ const TotalScoreCell: React.FunctionComponent<Props> = ({ playerId }) => {
     });
     return (
         <Text key={playerId} style={[styles.scoreEntry, { color: theme.text }]}>
-            {scoreTotal}
+            {totalScore}
         </Text>
     );
 };

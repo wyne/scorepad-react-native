@@ -27,13 +27,13 @@ const ShareScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     const currentGameId = useAppSelector(state => state.settings.currentGameId);
     if (typeof currentGameId == 'undefined') return null;
 
-    const roundTotal = useAppSelector(state => selectGameById(state, currentGameId)?.roundTotal || 0);
+    const roundCount = useAppSelector(state => selectGameById(state, currentGameId)?.roundTotal || 0);
     const currentGame = useAppSelector(selectCurrentGame);
     if (typeof currentGame == 'undefined') return null;
 
     const scoreboardImageEl = useRef<View>(null);
 
-    const roundsIterator = [...Array(roundTotal).keys()];
+    const roundsIterator = [...Array(roundCount).keys()];
 
     const exportImage = async () => {
         if (scoreboardImageEl.current == null) return;
@@ -74,7 +74,7 @@ const ShareScreen: React.FunctionComponent<Props> = ({ navigation }) => {
                     icon={<Icon name='edit' color={theme.tint} />}
                     style={{ padding: 10 }}
                     onPress={async () => {
-                        navigation.navigate('Settings', { source: 'share_screen' });
+                        navigation.navigate('EditGame', { source: 'share_screen' });
                     }} />
 
                 <View style={{

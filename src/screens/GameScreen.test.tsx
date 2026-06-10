@@ -51,38 +51,38 @@ jest.mock('@gorhom/bottom-sheet', () => {
 });
 
 // Mock the components that GameScreen uses
-jest.mock('../components/Boards/FlexboxBoard', () => {
-    return function MockFlexboxBoard() {
+jest.mock('../components/Boards/TileBoard', () => {
+    return function MockTileBoard() {
         const { View, Text } = jest.requireActual('react-native');
-        return <View testID="flexbox-board"><Text>FlexboxBoard</Text></View>;
+        return <View testID="tile-board"><Text>TileBoard</Text></View>;
     };
 });
 
-jest.mock('../components/Boards/RowsBoard', () => {
-    return function MockRowsBoard() {
+jest.mock('../components/Boards/ListBoard', () => {
+    return function MockListBoard() {
         const { View, Text } = jest.requireActual('react-native');
-        return <View testID="rows-board"><Text>RowsBoard</Text></View>;
+        return <View testID="list-board"><Text>ListBoard</Text></View>;
     };
 });
 
-jest.mock('../components/Sheets/AddendModal', () => {
-    return function MockAddendModal() {
+jest.mock('../components/Sheets/PointValuesSheet', () => {
+    return function MockPointValuesSheet() {
         const { View, Text } = jest.requireActual('react-native');
-        return <View testID="addend-modal"><Text>AddendModal</Text></View>;
+        return <View testID="point-values-sheet"><Text>PointValuesSheet</Text></View>;
     };
 });
 
-jest.mock('../components/Sheets/GestureInfoModal', () => {
-    return function MockGestureInfoModal() {
+jest.mock('../components/Sheets/GestureInfoSheet', () => {
+    return function MockGestureInfoSheet() {
         const { View, Text } = jest.requireActual('react-native');
-        return <View testID="gesture-info-modal"><Text>GestureInfoModal</Text></View>;
+        return <View testID="gesture-info-sheet"><Text>GestureInfoSheet</Text></View>;
     };
 });
 
-jest.mock('../components/Sheets/ChooseWinnersModal', () => {
-    return function MockChooseWinnersModal() {
+jest.mock('../components/Sheets/ChooseWinnersSheet', () => {
+    return function MockChooseWinnersSheet() {
         const { View, Text } = jest.requireActual('react-native');
-        return <View testID="choose-winners-modal"><Text>ChooseWinnersModal</Text></View>;
+        return <View testID="choose-winners-sheet"><Text>ChooseWinnersSheet</Text></View>;
     };
 });
 
@@ -168,11 +168,11 @@ describe('GameScreen', () => {
             </Provider>
         );
 
-        expect(getByTestId('flexbox-board')).toBeTruthy();
-        expect(getByTestId('addend-modal')).toBeTruthy();
+        expect(getByTestId('tile-board')).toBeTruthy();
+        expect(getByTestId('point-values-sheet')).toBeTruthy();
     });
 
-    it('should render RowsBoard when interactionType is RadialGesture', () => {
+    it('should render ListBoard when interactionType is Dial', () => {
         const store = createMockStore({
             settings: {
                 currentGameId: 'game-1',
@@ -194,6 +194,6 @@ describe('GameScreen', () => {
             </Provider>
         );
 
-        expect(getByTestId('rows-board')).toBeTruthy();
+        expect(getByTestId('list-board')).toBeTruthy();
     });
 });

@@ -7,12 +7,12 @@ import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 
 import { useAppSelector } from '../../redux/hooks';
 import { selectInteractionType } from '../../redux/selectors';
-import FlexboxBoard from '../components/Boards/FlexboxBoard';
-import RowsBoard from '../components/Boards/RowsBoard';
+import ListBoard from '../components/Boards/ListBoard';
+import TileBoard from '../components/Boards/TileBoard';
 import { InteractionType } from '../components/Interactions/InteractionType';
-import AddendModal from '../components/Sheets/AddendModal';
-import ChooseWinnersModal from '../components/Sheets/ChooseWinnersModal';
-import GestureInfoModal from '../components/Sheets/GestureInfoModal';
+import ChooseWinnersSheet from '../components/Sheets/ChooseWinnersSheet';
+import GestureInfoSheet from '../components/Sheets/GestureInfoSheet';
+import PointValuesSheet from '../components/Sheets/PointValuesSheet';
 import { useGestureHint } from '../hooks/useGestureHint';
 
 function useKeepScreenAwake(active: boolean): void {
@@ -27,7 +27,7 @@ function useKeepScreenAwake(active: boolean): void {
     }, [active]);
 }
 
-const ScoreBoardScreen: React.FunctionComponent = () => {
+const GameScreen: React.FunctionComponent = () => {
     const currentGameId = useAppSelector(state => state.settings.currentGameId);
     const keepScreenAwake = useAppSelector(state => state.settings.keepScreenAwake);
     const interactionType = useAppSelector(selectInteractionType);
@@ -42,20 +42,20 @@ const ScoreBoardScreen: React.FunctionComponent = () => {
             <View style={{ flex: 1 }}>
                 {interactionType === InteractionType.Dial
                     ? <Animated.View key="rows" entering={FadeIn.duration(220)} exiting={FadeOut.duration(180)} style={StyleSheet.absoluteFill}>
-                        <RowsBoard showHint={showHint} />
+                        <ListBoard showHint={showHint} />
                     </Animated.View>
                     : <Animated.View key="flex" entering={FadeIn.duration(220)} exiting={FadeOut.duration(180)} style={StyleSheet.absoluteFill}>
-                        <FlexboxBoard showHint={showHint} />
+                        <TileBoard showHint={showHint} />
                     </Animated.View>
                 }
 
-                <AddendModal />
-                <ChooseWinnersModal />
-                <GestureInfoModal />
+                <PointValuesSheet />
+                <ChooseWinnersSheet />
+                <GestureInfoSheet />
             </View>
         </View>
     );
 };
 
 
-export default ScoreBoardScreen;
+export default GameScreen;

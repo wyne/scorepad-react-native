@@ -9,7 +9,7 @@ import playersReducer from '../../../redux/PlayersSlice';
 import settingsReducer from '../../../redux/SettingsSlice';
 import { logEvent } from '../../Analytics';
 
-import ChooseWinnersModal from './ChooseWinnersModal';
+import ChooseWinnersSheet from './ChooseWinnersSheet';
 
 jest.mock('../../Analytics', () => ({
     logEvent: jest.fn(),
@@ -50,8 +50,8 @@ jest.mock('@gorhom/bottom-sheet', () => {
     };
 });
 
-jest.mock('./ChooseWinnersModalContext', () => ({
-    useChooseWinnersModalContext: jest.fn(() => ({
+jest.mock('./ChooseWinnersSheetContext', () => ({
+    useChooseWinnersSheetContext: jest.fn(() => ({
         current: {
             present: jest.fn(),
             close: jest.fn(),
@@ -79,7 +79,7 @@ jest.mock('react-native-safe-area-context', () => ({
     useSafeAreaInsets: jest.fn(() => ({ top: 50, bottom: 34, left: 0, right: 0 })),
 }));
 
-describe('ChooseWinnersModal', () => {
+describe('ChooseWinnersSheet', () => {
     const createMockStore = (
         players: Record<string, { id: string; playerName: string; scores: number[] }>,
         gameId?: string,
@@ -129,23 +129,23 @@ describe('ChooseWinnersModal', () => {
 
     it('should render player names', () => {
         const store = createMockStore(mockPlayers, 'game-1', ['player-1', 'player-2', 'player-3']);
-        const { getByText } = render(<Provider store={store}><ChooseWinnersModal /></Provider>);
+        const { getByText } = render(<Provider store={store}><ChooseWinnersSheet /></Provider>);
 
         expect(getByText('Alice')).toBeTruthy();
         expect(getByText('Bob')).toBeTruthy();
         expect(getByText('Charlie')).toBeTruthy();
     });
 
-    it('should show the modal title', () => {
+    it('should show the sheet title', () => {
         const store = createMockStore(mockPlayers, 'game-1', ['player-1', 'player-2', 'player-3']);
-        const { getByText } = render(<Provider store={store}><ChooseWinnersModal /></Provider>);
+        const { getByText } = render(<Provider store={store}><ChooseWinnersSheet /></Provider>);
 
         expect(getByText('Choose Winner(s)')).toBeTruthy();
     });
 
     it('should sort players by total score descending', () => {
         const store = createMockStore(mockPlayers, 'game-1', ['player-1', 'player-2', 'player-3']);
-        const { getAllByTestId } = render(<Provider store={store}><ChooseWinnersModal /></Provider>);
+        const { getAllByTestId } = render(<Provider store={store}><ChooseWinnersSheet /></Provider>);
 
         const rows = getAllByTestId(/^winner-player-row-\d+$/);
         expect(within(rows[0]).getByText('Bob')).toBeTruthy();    // 15
@@ -155,7 +155,7 @@ describe('ChooseWinnersModal', () => {
 
     it('should display total scores for each player', () => {
         const store = createMockStore(mockPlayers, 'game-1', ['player-1', 'player-2', 'player-3']);
-        const { getByText } = render(<Provider store={store}><ChooseWinnersModal /></Provider>);
+        const { getByText } = render(<Provider store={store}><ChooseWinnersSheet /></Provider>);
 
         expect(getByText('15')).toBeTruthy();
         expect(getByText('10')).toBeTruthy();
@@ -164,7 +164,7 @@ describe('ChooseWinnersModal', () => {
 
     it('should toggle player selection on press', () => {
         const store = createMockStore(mockPlayers, 'game-1', ['player-1', 'player-2', 'player-3']);
-        const { getByText, getAllByTestId, queryAllByTestId } = render(<Provider store={store}><ChooseWinnersModal /></Provider>);
+        const { getByText, getAllByTestId, queryAllByTestId } = render(<Provider store={store}><ChooseWinnersSheet /></Provider>);
 
         expect(queryAllByTestId('icon-checkmark-circle').length).toBe(0);
         expect(getAllByTestId('icon-ellipse-outline').length).toBe(3);
@@ -177,7 +177,7 @@ describe('ChooseWinnersModal', () => {
 
     it('should deselect a player on second press', () => {
         const store = createMockStore(mockPlayers, 'game-1', ['player-1', 'player-2', 'player-3']);
-        const { getByText, getAllByTestId, queryAllByTestId } = render(<Provider store={store}><ChooseWinnersModal /></Provider>);
+        const { getByText, getAllByTestId, queryAllByTestId } = render(<Provider store={store}><ChooseWinnersSheet /></Provider>);
 
         fireEvent.press(getByText('Alice'));
         expect(getAllByTestId('icon-checkmark-circle').length).toBe(1);
@@ -189,7 +189,7 @@ describe('ChooseWinnersModal', () => {
 
     it('should allow selecting multiple players', () => {
         const store = createMockStore(mockPlayers, 'game-1', ['player-1', 'player-2', 'player-3']);
-        const { getByText, getAllByTestId } = render(<Provider store={store}><ChooseWinnersModal /></Provider>);
+        const { getByText, getAllByTestId } = render(<Provider store={store}><ChooseWinnersSheet /></Provider>);
 
         fireEvent.press(getByText('Alice'));
         fireEvent.press(getByText('Bob'));
@@ -200,7 +200,7 @@ describe('ChooseWinnersModal', () => {
 
     it('should render Cancel and Lock Game buttons', () => {
         const store = createMockStore(mockPlayers, 'game-1', ['player-1', 'player-2', 'player-3']);
-        const { getByLabelText } = render(<Provider store={store}><ChooseWinnersModal /></Provider>);
+        const { getByLabelText } = render(<Provider store={store}><ChooseWinnersSheet /></Provider>);
 
         expect(getByLabelText('Cancel')).toBeTruthy();
         expect(getByLabelText('Lock Game')).toBeTruthy();
@@ -208,7 +208,7 @@ describe('ChooseWinnersModal', () => {
 
     it('should clear selection when Cancel is pressed', () => {
         const store = createMockStore(mockPlayers, 'game-1', ['player-1', 'player-2', 'player-3']);
-        const { getByText, getByLabelText, getAllByTestId, queryAllByTestId } = render(<Provider store={store}><ChooseWinnersModal /></Provider>);
+        const { getByText, getByLabelText, getAllByTestId, queryAllByTestId } = render(<Provider store={store}><ChooseWinnersSheet /></Provider>);
 
         fireEvent.press(getByText('Alice'));
         expect(getAllByTestId('icon-checkmark-circle').length).toBe(1);
@@ -221,7 +221,7 @@ describe('ChooseWinnersModal', () => {
 
     it('should dispatch lock action with selected winners', () => {
         const store = createMockStore(mockPlayers, 'game-1', ['player-1', 'player-2', 'player-3']);
-        const { getByText, getByLabelText } = render(<Provider store={store}><ChooseWinnersModal /></Provider>);
+        const { getByText, getByLabelText } = render(<Provider store={store}><ChooseWinnersSheet /></Provider>);
 
         fireEvent.press(getByText('Alice'));
         fireEvent.press(getByLabelText('Lock Game'));
@@ -233,7 +233,7 @@ describe('ChooseWinnersModal', () => {
 
     it('should lock game with no winners when none selected', () => {
         const store = createMockStore(mockPlayers, 'game-1', ['player-1', 'player-2', 'player-3']);
-        const { getByLabelText } = render(<Provider store={store}><ChooseWinnersModal /></Provider>);
+        const { getByLabelText } = render(<Provider store={store}><ChooseWinnersSheet /></Provider>);
 
         fireEvent.press(getByLabelText('Lock Game'));
 
@@ -244,7 +244,7 @@ describe('ChooseWinnersModal', () => {
 
     it('should clear selection after locking', () => {
         const store = createMockStore(mockPlayers, 'game-1', ['player-1', 'player-2', 'player-3']);
-        const { getByText, getByLabelText, getAllByTestId, queryAllByTestId } = render(<Provider store={store}><ChooseWinnersModal /></Provider>);
+        const { getByText, getByLabelText, getAllByTestId, queryAllByTestId } = render(<Provider store={store}><ChooseWinnersSheet /></Provider>);
 
         fireEvent.press(getByText('Alice'));
         expect(getAllByTestId('icon-checkmark-circle').length).toBe(1);
@@ -257,7 +257,7 @@ describe('ChooseWinnersModal', () => {
 
     it('should log analytics event with correct winner count when locking', () => {
         const store = createMockStore(mockPlayers, 'game-1', ['player-1', 'player-2', 'player-3']);
-        const { getByText, getByLabelText } = render(<Provider store={store}><ChooseWinnersModal /></Provider>);
+        const { getByText, getByLabelText } = render(<Provider store={store}><ChooseWinnersSheet /></Provider>);
 
         fireEvent.press(getByText('Alice'));
         fireEvent.press(getByText('Bob'));
@@ -272,7 +272,7 @@ describe('ChooseWinnersModal', () => {
 
     it('should log analytics event with zero winners when locking with none selected', () => {
         const store = createMockStore(mockPlayers, 'game-1', ['player-1', 'player-2', 'player-3']);
-        const { getByLabelText } = render(<Provider store={store}><ChooseWinnersModal /></Provider>);
+        const { getByLabelText } = render(<Provider store={store}><ChooseWinnersSheet /></Provider>);
 
         fireEvent.press(getByLabelText('Lock Game'));
 

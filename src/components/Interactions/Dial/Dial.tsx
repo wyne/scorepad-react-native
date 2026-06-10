@@ -8,7 +8,7 @@ interface Props {
     showHint?: boolean;
 }
 
-// Stub — RowsBoard renders when Dial is active, so this component
+// Stub — ListBoard renders when Dial is active, so this component
 // is never actually mounted. It exists only for the InteractionComponents map.
 const Dial: React.FC<Props> = ({ children }) => {
     return <>{children}</>;

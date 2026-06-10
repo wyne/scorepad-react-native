@@ -25,9 +25,9 @@ const AbstractPopupMenu: React.FC<Props> = (props) => {
 
     if (props.gameId == null) { return null; }
     const gameTitle = useAppSelector(state => selectGameById(state, props.gameId)?.title);
-    const roundTotal = useAppSelector(state => selectGameById(state, props.gameId)?.roundTotal);
+    const roundCount = useAppSelector(state => selectGameById(state, props.gameId)?.roundTotal);
     const playerIds = useAppSelector(state => selectGameById(state, props.gameId)?.playerIds);
-    if (roundTotal == null || playerIds == null) { return null; }
+    if (roundCount == null || playerIds == null) { return null; }
 
     /**
      * Share Game
@@ -37,7 +37,7 @@ const AbstractPopupMenu: React.FC<Props> = (props) => {
         props.navigation.navigate('Share');
 
         await logEvent('menu_share', {
-            round_count: roundTotal,
+            round_count: roundCount,
             player_count: playerIds.length,
         });
     };
@@ -47,10 +47,10 @@ const AbstractPopupMenu: React.FC<Props> = (props) => {
      */
     const editGameHandler = async () => {
         props.setCurrentGameCallback();
-        props.navigation.navigate('Settings', { source: 'list_screen' });
+        props.navigation.navigate('EditGame', { source: 'list_screen' });
 
         await logEvent('menu_edit', {
-            round_count: roundTotal,
+            round_count: roundCount,
             player_count: playerIds.length,
         });
     };
@@ -93,7 +93,7 @@ const AbstractPopupMenu: React.FC<Props> = (props) => {
 
         await logEvent('delete_game', {
             index: props.index,
-            round_count: roundTotal,
+            round_count: roundCount,
             player_count: playerIds.length,
         });
     };

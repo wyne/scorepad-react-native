@@ -17,17 +17,17 @@ import { MAX_PLAYERS } from '../constants';
 import { useTheme } from '../theme';
 
 type RouteParams = {
-    Settings: {
+    EditGame: {
         source?: string;
     };
 };
 
 interface Props {
     navigation: NativeStackNavigationProp<ParamListBase, string, undefined>;
-    route: RouteProp<RouteParams, 'Settings'>;
+    route: RouteProp<RouteParams, 'EditGame'>;
 }
 
-const SettingsScreen: React.FunctionComponent<Props> = ({ navigation, route }) => {
+const EditGameScreen: React.FunctionComponent<Props> = ({ navigation, route }) => {
     const dispatch = useAppDispatch();
 
     const currentGameId = useAppSelector(state => state.settings.currentGameId);
@@ -168,4 +168,4 @@ const styles = StyleSheet.create({
     }
 });
 
-export default SettingsScreen;
+export default EditGameScreen;

@@ -42,13 +42,13 @@ const GameListItem: React.FunctionComponent<Props> = ({ navigation, gameId, inde
 
     if (gameId == null) { return null; }
 
-    const roundTotal = useAppSelector(state => selectGameById(state, gameId)?.roundTotal);
+    const roundCount = useAppSelector(state => selectGameById(state, gameId)?.roundTotal);
     const playerIds = useAppSelector(state => selectGameById(state, gameId)?.playerIds);
     const gameTitle = useAppSelector(state => selectGameById(state, gameId)?.title);
     const locked = useAppSelector(state => selectGameById(state, gameId)?.locked);
     const winnerIds = useAppSelector(state => selectGameById(state, gameId)?.winnerIds);
     const dateCreated = useAppSelector(state => selectGameById(state, gameId)?.dateCreated);
-    if (roundTotal == null || playerIds == null) { return null; }
+    if (roundCount == null || playerIds == null) { return null; }
 
     const setCurrentGameCallback = useCallback(() => {
         dispatch(setCurrentGameId(gameId));
@@ -65,7 +65,7 @@ const GameListItem: React.FunctionComponent<Props> = ({ navigation, gameId, inde
             index: index,
             game_id: gameId,
             player_count: playerIds.length,
-            round_count: roundTotal,
+            round_count: roundCount,
         });
     };
 
@@ -102,7 +102,7 @@ const GameListItem: React.FunctionComponent<Props> = ({ navigation, gameId, inde
                             {playerIds.length} <Icon color={theme.badgeBlue} name='users' type='font-awesome-5' size={16} />
                         </Text>
                         <Text style={[styles.badgeRounds, { color: theme.badgeRed }]}>
-                            {roundTotal} <Icon color={theme.badgeRed} name='circle-notch' type='font-awesome-5' size={16} />
+                            {roundCount} <Icon color={theme.badgeRed} name='circle-notch' type='font-awesome-5' size={16} />
                         </Text>
                         <ListItem.Chevron iconStyle={{ color: theme.separator }} />
                     </View>
