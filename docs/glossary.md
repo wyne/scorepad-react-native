@@ -52,9 +52,9 @@ A game whose scores are finalized. Locked games show winners and prevent normal 
 
 ### Screens
 
-**Game list**
+**Game list screen**
 
-The home screen that lists saved games.
+The home screen that lists saved games. Component: `ListScreen`.
 
 **Game screen**
 
