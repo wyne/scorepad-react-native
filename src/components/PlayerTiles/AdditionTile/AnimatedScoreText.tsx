@@ -1,7 +1,7 @@
 import React from 'react';
 
-import { TextInput, TextInputProps } from 'react-native';
-import Animated, { SharedValue, useAnimatedProps } from 'react-native-reanimated';
+import { StyleProp, TextInput, TextInputProps, TextStyle } from 'react-native';
+import Animated, { AnimatedStyle, SharedValue, useAnimatedProps } from 'react-native-reanimated';
 
 type AnimatedTextInputProps = TextInputProps & { text?: string };
 
@@ -9,7 +9,8 @@ const AnimatedTextInput = Animated.createAnimatedComponent(
     TextInput as React.ComponentType<AnimatedTextInputProps>
 );
 
-interface Props extends Omit<TextInputProps, 'editable' | 'value'> {
+interface Props extends Omit<TextInputProps, 'editable' | 'style' | 'value'> {
+    style?: StyleProp<AnimatedStyle<TextStyle>>;
     text: SharedValue<string>;
 }
 
