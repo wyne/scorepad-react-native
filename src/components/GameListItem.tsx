@@ -39,15 +39,12 @@ export type Props = {
 const GameListItem: React.FunctionComponent<Props> = ({ navigation, gameId, index }) => {
     const theme = useTheme();
     const dispatch = useAppDispatch();
+    const game = useAppSelector(state => selectGameById(state, gameId));
 
     if (gameId == null) { return null; }
+    if (!game) { return null; }
 
-    const roundCount = useAppSelector(state => selectGameById(state, gameId)?.roundTotal);
-    const playerIds = useAppSelector(state => selectGameById(state, gameId)?.playerIds);
-    const gameTitle = useAppSelector(state => selectGameById(state, gameId)?.title);
-    const locked = useAppSelector(state => selectGameById(state, gameId)?.locked);
-    const winnerIds = useAppSelector(state => selectGameById(state, gameId)?.winnerIds);
-    const dateCreated = useAppSelector(state => selectGameById(state, gameId)?.dateCreated);
+    const { roundTotal: roundCount, playerIds, title: gameTitle, locked, winnerIds, dateCreated } = game;
     if (roundCount == null || playerIds == null) { return null; }
 
     const setCurrentGameCallback = useCallback(() => {

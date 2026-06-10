@@ -22,11 +22,12 @@ interface Props {
 
 const AbstractPopupMenu: React.FC<Props> = (props) => {
     const dispatch = useAppDispatch();
+    const game = useAppSelector(state => selectGameById(state, props.gameId));
 
     if (props.gameId == null) { return null; }
-    const gameTitle = useAppSelector(state => selectGameById(state, props.gameId)?.title);
-    const roundCount = useAppSelector(state => selectGameById(state, props.gameId)?.roundTotal);
-    const playerIds = useAppSelector(state => selectGameById(state, props.gameId)?.playerIds);
+    if (!game) { return null; }
+
+    const { roundTotal: roundCount, playerIds, title: gameTitle } = game;
     if (roundCount == null || playerIds == null) { return null; }
 
     /**
