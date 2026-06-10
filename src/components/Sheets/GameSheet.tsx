@@ -1,12 +1,12 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import BottomSheet, { BottomSheetBackdrop, BottomSheetBackdropProps, BottomSheetScrollView } from '@gorhom/bottom-sheet';
+import BottomSheet, { BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { ParamListBase, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Alert, StyleSheet, Text, TouchableWithoutFeedback, View, useWindowDimensions } from 'react-native';
 import { Button } from 'react-native-elements';
 import Animated, { Extrapolate, FadeIn, interpolate, Layout, useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { asyncRematchGame, selectGameById, updateGame } from '../../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
@@ -19,6 +19,7 @@ import ScoreLogTable from '../ScoreLogTable';
 
 import { useChooseWinnersSheetContext } from './ChooseWinnersSheetContext';
 import { useGameSheetContext } from './GameSheetContext';
+import { getSheetShadowStyle, useSheetBackdrop, useSheetTopInset } from './SheetChrome';
 
 /**
  * Height of the bottom sheet
@@ -44,8 +45,7 @@ const GameSheet: React.FunctionComponent = () => {
 
     const dispatch = useAppDispatch();
 
-    const insets = useSafeAreaInsets();
-    const topInset = insets.top;
+    const topInset = useSheetTopInset();
 
     // Stable key for animated children to force remount on each mount
     const mountKey = useRef(Date.now()).current;
@@ -218,17 +218,7 @@ const GameSheet: React.FunctionComponent = () => {
         };
     });
 
-    const renderBackdrop = useCallback(
-        (props: BottomSheetBackdropProps) => (
-            <BottomSheetBackdrop
-                {...props}
-                disappearsOnIndex={0}
-                appearsOnIndex={1}
-                pressBehavior={0}
-            />
-        ),
-        []
-    );
+    const renderBackdrop = useSheetBackdrop(0, 1);
 
     return (
         <BottomSheet
@@ -243,7 +233,7 @@ const GameSheet: React.FunctionComponent = () => {
             animatedPosition={animatedPosition}
             enablePanDownToClose={false}
             topInset={topInset}
-            style={theme.background === '#000000' ? undefined : styles.sheetShadow}
+            style={getSheetShadowStyle(theme.background)}
             accessible={false}
             accessibilityViewIsModal={false}
         >
@@ -381,13 +371,6 @@ const styles = StyleSheet.create({
         backgroundColor: 'rgba(0,0,0,.2)',
         borderRadius: 10,
         alignItems: 'center'
-    },
-    sheetShadow: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: -3 },
-        shadowOpacity: 0.12,
-        shadowRadius: 5,
-        elevation: 8,
     },
 });
 

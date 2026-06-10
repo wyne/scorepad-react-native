@@ -1,14 +1,12 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 
 import {
-    BottomSheetBackdrop,
-    BottomSheetBackdropProps,
     BottomSheetModal,
     BottomSheetScrollView
 } from '@gorhom/bottom-sheet';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Icon } from 'react-native-elements';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { shallowEqual } from 'react-redux';
 
 import { selectGameById, updateGame } from '../../../redux/GamesSlice';
@@ -18,12 +16,12 @@ import { useTheme } from '../../theme';
 
 import { useChooseWinnersSheetContext } from './ChooseWinnersSheetContext';
 import GlassButton from './GlassButton';
+import { getSheetShadowStyle, useSheetBackdrop, useSheetTopInset } from './SheetChrome';
 
 const ChooseWinnersSheet: React.FunctionComponent = () => {
     const theme = useTheme();
     const dispatch = useAppDispatch();
-    const insets = useSafeAreaInsets();
-    const topInset = insets.top + 50;
+    const topInset = useSheetTopInset(50);
 
     const currentGameId = useAppSelector(state => state.settings.currentGameId);
     const playerIds = useAppSelector(state => selectGameById(state, currentGameId || '')?.playerIds);
@@ -64,17 +62,7 @@ const ChooseWinnersSheet: React.FunctionComponent = () => {
 
     const snapPoints = useMemo(() => ['50%', '80%'], []);
 
-    const renderBackdrop = useCallback(
-        (props: BottomSheetBackdropProps) => (
-            <BottomSheetBackdrop
-                {...props}
-                disappearsOnIndex={-1}
-                appearsOnIndex={0}
-                pressBehavior={0}
-            />
-        ),
-        []
-    );
+    const renderBackdrop = useSheetBackdrop(-1, 0);
 
     const togglePlayer = (playerId: string) => {
         setSelectedIds((prev) => {
@@ -124,7 +112,7 @@ const ChooseWinnersSheet: React.FunctionComponent = () => {
             backgroundStyle={{ backgroundColor: theme.sheetBackground }}
             handleIndicatorStyle={{ backgroundColor: theme.sheetHandle }}
             topInset={topInset}
-            style={theme.background === '#000000' ? undefined : styles.sheetShadow}
+            style={getSheetShadowStyle(theme.background)}
             accessible={false}
             accessibilityViewIsModal={false}
         >
@@ -244,13 +232,6 @@ const styles = StyleSheet.create({
     playerScore: {
         fontSize: 16,
         fontWeight: '600',
-    },
-    sheetShadow: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: -3 },
-        shadowOpacity: 0.12,
-        shadowRadius: 5,
-        elevation: 8,
     },
 });
 
