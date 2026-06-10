@@ -8,30 +8,12 @@ import { shallowEqual } from 'react-redux';
 
 import { selectGameById } from '../../../redux/GamesSlice';
 import { useAppSelector } from '../../../redux/hooks';
+import { readableTextColor, withInkOpacity } from '../../colorUtils';
 import DialOverlay from '../Interactions/Dial/DialOverlay';
 import { useMenuOpen } from '../MenuOpenContext';
 import { bottomSheetHeight } from '../Sheets/GameSheet';
 
 const ROW_BOARD_PADDING = 12;
-
-// TODO: consolidate inkFor/inkA into a shared src/colorUtils.ts module and rename:
-//   inkFor → readableColor (use getContrastRatio from 'colorsheet', add data migration
-//   to backfill player colors, then introduce usePlayerColors hook)
-//   inkA → withOpacity
-//   Same change needed in DialOverlay.tsx and DialControl.tsx.
-function inkFor(hex: string): string {
-    const h = hex.replace('#', '');
-    const r = parseInt(h.slice(0, 2), 16) / 255;
-    const g = parseInt(h.slice(2, 4), 16) / 255;
-    const b = parseInt(h.slice(4, 6), 16) / 255;
-    const lin = (c: number) => (c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4));
-    const L = 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b);
-    return L > 0.42 ? '#000' : '#fff';
-}
-
-function inkA(ink: string, a: number): string {
-    return ink === '#000' ? `rgba(0,0,0,${a})` : `rgba(255,255,255,${a})`;
-}
 
 interface PlayerRowProps {
     playerId: string;
@@ -87,13 +69,13 @@ const PlayerRow: React.FC<PlayerRowProps> = ({ playerId, index, svDimmed, disabl
 
     if (!playerName) return null;
 
-    const ink = inkFor(color);
+    const ink = readableTextColor(color);
 
     const separatorSign = currentRoundScore < 0 ? '−' : '+';
     const roundAbs = Math.abs(currentRoundScore);
 
     const secondaryNumberStyle = {
-        color: inkA(ink, 0.45),
+        color: withInkOpacity(ink, 0.45),
         fontSize: 18,
         fontWeight: '600' as const,
         lineHeight: 22,
@@ -107,13 +89,13 @@ const PlayerRow: React.FC<PlayerRowProps> = ({ playerId, index, svDimmed, disabl
         fontVariant: ['tabular-nums' as const]
     };
     const captionStyle = {
-        color: inkA(ink, 0.65),
+        color: withInkOpacity(ink, 0.65),
         fontSize: 8,
         fontWeight: '800' as const,
         letterSpacing: 1.0,
         marginTop: 1
     };
-    const operatorStyle = { color: inkA(ink, 0.5), fontSize: 16, fontWeight: '500' as const };
+    const operatorStyle = { color: withInkOpacity(ink, 0.5), fontSize: 16, fontWeight: '500' as const };
 
     return (
         <Animated.View style={rowStyle} testID={`player-row-${index}`}>
@@ -137,8 +119,8 @@ const PlayerRow: React.FC<PlayerRowProps> = ({ playerId, index, svDimmed, disabl
                             /* Locked: hide PREV/RND, show winner pill in that slot */
                             isWinner && (
                                 <View style={styles.winnerBadge}>
-                                    <Icon name="trophy" type="ionicon" color={inkA(ink, 0.75)} size={11} />
-                                    <Text style={[styles.winnerText, { color: inkA(ink, 0.75) }]}>WINNER</Text>
+                                    <Icon name="trophy" type="ionicon" color={withInkOpacity(ink, 0.75)} size={11} />
+                                    <Text style={[styles.winnerText, { color: withInkOpacity(ink, 0.75) }]}>WINNER</Text>
                                 </View>
                             )
                         ) : (

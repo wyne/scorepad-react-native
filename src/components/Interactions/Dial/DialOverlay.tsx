@@ -18,6 +18,7 @@ import { useAppDispatch, useAppSelector } from '../../../../redux/hooks';
 import { playerRoundScoreSet, selectPlayerById, selectPlayerRoundStats } from '../../../../redux/PlayersSlice';
 import { selectCurrentGame } from '../../../../redux/selectors';
 import { setLastUsedInteractionType } from '../../../../redux/SettingsSlice';
+import { readableTextColor, withInkOpacity } from '../../../colorUtils';
 import { useMenuOpen } from '../../MenuOpenContext';
 import { InteractionType } from '../InteractionType';
 
@@ -39,21 +40,6 @@ function resistedDrag(t: number): number {
     'worklet';
     if (t <= 0) return 0;
     return t / (1 + t / 400); // nearly 1:1 at small pulls, strong resistance beyond ~150 px
-}
-
-// TODO: see ListBoard.tsx — consolidate inkFor/inkA into shared colorUtils module
-function inkFor(hex: string): string {
-    const h = hex.replace('#', '');
-    const r = parseInt(h.slice(0, 2), 16) / 255;
-    const g = parseInt(h.slice(2, 4), 16) / 255;
-    const b = parseInt(h.slice(4, 6), 16) / 255;
-    const lin = (c: number) => c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
-    const L = 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b);
-    return L > 0.42 ? '#000' : '#fff';
-}
-
-function inkA(ink: string, a: number): string {
-    return ink === '#000' ? `rgba(0,0,0,${a})` : `rgba(255,255,255,${a})`;
 }
 
 function bounded(value: number, min: number, max: number): number {
@@ -168,7 +154,7 @@ const PlayerDialPage: React.FC<PlayerDialPageProps> = ({
 
     if (!player) return null;
 
-    const ink = inkFor(player.color ?? '#444');
+    const ink = readableTextColor(player.color ?? '#444');
     const playerColor = player.color ?? '#444';
     const isLandscape = pageWidth > pageHeight;
 
@@ -177,8 +163,8 @@ const PlayerDialPage: React.FC<PlayerDialPageProps> = ({
 
     if (isLandscape) {
         const lsDialSize = Math.min(Math.round((pageHeight - 52 * scale) / 1.25), Math.round(200 * scale));
-        const stepBg = isSecondary ? LS_ACCENT : inkA(ink, 0.12);
-        const stepDotBg = isSecondary ? '#fff' : inkA(ink, 0.4);
+        const stepBg = isSecondary ? LS_ACCENT : withInkOpacity(ink, 0.12);
+        const stepDotBg = isSecondary ? '#fff' : withInkOpacity(ink, 0.4);
         const stepTextColor = isSecondary ? '#fff' : ink;
 
         return (
@@ -191,7 +177,7 @@ const PlayerDialPage: React.FC<PlayerDialPageProps> = ({
                         paddingHorizontal: 20 * scale,
                         paddingBottom: 6 * scale,
                     }]}>
-                        <View style={[styles.dragHandle, { backgroundColor: inkA(ink, 0.3) }]} />
+                        <View style={[styles.dragHandle, { backgroundColor: withInkOpacity(ink, 0.3) }]} />
                         <Text style={[styles.name, { color: ink, fontSize: 22 * scale, lineHeight: 26 * scale }]}
                             numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.6}>
                             {player.playerName}
@@ -209,7 +195,7 @@ const PlayerDialPage: React.FC<PlayerDialPageProps> = ({
                     <View style={[styles.lsCol, { gap: 16 * scale }]}>
                         <View style={styles.prevBlock}>
                             <Text style={[styles.prevNumber, { color: ink, fontSize: 22 * scale, lineHeight: 26 * scale }]}>{previousTotal}</Text>
-                            <Text style={[styles.prevLabel, { color: inkA(ink, 0.6), fontSize: 10 * scale, lineHeight: 12 * scale }]}>PREVIOUS TOTAL</Text>
+                            <Text style={[styles.prevLabel, { color: withInkOpacity(ink, 0.6), fontSize: 10 * scale, lineHeight: 12 * scale }]}>PREVIOUS TOTAL</Text>
                         </View>
                         <View style={[styles.lsPill, {
                             backgroundColor: stepBg,
@@ -246,14 +232,14 @@ const PlayerDialPage: React.FC<PlayerDialPageProps> = ({
                     <View style={[styles.lsCol, { gap: 16 * scale }]}>
                         <View style={styles.prevBlock}>
                             <Text style={[styles.prevNumber, { color: ink, fontSize: 22 * scale, lineHeight: 26 * scale }]}>{currentRoundTotalScore}</Text>
-                            <Text style={[styles.prevLabel, { color: inkA(ink, 0.6), fontSize: 10 * scale, lineHeight: 12 * scale }]}>NEW TOTAL</Text>
+                            <Text style={[styles.prevLabel, { color: withInkOpacity(ink, 0.6), fontSize: 10 * scale, lineHeight: 12 * scale }]}>NEW TOTAL</Text>
                         </View>
                         <Pressable
                             onPress={onDone}
                             style={({ pressed }) => [
                                 styles.lsDoneBtn,
                                 {
-                                    backgroundColor: inkA(ink, pressed ? 0.28 : 0.16),
+                                    backgroundColor: withInkOpacity(ink, pressed ? 0.28 : 0.16),
                                     height: 44 * scale,
                                     borderRadius: 14 * scale,
                                 },
@@ -280,7 +266,7 @@ const PlayerDialPage: React.FC<PlayerDialPageProps> = ({
                 {/* Top group: drag handle + name + prev total — also the swipe-to-dismiss zone */}
                 <GestureDetector gesture={dismissGesture}>
                     <View style={[styles.topGroup, { gap: 8 * scale }]}>
-                        <View style={[styles.dragHandle, { backgroundColor: inkA(ink, 0.3) }]} />
+                        <View style={[styles.dragHandle, { backgroundColor: withInkOpacity(ink, 0.3) }]} />
                         <Text
                             style={[styles.name, { color: ink, fontSize: 32 * scale, lineHeight: 36 * scale }]}
                             numberOfLines={1}
@@ -291,7 +277,7 @@ const PlayerDialPage: React.FC<PlayerDialPageProps> = ({
                         </Text>
                         <View style={styles.prevBlock}>
                             <Text style={[styles.prevNumber, { color: ink, fontSize: 22 * scale, lineHeight: 26 * scale }]}>{previousTotal}</Text>
-                            <Text style={[styles.prevLabel, { color: inkA(ink, 0.6), fontSize: 10 * scale, lineHeight: 12 * scale }]}>PREVIOUS TOTAL</Text>
+                            <Text style={[styles.prevLabel, { color: withInkOpacity(ink, 0.6), fontSize: 10 * scale, lineHeight: 12 * scale }]}>PREVIOUS TOTAL</Text>
                         </View>
                     </View>
                 </GestureDetector>
@@ -319,7 +305,7 @@ const PlayerDialPage: React.FC<PlayerDialPageProps> = ({
                     style={({ pressed }) => [
                         styles.doneBtn,
                         {
-                            backgroundColor: inkA(ink, pressed ? 0.28 : 0.16),
+                            backgroundColor: withInkOpacity(ink, pressed ? 0.28 : 0.16),
                             height: 48 * scale,
                             borderRadius: 14 * scale,
                         },
