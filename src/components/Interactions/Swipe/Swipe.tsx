@@ -1,15 +1,16 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 
 import * as Haptics from 'expo-haptics';
 import { Animated, StyleSheet, Text, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
-import ReAnimated, { runOnJS, useAnimatedReaction, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
+import ReAnimated, { runOnJS, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 
 import { useAppDispatch, useAppSelector } from '../../../../redux/hooks';
-import { playerRoundScoreIncrement } from '../../../../redux/PlayersSlice';
+import { playerRoundScoreIncrement, selectPlayerRoundStats } from '../../../../redux/PlayersSlice';
 import { selectCurrentGame } from '../../../../redux/selectors';
 import { logEvent } from '../../../Analytics';
 import { useMenuOpen } from '../../MenuOpenContext';
+import { OptimisticScoreContext } from '../../PlayerTiles/AdditionTile/OptimisticScoreContext';
 
 interface HalfTapProps {
     children: React.ReactNode;
@@ -38,11 +39,32 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
     const currentGameId = useAppSelector(state => state.settings.currentGameId);
     const currentRoundIndex = useAppSelector(state => selectCurrentGame(state)?.roundCurrent) || 0;
     const currentGameLocked = useAppSelector(state => selectCurrentGame(state)?.locked);
+    const { currentRoundScore, currentRoundTotalScore } = useAppSelector(
+        state => selectPlayerRoundStats(state, playerId, currentRoundIndex)
+    );
 
     const dispatch = useAppDispatch();
 
     const addendOne = useAppSelector(state => state.settings.addendOne);
     const addendTwo = useAppSelector(state => state.settings.addendTwo);
+    const svAddendOne = useSharedValue(addendOne);
+    const svAddendTwo = useSharedValue(addendTwo);
+    const svRoundScore = useSharedValue(currentRoundScore);
+    const svRoundTotalScore = useSharedValue(currentRoundTotalScore);
+    const optimisticScores = useMemo(() => ({
+        currentRoundScore: svRoundScore,
+        currentRoundTotalScore: svRoundTotalScore,
+    }), [svRoundScore, svRoundTotalScore]);
+
+    useEffect(() => {
+        svAddendOne.value = addendOne;
+        svAddendTwo.value = addendTwo;
+    }, [addendOne, addendTwo]);
+
+    useLayoutEffect(() => {
+        svRoundScore.value = currentRoundScore;
+        svRoundTotalScore.value = currentRoundTotalScore;
+    }, [currentRoundScore, currentRoundTotalScore]);
 
     //#endregion
 
@@ -131,8 +153,12 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
 
     //#region Gesture handling
 
-    const totalOffset = useSharedValue<number | null>(0);
     const panY = useSharedValue(0);
+    const svStartRoundScore = useSharedValue(0);
+    const svStartRoundTotalScore = useSharedValue(0);
+    const svPendingDelta = useSharedValue(0);
+    const svLastNotches = useSharedValue(0);
+    const svDidFlush = useSharedValue(true);
 
     const { menuOpen } = useMenuOpen();
 
@@ -151,27 +177,68 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
         secondaryHoldStop();
     }, [index, currentGameId, secondaryHold, addendOne, addendTwo, currentRoundIndex, menuOpen]);
 
+    const flushPendingChange = useCallback((delta: number) => {
+        if (delta === 0) return;
+        if (menuOpen) return;
+
+        dispatch(playerRoundScoreIncrement(playerId, currentRoundIndex, delta));
+    }, [dispatch, playerId, currentRoundIndex, menuOpen]);
+
+    const bumpFeedback = useCallback((secondary: boolean) => {
+        if (secondary) {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+        } else {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        }
+    }, []);
+
     const panGesture = Gesture.Pan()
         .enabled(!currentGameLocked && !menuOpen)
         .minDistance(0)
         .onBegin(() => {
+            svStartRoundScore.value = svRoundScore.value;
+            svStartRoundTotalScore.value = svRoundTotalScore.value;
+            svPendingDelta.value = 0;
+            svLastNotches.value = 0;
+            svDidFlush.value = false;
             runOnJS(secondaryHoldStart)();
         })
         .onUpdate((event) => {
             const y = event.translationY;
             panY.value = y;
-            totalOffset.value = -y;
 
             if (isSecondaryHoldActive.value == false && Math.abs(y) > 1) {
                 runOnJS(secondaryHoldStop)();
             }
+
+            const notches = Math.round((-y || 0) / notchSize);
+            if (notches === svLastNotches.value) return;
+
+            svLastNotches.value = notches;
+            const secondaryActive = isSecondaryHoldActive.value;
+            const scoreDelta = notches * (secondaryActive ? svAddendTwo.value : svAddendOne.value);
+            svPendingDelta.value = scoreDelta;
+            svRoundScore.value = svStartRoundScore.value + scoreDelta;
+            svRoundTotalScore.value = svStartRoundTotalScore.value + scoreDelta;
+            runOnJS(bumpFeedback)(secondaryActive);
         })
         .onEnd((event) => {
-            totalOffset.value = null;
+            if (!svDidFlush.value) {
+                svDidFlush.value = true;
+                if (svPendingDelta.value !== 0) {
+                    runOnJS(flushPendingChange)(svPendingDelta.value);
+                }
+            }
             panY.value = withTiming(0, { duration: 200 });
             runOnJS(endGesture)(event.translationY);
         })
         .onFinalize(() => {
+            if (!svDidFlush.value) {
+                svDidFlush.value = true;
+                if (svPendingDelta.value !== 0) {
+                    runOnJS(flushPendingChange)(svPendingDelta.value);
+                }
+            }
             runOnJS(secondaryHoldStop)();
         });
 
@@ -181,42 +248,8 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
 
     //#endregion
 
-    //#region Helpers
-
-    const scoreChangeHandler = (value: number) => {
-        if (Math.abs(value) == 0) return;
-        if (menuOpen) return;
-
-        const scoreDelta = value * (secondaryHold ? addendTwo : addendOne);
-
-        if (secondaryHold) {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-        } else {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-        }
-
-        dispatch(playerRoundScoreIncrement(playerId, currentRoundIndex, scoreDelta));
-    };
-
-    useAnimatedReaction(
-        () => {
-            return totalOffset.value;
-        },
-        (currentValue, previousValue) => {
-            if (currentValue === null) return;
-
-            const c = Math.round((currentValue || 0) / notchSize);
-            const p = Math.round((previousValue || 0) / notchSize);
-            if (c - p !== 0) {
-                runOnJS(scoreChangeHandler)(c - p);
-            }
-        }
-    );
-
-    //#endregion
-
     return (
-        <>
+        <OptimisticScoreContext.Provider value={optimisticScores}>
             <Animated.View style={[
                 {
                     transform: [{
@@ -252,7 +285,7 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
                     <View style={[styles.slider, styles.sliderBottom]} />
                 </ReAnimated.View>
             </GestureDetector>
-        </>
+        </OptimisticScoreContext.Provider>
     );
 };
 
