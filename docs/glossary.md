@@ -86,7 +86,7 @@ The bottom sheet on the game screen that shows the score log and game actions su
 
 **Point values sheet**
 
-The sheet for changing primary and secondary point steps. Component: `PointValuesSheet`.
+The sheet for changing the two addends. Component: `PointValuesSheet`, named after its on-screen title "Point Values".
 
 **Choose winners sheet**
 
@@ -136,21 +136,17 @@ The score entry interaction that changes score by vertical drag distance.
 
 The score entry interaction that changes score by rotating a dial control. This is independent from whether the board is arranged as tiles or rows.
 
-**Primary point step**
+**Addend**
 
-The normal score increment. Existing Redux state stores this as `addendOne`.
-
-**Secondary point step**
-
-The alternate score increment used by long press or hold gestures. Existing Redux state stores this as `addendTwo`.
+A score increment. There are two: `addendOne` is the normal increment applied by a tap, swipe notch, or dial step; `addendTwo` is the alternate (usually larger) increment used while a long press or secondary hold is active. These names are used end-to-end — persisted Redux state, actions, analytics, and component code all spell them the same way.
 
 **Point values**
 
-The user-facing label for primary and secondary point steps.
+The user-facing label for the addend pair (`addendOne` and `addendTwo`).
 
 **Secondary hold**
 
-A hold gesture that switches score entry from the primary point step to the secondary point step. Code name: `secondaryHold` (formerly "power hold").
+A hold gesture that switches score entry from `addendOne` to `addendTwo`. Code name: `secondaryHold` (formerly "power hold").
 
 ## Current Compatibility Notes
 
@@ -158,9 +154,7 @@ Some persisted Redux names and analytics keys are historically inconsistent. The
 
 - `roundCurrent` (persisted) → `currentRoundIndex`
 - `roundTotal` (persisted) → `roundCount`
-- `addendOne` (persisted) → `primaryPointStep`
-- `addendTwo` (persisted) → `secondaryPointStep`
-- `power_hold` (analytics param) and `addend_*` (analytics events) → secondary hold / point step terms
+- `power_hold` (analytics param) → secondary hold
 - `home_fullscreen` (persisted) currently controls whether the game sheet is hidden on the game screen.
 - `ScoreState` is the persisted player entity shape.
 

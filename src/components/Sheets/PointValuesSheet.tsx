@@ -18,15 +18,15 @@ import { InteractionType } from '../Interactions/InteractionType';
 
 import { usePointValuesSheetContext } from './PointValuesSheetContext';
 
-const POINT_STEP_OPTIONS = [...Array(100).keys()].map((index) => ({
+const ADDEND_OPTIONS = [...Array(100).keys()].map((index) => ({
     value: index + 1,
     label: (index + 1).toString()
 }));
 
 const PointValuesSheet: React.FunctionComponent = () => {
     const theme = useTheme();
-    const reduxPrimaryPointStep = useAppSelector((state) => state.settings.addendOne);
-    const reduxSecondaryPointStep = useAppSelector((state) => state.settings.addendTwo);
+    const reduxAddendOne = useAppSelector((state) => state.settings.addendOne);
+    const reduxAddendTwo = useAppSelector((state) => state.settings.addendTwo);
     const interactionType = useAppSelector((state) => state.settings.interactionType);
 
     const dispatch = useAppDispatch();
@@ -42,13 +42,13 @@ const PointValuesSheet: React.FunctionComponent = () => {
     );
 
     // 1. Local state handles the immediate UI change
-    const [localPrimaryPointStep, setLocalPrimaryPointStep] = useState(reduxPrimaryPointStep);
-    const [localSecondaryPointStep, setLocalSecondaryPointStep] = useState(reduxSecondaryPointStep);
+    const [localAddendOne, setLocalAddendOne] = useState(reduxAddendOne);
+    const [localAddendTwo, setLocalAddendTwo] = useState(reduxAddendTwo);
 
     // 3. Update local state instantly, defer Redux slightly to prevent UI stutter
-    const onPrimaryPointStepChange: (value: { item: { value: number } }) => void = useCallback(
+    const onAddendOneChange: (value: { item: { value: number } }) => void = useCallback(
         ({ item: { value } }) => {
-            setLocalPrimaryPointStep(value);
+            setLocalAddendOne(value);
 
             requestAnimationFrame(() => {
                 dispatch(setMultiplier(value));
@@ -59,9 +59,9 @@ const PointValuesSheet: React.FunctionComponent = () => {
         [dispatch]
     );
 
-    const onSecondaryPointStepChange: (value: { item: { value: number } }) => void = useCallback(
+    const onAddendTwoChange: (value: { item: { value: number } }) => void = useCallback(
         ({ item: { value } }) => {
-            setLocalSecondaryPointStep(value);
+            setLocalAddendTwo(value);
 
             requestAnimationFrame(() => {
                 dispatch(setMultiplier(value));
@@ -90,7 +90,7 @@ const PointValuesSheet: React.FunctionComponent = () => {
         []
     );
 
-    const primaryPointStepLabel = useMemo(() => {
+    const addendOneLabel = useMemo(() => {
         switch (interactionType) {
             case InteractionType.HalfTap:
                 return 'Single Tap';
@@ -101,7 +101,7 @@ const PointValuesSheet: React.FunctionComponent = () => {
         }
     }, [interactionType]);
 
-    const secondaryPointStepLabel = useMemo(() => {
+    const addendTwoLabel = useMemo(() => {
         switch (interactionType) {
             case InteractionType.HalfTap:
                 return 'Long Press';
@@ -128,7 +128,7 @@ const PointValuesSheet: React.FunctionComponent = () => {
                     <Text style={{ color: theme.text, fontSize: 20 }}>Point Values</Text>
                     <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-around', padding: 10 }}>
                         <View>
-                            <Text style={{ color: theme.text, textAlign: 'center' }}>{primaryPointStepLabel}</Text>
+                            <Text style={{ color: theme.text, textAlign: 'center' }}>{addendOneLabel}</Text>
                             <View
                                 style={[
                                     isAndroid ? styles.pickerContainerAndroid : styles.pickerContainer,
@@ -138,9 +138,9 @@ const PointValuesSheet: React.FunctionComponent = () => {
                                     onValueChanging={() => {
                                         WheelPickerFeedback.triggerSoundAndImpact();
                                     }}
-                                    data={POINT_STEP_OPTIONS}
-                                    value={localPrimaryPointStep}
-                                    onValueChanged={onPrimaryPointStepChange}
+                                    data={ADDEND_OPTIONS}
+                                    value={localAddendOne}
+                                    onValueChanged={onAddendOneChange}
                                     enableScrollByTapOnItem={true}
                                     style={styles.wheelPicker}
                                     width={60}
@@ -150,7 +150,7 @@ const PointValuesSheet: React.FunctionComponent = () => {
                             </View>
                         </View>
                         <View>
-                            <Text style={{ color: theme.text, textAlign: 'center' }}>{secondaryPointStepLabel}</Text>
+                            <Text style={{ color: theme.text, textAlign: 'center' }}>{addendTwoLabel}</Text>
                             <View
                                 style={[
                                     isAndroid ? styles.pickerContainerAndroid : styles.pickerContainer,
@@ -160,9 +160,9 @@ const PointValuesSheet: React.FunctionComponent = () => {
                                     onValueChanging={() => {
                                         WheelPickerFeedback.triggerSoundAndImpact();
                                     }}
-                                    data={POINT_STEP_OPTIONS}
-                                    value={localSecondaryPointStep}
-                                    onValueChanged={onSecondaryPointStepChange}
+                                    data={ADDEND_OPTIONS}
+                                    value={localAddendTwo}
+                                    onValueChanged={onAddendTwoChange}
                                     enableScrollByTapOnItem={true}
                                     style={styles.wheelPicker}
                                     width={60}

@@ -32,8 +32,8 @@ export const HalfTileTouchSurface: React.FunctionComponent<Props> = (
 
     const [particles, setParticles] = useState<ScoreParticleProps[]>([]);
 
-    const primaryPointStep = useAppSelector(state => state.settings.addendOne);
-    const secondaryPointStep = useAppSelector(state => state.settings.addendTwo);
+    const addendOne = useAppSelector(state => state.settings.addendOne);
+    const addendTwo = useAppSelector(state => state.settings.addendTwo);
 
     const currentGameId = useAppSelector(state => state.settings.currentGameId);
     const currentGame = useAppSelector(selectCurrentGame);
@@ -76,8 +76,8 @@ export const HalfTileTouchSurface: React.FunctionComponent<Props> = (
             style={[styles.surface, scoreType == 'increment' ? styles.surfaceAdd : styles.surfaceSubtract]}
             underlayColor={currentGame.locked || menuOpen ? 'transparent' : fontColor + '30'}
             activeOpacity={menuOpen ? 1 : 1}
-            onPress={() => scoreChangeHandler(primaryPointStep)}
-            onLongPress={() => scoreChangeHandler(secondaryPointStep, true)}>
+            onPress={() => scoreChangeHandler(addendOne)}
+            onLongPress={() => scoreChangeHandler(addendTwo, true)}>
             <View style={[StyleSheet.absoluteFill,
                 scoreType === 'increment' ? styles.hintContainerTop : styles.hintContainerBottom
             ]}>

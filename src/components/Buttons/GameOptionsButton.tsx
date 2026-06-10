@@ -25,8 +25,8 @@ const GameOptionsButton: React.FunctionComponent = () => {
     const interactionType = useAppSelector(state => state.settings.interactionType);
     const fullscreen = useAppSelector(state => state.settings.home_fullscreen);
     const installId = useAppSelector(state => state.settings.installId);
-    const primaryPointStep = useAppSelector(state => state.settings.addendOne);
-    const secondaryPointStep = useAppSelector(state => state.settings.addendTwo);
+    const addendOne = useAppSelector(state => state.settings.addendOne);
+    const addendTwo = useAppSelector(state => state.settings.addendTwo);
     const showDialDot = useAppSelector(state =>
         !state.settings.seenFeatureNotifications.includes(FEATURE_DIAL_GESTURE)
     );
@@ -42,10 +42,10 @@ const GameOptionsButton: React.FunctionComponent = () => {
     const isDial = interactionType === InteractionType.Dial;
 
     const pointValuesSubtitle = isTap
-        ? `Tap: ${primaryPointStep} / Hold: ${secondaryPointStep}`
+        ? `Tap: ${addendOne} / Hold: ${addendTwo}`
         : isDial
-            ? `Spin: ${primaryPointStep} / Hold: ${secondaryPointStep}`
-            : `Swipe: ${primaryPointStep} / Hold: ${secondaryPointStep}`;
+            ? `Spin: ${addendOne} / Hold: ${addendTwo}`
+            : `Swipe: ${addendOne} / Hold: ${addendTwo}`;
 
     const gestureActions: MenuAction[] = [
         {
@@ -160,9 +160,9 @@ const GameOptionsButton: React.FunctionComponent = () => {
         >
             <View style={styles.button}>
                 <View style={styles.content}>
-                    <View style={styles.pointStepColumn}>
-                        <Text style={[styles.pointStepText, { color: theme.text }]}>{primaryPointStep}</Text>
-                        <Text style={[styles.pointStepText, { color: theme.text }]}>{secondaryPointStep}</Text>
+                    <View style={styles.addendColumn}>
+                        <Text style={[styles.addendText, { color: theme.text }]}>{addendOne}</Text>
+                        <Text style={[styles.addendText, { color: theme.text }]}>{addendTwo}</Text>
                     </View>
                     <View>
                         {Platform.OS === 'ios' ? (
@@ -206,10 +206,10 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
     },
-    pointStepColumn: {
+    addendColumn: {
         marginRight: 4,
     },
-    pointStepText: {
+    addendText: {
         fontSize: 10,
         lineHeight: 11,
         textAlign: 'center',

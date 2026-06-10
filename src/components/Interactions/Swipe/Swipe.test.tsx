@@ -143,7 +143,7 @@ describe('SwipeVertical', () => {
     );
   });
 
-  it('uses the secondary point step when secondaryHold is active', () => {
+  it('uses addendTwo when secondaryHold is active', () => {
     const { dispatch } = renderSwipe();
     const ph = (globalThis as any).__ph;
     jest.useFakeTimers();

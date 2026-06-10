@@ -41,8 +41,8 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
 
     const dispatch = useAppDispatch();
 
-    const primaryPointStep = useAppSelector(state => state.settings.addendOne);
-    const secondaryPointStep = useAppSelector(state => state.settings.addendTwo);
+    const addendOne = useAppSelector(state => state.settings.addendOne);
+    const addendTwo = useAppSelector(state => state.settings.addendTwo);
 
     //#endregion
 
@@ -141,7 +141,7 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
         logEvent('score_change', {
             player_index: index,
             game_id: currentGameId,
-            addend: secondaryHold ? secondaryPointStep : primaryPointStep,
+            addend: secondaryHold ? addendTwo : addendOne,
             round: currentRoundIndex,
             type: translationY > 0 ? 'decrement' : 'increment',
             power_hold: secondaryHold,
@@ -149,7 +149,7 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
             interaction: 'swipe-vertical',
         });
         secondaryHoldStop();
-    }, [index, currentGameId, secondaryHold, primaryPointStep, secondaryPointStep, currentRoundIndex, menuOpen]);
+    }, [index, currentGameId, secondaryHold, addendOne, addendTwo, currentRoundIndex, menuOpen]);
 
     const panGesture = Gesture.Pan()
         .enabled(!currentGameLocked && !menuOpen)
@@ -187,7 +187,7 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
         if (Math.abs(value) == 0) return;
         if (menuOpen) return;
 
-        const scoreDelta = value * (secondaryHold ? secondaryPointStep : primaryPointStep);
+        const scoreDelta = value * (secondaryHold ? addendTwo : addendOne);
 
         if (secondaryHold) {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);

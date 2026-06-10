@@ -71,8 +71,8 @@ const PlayerDialPage: React.FC<PlayerDialPageProps> = ({
     pageWidth,
     pageHeight,
     boardHeight,
-    addendOne: primaryPointStep,
-    addendTwo: secondaryPointStep,
+    addendOne,
+    addendTwo,
     menuOpen,
     swipeDragY,
     swipeDragX,
@@ -179,7 +179,7 @@ const PlayerDialPage: React.FC<PlayerDialPageProps> = ({
                         <View style={[styles.lsPill, { backgroundColor: stepBg }]}>
                             <View style={[styles.lsPillDot, { backgroundColor: stepDotBg }]} />
                             <Text style={[styles.lsPillText, { color: stepTextColor }]}>
-                                STEP +{isSecondary ? secondaryPointStep : primaryPointStep}
+                                STEP +{isSecondary ? addendTwo : addendOne}
                             </Text>
                         </View>
                     </View>
@@ -193,8 +193,8 @@ const PlayerDialPage: React.FC<PlayerDialPageProps> = ({
                             isSecondary={isSecondary}
                             ink={ink}
                             svNewTotal={svScoreTotal}
-                            addendOne={primaryPointStep}
-                            addendTwo={secondaryPointStep}
+                            addendOne={addendOne}
+                            addendTwo={addendTwo}
                             dialSize={lsDialSize}
                             landscape
                             menuOpen={menuOpen}
@@ -256,8 +256,8 @@ const PlayerDialPage: React.FC<PlayerDialPageProps> = ({
                         isSecondary={isSecondary}
                         ink={ink}
                         svNewTotal={svScoreTotal}
-                        addendOne={primaryPointStep}
-                        addendTwo={secondaryPointStep}
+                        addendOne={addendOne}
+                        addendTwo={addendTwo}
                         dialSize={dialSize}
                         menuOpen={menuOpen}
                         showHint={showHint}
@@ -308,8 +308,8 @@ const DialOverlay: React.FC<Props> = ({
 }) => {
     const currentGame = useAppSelector(selectCurrentGame);
     const { menuOpen } = useMenuOpen();
-    const primaryPointStep = useAppSelector(state => state.settings.addendOne);
-    const secondaryPointStep = useAppSelector(state => state.settings.addendTwo);
+    const addendOne = useAppSelector(state => state.settings.addendOne);
+    const addendTwo = useAppSelector(state => state.settings.addendTwo);
 
     const [activeIndex, setActiveIndex] = useState(initialIndex);
     const activeIndexRef = useRef(initialIndex);
@@ -395,8 +395,8 @@ const DialOverlay: React.FC<Props> = ({
                 pageWidth={pageWidth}
                 pageHeight={targetHeight}
                 boardHeight={boardHeight}
-                addendOne={primaryPointStep}
-                addendTwo={secondaryPointStep}
+                addendOne={addendOne}
+                addendTwo={addendTwo}
                 menuOpen={menuOpen}
                 swipeDragY={swipeDragY}
                 swipeDragX={swipeDragX}
@@ -405,7 +405,7 @@ const DialOverlay: React.FC<Props> = ({
                 showHint={showHint}
             />
         </View>
-    ), [pageWidth, targetHeight, boardHeight, primaryPointStep, secondaryPointStep, menuOpen, swipeDragY, swipeDragX, handleDone, handleDismiss, showHint]);
+    ), [pageWidth, targetHeight, boardHeight, addendOne, addendTwo, menuOpen, swipeDragY, swipeDragX, handleDone, handleDismiss, showHint]);
 
     if (!currentGame) return null;
 
