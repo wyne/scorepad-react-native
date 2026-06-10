@@ -1,0 +1,419 @@
+import React, { useCallback, useEffect, useLayoutEffect, useState } from 'react';
+
+import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import {
+    Easing,
+    runOnJS,
+    SharedValue,
+    useSharedValue,
+    withSpring,
+    withTiming,
+} from 'react-native-reanimated';
+
+import { useAppDispatch, useAppSelector } from '../../../../redux/hooks';
+import { playerRoundScoreSet, selectPlayerById, selectPlayerRoundStats } from '../../../../redux/PlayersSlice';
+import { selectCurrentGame } from '../../../../redux/selectors';
+import { setLastUsedInteractionType } from '../../../../redux/SettingsSlice';
+import { InteractionType } from '../InteractionType';
+
+import DialControl from './DialControl';
+
+const SWIPE_DISMISS_DISTANCE = 50;
+const SWIPE_DISMISS_VELOCITY = 400;
+const MIN_DISMISS_VELOCITY = 600; // px/s floor so slow releases still exit cleanly
+const LS_ACCENT = '#3a86ff'; // matches DialControl's ACCENT for the landscape step pill
+
+function resistedDrag(t: number): number {
+    'worklet';
+    if (t <= 0) return 0;
+    return t / (1 + t / 400); // nearly 1:1 at small pulls, strong resistance beyond ~150 px
+}
+
+// TODO: see ListBoard.tsx — consolidate inkFor/inkA into shared colorUtils module
+function inkFor(hex: string): string {
+    const h = hex.replace('#', '');
+    const r = parseInt(h.slice(0, 2), 16) / 255;
+    const g = parseInt(h.slice(2, 4), 16) / 255;
+    const b = parseInt(h.slice(4, 6), 16) / 255;
+    const lin = (c: number) => c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+    const L = 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b);
+    return L > 0.42 ? '#000' : '#fff';
+}
+
+function inkA(ink: string, a: number): string {
+    return ink === '#000' ? `rgba(0,0,0,${a})` : `rgba(255,255,255,${a})`;
+}
+
+function bounded(value: number, min: number, max: number): number {
+    return Math.min(Math.max(value, min), max);
+}
+
+// ─── PlayerDialPage ───────────────────────────────────────────────────────────
+
+interface PlayerDialPageProps {
+    playerId: string;
+    pageWidth: number;
+    pageHeight: number;
+    boardHeight: number;
+    addendOne: number;
+    addendTwo: number;
+    menuOpen: boolean;
+    swipeDragY: SharedValue<number>;
+    swipeDragX: SharedValue<number>;
+    onDone: () => void;
+    onDismiss: () => void;
+    showHint: boolean;
+}
+
+const PlayerDialPage: React.FC<PlayerDialPageProps> = ({
+    playerId,
+    pageWidth,
+    pageHeight,
+    boardHeight,
+    addendOne,
+    addendTwo,
+    menuOpen,
+    swipeDragY,
+    swipeDragX,
+    onDone,
+    onDismiss,
+    showHint,
+}) => {
+    const dispatch = useAppDispatch();
+    const player = useAppSelector(state => selectPlayerById(state, playerId));
+    const currentRoundIndex = useAppSelector(state => selectCurrentGame(state)?.roundCurrent ?? 0);
+    const { currentRoundScore, previousTotal, currentRoundTotalScore } = useAppSelector(
+        state => selectPlayerRoundStats(state, playerId, currentRoundIndex)
+    );
+
+    // Stable SharedValue refs — same object identity every render, so React.memo(DialControl)
+    // skips re-renders when score changes. The displayed numbers update via Reanimated on the UI thread.
+    const svRoundScore = useSharedValue(currentRoundScore);
+    const svScoreTotal = useSharedValue(currentRoundTotalScore);
+    useLayoutEffect(() => {
+        svRoundScore.value = currentRoundScore;
+        svScoreTotal.value = currentRoundTotalScore;
+    }, [currentRoundScore, currentRoundTotalScore]);
+
+    const [isSecondary, setIsSecondary] = useState(false);
+
+    // Reset dial mode when the active round changes
+    useEffect(() => {
+        setIsSecondary(false);
+    }, [currentRoundIndex]);
+
+    const handleChange = useCallback((v: number) => {
+        dispatch(playerRoundScoreSet(playerId, currentRoundIndex, v));
+        dispatch(setLastUsedInteractionType(InteractionType.Dial));
+    }, [dispatch, playerId, currentRoundIndex]);
+
+    const isDismissing = useSharedValue(false);
+
+    // Vertical-only dismiss gesture: fails on horizontal so FlatList keeps scroll
+    const dismissGesture = Gesture.Pan()
+        .enabled(!menuOpen)
+        .activeOffsetY([-10, 10])
+        .failOffsetX([-8, 8])
+        .onUpdate((e) => {
+            swipeDragY.value = resistedDrag(e.translationY);
+            swipeDragX.value = e.translationX * 0.35;
+        })
+        .onEnd((e) => {
+            if (e.translationY > SWIPE_DISMISS_DISTANCE || e.velocityY > SWIPE_DISMISS_VELOCITY) {
+                isDismissing.value = true;
+                // Duration scales with velocity: fast throw exits quickly, slow release still exits
+                const exitVelocity = Math.max(e.velocityY, MIN_DISMISS_VELOCITY);
+                const duration = Math.max(150, 400 - exitVelocity / 5);
+                swipeDragY.value = withTiming(boardHeight, { duration, easing: Easing.in(Easing.cubic) },
+                    () => runOnJS(onDismiss)(),
+                );
+                swipeDragX.value = withTiming(0, { duration, easing: Easing.out(Easing.quad) });
+            } else {
+                swipeDragY.value = withSpring(0, { velocity: e.velocityY, damping: 26, stiffness: 300 });
+                swipeDragX.value = withSpring(0, { velocity: e.velocityX, damping: 26, stiffness: 300 });
+            }
+        })
+        .onFinalize(() => {
+            if (!isDismissing.value) {
+                swipeDragY.value = withSpring(0, { velocity: 0, damping: 26, stiffness: 300 });
+                swipeDragX.value = withSpring(0, { velocity: 0, damping: 26, stiffness: 300 });
+            }
+            isDismissing.value = false;
+        });
+
+    if (!player) return null;
+
+    const ink = inkFor(player.color ?? '#444');
+    const playerColor = player.color ?? '#444';
+    const isLandscape = pageWidth > pageHeight;
+
+    const scale = bounded(Math.sqrt((pageWidth * pageHeight) / (376 * 660)), 1, 1.18);
+    const cardStyle = { width: pageWidth, height: pageHeight, backgroundColor: playerColor, borderRadius: 26 * scale, overflow: 'hidden' as const };
+
+    if (isLandscape) {
+        const lsDialSize = Math.min(Math.round((pageHeight - 52 * scale) / 1.25), Math.round(200 * scale));
+        const stepBg = isSecondary ? LS_ACCENT : inkA(ink, 0.12);
+        const stepDotBg = isSecondary ? '#fff' : inkA(ink, 0.4);
+        const stepTextColor = isSecondary ? '#fff' : ink;
+
+        return (
+            <View style={cardStyle} testID="dial-card">
+                {/* Header: drag handle + name — swipe-to-dismiss zone */}
+                <GestureDetector gesture={dismissGesture}>
+                    <View style={[styles.lsHeader, {
+                        gap: 4 * scale,
+                        paddingTop: 10 * scale,
+                        paddingHorizontal: 20 * scale,
+                        paddingBottom: 6 * scale,
+                    }]}>
+                        <View style={[styles.dragHandle, { backgroundColor: inkA(ink, 0.3) }]} />
+                        <Text style={[styles.name, { color: ink, fontSize: 22 * scale, lineHeight: 26 * scale }]}
+                            numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.6}>
+                            {player.playerName}
+                        </Text>
+                    </View>
+                </GestureDetector>
+
+                {/* Three-column body */}
+                <View style={[styles.lsBody, {
+                    paddingHorizontal: 16 * scale,
+                    paddingBottom: 12 * scale,
+                    gap: 8 * scale,
+                }]}>
+                    {/* Left: previous total + step pill */}
+                    <View style={[styles.lsCol, { gap: 16 * scale }]}>
+                        <View style={styles.prevBlock}>
+                            <Text style={[styles.prevNumber, { color: ink, fontSize: 22 * scale, lineHeight: 26 * scale }]}>{previousTotal}</Text>
+                            <Text style={[styles.prevLabel, { color: inkA(ink, 0.6), fontSize: 10 * scale, lineHeight: 12 * scale }]}>PREVIOUS TOTAL</Text>
+                        </View>
+                        <View style={[styles.lsPill, {
+                            backgroundColor: stepBg,
+                            gap: 8 * scale,
+                            paddingVertical: 6 * scale,
+                            paddingHorizontal: 14 * scale,
+                        }]}>
+                            <View style={[styles.lsPillDot, { backgroundColor: stepDotBg, width: 8 * scale, height: 8 * scale, borderRadius: 4 * scale }]} />
+                            <Text style={[styles.lsPillText, { color: stepTextColor, fontSize: 13 * scale, lineHeight: 16 * scale }]}>
+                                STEP +{isSecondary ? addendTwo : addendOne}
+                            </Text>
+                        </View>
+                    </View>
+
+                    {/* Center: dial */}
+                    <View style={styles.lsCenter}>
+                        <DialControl
+                            svValue={svRoundScore}
+                            onChange={handleChange}
+                            onToggleMode={setIsSecondary}
+                            isSecondary={isSecondary}
+                            ink={ink}
+                            svNewTotal={svScoreTotal}
+                            addendOne={addendOne}
+                            addendTwo={addendTwo}
+                            dialSize={lsDialSize}
+                            landscape
+                            menuOpen={menuOpen}
+                            showHint={showHint}
+                        />
+                    </View>
+
+                    {/* Right: new total + Done */}
+                    <View style={[styles.lsCol, { gap: 16 * scale }]}>
+                        <View style={styles.prevBlock}>
+                            <Text style={[styles.prevNumber, { color: ink, fontSize: 22 * scale, lineHeight: 26 * scale }]}>{currentRoundTotalScore}</Text>
+                            <Text style={[styles.prevLabel, { color: inkA(ink, 0.6), fontSize: 10 * scale, lineHeight: 12 * scale }]}>NEW TOTAL</Text>
+                        </View>
+                        <Pressable
+                            onPress={onDone}
+                            style={({ pressed }) => [
+                                styles.lsDoneBtn,
+                                {
+                                    backgroundColor: inkA(ink, pressed ? 0.28 : 0.16),
+                                    height: 44 * scale,
+                                    borderRadius: 14 * scale,
+                                },
+                            ]}
+                        >
+                            <Text style={[styles.doneBtnText, { color: ink, fontSize: 20 * scale, lineHeight: 24 * scale }]}>Done</Text>
+                        </Pressable>
+                    </View>
+                </View>
+            </View>
+        );
+    }
+
+    const dialSize = Math.min(Math.round(pageHeight * 0.38), Math.round(pageWidth * 0.9), Math.round(240 * scale));
+
+    return (
+        <View style={cardStyle} testID="dial-card">
+            <View style={[styles.inner, {
+                gap: 16 * scale,
+                paddingHorizontal: 24 * scale,
+                paddingTop: 14 * scale,
+                paddingBottom: 16 * scale,
+            }]}>
+                {/* Top group: drag handle + name + prev total — also the swipe-to-dismiss zone */}
+                <GestureDetector gesture={dismissGesture}>
+                    <View style={[styles.topGroup, { gap: 8 * scale }]}>
+                        <View style={[styles.dragHandle, { backgroundColor: inkA(ink, 0.3) }]} />
+                        <Text
+                            style={[styles.name, { color: ink, fontSize: 32 * scale, lineHeight: 36 * scale }]}
+                            numberOfLines={1}
+                            adjustsFontSizeToFit
+                            minimumFontScale={0.7}
+                        >
+                            {player.playerName}
+                        </Text>
+                        <View style={styles.prevBlock}>
+                            <Text style={[styles.prevNumber, { color: ink, fontSize: 22 * scale, lineHeight: 26 * scale }]}>{previousTotal}</Text>
+                            <Text style={[styles.prevLabel, { color: inkA(ink, 0.6), fontSize: 10 * scale, lineHeight: 12 * scale }]}>PREVIOUS TOTAL</Text>
+                        </View>
+                    </View>
+                </GestureDetector>
+
+                {/* Dial */}
+                <View style={styles.dialWrap}>
+                    <DialControl
+                        svValue={svRoundScore}
+                        onChange={handleChange}
+                        onToggleMode={setIsSecondary}
+                        isSecondary={isSecondary}
+                        ink={ink}
+                        svNewTotal={svScoreTotal}
+                        addendOne={addendOne}
+                        addendTwo={addendTwo}
+                        dialSize={dialSize}
+                        menuOpen={menuOpen}
+                        showHint={showHint}
+                    />
+                </View>
+
+                {/* Done */}
+                <Pressable
+                    onPress={onDone}
+                    style={({ pressed }) => [
+                        styles.doneBtn,
+                        {
+                            backgroundColor: inkA(ink, pressed ? 0.28 : 0.16),
+                            height: 48 * scale,
+                            borderRadius: 14 * scale,
+                        },
+                    ]}
+                >
+                    <Text style={[styles.doneBtnText, { color: ink, fontSize: 20 * scale, lineHeight: 24 * scale }]}>Done</Text>
+                </Pressable>
+            </View>
+        </View>
+    );
+};
+
+export default React.memo(PlayerDialPage);
+
+const styles = StyleSheet.create({
+    inner: {
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'flex-start',
+        gap: 16,
+        paddingHorizontal: 24,
+        paddingTop: 14,
+        paddingBottom: 16,
+    },
+    topGroup: {
+        alignItems: 'center',
+        gap: 8,
+        width: '100%',
+    },
+    dragHandle: {
+        width: 36,
+        height: 4,
+        borderRadius: 2,
+    },
+    name: {
+        fontSize: 32,
+        fontWeight: '800',
+        lineHeight: 36,
+    },
+    prevBlock: {
+        alignItems: 'center',
+        gap: 2,
+    },
+    prevNumber: {
+        fontSize: 22,
+        fontWeight: '800',
+        lineHeight: 26,
+        fontVariant: ['tabular-nums'],
+    },
+    prevLabel: {
+        fontSize: 10,
+        fontWeight: '800',
+        letterSpacing: 1.4,
+    },
+    dialWrap: {
+        alignItems: 'center',
+    },
+    doneBtn: {
+        width: '74%',
+        maxWidth: 300,
+        height: 48,
+        borderRadius: 14,
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginTop: 'auto',
+    },
+    doneBtnText: {
+        fontSize: 20,
+        fontWeight: '700',
+    },
+    // ── Landscape layout ────────────────────────────────────────────────────────
+    lsHeader: {
+        alignItems: 'center',
+        gap: 4,
+        paddingTop: 10,
+        paddingHorizontal: 20,
+        paddingBottom: 6,
+    },
+    lsBody: {
+        flex: 1,
+        flexDirection: 'row',
+        paddingHorizontal: 16,
+        paddingBottom: 12,
+        gap: 8,
+    },
+    lsCol: {
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 16,
+    },
+    lsCenter: {
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    lsPill: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+        paddingVertical: 6,
+        paddingHorizontal: 14,
+        borderRadius: 999,
+    },
+    lsPillDot: {
+        width: 8,
+        height: 8,
+        borderRadius: 4,
+    },
+    lsPillText: {
+        fontWeight: '700',
+        fontSize: 13,
+        letterSpacing: 0.8,
+    },
+    lsDoneBtn: {
+        width: '90%',
+        height: 44,
+        borderRadius: 14,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+});
