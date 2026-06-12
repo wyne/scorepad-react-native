@@ -41,15 +41,15 @@ const GameListItem: React.FunctionComponent<Props> = ({ navigation, gameId, inde
     const dispatch = useAppDispatch();
     const game = useAppSelector(state => selectGameById(state, gameId));
 
+    const setCurrentGameCallback = useCallback(() => {
+        dispatch(setCurrentGameId(gameId));
+    }, [gameId]);
+
     if (gameId == null) { return null; }
     if (!game) { return null; }
 
     const { roundTotal: roundCount, playerIds, title: gameTitle, locked, winnerIds, dateCreated } = game;
     if (roundCount == null || playerIds == null) { return null; }
-
-    const setCurrentGameCallback = useCallback(() => {
-        dispatch(setCurrentGameId(gameId));
-    }, [gameId]);
 
     /**
      * Choose Game and navigate to GameScreen
