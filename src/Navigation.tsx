@@ -7,6 +7,7 @@ import { Platform, View } from 'react-native';
 import { useAppSelector } from '../redux/hooks';
 import AppSettingsButton from '../src/components/Buttons/AppSettingsButton';
 import GameOptionsButton from '../src/components/Buttons/GameOptionsButton';
+import AppWordmark from '../src/components/Headers/AppWordmark';
 import RoundHeaderTitle from '../src/components/Headers/RoundHeaderTitle';
 import AppSettingsScreen from '../src/screens/AppSettingsScreen';
 import DebugLogScreen from '../src/screens/DebugLogScreen';
@@ -64,7 +65,7 @@ export const Navigation = () => {
                         <Stack.Screen name="List" component={ListScreen}
                             options={{
                                 orientation: 'portrait',
-                                title: 'ScorePad',
+                                headerTitle: () => <AppWordmark />,
                                 headerTransparent: isIOS,
                                 headerBlurEffect: isIOS ? 'systemChromeMaterial' : undefined,
                                 headerShadowVisible: isAndroid,
