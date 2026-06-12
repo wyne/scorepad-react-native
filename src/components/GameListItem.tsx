@@ -8,6 +8,7 @@ import Animated, { FadeInUp } from 'react-native-reanimated';
 
 import { selectGameById } from '../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
+import { selectPlayerById } from '../../redux/PlayersSlice';
 import { setCurrentGameId } from '../../redux/SettingsSlice';
 import { logEvent } from '../Analytics';
 import { useTheme } from '../theme';
@@ -40,6 +41,9 @@ const GameListItem: React.FunctionComponent<Props> = ({ navigation, gameId, inde
     const theme = useTheme();
     const dispatch = useAppDispatch();
     const game = useAppSelector(state => selectGameById(state, gameId));
+    const stripeColor = useAppSelector(
+        state => selectPlayerById(state, game?.playerIds?.[0] ?? '')?.color ?? '#01497c'
+    );
 
     const setCurrentGameCallback = useCallback(() => {
         dispatch(setCurrentGameId(gameId));
@@ -80,28 +84,31 @@ const GameListItem: React.FunctionComponent<Props> = ({ navigation, gameId, inde
                     onPress={Platform.OS == 'android' ? undefined : chooseGameHandler}
                     containerStyle={{ backgroundColor: theme.backgroundSecondary, borderBottomColor: theme.separator }}
                 >
-                    <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1, gap: 16 }}>
-                        <ListItem.Content style={{ flex: 1 }}>
-                            <ListItem.Title style={{ alignItems: 'center', color: theme.text }}>
-                                {gameTitle}
-                                {locked && <Icon name='lock-closed-outline' type='ionicon' size={14} color={theme.success} style={{ paddingHorizontal: 4 }} />}
-                            </ListItem.Title>
-                            <ListItem.Subtitle style={{ color: theme.textTertiary }}>
-                                <Text>{timeAgo(dateCreated)}</Text>
-                            </ListItem.Subtitle>
-                            <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
-                                {playerIds.map((playerId, index) => (
-                                    <GameListItemPlayerName key={playerId} playerId={playerId} last={index == playerIds.length - 1} isWinner={winnerIds?.includes(playerId) === true} />
-                                ))}
-                            </View>
-                        </ListItem.Content>
-                        <Text style={[styles.badgePlayers, { color: theme.badgeBlue }]}>
-                            {playerIds.length} <Icon color={theme.badgeBlue} name='users' type='font-awesome-5' size={16} />
-                        </Text>
-                        <Text style={[styles.badgeRounds, { color: theme.badgeRed }]}>
-                            {roundCount} <Icon color={theme.badgeRed} name='circle-notch' type='font-awesome-5' size={16} />
-                        </Text>
-                        <ListItem.Chevron iconStyle={{ color: theme.separator }} />
+                    <View style={{ flexDirection: 'row', alignItems: 'stretch' }}>
+                        <View style={[styles.stripe, { backgroundColor: stripeColor }]} />
+                        <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1, gap: 16 }}>
+                            <ListItem.Content style={{ flex: 1 }}>
+                                <ListItem.Title style={{ alignItems: 'center', color: theme.text }}>
+                                    {gameTitle}
+                                    {locked && <Icon name='lock-closed-outline' type='ionicon' size={14} color={theme.success} style={{ paddingHorizontal: 4 }} />}
+                                </ListItem.Title>
+                                <ListItem.Subtitle style={{ color: theme.textTertiary }}>
+                                    <Text>{timeAgo(dateCreated)}</Text>
+                                </ListItem.Subtitle>
+                                <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+                                    {playerIds.map((playerId, index) => (
+                                        <GameListItemPlayerName key={playerId} playerId={playerId} last={index == playerIds.length - 1} isWinner={winnerIds?.includes(playerId) === true} />
+                                    ))}
+                                </View>
+                            </ListItem.Content>
+                            <Text style={[styles.badgePlayers, { color: theme.badgeBlue }]}>
+                                {playerIds.length} <Icon color={theme.badgeBlue} name='users' type='font-awesome-5' size={16} />
+                            </Text>
+                            <Text style={[styles.badgeRounds, { color: theme.badgeRed }]}>
+                                {roundCount} <Icon color={theme.badgeRed} name='circle-notch' type='font-awesome-5' size={16} />
+                            </Text>
+                            <ListItem.Chevron iconStyle={{ color: theme.separator }} />
+                        </View>
                     </View>
                 </ListItem>
             </AbstractPopupMenu>
@@ -122,7 +129,14 @@ const styles = StyleSheet.create({
     badgeRounds: {
         alignItems: 'center',
         fontSize: 20,
-    }
+    },
+    stripe: {
+        width: 5,
+        borderRadius: 3,
+        marginVertical: 8,
+        marginLeft: 4,
+        marginRight: 4,
+    },
 });
 
 export default memo(GameListItem);
