@@ -72,7 +72,7 @@ switch (variant) {
 export default {
   name: 'ScorePad with Rounds',
   slug: 'scorepad',
-  version: '3.0.1',
+  version: '3.0.2',
   orientation: 'default',
   icon: icon,
   assetBundlePatterns: ['assets/*'],
@@ -97,7 +97,7 @@ export default {
     package: packageName,
     permissions: [],
     blockedPermissions: ['android.permission.ACTIVITY_RECOGNITION'],
-    versionCode: 87,
+    versionCode: 88,
     googleServicesFile: './google-services.json',
   },
   userInterfaceStyle: 'automatic',
