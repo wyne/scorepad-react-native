@@ -9,19 +9,19 @@ import Animated, {
 import { calculateFontSize, animationDuration, enteringAnimation, multiLineScoreSizeMultiplier, singleLineScoreSizeMultiplier, scoreMathOpacity } from './Helpers';
 
 interface Props {
-    roundScore: number;
-    totalScore: number;
+    currentRoundScore: number;
+    currentRoundTotalScore: number;
     fontColor: string;
     containerWidth: number;
 }
 
 const ScoreBefore: React.FunctionComponent<Props> = ({
     containerWidth,
-    roundScore,
-    totalScore,
+    currentRoundScore,
+    currentRoundTotalScore,
     fontColor
 }) => {
-    const scoreBefore = totalScore - roundScore;
+    const scoreBefore = currentRoundTotalScore - currentRoundScore;
 
     const fontSize = useSharedValue(calculateFontSize(containerWidth));
     const fontOpacity = useSharedValue(100);
@@ -29,12 +29,12 @@ const ScoreBefore: React.FunctionComponent<Props> = ({
     const animatedStyles = useAnimatedStyle(() => {
         return {
             fontSize: fontSize.value,
-            fontWeight: roundScore == 0 ? 'bold' : 'normal',
+            fontWeight: currentRoundScore == 0 ? 'bold' : 'normal',
             opacity: fontOpacity.value / 100,
         };
     });
 
-    const scaleFactor = roundScore == 0 ? singleLineScoreSizeMultiplier : multiLineScoreSizeMultiplier;
+    const scaleFactor = currentRoundScore == 0 ? singleLineScoreSizeMultiplier : multiLineScoreSizeMultiplier;
 
     useEffect(() => {
         fontSize.value = withTiming(
@@ -43,10 +43,10 @@ const ScoreBefore: React.FunctionComponent<Props> = ({
         );
 
         fontOpacity.value = withTiming(
-            roundScore == 0 ? 100 : scoreMathOpacity * 100,
+            currentRoundScore == 0 ? 100 : scoreMathOpacity * 100,
             { duration: animationDuration }
         );
-    }, [roundScore, containerWidth]);
+    }, [currentRoundScore, containerWidth]);
 
     return (
         <Animated.View entering={enteringAnimation}>

@@ -5,11 +5,11 @@ import { StyleSheet, Text, View } from 'react-native';
 
 import { useTheme } from '../../theme';
 
-import { useGestureInfoModalContext } from './GestureInfoModalContext';
+import { useGestureInfoSheetContext } from './GestureInfoSheetContext';
 
-const GestureInfoModal: React.FunctionComponent = () => {
+const GestureInfoSheet: React.FunctionComponent = () => {
     const theme = useTheme();
-    const gestureInfoModalRef = useGestureInfoModalContext();
+    const gestureInfoSheetRef = useGestureInfoSheetContext();
 
     const snapPoints = useMemo(() => ['90%'], []);
 
@@ -26,7 +26,7 @@ const GestureInfoModal: React.FunctionComponent = () => {
 
     return (
         <BottomSheetModal
-            ref={gestureInfoModalRef}
+            ref={gestureInfoSheetRef}
             index={0}
             snapPoints={snapPoints}
             enableDynamicSizing={false}
@@ -132,4 +132,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default GestureInfoModal;
+export default GestureInfoSheet;

@@ -16,14 +16,14 @@ import { logEvent } from '../../Analytics';
 import { useTheme } from '../../theme';
 import { InteractionType } from '../Interactions/InteractionType';
 
-import { useAddendModalContext } from './AddendModalContext';
+import { usePointValuesSheetContext } from './PointValuesSheetContext';
 
 const ADDEND_OPTIONS = [...Array(100).keys()].map((index) => ({
     value: index + 1,
     label: (index + 1).toString()
 }));
 
-const AddendModal: React.FunctionComponent = () => {
+const PointValuesSheet: React.FunctionComponent = () => {
     const theme = useTheme();
     const reduxAddendOne = useAppSelector((state) => state.settings.addendOne);
     const reduxAddendTwo = useAppSelector((state) => state.settings.addendTwo);
@@ -73,13 +73,13 @@ const AddendModal: React.FunctionComponent = () => {
     );
 
     // ref
-    const addendModalRef = useAddendModalContext();
+    const pointValuesSheetRef = usePointValuesSheetContext();
 
     const snapPoints = useMemo(() => [1, 520], []);
 
     const handleSheetChanges = useCallback((index: number) => {
         if (index === 0) {
-            addendModalRef?.current?.close();
+            pointValuesSheetRef?.current?.close();
         }
     }, []);
 
@@ -114,7 +114,7 @@ const AddendModal: React.FunctionComponent = () => {
 
     return (
         <BottomSheetModal
-            ref={addendModalRef}
+            ref={pointValuesSheetRef}
             index={1}
             enablePanDownToClose={true}
             enableContentPanningGesture={false}
@@ -123,7 +123,7 @@ const AddendModal: React.FunctionComponent = () => {
             backdropComponent={renderBackdrop}
             backgroundStyle={{ backgroundColor: theme.sheetBackground }}
             handleIndicatorStyle={{ backgroundColor: theme.sheetHandle }}>
-            <BottomSheetScrollView style={styles.modalContainer} contentContainerStyle={{ alignItems: 'center' }}>
+            <BottomSheetScrollView style={styles.sheetContainer} contentContainerStyle={{ alignItems: 'center' }}>
                 <View style={{ flex: 1, width: '100%', alignItems: 'center' }}>
                     <Text style={{ color: theme.text, fontSize: 20 }}>Point Values</Text>
                     <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-around', padding: 10 }}>
@@ -179,11 +179,11 @@ const AddendModal: React.FunctionComponent = () => {
 };
 
 const styles = StyleSheet.create({
-    modalContainer: { flex: 1 },
+    sheetContainer: { flex: 1 },
     wheelPicker: { padding: 0, margin: 'auto' },
     wheelPickerAndroid: { width: 200 },
     pickerContainer: { borderRadius: 10, margin: 10, width: 80 },
     pickerContainerAndroid: { borderRadius: 10, margin: 10 }
 });
 
-export default AddendModal;
+export default PointValuesSheet;

@@ -39,7 +39,7 @@ export const HalfTileTouchSurface: React.FunctionComponent<Props> = (
     const currentGame = useAppSelector(selectCurrentGame);
     if (typeof currentGame == 'undefined') return null;
 
-    const roundCurrent = currentGame.roundCurrent;
+    const currentRoundIndex = currentGame.roundCurrent;
 
     const addParticle = (addend: number) => {
         const key = Math.random().toString(36).substring(7);
@@ -51,7 +51,7 @@ export const HalfTileTouchSurface: React.FunctionComponent<Props> = (
         setParticles((particles) => [...particles, { key, value }]);
     };
 
-    const scoreChangeHandler = (addend: number, powerHold = false) => {
+    const scoreChangeHandler = (addend: number, secondaryHold = false) => {
         if (currentGame.locked) return;
         if (menuOpen) return;
 
@@ -63,12 +63,12 @@ export const HalfTileTouchSurface: React.FunctionComponent<Props> = (
             player_index: playerIndex,
             game_id: currentGameId,
             addend: addend,
-            round: roundCurrent,
+            round: currentRoundIndex,
             type: scoreType,
-            power_hold: powerHold,
+            power_hold: secondaryHold,
             interaction: 'half-tap',
         });
-        dispatch(playerRoundScoreIncrement(playerId, roundCurrent, scoreType == 'increment' ? addend : -addend));
+        dispatch(playerRoundScoreIncrement(playerId, currentRoundIndex, scoreType == 'increment' ? addend : -addend));
     };
 
     return (

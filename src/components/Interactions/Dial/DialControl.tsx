@@ -23,7 +23,7 @@ type AnimatedTextInputProps = TextInputProps & {
 };
 const AnimatedTextInput = Animated.createAnimatedComponent(TextInput as React.ComponentType<AnimatedTextInputProps>);
 
-import { POWER_HOLD_ACTIVATION_MS, POWER_HOLD_INDICATOR_DELAY_MS } from '../interactionConstants';
+import { SECONDARY_HOLD_ACTIVATION_MS, SECONDARY_HOLD_INDICATOR_DELAY_MS } from '../interactionConstants';
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 const AnimatedLine = Animated.createAnimatedComponent(Line);
@@ -42,7 +42,7 @@ export function getCenterValueFontScale(value: number): number {
     return Math.max(CENTER_VALUE_MIN_SCALE, Math.min(1, CENTER_VALUE_TARGET_CHARS / textLength));
 }
 
-// TODO: see RowsBoard.tsx — consolidate inkFor/inkA into shared colorUtils module
+// TODO: see ListBoard.tsx — consolidate inkFor/inkA into shared colorUtils module
 function inkA(ink: string, a: number): string {
     return ink === '#000' ? `rgba(0,0,0,${a})` : `rgba(255,255,255,${a})`;
 }
@@ -216,9 +216,9 @@ const DialControl: React.FC<Props> = ({
     // JS-thread callbacks called via runOnJS
     const startLongPress = useCallback(() => {
         holdProgress.value = withDelay(
-            POWER_HOLD_INDICATOR_DELAY_MS,
+            SECONDARY_HOLD_INDICATOR_DELAY_MS,
             withTiming(1, {
-                duration: POWER_HOLD_ACTIVATION_MS - POWER_HOLD_INDICATOR_DELAY_MS,
+                duration: SECONDARY_HOLD_ACTIVATION_MS - SECONDARY_HOLD_INDICATOR_DELAY_MS,
                 easing: Easing.out(Easing.quad),
             }),
         );
@@ -230,7 +230,7 @@ const DialControl: React.FC<Props> = ({
                 // Snap ring back on activation
                 holdProgress.value = withTiming(0, { duration: 120, easing: Easing.out(Easing.cubic) });
             }
-        }, POWER_HOLD_ACTIVATION_MS);
+        }, SECONDARY_HOLD_ACTIVATION_MS);
     }, [onToggleMode]);
 
     const stopLongPress = useCallback(() => {

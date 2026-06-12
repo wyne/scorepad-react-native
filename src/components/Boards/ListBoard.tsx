@@ -36,24 +36,24 @@ function inkA(ink: string, a: number): string {
 interface PlayerRowProps {
     playerId: string;
     index: number;
-    roundCurrent: number;
+    currentRoundIndex: number;
     svDimmed: SharedValue<boolean>;
     disabled: boolean;
     onRowPress: (id: string) => void;
 }
 
-const PlayerRow: React.FC<PlayerRowProps> = ({ playerId, index, roundCurrent, svDimmed, disabled, onRowPress }) => {
+const PlayerRow: React.FC<PlayerRowProps> = ({ playerId, index, currentRoundIndex, svDimmed, disabled, onRowPress }) => {
     const player = useAppSelector((state) => selectPlayerById(state, playerId));
     const currentGame = useAppSelector(selectCurrentGame);
     const isWinner = !!(currentGame?.locked && currentGame?.winnerIds?.includes(playerId));
-    const { roundScore, previousTotal, currentTotal } = useAppSelector(
-        (state) => selectPlayerRoundStats(state, playerId, roundCurrent)
+    const { currentRoundScore, previousTotal, currentRoundTotalScore } = useAppSelector(
+        (state) => selectPlayerRoundStats(state, playerId, currentRoundIndex)
     );
     const breakdownOpacity = useSharedValue(1);
 
     React.useEffect(() => {
-        breakdownOpacity.value = withTiming(roundScore !== 0 ? 1 : 0, { duration: 220 });
-    }, [roundScore]);
+        breakdownOpacity.value = withTiming(currentRoundScore !== 0 ? 1 : 0, { duration: 220 });
+    }, [currentRoundScore]);
 
     const rowStyle = useAnimatedStyle(() => ({
         opacity: withTiming(svDimmed.value ? 0.28 : 1, { duration: 280 }),
@@ -65,8 +65,8 @@ const PlayerRow: React.FC<PlayerRowProps> = ({ playerId, index, roundCurrent, sv
     const color = player.color ?? '#555';
     const ink = inkFor(color);
 
-    const separatorSign = roundScore < 0 ? '−' : '+';
-    const roundAbs = Math.abs(roundScore);
+    const separatorSign = currentRoundScore < 0 ? '−' : '+';
+    const roundAbs = Math.abs(currentRoundScore);
 
     const secondaryNumberStyle = {
         color: inkA(ink, 0.45),
@@ -133,7 +133,7 @@ const PlayerRow: React.FC<PlayerRowProps> = ({ playerId, index, roundCurrent, sv
                             </Animated.View>
                         )}
                         <View style={styles.scoreCol}>
-                            <Text style={totalNumberStyle}>{currentTotal}</Text>
+                            <Text style={totalNumberStyle}>{currentRoundTotalScore}</Text>
                             <Text style={captionStyle}>TOTAL</Text>
                         </View>
                     </View>
@@ -145,7 +145,7 @@ const PlayerRow: React.FC<PlayerRowProps> = ({ playerId, index, roundCurrent, sv
 
 const MemoizedPlayerRow = React.memo(PlayerRow);
 
-const RowsBoard: React.FC<{ showHint: boolean }> = ({ showHint }) => {
+const ListBoard: React.FC<{ showHint: boolean }> = ({ showHint }) => {
     const currentGame = useAppSelector(selectCurrentGame);
     const fullscreen = useAppSelector(state => state.settings.home_fullscreen);
     const { menuOpen } = useMenuOpen();
@@ -186,7 +186,7 @@ const RowsBoard: React.FC<{ showHint: boolean }> = ({ showHint }) => {
     if (!currentGame) return null;
     const playerIds = currentGame.playerIds;
     if (!playerIds?.length) return null;
-    const roundCurrent = currentGame.roundCurrent;
+    const currentRoundIndex = currentGame.roundCurrent;
     const scrollInsets = {
         bottom: fullscreen ? insets.bottom + 10 : bottomSheetHeight + 10,
         left: insets.left + ROW_BOARD_PADDING,
@@ -194,9 +194,9 @@ const RowsBoard: React.FC<{ showHint: boolean }> = ({ showHint }) => {
     };
 
     return (
-        <View style={styles.container} onLayout={handleBoardLayout} testID="rows-board-container">
+        <View style={styles.container} onLayout={handleBoardLayout} testID="list-board-container">
             <ScrollView
-                testID="rows-board-scroll"
+                testID="list-board-scroll"
                 style={styles.scroll}
                 contentContainerStyle={[styles.scrollContent, {
                     paddingBottom: scrollInsets.bottom,
@@ -212,7 +212,7 @@ const RowsBoard: React.FC<{ showHint: boolean }> = ({ showHint }) => {
                         key={id}
                         playerId={id}
                         index={index}
-                        roundCurrent={roundCurrent}
+                        currentRoundIndex={currentRoundIndex}
                         svDimmed={svDimmed}
                         disabled={!!(currentGame?.locked || menuOpen)}
                         onRowPress={handleRowPress}
@@ -295,4 +295,4 @@ const styles = StyleSheet.create({
     }
 });
 
-export default RowsBoard;
+export default ListBoard;

@@ -42,7 +42,7 @@ const ListScreen: React.FunctionComponent<Props> = ({ navigation }) => {
 
         // Update rollingGameCounter if it is undefined or less than the current gameIds length
         if (rollingGameCounter === undefined || rollingGameCounter < gameIds.length) {
-            setRollingGameCounter(gameIds.length);
+            dispatch(setRollingGameCounter(gameIds.length));
         }
 
         logEvent('game_list', {

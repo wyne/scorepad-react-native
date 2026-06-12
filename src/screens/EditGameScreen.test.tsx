@@ -9,7 +9,7 @@ import playersReducer from '../../redux/PlayersSlice';
 import settingsReducer from '../../redux/SettingsSlice';
 import { logEvent } from '../Analytics';
 
-import SettingsScreen from './SettingsScreen';
+import EditGameScreen from './EditGameScreen';
 
 // Mock Analytics
 jest.mock('../Analytics', () => ({
@@ -140,7 +140,7 @@ const mockNavigation = {
 
 const mockRoute = {
     key: 'Settings',
-    name: 'Settings' as const,
+    name: 'EditGame' as const,
     params: { source: 'test' },
 };
 
@@ -155,7 +155,7 @@ const createMockStore = (initialState: Parameters<typeof configureStore>[0]['pre
     });
 };
 
-describe('SettingsScreen', () => {
+describe('EditGameScreen', () => {
     const mockGame = {
         id: 'game-1',
         title: 'Test Game',
@@ -199,7 +199,7 @@ describe('SettingsScreen', () => {
 
         const { toJSON } = render(
             <Provider store={store}>
-                <SettingsScreen navigation={mockNavigation} route={mockRoute} />
+                <EditGameScreen navigation={mockNavigation} route={mockRoute} />
             </Provider>
         );
 
@@ -228,7 +228,7 @@ describe('SettingsScreen', () => {
 
         const { toJSON } = render(
             <Provider store={store}>
-                <SettingsScreen navigation={mockNavigation} route={mockRoute} />
+                <EditGameScreen navigation={mockNavigation} route={mockRoute} />
             </Provider>
         );
 
@@ -254,7 +254,7 @@ describe('SettingsScreen', () => {
 
         const { getByText, getByTestId } = render(
             <Provider store={store}>
-                <SettingsScreen navigation={mockNavigation} route={mockRoute} />
+                <EditGameScreen navigation={mockNavigation} route={mockRoute} />
             </Provider>
         );
 
@@ -283,7 +283,7 @@ describe('SettingsScreen', () => {
 
         const { getByText } = render(
             <Provider store={store}>
-                <SettingsScreen navigation={mockNavigation} route={mockRoute} />
+                <EditGameScreen navigation={mockNavigation} route={mockRoute} />
             </Provider>
         );
 
@@ -314,7 +314,7 @@ describe('SettingsScreen', () => {
 
         const { queryByText } = render(
             <Provider store={store}>
-                <SettingsScreen navigation={mockNavigation} route={mockRoute} />
+                <EditGameScreen navigation={mockNavigation} route={mockRoute} />
             </Provider>
         );
 
@@ -340,7 +340,7 @@ describe('SettingsScreen', () => {
 
         const { getByText } = render(
             <Provider store={store}>
-                <SettingsScreen navigation={mockNavigation} route={mockRoute} />
+                <EditGameScreen navigation={mockNavigation} route={mockRoute} />
             </Provider>
         );
 
@@ -376,7 +376,7 @@ describe('SettingsScreen', () => {
 
         const { getByText } = render(
             <Provider store={store}>
-                <SettingsScreen navigation={mockNavigation} route={mockRoute} />
+                <EditGameScreen navigation={mockNavigation} route={mockRoute} />
             </Provider>
         );
 
@@ -402,7 +402,7 @@ describe('SettingsScreen', () => {
 
         const { getByText } = render(
             <Provider store={store}>
-                <SettingsScreen navigation={mockNavigation} route={mockRoute} />
+                <EditGameScreen navigation={mockNavigation} route={mockRoute} />
             </Provider>
         );
 
@@ -436,7 +436,7 @@ describe('SettingsScreen', () => {
 
         const { getByTestId } = render(
             <Provider store={store}>
-                <SettingsScreen navigation={mockNavigation} route={mockRoute} />
+                <EditGameScreen navigation={mockNavigation} route={mockRoute} />
             </Provider>
         );
 

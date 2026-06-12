@@ -146,15 +146,15 @@ jest.mock('../Icons/RematchIcon', () => {
     };
 });
 
-jest.mock('../Rounds', () => {
+jest.mock('../ScoreLogTable', () => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    return function MockRounds({ navigation }: {
+    return function MockScoreLogTable({ navigation }: {
         navigation: object;
     }) {
         const { View, Text } = jest.requireActual('react-native');
         return (
-            <View testID="rounds">
-                <Text>Rounds</Text>
+            <View testID="score-log-table">
+                <Text>ScoreLogTable</Text>
             </View>
         );
     };
@@ -288,7 +288,7 @@ describe('GameSheet', () => {
 
         expect(getByTestId('bottom-sheet')).toBeTruthy();
         expect(getByText('Test Game')).toBeTruthy();
-        expect(getByTestId('rounds')).toBeTruthy();
+        expect(getByTestId('score-log-table')).toBeTruthy();
     });
 
     it('should show locked text when game is locked', () => {
@@ -590,7 +590,7 @@ describe('GameSheet', () => {
         });
     });
 
-    it('should navigate to Settings when edit game button is pressed', async () => {
+    it('should navigate to EditGame when edit game button is pressed', async () => {
         const store = createMockStore({
             settings: {
                 currentGameId: 'game-1',
@@ -617,7 +617,7 @@ describe('GameSheet', () => {
         fireEvent.press(editButton);
 
         await waitFor(() => {
-            expect(mockNavigate).toHaveBeenCalledWith('Settings', { source: 'edit_game' });
+            expect(mockNavigate).toHaveBeenCalledWith('EditGame', { source: 'edit_game' });
             expect(logEvent).toHaveBeenCalledWith('edit_game', {
                 game_id: 'game-1',
             });

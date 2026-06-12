@@ -42,16 +42,16 @@ jest.mock('react-native-reanimated', () => {
 // Mock the sub-components
 jest.mock('./ScoreBefore', () => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    return function MockScoreBefore({ containerWidth, roundScore, totalScore, fontColor }: {
+    return function MockScoreBefore({ containerWidth, currentRoundScore, currentRoundTotalScore, fontColor }: {
         containerWidth: number;
-        roundScore: number;
-        totalScore: number;
+        currentRoundScore: number;
+        currentRoundTotalScore: number;
         fontColor: string;
     }) {
         const { View, Text } = jest.requireActual('react-native');
         return (
             <View testID="score-before">
-                <Text>Before: {totalScore - roundScore}</Text>
+                <Text>Before: {currentRoundTotalScore - currentRoundScore}</Text>
                 <Text>Color: {fontColor}</Text>
                 <Text>Width: {containerWidth}</Text>
             </View>
@@ -60,15 +60,15 @@ jest.mock('./ScoreBefore', () => {
 });
 
 jest.mock('./ScoreRound', () => {
-    return function MockScoreRound({ containerWidth, roundScore, fontColor }: {
+    return function MockScoreRound({ containerWidth, currentRoundScore, fontColor }: {
         containerWidth: number;
-        roundScore: number;
+        currentRoundScore: number;
         fontColor: string;
     }) {
         const { View, Text } = jest.requireActual('react-native');
         return (
             <View testID="score-round">
-                <Text>Round: {roundScore}</Text>
+                <Text>Round: {currentRoundScore}</Text>
                 <Text>Color: {fontColor}</Text>
                 <Text>Width: {containerWidth}</Text>
             </View>
@@ -78,16 +78,16 @@ jest.mock('./ScoreRound', () => {
 
 jest.mock('./ScoreAfter', () => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    return function MockScoreAfter({ containerWidth, roundScore, totalScore, fontColor }: {
+    return function MockScoreAfter({ containerWidth, currentRoundScore, currentRoundTotalScore, fontColor }: {
         containerWidth: number;
-        roundScore: number;
-        totalScore: number;
+        currentRoundScore: number;
+        currentRoundTotalScore: number;
         fontColor: string;
     }) {
         const { View, Text } = jest.requireActual('react-native');
         return (
             <View testID="score-after">
-                <Text>After: {totalScore}</Text>
+                <Text>After: {currentRoundTotalScore}</Text>
                 <Text>Color: {fontColor}</Text>
                 <Text>Width: {containerWidth}</Text>
             </View>

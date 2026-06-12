@@ -16,10 +16,10 @@ import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
 import { logEvent } from '../../Analytics';
 import { useTheme } from '../../theme';
 
-import { useChooseWinnersModalContext } from './ChooseWinnersModalContext';
+import { useChooseWinnersSheetContext } from './ChooseWinnersSheetContext';
 import GlassButton from './GlassButton';
 
-const ChooseWinnersModal: React.FunctionComponent = () => {
+const ChooseWinnersSheet: React.FunctionComponent = () => {
     const theme = useTheme();
     const dispatch = useAppDispatch();
     const insets = useSafeAreaInsets();
@@ -60,7 +60,7 @@ const ChooseWinnersModal: React.FunctionComponent = () => {
 
     const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
-    const chooseWinnersModalRef = useChooseWinnersModalContext();
+    const chooseWinnersSheetRef = useChooseWinnersSheetContext();
 
     const snapPoints = useMemo(() => ['50%', '80%'], []);
 
@@ -106,17 +106,17 @@ const ChooseWinnersModal: React.FunctionComponent = () => {
             winner_count: selectedIds.size,
         });
         setSelectedIds(new Set());
-        chooseWinnersModalRef?.current?.close();
+        chooseWinnersSheetRef?.current?.close();
     };
 
     const handleClose = () => {
         setSelectedIds(new Set());
-        chooseWinnersModalRef?.current?.close();
+        chooseWinnersSheetRef?.current?.close();
     };
 
     return (
         <BottomSheetModal
-            ref={chooseWinnersModalRef}
+            ref={chooseWinnersSheetRef}
             index={1}
             enablePanDownToClose={false}
             snapPoints={snapPoints}
@@ -254,4 +254,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default ChooseWinnersModal;
+export default ChooseWinnersSheet;

@@ -39,7 +39,7 @@ function resistedDrag(t: number): number {
     return t / (1 + t / 400); // nearly 1:1 at small pulls, strong resistance beyond ~150 px
 }
 
-// TODO: see RowsBoard.tsx — consolidate inkFor/inkA into shared colorUtils module
+// TODO: see ListBoard.tsx — consolidate inkFor/inkA into shared colorUtils module
 function inkFor(hex: string): string {
     const h = hex.replace('#', '');
     const r = parseInt(h.slice(0, 2), 16) / 255;
@@ -104,30 +104,30 @@ const PlayerDialPage: React.FC<PlayerDialPageProps> = ({
 }) => {
     const dispatch = useAppDispatch();
     const player = useAppSelector(state => selectPlayerById(state, playerId));
-    const roundCurrent = useAppSelector(state => selectCurrentGame(state)?.roundCurrent ?? 0);
-    const { roundScore, previousTotal, currentTotal: scoreTotal } = useAppSelector(
-        state => selectPlayerRoundStats(state, playerId, roundCurrent)
+    const currentRoundIndex = useAppSelector(state => selectCurrentGame(state)?.roundCurrent ?? 0);
+    const { currentRoundScore, previousTotal, currentRoundTotalScore } = useAppSelector(
+        state => selectPlayerRoundStats(state, playerId, currentRoundIndex)
     );
 
     // Stable SharedValue refs — same object identity every render, so React.memo(DialControl)
     // skips re-renders when score changes. The displayed numbers update via Reanimated on the UI thread.
-    const svRoundScore = useSharedValue(roundScore);
-    const svScoreTotal = useSharedValue(scoreTotal);
+    const svRoundScore = useSharedValue(currentRoundScore);
+    const svScoreTotal = useSharedValue(currentRoundTotalScore);
     useLayoutEffect(() => {
-        svRoundScore.value = roundScore;
-        svScoreTotal.value = scoreTotal;
-    }, [roundScore, scoreTotal]);
+        svRoundScore.value = currentRoundScore;
+        svScoreTotal.value = currentRoundTotalScore;
+    }, [currentRoundScore, currentRoundTotalScore]);
 
     const [isSecondary, setIsSecondary] = useState(false);
 
     // Reset dial mode when the active round changes
     useEffect(() => {
         setIsSecondary(false);
-    }, [roundCurrent]);
+    }, [currentRoundIndex]);
 
     const handleChange = useCallback((v: number) => {
-        dispatch(playerRoundScoreSet(playerId, roundCurrent, v));
-    }, [dispatch, playerId, roundCurrent]);
+        dispatch(playerRoundScoreSet(playerId, currentRoundIndex, v));
+    }, [dispatch, playerId, currentRoundIndex]);
 
     const isDismissing = useSharedValue(false);
 
@@ -242,7 +242,7 @@ const PlayerDialPage: React.FC<PlayerDialPageProps> = ({
                     {/* Right: new total + Done */}
                     <View style={[styles.lsCol, { gap: 16 * scale }]}>
                         <View style={styles.prevBlock}>
-                            <Text style={[styles.prevNumber, { color: ink, fontSize: 22 * scale, lineHeight: 26 * scale }]}>{scoreTotal}</Text>
+                            <Text style={[styles.prevNumber, { color: ink, fontSize: 22 * scale, lineHeight: 26 * scale }]}>{currentRoundTotalScore}</Text>
                             <Text style={[styles.prevLabel, { color: inkA(ink, 0.6), fontSize: 10 * scale, lineHeight: 12 * scale }]}>NEW TOTAL</Text>
                         </View>
                         <Pressable

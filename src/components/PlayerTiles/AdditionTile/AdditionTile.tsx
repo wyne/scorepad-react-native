@@ -30,14 +30,14 @@ const AdditionTile: React.FunctionComponent<Props> = ({
     const currentGame = useAppSelector(selectCurrentGame);
     if (typeof currentGame == 'undefined') return null;
 
-    const roundCurrent = currentGame.roundCurrent;
+    const currentRoundIndex = currentGame.roundCurrent;
     const isLocked = currentGame.locked === true;
 
     const player = useAppSelector(state => selectPlayerById(state, playerId));
     if (typeof player == 'undefined') return null;
     const playerName = player.playerName;
-    const { currentTotal: scoreTotal, grandTotal: finalScoreTotal, roundScore: scoreRound } = useAppSelector(
-        state => selectPlayerRoundStats(state, playerId, roundCurrent)
+    const { currentRoundScore, currentRoundTotalScore, grandTotalScore } = useAppSelector(
+        state => selectPlayerRoundStats(state, playerId, currentRoundIndex)
     );
 
     if (maxWidth == null || maxHeight == null) return null;
@@ -62,7 +62,7 @@ const AdditionTile: React.FunctionComponent<Props> = ({
                     style={[scoreStyles.scoreText, { fontSize: finalScoreFontSize, color: fontColor }]}
                     allowFontScaling={false}
                 >
-                    {finalScoreTotal}
+                    {grandTotalScore}
                 </Animated.Text>
             </Animated.View>
         );
@@ -75,13 +75,13 @@ const AdditionTile: React.FunctionComponent<Props> = ({
             </Animated.Text>
 
             <Animated.View style={styles.scoreLineOne}>
-                <ScoreBefore containerWidth={containerShortEdge} roundScore={scoreRound} totalScore={scoreTotal}
+                <ScoreBefore containerWidth={containerShortEdge} currentRoundScore={currentRoundScore} currentRoundTotalScore={currentRoundTotalScore}
                     fontColor={fontColor} />
-                <ScoreRound containerWidth={containerShortEdge} roundScore={scoreRound}
+                <ScoreRound containerWidth={containerShortEdge} currentRoundScore={currentRoundScore}
                     fontColor={fontColor} />
             </Animated.View>
 
-            <ScoreAfter containerWidth={containerShortEdge} roundScore={scoreRound} totalScore={scoreTotal}
+            <ScoreAfter containerWidth={containerShortEdge} currentRoundScore={currentRoundScore} currentRoundTotalScore={currentRoundTotalScore}
                 fontColor={fontColor} />
         </Animated.View>
     );

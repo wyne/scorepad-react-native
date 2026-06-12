@@ -20,3 +20,7 @@ https://www.scorepadapp.com
 ## Contributing
 
 See [Contributing.md](Contributing.md).
+
+## Project Glossary
+
+See [docs/glossary.md](docs/glossary.md) for the main product and code concepts used throughout the project.

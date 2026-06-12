@@ -16,7 +16,7 @@ export interface GameState {
     title: string;
     dateCreated: number;
     roundCurrent: number; // 0-indexed
-    roundTotal: number; // 1-indexed
+    roundTotal: number; // count of visible rounds (>= 1), not an index
     playerIds: string[];
     locked?: boolean;
     winnerIds?: string[];

@@ -13,7 +13,7 @@ import { useTheme } from '../../theme';
 
 import HeaderButton from './HeaderButton';
 
-const AppInfoButton: React.FunctionComponent = () => {
+const AppSettingsButton: React.FunctionComponent = () => {
     const theme = useTheme();
     const navigation = useNavigation<NativeStackNavigationProp<ParamListBase>>();
     const hasUnseenFeature = useAppSelector(state =>
@@ -21,11 +21,11 @@ const AppInfoButton: React.FunctionComponent = () => {
     );
 
     return (
-        <HeaderButton accessibilityLabel='App Info' onPress={async () => {
-            navigation.navigate('AppInfo');
+        <HeaderButton accessibilityLabel='App Settings' onPress={async () => {
+            navigation.navigate('AppSettings');
             await logEvent('app_info');
         }}>
-            <View testID='app-info-button'>
+            <View testID='app-settings-button'>
                 <Icon name="gear"
                     type="font-awesome"
                     size={20}
@@ -48,4 +48,4 @@ const AppInfoButton: React.FunctionComponent = () => {
     );
 };
 
-export default AppInfoButton;
+export default AppSettingsButton;

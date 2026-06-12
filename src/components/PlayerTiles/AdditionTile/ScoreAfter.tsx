@@ -10,13 +10,13 @@ import { calculateFontSize, animationDuration, enteringAnimation, ZoomOutFadeOut
 import { scoreStyles } from './scoreStyles';
 
 interface Props {
-    roundScore: number;
-    totalScore: number;
+    currentRoundScore: number;
+    currentRoundTotalScore: number;
     fontColor: string;
     containerWidth: number;
 }
 
-const ScoreAfter: React.FunctionComponent<Props> = ({ containerWidth, roundScore, totalScore, fontColor }) => {
+const ScoreAfter: React.FunctionComponent<Props> = ({ containerWidth, currentRoundScore, currentRoundTotalScore, fontColor }) => {
     const fontSize = useSharedValue(calculateFontSize(containerWidth));
     const opacity = useSharedValue(1);
 
@@ -29,21 +29,21 @@ const ScoreAfter: React.FunctionComponent<Props> = ({ containerWidth, roundScore
 
     useEffect(() => {
         fontSize.value = withTiming(
-            roundScore == 0 ? 1 : calculateFontSize(containerWidth) * 1.1,
+            currentRoundScore == 0 ? 1 : calculateFontSize(containerWidth) * 1.1,
             { duration: animationDuration },
         );
         opacity.value = withTiming(
-            roundScore == 0 ? 0 : 1,
+            currentRoundScore == 0 ? 0 : 1,
             { duration: animationDuration },
         );
-    }, [roundScore, containerWidth]);
+    }, [currentRoundScore, containerWidth]);
 
     return (
         <Animated.View entering={enteringAnimation} exiting={ZoomOutFadeOut}>
             <Animated.Text
                 allowFontScaling={false}
                 style={[animatedStyles, scoreStyles.scoreText, { color: fontColor }]}>
-                {totalScore}
+                {currentRoundTotalScore}
             </Animated.Text>
         </Animated.View>
     );

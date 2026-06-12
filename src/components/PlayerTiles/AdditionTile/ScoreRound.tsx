@@ -9,12 +9,12 @@ import Animated, {
 import { calculateFontSize, animationDuration, multiLineScoreSizeMultiplier, scoreMathOpacity } from './Helpers';
 
 interface Props {
-    roundScore: number;
+    currentRoundScore: number;
     fontColor: string;
     containerWidth: number;
 }
 
-const ScoreRound: React.FunctionComponent<Props> = ({ containerWidth, roundScore, fontColor }) => {
+const ScoreRound: React.FunctionComponent<Props> = ({ containerWidth, currentRoundScore, fontColor }) => {
     const fontSize = useSharedValue(calculateFontSize(containerWidth));
 
     const animatedStyles = useAnimatedStyle(() => {
@@ -23,7 +23,7 @@ const ScoreRound: React.FunctionComponent<Props> = ({ containerWidth, roundScore
         };
     });
 
-    const d = roundScore;
+    const d = currentRoundScore;
 
     useEffect(() => {
         fontSize.value = withTiming(
@@ -31,9 +31,9 @@ const ScoreRound: React.FunctionComponent<Props> = ({ containerWidth, roundScore
             { duration: animationDuration }
         );
 
-    }, [roundScore, containerWidth]);
+    }, [currentRoundScore, containerWidth]);
 
-    if (roundScore == 0) {
+    if (currentRoundScore == 0) {
         return <></>;
     }
 
@@ -46,8 +46,8 @@ const ScoreRound: React.FunctionComponent<Props> = ({ containerWidth, roundScore
                     color: fontColor,
                     opacity: scoreMathOpacity
                 }]}>
-                {roundScore > 0 && ' + '}
-                {roundScore < 0 && ' - '}
+                {currentRoundScore > 0 && ' + '}
+                {currentRoundScore < 0 && ' - '}
                 {Math.abs(d)}
             </Animated.Text>
         </Animated.View>

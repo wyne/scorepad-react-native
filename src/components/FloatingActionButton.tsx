@@ -39,7 +39,7 @@ const FloatingActionButton: React.FunctionComponent<Props> = ({ navigation }) =>
             asyncCreateGame({ gameCount: gameList.length, playerCount })
         ).then(() => {
             setTimeout(() => {
-                navigation.navigate('Settings', { source: 'new_game' });
+                navigation.navigate('EditGame', { source: 'new_game' });
             }, 500);
         });
     };
