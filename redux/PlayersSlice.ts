@@ -114,7 +114,7 @@ export const selectPlayerScoreByRound = createSelector(
     (entities, playerId, round) => entities[playerId]?.scores[round] || 0
 );
 
-export const selectPlayerTotalScore = createSelector(
+export const selectPlayerGrandTotalScore = createSelector(
     [(state: RootState, playerId: string) => state.players.entities[playerId]],
     (player) => player?.scores?.reduce((sum, s) => sum + (s || 0), 0) ?? 0
 );

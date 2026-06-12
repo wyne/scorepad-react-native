@@ -3,7 +3,7 @@ import React, { memo } from 'react';
 import { Text, StyleSheet } from 'react-native';
 
 import { useAppSelector } from '../../../redux/hooks';
-import { selectPlayerTotalScore } from '../../../redux/PlayersSlice';
+import { selectPlayerGrandTotalScore } from '../../../redux/PlayersSlice';
 import { useTheme } from '../../theme';
 
 export type Props = {
@@ -11,7 +11,7 @@ export type Props = {
 }
 const TotalScoreCell: React.FunctionComponent<Props> = ({ playerId }) => {
     const theme = useTheme();
-    const scoreTotal = useAppSelector(state => selectPlayerTotalScore(state, playerId));
+    const scoreTotal = useAppSelector(state => selectPlayerGrandTotalScore(state, playerId));
     return (
         <Text key={playerId} style={[styles.scoreEntry, { color: theme.text }]}>
             {scoreTotal}
