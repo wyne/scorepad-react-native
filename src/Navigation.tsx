@@ -51,18 +51,12 @@ export const Navigation = () => {
         : { ...DefaultTheme, colors: { ...DefaultTheme.colors, background: theme.background, card: theme.backgroundSecondary } };
 
     const fullscreen = useAppSelector(state => state.settings.home_fullscreen);
-    const [currentRoute, setCurrentRoute] = useState('List');
+    const [showGameSheet, setShowGameSheet] = useState(false);
 
     return (
         <View style={{ flex: 1 }}>
             <NavigationContainer
                 theme={navTheme}
-                onStateChange={(state) => {
-                    const route = state?.routes[state.index ?? 0];
-                    if (route) {
-                        setCurrentRoute(route.name);
-                    }
-                }}
             >
                 <GestureInfoSheetContextProvider>
                     <MenuOpenContextProvider>
@@ -87,6 +81,15 @@ export const Navigation = () => {
                                 headerBlurEffect: 'systemChromeMaterial',
                                 headerShadowVisible: false,
                                 headerBackButtonDisplayMode: 'minimal',
+                            }}
+                            listeners={{
+                                focus: () => setShowGameSheet(true),
+                                transitionStart: (event) => {
+                                    if (event.data.closing) {
+                                        setShowGameSheet(false);
+                                    }
+                                },
+                                blur: () => setShowGameSheet(false),
                             }}
                         />
                         <Stack.Screen name="EditGame" component={EditGameScreen}
@@ -126,7 +129,7 @@ export const Navigation = () => {
                         </Stack.Navigator>
                     </MenuOpenContextProvider>
                 </GestureInfoSheetContextProvider>
-                {!fullscreen && currentRoute === 'Game' && <GameSheet />}
+                {!fullscreen && showGameSheet && <GameSheet />}
             </NavigationContainer>
         </View>
     );
