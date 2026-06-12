@@ -30,9 +30,10 @@ const GameSheet: React.FunctionComponent = () => {
     const navigation = useNavigation<NativeStackNavigationProp<ParamListBase>>();
     const { height: containerHeight } = useWindowDimensions();
     const currentGameId = useAppSelector(state => state.settings.currentGameId);
-    const gameTitle = useAppSelector(state => selectGameById(state, currentGameId || '')?.title);
-    const gameLocked = useAppSelector(state => selectGameById(state, currentGameId || '')?.locked);
-    const playerIds = useAppSelector(state => selectGameById(state, currentGameId || '')?.playerIds);
+    const game = useAppSelector(state => selectGameById(state, currentGameId || ''));
+    const gameTitle = game?.title;
+    const gameLocked = game?.locked;
+    const playerIds = game?.playerIds;
     const chooseWinnersSheetRef = useChooseWinnersSheetContext();
 
     if (currentGameId == undefined) return null;
