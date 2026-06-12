@@ -62,3 +62,8 @@ coverage/
 
 # e2e recordings
 e2e/recordings/
+
+# Claude Code local artifacts
+.claude/settings.local.json
+.claude/worktrees/
+.claude/plans/
