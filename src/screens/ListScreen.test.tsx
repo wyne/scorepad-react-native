@@ -4,11 +4,13 @@ import type { ParamListBase } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { configureStore } from '@reduxjs/toolkit';
 import { fireEvent, render, waitFor } from '@testing-library/react-native';
+import { StyleSheet } from 'react-native';
 import { Provider } from 'react-redux';
 
 import gamesReducer from '../../redux/GamesSlice';
 import playersReducer from '../../redux/PlayersSlice';
 import settingsReducer from '../../redux/SettingsSlice';
+import { FAB_BOTTOM_MARGIN, FAB_EDGE_MARGIN, FAB_LIST_CLEARANCE, FAB_SIZE } from '../components/FloatingActionButton';
 
 import ListScreen from './ListScreen';
 
@@ -47,12 +49,13 @@ jest.mock('react-native-reanimated', () => {
     };
 });
 
+let mockSafeAreaInsets = { top: 0, bottom: 0, left: 0, right: 0 };
 jest.mock('react-native-safe-area-context', () => ({
     SafeAreaView: ({ children, style }: { children: React.ReactNode; style: object }) => {
         const { View } = jest.requireActual('react-native');
         return <View style={style} testID="safe-area-view">{children}</View>;
     },
-    useSafeAreaInsets: () => ({ top: 0, bottom: 0, left: 0, right: 0 }),
+    useSafeAreaInsets: () => mockSafeAreaInsets,
 }));
 
 jest.mock('../Analytics', () => ({
@@ -131,6 +134,7 @@ describe('ListScreen', () => {
 
     beforeEach(() => {
         jest.clearAllMocks();
+        mockSafeAreaInsets = { top: 0, bottom: 0, left: 0, right: 0 };
     });
 
     it('should render safely with no games', () => {
@@ -359,5 +363,43 @@ describe('ListScreen', () => {
         expect(logEvent).toHaveBeenCalledWith('game_list', expect.objectContaining({
             devMenuEnabled: true,
         }));
+    });
+
+    it('uses safe-area insets for list clearance and the add button position', () => {
+        mockSafeAreaInsets = { top: 0, bottom: 34, left: 0, right: 12 };
+        const store = createMockStore({
+            settings: {
+                appOpens: 1,
+                devMenuEnabled: false,
+                installId: 'existing-id',
+                rollingGameCounter: 0,
+            },
+            games: { entities: {}, ids: [] },
+            players: { entities: {}, ids: [] },
+        });
+
+        const { getByTestId } = render(
+            <Provider store={store}>
+                <ListScreen navigation={mockNavigation} />
+            </Provider>
+        );
+
+        const expectedBottomInset = 34 + FAB_BOTTOM_MARGIN + FAB_SIZE + FAB_LIST_CLEARANCE;
+        expect(StyleSheet.flatten(getByTestId('game-list').props.contentContainerStyle)).toEqual(
+            expect.objectContaining({
+                paddingBottom: expectedBottomInset,
+            })
+        );
+        expect(getByTestId('game-list').props.scrollIndicatorInsets).toEqual(
+            expect.objectContaining({
+                bottom: expectedBottomInset,
+            })
+        );
+        expect(StyleSheet.flatten(getByTestId('add-game-button-container').props.style)).toEqual(
+            expect.objectContaining({
+                bottom: 34 + FAB_BOTTOM_MARGIN,
+                right: 12 + FAB_EDGE_MARGIN,
+            })
+        );
     });
 });

@@ -2,11 +2,12 @@ import React from 'react';
 
 import { configureStore } from '@reduxjs/toolkit';
 import { fireEvent, render } from '@testing-library/react-native';
+import { StyleSheet } from 'react-native';
 import { Provider } from 'react-redux';
 
 import gamesReducer from '../../../redux/GamesSlice';
 import playersReducer from '../../../redux/PlayersSlice';
-import settingsReducer from '../../../redux/SettingsSlice';
+import settingsReducer, { toggleHomeFullscreen } from '../../../redux/SettingsSlice';
 
 jest.mock('../Sheets/GameSheet', () => ({ bottomSheetHeight: 80 }));
 
@@ -33,8 +34,9 @@ jest.mock('react-native-reanimated', () => {
     };
 });
 
+let mockSafeAreaInsets = { top: 0, bottom: 0, left: 0, right: 0 };
 jest.mock('react-native-safe-area-context', () => ({
-    useSafeAreaInsets: () => ({ top: 0, bottom: 0, left: 0, right: 0 }),
+    useSafeAreaInsets: () => mockSafeAreaInsets,
 }));
 
 jest.mock('react-native-elements', () => ({
@@ -88,6 +90,7 @@ function fireLayouts(getByTestId: ReturnType<typeof render>['getByTestId']) {
 describe('ListBoard', () => {
     beforeEach(() => {
         mockMenuOpen = false;
+        mockSafeAreaInsets = { top: 0, bottom: 0, left: 0, right: 0 };
     });
 
     it('opens the overlay when the game is unlocked and menu is closed', () => {
@@ -123,6 +126,36 @@ describe('ListBoard', () => {
         fireLayouts(getByTestId);
         fireEvent.press(getByText('Player 1'));
         expect(queryByTestId('inline-expand-overlay')).toBeNull();
+    });
+
+    it('adds safe-area side insets to the row list padding', () => {
+        mockSafeAreaInsets = { top: 0, bottom: 0, left: 24, right: 16 };
+        const store = createStore();
+        const { getByTestId } = render(
+            <Provider store={store}><ListBoard showHint={false} /></Provider>
+        );
+
+        expect(StyleSheet.flatten(getByTestId('list-board-scroll').props.contentContainerStyle)).toEqual(
+            expect.objectContaining({
+                paddingLeft: 36,
+                paddingRight: 28,
+            })
+        );
+    });
+
+    it('uses the bottom safe area when fullscreen removes the bottom sheet clearance', () => {
+        mockSafeAreaInsets = { top: 0, bottom: 34, left: 0, right: 0 };
+        const store = createStore();
+        store.dispatch(toggleHomeFullscreen());
+        const { getByTestId } = render(
+            <Provider store={store}><ListBoard showHint={false} /></Provider>
+        );
+
+        expect(StyleSheet.flatten(getByTestId('list-board-scroll').props.contentContainerStyle)).toEqual(
+            expect.objectContaining({
+                paddingBottom: 44,
+            })
+        );
     });
 });
 

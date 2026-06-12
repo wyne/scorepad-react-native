@@ -12,6 +12,8 @@ import DialOverlay from '../Interactions/Dial/DialOverlay';
 import { useMenuOpen } from '../MenuOpenContext';
 import { bottomSheetHeight } from '../Sheets/GameSheet';
 
+const ROW_BOARD_PADDING = 12;
+
 // TODO: consolidate inkFor/inkA into a shared src/colorUtils.ts module and rename:
 //   inkFor → readableColor (use getContrastRatio from 'colorsheet', add data migration
 //   to backfill player colors, then introduce usePlayerColors hook)
@@ -185,14 +187,25 @@ const ListBoard: React.FC<{ showHint: boolean }> = ({ showHint }) => {
     const playerIds = currentGame.playerIds;
     if (!playerIds?.length) return null;
     const currentRoundIndex = currentGame.roundCurrent;
+    const scrollInsets = {
+        bottom: fullscreen ? insets.bottom + 10 : bottomSheetHeight + 10,
+        left: insets.left + ROW_BOARD_PADDING,
+        right: insets.right + ROW_BOARD_PADDING,
+    };
 
     return (
         <View style={styles.container} onLayout={handleBoardLayout} testID="list-board-container">
             <ScrollView
+                testID="list-board-scroll"
                 style={styles.scroll}
-                contentContainerStyle={[styles.scrollContent, { paddingBottom: fullscreen ? 10 : bottomSheetHeight + 10 }]}
+                contentContainerStyle={[styles.scrollContent, {
+                    paddingBottom: scrollInsets.bottom,
+                    paddingLeft: scrollInsets.left,
+                    paddingRight: scrollInsets.right,
+                }]}
                 alwaysBounceVertical
                 showsVerticalScrollIndicator={false}
+                scrollIndicatorInsets={scrollInsets}
                 scrollEnabled={selectedId === null}>
                 {playerIds.map((id, index) => (
                     <MemoizedPlayerRow
@@ -237,7 +250,7 @@ const styles = StyleSheet.create({
         gap: 10,
         paddingTop: 10,
         paddingBottom: bottomSheetHeight + 10,
-        paddingHorizontal: 12
+        paddingHorizontal: ROW_BOARD_PADDING
     },
     row: {
         borderRadius: 12,

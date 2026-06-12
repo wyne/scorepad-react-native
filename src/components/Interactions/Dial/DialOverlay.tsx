@@ -25,6 +25,11 @@ const SWIPE_DISMISS_DISTANCE = 50;
 const SWIPE_DISMISS_VELOCITY = 400;
 const MARGIN_BOTTOM = 12;
 const MARGIN_H = 12;
+const CARD_MIN_WIDE_WIDTH = 520;
+const CARD_WIDTH_SCALE = 0.74;
+const CARD_MAX_PORTRAIT_WIDTH = 560;
+const CARD_MAX_LANDSCAPE_WIDTH = 760;
+const CARD_MAX_HEIGHT = 720;
 const MIN_DISMISS_VELOCITY = 600; // px/s floor so slow releases still exit cleanly
 const LS_ACCENT = '#3a86ff'; // matches DialControl's ACCENT for the landscape step pill
 
@@ -47,6 +52,23 @@ function inkFor(hex: string): string {
 
 function inkA(ink: string, a: number): string {
     return ink === '#000' ? `rgba(0,0,0,${a})` : `rgba(255,255,255,${a})`;
+}
+
+function bounded(value: number, min: number, max: number): number {
+    return Math.min(Math.max(value, min), max);
+}
+
+function getDialCardLayout(boardWidth: number, boardHeight: number) {
+    const availableWidth = Math.max(0, boardWidth - MARGIN_H * 2);
+    const maxWidth = boardWidth > boardHeight ? CARD_MAX_LANDSCAPE_WIDTH : CARD_MAX_PORTRAIT_WIDTH;
+    const scaledWidth = Math.max(Math.round(availableWidth * CARD_WIDTH_SCALE), Math.min(availableWidth, CARD_MIN_WIDE_WIDTH));
+    const width = Math.min(availableWidth, scaledWidth, maxWidth);
+    const height = Math.min(Math.max(0, boardHeight), CARD_MAX_HEIGHT);
+
+    return {
+        width,
+        height,
+    };
 }
 
 // ─── PlayerDialPage ───────────────────────────────────────────────────────────
@@ -147,21 +169,27 @@ const PlayerDialPage: React.FC<PlayerDialPageProps> = ({
     const playerColor = player.color ?? '#444';
     const isLandscape = pageWidth > pageHeight;
 
-    const cardStyle = { width: pageWidth, height: pageHeight, backgroundColor: playerColor, borderRadius: 26, overflow: 'hidden' as const };
+    const scale = bounded(Math.sqrt((pageWidth * pageHeight) / (376 * 660)), 1, 1.18);
+    const cardStyle = { width: pageWidth, height: pageHeight, backgroundColor: playerColor, borderRadius: 26 * scale, overflow: 'hidden' as const };
 
     if (isLandscape) {
-        const lsDialSize = Math.min(Math.round((pageHeight - 52) / 1.25), 200);
+        const lsDialSize = Math.min(Math.round((pageHeight - 52 * scale) / 1.25), Math.round(200 * scale));
         const stepBg = isSecondary ? LS_ACCENT : inkA(ink, 0.12);
         const stepDotBg = isSecondary ? '#fff' : inkA(ink, 0.4);
         const stepTextColor = isSecondary ? '#fff' : ink;
 
         return (
-            <View style={cardStyle}>
+            <View style={cardStyle} testID="dial-card">
                 {/* Header: drag handle + name — swipe-to-dismiss zone */}
                 <GestureDetector gesture={dismissGesture}>
-                    <View style={styles.lsHeader}>
+                    <View style={[styles.lsHeader, {
+                        gap: 4 * scale,
+                        paddingTop: 10 * scale,
+                        paddingHorizontal: 20 * scale,
+                        paddingBottom: 6 * scale,
+                    }]}>
                         <View style={[styles.dragHandle, { backgroundColor: inkA(ink, 0.3) }]} />
-                        <Text style={[styles.name, { color: ink, fontSize: 22, lineHeight: 26 }]}
+                        <Text style={[styles.name, { color: ink, fontSize: 22 * scale, lineHeight: 26 * scale }]}
                             numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.6}>
                             {player.playerName}
                         </Text>
@@ -169,16 +197,25 @@ const PlayerDialPage: React.FC<PlayerDialPageProps> = ({
                 </GestureDetector>
 
                 {/* Three-column body */}
-                <View style={styles.lsBody}>
+                <View style={[styles.lsBody, {
+                    paddingHorizontal: 16 * scale,
+                    paddingBottom: 12 * scale,
+                    gap: 8 * scale,
+                }]}>
                     {/* Left: previous total + step pill */}
-                    <View style={styles.lsCol}>
+                    <View style={[styles.lsCol, { gap: 16 * scale }]}>
                         <View style={styles.prevBlock}>
-                            <Text style={[styles.prevNumber, { color: ink }]}>{previousTotal}</Text>
-                            <Text style={[styles.prevLabel, { color: inkA(ink, 0.6) }]}>PREVIOUS TOTAL</Text>
+                            <Text style={[styles.prevNumber, { color: ink, fontSize: 22 * scale, lineHeight: 26 * scale }]}>{previousTotal}</Text>
+                            <Text style={[styles.prevLabel, { color: inkA(ink, 0.6), fontSize: 10 * scale, lineHeight: 12 * scale }]}>PREVIOUS TOTAL</Text>
                         </View>
-                        <View style={[styles.lsPill, { backgroundColor: stepBg }]}>
-                            <View style={[styles.lsPillDot, { backgroundColor: stepDotBg }]} />
-                            <Text style={[styles.lsPillText, { color: stepTextColor }]}>
+                        <View style={[styles.lsPill, {
+                            backgroundColor: stepBg,
+                            gap: 8 * scale,
+                            paddingVertical: 6 * scale,
+                            paddingHorizontal: 14 * scale,
+                        }]}>
+                            <View style={[styles.lsPillDot, { backgroundColor: stepDotBg, width: 8 * scale, height: 8 * scale, borderRadius: 4 * scale }]} />
+                            <Text style={[styles.lsPillText, { color: stepTextColor, fontSize: 13 * scale, lineHeight: 16 * scale }]}>
                                 STEP +{isSecondary ? addendTwo : addendOne}
                             </Text>
                         </View>
@@ -203,19 +240,23 @@ const PlayerDialPage: React.FC<PlayerDialPageProps> = ({
                     </View>
 
                     {/* Right: new total + Done */}
-                    <View style={styles.lsCol}>
+                    <View style={[styles.lsCol, { gap: 16 * scale }]}>
                         <View style={styles.prevBlock}>
-                        <Text style={[styles.prevNumber, { color: ink }]}>{currentRoundTotalScore}</Text>
-                            <Text style={[styles.prevLabel, { color: inkA(ink, 0.6) }]}>NEW TOTAL</Text>
+                            <Text style={[styles.prevNumber, { color: ink, fontSize: 22 * scale, lineHeight: 26 * scale }]}>{currentRoundTotalScore}</Text>
+                            <Text style={[styles.prevLabel, { color: inkA(ink, 0.6), fontSize: 10 * scale, lineHeight: 12 * scale }]}>NEW TOTAL</Text>
                         </View>
                         <Pressable
                             onPress={onDone}
                             style={({ pressed }) => [
                                 styles.lsDoneBtn,
-                                { backgroundColor: inkA(ink, pressed ? 0.28 : 0.16) },
+                                {
+                                    backgroundColor: inkA(ink, pressed ? 0.28 : 0.16),
+                                    height: 44 * scale,
+                                    borderRadius: 14 * scale,
+                                },
                             ]}
                         >
-                            <Text style={[styles.doneBtnText, { color: ink }]}>Done</Text>
+                            <Text style={[styles.doneBtnText, { color: ink, fontSize: 20 * scale, lineHeight: 24 * scale }]}>Done</Text>
                         </Pressable>
                     </View>
                 </View>
@@ -223,17 +264,22 @@ const PlayerDialPage: React.FC<PlayerDialPageProps> = ({
         );
     }
 
-    const dialSize = Math.min(Math.round(pageHeight * 0.38), Math.round(pageWidth * 0.9), 240);
+    const dialSize = Math.min(Math.round(pageHeight * 0.38), Math.round(pageWidth * 0.9), Math.round(240 * scale));
 
     return (
-        <View style={cardStyle}>
-            <View style={styles.inner}>
+        <View style={cardStyle} testID="dial-card">
+            <View style={[styles.inner, {
+                gap: 16 * scale,
+                paddingHorizontal: 24 * scale,
+                paddingTop: 14 * scale,
+                paddingBottom: 16 * scale,
+            }]}>
                 {/* Top group: drag handle + name + prev total — also the swipe-to-dismiss zone */}
                 <GestureDetector gesture={dismissGesture}>
-                    <View style={styles.topGroup}>
+                    <View style={[styles.topGroup, { gap: 8 * scale }]}>
                         <View style={[styles.dragHandle, { backgroundColor: inkA(ink, 0.3) }]} />
                         <Text
-                            style={[styles.name, { color: ink }]}
+                            style={[styles.name, { color: ink, fontSize: 32 * scale, lineHeight: 36 * scale }]}
                             numberOfLines={1}
                             adjustsFontSizeToFit
                             minimumFontScale={0.7}
@@ -241,8 +287,8 @@ const PlayerDialPage: React.FC<PlayerDialPageProps> = ({
                             {player.playerName}
                         </Text>
                         <View style={styles.prevBlock}>
-                            <Text style={[styles.prevNumber, { color: ink }]}>{previousTotal}</Text>
-                            <Text style={[styles.prevLabel, { color: inkA(ink, 0.6) }]}>PREVIOUS TOTAL</Text>
+                            <Text style={[styles.prevNumber, { color: ink, fontSize: 22 * scale, lineHeight: 26 * scale }]}>{previousTotal}</Text>
+                            <Text style={[styles.prevLabel, { color: inkA(ink, 0.6), fontSize: 10 * scale, lineHeight: 12 * scale }]}>PREVIOUS TOTAL</Text>
                         </View>
                     </View>
                 </GestureDetector>
@@ -269,10 +315,14 @@ const PlayerDialPage: React.FC<PlayerDialPageProps> = ({
                     onPress={onDone}
                     style={({ pressed }) => [
                         styles.doneBtn,
-                        { backgroundColor: inkA(ink, pressed ? 0.28 : 0.16) },
+                        {
+                            backgroundColor: inkA(ink, pressed ? 0.28 : 0.16),
+                            height: 48 * scale,
+                            borderRadius: 14 * scale,
+                        },
                     ]}
                 >
-                    <Text style={[styles.doneBtnText, { color: ink }]}>Done</Text>
+                    <Text style={[styles.doneBtnText, { color: ink, fontSize: 20 * scale, lineHeight: 24 * scale }]}>Done</Text>
                 </Pressable>
             </View>
         </View>
@@ -322,7 +372,7 @@ const DialOverlay: React.FC<Props> = ({
     const targetTop = marginTop;
     const targetWidth = boardWidth;
     const targetHeight = boardHeight - marginTop - MARGIN_BOTTOM;
-    const pageWidth = boardWidth - MARGIN_H * 2;
+    const cardLayout = getDialCardLayout(boardWidth, targetHeight);
 
     const swipeDragY = useSharedValue(0);
     const swipeDragX = useSharedValue(0);
@@ -389,11 +439,11 @@ const DialOverlay: React.FC<Props> = ({
     }, [targetWidth]);
 
     const renderItem = useCallback(({ item: pid }: { item: string }) => (
-        <View style={{ width: targetWidth, paddingHorizontal: MARGIN_H }}>
+        <View testID="dial-page-frame" style={{ width: targetWidth, alignItems: 'center', justifyContent: 'center' }}>
             <MemoizedPlayerDialPage
                 playerId={pid}
-                pageWidth={pageWidth}
-                pageHeight={targetHeight}
+                pageWidth={cardLayout.width}
+                pageHeight={cardLayout.height}
                 boardHeight={boardHeight}
                 addendOne={addendOne}
                 addendTwo={addendTwo}
@@ -405,7 +455,7 @@ const DialOverlay: React.FC<Props> = ({
                 showHint={showHint}
             />
         </View>
-    ), [pageWidth, targetHeight, boardHeight, addendOne, addendTwo, menuOpen, swipeDragY, swipeDragX, handleDone, handleDismiss, showHint]);
+    ), [targetWidth, cardLayout.width, cardLayout.height, boardHeight, addendOne, addendTwo, menuOpen, swipeDragY, swipeDragX, handleDone, handleDismiss, showHint]);
 
     if (!currentGame) return null;
 
