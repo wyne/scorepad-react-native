@@ -15,9 +15,9 @@ import { PersistGate } from 'redux-persist/integration/react';
 configureReanimatedLogger({ level: ReanimatedLogLevel.warn, strict: false });
 
 import { persistor, store } from './redux/store';
-import { AddendModalContextProvider } from './src/components/Sheets/AddendModalContext';
-import { ChooseWinnersModalContextProvider } from './src/components/Sheets/ChooseWinnersModalContext';
+import { ChooseWinnersSheetContextProvider } from './src/components/Sheets/ChooseWinnersSheetContext';
 import { GameSheetContextProvider } from './src/components/Sheets/GameSheetContext';
+import { PointValuesSheetContextProvider } from './src/components/Sheets/PointValuesSheetContext';
 import { Navigation } from './src/Navigation';
 
 if (process.env.EXPO_PUBLIC_FIREBASE_ANALYTICS == 'false') {
@@ -32,14 +32,14 @@ export default function App() {
                     <Provider store={store}>
                         <GameSheetContextProvider>
                             <MenuProvider>
-                                <AddendModalContextProvider>
-                                    <ChooseWinnersModalContextProvider>
+                                <PointValuesSheetContextProvider>
+                                    <ChooseWinnersSheetContextProvider>
                                     <PersistGate loading={null} persistor={persistor}>
                                         <StatusBar />
                                         <Navigation />
                                     </PersistGate>
-                                    </ChooseWinnersModalContextProvider>
-                                </AddendModalContextProvider>
+                                    </ChooseWinnersSheetContextProvider>
+                                </PointValuesSheetContextProvider>
                             </MenuProvider>
                         </GameSheetContextProvider>
                     </Provider>
