@@ -1,5 +1,10 @@
 import React from 'react';
 
+// Imported first for its side effect: Sentry.init must run before other modules
+// (store creation, firebase) so their errors are captured.
+// eslint-disable-next-line import/order
+import Sentry from './src/sentry';
+
 import analytics from '@react-native-firebase/analytics';
 import { StatusBar } from 'expo-status-bar';
 import { View } from 'react-native';
@@ -24,7 +29,7 @@ if (process.env.EXPO_PUBLIC_FIREBASE_ANALYTICS == 'false') {
     analytics().setAnalyticsCollectionEnabled(false);
 }
 
-export default function App() {
+function App() {
     return (
         <View style={{ flex: 1, backgroundColor: '#000' }}>
             <SafeAreaProvider>
@@ -47,4 +52,6 @@ export default function App() {
             </SafeAreaProvider>
         </View>
     );
-};
+}
+
+export default Sentry.wrap(App);

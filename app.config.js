@@ -142,5 +142,14 @@ export default {
         skipOnboarding: true,
       },
     ],
+    [
+      '@sentry/react-native/expo',
+      {
+        // Source map upload during EAS builds; skipped with a warning unless
+        // SENTRY_AUTH_TOKEN is set in the build environment.
+        organization: process.env.SENTRY_ORG || 'wyne',
+        project: process.env.SENTRY_PROJECT || 'scorepad-react-native',
+      },
+    ],
   ],
 };

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-import { DarkTheme, DefaultTheme, NavigationContainer } from '@react-navigation/native';
+import { DarkTheme, DefaultTheme, NavigationContainer, useNavigationContainerRef } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Platform, View } from 'react-native';
 
@@ -19,6 +19,7 @@ import GameSheet from './components/Sheets/GameSheet';
 import { GestureInfoSheetContextProvider } from './components/Sheets/GestureInfoSheetContext';
 import EditPlayerScreen from './screens/EditPlayerScreen';
 import ShareScreen from './screens/ShareScreen';
+import { navigationIntegration } from './sentry';
 import { useTheme } from './theme';
 
 export type RootStackParamList = {
@@ -52,11 +53,14 @@ export const Navigation = () => {
 
     const fullscreen = useAppSelector(state => state.settings.home_fullscreen);
     const [showGameSheet, setShowGameSheet] = useState(false);
+    const navigationRef = useNavigationContainerRef();
 
     return (
         <View style={{ flex: 1 }}>
             <NavigationContainer
+                ref={navigationRef}
                 theme={navTheme}
+                onReady={() => navigationIntegration.registerNavigationContainer(navigationRef)}
             >
                 <GestureInfoSheetContextProvider>
                     <MenuOpenContextProvider>
