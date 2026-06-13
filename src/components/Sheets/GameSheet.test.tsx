@@ -32,6 +32,7 @@ jest.mock('@gorhom/bottom-sheet', () => {
         handleIndicatorStyle?: object;
         animatedPosition?: object;
         enablePanDownToClose?: boolean;
+        topInset?: number;
     }, ref: React.Ref<{ snapToIndex: (index: number) => void }>) => {
         useImperativeHandle(ref, () => ({
             snapToIndex: jest.fn((index: number) => {
@@ -40,7 +41,7 @@ jest.mock('@gorhom/bottom-sheet', () => {
         }));
         
         return (
-            <View testID="bottom-sheet" style={{ backgroundColor: 'rgb(30,40,50)' }}>
+            <View testID="bottom-sheet" style={{ backgroundColor: 'rgb(30,40,50)' }} topInset={props.topInset}>
                 {props.children}
             </View>
         );
@@ -289,6 +290,32 @@ describe('GameSheet', () => {
         expect(getByTestId('bottom-sheet')).toBeTruthy();
         expect(getByText('Test Game')).toBeTruthy();
         expect(getByTestId('score-log-table')).toBeTruthy();
+    });
+
+    it('should allow full expansion up to the top safe area', () => {
+        const store = createMockStore({
+            settings: {
+                currentGameId: 'game-1',
+            },
+            games: {
+                entities: {
+                    'game-1': mockGame,
+                },
+                ids: ['game-1'],
+            },
+            players: {
+                entities: mockPlayers,
+                ids: ['player-1', 'player-2'],
+            },
+        });
+
+        const { getByTestId } = render(
+            <Provider store={store}>
+                <GameSheet {...defaultProps} />
+            </Provider>
+        );
+
+        expect(getByTestId('bottom-sheet').props.topInset).toBe(50);
     });
 
     it('should show locked text when game is locked', () => {
