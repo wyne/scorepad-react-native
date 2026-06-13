@@ -1,11 +1,11 @@
 import React from 'react';
 
 import { configureStore } from '@reduxjs/toolkit';
-import { fireEvent, render } from '@testing-library/react-native';
+import { act, fireEvent, render } from '@testing-library/react-native';
 import { StyleSheet } from 'react-native';
 import { Provider } from 'react-redux';
 
-import gamesReducer from '../../../redux/GamesSlice';
+import gamesReducer, { roundNext } from '../../../redux/GamesSlice';
 import playersReducer from '../../../redux/PlayersSlice';
 import settingsReducer, { toggleHomeFullscreen } from '../../../redux/SettingsSlice';
 
@@ -50,9 +50,18 @@ jest.mock('../MenuOpenContext', () => ({
 
 import ListBoard from './ListBoard';
 
-const createStore = (gameOverrides: Record<string, unknown> = {}, playerIds = ['player-1', 'player-2']) => {
+const createStore = (
+    gameOverrides: Record<string, unknown> = {},
+    playerIds = ['player-1', 'player-2'],
+    playerOverrides: Record<string, Record<string, unknown>> = {}
+) => {
     const players = Object.fromEntries(
-        playerIds.map((id) => [id, { id, playerName: `Player ${id.split('-')[1]}`, scores: [0] }])
+        playerIds.map((id) => [id, {
+            id,
+            playerName: `Player ${id.split('-')[1]}`,
+            scores: [0],
+            ...playerOverrides[id],
+        }])
     );
     return configureStore({
         reducer: { settings: settingsReducer, games: gamesReducer, players: playersReducer },
@@ -156,6 +165,47 @@ describe('ListBoard', () => {
                 paddingBottom: 44,
             })
         );
+    });
+
+    it('does not re-render player rows when advancing to an empty round keeps displayed row data unchanged', () => {
+        const store = createStore();
+        const onPlayerRowRender = jest.fn();
+
+        render(
+            <Provider store={store}><ListBoard showHint={false} onPlayerRowRender={onPlayerRowRender} /></Provider>
+        );
+
+        expect(onPlayerRowRender).toHaveBeenCalledTimes(2);
+        onPlayerRowRender.mockClear();
+
+        act(() => {
+            store.dispatch(roundNext('game-1'));
+        });
+
+        expect(onPlayerRowRender).not.toHaveBeenCalled();
+    });
+
+    it('only re-renders rows whose displayed score math changes on round advance', () => {
+        const store = createStore({}, ['player-1', 'player-2'], {
+            'player-1': { scores: [5] },
+            'player-2': { scores: [0] },
+        });
+        const onPlayerRowRender = jest.fn();
+
+        const { getAllByText } = render(
+            <Provider store={store}><ListBoard showHint={false} onPlayerRowRender={onPlayerRowRender} /></Provider>
+        );
+
+        expect(onPlayerRowRender).toHaveBeenCalledTimes(2);
+        onPlayerRowRender.mockClear();
+
+        act(() => {
+            store.dispatch(roundNext('game-1'));
+        });
+
+        expect(onPlayerRowRender).toHaveBeenCalledTimes(1);
+        expect(onPlayerRowRender).toHaveBeenCalledWith('player-1');
+        expect(getAllByText('5').length).toBeGreaterThanOrEqual(1);
     });
 });
 

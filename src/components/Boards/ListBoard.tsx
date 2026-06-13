@@ -4,10 +4,10 @@ import { LayoutChangeEvent, LayoutRectangle, Pressable, ScrollView, StyleSheet, 
 import { Icon } from 'react-native-elements';
 import Animated, { Easing, SharedValue, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { shallowEqual } from 'react-redux';
 
+import { selectGameById } from '../../../redux/GamesSlice';
 import { useAppSelector } from '../../../redux/hooks';
-import { selectPlayerById, selectPlayerRoundStats } from '../../../redux/PlayersSlice';
-import { selectCurrentGame } from '../../../redux/selectors';
 import DialOverlay from '../Interactions/Dial/DialOverlay';
 import { useMenuOpen } from '../MenuOpenContext';
 import { bottomSheetHeight } from '../Sheets/GameSheet';
@@ -36,19 +36,44 @@ function inkA(ink: string, a: number): string {
 interface PlayerRowProps {
     playerId: string;
     index: number;
-    currentRoundIndex: number;
     svDimmed: SharedValue<boolean>;
     disabled: boolean;
     onRowPress: (id: string) => void;
+    onRender?: (id: string) => void;
 }
 
-const PlayerRow: React.FC<PlayerRowProps> = ({ playerId, index, currentRoundIndex, svDimmed, disabled, onRowPress }) => {
-    const player = useAppSelector((state) => selectPlayerById(state, playerId));
-    const currentGame = useAppSelector(selectCurrentGame);
-    const isWinner = !!(currentGame?.locked && currentGame?.winnerIds?.includes(playerId));
-    const { currentRoundScore, previousTotal, currentRoundTotalScore } = useAppSelector(
-        (state) => selectPlayerRoundStats(state, playerId, currentRoundIndex)
-    );
+const PlayerRow: React.FC<PlayerRowProps> = ({ playerId, index, svDimmed, disabled, onRowPress, onRender }) => {
+    onRender?.(playerId);
+
+    const {
+        playerName,
+        color,
+        locked,
+        isWinner,
+        currentRoundScore,
+        previousTotal,
+        currentRoundTotalScore,
+    } = useAppSelector((state) => {
+        const player = state.players.entities[playerId];
+        const currentGameId = state.settings.currentGameId;
+        const currentGame = currentGameId ? selectGameById(state, currentGameId) : undefined;
+        const currentRoundIndex = currentGame?.roundCurrent ?? 0;
+        const scores = player?.scores ?? [];
+        const currentRoundScore = scores[currentRoundIndex] ?? 0;
+        const previousTotal = scores.reduce(
+            (sum, s, i) => (i < currentRoundIndex ? sum + (s || 0) : sum), 0
+        );
+
+        return {
+            playerName: player?.playerName,
+            color: player?.color ?? '#555',
+            locked: currentGame?.locked === true,
+            isWinner: !!(currentGame?.locked && currentGame?.winnerIds?.includes(playerId)),
+            currentRoundScore,
+            previousTotal,
+            currentRoundTotalScore: previousTotal + currentRoundScore,
+        };
+    }, shallowEqual);
     const breakdownOpacity = useSharedValue(1);
 
     React.useEffect(() => {
@@ -60,9 +85,8 @@ const PlayerRow: React.FC<PlayerRowProps> = ({ playerId, index, currentRoundInde
     }));
     const breakdownStyle = useAnimatedStyle(() => ({ opacity: breakdownOpacity.value }));
 
-    if (!player) return null;
+    if (!playerName) return null;
 
-    const color = player.color ?? '#555';
     const ink = inkFor(color);
 
     const separatorSign = currentRoundScore < 0 ? '−' : '+';
@@ -104,12 +128,12 @@ const PlayerRow: React.FC<PlayerRowProps> = ({ playerId, index, currentRoundInde
                         numberOfLines={1}
                         adjustsFontSizeToFit
                         minimumFontScale={0.6}>
-                        {player.playerName}
+                        {playerName}
                     </Text>
 
                     {/* Score section */}
                     <View style={styles.scoreMath}>
-                        {currentGame?.locked ? (
+                        {locked ? (
                             /* Locked: hide PREV/RND, show winner pill in that slot */
                             isWinner && (
                                 <View style={styles.winnerBadge}>
@@ -145,8 +169,21 @@ const PlayerRow: React.FC<PlayerRowProps> = ({ playerId, index, currentRoundInde
 
 const MemoizedPlayerRow = React.memo(PlayerRow);
 
-const ListBoard: React.FC<{ showHint: boolean }> = ({ showHint }) => {
-    const currentGame = useAppSelector(selectCurrentGame);
+interface ListBoardProps {
+    showHint: boolean;
+    onPlayerRowRender?: (id: string) => void;
+}
+
+const ListBoard: React.FC<ListBoardProps> = ({ showHint, onPlayerRowRender }) => {
+    const { playerIds, locked } = useAppSelector((state) => {
+        const currentGameId = state.settings.currentGameId;
+        const currentGame = currentGameId ? selectGameById(state, currentGameId) : undefined;
+
+        return {
+            playerIds: currentGame?.playerIds,
+            locked: currentGame?.locked === true,
+        };
+    }, shallowEqual);
     const fullscreen = useAppSelector(state => state.settings.home_fullscreen);
     const { menuOpen } = useMenuOpen();
     const insets = useSafeAreaInsets();
@@ -166,7 +203,7 @@ const ListBoard: React.FC<{ showHint: boolean }> = ({ showHint }) => {
 
     const handleRowPress = useCallback(
         (id: string) => {
-            if (currentGame?.locked || menuOpen) return;
+            if (locked || menuOpen) return;
             if (!boardLayout) return;
             // Start entrance animation before React schedules the re-render so the
             // overlay is already mid-animation by the time it first paints.
@@ -176,17 +213,14 @@ const ListBoard: React.FC<{ showHint: boolean }> = ({ showHint }) => {
             svOverlaySlideY.value = withTiming(0, { duration: 200, easing: Easing.out(Easing.cubic) });
             setSelectedId(id);
         },
-        [boardLayout, currentGame?.locked, menuOpen]
+        [boardLayout, locked, menuOpen]
     );
 
     const handleClose = useCallback(() => {
         setSelectedId(null);
     }, []);
 
-    if (!currentGame) return null;
-    const playerIds = currentGame.playerIds;
     if (!playerIds?.length) return null;
-    const currentRoundIndex = currentGame.roundCurrent;
     const scrollInsets = {
         bottom: fullscreen ? insets.bottom + 10 : bottomSheetHeight + 10,
         left: insets.left + ROW_BOARD_PADDING,
@@ -212,10 +246,10 @@ const ListBoard: React.FC<{ showHint: boolean }> = ({ showHint }) => {
                         key={id}
                         playerId={id}
                         index={index}
-                        currentRoundIndex={currentRoundIndex}
                         svDimmed={svDimmed}
-                        disabled={!!(currentGame?.locked || menuOpen)}
+                        disabled={!!(locked || menuOpen)}
                         onRowPress={handleRowPress}
+                        onRender={onPlayerRowRender}
                     />
                 ))}
             </ScrollView>
