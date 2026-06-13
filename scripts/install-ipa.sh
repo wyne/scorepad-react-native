@@ -60,11 +60,10 @@ if command -v fzf &>/dev/null; then
         for f in "${IPAS[@]}"; do
             name=$(basename "$f")
             IFS='|' read -r ver ts rel <<< "$(ipa_info "$f" "$name")"
-            if [ -n "$rel" ]; then ts_disp="${ts} (${rel})"; else ts_disp="$ts"; fi
-            printf "%s|%s|%s|%s\n" "$name" "$ver" "$ts_disp" "$f"
+            printf "%s|%s|%s|%s|%s\n" "$rel" "$name" "$ver" "$ts" "$f"
         done | fzf \
             --prompt='> ' \
-            --with-nth='1..3' \
+            --with-nth='1..4' \
             --delimiter='|' \
             --preview "
                 f=\$(echo {} | cut -d'|' -f4)
@@ -81,14 +80,13 @@ print('Min OS:', d.get('MinimumOSVersion', '?'))
             --height=~50% \
             2>/dev/null || true)
     if [ -z "$IPA_PATH" ]; then echo "Cancelled." >&2; exit 1; fi
-    IPA_PATH=$(echo "$IPA_PATH" | cut -d'|' -f4)
+    IPA_PATH=$(echo "$IPA_PATH" | cut -d'|' -f5)
 else
     echo -e "${COLOR_BOLD}Select an IPA:${COLOR_RESET}"
     for i in "${!IPAS[@]}"; do
         name=$(basename "${IPAS[$i]}")
         IFS='|' read -r ver ts rel <<< "$(ipa_info "${IPAS[$i]}" "$name")"
-        ts_disp="${ts:+$ts (${rel:-$ts})}"
-        echo -e "  $((i+1)). ${COLOR_CYAN}${name}${COLOR_RESET}  ${COLOR_YELLOW}${ver}${COLOR_RESET}  ${COLOR_DIM}${ts_disp}${COLOR_RESET}"
+        echo -e "  $((i+1)). ${COLOR_DIM}${rel}${COLOR_RESET}  ${COLOR_CYAN}${name}${COLOR_RESET}  ${COLOR_YELLOW}${ver}${COLOR_RESET}  ${COLOR_DIM}${ts}${COLOR_RESET}"
     done
     printf "Select IPA [1-%d]: " "${#IPAS[@]}"
     read -r n; n=$((n - 1))
