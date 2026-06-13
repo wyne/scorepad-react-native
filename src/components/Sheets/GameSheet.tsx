@@ -7,7 +7,6 @@ import { Alert, StyleSheet, Text, TouchableWithoutFeedback, View, useWindowDimen
 import { Button } from 'react-native-elements';
 import Animated, { Extrapolate, FadeIn, interpolate, Layout, useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { shallowEqual } from 'react-redux';
 
 import { asyncRematchGame, selectGameById, updateGame } from '../../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
@@ -26,26 +25,15 @@ import { useGameSheetContext } from './GameSheetContext';
  */
 export const bottomSheetHeight = 80;
 
-interface Props {
-    /** Test-only render probe for selector invalidation regressions. */
-    onRender?: (id: string) => void;
-}
-
-const GameSheet: React.FunctionComponent<Props> = ({ onRender }) => {
+const GameSheet: React.FunctionComponent = () => {
     const theme = useTheme();
     const navigation = useNavigation<NativeStackNavigationProp<ParamListBase>>();
     const { height: containerHeight } = useWindowDimensions();
     const currentGameId = useAppSelector(state => state.settings.currentGameId);
-    onRender?.(currentGameId || '');
-    const { gameLocked, gameTitle, playerIds } = useAppSelector(state => {
-        const game = selectGameById(state, currentGameId || '');
-
-        return {
-            gameLocked: game?.locked,
-            gameTitle: game?.title,
-            playerIds: game?.playerIds,
-        };
-    }, shallowEqual);
+    const game = useAppSelector(state => selectGameById(state, currentGameId || ''));
+    const gameTitle = game?.title;
+    const gameLocked = game?.locked;
+    const playerIds = game?.playerIds;
     const chooseWinnersSheetRef = useChooseWinnersSheetContext();
 
     // ref
@@ -284,79 +272,77 @@ const GameSheet: React.FunctionComponent<Props> = ({ onRender }) => {
                         }
                     </View>
 
-                    {shouldRenderContent && (
-                        <Animated.View style={[styles.sheetContent, animatedSheetStyle]}>
-                            <ScoreLogTable showScores={shouldRenderContent} />
+                    <Animated.View style={[styles.sheetContent, animatedSheetStyle]}>
+                        <ScoreLogTable showScores={shouldRenderContent} />
 
-                            <Text style={{ color: theme.text, margin: 10, marginTop: 0 }}>
-                                Tap the player column or total score column to change sorting.
-                            </Text>
+                        <Text style={{ color: theme.text, margin: 10, marginTop: 0 }}>
+                            Tap the player column or total score column to change sorting.
+                        </Text>
 
-                            <Animated.View layout={Layout.delay(200)}>
+                        <Animated.View layout={Layout.delay(200)}>
 
-                                {!gameLocked &&
-                                    <Animated.View entering={FadeIn.delay(400)}>
-                                        <Button title="Edit Game and Players"
-                                            type="clear"
-                                            testID="edit-game-and-players"
-                                            accessibilityLabel="Edit Game and Players"
-                                            titleStyle={{ color: theme.tint }}
-                                            style={{
-                                                margin: 5, marginTop: 15,
-                                                backgroundColor: theme.background === '#000000' ? 'rgba(0,0,0,.2)' : '#FFFFFF', borderRadius: 10
-                                            }}
-                                            onPress={() => {
+                            {!gameLocked &&
+                                <Animated.View entering={FadeIn.delay(400)}>
+                                    <Button title="Edit Game and Players"
+                                        type="clear"
+                                        testID="edit-game-and-players"
+                                        accessibilityLabel="Edit Game and Players"
+                                        titleStyle={{ color: theme.tint }}
+                                        style={{
+                                            margin: 5, marginTop: 15,
+                                            backgroundColor: theme.background === '#000000' ? 'rgba(0,0,0,.2)' : '#FFFFFF', borderRadius: 10
+                                        }}
+                                        onPress={() => {
 
-                                                logEvent('edit_game', {
-                                                    game_id: currentGameId
-                                                });
-                                                navigation.navigate('EditGame', { source: 'edit_game' });
-                                            }
-                                            }
-                                        />
-                                    </Animated.View>
-                                }
-                            </Animated.View>
-
-                            <Animated.View key={mountKey + 'a'} layout={Layout.delay(200)} style={{ flexDirection: 'row', justifyContent: 'space-around', paddingVertical: 10 }}>
-                                <BigButton text="Share"
-                                    color={theme.tint}
-                                    icon="share-outline"
-                                    onPress={() => navigation.navigate('Share')}
-                                    testID="share-button"
-                                />
-
-                                <BigButton text={gameLocked ? 'Unlock' : 'Choose Winners'}
-                                    color={gameLocked ? theme.warning : theme.success}
-                                    icon={gameLocked ? 'lock-closed-outline' : 'lock-open-outline'}
-                                    onPress={gameLocked ? unlockGame : () => chooseWinnersSheetRef?.current?.present()}
-                                    testID={gameLocked ? 'unlock-button' : 'choose-winners-button'}
-                                />
-
-                            </Animated.View>
-
-                            <Animated.View key={mountKey + 'b'} layout={Layout.delay(200)} style={{ flexDirection: 'row', justifyContent: 'space-around', paddingVertical: 10 }}>
-                                {!gameLocked &&
-                                    <Animated.View layout={Layout.delay(200)} style={{ justifyContent: 'center', alignItems: 'center' }}>
-                                        <BigButton text="Reset"
-                                            color={theme.destructive}
-                                            icon="backspace-outline"
-                                            onPress={resetGameHandler}
-                                        />
-                                    </Animated.View>
-                                }
-
-                                <Animated.View layout={Layout.delay(200)} style={{ justifyContent: 'center', alignItems: 'center' }}>
-                                    <BigButton text="Rematch"
-                                        color={theme.warning}
-                                        icon={<RematchIcon fill={theme.warning} />}
-                                        onPress={rematchGameHandler}
+                                            logEvent('edit_game', {
+                                                game_id: currentGameId
+                                            });
+                                            navigation.navigate('EditGame', { source: 'edit_game' });
+                                        }
+                                        }
                                     />
                                 </Animated.View>
-
-                            </Animated.View>
+                            }
                         </Animated.View>
-                    )}
+
+                        <Animated.View key={mountKey + 'a'} layout={Layout.delay(200)} style={{ flexDirection: 'row', justifyContent: 'space-around', paddingVertical: 10 }}>
+                            <BigButton text="Share"
+                                color={theme.tint}
+                                icon="share-outline"
+                                onPress={() => navigation.navigate('Share')}
+                                testID="share-button"
+                            />
+
+                            <BigButton text={gameLocked ? 'Unlock' : 'Choose Winners'}
+                                color={gameLocked ? theme.warning : theme.success}
+                                icon={gameLocked ? 'lock-closed-outline' : 'lock-open-outline'}
+                                onPress={gameLocked ? unlockGame : () => chooseWinnersSheetRef?.current?.present()}
+                                testID={gameLocked ? 'unlock-button' : 'choose-winners-button'}
+                            />
+
+                        </Animated.View>
+
+                        <Animated.View key={mountKey + 'b'} layout={Layout.delay(200)} style={{ flexDirection: 'row', justifyContent: 'space-around', paddingVertical: 10 }}>
+                            {!gameLocked &&
+                                <Animated.View layout={Layout.delay(200)} style={{ justifyContent: 'center', alignItems: 'center' }}>
+                                    <BigButton text="Reset"
+                                        color={theme.destructive}
+                                        icon="backspace-outline"
+                                        onPress={resetGameHandler}
+                                    />
+                                </Animated.View>
+                            }
+
+                            <Animated.View layout={Layout.delay(200)} style={{ justifyContent: 'center', alignItems: 'center' }}>
+                                <BigButton text="Rematch"
+                                    color={theme.warning}
+                                    icon={<RematchIcon fill={theme.warning} />}
+                                    onPress={rematchGameHandler}
+                                />
+                            </Animated.View>
+
+                        </Animated.View>
+                    </Animated.View>
                 </SafeAreaView>
             </BottomSheetScrollView>
 
