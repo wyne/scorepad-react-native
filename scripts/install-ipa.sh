@@ -61,12 +61,25 @@ fi
 
 if command -v fzf &>/dev/null; then
     echo "Select an IPA:"
+    # First pass: gather rows and compute column widths so they align.
+    rels=(); names=(); vers=(); tss=(); paths=()
+    w_rel=0; w_name=0; w_ver=0
+    for f in "${IPAS[@]}"; do
+        name=$(basename "$f")
+        IFS='|' read -r ver ts rel <<< "$(ipa_info "$f" "$name")"
+        rel="${rel:-unknown}"
+        rels+=("$rel"); names+=("$name"); vers+=("$ver"); tss+=("$ts"); paths+=("$f")
+        (( ${#rel}  > w_rel ))  && w_rel=${#rel}
+        (( ${#name} > w_name )) && w_name=${#name}
+        (( ${#ver}  > w_ver ))  && w_ver=${#ver}
+    done
     IPA_PATH=$(
-        for f in "${IPAS[@]}"; do
-            name=$(basename "$f")
-            IFS='|' read -r ver ts rel <<< "$(ipa_info "$f" "$name")"
-            rel_disp="${rel:-unknown}"
-            printf "%s  %s  %s  %s|%s\n" "$rel_disp" "$name" "$ver" "$ts" "$f"
+        for i in "${!paths[@]}"; do
+            printf "%-*s  %-*s  %-*s  %s|%s\n" \
+                "$w_rel" "${rels[$i]}" \
+                "$w_name" "${names[$i]}" \
+                "$w_ver" "${vers[$i]}" \
+                "${tss[$i]}" "${paths[$i]}"
         done | fzf \
             --prompt='> ' \
             --with-nth='1' \
