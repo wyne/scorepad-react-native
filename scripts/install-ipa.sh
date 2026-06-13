@@ -23,10 +23,15 @@ relative_time() {
 
 ipa_info() {
     local f=$1 name=$2
-    local ver="" ts="" rel=""
+    local ver="" ts="" rel="" e=""
     if [[ "$name" =~ ^build-([0-9]+)\.ipa$ ]]; then
-        local e=$((BASH_REMATCH[1] / 1000))
-        ts=$(date -r "$e" "+%Y-%m-%d %H:%M" 2>/dev/null || echo "unknown")
+        e=$((BASH_REMATCH[1] / 1000))
+    else
+        # Fall back to the file's modification time for arbitrarily named IPAs
+        e=$(stat -f %m "$f" 2>/dev/null || stat -c %Y "$f" 2>/dev/null || echo "")
+    fi
+    if [ -n "$e" ]; then
+        ts=$(date -r "$e" "+%Y-%m-%d %H:%M" 2>/dev/null || echo "")
         rel=$(relative_time "$e")
     fi
     if plist=$(unzip -p "$f" "Payload/*.app/Info.plist" 2>/dev/null); then
@@ -56,18 +61,31 @@ fi
 
 if command -v fzf &>/dev/null; then
     echo "Select an IPA:"
+    # First pass: gather rows and compute column widths so they align.
+    rels=(); names=(); vers=(); tss=(); paths=()
+    w_rel=0; w_name=0; w_ver=0
+    for f in "${IPAS[@]}"; do
+        name=$(basename "$f")
+        IFS='|' read -r ver ts rel <<< "$(ipa_info "$f" "$name")"
+        rel="${rel:-unknown}"
+        rels+=("$rel"); names+=("$name"); vers+=("$ver"); tss+=("$ts"); paths+=("$f")
+        (( ${#rel}  > w_rel ))  && w_rel=${#rel}
+        (( ${#name} > w_name )) && w_name=${#name}
+        (( ${#ver}  > w_ver ))  && w_ver=${#ver}
+    done
     IPA_PATH=$(
-        for f in "${IPAS[@]}"; do
-            name=$(basename "$f")
-            IFS='|' read -r ver ts rel <<< "$(ipa_info "$f" "$name")"
-            if [ -n "$rel" ]; then ts_disp="${ts} (${rel})"; else ts_disp="$ts"; fi
-            printf "%s|%s|%s|%s\n" "$name" "$ver" "$ts_disp" "$f"
+        for i in "${!paths[@]}"; do
+            printf "%-*s  %-*s  %-*s  %s|%s\n" \
+                "$w_rel" "${rels[$i]}" \
+                "$w_name" "${names[$i]}" \
+                "$w_ver" "${vers[$i]}" \
+                "${tss[$i]}" "${paths[$i]}"
         done | fzf \
             --prompt='> ' \
-            --with-nth='1..3' \
+            --with-nth='1' \
             --delimiter='|' \
             --preview "
-                f=\$(echo {} | cut -d'|' -f4)
+                f=\$(echo {} | cut -d'|' -f2)
                 unzip -p \"\$f\" 'Payload/*.app/Info.plist' 2>/dev/null | plutil -convert json -o - - 2>/dev/null | python3 -c \"
 import sys, json
 d = json.load(sys.stdin)
@@ -81,14 +99,13 @@ print('Min OS:', d.get('MinimumOSVersion', '?'))
             --height=~50% \
             2>/dev/null || true)
     if [ -z "$IPA_PATH" ]; then echo "Cancelled." >&2; exit 1; fi
-    IPA_PATH=$(echo "$IPA_PATH" | cut -d'|' -f4)
+    IPA_PATH=$(echo "$IPA_PATH" | cut -d'|' -f2)
 else
     echo -e "${COLOR_BOLD}Select an IPA:${COLOR_RESET}"
     for i in "${!IPAS[@]}"; do
         name=$(basename "${IPAS[$i]}")
         IFS='|' read -r ver ts rel <<< "$(ipa_info "${IPAS[$i]}" "$name")"
-        ts_disp="${ts:+$ts (${rel:-$ts})}"
-        echo -e "  $((i+1)). ${COLOR_CYAN}${name}${COLOR_RESET}  ${COLOR_YELLOW}${ver}${COLOR_RESET}  ${COLOR_DIM}${ts_disp}${COLOR_RESET}"
+        echo -e "  $((i+1)). ${COLOR_YELLOW}${rel:-unknown}${COLOR_RESET}  ${COLOR_CYAN}${name}${COLOR_RESET}  ${COLOR_DIM}${ver}${COLOR_RESET}  ${COLOR_DIM}${ts}${COLOR_RESET}"
     done
     printf "Select IPA [1-%d]: " "${#IPAS[@]}"
     read -r n; n=$((n - 1))
