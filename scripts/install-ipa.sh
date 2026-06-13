@@ -60,13 +60,14 @@ if command -v fzf &>/dev/null; then
         for f in "${IPAS[@]}"; do
             name=$(basename "$f")
             IFS='|' read -r ver ts rel <<< "$(ipa_info "$f" "$name")"
-            printf "%s|%s|%s|%s|%s\n" "$rel" "$name" "$ver" "$ts" "$f"
+            rel_disp="${rel:-unknown}"
+            printf "%s|%s|%s|%s|%s\n" "$rel_disp" "$name" "$ver" "$ts" "$f"
         done | fzf \
             --prompt='> ' \
             --with-nth='1..4' \
             --delimiter='|' \
             --preview "
-                f=\$(echo {} | cut -d'|' -f4)
+                f=\$(echo {} | cut -d'|' -f5)
                 unzip -p \"\$f\" 'Payload/*.app/Info.plist' 2>/dev/null | plutil -convert json -o - - 2>/dev/null | python3 -c \"
 import sys, json
 d = json.load(sys.stdin)
@@ -86,7 +87,7 @@ else
     for i in "${!IPAS[@]}"; do
         name=$(basename "${IPAS[$i]}")
         IFS='|' read -r ver ts rel <<< "$(ipa_info "${IPAS[$i]}" "$name")"
-        echo -e "  $((i+1)). ${COLOR_DIM}${rel}${COLOR_RESET}  ${COLOR_CYAN}${name}${COLOR_RESET}  ${COLOR_YELLOW}${ver}${COLOR_RESET}  ${COLOR_DIM}${ts}${COLOR_RESET}"
+        echo -e "  $((i+1)). ${COLOR_YELLOW}${rel:-unknown}${COLOR_RESET}  ${COLOR_CYAN}${name}${COLOR_RESET}  ${COLOR_DIM}${ver}${COLOR_RESET}  ${COLOR_DIM}${ts}${COLOR_RESET}"
     done
     printf "Select IPA [1-%d]: " "${#IPAS[@]}"
     read -r n; n=$((n - 1))
