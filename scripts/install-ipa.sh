@@ -23,10 +23,15 @@ relative_time() {
 
 ipa_info() {
     local f=$1 name=$2
-    local ver="" ts="" rel=""
+    local ver="" ts="" rel="" e=""
     if [[ "$name" =~ ^build-([0-9]+)\.ipa$ ]]; then
-        local e=$((BASH_REMATCH[1] / 1000))
-        ts=$(date -r "$e" "+%Y-%m-%d %H:%M" 2>/dev/null || echo "unknown")
+        e=$((BASH_REMATCH[1] / 1000))
+    else
+        # Fall back to the file's modification time for arbitrarily named IPAs
+        e=$(stat -f %m "$f" 2>/dev/null || stat -c %Y "$f" 2>/dev/null || echo "")
+    fi
+    if [ -n "$e" ]; then
+        ts=$(date -r "$e" "+%Y-%m-%d %H:%M" 2>/dev/null || echo "")
         rel=$(relative_time "$e")
     fi
     if plist=$(unzip -p "$f" "Payload/*.app/Info.plist" 2>/dev/null); then
@@ -61,13 +66,13 @@ if command -v fzf &>/dev/null; then
             name=$(basename "$f")
             IFS='|' read -r ver ts rel <<< "$(ipa_info "$f" "$name")"
             rel_disp="${rel:-unknown}"
-            printf "%s|%s|%s|%s|%s\n" "$rel_disp" "$name" "$ver" "$ts" "$f"
+            printf "%s  %s  %s  %s|%s\n" "$rel_disp" "$name" "$ver" "$ts" "$f"
         done | fzf \
             --prompt='> ' \
-            --with-nth='1..4' \
+            --with-nth='1' \
             --delimiter='|' \
             --preview "
-                f=\$(echo {} | cut -d'|' -f5)
+                f=\$(echo {} | cut -d'|' -f2)
                 unzip -p \"\$f\" 'Payload/*.app/Info.plist' 2>/dev/null | plutil -convert json -o - - 2>/dev/null | python3 -c \"
 import sys, json
 d = json.load(sys.stdin)
@@ -81,7 +86,7 @@ print('Min OS:', d.get('MinimumOSVersion', '?'))
             --height=~50% \
             2>/dev/null || true)
     if [ -z "$IPA_PATH" ]; then echo "Cancelled." >&2; exit 1; fi
-    IPA_PATH=$(echo "$IPA_PATH" | cut -d'|' -f5)
+    IPA_PATH=$(echo "$IPA_PATH" | cut -d'|' -f2)
 else
     echo -e "${COLOR_BOLD}Select an IPA:${COLOR_RESET}"
     for i in "${!IPAS[@]}"; do
