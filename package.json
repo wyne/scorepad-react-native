@@ -31,7 +31,6 @@
     "@react-native-community/masked-view": "^0.1.11",
     "@react-native-firebase/analytics": "^24.0.0",
     "@react-native-firebase/app": "^24.0.0",
-    "@react-native-firebase/auth": "^24.0.0",
     "@react-native-firebase/crashlytics": "^24.0.0",
     "@react-native-menu/menu": "^2.0.0",
     "@react-native-picker/picker": "2.11.4",
