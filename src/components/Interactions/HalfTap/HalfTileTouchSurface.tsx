@@ -3,9 +3,9 @@ import React, { useState } from 'react';
 import * as Haptics from 'expo-haptics';
 import { StyleSheet, Text, TouchableHighlight, View } from 'react-native';
 
-import { useAppDispatch, useAppSelector } from '../../../../redux/hooks';
+import { selectGameById } from '../../../../redux/GamesSlice';
+import { useAppDispatch, useAppSelector, useAppStore } from '../../../../redux/hooks';
 import { playerRoundScoreIncrement } from '../../../../redux/PlayersSlice';
-import { selectCurrentGame } from '../../../../redux/selectors';
 import { logEvent } from '../../../Analytics';
 import { useMenuOpen } from '../../MenuOpenContext';
 import { ScoreParticle } from '../../PlayerTiles/AdditionTile/ScoreParticle';
@@ -21,14 +21,18 @@ type Props = {
     fontColor: string;
     scoreType: 'increment' | 'decrement';
     showHint?: boolean;
+    /** Test-only render probe for selector invalidation regressions. */
+    onRender?: (id: string) => void;
 };
 
 export const HalfTileTouchSurface: React.FunctionComponent<Props> = (
-    { playerIndex, fontColor, playerId, scoreType, showHint }: Props) => {
+    { playerIndex, fontColor, playerId, scoreType, showHint, onRender }: Props) => {
+    onRender?.(playerId);
 
     const { menuOpen } = useMenuOpen();
     const showPointParticles = useAppSelector(state => state.settings.showPointParticles);
     const dispatch = useAppDispatch();
+    const store = useAppStore();
 
     const [particles, setParticles] = useState<ScoreParticleProps[]>([]);
 
@@ -36,10 +40,21 @@ export const HalfTileTouchSurface: React.FunctionComponent<Props> = (
     const addendTwo = useAppSelector(state => state.settings.addendTwo);
 
     const currentGameId = useAppSelector(state => state.settings.currentGameId);
-    const currentGame = useAppSelector(selectCurrentGame);
-    if (typeof currentGame == 'undefined') return null;
+    const currentGameLocked = useAppSelector(state => {
+        const currentGameId = state.settings.currentGameId;
+        return currentGameId ? selectGameById(state, currentGameId)?.locked === true : false;
+    });
+    const hasCurrentGame = useAppSelector(state => {
+        const currentGameId = state.settings.currentGameId;
+        return currentGameId ? typeof selectGameById(state, currentGameId) !== 'undefined' : false;
+    });
+    if (!hasCurrentGame) return null;
 
-    const currentRoundIndex = currentGame.roundCurrent;
+    const getCurrentRoundIndex = () => {
+        const state = store.getState();
+        const currentGameId = state.settings.currentGameId;
+        return currentGameId ? selectGameById(state, currentGameId)?.roundCurrent ?? 0 : 0;
+    };
 
     const addParticle = (addend: number) => {
         const key = Math.random().toString(36).substring(7);
@@ -52,8 +67,9 @@ export const HalfTileTouchSurface: React.FunctionComponent<Props> = (
     };
 
     const scoreChangeHandler = (addend: number, secondaryHold = false) => {
-        if (currentGame.locked) return;
+        if (currentGameLocked) return;
         if (menuOpen) return;
+        const currentRoundIndex = getCurrentRoundIndex();
 
         if (showPointParticles) {
             addParticle(addend);
@@ -74,7 +90,7 @@ export const HalfTileTouchSurface: React.FunctionComponent<Props> = (
     return (
         <TouchableHighlight
             style={[styles.surface, scoreType == 'increment' ? styles.surfaceAdd : styles.surfaceSubtract]}
-            underlayColor={currentGame.locked || menuOpen ? 'transparent' : fontColor + '30'}
+            underlayColor={currentGameLocked || menuOpen ? 'transparent' : fontColor + '30'}
             activeOpacity={menuOpen ? 1 : 1}
             onPress={() => scoreChangeHandler(addendOne)}
             onLongPress={() => scoreChangeHandler(addendTwo, true)}>
