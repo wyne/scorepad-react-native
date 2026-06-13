@@ -147,7 +147,7 @@ export default {
       {
         // Source map upload during EAS builds; skipped with a warning unless
         // SENTRY_AUTH_TOKEN is set in the build environment.
-        organization: process.env.SENTRY_ORG || 'wyne',
+        organization: process.env.SENTRY_ORG || 'justin-wyne',
         project: process.env.SENTRY_PROJECT || 'scorepad-react-native',
       },
     ],
