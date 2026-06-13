@@ -5,9 +5,9 @@ import { Animated, StyleSheet, Text, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import ReAnimated, { runOnJS, useAnimatedReaction, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 
-import { useAppDispatch, useAppSelector } from '../../../../redux/hooks';
+import { selectGameById } from '../../../../redux/GamesSlice';
+import { useAppDispatch, useAppSelector, useAppStore } from '../../../../redux/hooks';
 import { playerRoundScoreIncrement } from '../../../../redux/PlayersSlice';
-import { selectCurrentGame } from '../../../../redux/selectors';
 import { logEvent } from '../../../Analytics';
 import { useMenuOpen } from '../../MenuOpenContext';
 
@@ -18,6 +18,7 @@ interface HalfTapProps {
     playerId: string;
     showHint?: boolean;
     tileHeight?: number;
+    onRender?: (id: string) => void;
 }
 
 const notchSize = 50;
@@ -31,15 +32,21 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
     fontColor,
     showHint,
     tileHeight,
+    onRender,
 }) => {
+    onRender?.(playerId);
+
     const hintVisible = showHint && (!tileHeight || tileHeight >= HINT_MIN_HEIGHT);
     //#region Selector setup
 
     const currentGameId = useAppSelector(state => state.settings.currentGameId);
-    const currentRoundIndex = useAppSelector(state => selectCurrentGame(state)?.roundCurrent) || 0;
-    const currentGameLocked = useAppSelector(state => selectCurrentGame(state)?.locked);
+    const currentGameLocked = useAppSelector(state => {
+        const currentGameId = state.settings.currentGameId;
+        return currentGameId ? selectGameById(state, currentGameId)?.locked === true : false;
+    });
 
     const dispatch = useAppDispatch();
+    const store = useAppStore();
 
     const addendOne = useAppSelector(state => state.settings.addendOne);
     const addendTwo = useAppSelector(state => state.settings.addendTwo);
@@ -136,20 +143,26 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
 
     const { menuOpen } = useMenuOpen();
 
+    const getCurrentRoundIndex = useCallback(() => {
+        const state = store.getState();
+        const currentGameId = state.settings.currentGameId;
+        return currentGameId ? selectGameById(state, currentGameId)?.roundCurrent ?? 0 : 0;
+    }, [store]);
+
     const endGesture = useCallback((translationY: number) => {
         if (menuOpen) return;
         logEvent('score_change', {
             player_index: index,
             game_id: currentGameId,
             addend: secondaryHold ? addendTwo : addendOne,
-            round: currentRoundIndex,
+            round: getCurrentRoundIndex(),
             type: translationY > 0 ? 'decrement' : 'increment',
             power_hold: secondaryHold,
             notches: -Math.round((translationY || 0) / notchSize),
             interaction: 'swipe-vertical',
         });
         secondaryHoldStop();
-    }, [index, currentGameId, secondaryHold, addendOne, addendTwo, currentRoundIndex, menuOpen]);
+    }, [index, currentGameId, secondaryHold, addendOne, addendTwo, getCurrentRoundIndex, menuOpen]);
 
     const panGesture = Gesture.Pan()
         .enabled(!currentGameLocked && !menuOpen)
@@ -188,6 +201,7 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
         if (menuOpen) return;
 
         const scoreDelta = value * (secondaryHold ? addendTwo : addendOne);
+        const currentRoundIndex = getCurrentRoundIndex();
 
         if (secondaryHold) {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);

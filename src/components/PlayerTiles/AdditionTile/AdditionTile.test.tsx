@@ -1,10 +1,10 @@
 import React from 'react';
 
 import { configureStore } from '@reduxjs/toolkit';
-import { render } from '@testing-library/react-native';
+import { act, render } from '@testing-library/react-native';
 import { Provider } from 'react-redux';
 
-import gamesReducer from '../../../../redux/GamesSlice';
+import gamesReducer, { roundNext } from '../../../../redux/GamesSlice';
 import playersReducer from '../../../../redux/PlayersSlice';
 import settingsReducer from '../../../../redux/SettingsSlice';
 
@@ -480,5 +480,94 @@ describe('AdditionTile', () => {
                 </Provider>
             );
         }).not.toThrow();
+    });
+
+    it('does not re-render when advancing to an empty round keeps displayed score data unchanged', () => {
+        const store = createMockStore({
+            settings: {
+                currentGameId: 'game-1',
+            },
+            games: {
+                entities: {
+                    'game-1': {
+                        ...mockGame,
+                        roundCurrent: 0,
+                        roundTotal: 1,
+                    },
+                },
+                ids: ['game-1'],
+            },
+            players: {
+                entities: {
+                    'player-1': {
+                        ...mockPlayer,
+                        scores: [0],
+                    },
+                },
+                ids: ['player-1'],
+            },
+        });
+        const onRender = jest.fn();
+
+        render(
+            <Provider store={store}>
+                <AdditionTile {...defaultProps} onRender={onRender} />
+            </Provider>
+        );
+
+        expect(onRender).toHaveBeenCalledTimes(1);
+        onRender.mockClear();
+
+        act(() => {
+            store.dispatch(roundNext('game-1'));
+        });
+
+        expect(onRender).not.toHaveBeenCalled();
+    });
+
+    it('re-renders when advancing rounds changes displayed score math', () => {
+        const store = createMockStore({
+            settings: {
+                currentGameId: 'game-1',
+            },
+            games: {
+                entities: {
+                    'game-1': {
+                        ...mockGame,
+                        roundCurrent: 0,
+                        roundTotal: 1,
+                    },
+                },
+                ids: ['game-1'],
+            },
+            players: {
+                entities: {
+                    'player-1': {
+                        ...mockPlayer,
+                        scores: [5],
+                    },
+                },
+                ids: ['player-1'],
+            },
+        });
+        const onRender = jest.fn();
+
+        const { getByText } = render(
+            <Provider store={store}>
+                <AdditionTile {...defaultProps} onRender={onRender} />
+            </Provider>
+        );
+
+        expect(onRender).toHaveBeenCalledTimes(1);
+        onRender.mockClear();
+
+        act(() => {
+            store.dispatch(roundNext('game-1'));
+        });
+
+        expect(onRender).toHaveBeenCalledTimes(1);
+        expect(getByText('Before: 5')).toBeTruthy();
+        expect(getByText('Round: 0')).toBeTruthy();
+        expect(getByText('After: 5')).toBeTruthy();
     });
 });

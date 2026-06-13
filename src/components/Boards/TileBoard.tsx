@@ -3,8 +3,8 @@ import React, { memo, useEffect, useState } from 'react';
 import { LayoutChangeEvent, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { selectGameById } from '../../../redux/GamesSlice';
 import { useAppSelector } from '../../../redux/hooks';
-import { selectCurrentGame } from '../../../redux/selectors';
 import { bottomSheetHeight } from '../../components/Sheets/GameSheet';
 import { useTheme } from '../../theme';
 
@@ -13,7 +13,10 @@ import PlayerTile from './PlayerTile';
 const TileBoard: React.FC<{ showHint: boolean }> = ({ showHint }) => {
     const theme = useTheme();
     const fullscreen = useAppSelector(state => state.settings.home_fullscreen);
-    const playerIds = useAppSelector(state => selectCurrentGame(state)?.playerIds);
+    const playerIds = useAppSelector(state => {
+        const currentGameId = state.settings.currentGameId;
+        return currentGameId ? selectGameById(state, currentGameId)?.playerIds : undefined;
+    });
 
     if (playerIds == null || playerIds.length == 0) return null;
 

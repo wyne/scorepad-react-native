@@ -1,11 +1,14 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 
+import { getContrastRatio } from 'colorsheet';
 import { DimensionValue, StyleSheet } from 'react-native';
 import Animated, { Easing, FadeIn } from 'react-native-reanimated';
+import { shallowEqual } from 'react-redux';
 
-import { makeSelectPlayerColors } from '../../../redux/GamesSlice';
+import { selectGameById } from '../../../redux/GamesSlice';
 import { useAppSelector } from '../../../redux/hooks';
-import { selectCurrentGame, selectInteractionType } from '../../../redux/selectors';
+import { selectInteractionType } from '../../../redux/selectors';
+import { getPalette } from '../../ColorPalette';
 import { useTheme } from '../../theme';
 import { interactionComponents } from '../Interactions/InteractionComponents';
 import { InteractionType } from '../Interactions/InteractionType';
@@ -37,13 +40,25 @@ const PlayerTile: React.FunctionComponent<Props> = React.memo(({
     if (Number.isNaN(width) || Number.isNaN(height)) return null;
 
     const theme = useTheme();
-    const currentGame = useAppSelector(selectCurrentGame);
-    const currentGameId = currentGame?.id;
     const playerIndexLabel = useAppSelector(state => state.settings.showPlayerIndex);
-    const selectPlayerColors = useMemo(() => makeSelectPlayerColors(), []);
-    const playerColors = useAppSelector(state => selectPlayerColors(state, currentGameId, playerId));
-    const [bg, fg] = playerColors;
-    const isWinner = !!(currentGame?.locked && currentGame?.winnerIds?.includes(playerId));
+    const { bg, fg, isWinner } = useAppSelector(state => {
+        const currentGameId = state.settings.currentGameId;
+        const currentGame = currentGameId ? selectGameById(state, currentGameId) : undefined;
+        const palette = getPalette(currentGame?.palette || 'original') || getPalette('original');
+        const playerIndex = currentGame?.playerIds.indexOf(playerId) ?? 0;
+        const paletteBG = palette[playerIndex % palette.length];
+        const bg = state.players.entities[playerId]?.color || paletteBG;
+
+        const blackContrast = getContrastRatio(bg, '#000').number;
+        const whiteContrast = getContrastRatio(bg, '#fff').number;
+        const fg = blackContrast >= whiteContrast + 1 ? '#000000' : '#FFFFFF';
+
+        return {
+            bg,
+            fg,
+            isWinner: !!(currentGame?.locked && currentGame?.winnerIds?.includes(playerId)),
+        };
+    }, shallowEqual);
 
     const widthPerc: DimensionValue = `${(100 / cols)}%`;
     const heightPerc: DimensionValue = `${(100 / rows)}%`;
