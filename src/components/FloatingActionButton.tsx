@@ -7,7 +7,7 @@ import { StyleSheet, View } from 'react-native';
 import { Icon } from 'react-native-elements';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { asyncCreateGame, selectAllGames } from '../../redux/GamesSlice';
+import { asyncCreateGame, selectGameIds } from '../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { MAX_PLAYERS } from '../constants';
 import { useTheme } from '../theme';
@@ -24,7 +24,7 @@ interface Props {
 const FloatingActionButton: React.FunctionComponent<Props> = ({ navigation }) => {
     const theme = useTheme();
     const dispatch = useAppDispatch();
-    const gameList = useAppSelector(selectAllGames);
+    const gameCount = useAppSelector(state => selectGameIds(state).length);
     const insets = useSafeAreaInsets();
 
     const playerNumberOptions = [...Array.from(Array(MAX_PLAYERS).keys(), n => n + 1)];
@@ -36,7 +36,7 @@ const FloatingActionButton: React.FunctionComponent<Props> = ({ navigation }) =>
 
     const addGameHandler = async (playerCount: number) => {
         dispatch(
-            asyncCreateGame({ gameCount: gameList.length, playerCount })
+            asyncCreateGame({ gameCount, playerCount })
         ).then(() => {
             setTimeout(() => {
                 navigation.navigate('EditGame', { source: 'new_game' });

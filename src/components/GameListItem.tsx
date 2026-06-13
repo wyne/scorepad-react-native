@@ -5,6 +5,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Platform, StyleSheet, Text, View } from 'react-native';
 import { Icon, ListItem } from 'react-native-elements';
 import Animated, { FadeInUp } from 'react-native-reanimated';
+import { shallowEqual } from 'react-redux';
 
 import { selectGameById } from '../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
@@ -34,22 +35,41 @@ export type Props = {
     navigation: NativeStackNavigationProp<ParamListBase, string, undefined>;
     gameId: string;
     index: number;
+    /** Test-only render probe for selector invalidation regressions. */
+    onRender?: (id: string) => void;
 };
 
-const GameListItem: React.FunctionComponent<Props> = ({ navigation, gameId, index }) => {
+const GameListItem: React.FunctionComponent<Props> = ({ navigation, gameId, index, onRender }) => {
+    onRender?.(gameId);
+
     const theme = useTheme();
     const dispatch = useAppDispatch();
-    const game = useAppSelector(state => selectGameById(state, gameId));
+    const {
+        dateCreated,
+        gameTitle,
+        locked,
+        playerIds,
+        roundCount,
+        winnerIds,
+    } = useAppSelector(state => {
+        const game = selectGameById(state, gameId);
+
+        return {
+            dateCreated: game?.dateCreated,
+            gameTitle: game?.title,
+            locked: game?.locked,
+            playerIds: game?.playerIds,
+            roundCount: game?.roundTotal,
+            winnerIds: game?.winnerIds,
+        };
+    }, shallowEqual);
 
     const setCurrentGameCallback = useCallback(() => {
         dispatch(setCurrentGameId(gameId));
-    }, [gameId]);
+    }, [dispatch, gameId]);
 
     if (gameId == null) { return null; }
-    if (!game) { return null; }
-
-    const { roundTotal: roundCount, playerIds, title: gameTitle, locked, winnerIds, dateCreated } = game;
-    if (roundCount == null || playerIds == null) { return null; }
+    if (gameTitle == null || roundCount == null || playerIds == null) { return null; }
 
     /**
      * Choose Game and navigate to GameScreen

@@ -7,7 +7,7 @@ import { act, fireEvent, render } from '@testing-library/react-native';
 import { Alert } from 'react-native';
 import { Provider } from 'react-redux';
 
-import gamesReducer, { gameDelete } from '../../redux/GamesSlice';
+import gamesReducer, { gameDelete, roundNext } from '../../redux/GamesSlice';
 import playersReducer from '../../redux/PlayersSlice';
 import settingsReducer from '../../redux/SettingsSlice';
 
@@ -232,5 +232,25 @@ describe('GameListItem', () => {
             ]),
             { cancelable: false },
         );
+    });
+
+    it('does not re-render when only roundCurrent changes', () => {
+        const store = createMockStore(populatedState);
+        const onRender = jest.fn();
+
+        render(
+            <Provider store={store}>
+                <GameListItem navigation={mockNavigation} gameId="game-1" index={0} onRender={onRender} />
+            </Provider>
+        );
+
+        expect(onRender).toHaveBeenCalledTimes(1);
+        onRender.mockClear();
+
+        act(() => {
+            store.dispatch(roundNext('game-1'));
+        });
+
+        expect(onRender).not.toHaveBeenCalled();
     });
 });

@@ -1,11 +1,11 @@
 import React from 'react';
 
 import { configureStore } from '@reduxjs/toolkit';
-import { fireEvent, render, waitFor } from '@testing-library/react-native';
+import { act, fireEvent, render, waitFor } from '@testing-library/react-native';
 import { Alert } from 'react-native';
 import { Provider } from 'react-redux';
 
-import gamesReducer from '../../../redux/GamesSlice';
+import gamesReducer, { roundNext } from '../../../redux/GamesSlice';
 import playersReducer from '../../../redux/PlayersSlice';
 import settingsReducer from '../../../redux/SettingsSlice';
 import { logEvent } from '../../Analytics';
@@ -25,6 +25,7 @@ jest.mock('@gorhom/bottom-sheet', () => {
     const MockBottomSheet = forwardRef((props: {
         children: React.ReactNode;
         onChange?: (index: number) => void;
+        onAnimate?: (fromIndex: number, toIndex: number) => void;
         snapPoints: (string | number)[];
         index: number;
         backdropComponent?: React.ComponentType;
@@ -41,7 +42,12 @@ jest.mock('@gorhom/bottom-sheet', () => {
         }));
         
         return (
-            <View testID="bottom-sheet" style={{ backgroundColor: 'rgb(30,40,50)' }} topInset={props.topInset}>
+            <View
+                testID="bottom-sheet"
+                style={{ backgroundColor: 'rgb(30,40,50)' }}
+                topInset={props.topInset}
+                onAnimate={() => props.onAnimate?.(0, 1)}
+                onChange={() => props.onChange?.(1)}>
                 {props.children}
             </View>
         );
@@ -210,6 +216,10 @@ const createMockStore = (initialState: Parameters<typeof configureStore>[0]['pre
     });
 };
 
+const expandSheet = (getByTestId: ReturnType<typeof render>['getByTestId']) => {
+    fireEvent(getByTestId('bottom-sheet'), 'animate');
+};
+
 describe('GameSheet', () => {
     const mockGame = {
         id: 'game-1',
@@ -281,7 +291,7 @@ describe('GameSheet', () => {
             },
         });
 
-        const { getByTestId, getByText } = render(
+        const { getByTestId, getByText, queryByTestId } = render(
             <Provider store={store}>
                 <GameSheet {...defaultProps} />
             </Provider>
@@ -289,7 +299,7 @@ describe('GameSheet', () => {
 
         expect(getByTestId('bottom-sheet')).toBeTruthy();
         expect(getByText('Test Game')).toBeTruthy();
-        expect(getByTestId('score-log-table')).toBeTruthy();
+        expect(queryByTestId('score-log-table')).toBeNull();
     });
 
     it('should allow full expansion up to the top safe area', () => {
@@ -336,12 +346,13 @@ describe('GameSheet', () => {
             },
         });
 
-        const { getByText } = render(
+        const { getByTestId, getByText } = render(
             <Provider store={store}>
                 <GameSheet {...defaultProps} />
             </Provider>
         );
 
+        expandSheet(getByTestId);
         expect(getByText('Locked')).toBeTruthy();
         expect(getByText('Unlock')).toBeTruthy();
     });
@@ -370,6 +381,7 @@ describe('GameSheet', () => {
             </Provider>
         );
 
+        expandSheet(getByTestId);
         expect(getByTestId('unlock-button')).toBeTruthy();
     });
 
@@ -396,6 +408,7 @@ describe('GameSheet', () => {
             </Provider>
         );
 
+        expandSheet(getByTestId);
         expect(getByTestId('choose-winners-button')).toBeTruthy();
     });
 
@@ -422,6 +435,7 @@ describe('GameSheet', () => {
             </Provider>
         );
 
+        expandSheet(getByTestId);
         fireEvent.press(getByTestId('share-button'));
 
         expect(mockNavigate).toHaveBeenCalledWith('Share');
@@ -451,6 +465,7 @@ describe('GameSheet', () => {
             </Provider>
         );
 
+        expandSheet(getByTestId);
         const unlockButton = getByTestId('unlock-button');
         fireEvent.press(unlockButton);
 
@@ -485,6 +500,7 @@ describe('GameSheet', () => {
             </Provider>
         );
 
+        expandSheet(getByTestId);
         expect(getByTestId('big-button-reset')).toBeTruthy();
     });
 
@@ -506,12 +522,13 @@ describe('GameSheet', () => {
             },
         });
 
-        const { queryByTestId } = render(
+        const { getByTestId, queryByTestId } = render(
             <Provider store={store}>
                 <GameSheet {...defaultProps} />
             </Provider>
         );
 
+        expandSheet(getByTestId);
         expect(queryByTestId('big-button-reset')).toBeNull();
     });
 
@@ -538,6 +555,7 @@ describe('GameSheet', () => {
             </Provider>
         );
 
+        expandSheet(getByTestId);
         expect(getByTestId('big-button-rematch')).toBeTruthy();
     });
 
@@ -564,6 +582,7 @@ describe('GameSheet', () => {
             </Provider>
         );
 
+        expandSheet(getByTestId);
         const resetButton = getByTestId('big-button-reset');
         fireEvent.press(resetButton);
 
@@ -602,6 +621,7 @@ describe('GameSheet', () => {
             </Provider>
         );
 
+        expandSheet(getByTestId);
         const rematchButton = getByTestId('big-button-rematch');
         fireEvent.press(rematchButton);
 
@@ -634,12 +654,13 @@ describe('GameSheet', () => {
             },
         });
 
-        const { getByText } = render(
+        const { getByTestId, getByText } = render(
             <Provider store={store}>
                 <GameSheet {...defaultProps} />
             </Provider>
         );
 
+        expandSheet(getByTestId);
         const editButton = getByText('Edit Game and Players');
         fireEvent.press(editButton);
 
@@ -669,12 +690,13 @@ describe('GameSheet', () => {
             },
         });
 
-        const { queryByText } = render(
+        const { getByTestId, queryByText } = render(
             <Provider store={store}>
                 <GameSheet {...defaultProps} />
             </Provider>
         );
 
+        expandSheet(getByTestId);
         expect(queryByText('Edit Game and Players')).toBeNull();
     });
 
@@ -702,6 +724,7 @@ describe('GameSheet', () => {
             </Provider>
         );
 
+        expandSheet(getByTestId);
         const unlockButton = getByTestId('unlock-button');
         fireEvent.press(unlockButton);
 
@@ -731,12 +754,47 @@ describe('GameSheet', () => {
             },
         });
 
-        const { getByText } = render(
+        const { getByTestId, getByText } = render(
             <Provider store={store}>
                 <GameSheet {...defaultProps} />
             </Provider>
         );
 
+        expandSheet(getByTestId);
         expect(getByText('Tap the player column or total score column to change sorting.')).toBeTruthy();
+    });
+
+    it('does not re-render while collapsed when only roundCurrent changes', () => {
+        const store = createMockStore({
+            settings: {
+                currentGameId: 'game-1',
+            },
+            games: {
+                entities: {
+                    'game-1': mockGame,
+                },
+                ids: ['game-1'],
+            },
+            players: {
+                entities: mockPlayers,
+                ids: ['player-1', 'player-2'],
+            },
+        });
+        const onRender = jest.fn();
+
+        render(
+            <Provider store={store}>
+                <GameSheet onRender={onRender} />
+            </Provider>
+        );
+
+        expect(onRender).toHaveBeenCalledTimes(1);
+        onRender.mockClear();
+
+        act(() => {
+            store.dispatch(roundNext('game-1'));
+        });
+
+        expect(onRender).not.toHaveBeenCalled();
     });
 });
