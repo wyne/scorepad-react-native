@@ -19,6 +19,7 @@ interface Props {
     maxHeight: number | null;
     playerId: string;
     index: number;
+    /** Test-only render probe for selector invalidation regressions. */
     onRender?: (id: string) => void;
 }
 

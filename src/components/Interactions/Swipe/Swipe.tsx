@@ -18,6 +18,7 @@ interface HalfTapProps {
     playerId: string;
     showHint?: boolean;
     tileHeight?: number;
+    /** Test-only render probe for selector invalidation regressions. */
     onRender?: (id: string) => void;
 }
 
