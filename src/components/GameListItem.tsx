@@ -37,9 +37,11 @@ export type Props = {
     index: number;
     /** Test-only render probe for selector invalidation regressions. */
     onRender?: (id: string) => void;
+    /** Test-only render probe for popup menu selector invalidation regressions. */
+    onMenuRender?: (id: string) => void;
 };
 
-const GameListItem: React.FunctionComponent<Props> = ({ navigation, gameId, index, onRender }) => {
+const GameListItem: React.FunctionComponent<Props> = ({ navigation, gameId, index, onMenuRender, onRender }) => {
     onRender?.(gameId);
 
     const theme = useTheme();
@@ -95,6 +97,7 @@ const GameListItem: React.FunctionComponent<Props> = ({ navigation, gameId, inde
                 chooseGameHandler={chooseGameHandler}
                 navigation={navigation}
                 index={index}
+                onRender={onMenuRender}
             >
                 <ListItem bottomDivider testID="game-list-item"
                     onPress={Platform.OS == 'android' ? undefined : chooseGameHandler}

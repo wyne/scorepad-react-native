@@ -236,21 +236,25 @@ describe('GameListItem', () => {
 
     it('does not re-render when only roundCurrent changes', () => {
         const store = createMockStore(populatedState);
+        const onMenuRender = jest.fn();
         const onRender = jest.fn();
 
         render(
             <Provider store={store}>
-                <GameListItem navigation={mockNavigation} gameId="game-1" index={0} onRender={onRender} />
+                <GameListItem navigation={mockNavigation} gameId="game-1" index={0} onMenuRender={onMenuRender} onRender={onRender} />
             </Provider>
         );
 
+        expect(onMenuRender).toHaveBeenCalledTimes(1);
         expect(onRender).toHaveBeenCalledTimes(1);
+        onMenuRender.mockClear();
         onRender.mockClear();
 
         act(() => {
             store.dispatch(roundNext('game-1'));
         });
 
+        expect(onMenuRender).not.toHaveBeenCalled();
         expect(onRender).not.toHaveBeenCalled();
     });
 });
