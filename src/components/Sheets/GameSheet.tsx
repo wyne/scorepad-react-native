@@ -45,7 +45,7 @@ const GameSheet: React.FunctionComponent = () => {
     const dispatch = useAppDispatch();
 
     const insets = useSafeAreaInsets();
-    const topInset = insets.top + 50;
+    const topInset = insets.top;
 
     // Stable key for animated children to force remount on each mount
     const mountKey = useRef(Date.now()).current;
