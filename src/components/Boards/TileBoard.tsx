@@ -1,4 +1,4 @@
-import React, { memo, useEffect, useState } from 'react';
+import React, { memo, useState } from 'react';
 
 import { LayoutChangeEvent, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -20,70 +20,27 @@ const TileBoard: React.FC<{ showHint: boolean }> = ({ showHint }) => {
 
     if (playerIds == null || playerIds.length == 0) return null;
 
-    const [rows, setRows] = useState<number>(0);
-    const [cols, setCols] = useState<number>(0);
-
-    const [width, setWidth] = useState<number | null>(null);
-    const [height, setHeight] = useState<number | null>(null);
-
     const playerCount = playerIds.length;
-
-    const desiredAspectRatio = 1;
+    const [layoutState, setLayoutState] = useState<TileBoardLayoutState>({
+        layout: null,
+        measurementCount: 0,
+    });
 
     const layoutHandler = (e: LayoutChangeEvent) => {
         const { width, height } = e.nativeEvent.layout;
+        const layout = calculateTileBoardLayout(playerCount, Math.round(width), Math.round(height));
 
-        setWidth(Math.round(width));
-        setHeight(Math.round(height));
-        calcGrid();
-    };
-    const calcGrid = () => {
-        let closestAspectRatio = Number.MAX_SAFE_INTEGER;
-        let bestRowCount = 1;
-
-        if (width == null || height == null) return;
-
-        for (let rows = 1; rows <= playerIds.length; rows++) {
-            const cols = Math.ceil(playerIds.length / rows);
-
-            if (playerIds.length % rows > 0 && rows - playerIds.length % rows > 1) {
-                continue;
-            }
-
-            const w = width / cols;
-            const h = height / rows;
-            const ratio = w / h;
-
-            if (Math.abs(desiredAspectRatio - ratio) < Math.abs(desiredAspectRatio - closestAspectRatio)) {
-                closestAspectRatio = ratio;
-                bestRowCount = rows;
-            }
-        }
-
-        setRows(bestRowCount);
-        setCols(Math.ceil(playerIds.length / bestRowCount));
+        setLayoutState((previous) => ({
+            layout,
+            measurementCount: previous.measurementCount + 1,
+        }));
     };
 
-    useEffect(() => {
-        if (width == null || height == null) return;
-        calcGrid();
-    }, [playerCount, width, height]);
-
-    type DimensionValue = (rows: number, cols: number) => {
-        width: number;
-        height: number;
-    };
-
-    const calculateTileDimensions: DimensionValue = (rows: number, cols: number) => {
-        if (width == null || height == null) return { width: 0, height: 0 };
-
-        const dims = {
-            width: Math.round(width / cols),
-            height: Math.round(height / rows)
-        };
-
-        return dims;
-    };
+    const { layout, measurementCount } = layoutState;
+    const layoutReady = measurementCount > 1;
+    const tileDimensions = layout == null
+        ? null
+        : calculateTileDimensions(layout);
 
     return (
         <SafeAreaView edges={['left', 'right']} style={
@@ -94,20 +51,70 @@ const TileBoard: React.FC<{ showHint: boolean }> = ({ showHint }) => {
             }]
         } onLayout={layoutHandler} >
             {playerIds.map((id, index) => (
-                width != null && height != null && rows != 0 && cols != 0 &&
+                layoutReady && layout != null && tileDimensions != null &&
                 <PlayerTile
                     key={id}
                     playerId={id}
-                    cols={cols}
-                    rows={rows}
-                    width={calculateTileDimensions(rows, cols).width}
-                    height={calculateTileDimensions(rows, cols).height}
+                    cols={layout.cols}
+                    rows={layout.rows}
+                    width={tileDimensions.width}
+                    height={tileDimensions.height}
                     index={index}
                     showHint={showHint}
                 />
             ))}
         </SafeAreaView>
     );
+};
+
+interface TileBoardLayout {
+    cols: number;
+    height: number;
+    rows: number;
+    width: number;
+}
+
+interface TileBoardLayoutState {
+    layout: TileBoardLayout | null;
+    measurementCount: number;
+}
+
+const desiredAspectRatio = 1;
+
+export const calculateTileBoardLayout = (playerCount: number, width: number, height: number): TileBoardLayout => {
+    let closestAspectRatio = Number.MAX_SAFE_INTEGER;
+    let bestRowCount = 1;
+
+    for (let rows = 1; rows <= playerCount; rows++) {
+        const cols = Math.ceil(playerCount / rows);
+
+        if (playerCount % rows > 0 && rows - playerCount % rows > 1) {
+            continue;
+        }
+
+        const w = width / cols;
+        const h = height / rows;
+        const ratio = w / h;
+
+        if (Math.abs(desiredAspectRatio - ratio) < Math.abs(desiredAspectRatio - closestAspectRatio)) {
+            closestAspectRatio = ratio;
+            bestRowCount = rows;
+        }
+    }
+
+    return {
+        cols: Math.ceil(playerCount / bestRowCount),
+        height,
+        rows: bestRowCount,
+        width,
+    };
+};
+
+export const calculateTileDimensions = (layout: TileBoardLayout) => {
+    return {
+        height: Math.round(layout.height / layout.rows),
+        width: Math.round(layout.width / layout.cols),
+    };
 };
 
 const styles = StyleSheet.create({

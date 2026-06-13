@@ -2,7 +2,7 @@ import React from 'react';
 
 import { getContrastRatio } from 'colorsheet';
 import { DimensionValue, StyleSheet } from 'react-native';
-import Animated, { Easing, FadeIn } from 'react-native-reanimated';
+import Animated from 'react-native-reanimated';
 import { shallowEqual } from 'react-redux';
 
 import { selectGameById } from '../../../redux/GamesSlice';
@@ -69,7 +69,6 @@ const PlayerTile: React.FunctionComponent<Props> = React.memo(({
 
     return (
         <Animated.View
-            entering={FadeIn.delay(25 * index + 50).duration(400).easing(Easing.ease)}
             style={[
                 styles.playerCard,
                 {

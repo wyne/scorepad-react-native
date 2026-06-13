@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 
 import Animated, {
     useSharedValue,
@@ -6,7 +6,7 @@ import Animated, {
     withTiming
 } from 'react-native-reanimated';
 
-import { calculateFontSize, animationDuration, enteringAnimation, multiLineScoreSizeMultiplier, singleLineScoreSizeMultiplier, scoreMathOpacity } from './Helpers';
+import { calculateFontSize, animationDuration, multiLineScoreSizeMultiplier, singleLineScoreSizeMultiplier, scoreMathOpacity } from './Helpers';
 
 interface Props {
     currentRoundScore: number;
@@ -21,10 +21,12 @@ const ScoreBefore: React.FunctionComponent<Props> = ({
     currentRoundTotalScore,
     fontColor
 }) => {
+    const initialRender = useRef(true);
     const scoreBefore = currentRoundTotalScore - currentRoundScore;
+    const scaleFactor = currentRoundScore == 0 ? singleLineScoreSizeMultiplier : multiLineScoreSizeMultiplier;
 
-    const fontSize = useSharedValue(calculateFontSize(containerWidth));
-    const fontOpacity = useSharedValue(100);
+    const fontSize = useSharedValue(calculateFontSize(containerWidth) * scaleFactor);
+    const fontOpacity = useSharedValue(currentRoundScore == 0 ? 100 : scoreMathOpacity * 100);
 
     const animatedStyles = useAnimatedStyle(() => {
         return {
@@ -34,9 +36,12 @@ const ScoreBefore: React.FunctionComponent<Props> = ({
         };
     });
 
-    const scaleFactor = currentRoundScore == 0 ? singleLineScoreSizeMultiplier : multiLineScoreSizeMultiplier;
-
     useEffect(() => {
+        if (initialRender.current) {
+            initialRender.current = false;
+            return;
+        }
+
         fontSize.value = withTiming(
             calculateFontSize(containerWidth) * scaleFactor,
             { duration: animationDuration }
@@ -49,7 +54,7 @@ const ScoreBefore: React.FunctionComponent<Props> = ({
     }, [currentRoundScore, containerWidth]);
 
     return (
-        <Animated.View entering={enteringAnimation}>
+        <Animated.View>
             <Animated.Text
                 allowFontScaling={false}
                 numberOfLines={1}

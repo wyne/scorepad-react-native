@@ -10,8 +10,10 @@ import settingsReducer from '../../redux/SettingsSlice';
 
 import GameScreen from './GameScreen';
 
+let mockHeaderHeight = 88;
+
 jest.mock('@react-navigation/elements', () => ({
-    useHeaderHeight: () => 88,
+    useHeaderHeight: () => mockHeaderHeight,
 }));
 
 jest.mock('react-native-reanimated', () => {
@@ -99,6 +101,10 @@ const createMockStore = (initialState: Parameters<typeof configureStore>[0]['pre
 };
 
 describe('GameScreen', () => {
+    beforeEach(() => {
+        mockHeaderHeight = 88;
+    });
+
     const mockGame = {
         id: 'game-1',
         title: 'Test Game',
@@ -168,8 +174,8 @@ describe('GameScreen', () => {
             </Provider>
         );
 
-        expect(getByTestId('tile-board')).toBeTruthy();
         expect(getByTestId('point-values-sheet')).toBeTruthy();
+        expect(getByTestId('tile-board')).toBeTruthy();
     });
 
     it('should render ListBoard when interactionType is Dial', () => {
@@ -196,4 +202,30 @@ describe('GameScreen', () => {
 
         expect(getByTestId('list-board')).toBeTruthy();
     });
+
+    it('should use the measured transparent header inset', () => {
+        const store = createMockStore({
+            settings: {
+                currentGameId: 'game-1',
+            },
+            games: {
+                entities: { 'game-1': mockGame },
+                ids: ['game-1'],
+            },
+            players: {
+                entities: mockPlayers,
+                ids: ['player-1', 'player-2'],
+            },
+        });
+
+        const { getByTestId, queryByTestId } = render(
+            <Provider store={store}>
+                <GameScreen />
+            </Provider>
+        );
+
+        expect(getByTestId('game-screen').props.style.paddingTop).toBe(88);
+        expect(queryByTestId('point-values-sheet')).toBeTruthy();
+    });
+
 });

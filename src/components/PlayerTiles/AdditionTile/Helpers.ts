@@ -1,14 +1,9 @@
-import { ZoomIn, withTiming } from 'react-native-reanimated';
+import { withTiming } from 'react-native-reanimated';
 
 /**
  * The duration of the animation in milliseconds.
  */
 export const animationDuration = 200;
-
-/**
- * The duration of the entering animation in milliseconds.
- */
-export const enteringAnimation = ZoomIn.duration(animationDuration);
 
 export const singleLineScoreSizeMultiplier = 1.2;
 

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 
 import Animated, {
     useSharedValue,
@@ -6,7 +6,7 @@ import Animated, {
     withTiming
 } from 'react-native-reanimated';
 
-import { calculateFontSize, animationDuration, enteringAnimation, ZoomOutFadeOut } from './Helpers';
+import { calculateFontSize, animationDuration, ZoomOutFadeOut } from './Helpers';
 import { scoreStyles } from './scoreStyles';
 
 interface Props {
@@ -17,8 +17,9 @@ interface Props {
 }
 
 const ScoreAfter: React.FunctionComponent<Props> = ({ containerWidth, currentRoundScore, currentRoundTotalScore, fontColor }) => {
-    const fontSize = useSharedValue(calculateFontSize(containerWidth));
-    const opacity = useSharedValue(1);
+    const initialRender = useRef(true);
+    const fontSize = useSharedValue(currentRoundScore == 0 ? 1 : calculateFontSize(containerWidth) * 1.1);
+    const opacity = useSharedValue(currentRoundScore == 0 ? 0 : 1);
 
     const animatedStyles = useAnimatedStyle(() => {
         return {
@@ -28,6 +29,11 @@ const ScoreAfter: React.FunctionComponent<Props> = ({ containerWidth, currentRou
     });
 
     useEffect(() => {
+        if (initialRender.current) {
+            initialRender.current = false;
+            return;
+        }
+
         fontSize.value = withTiming(
             currentRoundScore == 0 ? 1 : calculateFontSize(containerWidth) * 1.1,
             { duration: animationDuration },
@@ -39,7 +45,7 @@ const ScoreAfter: React.FunctionComponent<Props> = ({ containerWidth, currentRou
     }, [currentRoundScore, containerWidth]);
 
     return (
-        <Animated.View entering={enteringAnimation} exiting={ZoomOutFadeOut}>
+        <Animated.View exiting={ZoomOutFadeOut}>
             <Animated.Text
                 allowFontScaling={false}
                 style={[animatedStyles, scoreStyles.scoreText, { color: fontColor }]}>
