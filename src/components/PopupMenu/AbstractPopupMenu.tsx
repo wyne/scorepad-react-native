@@ -3,6 +3,7 @@ import React from 'react';
 import { ParamListBase } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Alert, Platform } from 'react-native';
+import { shallowEqual } from 'react-redux';
 
 import { asyncRematchGame, gameDelete, selectGameById } from '../../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
@@ -18,17 +19,26 @@ interface Props {
     setCurrentGameCallback: () => void;
     chooseGameHandler: () => void;
     index: number;
+    /** Test-only render probe for selector invalidation regressions. */
+    onRender?: (id: string) => void;
 }
 
 const AbstractPopupMenu: React.FC<Props> = (props) => {
+    props.onRender?.(props.gameId);
+
     const dispatch = useAppDispatch();
-    const game = useAppSelector(state => selectGameById(state, props.gameId));
+    const { gameTitle, playerIds, roundCount } = useAppSelector(state => {
+        const game = selectGameById(state, props.gameId);
+
+        return {
+            gameTitle: game?.title,
+            playerIds: game?.playerIds,
+            roundCount: game?.roundTotal,
+        };
+    }, shallowEqual);
 
     if (props.gameId == null) { return null; }
-    if (!game) { return null; }
-
-    const { roundTotal: roundCount, playerIds, title: gameTitle } = game;
-    if (roundCount == null || playerIds == null) { return null; }
+    if (gameTitle == null || roundCount == null || playerIds == null) { return null; }
 
     /**
      * Share Game

@@ -63,6 +63,7 @@ export const Navigation = () => {
                         <Stack.Navigator initialRouteName='List' >
                         <Stack.Screen name="List" component={ListScreen}
                             options={{
+                                freezeOnBlur: true,
                                 orientation: 'portrait',
                                 title: 'ScorePad',
                                 headerTransparent: isIOS,
