@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 import analytics from '@react-native-firebase/analytics';
+import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
-import { View } from 'react-native';
+import { View, useColorScheme } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { MenuProvider } from 'react-native-popup-menu';
 import { configureReanimatedLogger, ReanimatedLogLevel } from 'react-native-reanimated';
@@ -18,15 +19,25 @@ import { persistor, store } from './redux/store';
 import { ChooseWinnersSheetContextProvider } from './src/components/Sheets/ChooseWinnersSheetContext';
 import { GameSheetContextProvider } from './src/components/Sheets/GameSheetContext';
 import { PointValuesSheetContextProvider } from './src/components/Sheets/PointValuesSheetContext';
+import { SplashOverlay } from './src/components/SplashOverlay';
 import { Navigation } from './src/Navigation';
+
+// Keep the native splash screen up until our animated SplashOverlay mounts and
+// calls hideAsync(). Without this, Expo auto-hides the native splash on first JS
+// frame — before the UI/persisted state is ready — causing the black flash.
+SplashScreen.preventAutoHideAsync();
 
 if (process.env.EXPO_PUBLIC_FIREBASE_ANALYTICS == 'false') {
     analytics().setAnalyticsCollectionEnabled(false);
 }
 
 export default function App() {
+    const colorScheme = useColorScheme();
+    const bgColor = colorScheme === 'dark' ? '#000000' : '#F2F2F7';
+    const [splashDone, setSplashDone] = useState(false);
+
     return (
-        <View style={{ flex: 1, backgroundColor: '#000' }}>
+        <View style={{ flex: 1, backgroundColor: bgColor }}>
             <SafeAreaProvider>
                 <GestureHandlerRootView style={{ flex: 1 }}>
                     <Provider store={store}>
@@ -45,6 +56,7 @@ export default function App() {
                     </Provider>
                 </GestureHandlerRootView>
             </SafeAreaProvider>
+            {!splashDone && <SplashOverlay onDone={() => setSplashDone(true)} />}
         </View>
     );
 };

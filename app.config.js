@@ -76,7 +76,7 @@ export default {
   orientation: 'default',
   icon: icon,
   assetBundlePatterns: ['assets/*'],
-  backgroundColor: '#000000',
+  backgroundColor: '#F2F2F7',
   ios: {
     bundleIdentifier: packageName,
     supportsTablet: true,
@@ -120,6 +120,10 @@ export default {
   githubUrl: 'https://github.com/wyne/scorepad-react-native',
   owner: 'wyne',
   plugins: [
+    ['expo-splash-screen', {
+      backgroundColor: '#F2F2F7',
+      dark: { backgroundColor: '#000000' },
+    }],
     './plugins/withTouchVisualizer',
     'expo-font',
     '@react-native-firebase/app',
