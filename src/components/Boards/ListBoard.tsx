@@ -1,4 +1,4 @@
-import React, { useCallback, useLayoutEffect, useState } from 'react';
+import React, { useCallback, useLayoutEffect, useRef, useState } from 'react';
 
 import { LayoutChangeEvent, LayoutRectangle, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Icon } from 'react-native-elements';
@@ -189,6 +189,12 @@ const ListBoard: React.FC<ListBoardProps> = ({ showHint, onPlayerRowRender }) =>
     const insets = useSafeAreaInsets();
     const [selectedId, setSelectedId] = useState<string | null>(null);
     const [boardLayout, setBoardLayout] = useState<LayoutRectangle | null>(null);
+    // Mirror boardLayout in a ref so handleRowPress can read the latest layout
+    // without depending on the state value. Otherwise every onLayout pass (the
+    // layout settles in multiple passes on first open) would recreate the
+    // callback, change the onRowPress prop on every memoized row, and force the
+    // entire row list to re-render.
+    const boardLayoutRef = useRef<LayoutRectangle | null>(null);
     const svDimmed = useSharedValue(false);
     const svOverlayOpacity = useSharedValue(0);
     const svOverlaySlideY = useSharedValue(20);
@@ -198,13 +204,14 @@ const ListBoard: React.FC<ListBoardProps> = ({ showHint, onPlayerRowRender }) =>
     }, [selectedId]);
 
     const handleBoardLayout = useCallback((e: LayoutChangeEvent) => {
+        boardLayoutRef.current = e.nativeEvent.layout;
         setBoardLayout(e.nativeEvent.layout);
     }, []);
 
     const handleRowPress = useCallback(
         (id: string) => {
             if (locked || menuOpen) return;
-            if (!boardLayout) return;
+            if (!boardLayoutRef.current) return;
             // Start entrance animation before React schedules the re-render so the
             // overlay is already mid-animation by the time it first paints.
             svOverlayOpacity.value = 0;
@@ -213,7 +220,7 @@ const ListBoard: React.FC<ListBoardProps> = ({ showHint, onPlayerRowRender }) =>
             svOverlaySlideY.value = withTiming(0, { duration: 200, easing: Easing.out(Easing.cubic) });
             setSelectedId(id);
         },
-        [boardLayout, locked, menuOpen]
+        [locked, menuOpen]
     );
 
     const handleClose = useCallback(() => {
