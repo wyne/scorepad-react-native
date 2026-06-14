@@ -121,6 +121,7 @@ export default {
   owner: 'wyne',
   plugins: [
     './plugins/withIosSceneLifecycle',
+    './plugins/withPodsDeploymentTarget',
     ['expo-splash-screen', {
       backgroundColor: '#F2F2F7',
       dark: { backgroundColor: '#000000' },
