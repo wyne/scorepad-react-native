@@ -4,11 +4,13 @@ import { ParamListBase, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import {
     NativeSyntheticEvent,
+    Platform,
     ScrollView,
     StyleSheet,
     Text,
     TextInput,
     TextInputEndEditingEventData,
+    TextInputSubmitEditingEventData,
     TouchableOpacity,
     View
 } from 'react-native';
@@ -93,21 +95,28 @@ const EditPlayerScreen: React.FC<EditPlayerScreenProps> = ({
         const text = selectedNameRef.current ?? e.nativeEvent.text;
         selectedNameRef.current = null;
 
+        commitPlayerName(text);
+    };
+
+    const onSubmitEditingHandler = (e: NativeSyntheticEvent<TextInputSubmitEditingEventData>) => {
+        commitPlayerName(e.nativeEvent.text);
+    };
+
+    const onChangeHandler = (text: string) => {
+        if (text != '') {
+            savePlayerName(text);
+        }
+        setLocalPlayerName(text);
+    };
+
+    const commitPlayerName = (text: string) => {
         if (text == '') {
             setLocalPlayerName(originalPlayerName);
             savePlayerName(originalPlayerName);
         } else {
+            setLocalPlayerName(text);
             savePlayerName(text);
         }
-    };
-
-    const onChangeHandler = (text: string) => {
-        if (text == '') {
-            savePlayerName(originalPlayerName);
-        } else {
-            savePlayerName(text);
-        }
-        setLocalPlayerName(text);
     };
 
     const savePlayerName = (text: string) => {
@@ -120,13 +129,22 @@ const EditPlayerScreen: React.FC<EditPlayerScreenProps> = ({
     };
 
     const onFocus = () => setIsFocused(true);
-    const onBlur = () => setIsFocused(false);
+    const onBlur = () => {
+        setIsFocused(false);
+        if (localPlayerName == '') {
+            commitPlayerName(originalPlayerName);
+        }
+    };
     const onSuggestionSelect = (name: string) => {
         selectedNameRef.current = name;
         setLocalPlayerName(name);
         savePlayerName(name);
         setIsFocused(false);
         inputRef.current?.blur();
+    };
+    const clearPlayerName = () => {
+        setLocalPlayerName('');
+        inputRef.current?.focus();
     };
 
     const inputRef = React.useRef<TextInput>(null);
@@ -138,17 +156,15 @@ const EditPlayerScreen: React.FC<EditPlayerScreenProps> = ({
             <View style={{ position: 'relative', zIndex: 1 }}>
                 <Input
                     ref={inputRef}
-                    rightIcon={{
+                    clearButtonMode="while-editing"
+                    rightIcon={Platform.OS === 'ios' ? undefined : {
                         style: { padding: 8 },
                         disabled: localPlayerName == '',
                         disabledStyle: { display: 'none' },
                         color: theme.textTertiary,
                         size: 15,
                         name: 'close',
-                        onPress: () => {
-                            setLocalPlayerName('');
-                            inputRef.current?.focus();
-                        }
+                        onPress: clearPlayerName,
                     }}
                     containerStyle={{ flex: 1 }}
                     inputContainerStyle={{
@@ -160,10 +176,12 @@ const EditPlayerScreen: React.FC<EditPlayerScreenProps> = ({
                     maxLength={15}
                     onChangeText={onChangeHandler}
                     onEndEditing={onEndEditingHandler}
+                    onSubmitEditing={onSubmitEditingHandler}
                     onFocus={onFocus}
                     onBlur={onBlur}
                     placeholder='Player Name'
                     renderErrorMessage={false}
+                    returnKeyType="done"
                     selectTextOnFocus={true}
                     style={[styles.input, { color: theme.textSecondary }]}
                     value={localPlayerName}

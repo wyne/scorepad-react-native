@@ -1,7 +1,16 @@
 import React, { useEffect, useState } from 'react';
 
 import { useNavigation } from '@react-navigation/native';
-import { NativeSyntheticEvent, StyleSheet, Text, TextInputEndEditingEventData, View } from 'react-native';
+import {
+    NativeSyntheticEvent,
+    Platform,
+    StyleSheet,
+    Text,
+    TextInput,
+    TextInputEndEditingEventData,
+    TextInputSubmitEditingEventData,
+    View
+} from 'react-native';
 import { Input } from 'react-native-elements';
 
 import { updateGame } from '../../redux/GamesSlice';
@@ -18,6 +27,7 @@ const EditGame = ({ }) => {
     const dispatch = useAppDispatch();
     const currentGame = useAppSelector(selectCurrentGame);
     const [localTitle, setLocalTitle] = useState(currentGame?.title ?? '');
+    const inputRef = React.useRef<TextInput>(null);
 
     const navigation = useNavigation();
 
@@ -48,18 +58,30 @@ const EditGame = ({ }) => {
         commitTitle(text);
     };
 
+    const onSubmitEditingHandler = (e: NativeSyntheticEvent<TextInputSubmitEditingEventData>) => {
+        const text = e.nativeEvent.text;
+        commitTitle(text);
+    };
+
     const onChangeTextHandler = (text: string) => {
         setLocalTitle(text);
+    };
+
+    const clearTitle = () => {
+        setLocalTitle('');
+        inputRef.current?.focus();
     };
 
     return (
         <>
             <View style={[styles.inputContainer, { backgroundColor: theme.inputBackground }]}>
                 <Input
-                    defaultValue={localTitle}
+                    ref={inputRef}
+                    clearButtonMode="while-editing"
                     maxLength={30}
                     onChangeText={onChangeTextHandler}
                     onEndEditing={onEndEditingHandler}
+                    onSubmitEditing={onSubmitEditingHandler}
                     onBlur={() => {
                         if (localTitle == '') {
                             commitTitle(UNTITLED);
@@ -67,8 +89,20 @@ const EditGame = ({ }) => {
                     }}
                     placeholder={UNTITLED}
                     renderErrorMessage={false}
+                    returnKeyType="done"
+                    rightIcon={Platform.OS === 'ios' ? undefined : {
+                        style: { padding: 8 },
+                        disabled: localTitle == '',
+                        disabledStyle: { display: 'none' },
+                        color: theme.textTertiary,
+                        size: 15,
+                        name: 'close',
+                        onPress: clearTitle,
+                    }}
+                    selectTextOnFocus={true}
                     style={{ color: theme.inputText }}
                     inputContainerStyle={{ borderBottomWidth: 0 }}
+                    value={localTitle}
                 />
             </View>
             <View style={{ marginHorizontal: 20 }}>

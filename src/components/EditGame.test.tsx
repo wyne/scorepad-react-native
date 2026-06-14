@@ -2,6 +2,7 @@ import React from 'react';
 
 import { configureStore } from '@reduxjs/toolkit';
 import { fireEvent, render } from '@testing-library/react-native';
+import { Platform } from 'react-native';
 import { Provider } from 'react-redux';
 
 import gamesReducer from '../../redux/GamesSlice';
@@ -11,28 +12,45 @@ import settingsReducer from '../../redux/SettingsSlice';
 import EditGame from './EditGame';
 
 // Mock react-native-elements
-jest.mock('react-native-elements', () => ({
-    Input: ({ defaultValue, onChangeText, onEndEditing, onBlur, placeholder, testID }: {
-        defaultValue: string;
-        onChangeText: (text: string) => void;
-        onEndEditing: (e: { nativeEvent: { text: string } }) => void;
-        onBlur: (e: { nativeEvent: { text: string } }) => void;
-        placeholder: string;
-        testID?: string;
-    }) => {
-        const { TextInput } = jest.requireActual('react-native');
-        return (
-            <TextInput
-                defaultValue={defaultValue}
-                onChangeText={onChangeText}
-                onEndEditing={(e: { nativeEvent: { text: string } }) => onEndEditing({ nativeEvent: { text: e.nativeEvent.text } })}
-                onBlur={(e: { nativeEvent: { text: string } }) => onBlur({ nativeEvent: { text: e.nativeEvent.text } })}
-                placeholder={placeholder}
-                testID={testID || 'game-title-input'}
-            />
-        );
-    },
-}));
+jest.mock('react-native-elements', () => {
+    const React = jest.requireActual('react');
+    const { Pressable, TextInput } = jest.requireActual('react-native');
+
+    return {
+        Input: React.forwardRef(({ value, onChangeText, onEndEditing, onSubmitEditing, onBlur, placeholder, testID, rightIcon, ...props }: {
+            value: string;
+            onChangeText: (text: string) => void;
+            onEndEditing: (e: { nativeEvent: { text: string } }) => void;
+            onSubmitEditing: (e: { nativeEvent: { text: string } }) => void;
+            onBlur: () => void;
+            placeholder: string;
+            rightIcon?: { onPress: () => void; name: string };
+            testID?: string;
+        }, ref: React.Ref<{ focus: () => void }>) => {
+            React.useImperativeHandle(ref, () => ({
+                focus: jest.fn(),
+            }));
+
+            return (
+                <>
+                    <TextInput
+                        onBlur={onBlur}
+                        onChangeText={onChangeText}
+                        onEndEditing={(e: { nativeEvent: { text: string } }) => onEndEditing({ nativeEvent: { text: e.nativeEvent.text } })}
+                        onSubmitEditing={(e: { nativeEvent: { text: string } }) => onSubmitEditing({ nativeEvent: { text: e.nativeEvent.text } })}
+                        placeholder={placeholder}
+                        testID={testID || 'game-title-input'}
+                        value={value}
+                        {...props}
+                    />
+                    {rightIcon != null && (
+                        <Pressable onPress={rightIcon.onPress} testID="game-title-clear-button" />
+                    )}
+                </>
+            );
+        }),
+    };
+});
 
 // Mock @react-navigation/native
 jest.mock('@react-navigation/native', () => ({
@@ -89,6 +107,10 @@ describe('EditGame', () => {
 
     beforeEach(() => {
         jest.clearAllMocks();
+        Object.defineProperty(Platform, 'OS', {
+            configurable: true,
+            value: 'ios',
+        });
     });
 
     it('should render null when no current game is set', () => {
@@ -427,7 +449,71 @@ describe('EditGame', () => {
         );
 
         const input = getByTestId('game-title-input');
-        expect(input.props.defaultValue).toBe('');
+        expect(input.props.value).toBe('');
+    });
+
+    it('should use native replacement affordances', () => {
+        const store = createMockStore({
+            settings: {
+                currentGameId: 'game-1',
+            },
+            games: {
+                entities: {
+                    'game-1': mockGame,
+                },
+                ids: ['game-1'],
+            },
+            players: {
+                entities: mockPlayers,
+                ids: ['player-1', 'player-2'],
+            },
+        });
+
+        const { getByTestId } = render(
+            <Provider store={store}>
+                <EditGame />
+            </Provider>
+        );
+
+        const input = getByTestId('game-title-input');
+
+        expect(input.props.clearButtonMode).toBe('while-editing');
+        expect(input.props.returnKeyType).toBe('done');
+        expect(input.props.selectTextOnFocus).toBe(true);
+    });
+
+    it('should clear the game title locally with the Android clear button', () => {
+        Object.defineProperty(Platform, 'OS', {
+            configurable: true,
+            value: 'android',
+        });
+
+        const store = createMockStore({
+            settings: {
+                currentGameId: 'game-1',
+            },
+            games: {
+                entities: {
+                    'game-1': mockGame,
+                },
+                ids: ['game-1'],
+            },
+            players: {
+                entities: mockPlayers,
+                ids: ['player-1', 'player-2'],
+            },
+        });
+
+        const { getByDisplayValue, getByTestId } = render(
+            <Provider store={store}>
+                <EditGame />
+            </Provider>
+        );
+
+        fireEvent.press(getByTestId('game-title-clear-button'));
+
+        expect(getByDisplayValue('')).toBeTruthy();
+        expect(store.getState().games.entities['game-1']?.title).toBe('Test Game');
     });
 
     it('should handle very long titles within character limit', () => {

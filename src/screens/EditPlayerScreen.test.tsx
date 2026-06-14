@@ -3,6 +3,7 @@ import React from 'react';
 
 import { configureStore } from '@reduxjs/toolkit';
 import { act, fireEvent, render, waitFor } from '@testing-library/react-native';
+import { Platform } from 'react-native';
 import { Provider } from 'react-redux';
 
 import gamesReducer from '../../redux/GamesSlice';
@@ -99,6 +100,10 @@ describe('EditPlayerScreen', () => {
 
     beforeEach(() => {
         jest.clearAllMocks();
+        Object.defineProperty(Platform, 'OS', {
+            configurable: true,
+            value: 'ios',
+        });
     });
 
     it('should render null when playerId is null', () => {
@@ -300,7 +305,7 @@ describe('EditPlayerScreen', () => {
         expect(state.players.entities['player-1']?.playerName).toBe('New Player Name');
     });
 
-    it('should revert to original name when input is empty on change', () => {
+    it('should allow empty local text without saving blank while editing', () => {
         const store = createMockStore({
             settings: {
                 currentGameId: 'game-1',
@@ -335,7 +340,9 @@ describe('EditPlayerScreen', () => {
         const input = getByDisplayValue('Test Player');
         fireEvent.changeText(input, '');
 
-        // Check that the store was updated with the original name
+        expect(getByDisplayValue('')).toBeTruthy();
+
+        // Empty text is only local while editing; Redux keeps the last valid name.
         const state = store.getState();
         expect(state.players.entities['player-1']?.playerName).toBe('Test Player');
     });
@@ -386,6 +393,47 @@ describe('EditPlayerScreen', () => {
         expect(state.players.entities['player-1']?.playerName).toBe('Test Player');
     });
 
+    it('should revert to original name when empty input blurs', () => {
+        const store = createMockStore({
+            settings: {
+                currentGameId: 'game-1',
+            },
+            games: {
+                entities: {
+                    'game-1': mockGame,
+                },
+                ids: ['game-1'],
+            },
+            players: {
+                entities: {
+                    'player-1': mockPlayer,
+                },
+                ids: ['player-1'],
+            },
+        });
+
+        const mockRoute = {
+            params: {
+                index: 0,
+                playerId: 'player-1',
+            },
+        };
+
+        const { getByDisplayValue } = render(
+            <Provider store={store}>
+                <EditPlayerScreen navigation={mockNavigation} route={mockRoute as any} />
+            </Provider>
+        );
+
+        const input = getByDisplayValue('Test Player');
+
+        fireEvent.changeText(input, '');
+        fireEvent(input, 'blur');
+
+        expect(getByDisplayValue('Test Player')).toBeTruthy();
+        expect(store.getState().players.entities['player-1']?.playerName).toBe('Test Player');
+    });
+
     it('should save new name when input has text on end editing', () => {
         const store = createMockStore({
             settings: {
@@ -427,6 +475,11 @@ describe('EditPlayerScreen', () => {
     });
 
     it('should clear input when clear button is pressed', () => {
+        Object.defineProperty(Platform, 'OS', {
+            configurable: true,
+            value: 'android',
+        });
+
         const store = createMockStore({
             settings: {
                 currentGameId: 'game-1',
@@ -452,15 +505,23 @@ describe('EditPlayerScreen', () => {
             },
         };
 
-        const { getByTestId } = render(
+        const { getByDisplayValue, getByTestId } = render(
             <Provider store={store}>
                 <EditPlayerScreen navigation={mockNavigation} route={mockRoute as any} />
             </Provider>
         );
 
-        // Should render the input field successfully
         const input = getByTestId('RNE__Input__text-input');
-        expect(input).toBeTruthy();
+        const clearButton = input.parent?.parent?.findByProps({ name: 'close' });
+
+        if (clearButton == null) {
+            throw new Error('Expected Android clear button to render');
+        }
+
+        fireEvent.press(clearButton);
+
+        expect(getByDisplayValue('')).toBeTruthy();
+        expect(store.getState().players.entities['player-1']?.playerName).toBe('Test Player');
     });
 
     it('should limit input to 15 characters', () => {
@@ -597,7 +658,7 @@ describe('EditPlayerScreen', () => {
         expect(getByDisplayValue('')).toBeTruthy();
     });
 
-    it('should hide clear button when input is empty', () => {
+    it('should use the native iOS clear button mode', () => {
         const playerWithEmptyName = {
             id: 'player-2',
             playerName: '',
@@ -636,10 +697,9 @@ describe('EditPlayerScreen', () => {
         );
 
         const input = getByDisplayValue('');
-        
-        // The clear button should be disabled and hidden when input is empty
-        const clearButton = input.parent?.parent?.findByProps({ name: 'close' });
-        expect(clearButton?.props.disabled).toBe(true);
+
+        expect(input.props.clearButtonMode).toBe('while-editing');
+        expect(input.props.returnKeyType).toBe('done');
     });
 
     describe('suggestion feature', () => {
