@@ -46,6 +46,10 @@ const EditPlayerScreen: React.FC<EditPlayerScreenProps> = ({
         navigation.setOptions({
             headerLeft: ({ tintColor }) => (
                 <HeaderButton accessibilityLabel='EditPlayerBack' onPress={async () => {
+                    // Resign the first responder before the back transition starts,
+                    // while the input is still mounted, so iOS doesn't keep it around
+                    // and re-show the keyboard later (see beforeRemove handler below).
+                    Keyboard.dismiss();
                     navigation.goBack();
                     await logEvent('edit_player_back');
                 }}>
