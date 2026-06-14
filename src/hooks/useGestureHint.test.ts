@@ -4,26 +4,43 @@ import { configureStore } from '@reduxjs/toolkit';
 import { act, renderHook } from '@testing-library/react-native';
 import { Provider } from 'react-redux';
 
-import gamesReducer, { setGameInteractionType } from '../../redux/GamesSlice';
-import playersReducer, { playerRoundScoreSet } from '../../redux/PlayersSlice';
-import settingsReducer, { setInteractionType } from '../../redux/SettingsSlice';
+import gamesReducer from '../../redux/GamesSlice';
+import playersReducer from '../../redux/PlayersSlice';
+import settingsReducer, { setLastUsedInteractionType } from '../../redux/SettingsSlice';
 import { InteractionType } from '../components/Interactions/InteractionType';
 
 import { useGestureHint } from './useGestureHint';
 
-const createStore = (scores: number[] = [0]) =>
+interface StoreOpts {
+    /** Global gesture (the per-game fallback). Resolves the "current" gesture. */
+    interactionType?: InteractionType;
+    /** Per-game gesture override on game-1. */
+    gameInteractionType?: InteractionType;
+    /** The gesture the user last *used*. undefined = new user. */
+    lastUsed?: InteractionType;
+    locked?: boolean;
+}
+
+const createStore = (opts: StoreOpts = {}) =>
     configureStore({
         reducer: { settings: settingsReducer, games: gamesReducer, players: playersReducer },
         preloadedState: {
-            settings: { currentGameId: 'game-1', interactionType: InteractionType.SwipeVertical },
+            settings: {
+                currentGameId: 'game-1',
+                interactionType: opts.interactionType ?? InteractionType.SwipeVertical,
+                lastUsedInteractionType: opts.lastUsed,
+            },
             games: {
                 entities: {
-                    'game-1': { id: 'game-1', playerIds: ['p1'], dateCreated: 0, roundCurrent: 0, roundTotal: 1, locked: false },
+                    'game-1': {
+                        id: 'game-1', playerIds: ['p1'], dateCreated: 0, roundCurrent: 0, roundTotal: 1,
+                        locked: opts.locked ?? false, interactionType: opts.gameInteractionType,
+                    },
                 },
                 ids: ['game-1'],
             },
             players: {
-                entities: { p1: { id: 'p1', playerName: 'P1', scores } },
+                entities: { p1: { id: 'p1', playerName: 'P1', scores: [0] } },
                 ids: ['p1'],
             },
         } as Parameters<typeof configureStore>[0]['preloadedState'],
@@ -34,76 +51,47 @@ const wrap = (store: ReturnType<typeof createStore>) =>
         React.createElement(Provider, { store, children });
 
 describe('useGestureHint', () => {
-    // req 1: new game with no scores → show hint
-    it('shows hint on new game with zero scores', () => {
-        const store = createStore([0]);
+    // New user: never used a gesture → show the hint.
+    it('shows hint when there is no last-used gesture', () => {
+        const store = createStore({ lastUsed: undefined });
         const { result } = renderHook(() => useGestureHint(), { wrapper: wrap(store) });
         expect(result.current).toBe(true);
     });
 
-    // req 5: reopen game with existing scores → hide hint immediately (no flash)
-    it('hides hint immediately when game already has scores', () => {
-        const store = createStore([5]);
+    // The current gesture has already been used → no hint (covers reopen with scores).
+    it('hides hint when the current gesture matches the last-used gesture', () => {
+        const store = createStore({ interactionType: InteractionType.SwipeVertical, lastUsed: InteractionType.SwipeVertical });
         const { result } = renderHook(() => useGestureHint(), { wrapper: wrap(store) });
         expect(result.current).toBe(false);
     });
 
-    // req 2: score change → hide hint
-    it('hides hint when a score is added', () => {
-        const store = createStore([0]);
+    // Active gesture differs from the last-used one (gesture switched) → show hint.
+    it('shows hint when the current gesture differs from the last-used gesture', () => {
+        const store = createStore({ interactionType: InteractionType.HalfTap, lastUsed: InteractionType.SwipeVertical });
         const { result } = renderHook(() => useGestureHint(), { wrapper: wrap(store) });
-        expect(result.current).toBe(true);
-
-        act(() => { store.dispatch(playerRoundScoreSet('p1', 0, 5)); });
-        expect(result.current).toBe(false);
-    });
-
-    // req 3: gesture change → re-enable hint
-    it('re-shows hint when gesture type changes', () => {
-        const store = createStore([5]); // starts dismissed
-        const { result } = renderHook(() => useGestureHint(), { wrapper: wrap(store) });
-        expect(result.current).toBe(false);
-
-        act(() => { store.dispatch(setInteractionType(InteractionType.HalfTap)); });
         expect(result.current).toBe(true);
     });
 
-    // req 3 (per-game): changing the game's own gesture re-enables the hint
-    it('re-shows hint when the per-game gesture type changes', () => {
-        const store = createStore([5]); // starts dismissed
+    // Using the gesture (marking it last-used) dismisses the hint.
+    it('hides hint once the current gesture is used', () => {
+        const store = createStore({ interactionType: InteractionType.HalfTap, lastUsed: InteractionType.SwipeVertical });
         const { result } = renderHook(() => useGestureHint(), { wrapper: wrap(store) });
-        expect(result.current).toBe(false);
-
-        act(() => { store.dispatch(setGameInteractionType({ gameId: 'game-1', interactionType: InteractionType.HalfTap })); });
-        expect(result.current).toBe(true);
-    });
-
-    // req 4: score after gesture change → hide again
-    it('hides hint again after scoring with the new gesture', () => {
-        const store = createStore([5]); // starts dismissed
-        const { result } = renderHook(() => useGestureHint(), { wrapper: wrap(store) });
-
-        act(() => { store.dispatch(setInteractionType(InteractionType.HalfTap)); });
         expect(result.current).toBe(true);
 
-        act(() => { store.dispatch(playerRoundScoreSet('p1', 0, 10)); }); // fingerprint increases 5→10
+        act(() => { store.dispatch(setLastUsedInteractionType(InteractionType.HalfTap)); });
         expect(result.current).toBe(false);
     });
 
-    it('hides hint when the game is locked', () => {
-        const store = configureStore({
-            reducer: { settings: settingsReducer, games: gamesReducer, players: playersReducer },
-            preloadedState: {
-                settings: { currentGameId: 'game-1', interactionType: InteractionType.SwipeVertical },
-                games: {
-                    entities: {
-                        'game-1': { id: 'game-1', playerIds: ['p1'], dateCreated: 0, roundCurrent: 0, roundTotal: 1, locked: true },
-                    },
-                    ids: ['game-1'],
-                },
-                players: { entities: { p1: { id: 'p1', playerName: 'P1', scores: [0] } }, ids: ['p1'] },
-            } as Parameters<typeof configureStore>[0]['preloadedState'],
-        });
+    // Opening a game whose per-game gesture differs from the last-used one shows the
+    // hint — the "this game's mode is different" cue.
+    it('shows hint when a game uses a per-game gesture the user has not last used', () => {
+        const store = createStore({ lastUsed: InteractionType.SwipeVertical, gameInteractionType: InteractionType.Dial });
+        const { result } = renderHook(() => useGestureHint(), { wrapper: wrap(store) });
+        expect(result.current).toBe(true);
+    });
+
+    it('hides hint when the game is locked even if gestures differ', () => {
+        const store = createStore({ interactionType: InteractionType.HalfTap, lastUsed: InteractionType.SwipeVertical, locked: true });
         const { result } = renderHook(() => useGestureHint(), { wrapper: wrap(store) });
         expect(result.current).toBe(false);
     });

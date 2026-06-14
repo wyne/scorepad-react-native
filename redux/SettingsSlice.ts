@@ -11,6 +11,9 @@ export interface SettingsState {
     showPointParticles: boolean;
     showPlayerIndex: boolean;
     interactionType: InteractionType;
+    // The gesture the user most recently *used* (committed a score with).
+    // Drives the gesture hint: undefined means "never used a gesture" (new user).
+    lastUsedInteractionType?: InteractionType;
     lastStoreReviewPrompt: number;
     devMenuEnabled?: boolean;
     appOpens: number;
@@ -30,6 +33,7 @@ export const initialState: SettingsState = {
     showPointParticles: false,
     showPlayerIndex: false,
     interactionType: InteractionType.SwipeVertical,
+    lastUsedInteractionType: undefined,
     lastStoreReviewPrompt: 0,
     appOpens: 0,
     installId: undefined,
@@ -67,6 +71,12 @@ const settingsSlice = createSlice({
         },
         setInteractionType(state, action: PayloadAction<InteractionType>) {
             state.interactionType = action.payload;
+        },
+        setLastUsedInteractionType(state, action: PayloadAction<InteractionType>) {
+            // Guard so the per-score dispatch from interaction components is a
+            // no-op once already set — no state change means no re-render.
+            if (state.lastUsedInteractionType === action.payload) return;
+            state.lastUsedInteractionType = action.payload;
         },
         setLastStoreReviewPrompt(state, action: PayloadAction<number>) {
             state.lastStoreReviewPrompt = action.payload;
@@ -115,6 +125,7 @@ export const {
     toggleShowPointParticles,
     toggleShowPlayerIndex,
     setInteractionType,
+    setLastUsedInteractionType,
     setLastStoreReviewPrompt,
     toggleDevMenuEnabled,
     increaseAppOpens,

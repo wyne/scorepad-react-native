@@ -23,11 +23,16 @@ const settingsMigrations: any = {
         const interactionType = stored && validTypes.includes(stored) ? stored : 'swipe-vertical';
         return { ...state, interactionType };
     },
+    3: (state: Record<string, unknown> | undefined) => {
+        // Seed last-used gesture from the existing global gesture so returning
+        // users aren't shown the hint for a gesture they already use.
+        return { ...state, lastUsedInteractionType: state?.interactionType };
+    },
 };
 
 const settingsPersistConfig = {
     key: 'settings',
-    version: 3,
+    version: 4,
     storage: AsyncStorage,
     migrate: createMigrate(settingsMigrations),
     whitelist: [
@@ -40,6 +45,7 @@ const settingsPersistConfig = {
         'showPointParticles',
         'showPlayerIndex',
         'interactionType',
+        'lastUsedInteractionType',
         'lastStoreReviewPrompt',
         'devMenuEnabled',
         'appOpens',
