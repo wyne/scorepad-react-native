@@ -3,7 +3,7 @@ import React from 'react';
 import { MenuAction, MenuView } from '@react-native-menu/menu';
 import { ParamListBase } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { StyleSheet, View } from 'react-native';
+import { Keyboard, StyleSheet, View } from 'react-native';
 import { Icon } from 'react-native-elements';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -51,6 +51,11 @@ const FloatingActionButton: React.FunctionComponent<Props> = ({ navigation }) =>
         }]}>
             <MenuView
                 style={StyleSheet.absoluteFill}
+                // A text input elsewhere (e.g. the edit-player name field) can leave
+                // a dangling first responder that iOS tries to restore when this
+                // native menu presents, popping the keyboard up alongside it.
+                // Dismiss the keyboard as the menu opens so that can't happen.
+                onOpenMenu={() => Keyboard.dismiss()}
                 onPressAction={async ({ nativeEvent }) => {
                     const playerNumber = parseInt(nativeEvent.event);
                     addGameHandler(playerNumber);
