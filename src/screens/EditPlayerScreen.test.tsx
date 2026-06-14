@@ -3,7 +3,7 @@ import React from 'react';
 
 import { configureStore } from '@reduxjs/toolkit';
 import { act, fireEvent, render, waitFor } from '@testing-library/react-native';
-import { Platform } from 'react-native';
+import { Keyboard, Platform } from 'react-native';
 import { Provider } from 'react-redux';
 
 import gamesReducer from '../../redux/GamesSlice';
@@ -522,6 +522,50 @@ describe('EditPlayerScreen', () => {
 
         expect(getByDisplayValue('')).toBeTruthy();
         expect(store.getState().players.entities['player-1']?.playerName).toBe('Test Player');
+    });
+
+    it('should dismiss the keyboard before navigating back', async () => {
+        const dismissSpy = jest.spyOn(Keyboard, 'dismiss').mockImplementation(() => undefined);
+        const store = createMockStore({
+            settings: {
+                currentGameId: 'game-1',
+            },
+            games: {
+                entities: {
+                    'game-1': mockGame,
+                },
+                ids: ['game-1'],
+            },
+            players: {
+                entities: {
+                    'player-1': mockPlayer,
+                },
+                ids: ['player-1'],
+            },
+        });
+
+        const mockRoute = {
+            params: {
+                index: 0,
+                playerId: 'player-1',
+            },
+        };
+
+        render(
+            <Provider store={store}>
+                <EditPlayerScreen navigation={mockNavigation} route={mockRoute as any} />
+            </Provider>
+        );
+
+        const options = mockNavigation.setOptions.mock.calls[0][0];
+        const backButton = options.headerLeft({ tintColor: '#fff' });
+
+        await act(async () => {
+            await backButton.props.onPress();
+        });
+
+        expect(dismissSpy).toHaveBeenCalled();
+        expect(mockNavigation.goBack).toHaveBeenCalled();
     });
 
     it('should limit input to 15 characters', () => {

@@ -1,9 +1,10 @@
-import React, { useLayoutEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 
 import { ParamListBase, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import {
     NativeSyntheticEvent,
+    Keyboard,
     Platform,
     ScrollView,
     StyleSheet,
@@ -42,11 +43,19 @@ const EditPlayerScreen: React.FC<EditPlayerScreenProps> = ({
 }) => {
 
     const theme = useTheme();
+    const inputRef = React.useRef<TextInput>(null);
+    const selectedNameRef = useRef<string | null>(null);
+
+    const dismissInput = useCallback(() => {
+        inputRef.current?.blur();
+        Keyboard.dismiss();
+    }, []);
 
     useLayoutEffect(() => {
         navigation.setOptions({
             headerLeft: ({ tintColor }) => (
                 <HeaderButton accessibilityLabel='EditPlayerBack' onPress={async () => {
+                    dismissInput();
                     navigation.goBack();
                     await logEvent('edit_player_back');
                 }}>
@@ -54,7 +63,7 @@ const EditPlayerScreen: React.FC<EditPlayerScreenProps> = ({
                 </HeaderButton>
             ),
         });
-    }, [navigation, theme.tint]);
+    }, [dismissInput, navigation, theme.tint]);
     const dispatch = useAppDispatch();
     const currentGame = useAppSelector(selectCurrentGame);
     const { index, playerId } = route.params;
@@ -71,6 +80,11 @@ const EditPlayerScreen: React.FC<EditPlayerScreenProps> = ({
     const [isFocused, setIsFocused] = useState(false);
 
     const allPlayerNames = useAppSelector(selectAllPlayerNames);
+
+    useEffect(() => {
+        const unsubscribe = navigation.addListener('beforeRemove', dismissInput);
+        return unsubscribe;
+    }, [dismissInput, navigation]);
 
     const suggestions = useMemo(() => {
         if (!isFocused || localPlayerName.length === 0) return [];
@@ -140,9 +154,6 @@ const EditPlayerScreen: React.FC<EditPlayerScreenProps> = ({
         setLocalPlayerName('');
         inputRef.current?.focus();
     };
-
-    const inputRef = React.useRef<TextInput>(null);
-    const selectedNameRef = useRef<string | null>(null);
 
     return (
         <ScrollView style={{ flex: 1 }} keyboardShouldPersistTaps="handled">
