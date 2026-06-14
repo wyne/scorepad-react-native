@@ -4,6 +4,7 @@ import { configureStore } from '@reduxjs/toolkit';
 import { render } from '@testing-library/react-native';
 import { Provider } from 'react-redux';
 
+import gamesReducer from '../../../redux/GamesSlice';
 import settingsReducer from '../../../redux/SettingsSlice';
 import { FEATURE_DIAL_GESTURE } from '../../constants';
 
@@ -53,7 +54,7 @@ import GameOptionsButton from './GameOptionsButton';
 
 const createStore = (seenFeatureNotifications: string[] = []) =>
     configureStore({
-        reducer: { settings: settingsReducer },
+        reducer: { settings: settingsReducer, games: gamesReducer },
         preloadedState: {
             settings: {
                 currentGameId: 'game-1',
@@ -62,6 +63,12 @@ const createStore = (seenFeatureNotifications: string[] = []) =>
                 addendOne: 1,
                 addendTwo: 10,
                 seenFeatureNotifications,
+            },
+            games: {
+                entities: {
+                    'game-1': { id: 'game-1', playerIds: ['p1'], dateCreated: 0, roundCurrent: 0, roundTotal: 1 },
+                },
+                ids: ['game-1'],
             },
         } as Parameters<typeof configureStore>[0]['preloadedState'],
     });

@@ -64,7 +64,9 @@ const PlayerTile: React.FunctionComponent<Props> = React.memo(({
     const heightPerc: DimensionValue = `${(100 / rows)}%`;
 
     // Dynamic InteractionComponent
-    const interactionType: InteractionType = useAppSelector(selectInteractionType);
+    const interactionType: InteractionType = useAppSelector(
+        state => selectInteractionType(state, state.settings.currentGameId)
+    );
     const InteractionComponent = interactionComponents[interactionType];
 
     return (

@@ -4,7 +4,7 @@ import { useAppSelector } from '../../redux/hooks';
 import { selectCurrentGame, selectInteractionType } from '../../redux/selectors';
 
 export function useGestureHint(): boolean {
-    const interactionType = useAppSelector(selectInteractionType);
+    const interactionType = useAppSelector(state => selectInteractionType(state, state.settings.currentGameId));
     const gameLocked = useAppSelector(state => selectCurrentGame(state)?.locked ?? false);
 
     const fingerprint = useAppSelector(state => {

@@ -4,7 +4,7 @@ import { configureStore } from '@reduxjs/toolkit';
 import { act, renderHook } from '@testing-library/react-native';
 import { Provider } from 'react-redux';
 
-import gamesReducer from '../../redux/GamesSlice';
+import gamesReducer, { setGameInteractionType } from '../../redux/GamesSlice';
 import playersReducer, { playerRoundScoreSet } from '../../redux/PlayersSlice';
 import settingsReducer, { setInteractionType } from '../../redux/SettingsSlice';
 import { InteractionType } from '../components/Interactions/InteractionType';
@@ -65,6 +65,16 @@ describe('useGestureHint', () => {
         expect(result.current).toBe(false);
 
         act(() => { store.dispatch(setInteractionType(InteractionType.HalfTap)); });
+        expect(result.current).toBe(true);
+    });
+
+    // req 3 (per-game): changing the game's own gesture re-enables the hint
+    it('re-shows hint when the per-game gesture type changes', () => {
+        const store = createStore([5]); // starts dismissed
+        const { result } = renderHook(() => useGestureHint(), { wrapper: wrap(store) });
+        expect(result.current).toBe(false);
+
+        act(() => { store.dispatch(setGameInteractionType({ gameId: 'game-1', interactionType: InteractionType.HalfTap })); });
         expect(result.current).toBe(true);
     });
 
