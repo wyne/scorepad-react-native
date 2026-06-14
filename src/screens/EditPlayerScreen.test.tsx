@@ -3,6 +3,7 @@ import React from 'react';
 
 import { configureStore } from '@reduxjs/toolkit';
 import { act, fireEvent, render, waitFor } from '@testing-library/react-native';
+import { Keyboard } from 'react-native';
 import { Provider } from 'react-redux';
 
 import gamesReducer from '../../redux/GamesSlice';
@@ -461,6 +462,45 @@ describe('EditPlayerScreen', () => {
         // Should render the input field successfully
         const input = getByTestId('RNE__Input__text-input');
         expect(input).toBeTruthy();
+    });
+
+    it('dismisses the keyboard when the screen is removed', () => {
+        // Regression: the clear button focuses the input programmatically. If the
+        // screen unmounts while it is still the first responder, iOS re-shows the
+        // keyboard the next time a native menu (the new-game player-count menu)
+        // presents. Leaving the screen must dismiss the keyboard.
+        const dismissSpy = jest.spyOn(Keyboard, 'dismiss').mockImplementation(() => { });
+
+        let beforeRemoveCallback: (() => void) | undefined;
+        mockNavigation.addListener.mockImplementation((event: string, cb: () => void) => {
+            if (event === 'beforeRemove') {
+                beforeRemoveCallback = cb;
+            }
+            return jest.fn();
+        });
+
+        const mockRoute = {
+            params: {
+                index: 0,
+                playerId: 'player-1',
+            },
+        };
+
+        render(
+            <Provider store={mockStore}>
+                <EditPlayerScreen navigation={mockNavigation} route={mockRoute as any} />
+            </Provider>
+        );
+
+        expect(beforeRemoveCallback).toBeDefined();
+
+        act(() => {
+            beforeRemoveCallback?.();
+        });
+
+        expect(dismissSpy).toHaveBeenCalled();
+
+        dismissSpy.mockRestore();
     });
 
     it('should limit input to 15 characters', () => {

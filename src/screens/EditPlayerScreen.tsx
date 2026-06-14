@@ -1,8 +1,9 @@
-import React, { useLayoutEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 
 import { ParamListBase, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import {
+    Keyboard,
     NativeSyntheticEvent,
     ScrollView,
     StyleSheet,
@@ -53,6 +54,18 @@ const EditPlayerScreen: React.FC<EditPlayerScreenProps> = ({
             ),
         });
     }, [navigation, theme.tint]);
+
+    // The clear button focuses the input programmatically. If the screen is
+    // removed while that input is still the first responder, iOS keeps a
+    // dangling reference and re-shows the keyboard the next time a native view
+    // (e.g. the new-game player-count menu) presents. Dismiss it on the way out.
+    useEffect(() => {
+        const unsubscribe = navigation.addListener('beforeRemove', () => {
+            Keyboard.dismiss();
+        });
+        return unsubscribe;
+    }, [navigation]);
+
     const dispatch = useAppDispatch();
     const currentGame = useAppSelector(selectCurrentGame);
     const { index, playerId } = route.params;
