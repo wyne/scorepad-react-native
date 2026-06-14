@@ -1,7 +1,8 @@
-// Local copy of expo-ios-scene-lifecycle-plugin with fixed regex.
-// The upstream package regex assumed #endif was unindented, but Expo SDK 56
-// generates AppDelegate.swift with an indented #endif. Changed \n#endif to
-// \n[ \t]*#endif to allow leading whitespace.
+// Local copy of expo-ios-scene-lifecycle-plugin with revised patching strategy.
+// The upstream plugin matched the entire #if os(iOS) ... #endif block as one unit,
+// which breaks when other plugins (Firebase, TouchVisualizer) inject code between
+// `window = UIWindow(...)` and `factory.startReactNative(...)`.
+// Instead, we target each line individually and wrap them in if #unavailable(iOS 13.0).
 // Ref: https://github.com/expo/expo/issues/46664
 const { withAppDelegate, withInfoPlist } = require('@expo/config-plugins');
 
@@ -95,40 +96,41 @@ function patchAppDelegate(contents) {
 
   let nextContents = contents;
 
-  // Allow optional leading whitespace before #endif — Expo SDK 56 generates
-  // AppDelegate.swift with an indented #endif inside function bodies.
-  const startupBlockPattern =
-    /#if os\(iOS\) \|\| os\(tvOS\)\n\s*window = UIWindow\(frame: UIScreen\.main\.bounds\)\n\s*factory\.startReactNative\(\n\s*withModuleName: "main",\n\s*in: window,\n\s*launchOptions: launchOptions\)\n[ \t]*#endif/;
-
-  if (!startupBlockPattern.test(nextContents)) {
-    throw new Error('Could not find the Expo AppDelegate React Native startup block to patch for UIScene lifecycle.');
+  // Wrap the window creation line — capture only horizontal whitespace (spaces/tabs)
+  // so the preceding newline isn't included and we don't get spurious blank lines.
+  const windowPattern = /([ \t]+)window = UIWindow\(frame: UIScreen\.main\.bounds\)/;
+  if (!windowPattern.test(nextContents)) {
+    throw new Error(
+      'Could not find "window = UIWindow(frame: UIScreen.main.bounds)" to patch for UIScene lifecycle.'
+    );
   }
-
-  nextContents = nextContents.replace(
-    startupBlockPattern,
-    `#if os(iOS) || os(tvOS)
-    if #unavailable(iOS 13.0) {
-      window = UIWindow(frame: UIScreen.main.bounds)
-      factory.startReactNative(
-        withModuleName: "main",
-        in: window,
-        launchOptions: launchOptions)
-    }
-#endif`,
+  nextContents = nextContents.replace(windowPattern, (_, ws) =>
+    `${ws}if #unavailable(iOS 13.0) {\n${ws}  window = UIWindow(frame: UIScreen.main.bounds)\n${ws}}`
   );
 
+  // Wrap the factory.startReactNative call — capture only horizontal whitespace.
+  const factoryPattern =
+    /([ \t]+)factory\.startReactNative\(\n[ \t]+withModuleName: "main",\n[ \t]+in: window,\n[ \t]+launchOptions: launchOptions\)/;
+  if (!factoryPattern.test(nextContents)) {
+    throw new Error(
+      'Could not find "factory.startReactNative(...)" block to patch for UIScene lifecycle.'
+    );
+  }
+  nextContents = nextContents.replace(factoryPattern, (_, ws) =>
+    `${ws}if #unavailable(iOS 13.0) {\n${ws}  factory.startReactNative(\n${ws}    withModuleName: "main",\n${ws}    in: window,\n${ws}    launchOptions: launchOptions)\n${ws}}`
+  );
+
+  // Insert the scene configuration method before the Linking API section.
   if (!nextContents.includes('configurationForConnecting connectingSceneSession')) {
     const linkingMarker = '\n  // Linking API';
-
     if (!nextContents.includes(linkingMarker)) {
       throw new Error('Could not find the AppDelegate linking section to insert the UIScene configuration method.');
     }
-
     nextContents = nextContents.replace(linkingMarker, `\n${sceneConfigurationMethod}\n  // Linking API`);
   }
 
+  // Insert the SceneDelegate class before ReactNativeDelegate.
   const reactNativeDelegateMarker = '\nclass ReactNativeDelegate: ExpoReactNativeFactoryDelegate';
-
   if (!nextContents.includes(reactNativeDelegateMarker)) {
     throw new Error('Could not find ReactNativeDelegate to insert SceneDelegate.');
   }
@@ -140,7 +142,7 @@ function addAppDelegateSceneLifecycle(config) {
   return withAppDelegate(config, (nextConfig) => {
     if (nextConfig.modResults.language !== 'swift') {
       throw new Error(
-        `Cannot apply iOS scene lifecycle plugin to ${nextConfig.modResults.language} AppDelegate. Swift is required.`,
+        `Cannot apply iOS scene lifecycle plugin to ${nextConfig.modResults.language} AppDelegate. Swift is required.`
       );
     }
 
