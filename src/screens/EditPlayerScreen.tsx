@@ -17,7 +17,7 @@ import {
 import { Input } from 'react-native-elements';
 
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
-import { updatePlayer } from '../../redux/PlayersSlice';
+import { selectAllPlayerNames, updatePlayer } from '../../redux/PlayersSlice';
 import { selectCurrentGame } from '../../redux/selectors';
 import { logEvent } from '../Analytics';
 import HeaderButton from '../components/Buttons/HeaderButton';
@@ -70,13 +70,7 @@ const EditPlayerScreen: React.FC<EditPlayerScreenProps> = ({
     const [localPlayerName, setLocalPlayerName] = useState<string>(player?.playerName || '');
     const [isFocused, setIsFocused] = useState(false);
 
-    const allPlayerNames = useAppSelector(state => {
-        const names: string[] = [];
-        for (const p of Object.values(state.players.entities)) {
-            if (p) names.push(p.playerName);
-        }
-        return [...new Set(names)];
-    });
+    const allPlayerNames = useAppSelector(selectAllPlayerNames);
 
     const suggestions = useMemo(() => {
         if (!isFocused || localPlayerName.length === 0) return [];

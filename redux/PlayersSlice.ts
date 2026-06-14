@@ -105,6 +105,17 @@ export const selectPlayerNameById = createSelector(
     (player) => player?.playerName
 );
 
+export const selectAllPlayerNames = createSelector(
+    [(state: RootState) => state.players.entities],
+    (entities) => {
+        const names: string[] = [];
+        for (const player of Object.values(entities)) {
+            if (player) names.push(player.playerName);
+        }
+        return [...new Set(names)];
+    }
+);
+
 export const selectPlayerScoreByRound = createSelector(
     [
         (state: RootState) => state.players.entities,
