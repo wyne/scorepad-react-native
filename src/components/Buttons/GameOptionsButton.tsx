@@ -5,7 +5,9 @@ import { MenuAction, MenuView } from '@react-native-menu/menu';
 import { SymbolView } from 'expo-symbols';
 import { StyleSheet, View, Text, Platform } from 'react-native';
 
+import { setGameInteractionType } from '../../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
+import { selectInteractionType } from '../../../redux/selectors';
 import { toggleHomeFullscreen, setInteractionType, markFeatureNotificationSeen } from '../../../redux/SettingsSlice';
 import { logEvent } from '../../Analytics';
 import { FEATURE_DIAL_GESTURE } from '../../constants';
@@ -22,7 +24,7 @@ const GameOptionsButton: React.FunctionComponent = () => {
     const { setMenuOpen } = useMenuOpen();
 
     const currentGameId = useAppSelector(state => state.settings.currentGameId);
-    const interactionType = useAppSelector(state => state.settings.interactionType);
+    const interactionType = useAppSelector(state => selectInteractionType(state, currentGameId));
     const fullscreen = useAppSelector(state => state.settings.home_fullscreen);
     const installId = useAppSelector(state => state.settings.installId);
     const addendOne = useAppSelector(state => state.settings.addendOne);
@@ -114,19 +116,26 @@ const GameOptionsButton: React.FunctionComponent = () => {
             },
         ];
 
+    // Set the gesture for the current game, and update the global default so
+    // new games inherit the most recently chosen gesture.
+    const applyInteractionType = (type: InteractionType, eventName: string) => {
+        if (currentGameId) {
+            dispatch(setGameInteractionType({ gameId: currentGameId, interactionType: type }));
+        }
+        dispatch(setInteractionType(type));
+        logEvent('interaction_type', { interactionType: eventName, gameId: currentGameId });
+    };
+
     const handleAction = (event: string) => {
         switch (event) {
             case 'swipe':
-                dispatch(setInteractionType(InteractionType.SwipeVertical));
-                logEvent('interaction_type', { interactionType: 'swipe_vertical', gameId: currentGameId });
+                applyInteractionType(InteractionType.SwipeVertical, 'swipe_vertical');
                 break;
             case 'tap':
-                dispatch(setInteractionType(InteractionType.HalfTap));
-                logEvent('interaction_type', { interactionType: 'half_tap', gameId: currentGameId });
+                applyInteractionType(InteractionType.HalfTap, 'half_tap');
                 break;
             case 'dial':
-                dispatch(setInteractionType(InteractionType.Dial));
-                logEvent('interaction_type', { interactionType: 'radial_gesture', gameId: currentGameId });
+                applyInteractionType(InteractionType.Dial, 'radial_gesture');
                 break;
             case 'point-values':
                 gameSheetRef?.current?.snapToIndex(0);

@@ -1,21 +1,24 @@
-import React, { useLayoutEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 
 import { ParamListBase, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import {
     NativeSyntheticEvent,
+    Keyboard,
+    Platform,
     ScrollView,
     StyleSheet,
     Text,
     TextInput,
     TextInputEndEditingEventData,
+    TextInputSubmitEditingEventData,
     TouchableOpacity,
     View
 } from 'react-native';
 import { Input } from 'react-native-elements';
 
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
-import { updatePlayer } from '../../redux/PlayersSlice';
+import { selectAllPlayerNames, updatePlayer } from '../../redux/PlayersSlice';
 import { selectCurrentGame } from '../../redux/selectors';
 import { logEvent } from '../Analytics';
 import HeaderButton from '../components/Buttons/HeaderButton';
@@ -40,11 +43,19 @@ const EditPlayerScreen: React.FC<EditPlayerScreenProps> = ({
 }) => {
 
     const theme = useTheme();
+    const inputRef = React.useRef<TextInput>(null);
+    const selectedNameRef = useRef<string | null>(null);
+
+    const dismissInput = useCallback(() => {
+        inputRef.current?.blur();
+        Keyboard.dismiss();
+    }, []);
 
     useLayoutEffect(() => {
         navigation.setOptions({
             headerLeft: ({ tintColor }) => (
                 <HeaderButton accessibilityLabel='EditPlayerBack' onPress={async () => {
+                    dismissInput();
                     navigation.goBack();
                     await logEvent('edit_player_back');
                 }}>
@@ -52,7 +63,7 @@ const EditPlayerScreen: React.FC<EditPlayerScreenProps> = ({
                 </HeaderButton>
             ),
         });
-    }, [navigation, theme.tint]);
+    }, [dismissInput, navigation, theme.tint]);
     const dispatch = useAppDispatch();
     const currentGame = useAppSelector(selectCurrentGame);
     const { index, playerId } = route.params;
@@ -68,13 +79,12 @@ const EditPlayerScreen: React.FC<EditPlayerScreenProps> = ({
     const [localPlayerName, setLocalPlayerName] = useState<string>(player?.playerName || '');
     const [isFocused, setIsFocused] = useState(false);
 
-    const allPlayerNames = useAppSelector(state => {
-        const names: string[] = [];
-        for (const p of Object.values(state.players.entities)) {
-            if (p) names.push(p.playerName);
-        }
-        return [...new Set(names)];
-    });
+    const allPlayerNames = useAppSelector(selectAllPlayerNames);
+
+    useEffect(() => {
+        const unsubscribe = navigation.addListener('beforeRemove', dismissInput);
+        return unsubscribe;
+    }, [dismissInput, navigation]);
 
     const suggestions = useMemo(() => {
         if (!isFocused || localPlayerName.length === 0) return [];
@@ -93,21 +103,28 @@ const EditPlayerScreen: React.FC<EditPlayerScreenProps> = ({
         const text = selectedNameRef.current ?? e.nativeEvent.text;
         selectedNameRef.current = null;
 
+        commitPlayerName(text);
+    };
+
+    const onSubmitEditingHandler = (e: NativeSyntheticEvent<TextInputSubmitEditingEventData>) => {
+        commitPlayerName(e.nativeEvent.text);
+    };
+
+    const onChangeHandler = (text: string) => {
+        if (text != '') {
+            savePlayerName(text);
+        }
+        setLocalPlayerName(text);
+    };
+
+    const commitPlayerName = (text: string) => {
         if (text == '') {
             setLocalPlayerName(originalPlayerName);
             savePlayerName(originalPlayerName);
         } else {
+            setLocalPlayerName(text);
             savePlayerName(text);
         }
-    };
-
-    const onChangeHandler = (text: string) => {
-        if (text == '') {
-            savePlayerName(originalPlayerName);
-        } else {
-            savePlayerName(text);
-        }
-        setLocalPlayerName(text);
     };
 
     const savePlayerName = (text: string) => {
@@ -120,7 +137,12 @@ const EditPlayerScreen: React.FC<EditPlayerScreenProps> = ({
     };
 
     const onFocus = () => setIsFocused(true);
-    const onBlur = () => setIsFocused(false);
+    const onBlur = () => {
+        setIsFocused(false);
+        if (localPlayerName == '') {
+            commitPlayerName(originalPlayerName);
+        }
+    };
     const onSuggestionSelect = (name: string) => {
         selectedNameRef.current = name;
         setLocalPlayerName(name);
@@ -128,9 +150,10 @@ const EditPlayerScreen: React.FC<EditPlayerScreenProps> = ({
         setIsFocused(false);
         inputRef.current?.blur();
     };
-
-    const inputRef = React.useRef<TextInput>(null);
-    const selectedNameRef = useRef<string | null>(null);
+    const clearPlayerName = () => {
+        setLocalPlayerName('');
+        inputRef.current?.focus();
+    };
 
     return (
         <ScrollView style={{ flex: 1 }} keyboardShouldPersistTaps="handled">
@@ -138,17 +161,15 @@ const EditPlayerScreen: React.FC<EditPlayerScreenProps> = ({
             <View style={{ position: 'relative', zIndex: 1 }}>
                 <Input
                     ref={inputRef}
-                    rightIcon={{
+                    clearButtonMode="while-editing"
+                    rightIcon={Platform.OS === 'ios' ? undefined : {
                         style: { padding: 8 },
                         disabled: localPlayerName == '',
                         disabledStyle: { display: 'none' },
                         color: theme.textTertiary,
                         size: 15,
                         name: 'close',
-                        onPress: () => {
-                            setLocalPlayerName('');
-                            inputRef.current?.focus();
-                        }
+                        onPress: clearPlayerName,
                     }}
                     containerStyle={{ flex: 1 }}
                     inputContainerStyle={{
@@ -160,10 +181,12 @@ const EditPlayerScreen: React.FC<EditPlayerScreenProps> = ({
                     maxLength={15}
                     onChangeText={onChangeHandler}
                     onEndEditing={onEndEditingHandler}
+                    onSubmitEditing={onSubmitEditingHandler}
                     onFocus={onFocus}
                     onBlur={onBlur}
                     placeholder='Player Name'
                     renderErrorMessage={false}
+                    returnKeyType="done"
                     selectTextOnFocus={true}
                     style={[styles.input, { color: theme.textSecondary }]}
                     value={localPlayerName}

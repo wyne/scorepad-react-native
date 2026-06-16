@@ -105,6 +105,17 @@ export const selectPlayerNameById = createSelector(
     (player) => player?.playerName
 );
 
+export const selectAllPlayerNames = createSelector(
+    [(state: RootState) => state.players.entities],
+    (entities) => {
+        const names: string[] = [];
+        for (const player of Object.values(entities)) {
+            if (player) names.push(player.playerName);
+        }
+        return [...new Set(names)];
+    }
+);
+
 export const selectPlayerScoreByRound = createSelector(
     [
         (state: RootState) => state.players.entities,
@@ -112,6 +123,11 @@ export const selectPlayerScoreByRound = createSelector(
         (state: RootState, playerId: string, round: number) => round,
     ],
     (entities, playerId, round) => entities[playerId]?.scores[round] || 0
+);
+
+export const selectPlayerGrandTotalScore = createSelector(
+    [(state: RootState, playerId: string) => state.players.entities[playerId]],
+    (player) => player?.scores?.reduce((sum, s) => sum + (s || 0), 0) ?? 0
 );
 
 export const selectPlayerRoundStats = createSelector(

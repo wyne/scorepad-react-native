@@ -5,6 +5,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Platform, StyleSheet, Text, View } from 'react-native';
 import { Icon, ListItem } from 'react-native-elements';
 import Animated, { FadeInUp } from 'react-native-reanimated';
+import { shallowEqual } from 'react-redux';
 
 import { selectGameById } from '../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
@@ -34,25 +35,43 @@ export type Props = {
     navigation: NativeStackNavigationProp<ParamListBase, string, undefined>;
     gameId: string;
     index: number;
+    /** Test-only render probe for selector invalidation regressions. */
+    onRender?: (id: string) => void;
+    /** Test-only render probe for popup menu selector invalidation regressions. */
+    onMenuRender?: (id: string) => void;
 };
 
-const GameListItem: React.FunctionComponent<Props> = ({ navigation, gameId, index }) => {
+const GameListItem: React.FunctionComponent<Props> = ({ navigation, gameId, index, onMenuRender, onRender }) => {
+    onRender?.(gameId);
+
     const theme = useTheme();
     const dispatch = useAppDispatch();
+    const {
+        dateCreated,
+        gameTitle,
+        locked,
+        playerIds,
+        roundCount,
+        winnerIds,
+    } = useAppSelector(state => {
+        const game = selectGameById(state, gameId);
 
-    if (gameId == null) { return null; }
-
-    const roundCount = useAppSelector(state => selectGameById(state, gameId)?.roundTotal);
-    const playerIds = useAppSelector(state => selectGameById(state, gameId)?.playerIds);
-    const gameTitle = useAppSelector(state => selectGameById(state, gameId)?.title);
-    const locked = useAppSelector(state => selectGameById(state, gameId)?.locked);
-    const winnerIds = useAppSelector(state => selectGameById(state, gameId)?.winnerIds);
-    const dateCreated = useAppSelector(state => selectGameById(state, gameId)?.dateCreated);
-    if (roundCount == null || playerIds == null) { return null; }
+        return {
+            dateCreated: game?.dateCreated,
+            gameTitle: game?.title,
+            locked: game?.locked,
+            playerIds: game?.playerIds,
+            roundCount: game?.roundTotal,
+            winnerIds: game?.winnerIds,
+        };
+    }, shallowEqual);
 
     const setCurrentGameCallback = useCallback(() => {
         dispatch(setCurrentGameId(gameId));
-    }, [gameId]);
+    }, [dispatch, gameId]);
+
+    if (gameId == null) { return null; }
+    if (gameTitle == null || roundCount == null || playerIds == null) { return null; }
 
     /**
      * Choose Game and navigate to GameScreen
@@ -78,6 +97,7 @@ const GameListItem: React.FunctionComponent<Props> = ({ navigation, gameId, inde
                 chooseGameHandler={chooseGameHandler}
                 navigation={navigation}
                 index={index}
+                onRender={onMenuRender}
             >
                 <ListItem bottomDivider testID="game-list-item"
                     onPress={Platform.OS == 'android' ? undefined : chooseGameHandler}

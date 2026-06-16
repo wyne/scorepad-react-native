@@ -1,16 +1,18 @@
-import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import * as Haptics from 'expo-haptics';
 import { Animated, StyleSheet, Text, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import ReAnimated, { runOnJS, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 
-import { useAppDispatch, useAppSelector } from '../../../../redux/hooks';
-import { playerRoundScoreIncrement, selectPlayerRoundStats } from '../../../../redux/PlayersSlice';
-import { selectCurrentGame } from '../../../../redux/selectors';
+import { selectGameById } from '../../../../redux/GamesSlice';
+import { useAppDispatch, useAppSelector, useAppStore } from '../../../../redux/hooks';
+import { playerRoundScoreIncrement } from '../../../../redux/PlayersSlice';
+import { setLastUsedInteractionType } from '../../../../redux/SettingsSlice';
 import { logEvent } from '../../../Analytics';
 import { useMenuOpen } from '../../MenuOpenContext';
 import { OptimisticScoreContext } from '../../PlayerTiles/AdditionTile/OptimisticScoreContext';
+import { InteractionType } from '../InteractionType';
 
 interface HalfTapProps {
     children: React.ReactNode;
@@ -19,6 +21,8 @@ interface HalfTapProps {
     playerId: string;
     showHint?: boolean;
     tileHeight?: number;
+    /** Test-only render probe for selector invalidation regressions. */
+    onRender?: (id: string) => void;
 }
 
 const notchSize = 50;
@@ -32,25 +36,28 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
     fontColor,
     showHint,
     tileHeight,
+    onRender,
 }) => {
+    onRender?.(playerId);
+
     const hintVisible = showHint && (!tileHeight || tileHeight >= HINT_MIN_HEIGHT);
     //#region Selector setup
 
     const currentGameId = useAppSelector(state => state.settings.currentGameId);
-    const currentRoundIndex = useAppSelector(state => selectCurrentGame(state)?.roundCurrent) || 0;
-    const currentGameLocked = useAppSelector(state => selectCurrentGame(state)?.locked);
-    const { currentRoundScore, currentRoundTotalScore } = useAppSelector(
-        state => selectPlayerRoundStats(state, playerId, currentRoundIndex)
-    );
+    const currentGameLocked = useAppSelector(state => {
+        const currentGameId = state.settings.currentGameId;
+        return currentGameId ? selectGameById(state, currentGameId)?.locked === true : false;
+    });
 
     const dispatch = useAppDispatch();
+    const store = useAppStore();
 
     const addendOne = useAppSelector(state => state.settings.addendOne);
     const addendTwo = useAppSelector(state => state.settings.addendTwo);
     const svAddendOne = useSharedValue(addendOne);
     const svAddendTwo = useSharedValue(addendTwo);
-    const svRoundScore = useSharedValue(currentRoundScore);
-    const svRoundTotalScore = useSharedValue(currentRoundTotalScore);
+    const svRoundScore = useSharedValue(0);
+    const svRoundTotalScore = useSharedValue(0);
     const optimisticScores = useMemo(() => ({
         currentRoundScore: svRoundScore,
         currentRoundTotalScore: svRoundTotalScore,
@@ -60,11 +67,6 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
         svAddendOne.value = addendOne;
         svAddendTwo.value = addendTwo;
     }, [addendOne, addendTwo]);
-
-    useLayoutEffect(() => {
-        svRoundScore.value = currentRoundScore;
-        svRoundTotalScore.value = currentRoundTotalScore;
-    }, [currentRoundScore, currentRoundTotalScore]);
 
     //#endregion
 
@@ -162,27 +164,46 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
 
     const { menuOpen } = useMenuOpen();
 
+    const getCurrentRoundStats = useCallback(() => {
+        const state = store.getState();
+        const currentGameId = state.settings.currentGameId;
+        const currentGame = currentGameId ? selectGameById(state, currentGameId) : undefined;
+        const currentRoundIndex = currentGame?.roundCurrent ?? 0;
+        const scores: number[] = state.players.entities[playerId]?.scores ?? [];
+        const currentRoundScore = scores[currentRoundIndex] ?? 0;
+        const previousTotal = scores.reduce(
+            (sum, s, i) => (i < currentRoundIndex ? sum + (s || 0) : sum), 0
+        );
+
+        return {
+            currentRoundIndex,
+            currentRoundScore,
+            currentRoundTotalScore: previousTotal + currentRoundScore,
+        };
+    }, [playerId, store]);
+
     const endGesture = useCallback((translationY: number) => {
         if (menuOpen) return;
         logEvent('score_change', {
             player_index: index,
             game_id: currentGameId,
             addend: secondaryHold ? addendTwo : addendOne,
-            round: currentRoundIndex,
+            round: getCurrentRoundStats().currentRoundIndex,
             type: translationY > 0 ? 'decrement' : 'increment',
             power_hold: secondaryHold,
             notches: -Math.round((translationY || 0) / notchSize),
             interaction: 'swipe-vertical',
         });
         secondaryHoldStop();
-    }, [index, currentGameId, secondaryHold, addendOne, addendTwo, currentRoundIndex, menuOpen]);
+    }, [index, currentGameId, secondaryHold, addendOne, addendTwo, getCurrentRoundStats, menuOpen]);
 
     const flushPendingChange = useCallback((delta: number) => {
         if (delta === 0) return;
         if (menuOpen) return;
 
-        dispatch(playerRoundScoreIncrement(playerId, currentRoundIndex, delta));
-    }, [dispatch, playerId, currentRoundIndex, menuOpen]);
+        dispatch(playerRoundScoreIncrement(playerId, getCurrentRoundStats().currentRoundIndex, delta));
+        dispatch(setLastUsedInteractionType(InteractionType.SwipeVertical));
+    }, [dispatch, playerId, getCurrentRoundStats, menuOpen]);
 
     const bumpFeedback = useCallback((secondary: boolean) => {
         if (secondary) {

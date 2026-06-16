@@ -11,6 +11,7 @@ import WheelPickerFeedback from '@quidone/react-native-wheel-picker-feedback';
 import { Platform, StyleSheet, Text, View } from 'react-native';
 
 import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
+import { selectInteractionType } from '../../../redux/selectors';
 import { setAddendOne, setAddendTwo, setMultiplier } from '../../../redux/SettingsSlice';
 import { logEvent } from '../../Analytics';
 import { useTheme } from '../../theme';
@@ -27,7 +28,7 @@ const PointValuesSheet: React.FunctionComponent = () => {
     const theme = useTheme();
     const reduxAddendOne = useAppSelector((state) => state.settings.addendOne);
     const reduxAddendTwo = useAppSelector((state) => state.settings.addendTwo);
-    const interactionType = useAppSelector((state) => state.settings.interactionType);
+    const interactionType = useAppSelector((state) => selectInteractionType(state, state.settings.currentGameId));
 
     const dispatch = useAppDispatch();
 

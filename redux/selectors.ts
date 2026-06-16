@@ -3,8 +3,10 @@ import { InteractionType } from '../src/components/Interactions/InteractionType'
 import { selectGameById } from './GamesSlice';
 import { RootState } from './store';
 
-export const selectInteractionType = (state: RootState) => {
-    const interactionType: InteractionType = state.settings.interactionType;
+export const selectInteractionType = (state: RootState, gameId?: string): InteractionType => {
+    // Prefer the game-level gesture; fall back to the global default for new games.
+    const gameLevel = gameId ? selectGameById(state, gameId)?.interactionType : undefined;
+    const interactionType: InteractionType = gameLevel ?? state.settings.interactionType;
 
     // Check if interactionType is a valid InteractionType
     const isValidInteractionType = Object.values(InteractionType).includes(interactionType);

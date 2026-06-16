@@ -3,13 +3,19 @@ import React from 'react';
 import { MenuAction, MenuView } from '@react-native-menu/menu';
 import { ParamListBase } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { StyleSheet, View } from 'react-native';
+import { Keyboard, StyleSheet, View } from 'react-native';
 import { Icon } from 'react-native-elements';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { asyncCreateGame, selectAllGames } from '../../redux/GamesSlice';
+import { asyncCreateGame, selectGameIds } from '../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { MAX_PLAYERS } from '../constants';
 import { useTheme } from '../theme';
+
+export const FAB_SIZE = 60;
+export const FAB_EDGE_MARGIN = 20;
+export const FAB_BOTTOM_MARGIN = 16;
+export const FAB_LIST_CLEARANCE = 16;
 
 interface Props {
     navigation: NativeStackNavigationProp<ParamListBase, string, undefined>;
@@ -18,7 +24,8 @@ interface Props {
 const FloatingActionButton: React.FunctionComponent<Props> = ({ navigation }) => {
     const theme = useTheme();
     const dispatch = useAppDispatch();
-    const gameList = useAppSelector(selectAllGames);
+    const gameCount = useAppSelector(state => selectGameIds(state).length);
+    const insets = useSafeAreaInsets();
 
     const playerNumberOptions = [...Array.from(Array(MAX_PLAYERS).keys(), n => n + 1)];
 
@@ -29,7 +36,7 @@ const FloatingActionButton: React.FunctionComponent<Props> = ({ navigation }) =>
 
     const addGameHandler = async (playerCount: number) => {
         dispatch(
-            asyncCreateGame({ gameCount: gameList.length, playerCount })
+            asyncCreateGame({ gameCount, playerCount })
         ).then(() => {
             setTimeout(() => {
                 navigation.navigate('EditGame', { source: 'new_game' });
@@ -38,10 +45,17 @@ const FloatingActionButton: React.FunctionComponent<Props> = ({ navigation }) =>
     };
 
     return (
-        <View style={styles.container}>
+        <View testID="add-game-button-container" style={[styles.container, {
+            bottom: insets.bottom + FAB_BOTTOM_MARGIN,
+            right: insets.right + FAB_EDGE_MARGIN,
+        }]}>
             <MenuView
                 style={StyleSheet.absoluteFill}
+                onOpenMenu={() => {
+                    Keyboard.dismiss();
+                }}
                 onPressAction={async ({ nativeEvent }) => {
+                    Keyboard.dismiss();
                     const playerNumber = parseInt(nativeEvent.event);
                     addGameHandler(playerNumber);
                 }}
@@ -58,16 +72,14 @@ const FloatingActionButton: React.FunctionComponent<Props> = ({ navigation }) =>
 const styles = StyleSheet.create({
     container: {
         position: 'absolute',
-        bottom: 50,
-        right: 20,
-        width: 60,
-        height: 60,
+        width: FAB_SIZE,
+        height: FAB_SIZE,
         zIndex: 100,
     },
     fab: {
-        width: 60,
-        height: 60,
-        borderRadius: 30,
+        width: FAB_SIZE,
+        height: FAB_SIZE,
+        borderRadius: FAB_SIZE / 2,
         justifyContent: 'center',
         alignItems: 'center',
         shadowColor: '#000',

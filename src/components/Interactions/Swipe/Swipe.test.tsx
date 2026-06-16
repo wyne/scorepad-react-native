@@ -5,7 +5,9 @@ import { configureStore } from '@reduxjs/toolkit';
 import { act, render } from '@testing-library/react-native';
 import { Provider } from 'react-redux';
 
-import { playerRoundScoreIncrement } from '../../../../redux/PlayersSlice';
+import gamesReducer, { roundNext } from '../../../../redux/GamesSlice';
+import playersReducer, { playerRoundScoreIncrement } from '../../../../redux/PlayersSlice';
+import settingsReducer, { initialState as settingsInitialState } from '../../../../redux/SettingsSlice';
 
 import SwipeVertical from './Swipe';
 
@@ -48,18 +50,16 @@ jest.mock('react-native-gesture-handler', () => ({
   State: {},
 }));
 
-const stub = function (s: any = {}) { return s; };
-
 beforeEach(() => {
   (globalThis as any).__ph = {};
   jest.useRealTimers();
 });
 
-const renderSwipe = () => {
+const renderSwipe = ({ onRender }: { onRender?: (id: string) => void; } = {}) => {
   const store = configureStore({
-    reducer: { settings: stub, games: stub, players: stub },
+    reducer: { settings: settingsReducer, games: gamesReducer, players: playersReducer },
     preloadedState: {
-      settings: { addendOne: 1, addendTwo: 10, currentGameId: 'game-1', multiplier: '1', onboarded: null, interactionType: null, showPointParticles: true, _persist: { version: 0, rehydrated: true } },
+      settings: { ...settingsInitialState, addendOne: 1, addendTwo: 10, currentGameId: 'game-1', showPointParticles: true },
       games: { ids: ['game-1'], entities: { 'game-1': { id: 'game-1', title: 'Test', dateCreated: Date.now(), roundCurrent: 0, roundTotal: 1, locked: false, playerIds: ['player-1'] } }, _persist: { version: 0, rehydrated: true } },
       players: { ids: ['player-1'], entities: { 'player-1': { id: 'player-1', playerName: 'Test', scores: [0] } }, _persist: { version: 0, rehydrated: true } },
     },
@@ -67,10 +67,10 @@ const renderSwipe = () => {
   const dispatch = jest.spyOn(store, 'dispatch');
   render(
     <Provider store={store}>
-      <SwipeVertical fontColor="white" index={0} playerId="player-1"><></></SwipeVertical>
+      <SwipeVertical fontColor="white" index={0} playerId="player-1" onRender={onRender}><></></SwipeVertical>
     </Provider>
   );
-  return { dispatch };
+  return { dispatch, store };
 };
 
 describe('SwipeVertical', () => {
@@ -181,6 +181,7 @@ describe('SwipeVertical', () => {
 
     ph.onBegin();
     ph.onUpdate({ translationY: -100 });
+
     act(() => {
       ph.onEnd({ translationY: -100 });
       ph.onFinalize();
@@ -195,5 +196,40 @@ describe('SwipeVertical', () => {
         dispatchedAction.meta.multiplier === expectedAction.meta.multiplier
       );
     })).toHaveLength(1);
+  });
+
+  it('does not re-render solely because the current round changes', () => {
+    const onRender = jest.fn();
+    const { store } = renderSwipe({ onRender });
+
+    expect(onRender).toHaveBeenCalledTimes(1);
+    onRender.mockClear();
+
+    act(() => {
+      store.dispatch(roundNext('game-1'));
+    });
+
+    expect(onRender).not.toHaveBeenCalled();
+  });
+
+  it('scores against the latest round after a round change', () => {
+    const { dispatch, store } = renderSwipe();
+    const ph = (globalThis as any).__ph;
+
+    act(() => {
+      store.dispatch(roundNext('game-1'));
+    });
+    dispatch.mockClear();
+
+    ph.onBegin();
+    ph.onUpdate({ translationY: -100 });
+    act(() => {
+      ph.onEnd({ translationY: -100 });
+      ph.onFinalize();
+    });
+
+    expect(dispatch).toHaveBeenCalledWith(
+      playerRoundScoreIncrement('player-1', 1, 2)
+    );
   });
 });

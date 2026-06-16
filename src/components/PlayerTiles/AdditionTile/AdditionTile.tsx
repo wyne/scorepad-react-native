@@ -2,10 +2,10 @@ import React from 'react';
 
 import { StyleSheet } from 'react-native';
 import Animated from 'react-native-reanimated';
+import { shallowEqual } from 'react-redux';
 
+import { selectGameById } from '../../../../redux/GamesSlice';
 import { useAppSelector } from '../../../../redux/hooks';
-import { selectPlayerById, selectPlayerRoundStats } from '../../../../redux/PlayersSlice';
-import { selectCurrentGame } from '../../../../redux/selectors';
 
 import { calculateFontSize } from './Helpers';
 import { OptimisticScoreContext } from './OptimisticScoreContext';
@@ -20,6 +20,8 @@ interface Props {
     maxHeight: number | null;
     playerId: string;
     index: number;
+    /** Test-only render probe for selector invalidation regressions. */
+    onRender?: (id: string) => void;
 }
 
 const AdditionTile: React.FunctionComponent<Props> = ({
@@ -27,20 +29,49 @@ const AdditionTile: React.FunctionComponent<Props> = ({
     maxWidth,
     maxHeight,
     playerId,
+    onRender,
 }) => {
-    const currentGame = useAppSelector(selectCurrentGame);
-    if (typeof currentGame == 'undefined') return null;
+    onRender?.(playerId);
 
-    const currentRoundIndex = currentGame.roundCurrent;
-    const isLocked = currentGame.locked === true;
+    const {
+        currentRoundScore,
+        currentRoundTotalScore,
+        grandTotalScore,
+        hasCurrentGame,
+        isLocked,
+        playerName,
+    } = useAppSelector(state => {
+        const currentGameId = state.settings.currentGameId;
+        const currentGame = currentGameId ? selectGameById(state, currentGameId) : undefined;
+        const player = state.players.entities[playerId];
+        const scores = player?.scores ?? [];
+        const currentRoundIndex = currentGame?.roundCurrent ?? 0;
+        const currentRoundScore = scores[currentRoundIndex] ?? 0;
+        const previousTotal = scores.reduce(
+            (sum, s, i) => (i < currentRoundIndex ? sum + (s || 0) : sum), 0
+        );
 
-    const player = useAppSelector(state => selectPlayerById(state, playerId));
-    if (typeof player == 'undefined') return null;
-    const playerName = player.playerName;
-    const { currentRoundScore, currentRoundTotalScore, grandTotalScore } = useAppSelector(
-        state => selectPlayerRoundStats(state, playerId, currentRoundIndex)
-    );
+        return {
+            currentRoundScore,
+            currentRoundTotalScore: previousTotal + currentRoundScore,
+            grandTotalScore: scores.reduce((sum, s) => sum + (s || 0), 0),
+            hasCurrentGame: typeof currentGame !== 'undefined',
+            isLocked: currentGame?.locked === true,
+            playerName: player?.playerName,
+        };
+    }, shallowEqual);
+
     const optimisticScores = React.useContext(OptimisticScoreContext);
+
+    React.useLayoutEffect(() => {
+        if (optimisticScores == null) return;
+
+        optimisticScores.currentRoundScore.value = currentRoundScore;
+        optimisticScores.currentRoundTotalScore.value = currentRoundTotalScore;
+    }, [currentRoundScore, currentRoundTotalScore, optimisticScores]);
+
+    if (!hasCurrentGame) return null;
+    if (typeof playerName == 'undefined') return null;
 
     if (maxWidth == null || maxHeight == null) return null;
 

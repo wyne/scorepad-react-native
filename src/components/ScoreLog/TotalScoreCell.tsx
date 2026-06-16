@@ -1,9 +1,9 @@
 import React, { memo } from 'react';
 
-import { Text , StyleSheet } from 'react-native';
+import { Text, StyleSheet } from 'react-native';
 
 import { useAppSelector } from '../../../redux/hooks';
-import { selectPlayerById } from '../../../redux/PlayersSlice';
+import { selectPlayerGrandTotalScore } from '../../../redux/PlayersSlice';
 import { useTheme } from '../../theme';
 
 export type Props = {
@@ -11,16 +11,10 @@ export type Props = {
 }
 const TotalScoreCell: React.FunctionComponent<Props> = ({ playerId }) => {
     const theme = useTheme();
-    const scores: number[] = useAppSelector(state => (selectPlayerById(state, playerId) || { scores: [] }).scores);
-    const totalScore = scores.reduce((sum, current, round) => {
-        if (round > round) {
-            return sum;
-        }
-        return (sum || 0) + (current || 0);
-    });
+    const scoreTotal = useAppSelector(state => selectPlayerGrandTotalScore(state, playerId));
     return (
         <Text key={playerId} style={[styles.scoreEntry, { color: theme.text }]}>
-            {totalScore}
+            {scoreTotal}
         </Text>
     );
 };

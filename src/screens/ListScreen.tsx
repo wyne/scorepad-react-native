@@ -12,7 +12,7 @@ import { selectGameIds } from '../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { increaseAppOpens, setInstallId, setRollingGameCounter } from '../../redux/SettingsSlice';
 import { logEvent } from '../Analytics';
-import FloatingActionButton from '../components/FloatingActionButton';
+import FloatingActionButton, { FAB_BOTTOM_MARGIN, FAB_LIST_CLEARANCE, FAB_SIZE } from '../components/FloatingActionButton';
 import GameListItem from '../components/GameListItem';
 import { useTheme } from '../theme';
 
@@ -32,6 +32,7 @@ const ListScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     const headerHeight = useHeaderHeight();
     const listHeaderInset = Platform.OS === 'ios' ? headerHeight : 0;
     const insets = useSafeAreaInsets();
+    const listBottomInset = insets.bottom + FAB_BOTTOM_MARGIN + FAB_SIZE + FAB_LIST_CLEARANCE;
 
     useEffect(() => {
         if (installId === undefined) {
@@ -41,7 +42,7 @@ const ListScreen: React.FunctionComponent<Props> = ({ navigation }) => {
 
         // Update rollingGameCounter if it is undefined or less than the current gameIds length
         if (rollingGameCounter === undefined || rollingGameCounter < gameIds.length) {
-            setRollingGameCounter(gameIds.length);
+            dispatch(setRollingGameCounter(gameIds.length));
         }
 
         logEvent('game_list', {
@@ -58,10 +59,11 @@ const ListScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     return (
         <SafeAreaView edges={['left', 'right']} style={{ backgroundColor: theme.backgroundSecondary, flex: 1 }} testID="home-screen">
             <Animated.FlatList
+                testID="game-list"
                 alwaysBounceVertical
-                contentContainerStyle={{ flexGrow: 1, paddingTop: listHeaderInset, paddingBottom: insets.bottom + 70 }}
+                contentContainerStyle={{ flexGrow: 1, paddingTop: listHeaderInset, paddingBottom: listBottomInset }}
                 contentInsetAdjustmentBehavior="never"
-                scrollIndicatorInsets={{ top: listHeaderInset, bottom: insets.bottom + 70 }}
+                scrollIndicatorInsets={{ top: listHeaderInset, bottom: listBottomInset }}
                 itemLayoutAnimation={LinearTransition.easing(Easing.ease)}
                 ListEmptyComponent={
                     <>

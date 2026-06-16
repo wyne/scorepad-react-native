@@ -72,11 +72,11 @@ switch (variant) {
 export default {
   name: 'ScorePad with Rounds',
   slug: 'scorepad',
-  version: '3.0.1',
+  version: '3.0.2',
   orientation: 'default',
   icon: icon,
   assetBundlePatterns: ['assets/*'],
-  backgroundColor: '#000000',
+  backgroundColor: '#F2F2F7',
   ios: {
     bundleIdentifier: packageName,
     supportsTablet: true,
@@ -97,7 +97,7 @@ export default {
     package: packageName,
     permissions: [],
     blockedPermissions: ['android.permission.ACTIVITY_RECOGNITION'],
-    versionCode: 87,
+    versionCode: 88,
     googleServicesFile: './google-services.json',
   },
   userInterfaceStyle: 'automatic',
@@ -120,6 +120,10 @@ export default {
   githubUrl: 'https://github.com/wyne/scorepad-react-native',
   owner: 'wyne',
   plugins: [
+    ['expo-splash-screen', {
+      backgroundColor: '#F2F2F7',
+      dark: { backgroundColor: '#000000' },
+    }],
     './plugins/withTouchVisualizer',
     'expo-font',
     '@react-native-firebase/app',
@@ -131,7 +135,7 @@ export default {
       {
         ios: {
           useFrameworks: 'static',
-          forceStaticLinking: ['RNFBApp', 'RNFBAnalytics', 'RNFBAuth', 'RNFBCrashlytics'],
+          forceStaticLinking: ['RNFBApp', 'RNFBAnalytics', 'RNFBCrashlytics'],
         },
       },
     ],

@@ -2,6 +2,7 @@ import React from 'react';
 
 import { configureStore } from '@reduxjs/toolkit';
 import { act, fireEvent, render } from '@testing-library/react-native';
+import { StyleSheet } from 'react-native';
 import { SharedValue } from 'react-native-reanimated';
 import { Provider } from 'react-redux';
 
@@ -54,9 +55,9 @@ jest.mock('expo-haptics', () => ({
 }));
 
 jest.mock('./DialControl', () => {
-    return function MockDialControl() {
+    return function MockDialControl({ dialSize }: { dialSize: number }) {
         const { View } = jest.requireActual('react-native');
-        return <View testID="dial-control" />;
+        return <View testID="dial-control" style={{ width: dialSize, height: dialSize }} />;
     };
 });
 
@@ -110,9 +111,13 @@ const defaultProps = {
     svSlideY: mkSv(0),
 };
 
-const wrap = (store: ReturnType<typeof createStore>, onClose = jest.fn()) => (
+const wrap = (
+    store: ReturnType<typeof createStore>,
+    onClose = jest.fn(),
+    propOverrides: Partial<typeof defaultProps> = {},
+) => (
     <Provider store={store}>
-        <DialOverlay {...defaultProps} onClose={onClose} />
+        <DialOverlay {...defaultProps} {...propOverrides} onClose={onClose} />
     </Provider>
 );
 
@@ -212,5 +217,47 @@ describe('DialOverlay', () => {
 
         act(() => { store.dispatch(gameSave({ ...mockGame, locked: false })); });
         expect(onClose).not.toHaveBeenCalled();
+    });
+
+    it('centers a bounded portrait card inside a full-width tablet page', () => {
+        const { getByTestId } = render(wrap(createStore(), jest.fn(), {
+            boardWidth: 1024,
+            boardHeight: 1100,
+        }));
+
+        expect(StyleSheet.flatten(getByTestId('dial-page-frame').props.style)).toEqual(
+            expect.objectContaining({
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: 1024,
+            })
+        );
+        expect(StyleSheet.flatten(getByTestId('dial-card').props.style)).toEqual(
+            expect.objectContaining({
+                height: 720,
+                width: 560,
+            })
+        );
+        expect(StyleSheet.flatten(getByTestId('dial-control').props.style).width).toBeGreaterThan(240);
+    });
+
+    it('uses the landscape card dimensions instead of raw board width for dial sizing', () => {
+        const { getByTestId } = render(wrap(createStore(), jest.fn(), {
+            boardWidth: 1100,
+            boardHeight: 650,
+        }));
+
+        expect(StyleSheet.flatten(getByTestId('dial-card').props.style)).toEqual(
+            expect.objectContaining({
+                height: 626,
+                width: 760,
+            })
+        );
+        expect(StyleSheet.flatten(getByTestId('dial-control').props.style)).toEqual(
+            expect.objectContaining({
+                height: 236,
+                width: 236,
+            })
+        );
     });
 });

@@ -30,12 +30,11 @@ const GameSheet: React.FunctionComponent = () => {
     const navigation = useNavigation<NativeStackNavigationProp<ParamListBase>>();
     const { height: containerHeight } = useWindowDimensions();
     const currentGameId = useAppSelector(state => state.settings.currentGameId);
-    const gameTitle = useAppSelector(state => selectGameById(state, currentGameId || '')?.title);
-    const gameLocked = useAppSelector(state => selectGameById(state, currentGameId || '')?.locked);
-    const playerIds = useAppSelector(state => selectGameById(state, currentGameId || '')?.playerIds);
+    const game = useAppSelector(state => selectGameById(state, currentGameId || ''));
+    const gameTitle = game?.title;
+    const gameLocked = game?.locked;
+    const playerIds = game?.playerIds;
     const chooseWinnersSheetRef = useChooseWinnersSheetContext();
-
-    if (currentGameId == undefined) return null;
 
     // ref
     const gameSheetRef = useGameSheetContext();
@@ -46,7 +45,7 @@ const GameSheet: React.FunctionComponent = () => {
     const dispatch = useAppDispatch();
 
     const insets = useSafeAreaInsets();
-    const topInset = insets.top + 50;
+    const topInset = insets.top;
 
     // Stable key for animated children to force remount on each mount
     const mountKey = useRef(Date.now()).current;
@@ -55,6 +54,8 @@ const GameSheet: React.FunctionComponent = () => {
      * Unlock the game and clear winners
      */
     const unlockGame = () => {
+        if (currentGameId == undefined) return;
+
         dispatch(
             updateGame({
                 id: currentGameId,
@@ -117,6 +118,8 @@ const GameSheet: React.FunctionComponent = () => {
      * Rematch - start new game with same players
      */
     const rematchGameHandler = async () => {
+        if (currentGameId == undefined) return;
+
         Alert.alert(
             'Rematch',
             'This will create a new game with the same players and empty scores.',
@@ -173,6 +176,8 @@ const GameSheet: React.FunctionComponent = () => {
         setSnapPointIndex(index);
         if (index === 0) setShouldRenderContent(false);
     }, []);
+
+    if (currentGameId == undefined) return null;
 
     /**
      * Function to snap to the next point when the handle is pressed
