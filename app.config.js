@@ -120,6 +120,8 @@ export default {
   githubUrl: 'https://github.com/wyne/scorepad-react-native',
   owner: 'wyne',
   plugins: [
+    './plugins/withIosSceneLifecycle',
+    './plugins/withPodsDeploymentTarget',
     ['expo-splash-screen', {
       backgroundColor: '#F2F2F7',
       dark: { backgroundColor: '#000000' },
