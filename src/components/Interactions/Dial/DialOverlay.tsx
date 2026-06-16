@@ -17,7 +17,9 @@ import Animated, {
 import { useAppDispatch, useAppSelector } from '../../../../redux/hooks';
 import { playerRoundScoreSet, selectPlayerById, selectPlayerRoundStats } from '../../../../redux/PlayersSlice';
 import { selectCurrentGame } from '../../../../redux/selectors';
+import { setLastUsedInteractionType } from '../../../../redux/SettingsSlice';
 import { useMenuOpen } from '../../MenuOpenContext';
+import { InteractionType } from '../InteractionType';
 
 import DialControl from './DialControl';
 
@@ -127,6 +129,7 @@ const PlayerDialPage: React.FC<PlayerDialPageProps> = ({
 
     const handleChange = useCallback((v: number) => {
         dispatch(playerRoundScoreSet(playerId, currentRoundIndex, v));
+        dispatch(setLastUsedInteractionType(InteractionType.Dial));
     }, [dispatch, playerId, currentRoundIndex]);
 
     const isDismissing = useSharedValue(false);

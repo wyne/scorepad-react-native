@@ -30,7 +30,7 @@ function useKeepScreenAwake(active: boolean): void {
 const GameScreen: React.FunctionComponent = () => {
     const currentGameId = useAppSelector(state => state.settings.currentGameId);
     const keepScreenAwake = useAppSelector(state => state.settings.keepScreenAwake);
-    const interactionType = useAppSelector(selectInteractionType);
+    const interactionType = useAppSelector(state => selectInteractionType(state, currentGameId));
     const headerHeight = useHeaderHeight();
     const showHint = useGestureHint();
     useKeepScreenAwake(keepScreenAwake);

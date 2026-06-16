@@ -6,9 +6,11 @@ import { StyleSheet, Text, TouchableHighlight, View } from 'react-native';
 import { selectGameById } from '../../../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector, useAppStore } from '../../../../redux/hooks';
 import { playerRoundScoreIncrement } from '../../../../redux/PlayersSlice';
+import { setLastUsedInteractionType } from '../../../../redux/SettingsSlice';
 import { logEvent } from '../../../Analytics';
 import { useMenuOpen } from '../../MenuOpenContext';
 import { ScoreParticle } from '../../PlayerTiles/AdditionTile/ScoreParticle';
+import { InteractionType } from '../InteractionType';
 
 type ScoreParticleProps = {
     key: string;
@@ -85,6 +87,7 @@ export const HalfTileTouchSurface: React.FunctionComponent<Props> = (
             interaction: 'half-tap',
         });
         dispatch(playerRoundScoreIncrement(playerId, currentRoundIndex, scoreType == 'increment' ? addend : -addend));
+        dispatch(setLastUsedInteractionType(InteractionType.HalfTap));
     };
 
     return (

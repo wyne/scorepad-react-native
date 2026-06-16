@@ -70,10 +70,65 @@ describe('Redux selectors', () => {
             interactionType,
           },
         } as RootState;
-        
+
         const result = selectInteractionType(state);
         expect(result).toBe(interactionType);
       });
+    });
+
+    it('should prefer the game-level interaction type over the global default', () => {
+      const state = {
+        ...mockState,
+        settings: {
+          ...mockState.settings!,
+          interactionType: InteractionType.SwipeVertical,
+        },
+        games: {
+          ...mockState.games!,
+          entities: {
+            'game-1': {
+              ...mockState.games!.entities['game-1']!,
+              interactionType: InteractionType.Dial,
+            },
+          },
+        },
+      } as RootState;
+
+      expect(selectInteractionType(state, 'game-1')).toBe(InteractionType.Dial);
+    });
+
+    it('should fall back to the global default when the game has no interaction type', () => {
+      const state = {
+        ...mockState,
+        settings: {
+          ...mockState.settings!,
+          interactionType: InteractionType.HalfTap,
+        },
+      } as RootState;
+
+      // game-1 has no interactionType set
+      expect(selectInteractionType(state, 'game-1')).toBe(InteractionType.HalfTap);
+    });
+
+    it('should fall back to the global default when no gameId is provided', () => {
+      const state = {
+        ...mockState,
+        settings: {
+          ...mockState.settings!,
+          interactionType: InteractionType.HalfTap,
+        },
+        games: {
+          ...mockState.games!,
+          entities: {
+            'game-1': {
+              ...mockState.games!.entities['game-1']!,
+              interactionType: InteractionType.Dial,
+            },
+          },
+        },
+      } as RootState;
+
+      expect(selectInteractionType(state)).toBe(InteractionType.HalfTap);
     });
   });
 

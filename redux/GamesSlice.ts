@@ -4,6 +4,7 @@ import * as Crypto from 'expo-crypto';
 
 import { logEvent } from '../src/Analytics';
 import { getPalette } from '../src/ColorPalette';
+import { InteractionType } from '../src/components/Interactions/InteractionType';
 import { SortDirectionKey, SortSelectorKey } from '../src/components/ScoreLog/SortHelper';
 import logger from '../src/Logger';
 
@@ -23,6 +24,9 @@ export interface GameState {
     sortSelectorKey?: SortSelectorKey;
     sortDirectionKey?: SortDirectionKey;
     palette?: string;
+    // Per-game gesture. When unset, falls back to the global default
+    // (settings.interactionType) via selectInteractionType.
+    interactionType?: InteractionType;
 }
 
 const gamesAdapter = createEntityAdapter({
@@ -102,6 +106,17 @@ const gamesSlice = createSlice({
                 id: action.payload.gameId,
                 changes: {
                     playerIds: action.payload.playerIds,
+                }
+            });
+        },
+        setGameInteractionType(state, action: PayloadAction<{ gameId: string, interactionType: InteractionType; }>) {
+            const game = state.entities[action.payload.gameId];
+            if (!game) { return; }
+
+            gamesAdapter.updateOne(state, {
+                id: action.payload.gameId,
+                changes: {
+                    interactionType: action.payload.interactionType,
                 }
             });
         },
@@ -324,6 +339,7 @@ export const {
     gameDelete,
     setSortSelector,
     reorderPlayers,
+    setGameInteractionType,
     restoreAllGames,
 } = gamesSlice.actions;
 

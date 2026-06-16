@@ -8,8 +8,10 @@ import ReAnimated, { runOnJS, useAnimatedReaction, useAnimatedStyle, useSharedVa
 import { selectGameById } from '../../../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector, useAppStore } from '../../../../redux/hooks';
 import { playerRoundScoreIncrement } from '../../../../redux/PlayersSlice';
+import { setLastUsedInteractionType } from '../../../../redux/SettingsSlice';
 import { logEvent } from '../../../Analytics';
 import { useMenuOpen } from '../../MenuOpenContext';
+import { InteractionType } from '../InteractionType';
 
 interface HalfTapProps {
     children: React.ReactNode;
@@ -211,6 +213,7 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
         }
 
         dispatch(playerRoundScoreIncrement(playerId, currentRoundIndex, scoreDelta));
+        dispatch(setLastUsedInteractionType(InteractionType.SwipeVertical));
     };
 
     useAnimatedReaction(
