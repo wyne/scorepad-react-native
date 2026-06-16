@@ -3,7 +3,7 @@ import React from 'react';
 import { MenuAction, MenuView } from '@react-native-menu/menu';
 import { ParamListBase } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { StyleSheet, View } from 'react-native';
+import { Keyboard, StyleSheet, View } from 'react-native';
 import { Icon } from 'react-native-elements';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -51,7 +51,11 @@ const FloatingActionButton: React.FunctionComponent<Props> = ({ navigation }) =>
         }]}>
             <MenuView
                 style={StyleSheet.absoluteFill}
+                onOpenMenu={() => {
+                    Keyboard.dismiss();
+                }}
                 onPressAction={async ({ nativeEvent }) => {
+                    Keyboard.dismiss();
                     const playerNumber = parseInt(nativeEvent.event);
                     addGameHandler(playerNumber);
                 }}

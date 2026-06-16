@@ -4,6 +4,7 @@ import playersReducer, {
     playerAdd,
     playerRoundScoreIncrement,
     playerRoundScoreSet,
+    selectAllPlayerNames,
     selectAllPlayers,
     selectPlayerGrandTotalScore,
     selectPlayerRoundStats,
@@ -227,6 +228,32 @@ describe('player sort order', () => {
         const ordered = selectAllPlayers({ players }).map((p) => p.id);
         expect(ordered).toHaveLength(2);
         expect(ordered).toEqual(expect.arrayContaining(['a', 'b']));
+    });
+});
+
+describe('selectAllPlayerNames', () => {
+    it('should return unique player names with a stable memoized reference', () => {
+        const players = playersReducer(undefined, playerAdd({
+            id: '1',
+            playerName: 'Alice',
+            scores: [],
+        }));
+        const withDuplicateName = playersReducer(players, playerAdd({
+            id: '2',
+            playerName: 'Alice',
+            scores: [],
+        }));
+        const withOtherName = playersReducer(withDuplicateName, playerAdd({
+            id: '3',
+            playerName: 'Bob',
+            scores: [],
+        }));
+        const state = { players: withOtherName } as RootState;
+
+        const result = selectAllPlayerNames(state);
+
+        expect(result).toEqual(['Alice', 'Bob']);
+        expect(selectAllPlayerNames(state)).toBe(result);
     });
 });
 
