@@ -120,6 +120,10 @@ export default {
   githubUrl: 'https://github.com/wyne/scorepad-react-native',
   owner: 'wyne',
   plugins: [
+    // Listed BEFORE expo-splash-screen: Expo runs the most recently registered
+    // mod first, so an earlier-listed plugin's withAndroidStyles mod runs LAST,
+    // i.e. after expo-splash-screen has written its style items.
+    './plugins/withAndroidSplashNoIcon',
     ['expo-splash-screen', {
       backgroundColor: '#F2F2F7',
       dark: { backgroundColor: '#000000' },
