@@ -2,6 +2,7 @@ import { createSelector } from '@reduxjs/toolkit';
 
 import { GameState } from '../../../redux/GamesSlice';
 import { ScoreState, selectAllPlayers } from '../../../redux/PlayersSlice';
+import { grandTotalScore } from '../../../redux/scoreUtils';
 import { RootState } from '../../../redux/store';
 
 export const selectSortedPlayerIdsByIndex = createSelector(
@@ -39,9 +40,7 @@ export const selectSortedPlayerIdsByScore: SortSelector = createSelector(
         const playerIds = [...players]
             .filter(player => currentGame.playerIds?.includes(player.id))
             .sort((a, b) => {
-                const totalScoreA = a.scores.reduce((acc, score) => acc + score, 0);
-                const totalScoreB = b.scores.reduce((acc, score) => acc + score, 0);
-                const scoreDifference = totalScoreB - totalScoreA;
+                const scoreDifference = grandTotalScore(b.scores) - grandTotalScore(a.scores);
 
                 if (scoreDifference === 0) {
                     // If the total scores are equal, sort by player index
@@ -50,7 +49,7 @@ export const selectSortedPlayerIdsByScore: SortSelector = createSelector(
                     return indexA - indexB;
                 }
 
-                return totalScoreB - totalScoreA;
+                return scoreDifference;
             })
             .map(player => player.id);
 
