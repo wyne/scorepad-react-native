@@ -16,17 +16,32 @@ type MockScreenListeners = {
     transitionStart?: (event: { data: { closing: boolean } }) => void;
 };
 
+type MockNavigationContainerProps = {
+    children: React.ReactNode;
+    onReady?: () => void;
+    onStateChange?: () => void;
+};
+
+let mockActiveRouteName = 'List';
+let mockNavigationContainerProps: MockNavigationContainerProps | undefined;
 const mockScreenListeners: Record<string, MockScreenListeners | undefined> = {};
 
 jest.mock('@react-navigation/native', () => {
     const actual = jest.requireActual('@react-navigation/native');
+    const React = jest.requireActual('react');
 
     return {
         ...actual,
-        NavigationContainer: ({ children }: { children: React.ReactNode }) => {
+        NavigationContainer: React.forwardRef(({ children, onReady, onStateChange }: MockNavigationContainerProps, ref: React.Ref<{ getCurrentRoute: () => { name: string } }>) => {
             const { View } = jest.requireActual('react-native');
+
+            mockNavigationContainerProps = { children, onReady, onStateChange };
+            React.useImperativeHandle(ref, () => ({
+                getCurrentRoute: () => ({ name: mockActiveRouteName }),
+            }));
+
             return <View>{children}</View>;
-        },
+        }),
     };
 });
 
@@ -140,14 +155,24 @@ const getGameListeners = (): Required<MockScreenListeners> => {
     return listeners as Required<MockScreenListeners>;
 };
 
+const setActiveRoute = (routeName: string) => {
+    mockActiveRouteName = routeName;
+
+    act(() => {
+        mockNavigationContainerProps?.onStateChange?.();
+    });
+};
+
 describe('Navigation', () => {
     beforeEach(() => {
+        mockActiveRouteName = 'List';
+        mockNavigationContainerProps = undefined;
         Object.keys(mockScreenListeners).forEach((key) => {
             delete mockScreenListeners[key];
         });
     });
 
-    it('shows and hides the game sheet from native stack lifecycle events', () => {
+    it('shows and hides the game sheet from native stack lifecycle and route state events', () => {
         const { queryByTestId } = renderNavigation();
         const gameListeners = getGameListeners();
 
@@ -182,16 +207,51 @@ describe('Navigation', () => {
         });
 
         expect(queryByTestId('game-sheet')).toBeNull();
+
+        setActiveRoute('Game');
+
+        expect(queryByTestId('game-sheet')).toBeTruthy();
+
+        setActiveRoute('List');
+
+        expect(queryByTestId('game-sheet')).toBeNull();
+
+        setActiveRoute('Game');
+
+        expect(queryByTestId('game-sheet')).toBeTruthy();
+
+        setActiveRoute('EditGame');
+
+        expect(queryByTestId('game-sheet')).toBeNull();
+
+        setActiveRoute('Game');
+
+        expect(queryByTestId('game-sheet')).toBeTruthy();
+
+        setActiveRoute('Share');
+
+        expect(queryByTestId('game-sheet')).toBeNull();
     });
 
     it('does not render the game sheet when fullscreen mode is enabled', () => {
         const { queryByTestId } = renderNavigation(true);
-        const gameListeners = getGameListeners();
 
-        act(() => {
-            gameListeners.focus();
-        });
+        setActiveRoute('Game');
 
         expect(queryByTestId('game-sheet')).toBeNull();
+    });
+
+    it('syncs the game sheet with the initial route when navigation is ready', () => {
+        mockActiveRouteName = 'Game';
+
+        const { queryByTestId } = renderNavigation();
+
+        expect(queryByTestId('game-sheet')).toBeNull();
+
+        act(() => {
+            mockNavigationContainerProps?.onReady?.();
+        });
+
+        expect(queryByTestId('game-sheet')).toBeTruthy();
     });
 });
