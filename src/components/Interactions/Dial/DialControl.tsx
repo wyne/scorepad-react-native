@@ -17,6 +17,8 @@ import Animated, {
 } from 'react-native-reanimated';
 import Svg, { Circle, Line, Path } from 'react-native-svg';
 
+import { withInkOpacity } from '../../../colorUtils';
+
 // Extend TextInputProps to include Reanimated's animated text content prop
 type AnimatedTextInputProps = TextInputProps & {
     text?: string;
@@ -40,11 +42,6 @@ export function getCenterValueFontScale(value: number): number {
     'worklet';
     const textLength = value > 0 ? String(value).length + 1 : String(value).length;
     return Math.max(CENTER_VALUE_MIN_SCALE, Math.min(1, CENTER_VALUE_TARGET_CHARS / textLength));
-}
-
-// TODO: see ListBoard.tsx — consolidate inkFor/inkA into shared colorUtils module
-function inkA(ink: string, a: number): string {
-    return ink === '#000' ? `rgba(0,0,0,${a})` : `rgba(255,255,255,${a})`;
 }
 
 function fmtSigned(v: number): string {
@@ -383,7 +380,7 @@ const DialControl: React.FC<Props> = ({
 
     // --- SVG geometry ---
     const ringColor = isSecondary ? ACCENT : ink;
-    const trackColor = inkA(ink, 0.18);
+    const trackColor = withInkOpacity(ink, 0.18);
 
     // Tick marks — memoized, only recomputed when dial size changes
     const ticks = useMemo(() => Array.from({ length: 12 }, (_, i) => {
@@ -402,10 +399,10 @@ const DialControl: React.FC<Props> = ({
             {!landscape && (
                 <Animated.View style={[
                     styles.pill,
-                    { backgroundColor: pillActive ? ACCENT : inkA(ink, 0.12) },
+                    { backgroundColor: pillActive ? ACCENT : withInkOpacity(ink, 0.12) },
                     pillStyle,
                 ]}>
-                    <View style={[styles.pillDot, { backgroundColor: pillActive ? '#fff' : inkA(ink, 0.4) }]} />
+                    <View style={[styles.pillDot, { backgroundColor: pillActive ? '#fff' : withInkOpacity(ink, 0.4) }]} />
                     <Text style={[styles.pillText, { color: pillActive ? '#fff' : ink }]}>
                         STEP +{pillActive ? addendTwo : addendOne}
                     </Text>
@@ -475,7 +472,7 @@ const DialControl: React.FC<Props> = ({
                                     underlineColorAndroid="transparent"
                                 />
                             </Animated.View>
-                            <Text style={[styles.centerLabel, { color: inkA(ink, 0.62), fontSize: D * 0.049 }]}>
+                            <Text style={[styles.centerLabel, { color: withInkOpacity(ink, 0.62), fontSize: D * 0.049 }]}>
                                 THIS ROUND
                             </Text>
                         </View>
@@ -510,7 +507,7 @@ const DialControl: React.FC<Props> = ({
                     }}
                     style={({ pressed }) => [
                         styles.stepBtn,
-                        { backgroundColor: inkA(ink, pressed ? 0.26 : 0.15), width: D * 0.265, height: D * 0.224 },
+                        { backgroundColor: withInkOpacity(ink, pressed ? 0.26 : 0.15), width: D * 0.265, height: D * 0.224 },
                     ]}
                 >
                     <Text style={[styles.stepBtnText, { color: ink, fontSize: D * 0.12 }]}>
@@ -528,7 +525,7 @@ const DialControl: React.FC<Props> = ({
                             caretHidden={true}
                             underlineColorAndroid="transparent"
                         />
-                        <Text style={[styles.newTotalLabel, { color: inkA(ink, 0.62), fontSize: D * 0.044 }]}>
+                        <Text style={[styles.newTotalLabel, { color: withInkOpacity(ink, 0.62), fontSize: D * 0.044 }]}>
                             NEW TOTAL
                         </Text>
                     </View>
@@ -543,7 +540,7 @@ const DialControl: React.FC<Props> = ({
                     }}
                     style={({ pressed }) => [
                         styles.stepBtn,
-                        { backgroundColor: inkA(ink, pressed ? 0.26 : 0.15), width: D * 0.265, height: D * 0.224 },
+                        { backgroundColor: withInkOpacity(ink, pressed ? 0.26 : 0.15), width: D * 0.265, height: D * 0.224 },
                     ]}
                 >
                     <Text style={[styles.stepBtnText, { color: ink, fontSize: D * 0.12 }]}>
