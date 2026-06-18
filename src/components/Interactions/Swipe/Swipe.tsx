@@ -1,9 +1,9 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import * as Haptics from 'expo-haptics';
 import { Animated, StyleSheet, Text, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
-import ReAnimated, { runOnJS, useAnimatedReaction, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
+import ReAnimated, { runOnJS, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 
 import { selectGameById } from '../../../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector, useAppStore } from '../../../../redux/hooks';
@@ -11,6 +11,7 @@ import { playerRoundScoreIncrement } from '../../../../redux/PlayersSlice';
 import { setLastUsedInteractionType } from '../../../../redux/SettingsSlice';
 import { logEvent } from '../../../Analytics';
 import { useMenuOpen } from '../../MenuOpenContext';
+import { OptimisticScoreContext } from '../../PlayerTiles/AdditionTile/OptimisticScoreContext';
 import { InteractionType } from '../InteractionType';
 
 interface HalfTapProps {
@@ -53,6 +54,19 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
 
     const addendOne = useAppSelector(state => state.settings.addendOne);
     const addendTwo = useAppSelector(state => state.settings.addendTwo);
+    const svAddendOne = useSharedValue(addendOne);
+    const svAddendTwo = useSharedValue(addendTwo);
+    const svRoundScore = useSharedValue(0);
+    const svRoundTotalScore = useSharedValue(0);
+    const optimisticScores = useMemo(() => ({
+        currentRoundScore: svRoundScore,
+        currentRoundTotalScore: svRoundTotalScore,
+    }), [svRoundScore, svRoundTotalScore]);
+
+    useEffect(() => {
+        svAddendOne.value = addendOne;
+        svAddendTwo.value = addendTwo;
+    }, [addendOne, addendTwo]);
 
     //#endregion
 
@@ -141,16 +155,32 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
 
     //#region Gesture handling
 
-    const totalOffset = useSharedValue<number | null>(0);
     const panY = useSharedValue(0);
+    const svStartRoundScore = useSharedValue(0);
+    const svStartRoundTotalScore = useSharedValue(0);
+    const svPendingDelta = useSharedValue(0);
+    const svLastNotches = useSharedValue(0);
+    const svDidFlush = useSharedValue(true);
 
     const { menuOpen } = useMenuOpen();
 
-    const getCurrentRoundIndex = useCallback(() => {
+    const getCurrentRoundStats = useCallback(() => {
         const state = store.getState();
         const currentGameId = state.settings.currentGameId;
-        return currentGameId ? selectGameById(state, currentGameId)?.roundCurrent ?? 0 : 0;
-    }, [store]);
+        const currentGame = currentGameId ? selectGameById(state, currentGameId) : undefined;
+        const currentRoundIndex = currentGame?.roundCurrent ?? 0;
+        const scores: number[] = state.players.entities[playerId]?.scores ?? [];
+        const currentRoundScore = scores[currentRoundIndex] ?? 0;
+        const previousTotal = scores.reduce(
+            (sum, s, i) => (i < currentRoundIndex ? sum + (s || 0) : sum), 0
+        );
+
+        return {
+            currentRoundIndex,
+            currentRoundScore,
+            currentRoundTotalScore: previousTotal + currentRoundScore,
+        };
+    }, [playerId, store]);
 
     const endGesture = useCallback((translationY: number) => {
         if (menuOpen) return;
@@ -158,36 +188,78 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
             player_index: index,
             game_id: currentGameId,
             addend: secondaryHold ? addendTwo : addendOne,
-            round: getCurrentRoundIndex(),
+            round: getCurrentRoundStats().currentRoundIndex,
             type: translationY > 0 ? 'decrement' : 'increment',
             power_hold: secondaryHold,
             notches: -Math.round((translationY || 0) / notchSize),
             interaction: 'swipe-vertical',
         });
         secondaryHoldStop();
-    }, [index, currentGameId, secondaryHold, addendOne, addendTwo, getCurrentRoundIndex, menuOpen]);
+    }, [index, currentGameId, secondaryHold, addendOne, addendTwo, getCurrentRoundStats, menuOpen]);
+
+    const flushPendingChange = useCallback((delta: number) => {
+        if (delta === 0) return;
+        if (menuOpen) return;
+
+        dispatch(playerRoundScoreIncrement(playerId, getCurrentRoundStats().currentRoundIndex, delta));
+        dispatch(setLastUsedInteractionType(InteractionType.SwipeVertical));
+    }, [dispatch, playerId, getCurrentRoundStats, menuOpen]);
+
+    const bumpFeedback = useCallback((secondary: boolean) => {
+        if (secondary) {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+        } else {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        }
+    }, []);
 
     const panGesture = Gesture.Pan()
         .enabled(!currentGameLocked && !menuOpen)
         .minDistance(0)
         .onBegin(() => {
+            svStartRoundScore.value = svRoundScore.value;
+            svStartRoundTotalScore.value = svRoundTotalScore.value;
+            svPendingDelta.value = 0;
+            svLastNotches.value = 0;
+            svDidFlush.value = false;
             runOnJS(secondaryHoldStart)();
         })
         .onUpdate((event) => {
             const y = event.translationY;
             panY.value = y;
-            totalOffset.value = -y;
 
             if (isSecondaryHoldActive.value == false && Math.abs(y) > 1) {
                 runOnJS(secondaryHoldStop)();
             }
+
+            const notches = Math.round((-y || 0) / notchSize);
+            if (notches === svLastNotches.value) return;
+
+            svLastNotches.value = notches;
+            const secondaryActive = isSecondaryHoldActive.value;
+            const scoreDelta = notches * (secondaryActive ? svAddendTwo.value : svAddendOne.value);
+            svPendingDelta.value = scoreDelta;
+            svRoundScore.value = svStartRoundScore.value + scoreDelta;
+            svRoundTotalScore.value = svStartRoundTotalScore.value + scoreDelta;
+            runOnJS(bumpFeedback)(secondaryActive);
         })
         .onEnd((event) => {
-            totalOffset.value = null;
+            if (!svDidFlush.value) {
+                svDidFlush.value = true;
+                if (svPendingDelta.value !== 0) {
+                    runOnJS(flushPendingChange)(svPendingDelta.value);
+                }
+            }
             panY.value = withTiming(0, { duration: 200 });
             runOnJS(endGesture)(event.translationY);
         })
         .onFinalize(() => {
+            if (!svDidFlush.value) {
+                svDidFlush.value = true;
+                if (svPendingDelta.value !== 0) {
+                    runOnJS(flushPendingChange)(svPendingDelta.value);
+                }
+            }
             runOnJS(secondaryHoldStop)();
         });
 
@@ -197,44 +269,8 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
 
     //#endregion
 
-    //#region Helpers
-
-    const scoreChangeHandler = (value: number) => {
-        if (Math.abs(value) == 0) return;
-        if (menuOpen) return;
-
-        const scoreDelta = value * (secondaryHold ? addendTwo : addendOne);
-        const currentRoundIndex = getCurrentRoundIndex();
-
-        if (secondaryHold) {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-        } else {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-        }
-
-        dispatch(playerRoundScoreIncrement(playerId, currentRoundIndex, scoreDelta));
-        dispatch(setLastUsedInteractionType(InteractionType.SwipeVertical));
-    };
-
-    useAnimatedReaction(
-        () => {
-            return totalOffset.value;
-        },
-        (currentValue, previousValue) => {
-            if (currentValue === null) return;
-
-            const c = Math.round((currentValue || 0) / notchSize);
-            const p = Math.round((previousValue || 0) / notchSize);
-            if (c - p !== 0) {
-                runOnJS(scoreChangeHandler)(c - p);
-            }
-        }
-    );
-
-    //#endregion
-
     return (
-        <>
+        <OptimisticScoreContext.Provider value={optimisticScores}>
             <Animated.View style={[
                 {
                     transform: [{
@@ -270,7 +306,7 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
                     <View style={[styles.slider, styles.sliderBottom]} />
                 </ReAnimated.View>
             </GestureDetector>
-        </>
+        </OptimisticScoreContext.Provider>
     );
 };
 
