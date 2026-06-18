@@ -13,7 +13,7 @@ jest.mock('../Sheets/GameSheet', () => ({
     bottomSheetHeight: 80,
 }));
 
-import TileBoard from './TileBoard';
+import TileBoard, { calculateTileBoardLayout, calculateTileDimensions } from './TileBoard';
 
 // Mock react-native-safe-area-context
 jest.mock('react-native-safe-area-context', () => ({
@@ -78,6 +78,22 @@ const createMockStore = (initialState: Parameters<typeof configureStore>[0]['pre
         },
         preloadedState: initialState,
     });
+};
+
+const fireBoardLayout = (element: ReturnType<ReturnType<typeof render>['getByTestId']>, width: number, height: number) => {
+    fireEvent(element, 'layout', {
+        nativeEvent: {
+            layout: {
+                height,
+                width,
+            },
+        },
+    });
+};
+
+const fireSettledBoardLayout = (element: ReturnType<ReturnType<typeof render>['getByTestId']>, width: number, height: number) => {
+    fireBoardLayout(element, width, height);
+    fireBoardLayout(element, width, height);
 };
 
 describe('TileBoard', () => {
@@ -224,7 +240,35 @@ describe('TileBoard', () => {
         expect(queryByTestId('player-tile-player-1')).toBeNull();
     });
 
-    it('should render tiles after layout event with calculated grid', () => {
+    it('should not render tiles from the first layout measurement', () => {
+        const store = createMockStore({
+            settings: {
+                currentGameId: 'game-1',
+            },
+            games: {
+                entities: {
+                    'game-1': mockGame,
+                },
+                ids: ['game-1'],
+            },
+            players: {
+                entities: mockPlayers,
+                ids: ['player-1', 'player-2', 'player-3', 'player-4'],
+            },
+        });
+
+        const { getByTestId, queryByTestId } = render(
+            <Provider store={store}>
+                <TileBoard showHint={false} />
+            </Provider>
+        );
+
+        fireBoardLayout(getByTestId('safe-area-view'), 400, 600);
+
+        expect(queryByTestId('player-tile-player-1')).toBeNull();
+    });
+
+    it('should render tiles after settled layout with calculated grid', () => {
         const store = createMockStore({
             settings: {
                 currentGameId: 'game-1',
@@ -250,14 +294,7 @@ describe('TileBoard', () => {
         const safeAreaView = getByTestId('safe-area-view');
         
         // Trigger layout event with specific dimensions
-        fireEvent(safeAreaView, 'layout', {
-            nativeEvent: {
-                layout: {
-                    width: 400,
-                    height: 600,
-                },
-            },
-        });
+        fireSettledBoardLayout(safeAreaView, 400, 600);
 
         // After layout, tiles should be rendered
         expect(getByTestId('player-tile-player-1')).toBeTruthy();
@@ -296,14 +333,7 @@ describe('TileBoard', () => {
         const safeAreaView = getByTestId('safe-area-view');
         
         // Trigger layout with 400x600 dimensions
-        fireEvent(safeAreaView, 'layout', {
-            nativeEvent: {
-                layout: {
-                    width: 400,
-                    height: 600,
-                },
-            },
-        });
+        fireSettledBoardLayout(safeAreaView, 400, 600);
 
         // For 2x2 grid: width = 400/2 = 200, height = 600/2 = 300
         expect(getAllByText('Width: 200')).toHaveLength(4);
@@ -339,14 +369,7 @@ describe('TileBoard', () => {
         const safeAreaView = getByTestId('safe-area-view');
         
         // Trigger layout event
-        fireEvent(safeAreaView, 'layout', {
-            nativeEvent: {
-                layout: {
-                    width: 300,
-                    height: 400,
-                },
-            },
-        });
+        fireSettledBoardLayout(safeAreaView, 300, 400);
 
         // For 3 players, should calculate optimal grid (likely 3x1 or 1x3)
         expect(getByTestId('player-tile-player-1')).toBeTruthy();
@@ -388,14 +411,7 @@ describe('TileBoard', () => {
 
         const safeAreaView = getByTestId('safe-area-view');
         
-        fireEvent(safeAreaView, 'layout', {
-            nativeEvent: {
-                layout: {
-                    width: 300,
-                    height: 400,
-                },
-            },
-        });
+        fireSettledBoardLayout(safeAreaView, 300, 400);
 
         expect(getByTestId('player-tile-player-1')).toBeTruthy();
         // Single player should be 1x1 grid
@@ -463,14 +479,7 @@ describe('TileBoard', () => {
 
         const safeAreaView = getByTestId('safe-area-view');
         
-        fireEvent(safeAreaView, 'layout', {
-            nativeEvent: {
-                layout: {
-                    width: 400,
-                    height: 400,
-                },
-            },
-        });
+        fireSettledBoardLayout(safeAreaView, 400, 400);
 
         // Check that each tile has the correct index
         expect(getByText('Index: 0')).toBeTruthy(); // player-1
@@ -508,29 +517,50 @@ describe('TileBoard', () => {
         const safeAreaView = getByTestId('safe-area-view');
         
         // Initial layout
-        fireEvent(safeAreaView, 'layout', {
-            nativeEvent: {
-                layout: {
-                    width: 200,
-                    height: 400,
-                },
-            },
-        });
+        fireSettledBoardLayout(safeAreaView, 200, 400);
 
         // Should initially have certain dimensions (1x2 grid: width=200/1=200, height=400/2=200)
         expect(getAllByText('Width: 200')).toHaveLength(2);
 
         // Change layout dimensions
-        fireEvent(safeAreaView, 'layout', {
-            nativeEvent: {
-                layout: {
-                    width: 400,
-                    height: 200,
-                },
-            },
-        });
+        fireBoardLayout(safeAreaView, 400, 200);
 
         // Should recalculate and update dimensions (2x1 grid: width=400/2=200, height=200/1=200)
         expect(getAllByText('Width: 200')).toHaveLength(2);
+    });
+
+    describe('layout helpers', () => {
+        it('calculates a square grid and dimensions for four players', () => {
+            const layout = calculateTileBoardLayout(4, 400, 600);
+
+            expect(layout).toEqual({
+                cols: 2,
+                height: 600,
+                rows: 2,
+                width: 400,
+            });
+            expect(calculateTileDimensions(layout)).toEqual({
+                height: 300,
+                width: 200,
+            });
+        });
+
+        it('keeps a two-player board balanced for portrait and landscape layouts', () => {
+            const portraitLayout = calculateTileBoardLayout(2, 200, 400);
+            const landscapeLayout = calculateTileBoardLayout(2, 400, 200);
+
+            expect(portraitLayout).toEqual({
+                cols: 1,
+                height: 400,
+                rows: 2,
+                width: 200,
+            });
+            expect(landscapeLayout).toEqual({
+                cols: 2,
+                height: 200,
+                rows: 1,
+                width: 400,
+            });
+        });
     });
 });

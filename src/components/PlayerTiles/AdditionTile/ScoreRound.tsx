@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 
 import Animated, {
     useSharedValue,
@@ -15,7 +15,8 @@ interface Props {
 }
 
 const ScoreRound: React.FunctionComponent<Props> = ({ containerWidth, currentRoundScore, fontColor }) => {
-    const fontSize = useSharedValue(calculateFontSize(containerWidth));
+    const initialRender = useRef(true);
+    const fontSize = useSharedValue(calculateFontSize(containerWidth) * multiLineScoreSizeMultiplier);
 
     const animatedStyles = useAnimatedStyle(() => {
         return {
@@ -26,6 +27,11 @@ const ScoreRound: React.FunctionComponent<Props> = ({ containerWidth, currentRou
     const d = currentRoundScore;
 
     useEffect(() => {
+        if (initialRender.current) {
+            initialRender.current = false;
+            return;
+        }
+
         fontSize.value = withTiming(
             calculateFontSize(containerWidth) * multiLineScoreSizeMultiplier,
             { duration: animationDuration }

@@ -41,12 +41,18 @@ const GameScreen: React.FunctionComponent = () => {
         <View style={{ flex: 1, paddingTop: headerHeight }} testID="game-screen">
             <View style={{ flex: 1 }}>
                 {interactionType === InteractionType.Dial
-                    ? <Animated.View key="rows" entering={FadeIn.duration(220)} exiting={FadeOut.duration(180)} style={StyleSheet.absoluteFill}>
-                        <ListBoard showHint={showHint} />
-                    </Animated.View>
-                    : <Animated.View key="flex" entering={FadeIn.duration(220)} exiting={FadeOut.duration(180)} style={StyleSheet.absoluteFill}>
-                        <TileBoard showHint={showHint} />
-                    </Animated.View>
+                    ? (
+                        <Animated.View key="rows" entering={FadeIn.duration(220)} exiting={FadeOut.duration(180)}
+                            style={StyleSheet.absoluteFill} testID="game-board-container">
+                            <ListBoard showHint={showHint} />
+                        </Animated.View>
+                    )
+                    : (
+                        <Animated.View key="flex" entering={FadeIn.duration(220)} exiting={FadeOut.duration(180)}
+                            style={StyleSheet.absoluteFill} testID="game-board-container">
+                            <TileBoard showHint={showHint} />
+                        </Animated.View>
+                    )
                 }
 
                 <PointValuesSheet />
