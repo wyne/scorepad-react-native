@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-import { DarkTheme, DefaultTheme, NavigationContainer } from '@react-navigation/native';
+import { DarkTheme, DefaultTheme, NavigationContainer, useNavigationContainerRef } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Platform, View } from 'react-native';
 
@@ -39,6 +39,7 @@ export type RootStackParamList = {
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export const Navigation = () => {
+    const navigationRef = useNavigationContainerRef<RootStackParamList>();
     const theme = useTheme();
     const isAndroid = Platform.OS === 'android';
     const isIOS = Platform.OS === 'ios';
@@ -51,12 +52,19 @@ export const Navigation = () => {
         : { ...DefaultTheme, colors: { ...DefaultTheme.colors, background: theme.background, card: theme.backgroundSecondary } };
 
     const fullscreen = useAppSelector(state => state.settings.home_fullscreen);
-    const [showGameSheet, setShowGameSheet] = useState(false);
+    const [showGameSheetForActiveRoute, setShowGameSheetForActiveRoute] = useState(false);
+
+    const syncGameSheetWithActiveRoute = () => {
+        setShowGameSheetForActiveRoute(navigationRef.getCurrentRoute()?.name === 'Game');
+    };
 
     return (
         <View style={{ flex: 1 }}>
             <NavigationContainer
+                ref={navigationRef}
                 theme={navTheme}
+                onReady={syncGameSheetWithActiveRoute}
+                onStateChange={syncGameSheetWithActiveRoute}
             >
                 <GestureInfoSheetContextProvider>
                     <MenuOpenContextProvider>
@@ -84,13 +92,13 @@ export const Navigation = () => {
                                 headerBackButtonDisplayMode: 'minimal',
                             }}
                             listeners={{
-                                focus: () => setShowGameSheet(true),
+                                focus: () => setShowGameSheetForActiveRoute(true),
                                 transitionStart: (event) => {
                                     if (event.data.closing) {
-                                        setShowGameSheet(false);
+                                        setShowGameSheetForActiveRoute(false);
                                     }
                                 },
-                                blur: () => setShowGameSheet(false),
+                                blur: () => setShowGameSheetForActiveRoute(false),
                             }}
                         />
                         <Stack.Screen name="EditGame" component={EditGameScreen}
@@ -130,7 +138,7 @@ export const Navigation = () => {
                         </Stack.Navigator>
                     </MenuOpenContextProvider>
                 </GestureInfoSheetContextProvider>
-                {!fullscreen && showGameSheet && <GameSheet />}
+                {!fullscreen && showGameSheetForActiveRoute && <GameSheet />}
             </NavigationContainer>
         </View>
     );
