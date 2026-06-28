@@ -288,6 +288,7 @@ describe('DialOverlay', () => {
             round: 0,
             type: 'increment',
             power_hold: false,
+            notches: 3,
             interaction: 'dial',
         });
     });
@@ -301,6 +302,7 @@ describe('DialOverlay', () => {
         expect(mockLogEvent).toHaveBeenCalledWith('score_change', expect.objectContaining({
             addend: 1,
             type: 'decrement',
+            notches: -3,
             interaction: 'dial',
         }));
     });
@@ -316,6 +318,7 @@ describe('DialOverlay', () => {
             addend: 5,
             power_hold: true,
             type: 'increment',
+            notches: 1,
             interaction: 'dial',
         }));
     });

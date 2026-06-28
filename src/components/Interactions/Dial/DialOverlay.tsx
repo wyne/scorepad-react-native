@@ -142,14 +142,16 @@ const PlayerDialPage: React.FC<PlayerDialPageProps> = ({
         const delta = v - lastLoggedValueRef.current;
         lastLoggedValueRef.current = v;
         if (delta !== 0) {
+            const stepSize = isSecondary ? addendTwo : addendOne;
             logEvent('score_change', {
                 player_index: playerIndex,
                 game_id: currentGameId,
                 // Which configured step the user was on, matching half-tap/swipe — not the magnitude.
-                addend: isSecondary ? addendTwo : addendOne,
+                addend: stepSize,
                 round: currentRoundIndex,
                 type: delta > 0 ? 'increment' : 'decrement',
                 power_hold: isSecondary,
+                notches: stepSize !== 0 ? Math.round(delta / stepSize) : 0,
                 interaction: 'dial',
             });
         }
