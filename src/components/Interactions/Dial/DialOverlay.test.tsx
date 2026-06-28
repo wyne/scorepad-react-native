@@ -54,20 +54,28 @@ jest.mock('expo-haptics', () => ({
     ImpactFeedbackStyle: { Light: 'Light', Medium: 'Medium' },
 }));
 
+// Capture the onChange the overlay passes down so tests can drive a score change
+// through the (otherwise inert) mocked dial control.
+let mockDialOnChange: ((v: number) => void) | undefined;
 jest.mock('./DialControl', () => {
-    return function MockDialControl({ dialSize }: { dialSize: number }) {
+    return function MockDialControl(
+        { dialSize, onChange }: { dialSize: number; onChange: (v: number) => void },
+    ) {
         const { View } = jest.requireActual('react-native');
+        mockDialOnChange = onChange;
         return <View testID="dial-control" style={{ width: dialSize, height: dialSize }} />;
     };
 });
 
-jest.mock('../../../Analytics', () => ({ logEvent: function () { } }));
+jest.mock('../../../Analytics', () => ({ logEvent: jest.fn() }));
 
 let mockMenuOpen = false;
 jest.mock('../../MenuOpenContext', () => ({
     useMenuOpen: () => ({ menuOpen: mockMenuOpen, setMenuOpen: jest.fn() }),
 }));
 
+
+import * as Analytics from '../../../Analytics';
 
 import DialOverlay from './DialOverlay';
 
@@ -261,5 +269,46 @@ describe('DialOverlay', () => {
                 width: 236,
             })
         );
+    });
+
+    // --- analytics ---
+
+    it('logs a score_change event with the per-notch delta when the dial increments', () => {
+        const mockLogEvent = jest.mocked(Analytics.logEvent);
+        render(wrap(createStore())); // player starts the round at 5
+
+        act(() => { mockDialOnChange?.(8); });
+
+        expect(mockLogEvent).toHaveBeenCalledWith('score_change', {
+            player_index: 0,
+            game_id: 'game-1',
+            addend: 3,
+            round: 0,
+            type: 'increment',
+            power_hold: false,
+            interaction: 'dial',
+        });
+    });
+
+    it('logs a decrement when the dial lowers the score', () => {
+        const mockLogEvent = jest.mocked(Analytics.logEvent);
+        render(wrap(createStore())); // player starts the round at 5
+
+        act(() => { mockDialOnChange?.(2); });
+
+        expect(mockLogEvent).toHaveBeenCalledWith('score_change', expect.objectContaining({
+            addend: 3,
+            type: 'decrement',
+            interaction: 'dial',
+        }));
+    });
+
+    it('does not log a score_change when the value is unchanged', () => {
+        const mockLogEvent = jest.mocked(Analytics.logEvent);
+        render(wrap(createStore())); // player starts the round at 5
+
+        act(() => { mockDialOnChange?.(5); });
+
+        expect(mockLogEvent).not.toHaveBeenCalled();
     });
 });
