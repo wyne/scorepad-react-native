@@ -9,6 +9,7 @@ import { Provider } from 'react-redux';
 import gamesReducer, { gameSave } from '../../../../redux/GamesSlice';
 import playersReducer from '../../../../redux/PlayersSlice';
 import settingsReducer from '../../../../redux/SettingsSlice';
+import * as Analytics from '../../../Analytics';
 
 jest.mock('react-native-reanimated', () => {
     const { View } = jest.requireActual('react-native');
@@ -54,15 +55,18 @@ jest.mock('expo-haptics', () => ({
     ImpactFeedbackStyle: { Light: 'Light', Medium: 'Medium' },
 }));
 
-// Capture the onChange the overlay passes down so tests can drive a score change
-// through the (otherwise inert) mocked dial control.
+// Capture the callbacks the overlay passes down so tests can drive a score change /
+// step toggle through the (otherwise inert) mocked dial control.
 let mockDialOnChange: ((v: number) => void) | undefined;
+let mockDialOnToggleMode: ((secondary: boolean) => void) | undefined;
 jest.mock('./DialControl', () => {
     return function MockDialControl(
-        { dialSize, onChange }: { dialSize: number; onChange: (v: number) => void },
+        { dialSize, onChange, onToggleMode }:
+            { dialSize: number; onChange: (v: number) => void; onToggleMode: (secondary: boolean) => void },
     ) {
         const { View } = jest.requireActual('react-native');
         mockDialOnChange = onChange;
+        mockDialOnToggleMode = onToggleMode;
         return <View testID="dial-control" style={{ width: dialSize, height: dialSize }} />;
     };
 });
@@ -74,8 +78,6 @@ jest.mock('../../MenuOpenContext', () => ({
     useMenuOpen: () => ({ menuOpen: mockMenuOpen, setMenuOpen: jest.fn() }),
 }));
 
-
-import * as Analytics from '../../../Analytics';
 
 import DialOverlay from './DialOverlay';
 
@@ -97,7 +99,7 @@ const createStore = (gameOverrides: Record<string, unknown> = {}) =>
     configureStore({
         reducer: { settings: settingsReducer, games: gamesReducer, players: playersReducer },
         preloadedState: {
-            settings: { currentGameId: 'game-1' },
+            settings: { currentGameId: 'game-1', addendOne: 1, addendTwo: 5 },
             games: {
                 entities: { 'game-1': { ...mockGame, ...gameOverrides } },
                 ids: ['game-1'],
@@ -273,16 +275,16 @@ describe('DialOverlay', () => {
 
     // --- analytics ---
 
-    it('logs a score_change event with the per-notch delta when the dial increments', () => {
+    it('logs a score_change with the primary step (addendOne) when the dial increments', () => {
         const mockLogEvent = jest.mocked(Analytics.logEvent);
-        render(wrap(createStore())); // player starts the round at 5
+        render(wrap(createStore())); // player starts the round at 5; addendOne is 1
 
         act(() => { mockDialOnChange?.(8); });
 
         expect(mockLogEvent).toHaveBeenCalledWith('score_change', {
             player_index: 0,
             game_id: 'game-1',
-            addend: 3,
+            addend: 1,
             round: 0,
             type: 'increment',
             power_hold: false,
@@ -297,8 +299,23 @@ describe('DialOverlay', () => {
         act(() => { mockDialOnChange?.(2); });
 
         expect(mockLogEvent).toHaveBeenCalledWith('score_change', expect.objectContaining({
-            addend: 3,
+            addend: 1,
             type: 'decrement',
+            interaction: 'dial',
+        }));
+    });
+
+    it('logs the secondary step (addendTwo) and power_hold when in secondary mode', () => {
+        const mockLogEvent = jest.mocked(Analytics.logEvent);
+        render(wrap(createStore())); // addendTwo is 5
+
+        act(() => { mockDialOnToggleMode?.(true); });
+        act(() => { mockDialOnChange?.(10); });
+
+        expect(mockLogEvent).toHaveBeenCalledWith('score_change', expect.objectContaining({
+            addend: 5,
+            power_hold: true,
+            type: 'increment',
             interaction: 'dial',
         }));
     });

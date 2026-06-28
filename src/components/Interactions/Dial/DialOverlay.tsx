@@ -145,16 +145,17 @@ const PlayerDialPage: React.FC<PlayerDialPageProps> = ({
             logEvent('score_change', {
                 player_index: playerIndex,
                 game_id: currentGameId,
-                addend: Math.abs(delta),
+                // Which configured step the user was on, matching half-tap/swipe — not the magnitude.
+                addend: isSecondary ? addendTwo : addendOne,
                 round: currentRoundIndex,
                 type: delta > 0 ? 'increment' : 'decrement',
-                power_hold: false,
+                power_hold: isSecondary,
                 interaction: 'dial',
             });
         }
         dispatch(playerRoundScoreSet(playerId, currentRoundIndex, v));
         dispatch(setLastUsedInteractionType(InteractionType.Dial));
-    }, [dispatch, playerId, currentRoundIndex, playerIndex, currentGameId]);
+    }, [dispatch, playerId, currentRoundIndex, playerIndex, currentGameId, isSecondary, addendOne, addendTwo]);
 
     const isDismissing = useSharedValue(false);
 
