@@ -18,6 +18,7 @@ import { useAppDispatch, useAppSelector } from '../../../../redux/hooks';
 import { playerRoundScoreSet, selectPlayerById, selectPlayerRoundStats } from '../../../../redux/PlayersSlice';
 import { selectCurrentGame } from '../../../../redux/selectors';
 import { setLastUsedInteractionType } from '../../../../redux/SettingsSlice';
+import { logEvent } from '../../../Analytics';
 import { useMenuOpen } from '../../MenuOpenContext';
 import { InteractionType } from '../InteractionType';
 
@@ -111,6 +112,15 @@ const PlayerDialPage: React.FC<PlayerDialPageProps> = ({
         state => selectPlayerRoundStats(state, playerId, currentRoundIndex)
     );
 
+    // For analytics: the dial sets an absolute round score, so we derive the per-notch
+    // delta (addend / direction) by diffing against the previous value.
+    const currentGameId = useAppSelector(state => state.settings.currentGameId);
+    const playerIndex = useAppSelector(state => {
+        const game = selectCurrentGame(state);
+        return game ? game.playerIds.indexOf(playerId) : -1;
+    });
+    const lastLoggedValueRef = useRef(currentRoundScore);
+
     // Stable SharedValue refs — same object identity every render, so React.memo(DialControl)
     // skips re-renders when score changes. The displayed numbers update via Reanimated on the UI thread.
     const svRoundScore = useSharedValue(currentRoundScore);
@@ -118,6 +128,7 @@ const PlayerDialPage: React.FC<PlayerDialPageProps> = ({
     useLayoutEffect(() => {
         svRoundScore.value = currentRoundScore;
         svScoreTotal.value = currentRoundTotalScore;
+        lastLoggedValueRef.current = currentRoundScore;
     }, [currentRoundScore, currentRoundTotalScore]);
 
     const [isSecondary, setIsSecondary] = useState(false);
@@ -128,9 +139,22 @@ const PlayerDialPage: React.FC<PlayerDialPageProps> = ({
     }, [currentRoundIndex]);
 
     const handleChange = useCallback((v: number) => {
+        const delta = v - lastLoggedValueRef.current;
+        lastLoggedValueRef.current = v;
+        if (delta !== 0) {
+            logEvent('score_change', {
+                player_index: playerIndex,
+                game_id: currentGameId,
+                addend: Math.abs(delta),
+                round: currentRoundIndex,
+                type: delta > 0 ? 'increment' : 'decrement',
+                power_hold: false,
+                interaction: 'dial',
+            });
+        }
         dispatch(playerRoundScoreSet(playerId, currentRoundIndex, v));
         dispatch(setLastUsedInteractionType(InteractionType.Dial));
-    }, [dispatch, playerId, currentRoundIndex]);
+    }, [dispatch, playerId, currentRoundIndex, playerIndex, currentGameId]);
 
     const isDismissing = useSharedValue(false);
 

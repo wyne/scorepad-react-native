@@ -61,6 +61,8 @@ jest.mock('./DialControl', () => {
     };
 });
 
+jest.mock('../../../Analytics', () => ({ logEvent: function () { } }));
+
 let mockMenuOpen = false;
 jest.mock('../../MenuOpenContext', () => ({
     useMenuOpen: () => ({ menuOpen: mockMenuOpen, setMenuOpen: jest.fn() }),
