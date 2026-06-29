@@ -1,6 +1,6 @@
-import { getAnalytics, logEvent as firebaseLogEvent } from '@react-native-firebase/analytics';
+import { getAnalytics, logEvent as firebaseLogEvent, setUserProperty as firebaseSetUserProperty } from '@react-native-firebase/analytics';
 
-import type { AnalyticsEventParams } from './AnalyticsEvents';
+import type { AnalyticsEventParams, AnalyticsUserProperty } from './AnalyticsEvents';
 import logger from './Logger';
 
 /**
@@ -40,4 +40,26 @@ export const logEvent = async <K extends keyof AnalyticsEventParams>(
 
     // Log the event to Firebase Analytics
     await firebaseLogEvent(analytics, eventName, sanitized);
+};
+
+/**
+ * Sets a GA4 user property — user-scoped state you can segment on directly
+ * (vs. reconstructing it from a stream of events). Names are constrained to the
+ * catalog (AnalyticsUserProperty). Pass null to clear.
+ */
+export const setUserProperty = async (
+    name: AnalyticsUserProperty,
+    value: string | null,
+): Promise<void> => {
+    const analytics = getAnalytics();
+
+    logger.info(
+        '\x1b[35m', // magenta
+        'USER_PROPERTY',
+        name,
+        String(value),
+        '\x1b[0m'
+    );
+
+    await firebaseSetUserProperty(analytics, name, value);
 };
