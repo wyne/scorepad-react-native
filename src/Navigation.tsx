@@ -18,6 +18,7 @@ import ListScreen from '../src/screens/ListScreen';
 import { MenuOpenContextProvider } from './components/MenuOpenContext';
 import GameSheet from './components/Sheets/GameSheet';
 import { GestureInfoSheetContextProvider } from './components/Sheets/GestureInfoSheetContext';
+import { useAnalyticsUserProperties } from './hooks/useAnalyticsUserProperties';
 import EditPlayerScreen from './screens/EditPlayerScreen';
 import ShareScreen from './screens/ShareScreen';
 import { useTheme } from './theme';
@@ -40,6 +41,7 @@ export type RootStackParamList = {
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export const Navigation = () => {
+    useAnalyticsUserProperties();
     const navigationRef = useNavigationContainerRef<RootStackParamList>();
     const theme = useTheme();
     const isAndroid = Platform.OS === 'android';

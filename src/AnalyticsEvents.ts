@@ -100,3 +100,15 @@ export interface AnalyticsEventParams {
 }
 
 export type AnalyticsEventName = keyof AnalyticsEventParams;
+
+/**
+ * User-scoped properties (GA4 user properties). Unlike events, these describe the
+ * user's current state, so they can be segmented on directly rather than
+ * reconstructed from a stream of toggle events. Kept in sync from settings by
+ * useAnalyticsUserProperties.
+ */
+export type AnalyticsUserProperty =
+    | 'keep_screen_awake'
+    | 'point_particles'
+    | 'player_index'
+    | 'color_scheme';
