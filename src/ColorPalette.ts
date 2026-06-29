@@ -1,6 +1,3 @@
-import { useAppDispatch, useAppSelector } from '../redux/hooks';
-import { selectPlayerById, updatePlayer } from '../redux/PlayersSlice';
-
 type PaletteType = Record<string, string[]>;
 
 const palettes: PaletteType = {
@@ -85,19 +82,4 @@ export const getPalettes = (): string[] => {
 
 export const getPalette = (name: string): string[] => {
     return palettes[name];
-};
-
-export const setPlayerColor = (playerId: string, color: string) => {
-    const dispatch = useAppDispatch();
-
-    const player = useAppSelector(state => selectPlayerById(state, playerId));
-    if (typeof player == 'undefined') return;
-    player.color = color;
-
-    dispatch(updatePlayer({
-        id: playerId,
-        changes: {
-            color: color,
-        }
-    }));
 };

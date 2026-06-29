@@ -17,8 +17,7 @@ const TileBoard: React.FC<{ showHint: boolean }> = ({ showHint }) => {
         const currentGameId = state.settings.currentGameId;
         return currentGameId ? selectGameById(state, currentGameId)?.playerIds : undefined;
     });
-
-    if (playerIds == null || playerIds.length == 0) return null;
+    const visiblePlayerIds = playerIds ?? [];
 
     const [rows, setRows] = useState<number>(0);
     const [cols, setCols] = useState<number>(0);
@@ -26,7 +25,7 @@ const TileBoard: React.FC<{ showHint: boolean }> = ({ showHint }) => {
     const [width, setWidth] = useState<number | null>(null);
     const [height, setHeight] = useState<number | null>(null);
 
-    const playerCount = playerIds.length;
+    const playerCount = visiblePlayerIds.length;
 
     const desiredAspectRatio = 1;
 
@@ -43,10 +42,10 @@ const TileBoard: React.FC<{ showHint: boolean }> = ({ showHint }) => {
 
         if (width == null || height == null) return;
 
-        for (let rows = 1; rows <= playerIds.length; rows++) {
-            const cols = Math.ceil(playerIds.length / rows);
+        for (let rows = 1; rows <= visiblePlayerIds.length; rows++) {
+            const cols = Math.ceil(visiblePlayerIds.length / rows);
 
-            if (playerIds.length % rows > 0 && rows - playerIds.length % rows > 1) {
+            if (visiblePlayerIds.length % rows > 0 && rows - visiblePlayerIds.length % rows > 1) {
                 continue;
             }
 
@@ -61,7 +60,7 @@ const TileBoard: React.FC<{ showHint: boolean }> = ({ showHint }) => {
         }
 
         setRows(bestRowCount);
-        setCols(Math.ceil(playerIds.length / bestRowCount));
+        setCols(Math.ceil(visiblePlayerIds.length / bestRowCount));
     };
 
     useEffect(() => {
@@ -85,6 +84,8 @@ const TileBoard: React.FC<{ showHint: boolean }> = ({ showHint }) => {
         return dims;
     };
 
+    if (visiblePlayerIds.length === 0) return null;
+
     return (
         <SafeAreaView edges={['left', 'right']} style={
             [styles.contentStyle,
@@ -93,7 +94,7 @@ const TileBoard: React.FC<{ showHint: boolean }> = ({ showHint }) => {
                 backgroundColor: theme.background,
             }]
         } onLayout={layoutHandler} >
-            {playerIds.map((id, index) => (
+            {visiblePlayerIds.map((id, index) => (
                 width != null && height != null && rows != 0 && cols != 0 &&
                 <PlayerTile
                     key={id}

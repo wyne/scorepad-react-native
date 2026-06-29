@@ -5,7 +5,7 @@ module.exports = {
         jest: true,
     },
     parser: '@typescript-eslint/parser',
-    plugins: ['@typescript-eslint', 'import'],
+    plugins: ['@typescript-eslint', 'import', 'react-hooks'],
     extends: [
         'plugin:@typescript-eslint/recommended',
         'plugin:jest/recommended',
@@ -34,6 +34,10 @@ module.exports = {
             'newlines-between': 'always',
         }],
         'import/no-duplicates': 'error',
+        // Existing dependency warnings are being fixed incrementally. Keep them
+        // visible without blocking the ordering-safety rollout.
+        'react-hooks/exhaustive-deps': 'warn',
+        'react-hooks/rules-of-hooks': 'error',
     },
     ignorePatterns: ['web-build', '__mocks__'],
     overrides: [

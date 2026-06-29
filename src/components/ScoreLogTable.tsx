@@ -26,11 +26,12 @@ const ScoreLogTable: React.FunctionComponent<Props> = ({ showScores = true }) =>
     const [roundScrollOffset, setRoundScrollOffset] = useState<RoundScrollOffset>({});
 
     const currentGameId = useAppSelector(state => state.settings.currentGameId);
-
-    if (typeof currentGameId == 'undefined') return null;
-
-    const currentRoundIndex = useAppSelector(state => selectGameById(state, currentGameId)?.roundCurrent || 0);
-    const roundCount = useAppSelector(state => selectGameById(state, currentGameId)?.roundTotal || 1);
+    const currentRoundIndex = useAppSelector(
+        state => selectGameById(state, currentGameId ?? '')?.roundCurrent || 0
+    );
+    const roundCount = useAppSelector(
+        state => selectGameById(state, currentGameId ?? '')?.roundTotal || 1
+    );
 
     const scoreLogScrollViewEl = useRef<ScrollView>(null);
 
@@ -60,14 +61,18 @@ const ScoreLogTable: React.FunctionComponent<Props> = ({ showScores = true }) =>
     const dispatch = useAppDispatch();
 
     const sortByPlayerIndex = useCallback(() => {
+        if (!currentGameId) return;
         dispatch(setSortSelector({ gameId: currentGameId, sortSelector: SortSelectorKey.ByIndex }));
         logEvent('sort_by_index', { game_id: currentGameId });
     }, [dispatch, currentGameId]);
 
     const sortByTotalScore = useCallback(() => {
+        if (!currentGameId) return;
         dispatch(setSortSelector({ gameId: currentGameId, sortSelector: SortSelectorKey.ByScore }));
         logEvent('sort_by_score', { game_id: currentGameId });
     }, [dispatch, currentGameId]);
+
+    if (typeof currentGameId == 'undefined') return null;
 
     return (
         <View style={[styles.scoreTableContainer]}>
