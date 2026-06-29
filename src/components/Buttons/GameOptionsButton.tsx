@@ -123,7 +123,7 @@ const GameOptionsButton: React.FunctionComponent = () => {
             dispatch(setGameInteractionType({ gameId: currentGameId, interactionType: type }));
         }
         dispatch(setInteractionType(type));
-        logEvent('interaction_type', { interactionType: eventName, gameId: currentGameId });
+        logEvent('interaction_type', { interaction_type: eventName, game_id: currentGameId });
     };
 
     const handleAction = (event: string) => {
@@ -140,7 +140,7 @@ const GameOptionsButton: React.FunctionComponent = () => {
             case 'point-values':
                 gameSheetRef?.current?.snapToIndex(0);
                 pointValuesSheetRef?.current?.present();
-                logEvent('addend_sheet', { installId });
+                logEvent('addend_sheet', { install_id: installId });
                 break;
             case 'fullscreen':
                 dispatch(toggleHomeFullscreen());

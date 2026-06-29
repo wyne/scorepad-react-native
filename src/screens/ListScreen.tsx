@@ -46,11 +46,11 @@ const ListScreen: React.FunctionComponent<Props> = ({ navigation }) => {
         }
 
         logEvent('game_list', {
-            gameCount: gameIds.length,
-            appOpens,
-            devMenuEnabled,
-            installId,
-            rollingGameCounter,
+            game_count: gameIds.length,
+            app_opens: appOpens,
+            dev_menu_enabled: devMenuEnabled,
+            install_id: installId,
+            rolling_game_counter: rollingGameCounter,
         });
 
         dispatch(increaseAppOpens());

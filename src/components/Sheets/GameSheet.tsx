@@ -155,7 +155,7 @@ const GameSheet: React.FunctionComponent = () => {
                 logEvent('game_sheet_close');
             } else {
                 logEvent('game_sheet_snap', {
-                    snapPointIndex: snapPointIndex,
+                    snap_point_index: snapPointIndex,
                 });
 
             }

@@ -46,7 +46,7 @@ const RotatingIcon: React.FunctionComponent = () => {
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
             dispatch(toggleDevMenuEnabled());
             logEvent('dev_menu', {
-                installId,
+                install_id: installId,
             });
             rotation.value = withTiming(rotation.value + 360, { duration: 1000, easing: Easing.elastic(1) });
         } else {

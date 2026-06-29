@@ -81,7 +81,7 @@ const GameListItem: React.FunctionComponent<Props> = ({ navigation, gameId, inde
         navigation.navigate('Game');
 
         await logEvent('select_game', {
-            index: index,
+            list_index: index,
             game_id: gameId,
             player_count: playerIds.length,
             round_count: roundCount,

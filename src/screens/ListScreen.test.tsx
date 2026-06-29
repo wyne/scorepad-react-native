@@ -259,11 +259,11 @@ describe('ListScreen', () => {
         );
 
         expect(logEvent).toHaveBeenCalledWith('game_list', {
-            gameCount: 1,
-            appOpens: 3,
-            devMenuEnabled: true,
-            installId: 'test-install-id',
-            rollingGameCounter: 1,
+            game_count: 1,
+            app_opens: 3,
+            dev_menu_enabled: true,
+            install_id: 'test-install-id',
+            rolling_game_counter: 1,
         });
     });
 
@@ -361,7 +361,7 @@ describe('ListScreen', () => {
         );
 
         expect(logEvent).toHaveBeenCalledWith('game_list', expect.objectContaining({
-            devMenuEnabled: true,
+            dev_menu_enabled: true,
         }));
     });
 
