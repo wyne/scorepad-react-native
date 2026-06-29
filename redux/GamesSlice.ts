@@ -175,7 +175,7 @@ export const asyncRematchGame = createAsyncThunk(
 
         dispatch(setCurrentGameId(newGameId));
 
-        await logEvent('rematch_game', {
+        void logEvent('rematch_game', {
             game_id: game.id,
         });
 
@@ -249,7 +249,7 @@ export const asyncCreateGame = createAsyncThunk(
         dispatch(setCurrentGameId(newGameId));
         dispatch(incrementRollingGameCounter());
 
-        await logEvent('new_game', {
+        void logEvent('new_game', {
             game_count: gameCount,
             player_count: playerCount,
         });

@@ -16,9 +16,9 @@ interface Props {
 const BackButton: React.FunctionComponent<Props> = ({ navigation }) => {
     const theme = useTheme();
     return (
-        <HeaderButton accessibilityLabel='Home' onPress={async () => {
+        <HeaderButton accessibilityLabel='Home' onPress={() => {
             navigation.goBack();
-            await logEvent('navigate_home');
+            void logEvent('navigate_home');
         }}>
             <Icon name="bars"
                 type="font-awesome-5"

@@ -31,7 +31,7 @@ const RoundScoreColumn: React.FunctionComponent<Props> = ({
     const sortSelector = sortSelectors[sortKey || SortSelectorKey.ByIndex];
     const sortedPlayerIds = useAppSelector(sortSelector);
 
-    const onPressHandler = useCallback(async () => {
+    const onPressHandler = useCallback(() => {
         if (disabled || !currentGameId) return;
 
         // Read the round we're leaving before we change it (callback has stable deps).
@@ -42,7 +42,7 @@ const RoundScoreColumn: React.FunctionComponent<Props> = ({
                 roundCurrent: round,
             }
         }));
-        await logEvent('round_change', {
+        void logEvent('round_change', {
             game_id: currentGameId,
             source: 'direct select',
             from_round: fromRound,

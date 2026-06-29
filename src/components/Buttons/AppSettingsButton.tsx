@@ -21,9 +21,9 @@ const AppSettingsButton: React.FunctionComponent = () => {
     );
 
     return (
-        <HeaderButton accessibilityLabel='App Settings' onPress={async () => {
+        <HeaderButton accessibilityLabel='App Settings' onPress={() => {
             navigation.navigate('AppSettings');
-            await logEvent('app_info');
+            void logEvent('app_info');
         }}>
             <View testID='app-settings-button'>
                 <Icon name="gear"

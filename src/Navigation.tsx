@@ -1,11 +1,11 @@
 import React, { useRef, useState } from 'react';
 
-import { getAnalytics, logScreenView } from '@react-native-firebase/analytics';
 import { DarkTheme, DefaultTheme, NavigationContainer, useNavigationContainerRef } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Platform, View } from 'react-native';
 
 import { useAppSelector } from '../redux/hooks';
+import { logScreenView } from '../src/Analytics';
 import AppSettingsButton from '../src/components/Buttons/AppSettingsButton';
 import GameOptionsButton from '../src/components/Buttons/GameOptionsButton';
 import RoundHeaderTitle from '../src/components/Headers/RoundHeaderTitle';
@@ -71,7 +71,7 @@ export const Navigation = () => {
         // firebase.json. Fire-and-forget — never block navigation on analytics.
         if (routeName && routeName !== loggedRouteNameRef.current) {
             loggedRouteNameRef.current = routeName;
-            logScreenView(getAnalytics(), { screen_name: routeName, screen_class: routeName });
+            void logScreenView(routeName);
         }
     };
 

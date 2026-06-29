@@ -60,10 +60,10 @@ const PlayerListItem: React.FunctionComponent<Props> = ({
         );
     };
 
-    const deleteHandler = async () => {
+    const deleteHandler = () => {
         removePlayerHandler();
 
-        await logEvent('remove_player', {
+        void logEvent('remove_player', {
             game_id: currentGameId,
             player_index: index,
         });

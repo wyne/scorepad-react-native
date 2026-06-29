@@ -45,8 +45,8 @@ const EditGameScreen: React.FunctionComponent<Props> = ({ navigation, route }) =
     useLayoutEffect(() => {
         navigation.setOptions({
             headerRight: () => (
-                <HeaderButton accessibilityLabel='Save Game' onPress={async () => {
-                    await logEvent('save_game', {
+                <HeaderButton accessibilityLabel='Save Game' onPress={() => {
+                    void logEvent('save_game', {
                         source: route?.params?.source,
                         game_id: currentGame?.id,
                         palette: currentGame?.palette,
@@ -68,13 +68,13 @@ const EditGameScreen: React.FunctionComponent<Props> = ({ navigation, route }) =
     if (typeof currentGameId == 'undefined') return null;
     if (typeof playerIds == 'undefined') return null;
 
-    const addPlayerHandler = async () => {
+    const addPlayerHandler = () => {
         dispatch(addPlayer({
             gameId: currentGameId,
             playerName: `Player ${playerIds.length + 1}`,
         }));
 
-        await logEvent('add_player', {
+        void logEvent('add_player', {
             game_id: currentGameId,
             player_count: playerIds.length + 1,
         });

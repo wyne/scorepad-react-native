@@ -76,11 +76,11 @@ const GameListItem: React.FunctionComponent<Props> = ({ navigation, gameId, inde
     /**
      * Choose Game and navigate to GameScreen
      */
-    const chooseGameHandler = async () => {
+    const chooseGameHandler = () => {
         setCurrentGameCallback();
         navigation.navigate('Game');
 
-        await logEvent('select_game', {
+        void logEvent('select_game', {
             list_index: index,
             game_id: gameId,
             player_count: playerIds.length,

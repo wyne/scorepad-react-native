@@ -52,7 +52,7 @@ const ShareScreen: React.FunctionComponent<Props> = ({ navigation }) => {
                 UTI: 'image/png',
             });
 
-            await logEvent('share_image');
+            void logEvent('share_image');
         } catch (error) {
             console.error('Failed to capture or share image:', error);
         }
