@@ -48,7 +48,7 @@ const EditGameScreen: React.FunctionComponent<Props> = ({ navigation, route }) =
                 <HeaderButton accessibilityLabel='Save Game' onPress={async () => {
                     await logEvent('save_game', {
                         source: route?.params?.source,
-                        gameId: currentGame?.id,
+                        game_id: currentGame?.id,
                         palette: currentGame?.palette,
                         player_count: currentGame?.playerIds.length,
                     });

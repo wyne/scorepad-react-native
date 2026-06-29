@@ -85,7 +85,7 @@ const AppSettingsScreen: React.FunctionComponent<Props> = ({ navigation }) => {
         logEvent('toggle_feature', {
             feature: 'point_particles',
             value: !showPointParticles,
-            installId
+            install_id: installId
         });
     };
     const togglePlayerIndexSwitch = () => {
@@ -93,7 +93,7 @@ const AppSettingsScreen: React.FunctionComponent<Props> = ({ navigation }) => {
         logEvent('toggle_feature', {
             feature: 'player_index',
             value: !showPlayerIndex,
-            installId
+            install_id: installId
         });
     };
     const toggleKeepAwake = () => {
@@ -110,7 +110,7 @@ const AppSettingsScreen: React.FunctionComponent<Props> = ({ navigation }) => {
                             logEvent('toggle_feature', {
                                 feature: 'keep_screen_awake',
                                 value: true,
-                                installId
+                                install_id: installId
                             });
                         }
                     },
@@ -121,7 +121,7 @@ const AppSettingsScreen: React.FunctionComponent<Props> = ({ navigation }) => {
             logEvent('toggle_feature', {
                 feature: 'keep_screen_awake',
                 value: false,
-                installId
+                install_id: installId
             });
         }
     };

@@ -44,10 +44,10 @@ const ColorSelector: React.FC<ColorSelectorProps> = ({ playerId }) => {
             changes: { color: color }
         }));
         logEvent('set_player_color', {
-            gameId: currentGameId,
+            game_id: currentGameId,
             palette: currentGame?.palette,
             color,
-            inCurrentPalette,
+            in_current_palette: inCurrentPalette,
         });
     };
 

@@ -181,10 +181,10 @@ describe('ColorSelector', () => {
 
         // Check that analytics event was logged with correct parameters
         expect(mockLogEvent).toHaveBeenCalledWith('set_player_color', {
-            gameId: 'game-1',
+            game_id: 'game-1',
             palette: 'default',
             color: '#FF0000',
-            inCurrentPalette: true,
+            in_current_palette:true,
         });
     });
 
@@ -213,10 +213,10 @@ describe('ColorSelector', () => {
 
         // Check that analytics event was logged with correct parameters
         expect(mockLogEvent).toHaveBeenCalledWith('set_player_color', {
-            gameId: 'game-1',
+            game_id: 'game-1',
             palette: 'default',
             color: '#FF6B6B',
-            inCurrentPalette: false,
+            in_current_palette:false,
         });
     });
 
@@ -377,22 +377,22 @@ describe('ColorSelector', () => {
 
         // Verify all analytics calls
         expect(mockLogEvent).toHaveBeenNthCalledWith(1, 'set_player_color', {
-            gameId: 'game-1',
+            game_id: 'game-1',
             palette: 'default',
             color: '#FF0000',
-            inCurrentPalette: true,
+            in_current_palette:true,
         });
         expect(mockLogEvent).toHaveBeenNthCalledWith(2, 'set_player_color', {
-            gameId: 'game-1',
+            game_id: 'game-1',
             palette: 'default',
             color: '#00FF00',
-            inCurrentPalette: true,
+            in_current_palette:true,
         });
         expect(mockLogEvent).toHaveBeenNthCalledWith(3, 'set_player_color', {
-            gameId: 'game-1',
+            game_id: 'game-1',
             palette: 'default',
             color: '#FF6B6B',
-            inCurrentPalette: false,
+            in_current_palette:false,
         });
     });
 

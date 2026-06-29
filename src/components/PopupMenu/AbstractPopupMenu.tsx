@@ -103,7 +103,7 @@ const AbstractPopupMenu: React.FC<Props> = (props) => {
         );
 
         await logEvent('delete_game', {
-            index: props.index,
+            list_index: props.index,
             round_count: roundCount,
             player_count: playerIds.length,
         });

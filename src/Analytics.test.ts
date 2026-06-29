@@ -3,7 +3,12 @@ import { getAnalytics, logEvent as firebaseLogEvent } from '@react-native-fireba
 import { logEvent } from './Analytics';
 import logger from './Logger';
 
-// Mock Firebase Analytics — uses manual mock at __mocks__/@react-native-firebase/analytics.js
+// The wrapper's runtime behavior (sanitization, logging) is event-agnostic, so these
+// tests use a loosely-typed alias to exercise it with arbitrary names / param shapes.
+// Real event/param typing is covered by the catalog (AnalyticsEvents.ts) at call sites.
+const log = logEvent as unknown as (eventName: string, params?: Record<string, unknown>) => Promise<void>;
+
+// Mock Firebase Analytics — uses manual mock at __mocks__/@react-native-firebase/analytics.ts
 jest.mock('@react-native-firebase/analytics');
 
 // Mock Logger
@@ -22,7 +27,7 @@ describe('Analytics', () => {
       const eventName = 'test_event';
       const params = { customParam: 'customValue' };
 
-      await logEvent(eventName, params);
+      await log(eventName, params);
 
       expect(getAnalytics).toHaveBeenCalled();
       // GA4 auto-collects os / appVersion / sessionId / appInstanceId — we no longer
@@ -35,7 +40,7 @@ describe('Analytics', () => {
     it('should log an event with no params as an empty payload', async () => {
       const eventName = 'simple_event';
 
-      await logEvent(eventName);
+      await log(eventName);
 
       expect(firebaseLogEvent).toHaveBeenCalledWith(expect.anything(), eventName, {});
     });
@@ -44,7 +49,7 @@ describe('Analytics', () => {
       const eventName = 'console_test_event';
       const params = { testParam: 123 };
 
-      await logEvent(eventName, params);
+      await log(eventName, params);
 
       expect(logger.info).toHaveBeenCalledWith(
         '\x1b[34m',
@@ -58,7 +63,7 @@ describe('Analytics', () => {
     it('should handle empty parameters object', async () => {
       const eventName = 'empty_params_event';
 
-      await logEvent(eventName, {});
+      await log(eventName, {});
 
       expect(firebaseLogEvent).toHaveBeenCalledWith(expect.anything(), eventName, {});
     });
@@ -67,7 +72,7 @@ describe('Analytics', () => {
       const error = new Error('Firebase error');
       (firebaseLogEvent as jest.Mock).mockRejectedValue(error);
 
-      await expect(logEvent('error_event')).rejects.toThrow('Firebase error');
+      await expect(log('error_event')).rejects.toThrow('Firebase error');
     });
 
     it('should strip null and undefined parameter values', async () => {
@@ -82,7 +87,7 @@ describe('Analytics', () => {
         undefinedParam: undefined,
       };
 
-      await logEvent(eventName, params);
+      await log(eventName, params);
 
       expect(firebaseLogEvent).toHaveBeenCalledWith(expect.anything(), eventName, {
         stringParam: 'test',

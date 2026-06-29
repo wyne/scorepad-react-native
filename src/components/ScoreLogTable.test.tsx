@@ -262,7 +262,7 @@ describe('ScoreLogTable', () => {
         const playerNameColumn = getByTestId('player-name-column');
         fireEvent.press(playerNameColumn);
 
-        expect(logEvent).toHaveBeenCalledWith('sort_by_index', { gameId: 'game-1' });
+        expect(logEvent).toHaveBeenCalledWith('sort_by_index', { game_id: 'game-1' });
     });
 
     it('should handle sort by total score when total score column is pressed', () => {
@@ -298,7 +298,7 @@ describe('ScoreLogTable', () => {
         const totalScoreColumn = getByTestId('total-score-column');
         fireEvent.press(totalScoreColumn);
 
-        expect(logEvent).toHaveBeenCalledWith('sort_by_score', { gameId: 'game-1' });
+        expect(logEvent).toHaveBeenCalledWith('sort_by_score', { game_id: 'game-1' });
     });
 
     it('should handle games with single round', () => {

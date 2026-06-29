@@ -1,9 +1,13 @@
 import { getAnalytics, logEvent as firebaseLogEvent } from '@react-native-firebase/analytics';
 
+import type { AnalyticsEventParams } from './AnalyticsEvents';
 import logger from './Logger';
 
 /**
  * Logs an event to Firebase Analytics with additional logging.
+ *
+ * Events and their params are defined in the typed catalog (AnalyticsEvents.ts).
+ * A wrong event name or a mistyped/camelCase param key is a compile error.
  *
  * Note: we intentionally do NOT attach os / osVersion / appVersion / sessionId /
  * appInstanceId here. GA4 already auto-collects equivalents on every event
@@ -14,8 +18,10 @@ import logger from './Logger';
  * @param eventName The name of the event to log.
  * @param params The parameters of the event.
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const logEvent = async (eventName: string, params?: Record<string, any>) => {
+export const logEvent = async <K extends keyof AnalyticsEventParams>(
+    eventName: K,
+    params?: AnalyticsEventParams[K],
+): Promise<void> => {
     const analytics = getAnalytics();
 
     const sanitized = Object.fromEntries(

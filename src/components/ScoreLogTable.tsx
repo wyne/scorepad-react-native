@@ -61,12 +61,12 @@ const ScoreLogTable: React.FunctionComponent<Props> = ({ showScores = true }) =>
 
     const sortByPlayerIndex = useCallback(() => {
         dispatch(setSortSelector({ gameId: currentGameId, sortSelector: SortSelectorKey.ByIndex }));
-        logEvent('sort_by_index', { gameId: currentGameId });
+        logEvent('sort_by_index', { game_id: currentGameId });
     }, [dispatch, currentGameId]);
 
     const sortByTotalScore = useCallback(() => {
         dispatch(setSortSelector({ gameId: currentGameId, sortSelector: SortSelectorKey.ByScore }));
-        logEvent('sort_by_score', { gameId: currentGameId });
+        logEvent('sort_by_score', { game_id: currentGameId });
     }, [dispatch, currentGameId]);
 
     return (
