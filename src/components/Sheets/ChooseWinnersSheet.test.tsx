@@ -282,4 +282,20 @@ describe('ChooseWinnersSheet', () => {
             winner_count: 0,
         });
     });
+
+    it('should log game_complete with outcome stats when locking', () => {
+        const store = createMockStore(mockPlayers, 'game-1', ['player-1', 'player-2', 'player-3']);
+        const { getByText, getByLabelText } = render(<Provider store={store}><ChooseWinnersSheet /></Provider>);
+
+        fireEvent.press(getByText('Bob'));
+        fireEvent.press(getByLabelText('Lock Game'));
+
+        expect(logEvent).toHaveBeenCalledWith('game_complete', expect.objectContaining({
+            game_id: 'game-1',
+            player_count: 3,
+            round_count: 1,
+            winner_count: 1,
+            interaction: 'swipe-vertical', // resolved default for this game
+        }));
+    });
 });

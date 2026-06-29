@@ -13,6 +13,7 @@ import { shallowEqual } from 'react-redux';
 
 import { selectGameById, updateGame } from '../../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
+import { selectInteractionType } from '../../../redux/selectors';
 import { logEvent } from '../../Analytics';
 import { useTheme } from '../../theme';
 
@@ -26,7 +27,9 @@ const ChooseWinnersSheet: React.FunctionComponent = () => {
     const topInset = insets.top + 50;
 
     const currentGameId = useAppSelector(state => state.settings.currentGameId);
-    const playerIds = useAppSelector(state => selectGameById(state, currentGameId || '')?.playerIds);
+    const currentGame = useAppSelector(state => selectGameById(state, currentGameId || ''));
+    const interactionType = useAppSelector(state => selectInteractionType(state, currentGameId));
+    const playerIds = currentGame?.playerIds;
     const allPlayers = useAppSelector((state) =>
         (playerIds || []).map((id) => state.players.entities[id]),
         shallowEqual
@@ -105,6 +108,19 @@ const ChooseWinnersSheet: React.FunctionComponent = () => {
             locked: true,
             winner_count: selectedIds.size,
         });
+
+        logEvent('game_complete', {
+            game_id: currentGameId,
+            player_count: (playerIds ?? []).length,
+            round_count: currentGame?.roundTotal ?? 0,
+            winner_count: selectedIds.size,
+            duration_sec: currentGame?.dateCreated
+                ? Math.round((Date.now() - currentGame.dateCreated) / 1000)
+                : 0,
+            palette: currentGame?.palette,
+            interaction: interactionType,
+        });
+
         setSelectedIds(new Set());
         chooseWinnersSheetRef?.current?.close();
     };
