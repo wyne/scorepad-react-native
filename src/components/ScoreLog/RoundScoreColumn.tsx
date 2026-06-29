@@ -3,7 +3,7 @@ import React, { memo, useCallback } from 'react';
 import { LayoutChangeEvent, Text, TouchableWithoutFeedback, View } from 'react-native';
 
 import { updateGame } from '../../../redux/GamesSlice';
-import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
+import { useAppDispatch, useAppSelector, useAppStore } from '../../../redux/hooks';
 import { selectCurrentGame } from '../../../redux/selectors';
 import { logEvent } from '../../Analytics';
 
@@ -24,6 +24,7 @@ const RoundScoreColumn: React.FunctionComponent<Props> = ({
     onLayout,
 }) => {
     const dispatch = useAppDispatch();
+    const store = useAppStore();
 
     const currentGameId = useAppSelector(state => selectCurrentGame(state)?.id);
     const sortKey = useAppSelector(state => selectCurrentGame(state)?.sortSelectorKey);
@@ -33,6 +34,8 @@ const RoundScoreColumn: React.FunctionComponent<Props> = ({
     const onPressHandler = useCallback(async () => {
         if (disabled || !currentGameId) return;
 
+        // Read the round we're leaving before we change it (callback has stable deps).
+        const fromRound = selectCurrentGame(store.getState())?.roundCurrent ?? round;
         dispatch(updateGame({
             id: currentGameId,
             changes: {
@@ -42,6 +45,8 @@ const RoundScoreColumn: React.FunctionComponent<Props> = ({
         await logEvent('round_change', {
             game_id: currentGameId,
             source: 'direct select',
+            from_round: fromRound,
+            to_round: round,
         });
     }, []);
 

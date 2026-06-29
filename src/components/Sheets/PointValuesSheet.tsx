@@ -67,7 +67,7 @@ const PointValuesSheet: React.FunctionComponent = () => {
             requestAnimationFrame(() => {
                 dispatch(setMultiplier(value));
                 dispatch(setAddendTwo(value));
-                logEvent('addend_one_change', { addend_two: value });
+                logEvent('addend_two_change', { addend_two: value });
             });
         },
         [dispatch]
