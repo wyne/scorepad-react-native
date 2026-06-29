@@ -47,7 +47,7 @@ const settingsSlice = createSlice({
     name: 'settings',
     initialState,
     reducers: {
-        setCurrentGameId(state, action: PayloadAction<string>) {
+        setCurrentGameId(state, action: PayloadAction<string | undefined>) {
             console.info('Setting Current Game: ', action.payload);
             state.currentGameId = action.payload;
         },
