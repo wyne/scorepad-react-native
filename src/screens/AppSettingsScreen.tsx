@@ -131,12 +131,18 @@ const AppSettingsScreen: React.FunctionComponent<Props> = ({ navigation }) => {
             'This will replace all current games, players, and scores with the data from the backup. This action cannot be undone.',
             [
                 { text: 'Cancel', style: 'cancel' },
-                { text: 'Restore', style: 'destructive', onPress: importBackup },
+                {
+                    text: 'Restore', style: 'destructive', onPress: () => {
+                        logEvent('backup_restore');
+                        importBackup();
+                    }
+                },
             ]
         );
     };
 
     const handleExport = async () => {
+        logEvent('backup_export');
         await exportBackup();
     };
 
@@ -191,7 +197,10 @@ const AppSettingsScreen: React.FunctionComponent<Props> = ({ navigation }) => {
                     <React.Fragment key={option}>
                         <TouchableOpacity
                             style={[styles.disclosureRow]}
-                            onPress={() => dispatch(setColorScheme(option))}
+                            onPress={() => {
+                                dispatch(setColorScheme(option));
+                                logEvent('theme_change', { theme: option });
+                            }}
                         >
                             <Text style={[styles.disclosureLabel, { color: theme.text }]}>
                                 {option.charAt(0).toUpperCase() + option.slice(1)}

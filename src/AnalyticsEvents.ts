@@ -50,12 +50,16 @@ export interface AnalyticsEventParams {
     edit_players: { game_id?: string; player_count: number };
     reorder_players: { game_id?: string; player_count: number };
     edit_player_back: Record<string, never>;
+    /** Fired once on leaving the edit screen if the player's name actually changed. Name itself is not logged (PII). */
+    player_renamed: { game_id?: string; player_index?: number };
 
     // ── Appearance / config ─────────────────────────────────────────────────
     set_player_color: { game_id?: string; palette?: string; color: string; in_current_palette: boolean };
     set_game_palette: { game_id?: string; palette: string };
     /** Fired when the user switches the scoring interaction (swipe / half-tap / dial). */
     set_interaction: { interaction_type: string; game_id?: string };
+    /** Color scheme preference change in settings. */
+    theme_change: { theme: 'system' | 'light' | 'dark' };
     fullscreen: { fullscreen: boolean };
     addend_sheet: { install_id?: string };
     addend_one_change: { addend_one: number };
@@ -89,6 +93,10 @@ export interface AnalyticsEventParams {
     toggle_feature: { feature: string; value: boolean; install_id?: string };
     view_version: Record<string, never>;
     dev_menu: { install_id?: string };
+    /** User confirmed restoring all data from a backup file (destructive). */
+    backup_restore: Record<string, never>;
+    /** User exported a backup of their data. */
+    backup_export: Record<string, never>;
 }
 
 export type AnalyticsEventName = keyof AnalyticsEventParams;

@@ -9,6 +9,7 @@ import { Provider } from 'react-redux';
 import gamesReducer from '../../redux/GamesSlice';
 import playersReducer from '../../redux/PlayersSlice';
 import settingsReducer from '../../redux/SettingsSlice';
+import * as Analytics from '../Analytics';
 
 import EditPlayerScreen from './EditPlayerScreen';
 
@@ -17,6 +18,8 @@ jest.mock('expo-font', () => ({
     isLoaded: () => true,
     loadAsync: () => Promise.resolve(),
 }));
+
+jest.mock('../Analytics', () => ({ logEvent: jest.fn() }));
 
 // Mock the components that EditPlayerScreen uses
 jest.mock('../components/ColorPalettes/ColorSelector', () => {
@@ -659,6 +662,55 @@ describe('EditPlayerScreen', () => {
         );
 
         expect(getByPlaceholderText('Player Name')).toBeTruthy();
+    });
+
+    it('logs player_renamed on leave when the name changed', () => {
+        const mockLogEvent = jest.mocked(Analytics.logEvent);
+        const store = createMockStore({
+            settings: { currentGameId: 'game-1' },
+            games: { entities: { 'game-1': mockGame }, ids: ['game-1'] },
+            players: { entities: { 'player-1': mockPlayer }, ids: ['player-1'] },
+        });
+        const mockRoute = { params: { index: 0, playerId: 'player-1' } };
+
+        const { getByDisplayValue } = render(
+            <Provider store={store}>
+                <EditPlayerScreen navigation={mockNavigation} route={mockRoute as any} />
+            </Provider>
+        );
+
+        fireEvent.changeText(getByDisplayValue('Test Player'), 'Renamed Player');
+
+        const beforeRemove = mockNavigation.addListener.mock.calls
+            .find((c: any[]) => c[0] === 'beforeRemove')?.[1];
+        act(() => beforeRemove?.());
+
+        expect(mockLogEvent).toHaveBeenCalledWith('player_renamed', {
+            game_id: 'game-1',
+            player_index: 0,
+        });
+    });
+
+    it('does not log player_renamed when the name is unchanged', () => {
+        const mockLogEvent = jest.mocked(Analytics.logEvent);
+        const store = createMockStore({
+            settings: { currentGameId: 'game-1' },
+            games: { entities: { 'game-1': mockGame }, ids: ['game-1'] },
+            players: { entities: { 'player-1': mockPlayer }, ids: ['player-1'] },
+        });
+        const mockRoute = { params: { index: 0, playerId: 'player-1' } };
+
+        render(
+            <Provider store={store}>
+                <EditPlayerScreen navigation={mockNavigation} route={mockRoute as any} />
+            </Provider>
+        );
+
+        const beforeRemove = mockNavigation.addListener.mock.calls
+            .find((c: any[]) => c[0] === 'beforeRemove')?.[1];
+        act(() => beforeRemove?.());
+
+        expect(mockLogEvent).not.toHaveBeenCalledWith('player_renamed', expect.anything());
     });
 
     it('should handle empty player name initially', () => {

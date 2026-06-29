@@ -79,12 +79,22 @@ const EditPlayerScreen: React.FC<EditPlayerScreenProps> = ({
     const [localPlayerName, setLocalPlayerName] = useState<string>(player?.playerName || '');
     const [isFocused, setIsFocused] = useState(false);
 
+    // Latest committed name, kept current so the leave handler isn't a stale closure.
+    const latestNameRef = useRef<string>(player?.playerName || '');
+
     const allPlayerNames = useAppSelector(selectAllPlayerNames);
 
     useEffect(() => {
-        const unsubscribe = navigation.addListener('beforeRemove', dismissInput);
+        const onBeforeRemove = () => {
+            dismissInput();
+            // Log a rename once per session, on any exit, if the name actually changed.
+            if (latestNameRef.current !== originalPlayerName) {
+                logEvent('player_renamed', { game_id: currentGame?.id, player_index: index });
+            }
+        };
+        const unsubscribe = navigation.addListener('beforeRemove', onBeforeRemove);
         return unsubscribe;
-    }, [dismissInput, navigation]);
+    }, [dismissInput, navigation, originalPlayerName, currentGame?.id, index]);
 
     const suggestions = useMemo(() => {
         if (!isFocused || localPlayerName.length === 0) return [];
@@ -128,6 +138,7 @@ const EditPlayerScreen: React.FC<EditPlayerScreenProps> = ({
     };
 
     const savePlayerName = (text: string) => {
+        latestNameRef.current = text;
         dispatch(updatePlayer({
             id: playerId,
             changes: {
