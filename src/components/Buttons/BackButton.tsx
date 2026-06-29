@@ -18,7 +18,7 @@ const BackButton: React.FunctionComponent<Props> = ({ navigation }) => {
     return (
         <HeaderButton accessibilityLabel='Home' onPress={async () => {
             navigation.goBack();
-            await logEvent('menu');
+            await logEvent('navigate_home');
         }}>
             <Icon name="bars"
                 type="font-awesome-5"

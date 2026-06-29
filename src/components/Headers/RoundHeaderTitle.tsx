@@ -35,9 +35,9 @@ const RoundHeaderTitle: React.FunctionComponent = () => {
         logEvent('round_change', {
             game_id: currentGameId,
             source: 'next button',
-            round: currentRoundIndex,
-            next_round: currentRoundIndex + 1,
-            new_round: isLastRound,
+            from_round: currentRoundIndex,
+            to_round: currentRoundIndex + 1,
+            created_round: isLastRound,
         });
     };
 
@@ -49,8 +49,8 @@ const RoundHeaderTitle: React.FunctionComponent = () => {
         logEvent('round_change', {
             game_id: currentGameId,
             source: 'previous button',
-            round: currentRoundIndex,
-            next_round: currentRoundIndex - 1,
+            from_round: currentRoundIndex,
+            to_round: currentRoundIndex - 1,
         });
     };
 

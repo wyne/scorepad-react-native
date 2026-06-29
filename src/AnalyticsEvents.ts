@@ -25,10 +25,12 @@ export interface AnalyticsEventParams {
     };
     round_change: {
         game_id?: string;
+        /** What triggered the change: 'next button' | 'previous button' | 'direct select'. */
         source: string;
-        round?: number;
-        next_round?: number;
-        new_round?: boolean;
+        from_round: number;
+        to_round: number;
+        /** True when advancing created a brand-new round (was on the last round). */
+        created_round?: boolean;
     };
 
     // ── Game lifecycle ──────────────────────────────────────────────────────
@@ -52,10 +54,12 @@ export interface AnalyticsEventParams {
     // ── Appearance / config ─────────────────────────────────────────────────
     set_player_color: { game_id?: string; palette?: string; color: string; in_current_palette: boolean };
     set_game_palette: { game_id?: string; palette: string };
-    interaction_type: { interaction_type: string; game_id?: string };
+    /** Fired when the user switches the scoring interaction (swipe / half-tap / dial). */
+    set_interaction: { interaction_type: string; game_id?: string };
     fullscreen: { fullscreen: boolean };
     addend_sheet: { install_id?: string };
-    addend_one_change: { addend_one?: number; addend_two?: number };
+    addend_one_change: { addend_one: number };
+    addend_two_change: { addend_two: number };
 
     // ── Score log ───────────────────────────────────────────────────────────
     sort_by_index: { game_id?: string };
@@ -66,7 +70,8 @@ export interface AnalyticsEventParams {
     game_sheet_snap: { snap_point_index: number };
 
     // ── Menus / navigation ──────────────────────────────────────────────────
-    menu: Record<string, never>;
+    /** Header home/back button (the "bars" icon). */
+    navigate_home: Record<string, never>;
     menu_share: { round_count: number; player_count: number };
     menu_edit: { round_count: number; player_count: number };
     about_gestures: Record<string, never>;

@@ -123,7 +123,7 @@ const GameOptionsButton: React.FunctionComponent = () => {
             dispatch(setGameInteractionType({ gameId: currentGameId, interactionType: type }));
         }
         dispatch(setInteractionType(type));
-        logEvent('interaction_type', { interaction_type: eventName, game_id: currentGameId });
+        logEvent('set_interaction', { interaction_type: eventName, game_id: currentGameId });
     };
 
     const handleAction = (event: string) => {
