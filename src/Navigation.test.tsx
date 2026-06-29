@@ -1,5 +1,6 @@
 import React from 'react';
 
+import { logScreenView } from '@react-native-firebase/analytics';
 import { configureStore } from '@reduxjs/toolkit';
 import { act, render } from '@testing-library/react-native';
 import { Provider } from 'react-redux';
@@ -167,6 +168,7 @@ describe('Navigation', () => {
     beforeEach(() => {
         mockActiveRouteName = 'List';
         mockNavigationContainerProps = undefined;
+        (logScreenView as jest.Mock).mockClear();
         Object.keys(mockScreenListeners).forEach((key) => {
             delete mockScreenListeners[key];
         });
@@ -253,5 +255,30 @@ describe('Navigation', () => {
         });
 
         expect(queryByTestId('game-sheet')).toBeTruthy();
+    });
+
+    it('logs a screen_view with the route name, once per navigation', () => {
+        renderNavigation();
+
+        act(() => {
+            mockNavigationContainerProps?.onReady?.();
+        });
+
+        expect((logScreenView as jest.Mock)).toHaveBeenCalledWith(
+            expect.anything(),
+            { screen_name: 'List', screen_class: 'List' },
+        );
+
+        (logScreenView as jest.Mock).mockClear();
+        setActiveRoute('Game');
+        expect((logScreenView as jest.Mock)).toHaveBeenCalledWith(
+            expect.anything(),
+            { screen_name: 'Game', screen_class: 'Game' },
+        );
+
+        // Same route fires onStateChange again — should not re-log.
+        (logScreenView as jest.Mock).mockClear();
+        setActiveRoute('Game');
+        expect((logScreenView as jest.Mock)).not.toHaveBeenCalled();
     });
 });

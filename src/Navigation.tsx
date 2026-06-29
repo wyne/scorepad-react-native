@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 
+import { getAnalytics, logScreenView } from '@react-native-firebase/analytics';
 import { DarkTheme, DefaultTheme, NavigationContainer, useNavigationContainerRef } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Platform, View } from 'react-native';
@@ -54,8 +55,22 @@ export const Navigation = () => {
     const fullscreen = useAppSelector(state => state.settings.home_fullscreen);
     const [showGameSheetForActiveRoute, setShowGameSheetForActiveRoute] = useState(false);
 
-    const syncGameSheetWithActiveRoute = () => {
-        setShowGameSheetForActiveRoute(navigationRef.getCurrentRoute()?.name === 'Game');
+    // Track the last logged route so we emit one screen_view per actual navigation,
+    // not on every navigation state change.
+    const loggedRouteNameRef = useRef<string | undefined>(undefined);
+
+    const handleActiveRouteChange = () => {
+        const routeName = navigationRef.getCurrentRoute()?.name;
+        setShowGameSheetForActiveRoute(routeName === 'Game');
+
+        // Manual screen tracking: automatic native reporting only sees the
+        // react-native-screens wrapper class (RNSScreen) with no name, so we log the
+        // React Navigation route name instead. Automatic reporting is disabled in
+        // firebase.json. Fire-and-forget — never block navigation on analytics.
+        if (routeName && routeName !== loggedRouteNameRef.current) {
+            loggedRouteNameRef.current = routeName;
+            logScreenView(getAnalytics(), { screen_name: routeName, screen_class: routeName });
+        }
     };
 
     return (
@@ -63,8 +78,8 @@ export const Navigation = () => {
             <NavigationContainer
                 ref={navigationRef}
                 theme={navTheme}
-                onReady={syncGameSheetWithActiveRoute}
-                onStateChange={syncGameSheetWithActiveRoute}
+                onReady={handleActiveRouteChange}
+                onStateChange={handleActiveRouteChange}
             >
                 <GestureInfoSheetContextProvider>
                     <MenuOpenContextProvider>
