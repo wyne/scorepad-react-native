@@ -30,7 +30,9 @@ export interface GameState {
 }
 
 const gamesAdapter = createEntityAdapter({
-    sortComparer: (a: GameState, b: GameState) => (a.dateCreated < b.dateCreated) ? 1 : -1,
+    sortComparer: (a: GameState, b: GameState) => (
+        b.dateCreated - a.dateCreated || a.id.localeCompare(b.id)
+    ),
 });
 
 const initialState = gamesAdapter.getInitialState({

@@ -15,7 +15,7 @@ export interface ScoreState {
 
 const playersAdapter = createEntityAdapter({
     sortComparer: (a: ScoreState, b: ScoreState) => (
-        grandTotalScore(a.scores) < grandTotalScore(b.scores) ? 1 : -1
+        grandTotalScore(b.scores) - grandTotalScore(a.scores) || a.id.localeCompare(b.id)
     ),
 });
 

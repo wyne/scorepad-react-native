@@ -85,6 +85,29 @@ describe('games reducer', () => {
         expect(state.ids).toContain('game1');
     });
 
+    it('uses game id as a deterministic tie-breaker for equal creation dates', () => {
+        const dateCreated = Date.now();
+        store.dispatch(gameSave({
+            id: 'z-game',
+            title: 'Z Game',
+            dateCreated,
+            roundCurrent: 0,
+            roundTotal: 1,
+            playerIds: [],
+        }));
+        store.dispatch(gameSave({
+            id: 'a-game',
+            title: 'A Game',
+            dateCreated,
+            roundCurrent: 0,
+            roundTotal: 1,
+            playerIds: [],
+        }));
+
+        const tiedIds = store.getState().ids.filter(id => id !== 'game1');
+        expect(tiedIds).toEqual(['a-game', 'z-game']);
+    });
+
     it('should handle gameDelete', () => {
         store.dispatch(gameDelete('game1'));
 
