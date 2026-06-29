@@ -1,3 +1,5 @@
+import type { InteractionType } from './components/Interactions/InteractionType';
+
 /**
  * Catalog of every analytics event and its parameter shape.
  *
@@ -41,6 +43,20 @@ export interface AnalyticsEventParams {
     reset_game: { game_id?: string };
     delete_game: { list_index: number; round_count: number; player_count: number };
     lock_game: { game_id?: string; locked: boolean; winner_count?: number };
+    /**
+     * A game was finished (locked with winners optional). Companion to
+     * lock_game(locked:true) — this carries the outcome stats.
+     */
+    game_complete: {
+        game_id?: string;
+        player_count: number;
+        round_count: number;
+        winner_count: number;
+        duration_sec: number;
+        palette?: string;
+        /** The scoring gesture the game used (per-game, falls back to the default). */
+        interaction: InteractionType;
+    };
     edit_game: { game_id?: string };
 
     // ── Players ─────────────────────────────────────────────────────────────
