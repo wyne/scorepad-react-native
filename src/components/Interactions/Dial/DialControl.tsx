@@ -1,16 +1,14 @@
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 
 import * as Haptics from 'expo-haptics';
 import { Pressable, StyleSheet, Text, TextInput, TextInputProps, View } from 'react-native';
-import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import { GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
     Easing,
-    runOnJS,
     SharedValue,
     useAnimatedProps,
     useAnimatedStyle,
     useSharedValue,
-    withDelay,
     withRepeat,
     withSequence,
     withTiming,
@@ -23,15 +21,13 @@ type AnimatedTextInputProps = TextInputProps & {
 };
 const AnimatedTextInput = Animated.createAnimatedComponent(TextInput as React.ComponentType<AnimatedTextInputProps>);
 
-import { SECONDARY_HOLD_ACTIVATION_MS, SECONDARY_HOLD_INDICATOR_DELAY_MS } from '../interactionConstants';
+import { useDialGesture } from './useDialGesture';
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 const AnimatedLine = Animated.createAnimatedComponent(Line);
 const AnimatedPath = Animated.createAnimatedComponent(Path);
 
-const STEP_DEG = 30;
 const ACCENT = '#3a86ff';
-const MOVE_THRESHOLD_SQ = 100;
 const CENTER_VALUE_BASE_FONT_RATIO = 0.20;
 const CENTER_VALUE_MIN_SCALE = 0.62;
 const CENTER_VALUE_TARGET_CHARS = 4;
@@ -51,14 +47,6 @@ function fmtSigned(v: number): string {
     'worklet';
     if (v > 0) return '+' + v;
     return String(v);
-}
-
-// Wrap angle delta to [-180, 180]
-function wrapDelta(delta: number): number {
-    'worklet';
-    if (delta > 180) return delta - 360;
-    if (delta < -180) return delta + 360;
-    return delta;
 }
 
 interface Props {
@@ -96,11 +84,6 @@ const DialControl: React.FC<Props> = ({
 
     // Pip colour (contrasts with the ink on the ring)
     const pipColor = ink === '#000' ? 'rgba(255,255,255,0.75)' : 'rgba(0,0,0,0.75)';
-
-    // Drag visual state — SharedValues on UI thread, drives SVG via useAnimatedProps
-    const svIsDragging = useSharedValue(false);
-    const svTrailStartDeg = useSharedValue(0);
-    // svLastAngle and svAccDeg (below) are reused for notch position and trail arc
 
     const numScale = useSharedValue(1);
     const numScaleStyle = useAnimatedStyle(() => ({
@@ -145,34 +128,6 @@ const DialControl: React.FC<Props> = ({
         );
     }, []);
 
-    // Cancel any in-progress dial long-press when the menu opens
-    useEffect(() => {
-        if (menuOpen) stopLongPress();
-    }, [menuOpen]);
-
-    const isSecondaryRef = useRef(isSecondary);
-    isSecondaryRef.current = isSecondary;
-
-    // Shared values for worklet access
-    const svInc = useSharedValue(addendOne);
-    const svAccDeg = useSharedValue(0);
-    const svLastAngle = useSharedValue(0);
-    const svStartX = useSharedValue(0);
-    const svStartY = useSharedValue(0);
-    const svHasMoved = useSharedValue(false);
-    const svStartValue = useSharedValue(0);
-    // Optimistic drag state: update visible shared values during the gesture,
-    // then commit only the final pending score to Redux once the gesture closes.
-    const svStartNewTotal = useSharedValue(0);
-    const svPendingValue = useSharedValue(0);
-    const svLastStep = useSharedValue(0);
-    const svDidFlush = useSharedValue(true);
-
-    useEffect(() => { svInc.value = isSecondary ? addendTwo : addendOne; }, [isSecondary, addendOne, addendTwo]);
-
-    const lpTimer = useRef<ReturnType<typeof setTimeout>>();
-    useEffect(() => () => clearTimeout(lpTimer.current), []);
-
     // Pill pulse animation
     const pillScale = useSharedValue(1);
     const pillOpacity = useSharedValue(1);
@@ -204,44 +159,27 @@ const DialControl: React.FC<Props> = ({
         opacity: pillOpacity.value,
     }));
 
-    // Ring grow animation during long-press build-up
-    const holdProgress = useSharedValue(0);
-    const ringAnimProps = useAnimatedProps(() => ({
-        strokeWidth: SW * (1 + holdProgress.value * 0.35),
-    }));
-    const trackAnimProps = useAnimatedProps(() => ({
-        strokeWidth: SW * (1 + holdProgress.value * 0.35),
-    }));
-
-    // JS-thread callbacks called via runOnJS
-    const startLongPress = useCallback(() => {
-        holdProgress.value = withDelay(
-            SECONDARY_HOLD_INDICATOR_DELAY_MS,
-            withTiming(1, {
-                duration: SECONDARY_HOLD_ACTIVATION_MS - SECONDARY_HOLD_INDICATOR_DELAY_MS,
-                easing: Easing.out(Easing.quad),
-            }),
-        );
-        lpTimer.current = setTimeout(() => {
-            if (!svHasMoved.value) {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-                onToggleMode(true);
-                svAccDeg.value = 0;
-                // Snap ring back on activation
-                holdProgress.value = withTiming(0, { duration: 120, easing: Easing.out(Easing.cubic) });
-            }
-        }, SECONDARY_HOLD_ACTIVATION_MS);
-    }, [onToggleMode]);
-
-    const stopLongPress = useCallback(() => {
-        clearTimeout(lpTimer.current);
-        holdProgress.value = withTiming(0, { duration: 200, easing: Easing.out(Easing.cubic) });
-    }, []);
-
-    const handleBumpFeedback = useCallback(() => {
-        if (isSecondaryRef.current) popNumber();
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    }, [popNumber]);
+    const {
+        panGesture,
+        ringAnimProps,
+        trackAnimProps,
+        notchAnimProps,
+        trailAnimProps,
+        fullCircleAnimProps,
+    } = useDialGesture({
+        svValue,
+        svNewTotal,
+        onChange,
+        onToggleMode,
+        onSecondaryBump: popNumber,
+        isSecondary,
+        addendOne,
+        addendTwo,
+        menuOpen,
+        center: C,
+        radius: R,
+        strokeWidth: SW,
+    });
 
     const centerValueAnimProps = useAnimatedProps(() => ({
         text: fmtSigned(svValue.value),
@@ -250,136 +188,6 @@ const DialControl: React.FC<Props> = ({
     const newTotalAnimProps = useAnimatedProps(() => ({
         text: String(svNewTotal.value),
     }));
-
-    // Notch indicator — position and visibility driven by UI-thread SharedValues
-    const notchAnimProps = useAnimatedProps(() => {
-        const rad = svLastAngle.value * Math.PI / 180;
-        const inner = R - SW / 2 + 6;
-        const outer = R + SW / 2 - 6;
-        return {
-            x1: C + inner * Math.sin(rad),
-            y1: C - inner * Math.cos(rad),
-            x2: C + outer * Math.sin(rad),
-            y2: C - outer * Math.cos(rad),
-            strokeOpacity: svIsDragging.value ? 1 : 0,
-        };
-    });
-
-    // Trail arc path — computed on UI thread from accumulated rotation
-    const trailAnimProps = useAnimatedProps(() => {
-        'worklet';
-        const dragging = svIsDragging.value;
-        const acc = svAccDeg.value;
-        const absAcc = Math.abs(acc);
-        if (!dragging || absAcc <= 1 || absAcc >= 360) {
-            return { d: 'M 0 0', strokeOpacity: 0 };
-        }
-        const isCW = acc >= 0;
-        const sweepDeg = Math.min(absAcc, 359.9);
-        const startDeg = svTrailStartDeg.value;
-        const endDeg = isCW ? startDeg + sweepDeg : startDeg - sweepDeg;
-        const toRad = (d: number) => d * Math.PI / 180;
-        const sx = C + R * Math.sin(toRad(startDeg));
-        const sy = C - R * Math.cos(toRad(startDeg));
-        const ex = C + R * Math.sin(toRad(endDeg));
-        const ey = C - R * Math.cos(toRad(endDeg));
-        const largeArc = sweepDeg > 180 ? 1 : 0;
-        const sweep = isCW ? 1 : 0;
-        return {
-            d: `M ${sx} ${sy} A ${R} ${R} 0 ${largeArc} ${sweep} ${ex} ${ey}`,
-            strokeOpacity: 0.45,
-        };
-    });
-
-    // Full-circle indicator — visible when a complete rotation is accumulated
-    const fullCircleAnimProps = useAnimatedProps(() => ({
-        strokeOpacity: svIsDragging.value && Math.abs(svAccDeg.value) >= 360 ? 0.9 : 0,
-    }));
-
-    const handleDeactivate = useCallback(() => {
-        onToggleMode(false);
-    }, [onToggleMode]);
-
-    const flushPendingChange = useCallback((newVal: number) => {
-        onChange(newVal);
-    }, [onChange]);
-
-    const panGesture = Gesture.Pan()
-        .enabled(!menuOpen)
-        .minDistance(0)
-        .onBegin((e) => {
-            svStartValue.value = svValue.value; // round score at gesture start, before optimistic dial updates
-            // Capture the gesture baseline so live total = start total + round delta.
-            svStartNewTotal.value = svNewTotal.value; // total score at gesture start, before optimistic dial updates
-            svPendingValue.value = svValue.value; // latest optimistic round score waiting to be flushed to Redux
-            svLastStep.value = 0; // last emitted notch offset from svStartValue
-            svDidFlush.value = false; // reset one-shot guard for the eventual Redux flush
-            svAccDeg.value = 0; // accumulated rotation degrees since gesture start
-            svHasMoved.value = false; // long-press hold is still possible until movement passes threshold
-            svStartX.value = e.x; // touch start x, used to detect movement beyond hold threshold
-            svStartY.value = e.y; // touch start y, used to detect movement beyond hold threshold
-
-            const dx = e.x - C;
-            const dy = e.y - C;
-            const angle = Math.atan2(dx, -dy) * 180 / Math.PI;
-            svLastAngle.value = angle;
-            svTrailStartDeg.value = angle;
-            svIsDragging.value = true;
-
-            runOnJS(startLongPress)();
-        })
-        .onUpdate((e) => {
-            const dx2 = e.x - svStartX.value;
-            const dy2 = e.y - svStartY.value;
-            if (!svHasMoved.value && (dx2 * dx2 + dy2 * dy2) > MOVE_THRESHOLD_SQ) {
-                svHasMoved.value = true;
-                runOnJS(stopLongPress)();
-            }
-
-            const dx = e.x - C;
-            const dy = e.y - C;
-            const angle = Math.atan2(dx, -dy) * 180 / Math.PI;
-
-            const delta = wrapDelta(angle - svLastAngle.value);
-            svAccDeg.value += delta;
-            svLastAngle.value = angle;
-
-            const steps = Math.round(svAccDeg.value / STEP_DEG);
-            if (steps === svLastStep.value) return;
-
-            svLastStep.value = steps;
-            const newVal = svStartValue.value + steps * svInc.value;
-            svPendingValue.value = newVal;
-            svValue.value = newVal;
-            svNewTotal.value = svStartNewTotal.value + newVal - svStartValue.value;
-            runOnJS(handleBumpFeedback)();
-        })
-        .onEnd(() => {
-            // onFinalize can run after onEnd, so guard the JS/Redux commit.
-            if (!svDidFlush.value) {
-                svDidFlush.value = true;
-                if (svPendingValue.value !== svStartValue.value) {
-                    runOnJS(flushPendingChange)(svPendingValue.value);
-                }
-            }
-            svIsDragging.value = false;
-            svAccDeg.value = 0;
-            runOnJS(stopLongPress)();
-            runOnJS(handleDeactivate)();
-        })
-        .onFinalize(() => {
-            // onEnd can run before onFinalize, so guard the JS/Redux commit.
-            if (!svDidFlush.value) {
-                svDidFlush.value = true;
-                if (svPendingValue.value !== svStartValue.value) {
-                    runOnJS(flushPendingChange)(svPendingValue.value);
-                }
-            }
-            svIsDragging.value = false;
-            svAccDeg.value = 0;
-            runOnJS(stopLongPress)();
-            runOnJS(handleDeactivate)();
-        });
 
     // --- SVG geometry ---
     const ringColor = isSecondary ? ACCENT : ink;
