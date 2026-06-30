@@ -177,8 +177,6 @@ const GameSheet: React.FunctionComponent = () => {
         if (index === 0) setShouldRenderContent(false);
     }, []);
 
-    if (currentGameId == undefined) return null;
-
     /**
      * Function to snap to the next point when the handle is pressed
      */
@@ -229,6 +227,8 @@ const GameSheet: React.FunctionComponent = () => {
         ),
         []
     );
+
+    if (currentGameId == undefined) return null;
 
     return (
         <BottomSheet

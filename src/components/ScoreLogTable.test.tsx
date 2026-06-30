@@ -1,13 +1,13 @@
 import React from 'react';
 
 import { configureStore } from '@reduxjs/toolkit';
-import { fireEvent, render } from '@testing-library/react-native';
+import { act, fireEvent, render } from '@testing-library/react-native';
 import { ScrollView } from 'react-native';
 import { Provider } from 'react-redux';
 
 import gamesReducer from '../../redux/GamesSlice';
 import playersReducer from '../../redux/PlayersSlice';
-import settingsReducer from '../../redux/SettingsSlice';
+import settingsReducer, { setCurrentGameId } from '../../redux/SettingsSlice';
 
 import ScoreLogTable from './ScoreLogTable';
 
@@ -141,6 +141,38 @@ describe('ScoreLogTable', () => {
         );
 
         expect(toJSON()).toBeNull();
+    });
+
+    it('should render safely when a current game becomes available', () => {
+        const store = createMockStore({
+            settings: {
+                currentGameId: undefined,
+            },
+            games: {
+                entities: {
+                    'game-1': mockGame,
+                },
+                ids: ['game-1'],
+            },
+            players: {
+                entities: mockPlayers,
+                ids: ['player-1', 'player-2'],
+            },
+        });
+
+        const { getByTestId, toJSON } = render(
+            <Provider store={store}>
+                <ScoreLogTable />
+            </Provider>
+        );
+
+        expect(toJSON()).toBeNull();
+
+        act(() => {
+            store.dispatch(setCurrentGameId('game-1'));
+        });
+
+        expect(getByTestId('player-name-column')).toBeTruthy();
     });
 
     it('should render score table with player names and total scores', () => {

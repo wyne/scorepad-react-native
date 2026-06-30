@@ -33,10 +33,9 @@ const ColorSelector: React.FC<ColorSelectorProps> = ({ playerId }) => {
     const currentGame = useAppSelector(state => selectCurrentGame(state));
     const currentPalette = useAppSelector(state => selectCurrentGame(state)?.palette);
     const playerColor = useAppSelector(state => state.players.entities[playerId]?.color);
+    const dispatch = useAppDispatch();
 
     if (!currentGameId) return null;
-
-    const dispatch = useAppDispatch();
 
     const tapColorHandler = (color: string, inCurrentPalette: boolean = false) => {
         dispatch(updatePlayer({

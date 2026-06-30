@@ -35,10 +35,6 @@ const PlayerTile: React.FunctionComponent<Props> = React.memo(({
     playerId,
     showHint,
 }) => {
-    // Short circuit if width or height is not yet defined
-    if (!(width > 0 && height > 0)) return null;
-    if (Number.isNaN(width) || Number.isNaN(height)) return null;
-
     const theme = useTheme();
     const playerIndexLabel = useAppSelector(state => state.settings.showPlayerIndex);
     const { bg, fg, isWinner } = useAppSelector(state => {
@@ -68,6 +64,9 @@ const PlayerTile: React.FunctionComponent<Props> = React.memo(({
         state => selectInteractionType(state, state.settings.currentGameId)
     );
     const InteractionComponent = interactionComponents[interactionType];
+
+    if (!(width > 0 && height > 0)) return null;
+    if (Number.isNaN(width) || Number.isNaN(height)) return null;
 
     return (
         <Animated.View

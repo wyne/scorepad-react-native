@@ -25,13 +25,14 @@ const ShareScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     const theme = useTheme();
     const insets = useSafeAreaInsets();
     const currentGameId = useAppSelector(state => state.settings.currentGameId);
-    if (typeof currentGameId == 'undefined') return null;
-
-    const roundCount = useAppSelector(state => selectGameById(state, currentGameId)?.roundTotal || 0);
+    const roundCount = useAppSelector(
+        state => selectGameById(state, currentGameId ?? '')?.roundTotal || 0
+    );
     const currentGame = useAppSelector(selectCurrentGame);
-    if (typeof currentGame == 'undefined') return null;
-
     const scoreboardImageEl = useRef<View>(null);
+
+    if (typeof currentGameId == 'undefined') return null;
+    if (typeof currentGame == 'undefined') return null;
 
     const roundsIterator = [...Array(roundCount).keys()];
 

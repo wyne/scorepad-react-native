@@ -48,7 +48,7 @@ const RoundScoreColumn: React.FunctionComponent<Props> = ({
             from_round: fromRound,
             to_round: round,
         });
-    }, []);
+    }, [currentGameId, disabled, dispatch, round, store]);
 
     let backgroundColor = 'rgba(0,0,0,0)';
 

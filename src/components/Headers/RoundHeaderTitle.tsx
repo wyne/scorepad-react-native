@@ -14,12 +14,11 @@ const RoundHeaderTitle: React.FunctionComponent = () => {
     const dispatch = useAppDispatch();
 
     const currentGameId = useAppSelector(state => state.settings.currentGameId);
-
-    if (currentGameId == null) return null;
-
-    const currentGame = useAppSelector(state => selectGameById(state, currentGameId));
+    const currentGame = useAppSelector(state => selectGameById(state, currentGameId ?? ''));
     const currentRoundIndex = currentGame?.roundCurrent ?? 0;
     const roundCount = currentGame?.roundTotal ?? 0;
+
+    if (currentGameId == null) return null;
 
     const isFirstRound = currentRoundIndex === 0;
     const isLastRound = currentRoundIndex + 1 >= roundCount;

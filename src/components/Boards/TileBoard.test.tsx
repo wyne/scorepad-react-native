@@ -1,10 +1,10 @@
 import React from 'react';
 
 import { configureStore } from '@reduxjs/toolkit';
-import { fireEvent, render } from '@testing-library/react-native';
+import { act, fireEvent, render } from '@testing-library/react-native';
 import { Provider } from 'react-redux';
 
-import gamesReducer from '../../../redux/GamesSlice';
+import gamesReducer, { updateGame } from '../../../redux/GamesSlice';
 import playersReducer from '../../../redux/PlayersSlice';
 import settingsReducer from '../../../redux/SettingsSlice';
 
@@ -140,6 +140,44 @@ describe('TileBoard', () => {
         );
 
         expect(toJSON()).toBeNull();
+    });
+
+    it('should render safely when players become available after an empty state', () => {
+        const store = createMockStore({
+            settings: {
+                currentGameId: 'game-1',
+            },
+            games: {
+                entities: {
+                    'game-1': {
+                        ...mockGame,
+                        playerIds: [],
+                    },
+                },
+                ids: ['game-1'],
+            },
+            players: {
+                entities: mockPlayers,
+                ids: ['player-1'],
+            },
+        });
+
+        const { getByTestId, toJSON } = render(
+            <Provider store={store}>
+                <TileBoard showHint={false} />
+            </Provider>
+        );
+
+        expect(toJSON()).toBeNull();
+
+        act(() => {
+            store.dispatch(updateGame({
+                id: 'game-1',
+                changes: { playerIds: ['player-1'] },
+            }));
+        });
+
+        expect(getByTestId('safe-area-view')).toBeTruthy();
     });
 
     it('should render null when playerIds is null', () => {
