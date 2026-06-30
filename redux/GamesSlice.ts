@@ -1,4 +1,4 @@
-import { PayloadAction, createAsyncThunk, createEntityAdapter, createSelector, createSlice } from '@reduxjs/toolkit';
+import { PayloadAction, ThunkAction, UnknownAction, createAsyncThunk, createEntityAdapter, createSelector, createSlice } from '@reduxjs/toolkit';
 import { getContrastRatio } from 'colorsheet';
 import * as Crypto from 'expo-crypto';
 
@@ -8,7 +8,7 @@ import { InteractionType } from '../src/components/Interactions/InteractionType'
 import { SortDirectionKey, SortSelectorKey } from '../src/components/ScoreLog/SortHelper';
 import logger from '../src/Logger';
 
-import { playerAdd, selectPlayerById, updatePlayer } from './PlayersSlice';
+import { playerAdd, removePlayer, selectPlayerById, updatePlayer } from './PlayersSlice';
 import { incrementRollingGameCounter, setCurrentGameId } from './SettingsSlice';
 import { RootState } from './store';
 
@@ -129,9 +129,34 @@ const gamesSlice = createSlice({
     }
 });
 
+const { gameDelete } = gamesSlice.actions;
+
 interface GamesSlice {
     games: typeof initialState;
 }
+
+export const deleteGameAndPlayers = (
+    gameId: string
+): ThunkAction<void, RootState, unknown, UnknownAction> => (dispatch, getState) => {
+    const state = getState();
+    const game = selectGameById(state, gameId);
+    if (!game) return;
+
+    const playerIdsUsedByOtherGames = new Set(
+        Object.values(state.games.entities)
+            .filter(otherGame => otherGame?.id !== gameId)
+            .flatMap(otherGame => otherGame?.playerIds ?? [])
+    );
+
+    dispatch(gameDelete(gameId));
+    game.playerIds
+        .filter(playerId => !playerIdsUsedByOtherGames.has(playerId))
+        .forEach(playerId => dispatch(removePlayer(playerId)));
+
+    if (state.settings.currentGameId === gameId) {
+        dispatch(setCurrentGameId(undefined));
+    }
+};
 
 export const asyncRematchGame = createAsyncThunk(
     'games/rematch',
@@ -338,7 +363,6 @@ export const {
     roundNext,
     roundPrevious,
     gameSave,
-    gameDelete,
     setSortSelector,
     reorderPlayers,
     setGameInteractionType,

@@ -7,7 +7,7 @@ import { act, fireEvent, render } from '@testing-library/react-native';
 import { Alert } from 'react-native';
 import { Provider } from 'react-redux';
 
-import gamesReducer, { gameDelete, roundNext } from '../../redux/GamesSlice';
+import gamesReducer, { deleteGameAndPlayers, roundNext } from '../../redux/GamesSlice';
 import playersReducer from '../../redux/PlayersSlice';
 import settingsReducer from '../../redux/SettingsSlice';
 
@@ -187,7 +187,7 @@ describe('GameListItem', () => {
         expect(getByText('Test Game')).toBeTruthy();
 
         act(() => {
-            store.dispatch(gameDelete('game-1'));
+            store.dispatch(deleteGameAndPlayers('game-1'));
         });
 
         expect(toJSON()).toBeNull();

@@ -5,7 +5,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Alert, Platform } from 'react-native';
 import { shallowEqual } from 'react-redux';
 
-import { asyncRematchGame, gameDelete, selectGameById } from '../../../redux/GamesSlice';
+import { asyncRematchGame, deleteGameAndPlayers, selectGameById } from '../../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
 import { logEvent } from '../../Analytics';
 
@@ -95,18 +95,17 @@ const AbstractPopupMenu: React.FC<Props> = (props) => {
                 {
                     text: 'OK',
                     onPress: () => {
-                        dispatch(gameDelete(props.gameId));
+                        dispatch(deleteGameAndPlayers(props.gameId));
+                        void logEvent('delete_game', {
+                            list_index: props.index,
+                            round_count: roundCount,
+                            player_count: playerIds.length,
+                        });
                     }
                 },
             ],
             { cancelable: false },
         );
-
-        void logEvent('delete_game', {
-            list_index: props.index,
-            round_count: roundCount,
-            player_count: playerIds.length,
-        });
     };
 
     return Platform.select({

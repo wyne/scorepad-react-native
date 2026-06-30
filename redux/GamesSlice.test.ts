@@ -4,14 +4,15 @@ import { configureStore, EntityState, Store } from '@reduxjs/toolkit';
 import gamesReducer, {
     asyncCreateGame,
     asyncRematchGame,
-    gameDelete,
+    deleteGameAndPlayers,
     gameSave,
     GameState,
     roundNext,
     roundPrevious,
     selectAllGames
 } from './GamesSlice';
-import playersReducer from './PlayersSlice';
+import playersReducer, { playerAdd } from './PlayersSlice';
+import settingsReducer, { initialState as initialSettings } from './SettingsSlice';
 
 jest.mock('@react-native-firebase/analytics', () => {
     return () => ({
@@ -108,14 +109,6 @@ describe('games reducer', () => {
         expect(tiedIds).toEqual(['a-game', 'z-game']);
     });
 
-    it('should handle gameDelete', () => {
-        store.dispatch(gameDelete('game1'));
-
-        const state = store.getState();
-        expect(state.entities.game1).toBeUndefined();
-        expect(state.ids).not.toContain('game1');
-    });
-
     it('should select all games', () => {
         const initialState = {
             games: {
@@ -206,5 +199,87 @@ describe('asyncRematchGame', () => {
 
         expect(finalState.players.entities[finalState.players.ids[2]]?.scores).toEqual([0]);
         expect(finalState.players.entities[finalState.players.ids[3]]?.scores).toEqual([0]);
+    });
+});
+
+describe('deleteGameAndPlayers', () => {
+    it('removes unreferenced players, preserves shared players, and clears the current game', () => {
+        const store = configureStore({
+            reducer: {
+                games: gamesReducer,
+                players: playersReducer,
+                settings: settingsReducer,
+            },
+            preloadedState: {
+                games: {
+                    ids: ['game-1', 'game-2'],
+                    entities: {
+                        'game-1': {
+                            id: 'game-1',
+                            title: 'Game 1',
+                            dateCreated: 1,
+                            roundCurrent: 0,
+                            roundTotal: 1,
+                            playerIds: ['player-1', 'shared-player'],
+                        },
+                        'game-2': {
+                            id: 'game-2',
+                            title: 'Game 2',
+                            dateCreated: 2,
+                            roundCurrent: 0,
+                            roundTotal: 1,
+                            playerIds: ['shared-player'],
+                        },
+                    },
+                },
+                players: {
+                    ids: ['player-1', 'shared-player'],
+                    entities: {
+                        'player-1': {
+                            id: 'player-1',
+                            playerName: 'Player 1',
+                            scores: [0],
+                        },
+                        'shared-player': {
+                            id: 'shared-player',
+                            playerName: 'Shared Player',
+                            scores: [0],
+                        },
+                    },
+                },
+                settings: {
+                    ...initialSettings,
+                    currentGameId: 'game-1',
+                },
+            },
+        });
+
+        store.dispatch(deleteGameAndPlayers('game-1'));
+
+        const state = store.getState();
+        expect(state.games.entities['game-1']).toBeUndefined();
+        expect(state.games.entities['game-2']).toBeDefined();
+        expect(state.players.entities['player-1']).toBeUndefined();
+        expect(state.players.entities['shared-player']).toBeDefined();
+        expect(state.settings.currentGameId).toBeUndefined();
+    });
+
+    it('does nothing when the game does not exist', () => {
+        const store = configureStore({
+            reducer: {
+                games: gamesReducer,
+                players: playersReducer,
+                settings: settingsReducer,
+            },
+        });
+        store.dispatch(playerAdd({
+            id: 'player-1',
+            playerName: 'Player 1',
+            scores: [0],
+        }));
+
+        store.dispatch(deleteGameAndPlayers('missing-game'));
+
+        expect(store.getState().players.entities['player-1']).toBeDefined();
     });
 });
