@@ -54,10 +54,10 @@ const EditPlayerScreen: React.FC<EditPlayerScreenProps> = ({
     useLayoutEffect(() => {
         navigation.setOptions({
             headerLeft: ({ tintColor }) => (
-                <HeaderButton accessibilityLabel='EditPlayerBack' onPress={async () => {
+                <HeaderButton accessibilityLabel='EditPlayerBack' onPress={() => {
                     dismissInput();
                     navigation.goBack();
-                    await logEvent('edit_player_back');
+                    void logEvent('edit_player_back');
                 }}>
                     <Text style={{ color: tintColor ?? theme.tint, fontSize: 20 }}>Back</Text>
                 </HeaderButton>

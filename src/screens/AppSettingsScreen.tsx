@@ -146,13 +146,13 @@ const AppSettingsScreen: React.FunctionComponent<Props> = ({ navigation }) => {
         await exportBackup();
     };
 
-    const alertWithVersion = async () => {
+    const alertWithVersion = () => {
         Alert.alert('ScorePad with Rounds\n' +
             `v${appVersion} (${buildNumber})\n` +
             `${Platform.OS} ${Platform.Version}\n` +
             (process.env.EXPO_PUBLIC_FIREBASE_ANALYTICS)
         );
-        await logEvent('view_version');
+        void logEvent('view_version');
     };
 
     return (

@@ -1,6 +1,11 @@
-import { getAnalytics, logEvent as firebaseLogEvent } from '@react-native-firebase/analytics';
+import {
+  getAnalytics,
+  logEvent as firebaseLogEvent,
+  logScreenView as firebaseLogScreenView,
+  setUserProperty as firebaseSetUserProperty,
+} from '@react-native-firebase/analytics';
 
-import { logEvent } from './Analytics';
+import { logEvent, logScreenView, setUserProperty } from './Analytics';
 import logger from './Logger';
 
 // The wrapper's runtime behavior (sanitization, logging) is event-agnostic, so these
@@ -14,12 +19,15 @@ jest.mock('@react-native-firebase/analytics');
 // Mock Logger
 jest.mock('./Logger', () => ({
   info: jest.fn(),
+  error: jest.fn(),
 }));
 
 describe('Analytics', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (firebaseLogEvent as jest.Mock).mockResolvedValue(undefined);
+    (firebaseLogScreenView as jest.Mock).mockResolvedValue(undefined);
+    (firebaseSetUserProperty as jest.Mock).mockResolvedValue(undefined);
   });
 
   describe('logEvent', () => {
@@ -68,11 +76,17 @@ describe('Analytics', () => {
       expect(firebaseLogEvent).toHaveBeenCalledWith(expect.anything(), eventName, {});
     });
 
-    it('should propagate Firebase Analytics errors', async () => {
+    it('should absorb and report Firebase Analytics errors', async () => {
       const error = new Error('Firebase error');
       (firebaseLogEvent as jest.Mock).mockRejectedValue(error);
 
-      await expect(log('error_event')).rejects.toThrow('Firebase error');
+      await expect(log('error_event')).resolves.toBeUndefined();
+      expect(logger.error).toHaveBeenCalledWith(
+        'ANALYTICS_ERROR',
+        'event',
+        'error_event',
+        error
+      );
     });
 
     it('should strip null and undefined parameter values', async () => {
@@ -97,5 +111,31 @@ describe('Analytics', () => {
         objectParam: { nested: 'value' },
       });
     });
+  });
+
+  it('absorbs screen-view failures', async () => {
+    const error = new Error('Screen view failed');
+    (firebaseLogScreenView as jest.Mock).mockRejectedValue(error);
+
+    await expect(logScreenView('Game')).resolves.toBeUndefined();
+    expect(logger.error).toHaveBeenCalledWith(
+      'ANALYTICS_ERROR',
+      'screen_view',
+      'Game',
+      error
+    );
+  });
+
+  it('absorbs user-property failures', async () => {
+    const error = new Error('User property failed');
+    (firebaseSetUserProperty as jest.Mock).mockRejectedValue(error);
+
+    await expect(setUserProperty('color_scheme', 'dark')).resolves.toBeUndefined();
+    expect(logger.error).toHaveBeenCalledWith(
+      'ANALYTICS_ERROR',
+      'user_property',
+      'color_scheme',
+      error
+    );
   });
 });

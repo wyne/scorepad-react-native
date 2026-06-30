@@ -43,11 +43,11 @@ const AbstractPopupMenu: React.FC<Props> = (props) => {
     /**
      * Share Game
      */
-    const shareGameHandler = async () => {
+    const shareGameHandler = () => {
         props.setCurrentGameCallback();
         props.navigation.navigate('Share');
 
-        await logEvent('menu_share', {
+        void logEvent('menu_share', {
             round_count: roundCount,
             player_count: playerIds.length,
         });
@@ -56,11 +56,11 @@ const AbstractPopupMenu: React.FC<Props> = (props) => {
     /**
      * Edit Game
      */
-    const editGameHandler = async () => {
+    const editGameHandler = () => {
         props.setCurrentGameCallback();
         props.navigation.navigate('EditGame', { source: 'list_screen' });
 
-        await logEvent('menu_edit', {
+        void logEvent('menu_edit', {
             round_count: roundCount,
             player_count: playerIds.length,
         });
@@ -82,7 +82,7 @@ const AbstractPopupMenu: React.FC<Props> = (props) => {
     /**
      * Delete Game
      */
-    const deleteGameHandler = async () => {
+    const deleteGameHandler = () => {
         Alert.alert(
             'Delete Game',
             `Are you sure you want to delete ${gameTitle}?`,
@@ -102,7 +102,7 @@ const AbstractPopupMenu: React.FC<Props> = (props) => {
             { cancelable: false },
         );
 
-        await logEvent('delete_game', {
+        void logEvent('delete_game', {
             list_index: props.index,
             round_count: roundCount,
             player_count: playerIds.length,

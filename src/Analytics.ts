@@ -1,4 +1,9 @@
-import { getAnalytics, logEvent as firebaseLogEvent, setUserProperty as firebaseSetUserProperty } from '@react-native-firebase/analytics';
+import {
+    getAnalytics,
+    logEvent as firebaseLogEvent,
+    logScreenView as firebaseLogScreenView,
+    setUserProperty as firebaseSetUserProperty,
+} from '@react-native-firebase/analytics';
 
 import type { AnalyticsEventParams, AnalyticsUserProperty } from './AnalyticsEvents';
 import logger from './Logger';
@@ -22,8 +27,6 @@ export const logEvent = async <K extends keyof AnalyticsEventParams>(
     eventName: K,
     params?: AnalyticsEventParams[K],
 ): Promise<void> => {
-    const analytics = getAnalytics();
-
     const sanitized = Object.fromEntries(
         Object.entries({ ...params }).filter(
             ([, v]) => v != null && v !== undefined,
@@ -38,8 +41,22 @@ export const logEvent = async <K extends keyof AnalyticsEventParams>(
         '\x1b[0m' // Reset the color
     );
 
-    // Log the event to Firebase Analytics
-    await firebaseLogEvent(analytics, eventName, sanitized);
+    try {
+        await firebaseLogEvent(getAnalytics(), eventName, sanitized);
+    } catch (error) {
+        logger.error('ANALYTICS_ERROR', 'event', eventName, error);
+    }
+};
+
+export const logScreenView = async (screenName: string): Promise<void> => {
+    try {
+        await firebaseLogScreenView(getAnalytics(), {
+            screen_name: screenName,
+            screen_class: screenName,
+        });
+    } catch (error) {
+        logger.error('ANALYTICS_ERROR', 'screen_view', screenName, error);
+    }
 };
 
 /**
@@ -51,8 +68,6 @@ export const setUserProperty = async (
     name: AnalyticsUserProperty,
     value: string | null,
 ): Promise<void> => {
-    const analytics = getAnalytics();
-
     logger.info(
         '\x1b[35m', // magenta
         'USER_PROPERTY',
@@ -61,5 +76,9 @@ export const setUserProperty = async (
         '\x1b[0m'
     );
 
-    await firebaseSetUserProperty(analytics, name, value);
+    try {
+        await firebaseSetUserProperty(getAnalytics(), name, value);
+    } catch (error) {
+        logger.error('ANALYTICS_ERROR', 'user_property', name, error);
+    }
 };

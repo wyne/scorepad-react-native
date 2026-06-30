@@ -16,8 +16,8 @@ export const useAnalyticsUserProperties = () => {
     const playerIndex = useAppSelector(state => state.settings.showPlayerIndex);
     const colorScheme = useAppSelector(state => state.settings.colorScheme);
 
-    useEffect(() => { setUserProperty('keep_screen_awake', String(keepScreenAwake)); }, [keepScreenAwake]);
-    useEffect(() => { setUserProperty('point_particles', String(pointParticles)); }, [pointParticles]);
-    useEffect(() => { setUserProperty('player_index', String(playerIndex)); }, [playerIndex]);
-    useEffect(() => { setUserProperty('color_scheme', colorScheme); }, [colorScheme]);
+    useEffect(() => { void setUserProperty('keep_screen_awake', String(keepScreenAwake)); }, [keepScreenAwake]);
+    useEffect(() => { void setUserProperty('point_particles', String(pointParticles)); }, [pointParticles]);
+    useEffect(() => { void setUserProperty('player_index', String(playerIndex)); }, [playerIndex]);
+    useEffect(() => { void setUserProperty('color_scheme', colorScheme); }, [colorScheme]);
 };
