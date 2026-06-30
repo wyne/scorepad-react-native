@@ -226,8 +226,22 @@ describe('player sort order', () => {
             scores: [30],
         }));
         const ordered = selectAllPlayers({ players }).map((p) => p.id);
-        expect(ordered).toHaveLength(2);
-        expect(ordered).toEqual(expect.arrayContaining(['a', 'b']));
+        expect(ordered).toEqual(['a', 'b']);
+    });
+
+    it('uses player id as a deterministic tie-breaker regardless of insertion order', () => {
+        let players = playersReducer(undefined, playerAdd({
+            id: 'z',
+            playerName: 'Z',
+            scores: [30],
+        }));
+        players = playersReducer(players, playerAdd({
+            id: 'a',
+            playerName: 'A',
+            scores: [10, 20],
+        }));
+
+        expect(selectAllPlayers({ players }).map((player) => player.id)).toEqual(['a', 'z']);
     });
 });
 
