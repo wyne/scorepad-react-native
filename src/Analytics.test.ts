@@ -1,7 +1,6 @@
 import {
   getAnalytics,
   logEvent as firebaseLogEvent,
-  logScreenView as firebaseLogScreenView,
   setUserProperty as firebaseSetUserProperty,
 } from '@react-native-firebase/analytics';
 
@@ -26,7 +25,6 @@ describe('Analytics', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (firebaseLogEvent as jest.Mock).mockResolvedValue(undefined);
-    (firebaseLogScreenView as jest.Mock).mockResolvedValue(undefined);
     (firebaseSetUserProperty as jest.Mock).mockResolvedValue(undefined);
   });
 
@@ -115,7 +113,7 @@ describe('Analytics', () => {
 
   it('absorbs screen-view failures', async () => {
     const error = new Error('Screen view failed');
-    (firebaseLogScreenView as jest.Mock).mockRejectedValue(error);
+    (firebaseLogEvent as jest.Mock).mockRejectedValue(error);
 
     await expect(logScreenView('Game')).resolves.toBeUndefined();
     expect(logger.error).toHaveBeenCalledWith(

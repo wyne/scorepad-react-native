@@ -1,7 +1,6 @@
 import {
     getAnalytics,
     logEvent as firebaseLogEvent,
-    logScreenView as firebaseLogScreenView,
     setUserProperty as firebaseSetUserProperty,
 } from '@react-native-firebase/analytics';
 
@@ -50,7 +49,7 @@ export const logEvent = async <K extends keyof AnalyticsEventParams>(
 
 export const logScreenView = async (screenName: string): Promise<void> => {
     try {
-        await firebaseLogScreenView(getAnalytics(), {
+        await firebaseLogEvent(getAnalytics(), 'screen_view', {
             screen_name: screenName,
             screen_class: screenName,
         });
