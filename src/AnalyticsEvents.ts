@@ -113,6 +113,20 @@ export interface AnalyticsEventParams {
     backup_restore: Record<string, never>;
     /** User exported a backup of their data. */
     backup_export: Record<string, never>;
+
+    // ── Store review ────────────────────────────────────────────────────────
+    /**
+     * The native App Store review prompt was requested. Note this means we asked
+     * the OS, not that the user saw a dialog — iOS silently declines when it has
+     * shown too many prompts recently, and never tells us.
+     */
+    review_prompt: { game_count: number; days_since_last?: number };
+    /**
+     * We passed our own eligibility gates but no prompt was requested. Only
+     * logged for these outcomes — the ordinary "not eligible yet" case is not
+     * logged, since it would fire on nearly every navigation home.
+     */
+    review_prompt_skipped: { reason: 'unavailable' | 'error'; game_count: number };
 }
 
 export type AnalyticsEventName = keyof AnalyticsEventParams;
