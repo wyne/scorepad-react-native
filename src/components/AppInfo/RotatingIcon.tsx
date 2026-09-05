@@ -21,7 +21,7 @@ const TAP_RESET_TIMEOUT = 2000;
 const RotatingIcon: React.FunctionComponent = () => {
     const dispatch = useAppDispatch();
     const tapCountRef = useRef(0);
-    const resetTimerRef = useRef<ReturnType<typeof setTimeout>>();
+    const resetTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
     const installId = useAppSelector(state => state.settings.installId);
 

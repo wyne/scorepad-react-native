@@ -2,7 +2,7 @@ import React, { createContext, useContext, useRef } from 'react';
 
 import { BottomSheetModal } from '@gorhom/bottom-sheet';
 
-const GestureInfoSheetContext = createContext<React.RefObject<BottomSheetModal> | null>(null);
+const GestureInfoSheetContext = createContext<React.RefObject<BottomSheetModal | null> | null>(null);
 
 export const GestureInfoSheetContextProvider: React.FC<React.PropsWithChildren> = (props) => {
     const gestureInfoSheetRef = useRef<BottomSheetModal>(null);

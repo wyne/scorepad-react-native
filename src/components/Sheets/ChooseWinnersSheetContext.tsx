@@ -2,7 +2,7 @@ import React, { createContext, useContext, useRef } from 'react';
 
 import { BottomSheetModal } from '@gorhom/bottom-sheet';
 
-const ChooseWinnersSheetContext = createContext<React.RefObject<BottomSheetModal> | null>(null);
+const ChooseWinnersSheetContext = createContext<React.RefObject<BottomSheetModal | null> | null>(null);
 
 export const ChooseWinnersSheetContextProvider: React.FC<React.PropsWithChildren> = (props) => {
     const chooseWinnersSheetRef = useRef<BottomSheetModal>(null);

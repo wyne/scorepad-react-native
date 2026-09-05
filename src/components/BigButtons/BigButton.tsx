@@ -8,7 +8,7 @@ import { useTheme } from '../../theme';
 
 interface Props {
     onPress: () => void;
-    icon: string | JSX.Element;
+    icon: string | React.JSX.Element;
     text: string;
     color: string;
     animated?: boolean;
