@@ -99,6 +99,7 @@ export interface AnalyticsEventParams {
     // ── App-level ───────────────────────────────────────────────────────────
     game_list: {
         game_count: number;
+        /** Includes the launch being logged: a first open reports 1. 1-based since 3.0.5. */
         app_opens?: number;
         dev_menu_enabled?: boolean;
         install_id?: string;

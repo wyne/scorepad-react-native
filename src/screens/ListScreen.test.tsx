@@ -277,11 +277,70 @@ describe('ListScreen', () => {
 
         expect(logEvent).toHaveBeenCalledWith('game_list', {
             game_count: 1,
-            app_opens: 3,
+            app_opens: 4,
             dev_menu_enabled: true,
             install_id: 'test-install-id',
             rolling_game_counter: 1,
         });
+    });
+
+    // A brand-new install used to report install_id: undefined and app_opens: 0,
+    // because the event was built from the render closure rather than from the
+    // values the same effect was about to dispatch.
+    it('reports a generated install id and a 1-based app_opens on a first launch', () => {
+        const store = createMockStore({
+            settings: {
+                appOpens: 0,
+                devMenuEnabled: false,
+                installId: undefined,
+                rollingGameCounter: 0,
+            },
+            games: { entities: {}, ids: [] },
+            players: { entities: {}, ids: [] },
+        });
+
+        // eslint-disable-next-line @typescript-eslint/no-require-imports
+        const { logEvent } = require('../Analytics');
+
+        render(
+            <Provider store={store}>
+                <ListScreen navigation={mockNavigation} />
+            </Provider>
+        );
+
+        expect(logEvent).toHaveBeenCalledWith('game_list', expect.objectContaining({
+            app_opens: 1,
+            install_id: 'mock-uuid-123',
+        }));
+    });
+
+    // rolling_game_counter used to trail game_count by one render on the launch
+    // that first saw the new games.
+    it('reports a rolling counter that is never behind game_count', () => {
+        const store = createMockStore({
+            settings: {
+                appOpens: 2,
+                devMenuEnabled: false,
+                installId: 'test-install-id',
+                rollingGameCounter: 0,
+            },
+            games: { entities: { 'game-1': mockGame1, 'game-2': mockGame2 }, ids: ['game-1', 'game-2'] },
+            players: { entities: mockPlayers, ids: ['player-1', 'player-2', 'player-3', 'player-4'] },
+        });
+
+        // eslint-disable-next-line @typescript-eslint/no-require-imports
+        const { logEvent } = require('../Analytics');
+
+        render(
+            <Provider store={store}>
+                <ListScreen navigation={mockNavigation} />
+            </Provider>
+        );
+
+        expect(logEvent).toHaveBeenCalledWith('game_list', expect.objectContaining({
+            game_count: 2,
+            rolling_game_counter: 2,
+        }));
     });
 
     it('should update rolling game counter when current count is less than game ids length', () => {
