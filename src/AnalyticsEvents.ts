@@ -90,8 +90,6 @@ export interface AnalyticsEventParams {
     game_sheet_snap: { snap_point_index: number };
 
     // ── Menus / navigation ──────────────────────────────────────────────────
-    /** Header home/back button (the "bars" icon). */
-    navigate_home: Record<string, never>;
     menu_share: { round_count: number; player_count: number };
     menu_edit: { round_count: number; player_count: number };
     about_gestures: Record<string, never>;
