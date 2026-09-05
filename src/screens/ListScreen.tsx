@@ -52,26 +52,32 @@ const ListScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     );
 
     useEffect(() => {
+        // Resolve what this launch will report before logging it. Reading these
+        // straight from the render closure logged pre-dispatch state, so a
+        // brand-new install reported no install_id and app_opens: 0, and
+        // rolling_game_counter trailed game_count by a render.
+        const resolvedInstallId = installId ?? Crypto.randomUUID();
         if (installId === undefined) {
-            const installId = Crypto.randomUUID();
-            dispatch(setInstallId(installId));
+            dispatch(setInstallId(resolvedInstallId));
         }
 
         // Update rollingGameCounter if it is undefined or less than the current gameIds length
+        const resolvedRollingGameCounter = Math.max(rollingGameCounter ?? 0, gameIds.length);
         if (rollingGameCounter === undefined || rollingGameCounter < gameIds.length) {
             dispatch(setRollingGameCounter(gameIds.length));
         }
 
+        dispatch(increaseAppOpens());
+
         logEvent('game_list', {
             game_count: gameIds.length,
-            app_opens: appOpens,
+            // Counts this launch, so a first open reports 1 rather than 0.
+            app_opens: appOpens + 1,
             // Coerced: a settings backup predating the seeded default restores undefined.
             dev_menu_enabled: devMenuEnabled ?? false,
-            install_id: installId,
-            rolling_game_counter: rollingGameCounter,
+            install_id: resolvedInstallId,
+            rolling_game_counter: resolvedRollingGameCounter,
         });
-
-        dispatch(increaseAppOpens());
     }, []);
 
     return (
