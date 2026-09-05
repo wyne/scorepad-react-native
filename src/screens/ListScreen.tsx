@@ -65,7 +65,8 @@ const ListScreen: React.FunctionComponent<Props> = ({ navigation }) => {
         logEvent('game_list', {
             game_count: gameIds.length,
             app_opens: appOpens,
-            dev_menu_enabled: devMenuEnabled,
+            // Coerced: a settings backup predating the seeded default restores undefined.
+            dev_menu_enabled: devMenuEnabled ?? false,
             install_id: installId,
             rolling_game_counter: rollingGameCounter,
         });

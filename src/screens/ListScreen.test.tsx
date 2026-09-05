@@ -455,3 +455,33 @@ describe('ListScreen store review prompt', () => {
         expect(mockPromptForReview).toHaveBeenCalledTimes(1);
     });
 });
+
+describe('ListScreen dev_menu_enabled param', () => {
+    // logEvent strips undefined params, so an unseeded devMenuEnabled meant the
+    // flag reached analytics only when true — 4 of 1543 events in production.
+    it('reports dev_menu_enabled: false rather than omitting it', () => {
+        const store = createMockStore({
+            settings: {
+                appOpens: 1,
+                devMenuEnabled: undefined,
+                installId: 'test-install-id',
+                rollingGameCounter: 0,
+            },
+            games: { entities: {}, ids: [] },
+            players: { entities: {}, ids: [] },
+        });
+
+        // eslint-disable-next-line @typescript-eslint/no-require-imports
+        const { logEvent } = require('../Analytics');
+
+        render(
+            <Provider store={store}>
+                <ListScreen navigation={mockNavigation} />
+            </Provider>
+        );
+
+        expect(logEvent).toHaveBeenCalledWith('game_list', expect.objectContaining({
+            dev_menu_enabled: false,
+        }));
+    });
+});
