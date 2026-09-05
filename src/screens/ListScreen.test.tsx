@@ -19,6 +19,23 @@ jest.mock('@react-navigation/elements', () => ({
     useHeaderHeight: () => 0,
 }));
 
+// Focus effects run outside a NavigationContainer here: invoke the callback
+// once, standing in for the initial focus when the app opens on the list.
+const focusCallbacks: (() => void)[] = [];
+jest.mock('@react-navigation/native', () => ({
+    ...jest.requireActual('@react-navigation/native'),
+    useFocusEffect: (callback: () => void) => {
+        const { useEffect } = jest.requireActual('react');
+        focusCallbacks.push(callback);
+        useEffect(() => callback(), [callback]);
+    },
+}));
+
+jest.mock('../hooks/useStoreReviewPrompt', () => ({
+    useStoreReviewPrompt: () => mockPromptForReview,
+}));
+const mockPromptForReview = jest.fn();
+
 jest.mock('expo-blur', () => ({
     BlurView: ({ children, style }: { children: React.ReactNode; style: object }) => {
         const { View } = jest.requireActual('react-native');
@@ -401,5 +418,40 @@ describe('ListScreen', () => {
                 right: 12 + FAB_EDGE_MARGIN,
             })
         );
+    });
+});
+
+describe('ListScreen store review prompt', () => {
+    const renderList = () => {
+        const store = createMockStore({
+            settings: { appOpens: 3, devMenuEnabled: false, installId: 'existing-id', rollingGameCounter: 3 },
+            games: { entities: {}, ids: [] },
+            players: { entities: {}, ids: [] },
+        });
+        return render(
+            <Provider store={store}>
+                <ListScreen navigation={mockNavigation} />
+            </Provider>
+        );
+    };
+
+    beforeEach(() => {
+        focusCallbacks.length = 0;
+        mockPromptForReview.mockClear();
+    });
+
+    // The prompt must hang off a screen that actually mounts. The pre-3.0.4
+    // implementation was attached to BackButton, which the v3.0.0 refactor
+    // stopped rendering, so it could never fire.
+    it('does not prompt on the first focus (app launch)', () => {
+        renderList();
+        expect(mockPromptForReview).not.toHaveBeenCalled();
+    });
+
+    it('prompts when the list is focused again after a game', () => {
+        renderList();
+        expect(focusCallbacks.length).toBeGreaterThan(0);
+        focusCallbacks[focusCallbacks.length - 1]();
+        expect(mockPromptForReview).toHaveBeenCalledTimes(1);
     });
 });

@@ -1,7 +1,7 @@
-import React, { memo, useEffect } from 'react';
+import React, { memo, useCallback, useEffect, useRef } from 'react';
 
 import { useHeaderHeight } from '@react-navigation/elements';
-import { ParamListBase } from '@react-navigation/native';
+import { ParamListBase, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import * as Crypto from 'expo-crypto';
 import { Platform, StyleSheet, Text } from 'react-native';
@@ -14,6 +14,7 @@ import { increaseAppOpens, setInstallId, setRollingGameCounter } from '../../red
 import { logEvent } from '../Analytics';
 import FloatingActionButton, { FAB_BOTTOM_MARGIN, FAB_LIST_CLEARANCE, FAB_SIZE } from '../components/FloatingActionButton';
 import GameListItem from '../components/GameListItem';
+import { useStoreReviewPrompt } from '../hooks/useStoreReviewPrompt';
 import { useTheme } from '../theme';
 
 interface Props {
@@ -33,6 +34,22 @@ const ListScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     const listHeaderInset = Platform.OS === 'ios' ? headerHeight : 0;
     const insets = useSafeAreaInsets();
     const listBottomInset = insets.bottom + FAB_BOTTOM_MARGIN + FAB_SIZE + FAB_LIST_CLEARANCE;
+
+    // Ask for a review when the user comes back to the list from a game — the
+    // same moment the pre-3.0.0 prompt used, when it hung off the header's home
+    // button. The first focus is the app launching into the list, which is not
+    // that moment, so it is skipped.
+    const promptForReview = useStoreReviewPrompt();
+    const hasFocusedOnce = useRef(false);
+    useFocusEffect(
+        useCallback(() => {
+            if (!hasFocusedOnce.current) {
+                hasFocusedOnce.current = true;
+                return;
+            }
+            void promptForReview();
+        }, [promptForReview]),
+    );
 
     useEffect(() => {
         if (installId === undefined) {
