@@ -36,6 +36,9 @@ export const initialState: SettingsState = {
     lastUsedInteractionType: undefined,
     lastStoreReviewPrompt: 0,
     appOpens: 0,
+    // Seeded so the flag is always defined: logEvent strips undefined params,
+    // which meant dev_menu_enabled only ever reached analytics as true.
+    devMenuEnabled: false,
     installId: undefined,
     rollingGameCounter: 0,
     keepScreenAwake: false,
