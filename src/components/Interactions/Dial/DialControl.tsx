@@ -4,6 +4,7 @@ import * as Haptics from 'expo-haptics';
 import { Pressable, StyleSheet, Text, TextInput, TextInputProps, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
+    cancelAnimation,
     Easing,
     runOnJS,
     SharedValue,
@@ -127,7 +128,16 @@ const DialControl: React.FC<Props> = ({
                 withTiming(0.4, { duration: 750, easing: Easing.inOut(Easing.quad) }),
             ), -1, false,
         );
-    }, [showHint]);
+
+        // Both loops repeat forever; without this the arrows keep animating on
+        // the UI thread after the hint is dismissed and nothing reads them.
+        return () => {
+            cancelAnimation(arrowBob);
+            cancelAnimation(arrowOpacity);
+            arrowBob.value = 0;
+            arrowOpacity.value = 0.4;
+        };
+    }, [showHint, arrowBob, arrowOpacity]);
 
     const leftArrowStyle = useAnimatedStyle(() => ({
         opacity: arrowOpacity.value,
@@ -143,12 +153,7 @@ const DialControl: React.FC<Props> = ({
             withTiming(1.15, { duration: 55 }),
             withTiming(1, { duration: 140, easing: Easing.out(Easing.cubic) }),
         );
-    }, []);
-
-    // Cancel any in-progress dial long-press when the menu opens
-    useEffect(() => {
-        if (menuOpen) stopLongPress();
-    }, [menuOpen]);
+    }, [numScale]);
 
     const isSecondaryRef = useRef(isSecondary);
     isSecondaryRef.current = isSecondary;
@@ -168,7 +173,7 @@ const DialControl: React.FC<Props> = ({
     const svLastStep = useSharedValue(0);
     const svDidFlush = useSharedValue(true);
 
-    useEffect(() => { svInc.value = isSecondary ? addendTwo : addendOne; }, [isSecondary, addendOne, addendTwo]);
+    useEffect(() => { svInc.value = isSecondary ? addendTwo : addendOne; }, [isSecondary, addendOne, addendTwo, svInc]);
 
     const lpTimer = useRef<ReturnType<typeof setTimeout>>();
     useEffect(() => () => clearTimeout(lpTimer.current), []);
@@ -197,7 +202,7 @@ const DialControl: React.FC<Props> = ({
             pillScale.value = withTiming(1, { duration: 150 });
             pillOpacity.value = withTiming(1, { duration: 150 });
         }
-    }, [isSecondary]);
+    }, [pillActive, pillOpacity, pillScale]);
 
     const pillStyle = useAnimatedStyle(() => ({
         transform: [{ scale: pillScale.value }],
@@ -231,12 +236,18 @@ const DialControl: React.FC<Props> = ({
                 holdProgress.value = withTiming(0, { duration: 120, easing: Easing.out(Easing.cubic) });
             }
         }, SECONDARY_HOLD_ACTIVATION_MS);
-    }, [onToggleMode]);
+    }, [onToggleMode, holdProgress, svAccDeg, svHasMoved]);
 
     const stopLongPress = useCallback(() => {
         clearTimeout(lpTimer.current);
         holdProgress.value = withTiming(0, { duration: 200, easing: Easing.out(Easing.cubic) });
-    }, []);
+    }, [holdProgress]);
+
+    // Cancel any in-progress dial long-press when the menu opens.
+    // Declared after stopLongPress so the dependency array can reference it.
+    useEffect(() => {
+        if (menuOpen) stopLongPress();
+    }, [menuOpen, stopLongPress]);
 
     const handleBumpFeedback = useCallback(() => {
         if (isSecondaryRef.current) popNumber();
