@@ -77,8 +77,7 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
     });
 
     const wiggleValue = useRef(new Animated.Value(0)).current;
-    const animationRef = useRef<Animated.CompositeAnimation>(
-    );
+    const animationRef = useRef<Animated.CompositeAnimation | undefined>(undefined);
 
     const secondaryHoldStart = () => {
         Animated.timing(holdDuration, {

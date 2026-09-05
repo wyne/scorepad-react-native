@@ -170,7 +170,7 @@ const DialControl: React.FC<Props> = ({
 
     useEffect(() => { svInc.value = isSecondary ? addendTwo : addendOne; }, [isSecondary, addendOne, addendTwo]);
 
-    const lpTimer = useRef<ReturnType<typeof setTimeout>>();
+    const lpTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
     useEffect(() => () => clearTimeout(lpTimer.current), []);
 
     // Pill pulse animation
