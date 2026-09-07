@@ -10,9 +10,33 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
-      
+
   # Maintain dependencies for npm
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
       interval: "weekly"
+    ignore:
+      # Expo pins the versions of react-native and its native modules that a
+      # given SDK is tested against. Bumping them independently produces a
+      # binary that builds fine and fails at runtime -- react-native-pager-view
+      # was carried a full major version past SDK 57 this way.
+      #
+      # These are upgraded together by `npx expo install --fix` as part of an
+      # SDK upgrade, never one at a time. Everything else is still fair game.
+      - dependency-name: "expo"
+      - dependency-name: "expo-*"
+      - dependency-name: "@expo/*"
+      - dependency-name: "react-native"
+      - dependency-name: "react-native-gesture-handler"
+      - dependency-name: "react-native-pager-view"
+      - dependency-name: "react-native-reanimated"
+      - dependency-name: "react-native-safe-area-context"
+      - dependency-name: "react-native-screens"
+      - dependency-name: "react-native-svg"
+      - dependency-name: "react-native-view-shot"
+      - dependency-name: "react-native-webview"
+      - dependency-name: "@react-native-async-storage/async-storage"
+      - dependency-name: "@react-native-picker/picker"
+      - dependency-name: "react"
+      - dependency-name: "react-dom"
