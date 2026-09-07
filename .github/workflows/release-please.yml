@@ -19,6 +19,9 @@ on:
 permissions:
   contents: write
   pull-requests: write
+  # release-please creates and applies the `autorelease: pending` / `tagged`
+  # labels, which go through the issues API.
+  issues: write
 
 concurrency:
   group: release-please

@@ -156,7 +156,7 @@ A PR whose title does not parse produces no release at all, so `pr-checks.yml` e
 | Secret | Purpose |
 |--------|---------|
 | `EXPO_TOKEN` | EAS authentication for production builds. Already configured. |
-| `RELEASE_PLEASE_TOKEN` | Fine-grained PAT (`contents: write`, `pull-requests: write`). Optional but recommended: PRs opened with the default `GITHUB_TOKEN` do not trigger other workflows, so without it the release PR runs no checks until it is merged. |
+| `RELEASE_PLEASE_TOKEN` | Fine-grained PAT scoped to this repo, with **Contents: read and write**, **Pull requests: read and write**, and **Issues: read and write**. Optional but recommended: PRs opened with the default `GITHUB_TOKEN` do not trigger other workflows, so without it the release PR runs no checks until it is merged. Fine-grained PATs expire — when the release PR suddenly stops running checks, this is why. |
 
 **Preflight**, run automatically on the release PR and before every production build, and available locally:
 
