@@ -3,7 +3,7 @@ import { useCallback } from 'react';
 import * as StoreReview from 'expo-store-review';
 
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
-import { selectCurrentGame, selectLastStoreReviewPrompt } from '../../redux/selectors';
+import { selectLastStoreReviewPrompt } from '../../redux/selectors';
 import { setLastStoreReviewPrompt } from '../../redux/SettingsSlice';
 import { logEvent } from '../Analytics';
 import logger from '../Logger';
@@ -17,8 +17,11 @@ const MS_PER_DAY = 1000 * 60 * 60 * 24;
 
 export interface ReviewEligibility {
     gameCount: number;
-    /** Current round of the active game; 0 means the user hasn't scored anything yet. */
-    roundCurrent: number;
+    /**
+     * Whether the user has ever committed a score, via any gesture. False for
+     * someone who has created games but never actually played one.
+     */
+    hasScored: boolean;
     /** Epoch ms of the last prompt. 0 = never prompted. */
     lastPrompt: number;
     now: number;
@@ -29,11 +32,15 @@ export interface ReviewEligibility {
  * testable without a store, a renderer, or the native module.
  */
 export const shouldPromptForReview = (
-    { gameCount, roundCurrent, lastPrompt, now }: ReviewEligibility,
+    { gameCount, hasScored, lastPrompt, now }: ReviewEligibility,
 ): boolean => {
     if (gameCount < MIN_GAMES_FOR_REVIEW) return false;
-    // Don't ask someone who opened a game but never scored in it.
-    if (roundCurrent < 1) return false;
+    // Don't ask someone who has made games but never actually played one.
+    //
+    // This used to require the current game to have reached round 2, which was
+    // a poor proxy: single-round games are common (16% of all scored games),
+    // and a user who only ever plays those could never be asked.
+    if (!hasScored) return false;
 
     const daysSinceLastPrompt = (now - lastPrompt) / MS_PER_DAY;
     return daysSinceLastPrompt >= REVIEW_PROMPT_INTERVAL_DAYS;
@@ -55,14 +62,16 @@ export const shouldPromptForReview = (
  */
 export function useStoreReviewPrompt(): () => Promise<void> {
     const gameCount = useAppSelector(state => state.games.ids.length);
-    const roundCurrent = useAppSelector(state => selectCurrentGame(state)?.roundCurrent ?? 0);
+    // Set by every scoring gesture (swipe, half-tap, dial), so it is the
+    // engagement signal the round check was reaching for.
+    const hasScored = useAppSelector(state => state.settings.lastUsedInteractionType !== undefined);
     const lastPrompt = useAppSelector(selectLastStoreReviewPrompt);
     const dispatch = useAppDispatch();
 
     return useCallback(async () => {
         const now = Date.now();
 
-        if (!shouldPromptForReview({ gameCount, roundCurrent, lastPrompt, now })) return;
+        if (!shouldPromptForReview({ gameCount, hasScored, lastPrompt, now })) return;
 
         try {
             // iOS may decline to show anything (its own rate limit); Android
@@ -86,5 +95,5 @@ export function useStoreReviewPrompt(): () => Promise<void> {
             logger.error('STORE_REVIEW_ERROR', error);
             void logEvent('review_prompt_skipped', { reason: 'error', game_count: gameCount });
         }
-    }, [gameCount, roundCurrent, lastPrompt, dispatch]);
+    }, [gameCount, hasScored, lastPrompt, dispatch]);
 }
