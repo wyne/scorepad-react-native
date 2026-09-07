@@ -1,3 +1,5 @@
+import { version } from './package.json';
+
 const variant = process.env.APP_VARIANT;
 
 let packageName;
@@ -72,7 +74,7 @@ switch (variant) {
 export default {
   name: 'ScorePad with Rounds',
   slug: 'scorepad',
-  version: '3.0.4',
+  version,
   orientation: 'default',
   icon: icon,
   assetBundlePatterns: ['assets/*'],
@@ -97,7 +99,6 @@ export default {
     package: packageName,
     permissions: [],
     blockedPermissions: ['android.permission.ACTIVITY_RECOGNITION'],
-    versionCode: 88,
     googleServicesFile: './google-services.json',
   },
   userInterfaceStyle: 'automatic',

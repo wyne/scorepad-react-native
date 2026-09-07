@@ -1,0 +1,60 @@
+# Release automation.
+#
+# release-please keeps a standing "chore: release X.Y.Z" PR open against main,
+# recomputing the next version and the changelog from conventional-commit
+# titles on every push. Merging that PR is the entire release action: the tag
+# and GitHub release are created from the merge commit, so the version in
+# package.json, the tag, and the release can never disagree.
+#
+# app.config.js reads `version` from package.json, so the shipped app version
+# follows the same single source of truth. Build numbers are not managed here;
+# EAS owns those via appVersionSource: "remote".
+
+name: Release
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: release-please
+  cancel-in-progress: false
+
+jobs:
+  release-please:
+    name: Maintain release PR
+    runs-on: ubuntu-latest
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
+      version: ${{ steps.release.outputs.version }}
+    steps:
+      - name: Run release-please
+        id: release
+        uses: googleapis/release-please-action@v4
+        with:
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+          # A PR opened with the default GITHUB_TOKEN does not trigger other
+          # workflows, which would leave the release PR with no checks at all.
+          # RELEASE_PLEASE_TOKEN is a fine-grained PAT with contents:write and
+          # pull-requests:write; without it the release PR still works, it just
+          # runs unverified until merge.
+          token: ${{ secrets.RELEASE_PLEASE_TOKEN || secrets.GITHUB_TOKEN }}
+
+  build:
+    name: Production build
+    needs: release-please
+    if: needs.release-please.outputs.release_created == 'true'
+    # Called directly rather than via a `release: published` trigger, because
+    # releases created with GITHUB_TOKEN do not fire workflow events.
+    uses: ./.github/workflows/release-build.yml
+    with:
+      ref: ${{ needs.release-please.outputs.tag_name }}
+      tag: ${{ needs.release-please.outputs.tag_name }}
+      platform: all
+    secrets: inherit
