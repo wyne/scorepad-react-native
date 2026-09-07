@@ -1,0 +1,96 @@
+# Production build for the stores.
+#
+# Invoked automatically by release-please.yml once a release is cut, and
+# available on demand via workflow_dispatch for re-runs.
+#
+# This queues the build on EAS and returns; it does NOT submit to App Store
+# Connect or Google Play. Promote the finished binary from the EAS dashboard.
+
+name: Production Build
+
+on:
+  workflow_call:
+    inputs:
+      ref:
+        description: Git ref to build
+        required: true
+        type: string
+      tag:
+        description: Release tag, verified against package.json before building
+        required: true
+        type: string
+      platform:
+        description: ios, android, or all
+        required: false
+        type: string
+        default: all
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag to build (e.g. v3.0.4)
+        required: true
+        type: string
+      platform:
+        description: Platform to build
+        required: true
+        type: choice
+        default: all
+        options: [all, ios, android]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-build-${{ inputs.tag }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: EAS production build (${{ inputs.platform }})
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          # Build the tagged commit, not whatever main has drifted to.
+          ref: ${{ inputs.ref || inputs.tag }}
+          fetch-depth: 0
+
+      - name: Use Node.js 20.x
+        uses: actions/setup-node@v7
+        with:
+          node-version: 20.x
+          cache: 'npm'
+
+      - name: Set up EAS
+        uses: expo/expo-github-action@v9
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Release preflight
+        run: scripts/release-preflight.sh build "${{ inputs.tag }}"
+
+      - name: Queue production build
+        run: |
+          eas build \
+            --profile production \
+            --platform "${{ inputs.platform }}" \
+            --non-interactive \
+            --no-wait \
+            --message "${{ inputs.tag }} (${{ github.sha }})"
+
+      - name: Summary
+        run: |
+          {
+            echo "### Production build queued"
+            echo
+            echo "- Tag: \`${{ inputs.tag }}\`"
+            echo "- Platform: \`${{ inputs.platform }}\`"
+            echo "- Commit: \`${{ github.sha }}\`"
+            echo
+            echo "Track progress and submit to the stores from the [EAS dashboard](https://expo.dev/accounts/wyne/projects/scorepad/builds)."
+          } >> "$GITHUB_STEP_SUMMARY"

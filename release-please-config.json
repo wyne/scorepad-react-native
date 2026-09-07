@@ -1,0 +1,32 @@
+{
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
+  "packages": {
+    ".": {
+      "release-type": "node",
+      "package-name": "scorepad",
+      "changelog-path": "CHANGELOG.md",
+      "include-component-in-tag": false,
+      "include-v-in-tag": true,
+      "bump-minor-pre-major": false,
+      "draft": false,
+      "prerelease": false,
+      "pull-request-title-pattern": "chore: release ${version}",
+      "pull-request-header": "Merging this PR bumps `package.json` to the version below, tags the merge commit, and publishes the GitHub release. `app.config.js` reads its `version` from `package.json`, so the shipped app version follows automatically.",
+      "changelog-sections": [
+        { "type": "feat", "section": "Features" },
+        { "type": "fix", "section": "Bug Fixes" },
+        { "type": "perf", "section": "Performance" },
+        { "type": "revert", "section": "Reverts" },
+        { "type": "refactor", "section": "Refactors" },
+        { "type": "docs", "section": "Documentation" },
+        { "type": "build", "section": "Infrastructure" },
+        { "type": "ci", "section": "Infrastructure" },
+        { "type": "deps", "section": "Dependencies" },
+        { "type": "chore", "section": "Miscellaneous" },
+        { "type": "test", "section": "Tests", "hidden": true },
+        { "type": "style", "section": "Styling", "hidden": true }
+      ]
+    }
+  },
+  "last-release-sha": "904d676f0fdaa2442c3a316738075bdc014d7944"
+}

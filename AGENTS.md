@@ -59,7 +59,8 @@ npx eas build --profile preview --platform android       # Physical device
 npx eas build --profile production --platform android    # Store submission
 ```
 
-Before a production build, bump the user-facing `version` in `app.config.js`:
+Production builds are cut by CI when a release is merged — see [Releases](#releases).
+Do not bump the version by hand. To build production locally anyway:
 
 ```bash
 npx expo-doctor
@@ -121,14 +122,52 @@ npx eas build --platform android
   - Analytics: `-FIRAnalyticsDebugEnabled`
   - Crashlytics: `-FIRDebugEnabled`
 
-## Version Management
+## Releases
 
-App versions are managed via EAS **remote** version source:
+Releases are automated with [release-please](https://github.com/googleapis/release-please). Nothing about a release is typed by hand.
 
-- **User-facing version** (`version` in `app.config.js`): bump manually before each store submission.
-- **Build numbers** (`versionCode` / `buildNumber`): managed remotely by EAS. Set to `autoIncrement: true` on the production profile in `eas.json`. The build number auto-increments on every production build for the same user-facing version.
+**How it works**
 
-To sync or reset the remote build number (e.g. after a rollback or when adopting remote for the first time):
+1. Every push to `main` updates a standing `chore: release X.Y.Z` pull request. The version and the changelog are derived from conventional-commit titles since the last release.
+2. Merging that PR tags the merge commit `vX.Y.Z` and publishes the GitHub release. Because the tag is created from the same commit that carries the version bump, the file, tag, and release cannot disagree.
+3. The release then queues an EAS production build for both platforms.
+4. **Submission to the App Store / Play Console stays manual** — promote the finished binary from the [EAS dashboard](https://expo.dev/accounts/wyne/projects/scorepad/builds).
+
+**Commit titles matter.** The next version is computed from them:
+
+| Prefix | Effect |
+|--------|--------|
+| `fix:` | patch bump (3.0.4 → 3.0.5) |
+| `feat:` | minor bump (3.0.4 → 3.1.0) |
+| `feat!:` or `BREAKING CHANGE:` footer | major bump (3.0.4 → 4.0.0) |
+| `chore:`, `docs:`, `ci:`, `build:`, `refactor:` | no bump; appears in the changelog |
+
+A PR whose title does not parse produces no release at all, so `pr-checks.yml` enforces the format on every PR.
+
+**Version sources**
+
+- **User-facing version**: `version` in `package.json`, the single source of truth. `app.config.js` imports it, so the two can never drift. release-please owns this field — do not edit it manually.
+- **Build numbers** (`versionCode` / `buildNumber`): managed remotely by EAS via `appVersionSource: "remote"` and `autoIncrement: true` on the production profile. They are deliberately absent from `app.config.js`; the build number auto-increments on every production build for the same user-facing version.
+
+**Manual rebuild** of an existing tag: run the *Production Build* workflow from the Actions tab with the tag name.
+
+**Required secrets**
+
+| Secret | Purpose |
+|--------|---------|
+| `EXPO_TOKEN` | EAS authentication for production builds. Already configured. |
+| `RELEASE_PLEASE_TOKEN` | Fine-grained PAT scoped to this repo, with **Contents: read and write**, **Pull requests: read and write**, and **Issues: read and write**. Optional but recommended: PRs opened with the default `GITHUB_TOKEN` do not trigger other workflows, so without it the release PR runs no checks until it is merged. Fine-grained PATs expire — when the release PR suddenly stops running checks, this is why. |
+
+**Preflight**, run automatically on the release PR and before every production build, and available locally:
+
+```bash
+scripts/release-preflight.sh pr            # version not yet tagged
+scripts/release-preflight.sh build v3.0.5  # tag matches package.json
+```
+
+It checks that `eas.json` is strict JSON, that `app.config.js` resolves to the `package.json` version, that no build number is hardcoded, that the tag and version agree, and that `expo-doctor` is clean.
+
+**Remote build numbers.** To sync or reset one (e.g. after a rollback or when adopting remote for the first time):
 
 ```bash
 eas build:version:set

@@ -10,6 +10,38 @@ on:
     branches-ignore: [ "main", "beta" ]
 
 jobs:
+  pr-title:
+    name: Conventional PR title
+    # release-please derives the next version and the changelog from merged
+    # commit titles, so a non-conforming title silently means "no release".
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
+    steps:
+      - name: Validate PR title
+        uses: amannn/action-semantic-pull-request@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          types: |
+            feat
+            fix
+            perf
+            revert
+            refactor
+            docs
+            build
+            ci
+            chore
+            test
+            style
+          requireScope: false
+          subjectPattern: ^(?![A-Z]).+$
+          subjectPatternError: |
+            The subject "{subject}" of pull request "{title}" should start with a
+            lowercase character (it becomes a changelog entry verbatim).
+
   lint-and-test:
     name: Lint & Test
     runs-on: ubuntu-latest
