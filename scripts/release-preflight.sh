@@ -77,10 +77,12 @@ case "$MODE" in
 esac
 
 # 5. Expo's own project health checks.
-if npx expo-doctor >/dev/null 2>&1; then
+DOCTOR_OUT="$(npx expo-doctor 2>&1)" && DOCTOR_RC=0 || DOCTOR_RC=$?
+if [ "$DOCTOR_RC" -eq 0 ]; then
     pass "expo-doctor"
 else
-    fail "expo-doctor reported issues (run 'npx expo-doctor' for detail)"
+    fail "expo-doctor reported issues"
+    printf '%s\n' "$DOCTOR_OUT" | sed 's/^/        /' >&2
 fi
 
 if [ "$FAILED" -ne 0 ]; then
