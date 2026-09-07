@@ -11,6 +11,7 @@ import gamesReducer from '../../redux/GamesSlice';
 import playersReducer from '../../redux/PlayersSlice';
 import settingsReducer from '../../redux/SettingsSlice';
 import { logEvent } from '../Analytics';
+import { InteractionType } from '../components/Interactions/InteractionType';
 
 import ListScreen from './ListScreen';
 
@@ -124,8 +125,8 @@ const makeGame = (id: string, roundCurrent: number) => ({
  * a current game they have actually played past the first round, and no prior
  * prompt on record.
  */
-const eligibleState = (overrides: { roundCurrent?: number; lastStoreReviewPrompt?: number } = {}) => {
-    const { roundCurrent = 2, lastStoreReviewPrompt = 0 } = overrides;
+const eligibleState = (overrides: { hasScored?: boolean; lastStoreReviewPrompt?: number } = {}) => {
+    const { hasScored = true, lastStoreReviewPrompt = 0 } = overrides;
     return {
         settings: {
             appOpens: 5,
@@ -134,12 +135,14 @@ const eligibleState = (overrides: { roundCurrent?: number; lastStoreReviewPrompt
             rollingGameCounter: 3,
             currentGameId: 'g1',
             lastStoreReviewPrompt,
+            lastUsedInteractionType: hasScored ? InteractionType.SwipeVertical : undefined,
         },
         games: {
             entities: {
-                g1: makeGame('g1', roundCurrent),
-                g2: makeGame('g2', 1),
-                g3: makeGame('g3', 1),
+                // All single-round: the previous gate would have blocked these.
+                g1: makeGame('g1', 0),
+                g2: makeGame('g2', 0),
+                g3: makeGame('g3', 0),
             },
             ids: ['g1', 'g2', 'g3'],
         },
@@ -214,9 +217,8 @@ describe('ListScreen review prompt (integration)', () => {
         expect(StoreReview.requestReview).not.toHaveBeenCalled();
     });
 
-    it('stays silent for a user still on the first round of their current game', async () => {
-        // roundCurrent is 0-indexed, so 0 means they have not advanced a round.
-        renderList(eligibleState({ roundCurrent: 0 }));
+    it('stays silent for a user who has made games but never scored', async () => {
+        renderList(eligibleState({ hasScored: false }));
 
         refocus();
 
