@@ -66,6 +66,7 @@ describe('shouldPromptForReview', () => {
 
 interface StoreOpts {
     gameCount?: number;
+    rollingGameCounter?: number;
     hasScored?: boolean;
     lastStoreReviewPrompt?: number;
 }
@@ -86,6 +87,7 @@ const createStore = (opts: StoreOpts = {}) => {
                 lastUsedInteractionType: (opts.hasScored ?? true)
                     ? InteractionType.SwipeVertical
                     : undefined,
+                rollingGameCounter: opts.rollingGameCounter,
             },
             games: { entities, ids },
             players: { entities: { p1: { id: 'p1', playerName: 'P1', scores: [0] } }, ids: ['p1'] },
@@ -131,6 +133,29 @@ describe('useStoreReviewPrompt', () => {
         await result.current();
 
         expect(logEvent).toHaveBeenCalledWith('review_prompt', { game_count: 5, days_since_last: 120 });
+    });
+
+    // 6% of users have played three or more games but keep fewer than three,
+    // because they delete each one as it finishes. Counting the live list
+    // rather than the high-water mark made them permanently unaskable.
+    it('counts games ever played, not games still in the list', async () => {
+        const store = createStore({ gameCount: 1, rollingGameCounter: 8 });
+        const { result } = renderPrompt(store);
+
+        await result.current();
+
+        expect(StoreReview.requestReview).toHaveBeenCalledTimes(1);
+        expect(logEvent).toHaveBeenCalledWith('review_prompt', { game_count: 8, days_since_last: undefined });
+    });
+
+    it('falls back to the live count when the rolling counter is unseeded', async () => {
+        const store = createStore({ gameCount: 5, rollingGameCounter: undefined });
+        const { result } = renderPrompt(store);
+
+        await result.current();
+
+        expect(StoreReview.requestReview).toHaveBeenCalledTimes(1);
+        expect(logEvent).toHaveBeenCalledWith('review_prompt', { game_count: 5, days_since_last: undefined });
     });
 
     it('does nothing when the user is not eligible', async () => {

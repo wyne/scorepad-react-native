@@ -119,13 +119,21 @@ export interface AnalyticsEventParams {
      * the OS, not that the user saw a dialog — iOS silently declines when it has
      * shown too many prompts recently, and never tells us.
      */
-    review_prompt: { game_count: number; days_since_last?: number };
+    review_prompt: {
+        /** High-water game count (rolling_game_counter), not the current list length. */
+        game_count: number;
+        days_since_last?: number;
+    };
     /**
      * We passed our own eligibility gates but no prompt was requested. Only
      * logged for these outcomes — the ordinary "not eligible yet" case is not
      * logged, since it would fire on nearly every navigation home.
      */
-    review_prompt_skipped: { reason: 'unavailable' | 'error'; game_count: number };
+    review_prompt_skipped: {
+        reason: 'unavailable' | 'error';
+        /** High-water game count (rolling_game_counter), not the current list length. */
+        game_count: number;
+    };
 }
 
 export type AnalyticsEventName = keyof AnalyticsEventParams;

@@ -16,6 +16,10 @@ export const REVIEW_PROMPT_INTERVAL_DAYS = 90;
 const MS_PER_DAY = 1000 * 60 * 60 * 24;
 
 export interface ReviewEligibility {
+    /**
+     * Games ever accumulated, not games currently in the list. See the hook for
+     * why the distinction matters.
+     */
     gameCount: number;
     /**
      * Whether the user has ever committed a score, via any gesture. False for
@@ -61,7 +65,15 @@ export const shouldPromptForReview = (
  * on a user who was never shown anything.
  */
 export function useStoreReviewPrompt(): () => Promise<void> {
-    const gameCount = useAppSelector(state => state.games.ids.length);
+    // High-water mark rather than the live list length: someone who deletes a
+    // game once it is finished should not be pushed back below the threshold.
+    // 6% of users sit in exactly that position -- three or more games played,
+    // fewer than three kept -- and could never be asked. rollingGameCounter is
+    // maintained by ListScreen; fall back to the live count until it is seeded.
+    const gameCount = useAppSelector(state => Math.max(
+        state.settings.rollingGameCounter ?? 0,
+        state.games.ids.length,
+    ));
     // Set by every scoring gesture (swipe, half-tap, dial), so it is the
     // engagement signal the round check was reaching for.
     const hasScored = useAppSelector(state => state.settings.lastUsedInteractionType !== undefined);
