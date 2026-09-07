@@ -1,10 +1,16 @@
-# Production build for the stores.
+# Production build and store submission.
 #
 # Invoked automatically by release-please.yml once a release is cut, and
 # available on demand via workflow_dispatch for re-runs.
 #
-# This queues the build on EAS and returns; it does NOT submit to App Store
-# Connect or Google Play. Promote the finished binary from the EAS dashboard.
+# This queues the build on EAS and returns. EAS submits the binary once the
+# build finishes: iOS to App Store Connect (awaiting review), Android to the
+# Play internal testing track. Neither reaches users without a human promoting
+# it -- releasing on the App Store, or promoting off the internal track in the
+# Play Console.
+#
+# Submission credentials live on EAS servers, not in GitHub secrets. Set them up
+# once with `eas credentials`; CI authenticates with EXPO_TOKEN alone.
 
 name: Production Build
 
@@ -74,23 +80,39 @@ jobs:
       - name: Release preflight
         run: scripts/release-preflight.sh build "${{ inputs.tag }}"
 
-      - name: Queue production build
+      - name: Queue production build and submission
         run: |
+          # --auto-submit submits when the build completes, on EAS's side, so it
+          # composes with --no-wait: this job queues the work and exits rather
+          # than holding a runner for the length of a native build.
+          #
+          # Neither store release is automatic from here. iOS lands in App Store
+          # Connect awaiting review; Android lands on the internal track (set in
+          # eas.json) and has to be promoted in the Play Console.
           eas build \
             --profile production \
             --platform "${{ inputs.platform }}" \
             --non-interactive \
             --no-wait \
+            --auto-submit \
+            --what-to-test "${{ inputs.tag }}" \
             --message "${{ inputs.tag }} (${{ github.sha }})"
 
       - name: Summary
         run: |
           {
-            echo "### Production build queued"
+            echo "### Production build queued, submission to follow"
             echo
             echo "- Tag: \`${{ inputs.tag }}\`"
             echo "- Platform: \`${{ inputs.platform }}\`"
             echo "- Commit: \`${{ github.sha }}\`"
             echo
-            echo "Track progress and submit to the stores from the [EAS dashboard](https://expo.dev/accounts/wyne/projects/scorepad/builds)."
+            echo "EAS submits automatically once the build finishes."
+            echo
+            echo "| Store | Lands in | Still needs you to |"
+            echo "|-------|----------|--------------------|"
+            echo "| App Store | App Store Connect, awaiting review | Submit for review, then release |"
+            echo "| Play | Internal testing track | Promote to production |"
+            echo
+            echo "Progress: [EAS dashboard](https://expo.dev/accounts/wyne/projects/scorepad/builds)."
           } >> "$GITHUB_STEP_SUMMARY"

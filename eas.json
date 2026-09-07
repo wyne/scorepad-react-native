@@ -29,6 +29,7 @@
   "submit": {
     "production": {
       "android": {
+        "track": "internal",
         "changesNotSentForReview": false
       },
       "ios": {

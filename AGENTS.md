@@ -131,7 +131,12 @@ Releases are automated with [release-please](https://github.com/googleapis/relea
 1. Every push to `main` updates a standing `chore: release X.Y.Z` pull request. The version and the changelog are derived from conventional-commit titles since the last release.
 2. Merging that PR tags the merge commit `vX.Y.Z` and publishes the GitHub release. Because the tag is created from the same commit that carries the version bump, the file, tag, and release cannot disagree.
 3. The release then queues an EAS production build for both platforms.
-4. **Submission to the App Store / Play Console stays manual** — promote the finished binary from the [EAS dashboard](https://expo.dev/accounts/wyne/projects/scorepad/builds).
+4. EAS submits automatically once each build finishes. **Neither store releases without you**: iOS lands in App Store Connect awaiting review, Android on the Play internal testing track.
+
+| Store | Auto-submitted to | Still needs you to |
+|-------|-------------------|--------------------|
+| App Store | App Store Connect, awaiting review | Submit for review, then release |
+| Google Play | Internal testing track (`track: "internal"` in `eas.json`) | Promote to production |
 
 **Commit titles matter.** The next version is computed from them:
 
@@ -155,8 +160,17 @@ A PR whose title does not parse produces no release at all, so `pr-checks.yml` e
 
 | Secret | Purpose |
 |--------|---------|
-| `EXPO_TOKEN` | EAS authentication for production builds. Already configured. |
+| `EXPO_TOKEN` | EAS authentication for builds *and* submissions. Already configured. |
 | `RELEASE_PLEASE_TOKEN` | Fine-grained PAT scoped to this repo, with **Contents: read and write**, **Pull requests: read and write**, and **Issues: read and write**. Optional but recommended: PRs opened with the default `GITHUB_TOKEN` do not trigger other workflows, so without it the release PR runs no checks until it is merged. Fine-grained PATs expire — when the release PR suddenly stops running checks, this is why. |
+
+**Store credentials are not GitHub secrets.** They live on EAS servers, so CI needs nothing beyond `EXPO_TOKEN`. Set them up once, interactively, from a local checkout:
+
+```bash
+eas credentials --platform ios       # App Store Connect API key
+eas credentials --platform android   # Google Play service account JSON
+```
+
+For iOS choose an App Store Connect API Key rather than an app-specific password: the password route is tied to your Apple ID's 2FA and breaks when it rotates. For Android, create a service account in the Google Play Console (Users and permissions → grant it release permissions) and upload its JSON key to EAS.
 
 **Preflight**, run automatically on the release PR and before every production build, and available locally:
 
