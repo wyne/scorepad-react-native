@@ -167,6 +167,8 @@ scripts/release-preflight.sh build v3.0.5  # tag matches package.json
 
 It checks that `eas.json` is strict JSON, that `app.config.js` resolves to the `package.json` version, that no build number is hardcoded, that the tag and version agree, and that `expo-doctor` is clean.
 
+**Seeding.** `.release-please-manifest.json` records the last *shipped* version and `last-release-sha` the commit it shipped from — `3.0.4` at `127ba46`, per EAS production build #59. Historical tags are inconsistent (`v.2.1.3`, `v2.2.2.57`) and `v3.0.4` was never tagged, so the sha is authoritative rather than the tag list. Neither field needs touching again; release-please maintains both.
+
 **Remote build numbers.** To sync or reset one (e.g. after a rollback or when adopting remote for the first time):
 
 ```bash
