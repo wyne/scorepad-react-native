@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 
 import analytics from '@react-native-firebase/analytics';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
-import { View, useColorScheme } from 'react-native';
+import { View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { MenuProvider } from 'react-native-popup-menu';
 import { configureReanimatedLogger, ReanimatedLogLevel } from 'react-native-reanimated';
@@ -21,6 +21,7 @@ import { GameSheetContextProvider } from './src/components/Sheets/GameSheetConte
 import { PointValuesSheetContextProvider } from './src/components/Sheets/PointValuesSheetContext';
 import { SplashOverlay } from './src/components/SplashOverlay';
 import { Navigation } from './src/Navigation';
+import { useTheme } from './src/theme';
 
 // Keep the native splash screen up until our animated SplashOverlay mounts and
 // calls hideAsync(). Without this, Expo auto-hides the native splash on first JS
@@ -31,32 +32,50 @@ if (process.env.EXPO_PUBLIC_FIREBASE_ANALYTICS == 'false') {
     analytics().setAnalyticsCollectionEnabled(false);
 }
 
-export default function App() {
-    const colorScheme = useColorScheme();
-    const bgColor = colorScheme === 'dark' ? '#000000' : '#F2F2F7';
+const AppContent = () => {
+    const theme = useTheme();
+    const [appReady, setAppReady] = useState(false);
     const [splashDone, setSplashDone] = useState(false);
+    const handleBeforeLift = useCallback(() => setAppReady(true), []);
+    const handleSplashDone = useCallback(() => setSplashDone(true), []);
 
     return (
-        <View style={{ flex: 1, backgroundColor: bgColor }}>
+        <View style={{ flex: 1, backgroundColor: theme.background }}>
             <SafeAreaProvider>
                 <GestureHandlerRootView style={{ flex: 1 }}>
-                    <Provider store={store}>
-                        <GameSheetContextProvider>
-                            <MenuProvider>
-                                <PointValuesSheetContextProvider>
-                                    <ChooseWinnersSheetContextProvider>
-                                    <PersistGate loading={null} persistor={persistor}>
+                    <GameSheetContextProvider>
+                        <MenuProvider>
+                            <PointValuesSheetContextProvider>
+                                <ChooseWinnersSheetContextProvider>
+                                    <PersistGate
+                                        loading={null}
+                                        onBeforeLift={handleBeforeLift}
+                                        persistor={persistor}
+                                    >
                                         <StatusBar />
                                         <Navigation />
                                     </PersistGate>
-                                    </ChooseWinnersSheetContextProvider>
-                                </PointValuesSheetContextProvider>
-                            </MenuProvider>
-                        </GameSheetContextProvider>
-                    </Provider>
+                                </ChooseWinnersSheetContextProvider>
+                            </PointValuesSheetContextProvider>
+                        </MenuProvider>
+                    </GameSheetContextProvider>
                 </GestureHandlerRootView>
             </SafeAreaProvider>
-            {!splashDone && <SplashOverlay onDone={() => setSplashDone(true)} />}
+            {!splashDone && (
+                <SplashOverlay
+                    backgroundColor={theme.background}
+                    onDone={handleSplashDone}
+                    ready={appReady}
+                />
+            )}
         </View>
+    );
+};
+
+export default function App() {
+    return (
+        <Provider store={store}>
+            <AppContent />
+        </Provider>
     );
 };
