@@ -48,8 +48,10 @@ jest.mock('@expo/ui/swift-ui', () => {
 
 jest.mock('@expo/ui/swift-ui/modifiers', () => ({
     buttonStyle: jest.fn(),
+    contentShape: jest.fn(),
     frame: jest.fn(),
     glassEffect: jest.fn(),
+    shapes: { circle: jest.fn() },
 }));
 
 // Read through a getter: the component reads LIQUID_GLASS at render time, so

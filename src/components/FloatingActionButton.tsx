@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { Button, Host, Image, Menu } from '@expo/ui/swift-ui';
-import { buttonStyle, frame, glassEffect } from '@expo/ui/swift-ui/modifiers';
+import { buttonStyle, contentShape, frame, glassEffect, shapes } from '@expo/ui/swift-ui/modifiers';
 import { MenuAction, MenuView } from '@react-native-menu/menu';
 import { ParamListBase } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -85,6 +85,12 @@ const FloatingActionButton: React.FunctionComponent<Props> = ({ navigation }) =>
                                         glass: { variant: 'regular', interactive: true, tint: theme.tint },
                                         shape: 'circle',
                                     }),
+                                    // Without this the menu's dismissal morphs
+                                    // back into the glyph's own bounds — a small
+                                    // square — rather than the button. The
+                                    // preview shape has to be stated separately
+                                    // from the glass shape.
+                                    contentShape(shapes.circle(), ['interaction', 'contextMenuPreview']),
                                 ]}
                             />
                         }
