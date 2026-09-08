@@ -89,13 +89,17 @@ jobs:
           # Neither store release is automatic from here. iOS lands in App Store
           # Connect awaiting review; Android lands on the internal track (set in
           # eas.json) and has to be promoted in the Play Console.
+          #
+          # No --what-to-test: eas-cli sends it as the iOS submission's
+          # `changelog`, which EAS gates to Enterprise plans, and the whole
+          # submission is rejected rather than the field being dropped. Set
+          # TestFlight's "What to Test" in App Store Connect instead.
           eas build \
             --profile production \
             --platform "${{ inputs.platform }}" \
             --non-interactive \
             --no-wait \
             --auto-submit \
-            --what-to-test "${{ inputs.tag }}" \
             --message "${{ inputs.tag }} (${{ github.sha }})"
 
       - name: Summary
