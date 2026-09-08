@@ -7,7 +7,7 @@ import { Provider } from 'react-redux';
 
 import gamesReducer, { roundNext } from '../../../../redux/GamesSlice';
 import playersReducer, { playerRoundScoreIncrement } from '../../../../redux/PlayersSlice';
-import settingsReducer, { initialState as settingsInitialState } from '../../../../redux/SettingsSlice';
+import settingsReducer, { initialState as settingsInitialState, setAddendOne } from '../../../../redux/SettingsSlice';
 
 import SwipeVertical from './Swipe';
 
@@ -27,7 +27,7 @@ jest.mock('react-native-reanimated', () => ({
 
 jest.mock('../../../Analytics', () => ({ logEvent: function () { } }));
 jest.mock('expo-haptics', () => ({
-  impactAsync: function () { },
+  impactAsync: jest.fn(),
   ImpactFeedbackStyle: { Light: 'Light', Medium: 'Medium', Heavy: 'Heavy' },
 }));
 
@@ -58,6 +58,7 @@ beforeEach(() => {
   (globalThis as any).__ph = {};
   (globalThis as any).__react = undefined;
   jest.useRealTimers();
+  jest.clearAllMocks();
 });
 
 const renderSwipe = ({ onRender }: { onRender?: (id: string) => void; } = {}) => {
@@ -70,12 +71,12 @@ const renderSwipe = ({ onRender }: { onRender?: (id: string) => void; } = {}) =>
     },
   });
   const dispatch = jest.spyOn(store, 'dispatch');
-  render(
+  const view = render(
     <Provider store={store}>
       <SwipeVertical fontColor="white" index={0} playerId="player-1" onRender={onRender}><></></SwipeVertical>
     </Provider>
   );
-  return { dispatch, store };
+  return { dispatch, store, unmount: view.unmount };
 };
 
 const triggerReaction = (totalOffset: number, prevTotalOffset: number) => {
@@ -184,6 +185,49 @@ describe('SwipeVertical', () => {
     expect(dispatch).toHaveBeenCalledWith(
       playerRoundScoreIncrement('player-1', 0, 2)
     );
+  });
+
+  it('cancels the original hold timer after a re-render', () => {
+    const { dispatch, store } = renderSwipe();
+    jest.useFakeTimers();
+
+    (globalThis as any).__ph.onBegin();
+    act(() => {
+      store.dispatch(setAddendOne(2));
+    });
+
+    const rerenderedPan = (globalThis as any).__ph;
+    rerenderedPan.onUpdate({ translationY: -2 });
+    triggerReaction(2, 0);
+    act(() => {
+      jest.advanceTimersByTime(401);
+    });
+
+    rerenderedPan.onUpdate({ translationY: -100 });
+    triggerReaction(100, 2);
+    act(() => {
+      rerenderedPan.onEnd({ translationY: -100 });
+      rerenderedPan.onFinalize();
+    });
+
+    expect(dispatch).toHaveBeenCalledWith(
+      playerRoundScoreIncrement('player-1', 0, 4)
+    );
+  });
+
+  it('clears the hold timer when unmounted', () => {
+    const { unmount } = renderSwipe();
+    const ph = (globalThis as any).__ph;
+    jest.useFakeTimers();
+
+    ph.onBegin();
+    unmount();
+    act(() => {
+      jest.advanceTimersByTime(401);
+    });
+
+    const haptics = jest.requireMock('expo-haptics');
+    expect(haptics.impactAsync).not.toHaveBeenCalled();
   });
 
   it('does not re-render solely because the current round changes', () => {

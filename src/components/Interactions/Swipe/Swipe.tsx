@@ -60,15 +60,9 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
 
     const secondaryHoldTime = 500;
     const holdDuration = useRef(new Animated.Value(0)).current;
-    let secondaryHoldTimer: ReturnType<typeof setTimeout>;
+    const secondaryHoldTimerRef = useRef<ReturnType<typeof setTimeout>>();
     const [secondaryHold, setSecondaryHold] = useState<boolean>(false);
     const isSecondaryHoldActive = useSharedValue(false);
-
-    useEffect(() => {
-        return () => {
-            clearTimeout(secondaryHoldTimer);
-        };
-    }, []);
 
     const scale = holdDuration.interpolate({
         inputRange: [0, secondaryHoldTime * .2, secondaryHoldTime * .9, secondaryHoldTime],
@@ -79,14 +73,17 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
     const wiggleValue = useRef(new Animated.Value(0)).current;
     const animationRef = useRef<Animated.CompositeAnimation | undefined>(undefined);
 
-    const secondaryHoldStart = () => {
+    const secondaryHoldStart = useCallback(() => {
+        clearTimeout(secondaryHoldTimerRef.current);
+
         Animated.timing(holdDuration, {
             toValue: secondaryHoldTime,
             duration: secondaryHoldTime,
             useNativeDriver: true,
         }).start();
 
-        secondaryHoldTimer = setTimeout(() => {
+        secondaryHoldTimerRef.current = setTimeout(() => {
+            secondaryHoldTimerRef.current = undefined;
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
             setSecondaryHold(true);
             isSecondaryHoldActive.value = true;
@@ -112,9 +109,12 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
             );
             animationRef.current.start();
         }, secondaryHoldTime * .8);
-    };
+    }, [holdDuration, isSecondaryHoldActive, wiggleValue]);
 
-    const secondaryHoldStop = () => {
+    const secondaryHoldStop = useCallback(() => {
+        clearTimeout(secondaryHoldTimerRef.current);
+        secondaryHoldTimerRef.current = undefined;
+
         Animated.timing(holdDuration, {
             toValue: 0,
             duration: 100,
@@ -133,8 +133,14 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
             useNativeDriver: true,
         }).start();
 
-        clearTimeout(secondaryHoldTimer);
-    };
+    }, [holdDuration, isSecondaryHoldActive, wiggleValue]);
+
+    useEffect(() => {
+        return () => {
+            clearTimeout(secondaryHoldTimerRef.current);
+            animationRef.current?.stop();
+        };
+    }, []);
 
     //#endregion
 
@@ -164,7 +170,7 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
             interaction: 'swipe-vertical',
         });
         secondaryHoldStop();
-    }, [index, currentGameId, secondaryHold, addendOne, addendTwo, getCurrentRoundIndex, menuOpen]);
+    }, [index, currentGameId, secondaryHold, addendOne, addendTwo, getCurrentRoundIndex, menuOpen, secondaryHoldStop]);
 
     const panGesture = Gesture.Pan()
         .enabled(!currentGameLocked && !menuOpen)
