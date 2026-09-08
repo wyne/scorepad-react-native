@@ -1,5 +1,13 @@
 # Changelog
 
+## [3.1.1](https://github.com/wyne/scorepad-react-native/compare/v3.1.0...v3.1.1) (2026-09-08)
+
+
+### Infrastructure
+
+* bump release-please-action to v5 for the Node 24 runtime ([#740](https://github.com/wyne/scorepad-react-native/issues/740)) ([549eef3](https://github.com/wyne/scorepad-react-native/commit/549eef33c179c3bdb8a53f5c954b2076aae256b2))
+* run the EAS workflows on Node 22 ([#741](https://github.com/wyne/scorepad-react-native/issues/741)) ([eb79b5e](https://github.com/wyne/scorepad-react-native/commit/eb79b5e99253e4ddba635f62a292f0ad9e0a95ba))
+
 ## [3.1.0](https://github.com/wyne/scorepad-react-native/compare/v3.0.4...v3.1.0) (2026-09-08)
 
 
