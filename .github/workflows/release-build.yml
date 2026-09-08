@@ -62,10 +62,10 @@ jobs:
           ref: ${{ inputs.ref || inputs.tag }}
           fetch-depth: 0
 
-      - name: Use Node.js 20.x
+      - name: Use Node.js 22.x
         uses: actions/setup-node@v7
         with:
-          node-version: 20.x
+          node-version: 22.x
           cache: 'npm'
 
       - name: Set up EAS
