@@ -1,12 +1,14 @@
 {
   "scripts": {
     "start": "expo start --dev-client",
-    "android": "expo run:android",
+    "android": "npx expo prebuild --clean --platform android && expo run:android --variant release",
+    "android:dev": "APP_VARIANT=development npx expo prebuild --clean --platform android && APP_VARIANT=development expo run:android",
+    "android:preview": "APP_VARIANT=preview npx expo prebuild --clean --platform android && APP_VARIANT=preview expo run:android --variant release",
     "prebuild": "npx expo prebuild",
     "prebuild:clean": "npx expo prebuild --clean",
-    "ios": "npx expo prebuild --clean && expo run:ios --configuration Release",
-    "ios:dev": "APP_VARIANT=development npx expo prebuild --clean && APP_VARIANT=development expo run:ios",
-    "ios:preview": "APP_VARIANT=preview npx expo prebuild --clean && APP_VARIANT=preview expo run:ios --configuration Release",
+    "ios": "npx expo prebuild --clean --platform ios && expo run:ios --configuration Release",
+    "ios:dev": "APP_VARIANT=development npx expo prebuild --clean --platform ios && APP_VARIANT=development expo run:ios",
+    "ios:preview": "APP_VARIANT=preview npx expo prebuild --clean --platform ios && APP_VARIANT=preview expo run:ios --configuration Release",
     "web": "expo start --web",
     "eject": "expo eject",
     "dev": "APP_VARIANT=development expo start",
