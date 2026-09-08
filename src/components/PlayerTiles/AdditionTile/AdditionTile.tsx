@@ -8,6 +8,7 @@ import { selectGameById } from '../../../../redux/GamesSlice';
 import { useAppSelector } from '../../../../redux/hooks';
 
 import { calculateFontSize } from './Helpers';
+import { OptimisticScoreContext } from './OptimisticScoreContext';
 import ScoreAfter from './ScoreAfter';
 import ScoreBefore from './ScoreBefore';
 import ScoreRound from './ScoreRound';
@@ -60,6 +61,15 @@ const AdditionTile: React.FunctionComponent<Props> = ({
         };
     }, shallowEqual);
 
+    const optimisticScores = React.useContext(OptimisticScoreContext);
+
+    React.useLayoutEffect(() => {
+        if (optimisticScores == null) return;
+
+        optimisticScores.currentRoundScore.value = currentRoundScore;
+        optimisticScores.currentRoundTotalScore.value = currentRoundTotalScore;
+    }, [currentRoundScore, currentRoundTotalScore, optimisticScores]);
+
     if (!hasCurrentGame) return null;
     if (typeof playerName == 'undefined') return null;
 
@@ -99,13 +109,18 @@ const AdditionTile: React.FunctionComponent<Props> = ({
 
             <Animated.View style={styles.scoreLineOne}>
                 <ScoreBefore containerWidth={containerShortEdge} currentRoundScore={currentRoundScore} currentRoundTotalScore={currentRoundTotalScore}
-                    fontColor={fontColor} />
+                    fontColor={fontColor}
+                    optimisticCurrentRoundScore={optimisticScores?.currentRoundScore}
+                    optimisticCurrentRoundTotalScore={optimisticScores?.currentRoundTotalScore} />
                 <ScoreRound containerWidth={containerShortEdge} currentRoundScore={currentRoundScore}
-                    fontColor={fontColor} />
+                    fontColor={fontColor}
+                    optimisticCurrentRoundScore={optimisticScores?.currentRoundScore} />
             </Animated.View>
 
             <ScoreAfter containerWidth={containerShortEdge} currentRoundScore={currentRoundScore} currentRoundTotalScore={currentRoundTotalScore}
-                fontColor={fontColor} />
+                fontColor={fontColor}
+                optimisticCurrentRoundScore={optimisticScores?.currentRoundScore}
+                optimisticCurrentRoundTotalScore={optimisticScores?.currentRoundTotalScore} />
         </Animated.View>
     );
 };

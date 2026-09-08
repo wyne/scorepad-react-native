@@ -15,10 +15,6 @@ jest.mock('react-native-reanimated', () => ({
   __esModule: true,
   useSharedValue: function (i: unknown) { return { value: i }; },
   useAnimatedStyle: function (fn: () => unknown) { return fn(); },
-  useAnimatedReaction: function (_p: () => unknown, r: (c: unknown, p: unknown) => void) {
-    (globalThis as any).__react = r;
-    r(_p(), undefined);
-  },
   runOnJS: function (fn: (...args: unknown[]) => unknown) { return fn; },
   withTiming: function (_t: number) { return _t; },
   default: { View: function () { return null; } },
@@ -56,7 +52,6 @@ jest.mock('react-native-gesture-handler', () => ({
 
 beforeEach(() => {
   (globalThis as any).__ph = {};
-  (globalThis as any).__react = undefined;
   jest.useRealTimers();
 });
 
@@ -78,11 +73,6 @@ const renderSwipe = ({ onRender }: { onRender?: (id: string) => void; } = {}) =>
   return { dispatch, store };
 };
 
-const triggerReaction = (totalOffset: number, prevTotalOffset: number) => {
-  const react = (globalThis as any).__react;
-  if (react) react(totalOffset, prevTotalOffset);
-};
-
 describe('SwipeVertical', () => {
   it('renders and captures gesture callbacks', () => {
     renderSwipe();
@@ -98,7 +88,10 @@ describe('SwipeVertical', () => {
 
     ph.onBegin();
     ph.onUpdate({ translationY: -100 });
-    triggerReaction(100, 0);
+    expect(dispatch).not.toHaveBeenCalledWith(
+      playerRoundScoreIncrement('player-1', 0, 2)
+    );
+
     act(() => {
       ph.onEnd({ translationY: -100 });
       ph.onFinalize();
@@ -115,7 +108,6 @@ describe('SwipeVertical', () => {
 
     ph.onBegin();
     ph.onUpdate({ translationY: 100 });
-    triggerReaction(-100, 0);
     act(() => {
       ph.onEnd({ translationY: 100 });
       ph.onFinalize();
@@ -132,7 +124,6 @@ describe('SwipeVertical', () => {
 
     ph.onBegin();
     ph.onUpdate({ translationY: -250 });
-    triggerReaction(250, 0);
     act(() => {
       ph.onEnd({ translationY: -250 });
       ph.onFinalize();
@@ -152,7 +143,6 @@ describe('SwipeVertical', () => {
     act(() => { jest.advanceTimersByTime(401); });
 
     ph.onUpdate({ translationY: -100 });
-    triggerReaction(100, 0);
     act(() => {
       ph.onEnd({ translationY: -100 });
       ph.onFinalize();
@@ -170,12 +160,10 @@ describe('SwipeVertical', () => {
 
     ph.onBegin();
     ph.onUpdate({ translationY: -2 });
-    triggerReaction(2, 0);
 
     act(() => { jest.advanceTimersByTime(401); });
 
     ph.onUpdate({ translationY: -100 });
-    triggerReaction(100, 2);
     act(() => {
       ph.onEnd({ translationY: -100 });
       ph.onFinalize();
@@ -184,6 +172,30 @@ describe('SwipeVertical', () => {
     expect(dispatch).toHaveBeenCalledWith(
       playerRoundScoreIncrement('player-1', 0, 2)
     );
+  });
+
+  it('flushes only once when onEnd and onFinalize both run', () => {
+    const { dispatch } = renderSwipe();
+    const ph = (globalThis as any).__ph;
+    const expectedAction = playerRoundScoreIncrement('player-1', 0, 2);
+
+    ph.onBegin();
+    ph.onUpdate({ translationY: -100 });
+
+    act(() => {
+      ph.onEnd({ translationY: -100 });
+      ph.onFinalize();
+    });
+
+    expect(dispatch.mock.calls.filter(([action]) => {
+      const dispatchedAction = action as typeof expectedAction;
+      return (
+        dispatchedAction.type === expectedAction.type &&
+        dispatchedAction.payload === expectedAction.payload &&
+        dispatchedAction.meta.round === expectedAction.meta.round &&
+        dispatchedAction.meta.multiplier === expectedAction.meta.multiplier
+      );
+    })).toHaveLength(1);
   });
 
   it('does not re-render solely because the current round changes', () => {
@@ -211,7 +223,6 @@ describe('SwipeVertical', () => {
 
     ph.onBegin();
     ph.onUpdate({ translationY: -100 });
-    triggerReaction(100, 0);
     act(() => {
       ph.onEnd({ translationY: -100 });
       ph.onFinalize();
