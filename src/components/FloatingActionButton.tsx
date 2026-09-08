@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { Button, Host, Image, Menu } from '@expo/ui/swift-ui';
-import { buttonBorderShape, buttonStyle, frame, tint } from '@expo/ui/swift-ui/modifiers';
+import { buttonStyle, frame, glassEffect } from '@expo/ui/swift-ui/modifiers';
 import { MenuAction, MenuView } from '@react-native-menu/menu';
 import { ParamListBase } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -64,17 +64,31 @@ const FloatingActionButton: React.FunctionComponent<Props> = ({ navigation }) =>
                 // MenuView's anchor is a UIButton, and a UIControl consumes the
                 // touch rather than passing it to subviews — so a GlassView
                 // nested inside one never sees the touch-down that drives the
-                // interactive glass. A SwiftUI Menu wearing `.glassProminent`
-                // gets that response from the system instead.
+                // interactive glass. Inside SwiftUI the touch reaches the
+                // label, so an interactive glass effect there responds.
                 <Host style={StyleSheet.absoluteFill} testID="add-game-button">
                     <Menu
-                        label={<Image systemName="plus" size={24} color="#FFFFFF" />}
-                        modifiers={[
-                            buttonStyle('glassProminent'),
-                            buttonBorderShape('circle'),
-                            tint(theme.tint),
-                            frame({ width: FAB_SIZE, height: FAB_SIZE }),
-                        ]}
+                        label={
+                            // The glass goes on the label, sized by the frame
+                            // ahead of it, so the circle is exactly FAB_SIZE.
+                            // `.glassProminent` as a button style would instead
+                            // wrap the glyph in the style's own padding and size
+                            // itself, which is how this ended up much smaller
+                            // than the disc it replaced.
+                            <Image
+                                systemName="plus"
+                                size={24}
+                                color="#FFFFFF"
+                                modifiers={[
+                                    frame({ width: FAB_SIZE, height: FAB_SIZE }),
+                                    glassEffect({
+                                        glass: { variant: 'regular', interactive: true, tint: theme.tint },
+                                        shape: 'circle',
+                                    }),
+                                ]}
+                            />
+                        }
+                        modifiers={[buttonStyle('plain')]}
                     >
                         {playerNumberOptions.map((number) => (
                             <Button
