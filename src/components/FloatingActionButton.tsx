@@ -3,6 +3,7 @@ import React from 'react';
 import { MenuAction, MenuView } from '@react-native-menu/menu';
 import { ParamListBase } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { GlassView } from 'expo-glass-effect';
 import { Keyboard, StyleSheet, View } from 'react-native';
 import { Icon } from 'react-native-elements';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -10,6 +11,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { asyncCreateGame, selectGameIds } from '../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { MAX_PLAYERS } from '../constants';
+import { LIQUID_GLASS } from '../platform';
 import { useTheme } from '../theme';
 
 export const FAB_SIZE = 60;
@@ -44,6 +46,8 @@ const FloatingActionButton: React.FunctionComponent<Props> = ({ navigation }) =>
         });
     };
 
+    const icon = <Icon name="plus" type="font-awesome-5" size={24} color="#FFFFFF" />;
+
     return (
         <View testID="add-game-button-container" style={[styles.container, {
             bottom: insets.bottom + FAB_BOTTOM_MARGIN,
@@ -61,9 +65,34 @@ const FloatingActionButton: React.FunctionComponent<Props> = ({ navigation }) =>
                 }}
                 actions={menuActions}
             >
-                <View style={[styles.fab, { backgroundColor: theme.tint }]} testID="add-game-button">
-                    <Icon name="plus" type="font-awesome-5" size={24} color="#FFFFFF" />
-                </View>
+                {LIQUID_GLASS ? (
+                    // Tinted rather than clear: the button has to stay findable
+                    // while the games list scrolls under it, and the accent is
+                    // what makes it findable.
+                    //
+                    // `isInteractive` even though the menu owns the press: the
+                    // glass should pan under the finger on the way to opening
+                    // the menu, the same as every other glass control here.
+                    <GlassView
+                        accessibilityLabel="Add game"
+                        accessibilityRole="button"
+                        isInteractive
+                        style={styles.fab}
+                        testID="add-game-button"
+                        tintColor={theme.tint}
+                    >
+                        {icon}
+                    </GlassView>
+                ) : (
+                    <View
+                        accessibilityLabel="Add game"
+                        accessibilityRole="button"
+                        style={[styles.fab, styles.fabFlat, { backgroundColor: theme.tint }]}
+                        testID="add-game-button"
+                    >
+                        {icon}
+                    </View>
+                )}
             </MenuView>
         </View>
     );
@@ -76,12 +105,19 @@ const styles = StyleSheet.create({
         height: FAB_SIZE,
         zIndex: 100,
     },
+    /**
+     * The glass is the shape, so the circle lives on the element that draws the
+     * effect — a `borderRadius` set on an ancestor would leave the glass square.
+     */
     fab: {
         width: FAB_SIZE,
         height: FAB_SIZE,
         borderRadius: FAB_SIZE / 2,
         justifyContent: 'center',
         alignItems: 'center',
+    },
+    /** Glass lifts itself off the background; a flat disc needs the shadow to. */
+    fabFlat: {
         shadowColor: '#000',
         shadowOpacity: 0.3,
         shadowOffset: { width: 0, height: 4 },

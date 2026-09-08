@@ -29,6 +29,16 @@ jest.mock('react-native-elements', () => ({
     Icon: () => null,
 }));
 
+// Read through a getter: the component reads LIQUID_GLASS at render time, so
+// each test can pick the material without reloading the module graph.
+let mockLiquidGlass = false;
+
+jest.mock('../platform', () => ({
+    get LIQUID_GLASS() {
+        return mockLiquidGlass;
+    },
+}));
+
 jest.mock('react-native-safe-area-context', () => ({
     useSafeAreaInsets: () => ({ top: 0, bottom: 0, left: 0, right: 0 }),
 }));
@@ -81,6 +91,7 @@ const mockNavigation = {
 describe('FloatingActionButton', () => {
     beforeEach(() => {
         jest.clearAllMocks();
+        mockLiquidGlass = false;
         capturedOnOpenMenu = undefined;
         capturedOnPressAction = undefined;
         jest.spyOn(Keyboard, 'dismiss').mockImplementation(() => undefined);
@@ -110,5 +121,20 @@ describe('FloatingActionButton', () => {
         });
 
         expect(Keyboard.dismiss).toHaveBeenCalledTimes(1);
+    });
+
+    it.each([
+        ['liquid glass', true],
+        ['the flat fallback', false],
+    ])('renders the add button on %s', (_material, available) => {
+        mockLiquidGlass = available;
+
+        const { getByTestId } = render(
+            <Provider store={createMockStore()}>
+                <FloatingActionButton navigation={mockNavigation} />
+            </Provider>
+        );
+
+        expect(getByTestId('add-game-button')).toBeTruthy();
     });
 });
