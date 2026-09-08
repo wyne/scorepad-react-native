@@ -166,8 +166,8 @@ const ChooseWinnersSheet: React.FunctionComponent = () => {
                     iconName="checkmark"
                     iconType="ionicon"
                     iconSize={20}
-                    iconColor="#007AFF"
-                    blue
+                    iconColor="#FFFFFF"
+                    tintColor="#007AFF"
                 />
             </View>
 

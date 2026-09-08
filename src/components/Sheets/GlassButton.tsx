@@ -1,8 +1,14 @@
 import React from 'react';
 
-import { BlurView } from 'expo-blur';
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
+import { GlassView } from 'expo-glass-effect';
+import { Pressable, StyleSheet } from 'react-native';
 import { Icon } from 'react-native-elements';
+
+import { LIQUID_GLASS } from '../../platform';
+import { useTheme } from '../../theme';
+
+/** Diameter of the capsule, and the standard iOS touch target. */
+const SIZE = 44;
 
 interface Props {
     onPress: () => void;
@@ -12,9 +18,21 @@ interface Props {
     iconType: string;
     iconSize: number;
     iconColor: string;
-    blue?: boolean;
+    /**
+     * Tint for a prominent action — a sheet's confirm button, say. Left off,
+     * the button is plain glass and reads as the secondary control it is.
+     */
+    tintColor?: string;
 }
 
+/**
+ * A round sheet-header button: a Liquid Glass capsule on iOS 26, a filled disc
+ * anywhere else.
+ *
+ * Press feedback splits with the material. `isInteractive` hands it to UIKit,
+ * which morphs the glass under the finger, while the flat disc keeps the
+ * opacity dip a filled button expects.
+ */
 const GlassButton: React.FunctionComponent<Props> = ({
     onPress,
     accessibilityLabel,
@@ -23,50 +41,58 @@ const GlassButton: React.FunctionComponent<Props> = ({
     iconType,
     iconSize,
     iconColor,
-    blue = false,
+    tintColor,
 }) => {
+    const theme = useTheme();
+
+    const icon = <Icon name={iconName} type={iconType} size={iconSize} color={iconColor} />;
+
+    if (!LIQUID_GLASS) {
+        return (
+            <Pressable
+                accessibilityLabel={accessibilityLabel}
+                accessibilityRole="button"
+                onPress={onPress}
+                style={({ pressed }) => [
+                    styles.button,
+                    { backgroundColor: tintColor ?? theme.backgroundSecondary },
+                    pressed && styles.pressed,
+                ]}
+                testID={testID}
+            >
+                {icon}
+            </Pressable>
+        );
+    }
+
     return (
-        <TouchableOpacity
-            onPress={onPress}
-            style={[styles.button, blue && styles.buttonBlue]}
-            activeOpacity={0.7}
+        <Pressable
             accessibilityLabel={accessibilityLabel}
+            accessibilityRole="button"
+            onPress={onPress}
             testID={testID}
         >
-            <BlurView
-                intensity={60}
-                tint="systemUltraThinMaterial"
-                style={styles.absoluteFill}
-            />
-            {blue && <View style={[styles.absoluteFill, styles.blueOverlay]} />}
-            <Icon name={iconName} type={iconType} size={iconSize} color={iconColor} />
-        </TouchableOpacity>
+            {/*
+              * The glass is the shape, so the circle lives on the GlassView — a
+              * `borderRadius` on the Pressable would leave the effect square.
+              */}
+            <GlassView isInteractive style={styles.button} tintColor={tintColor}>
+                {icon}
+            </GlassView>
+        </Pressable>
     );
 };
 
 const styles = StyleSheet.create({
     button: {
-        width: 44,
-        height: 44,
-        borderRadius: 22,
-        overflow: 'hidden',
+        width: SIZE,
+        height: SIZE,
+        borderRadius: SIZE / 2,
         alignItems: 'center',
         justifyContent: 'center',
-        borderWidth: 0.5,
-        borderColor: 'rgba(255, 255, 255, 0.3)',
     },
-    buttonBlue: {
-        borderColor: 'rgba(0, 122, 255, 0.4)',
-    },
-    absoluteFill: {
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-    },
-    blueOverlay: {
-        backgroundColor: 'rgba(0, 122, 255, 0.2)',
+    pressed: {
+        opacity: 0.7,
     },
 });
 

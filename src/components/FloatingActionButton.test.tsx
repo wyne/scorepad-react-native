@@ -3,7 +3,7 @@ import React from 'react';
 import type { ParamListBase } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { configureStore } from '@reduxjs/toolkit';
-import { act, render } from '@testing-library/react-native';
+import { act, fireEvent, render } from '@testing-library/react-native';
 import { Keyboard } from 'react-native';
 import { Provider } from 'react-redux';
 
@@ -27,6 +27,41 @@ jest.mock('../ColorPalette', () => ({
 
 jest.mock('react-native-elements', () => ({
     Icon: () => null,
+}));
+
+jest.mock('@expo/ui/swift-ui', () => {
+    const { Pressable, Text, View } = jest.requireActual('react-native');
+
+    return {
+        Host: ({ children, testID }: { children: React.ReactNode; testID?: string }) => (
+            <View testID={testID}>{children}</View>
+        ),
+        Menu: ({ children }: { children: React.ReactNode }) => (
+            <View testID="player-count-menu">{children}</View>
+        ),
+        Button: ({ label, onPress }: { label: string; onPress: () => void }) => (
+            <Pressable accessibilityLabel={label} onPress={onPress}><Text>{label}</Text></Pressable>
+        ),
+        Image: () => null,
+    };
+});
+
+jest.mock('@expo/ui/swift-ui/modifiers', () => ({
+    buttonStyle: jest.fn(),
+    contentShape: jest.fn(),
+    frame: jest.fn(),
+    glassEffect: jest.fn(),
+    shapes: { circle: jest.fn() },
+}));
+
+// Read through a getter: the component reads LIQUID_GLASS at render time, so
+// each test can pick the material without reloading the module graph.
+let mockLiquidGlass = false;
+
+jest.mock('../platform', () => ({
+    get LIQUID_GLASS() {
+        return mockLiquidGlass;
+    },
 }));
 
 jest.mock('react-native-safe-area-context', () => ({
@@ -81,6 +116,7 @@ const mockNavigation = {
 describe('FloatingActionButton', () => {
     beforeEach(() => {
         jest.clearAllMocks();
+        mockLiquidGlass = false;
         capturedOnOpenMenu = undefined;
         capturedOnPressAction = undefined;
         jest.spyOn(Keyboard, 'dismiss').mockImplementation(() => undefined);
@@ -108,6 +144,35 @@ describe('FloatingActionButton', () => {
         await act(async () => {
             capturedOnPressAction?.({ nativeEvent: { event: '2' } });
         });
+
+        expect(Keyboard.dismiss).toHaveBeenCalledTimes(1);
+    });
+
+    it.each([
+        ['liquid glass', true],
+        ['the flat fallback', false],
+    ])('renders the add button on %s', (_material, available) => {
+        mockLiquidGlass = available;
+
+        const { getByTestId } = render(
+            <Provider store={createMockStore()}>
+                <FloatingActionButton navigation={mockNavigation} />
+            </Provider>
+        );
+
+        expect(getByTestId('add-game-button')).toBeTruthy();
+    });
+
+    it('dismisses the keyboard when a player count is picked on liquid glass', () => {
+        mockLiquidGlass = true;
+
+        const { getByLabelText } = render(
+            <Provider store={createMockStore()}>
+                <FloatingActionButton navigation={mockNavigation} />
+            </Provider>
+        );
+
+        fireEvent.press(getByLabelText('2 Players'));
 
         expect(Keyboard.dismiss).toHaveBeenCalledTimes(1);
     });

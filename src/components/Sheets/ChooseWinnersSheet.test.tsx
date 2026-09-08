@@ -15,15 +15,6 @@ jest.mock('../../Analytics', () => ({
     logEvent: jest.fn(),
 }));
 
-jest.mock('expo-blur', () => {
-    const { View } = jest.requireActual('react-native');
-    return {
-        BlurView: ({ children, style }: { children?: React.ReactNode; style?: object }) => (
-            <View style={style}>{children}</View>
-        ),
-    };
-});
-
 jest.mock('@gorhom/bottom-sheet', () => {
     const { forwardRef, useImperativeHandle } = jest.requireActual('react');
     const { View, ScrollView } = jest.requireActual('react-native');

@@ -52,13 +52,6 @@ jest.mock('expo-store-review', () => ({
     requestReview: jest.fn(),
 }));
 
-jest.mock('expo-blur', () => ({
-    BlurView: ({ children, style }: { children: React.ReactNode; style: object }) => {
-        const { View } = jest.requireActual('react-native');
-        return <View style={style} testID="blur-view">{children}</View>;
-    },
-}));
-
 jest.mock('expo-crypto', () => ({
     randomUUID: jest.fn(() => 'mock-uuid-123'),
 }));
