@@ -1,10 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 
-import { Button, Host, Image, Menu } from '@expo/ui/swift-ui';
-import { buttonStyle, contentShape, frame, glassEffect, shapes } from '@expo/ui/swift-ui/modifiers';
 import { MenuAction, MenuView } from '@react-native-menu/menu';
 import { ParamListBase } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { GlassView } from 'expo-glass-effect';
 import { Keyboard, StyleSheet, View } from 'react-native';
 import { Icon } from 'react-native-elements';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -24,19 +23,18 @@ interface Props {
     navigation: NativeStackNavigationProp<ParamListBase, string, undefined>;
 }
 
-const playerCountLabel = (count: number) => `${count}${count == 1 ? ' Player' : ' Players'}`;
-
 const FloatingActionButton: React.FunctionComponent<Props> = ({ navigation }) => {
     const theme = useTheme();
     const dispatch = useAppDispatch();
     const gameCount = useAppSelector(state => selectGameIds(state).length);
     const insets = useSafeAreaInsets();
+    const [menuOpen, setMenuOpen] = useState(false);
 
     const playerNumberOptions = [...Array.from(Array(MAX_PLAYERS).keys(), n => n + 1)];
 
     const menuActions: MenuAction[] = playerNumberOptions.map((number) => ({
         id: number.toString(),
-        title: playerCountLabel(number),
+        title: number.toString() + (number == 1 ? ' Player' : ' Players'),
     }));
 
     const addGameHandler = async (playerCount: number) => {
@@ -49,101 +47,102 @@ const FloatingActionButton: React.FunctionComponent<Props> = ({ navigation }) =>
         });
     };
 
-    const selectPlayerCount = (playerCount: number) => {
-        Keyboard.dismiss();
-        addGameHandler(playerCount);
-    };
+    const icon = <Icon name="plus" type="font-awesome-5" size={24} color="#FFFFFF" />;
 
     return (
-        <View testID="add-game-button-container" style={[styles.container, {
-            bottom: insets.bottom + FAB_BOTTOM_MARGIN,
-            right: insets.right + FAB_EDGE_MARGIN,
-        }]}>
-            {LIQUID_GLASS ? (
-                // SwiftUI owns the whole control here, which is the point.
-                // MenuView's anchor is a UIButton, and a UIControl consumes the
-                // touch rather than passing it to subviews — so a GlassView
-                // nested inside one never sees the touch-down that drives the
-                // interactive glass. Inside SwiftUI the touch reaches the
-                // label, so an interactive glass effect there responds.
-                <Host style={StyleSheet.absoluteFill} testID="add-game-button">
-                    <Menu
-                        label={
-                            // The glass goes on the label, sized by the frame
-                            // ahead of it, so the circle is exactly FAB_SIZE.
-                            // `.glassProminent` as a button style would instead
-                            // wrap the glyph in the style's own padding and size
-                            // itself, which is how this ended up much smaller
-                            // than the disc it replaced.
-                            <Image
-                                systemName="plus"
-                                size={24}
-                                color="#FFFFFF"
-                                modifiers={[
-                                    frame({ width: FAB_SIZE, height: FAB_SIZE }),
-                                    glassEffect({
-                                        glass: { variant: 'regular', interactive: true, tint: theme.tint },
-                                        shape: 'circle',
-                                    }),
-                                    // Without this the menu's dismissal morphs
-                                    // back into the glyph's own bounds — a small
-                                    // square — rather than the button. The
-                                    // preview shape has to be stated separately
-                                    // from the glass shape.
-                                    contentShape(shapes.circle(), ['interaction', 'contextMenuPreview']),
-                                ]}
-                            />
-                        }
-                        modifiers={[buttonStyle('plain')]}
-                    >
-                        {playerNumberOptions.map((number) => (
-                            <Button
-                                key={number}
-                                label={playerCountLabel(number)}
-                                onPress={() => selectPlayerCount(number)}
-                            />
-                        ))}
-                    </Menu>
-                </Host>
-            ) : (
+        <>
+            {/*
+              * The UIKit menu's dismissal tap is not being absorbed before React
+              * Native sees it, so tapping outside an open menu also lands on
+              * whatever sits underneath — usually a game row. This swallows that
+              * touch for as long as the menu is up. The menu still dismisses
+              * itself; this only stops the tap continuing into the list.
+              */}
+            {menuOpen && (
+                <View style={styles.dismissShield} testID="menu-dismiss-shield" />
+            )}
+            <View testID="add-game-button-container" style={[styles.container, {
+                bottom: insets.bottom + FAB_BOTTOM_MARGIN,
+                right: insets.right + FAB_EDGE_MARGIN,
+            }]}>
                 <MenuView
                     style={StyleSheet.absoluteFill}
                     onOpenMenu={() => {
                         Keyboard.dismiss();
+                        setMenuOpen(true);
                     }}
-                    onPressAction={({ nativeEvent }) => {
-                        selectPlayerCount(parseInt(nativeEvent.event));
+                    onCloseMenu={() => {
+                        setMenuOpen(false);
+                    }}
+                    onPressAction={async ({ nativeEvent }) => {
+                        Keyboard.dismiss();
+                        const playerNumber = parseInt(nativeEvent.event);
+                        addGameHandler(playerNumber);
                     }}
                     actions={menuActions}
                 >
-                    <View
-                        accessibilityLabel="Add game"
-                        accessibilityRole="button"
-                        style={[styles.fab, { backgroundColor: theme.tint }]}
-                        testID="add-game-button"
-                    >
-                        <Icon name="plus" type="font-awesome-5" size={24} color="#FFFFFF" />
-                    </View>
-                </MenuView>
-            )}
-        </View>
+                    {LIQUID_GLASS ? (
+                        // Tinted rather than clear: the button has to stay findable
+                        // while the games list scrolls under it, and the accent is
+                        // what makes it findable.
+                        //
+                        // No `isInteractive`: MenuView's anchor is a UIButton, and
+                        // a UIControl consumes the touch itself rather than passing
+                        // it to subviews, so the glass never sees the touch-down
+                        // that drives the effect.
+                        <GlassView
+                            accessibilityLabel="Add game"
+                            accessibilityRole="button"
+                            style={styles.fab}
+                            testID="add-game-button"
+                            tintColor={theme.tint}
+                        >
+                            {icon}
+                        </GlassView>
+                    ) : (
+                        <View
+                            accessibilityLabel="Add game"
+                            accessibilityRole="button"
+                            style={[styles.fab, styles.fabFlat, { backgroundColor: theme.tint }]}
+                            testID="add-game-button"
+                        >
+                            {icon}
+                        </View>
+                    )}
+                    </MenuView>
+            </View>
+        </>
     );
 };
 
 const styles = StyleSheet.create({
+    dismissShield: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        zIndex: 99,
+    },
     container: {
         position: 'absolute',
         width: FAB_SIZE,
         height: FAB_SIZE,
         zIndex: 100,
     },
-    /** Glass lifts itself off the background; a flat disc needs the shadow to. */
+    /**
+     * The glass is the shape, so the circle lives on the element that draws the
+     * effect — a `borderRadius` set on an ancestor would leave the glass square.
+     */
     fab: {
         width: FAB_SIZE,
         height: FAB_SIZE,
         borderRadius: FAB_SIZE / 2,
         justifyContent: 'center',
         alignItems: 'center',
+    },
+    /** Glass lifts itself off the background; a flat disc needs the shadow to. */
+    fabFlat: {
         shadowColor: '#000',
         shadowOpacity: 0.3,
         shadowOffset: { width: 0, height: 4 },
