@@ -181,7 +181,11 @@ const EditPlayerScreen: React.FC<EditPlayerScreenProps> = ({
     };
 
     return (
-        <ScrollView style={{ flex: 1 }} keyboardShouldPersistTaps="handled">
+        <ScrollView
+            style={{ flex: 1 }}
+            contentContainerStyle={styles.scrollContent}
+            keyboardShouldPersistTaps="handled"
+        >
 
             <SectionLabel>{`Player ${playerPositionWord(index + 1)} name`}</SectionLabel>
 
@@ -241,6 +245,14 @@ const EditPlayerScreen: React.FC<EditPlayerScreenProps> = ({
 export default EditPlayerScreen;
 
 const styles = StyleSheet.create({
+    scrollContent: {
+        // Grow to fill the screen even when the palette is shorter than it, so
+        // the empty space below stays part of the scroll view and can be
+        // dragged. Without this the content container ends at the palette and
+        // only touches landing on the content scroll.
+        flexGrow: 1,
+        paddingTop: 16,
+    },
     input: {
     },
     suggestionsContainer: {
