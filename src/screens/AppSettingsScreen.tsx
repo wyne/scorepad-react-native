@@ -12,6 +12,7 @@ import { logEvent } from '../Analytics';
 import RotatingIcon from '../components/AppInfo/RotatingIcon';
 import { loadSeedData } from '../components/AppInfo/SeedData';
 import HeaderButton from '../components/Buttons/HeaderButton';
+import SectionLabel from '../components/SectionLabel';
 import { FEATURE_KEEP_SCREEN_AWAKE } from '../constants';
 import { useTheme } from '../theme';
 
@@ -34,7 +35,7 @@ const AppSettingsScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     }, [navigation, theme.tint]);
     const Section = ({ children, title }: { children: React.ReactNode, title: string; }) => (
         <>
-            <Text style={[styles.sectionHeader, { color: theme.textTertiary }]}>{title}</Text>
+            <SectionLabel inset={40}>{title}</SectionLabel>
             <View style={[styles.section, { backgroundColor: theme.backgroundSecondary }]}>
                 {children}
             </View>
@@ -286,13 +287,6 @@ const styles = StyleSheet.create({
         margin: 10,
         alignContent: 'center',
         justifyContent: 'center',
-    },
-    sectionHeader: {
-        fontSize: 12,
-        marginTop: 20,
-        padding: 5,
-        paddingHorizontal: 40,
-        textTransform: 'uppercase',
     },
     section: {
         paddingHorizontal: 20,

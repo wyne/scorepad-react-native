@@ -23,6 +23,7 @@ import { selectCurrentGame } from '../../redux/selectors';
 import { logEvent } from '../Analytics';
 import HeaderButton from '../components/Buttons/HeaderButton';
 import ColorSelector from '../components/ColorPalettes/ColorSelector';
+import SectionLabel from '../components/SectionLabel';
 import { useTheme } from '../theme';
 
 type RouteParams = {
@@ -31,6 +32,19 @@ type RouteParams = {
         playerId: string | undefined;
     };
 };
+
+/**
+ * Spelled-out player positions. MAX_PLAYERS is 20, so the list covers every
+ * position a game can have; the numeral fallback keeps the label sensible if
+ * that cap is ever raised.
+ */
+const NUMBER_WORDS = [
+    'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten',
+    'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen',
+    'eighteen', 'nineteen', 'twenty',
+];
+
+const playerPositionWord = (position: number) => NUMBER_WORDS[position - 1] ?? String(position);
 
 export interface EditPlayerScreenProps {
     navigation: NativeStackNavigationProp<ParamListBase, string, undefined>;
@@ -169,6 +183,8 @@ const EditPlayerScreen: React.FC<EditPlayerScreenProps> = ({
     return (
         <ScrollView style={{ flex: 1 }} keyboardShouldPersistTaps="handled">
 
+            <SectionLabel>{`Player ${playerPositionWord(index + 1)} name`}</SectionLabel>
+
             <View style={{ position: 'relative', zIndex: 1 }}>
                 <Input
                     ref={inputRef}
@@ -216,9 +232,7 @@ const EditPlayerScreen: React.FC<EditPlayerScreenProps> = ({
                 )}
             </View>
 
-            <View style={{ marginHorizontal: 20 }}>
-                <ColorSelector playerId={playerId} />
-            </View>
+            <ColorSelector playerId={playerId} />
 
         </ScrollView>
     );

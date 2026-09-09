@@ -258,7 +258,7 @@ describe('EditGameScreen', () => {
             </Provider>
         );
 
-        expect(getByText('Game Title')).toBeTruthy();
+        expect(getByText('Game title')).toBeTruthy();
         expect(getByText('Players')).toBeTruthy();
         expect(getByTestId('edit-game')).toBeTruthy();
         expect(getByTestId('draggable-flatlist')).toBeTruthy();
