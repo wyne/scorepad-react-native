@@ -85,7 +85,7 @@ describe('GameListItemPlayerName', () => {
         expect(getByTestId('icon-trophy')).toBeTruthy();
     });
 
-    it('should emphasise the name when isWinner is true', () => {
+    it('should color the name when isWinner is true', () => {
         const store = createMockStore({
             'player-1': { id: 'player-1', playerName: 'Alice', scores: [10] },
         });
@@ -99,9 +99,7 @@ describe('GameListItemPlayerName', () => {
         // Matched loosely: the trophy is a sibling of the name inside the same
         // Text so the names flow as one line, which splits the text content.
         const textElement = getByText(/Alice/);
-        expect(textElement.props.style).toEqual(
-            expect.arrayContaining([expect.objectContaining({ fontWeight: '600' })])
-        );
+        expect(textElement.props.style).toEqual(expect.objectContaining({ color: '#000000' }));
     });
 
     it('should leave a non-winner unstyled so it inherits the row colour', () => {

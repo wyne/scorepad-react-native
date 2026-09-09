@@ -153,7 +153,7 @@ const GameListItem: React.FunctionComponent<Props> = ({ navigation, gameId, inde
                 >
                     <View style={styles.row}>
                         <ListItem.Content style={styles.content}>
-                            <ListItem.Title style={{ color: theme.text }}>
+                            <ListItem.Title style={[styles.title, { color: theme.text }]}>
                                 {gameTitle}
                                 {locked && <Icon name='lock-closed-outline' type='ionicon' size={14} color={theme.success} style={{ paddingHorizontal: 4 }} />}
                             </ListItem.Title>
@@ -207,6 +207,9 @@ const styles = StyleSheet.create({
     },
     players: {
         fontSize: 15,
+    },
+    title: {
+        fontWeight: '600',
     },
     timestamp: {
         fontSize: 13,
