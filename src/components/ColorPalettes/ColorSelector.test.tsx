@@ -116,7 +116,7 @@ describe('ColorSelector', () => {
             </Provider>
         );
 
-        expect(getByText('Current Pallete')).toBeTruthy();
+        expect(getByText('Current palette')).toBeTruthy();
     });
 
     it('should render other palettes section', () => {
@@ -128,7 +128,7 @@ describe('ColorSelector', () => {
             </Provider>
         );
 
-        expect(getByText('Other Palletes')).toBeTruthy();
+        expect(getByText('Other palettes')).toBeTruthy();
     });
 
     it('should render colors from current palette', () => {
@@ -287,8 +287,8 @@ describe('ColorSelector', () => {
         );
 
         // Should still render the sections
-        expect(getByText('Current Pallete')).toBeTruthy();
-        expect(getByText('Other Palletes')).toBeTruthy();
+        expect(getByText('Current palette')).toBeTruthy();
+        expect(getByText('Other palettes')).toBeTruthy();
     });
 
     it('should handle different player colors correctly', () => {
@@ -345,8 +345,8 @@ describe('ColorSelector', () => {
         );
 
         // Should still render section titles
-        expect(getByText('Current Pallete')).toBeTruthy();
-        expect(getByText('Other Palletes')).toBeTruthy();
+        expect(getByText('Current palette')).toBeTruthy();
+        expect(getByText('Other palettes')).toBeTruthy();
     });
 
     it('should handle multiple rapid color selections', () => {

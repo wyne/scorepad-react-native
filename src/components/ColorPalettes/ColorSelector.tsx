@@ -1,13 +1,13 @@
 import React from 'react';
 
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
 
 import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
 import { updatePlayer } from '../../../redux/PlayersSlice';
 import { selectCurrentGame } from '../../../redux/selectors';
 import { logEvent } from '../../Analytics';
 import { getPalette, getPalettes } from '../../ColorPalette';
-import { useTheme } from '../../theme';
+import SectionLabel from '../SectionLabel';
 
 interface ColorSelectorProps {
     playerId: string;
@@ -27,7 +27,6 @@ const ColorButton: React.FC<{ color: string, playerColor: string | undefined; }>
 };
 
 const ColorSelector: React.FC<ColorSelectorProps> = ({ playerId }) => {
-    const theme = useTheme();
     const colorPalettes = getPalettes();
     const currentGameId = useAppSelector(state => selectCurrentGame(state)?.id);
     const currentGame = useAppSelector(state => selectCurrentGame(state));
@@ -54,12 +53,10 @@ const ColorSelector: React.FC<ColorSelectorProps> = ({ playerId }) => {
         <View style={{ flexDirection: 'column' }}>
 
 
-            <View style={[styles.titleContainer]}>
-                <Text style={[styles.title, { color: theme.text }]}>Current Pallete</Text>
-            </View>
+            <SectionLabel>Current palette</SectionLabel>
 
             {currentPalette &&
-                <View style={{ flexDirection: 'row', marginVertical: 5 }}>
+                <View style={styles.paletteRow}>
                     {
                         getPalette(currentPalette).map((color, i) => (
                             <TouchableOpacity
@@ -74,13 +71,11 @@ const ColorSelector: React.FC<ColorSelectorProps> = ({ playerId }) => {
             }
 
 
-            <View style={[styles.titleContainer]}>
-                <Text style={[styles.title, { color: theme.text }]}>Other Palletes</Text>
-            </View>
+            <SectionLabel>Other palettes</SectionLabel>
 
             {colorPalettes.map((palette, palette_index) => (
                 currentPalette !== palette && (
-                    <View style={{ flexDirection: 'row', marginVertical: 5 }} key={'v' + palette_index}>
+                    <View style={styles.paletteRow} key={'v' + palette_index}>
                         {
                             getPalette(palette).map((color, i) => (
                                 <TouchableOpacity
@@ -101,6 +96,14 @@ const ColorSelector: React.FC<ColorSelectorProps> = ({ playerId }) => {
 export default ColorSelector;
 
 const styles = StyleSheet.create({
+    paletteRow: {
+        flexDirection: 'row',
+        marginVertical: 5,
+        // Each badge carries its own 5pt side margin, so the row is pulled in
+        // by that much to land the first swatch on the same 20pt gutter as the
+        // labels and the name field above.
+        marginHorizontal: 15,
+    },
     colorBadge: {
         borderColor: '#999',
         borderWidth: 1,
@@ -111,11 +114,4 @@ const styles = StyleSheet.create({
         padding: 5,
         width: 25,
     },
-    title: {
-    },
-    titleContainer: {
-        flexDirection: 'column',
-        justifyContent: 'space-between',
-        marginVertical: 10,
-    }
 });

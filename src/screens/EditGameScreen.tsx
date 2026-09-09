@@ -13,6 +13,7 @@ import { logEvent } from '../Analytics';
 import HeaderButton from '../components/Buttons/HeaderButton';
 import EditGame from '../components/EditGame';
 import PlayerListItem from '../components/PlayerListItem';
+import SectionLabel from '../components/SectionLabel';
 import { MAX_PLAYERS } from '../constants';
 import { useTheme } from '../theme';
 
@@ -97,10 +98,10 @@ const EditGameScreen: React.FunctionComponent<Props> = ({ navigation, route }) =
     return (
         <View style={{ flex: 1 }} testID="edit-game">
 
-            <Text style={[styles.heading, { color: theme.textSecondary }]}>Game Title</Text>
+            <SectionLabel inset={30}>Game title</SectionLabel>
             <EditGame />
             <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                <Text style={[styles.heading, { color: theme.textSecondary }]}>Players</Text>
+                <SectionLabel inset={25}>Players</SectionLabel>
                 {playerIds.length > 1 &&
                     <TouchableOpacity onPress={() => {
                         setEdit(!edit);
@@ -109,7 +110,7 @@ const EditGameScreen: React.FunctionComponent<Props> = ({ navigation, route }) =
                             player_count: playerIds.length,
                         });
                     }}>
-                        <Text style={[styles.heading, { color: theme.tint }]}>{edit ? 'Done' : 'Edit'}</Text>
+                        <Text style={[styles.editAction, { color: theme.tint }]}>{edit ? 'Done' : 'Edit'}</Text>
                     </TouchableOpacity>
                 }
             </View>
@@ -159,11 +160,11 @@ const styles = StyleSheet.create({
         fontSize: 18,
         margin: 15,
     },
-    heading: {
-        fontSize: 14,
-        textTransform: 'uppercase',
+    editAction: {
+        fontSize: 13,
+        fontWeight: '600',
         marginHorizontal: 20,
-        marginVertical: 5,
+        marginBottom: 6,
         marginTop: 20,
     }
 });
