@@ -148,10 +148,16 @@ const AppSettingsScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     };
 
     const alertWithVersion = () => {
+        // Same predicate App.tsx uses to call setAnalyticsCollectionEnabled(false),
+        // so this line cannot disagree with what the app is actually doing. Unset
+        // means enabled, which is the production case — reading the raw variable
+        // is what printed "undefined" in store builds.
+        const analyticsEnabled = process.env.EXPO_PUBLIC_FIREBASE_ANALYTICS !== 'false';
+
         Alert.alert('ScorePad with Rounds\n' +
             `v${appVersion} (${buildNumber})\n` +
             `${Platform.OS} ${Platform.Version}\n` +
-            (process.env.EXPO_PUBLIC_FIREBASE_ANALYTICS)
+            `Analytics: ${analyticsEnabled ? 'on' : 'off'}`
         );
         void logEvent('view_version');
     };
