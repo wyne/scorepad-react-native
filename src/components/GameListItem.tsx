@@ -105,10 +105,10 @@ const GameListItem: React.FunctionComponent<Props> = ({ navigation, gameId, inde
     /**
      * Winners lead the player line.
      *
-     * That line is a single truncating line, and the result of a finished game
-     * is the last thing that should be cut from it — with the roster in play
-     * order a winner sitting fifth of six simply disappeared. Sorting is stable,
-     * so within each group the play order is kept.
+     * That line truncates, and the result of a finished game is the last thing
+     * that should be cut from it — with the roster in play order a winner far
+     * enough down simply disappeared. Sorting is stable, so within each group
+     * the play order is kept.
      */
     const orderedPlayerIds = useMemo(() => {
         const ids = playerIds ?? [];
@@ -158,9 +158,16 @@ const GameListItem: React.FunctionComponent<Props> = ({ navigation, gameId, inde
                                 {locked && <Icon name='lock-closed-outline' type='ionicon' size={14} color={theme.success} style={{ paddingHorizontal: 4 }} />}
                             </ListItem.Title>
 
-                            {/* One line of text, so the names wrap and truncate
-                              * together instead of each being its own block. */}
-                            <Text style={[styles.players, { color: theme.textSecondary }]} numberOfLines={1} testID="game-list-players">
+                            {/* One run of text, so the names wrap and truncate
+                              * together instead of each being its own block.
+                              *
+                              * Two lines rather than one: the column is ~29
+                              * characters wide, and players default to names as
+                              * long as "Player 1", so a single line cut an
+                              * ordinary three-player game short. Two covers past
+                              * the 91st percentile of player counts while still
+                              * keeping every row the same height. */}
+                            <Text style={[styles.players, { color: theme.textSecondary }]} numberOfLines={2} testID="game-list-players">
                                 {orderedPlayerIds.map((playerId, index) => (
                                     <GameListItemPlayerName key={playerId} playerId={playerId} last={index == orderedPlayerIds.length - 1} isWinner={winnerIds?.includes(playerId) === true} />
                                 ))}
