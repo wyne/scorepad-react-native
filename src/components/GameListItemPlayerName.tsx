@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text } from 'react-native';
 import { Icon } from 'react-native-elements';
 
 import { useAppSelector } from '../../redux/hooks';
@@ -11,33 +11,30 @@ interface Props {
     isWinner?: boolean;
 }
 
+/**
+ * One name in the game row's player line.
+ *
+ * Returns a nested `Text` rather than a `View`, so names flow and wrap as a
+ * single line of text and the parent can truncate the run of them. A winner
+ * used to render as a flex row, which made it a block among inline siblings —
+ * it sat off the baseline and broke where the line wrapped.
+ */
 const GameListItemPlayerName: React.FunctionComponent<Props> = ({ playerId, last = false, isWinner = false }) => {
     const theme = useTheme();
     const playerName = useAppSelector(state => selectPlayerById(state, playerId)?.playerName);
 
-    if (isWinner) {
-        return (
-            <View style={styles.winnerRow}>
-                <Icon name="trophy" type="ionicon" size={14} color={theme.warning} style={{ marginRight: 2 }} />
-                <Text style={[styles.winnerText, { color: theme.text }]}>
-                    {playerName}{!last && ', '}
-                </Text>
-            </View>
-        );
-    }
-
     return (
-        <Text style={{ color: theme.text }}>{playerName}{!last && ', '}</Text>
+        <Text style={isWinner ? [styles.winner, { color: theme.text }] : undefined}>
+            {isWinner && <Icon name="trophy" type="ionicon" size={13} color={theme.warning} />}
+            {isWinner && ' '}
+            {playerName}{!last && ', '}
+        </Text>
     );
 };
 
 const styles = StyleSheet.create({
-    winnerRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    winnerText: {
-        fontWeight: 'bold',
+    winner: {
+        fontWeight: '600',
     },
 });
 

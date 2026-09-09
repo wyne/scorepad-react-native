@@ -85,7 +85,7 @@ describe('GameListItemPlayerName', () => {
         expect(getByTestId('icon-trophy')).toBeTruthy();
     });
 
-    it('should apply bold styling when isWinner is true', () => {
+    it('should emphasise the name when isWinner is true', () => {
         const store = createMockStore({
             'player-1': { id: 'player-1', playerName: 'Alice', scores: [10] },
         });
@@ -96,26 +96,28 @@ describe('GameListItemPlayerName', () => {
             </Provider>
         );
 
-        const textElement = getByText('Alice, ');
+        // Matched loosely: the trophy is a sibling of the name inside the same
+        // Text so the names flow as one line, which splits the text content.
+        const textElement = getByText(/Alice/);
         expect(textElement.props.style).toEqual(
-            expect.arrayContaining([expect.objectContaining({ fontWeight: 'bold' })])
+            expect.arrayContaining([expect.objectContaining({ fontWeight: '600' })])
         );
     });
 
-    it('should apply default color when isWinner is false', () => {
+    it('should leave a non-winner unstyled so it inherits the row colour', () => {
         const store = createMockStore({
             'player-1': { id: 'player-1', playerName: 'Alice', scores: [10] },
         });
 
-        const { getByText } = render(
+        const { getByText, queryByTestId } = render(
             <Provider store={store}>
                 <GameListItemPlayerName playerId="player-1" isWinner={false} />
             </Provider>
         );
 
-        const textElement = getByText('Alice, ');
-        expect(textElement.props.style).toEqual(
-            expect.objectContaining({ color: expect.any(String) })
-        );
+        expect(queryByTestId('icon-trophy')).toBeNull();
+        // The colour belongs to the player line that wraps these, so a plain
+        // name deliberately carries no style of its own.
+        expect(getByText('Alice, ').props.style).toBeUndefined();
     });
 });
