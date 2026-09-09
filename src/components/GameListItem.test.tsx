@@ -43,7 +43,7 @@ jest.mock('react-native-elements', () => {
         <TouchableOpacity testID={testID} onPress={onPress}>{children}</TouchableOpacity>
     );
     ListItem.Content = ({ children }: { children: React.ReactNode }) => <View>{children}</View>;
-    ListItem.Title = ({ children }: { children: React.ReactNode }) => <Text>{children}</Text>;
+    ListItem.Title = ({ children, style }: { children: React.ReactNode; style?: object }) => <Text style={style}>{children}</Text>;
     ListItem.Subtitle = ({ children }: { children: React.ReactNode }) => <Text>{children}</Text>;
     ListItem.Chevron = () => <View testID="chevron" />;
 
@@ -143,6 +143,20 @@ describe('GameListItem', () => {
         expect(getByText('Test Game')).toBeTruthy();
         expect(getByText('Player 1, ')).toBeTruthy();
         expect(getByText('Player 2')).toBeTruthy();
+    });
+
+    it('should emphasize the game title', () => {
+        const store = createMockStore(populatedState);
+
+        const { getByText } = render(
+            <Provider store={store}>
+                <GameListItem navigation={mockNavigation} gameId="game-1" index={0} />
+            </Provider>
+        );
+
+        expect(getByText('Test Game').props.style).toEqual(
+            expect.arrayContaining([expect.objectContaining({ fontWeight: '600' })])
+        );
     });
 
     it('should put winners first so a truncated player line still shows them', () => {

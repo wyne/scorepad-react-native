@@ -51,7 +51,7 @@ const darkColors: ThemeColors = {
   backgroundSecondary: '#1C1C1E',
   backgroundTertiary: '#2C2C2E',
   text: '#FFFFFF',
-  textSecondary: '#EEEEEE',
+  textSecondary: '#AEAEB2',
   textTertiary: '#8E8E93',
   tint: '#0a84ff',
   separator: '#38383A',

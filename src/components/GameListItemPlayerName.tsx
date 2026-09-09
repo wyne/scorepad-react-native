@@ -1,4 +1,4 @@
-import { StyleSheet, Text } from 'react-native';
+import { Text } from 'react-native';
 import { Icon } from 'react-native-elements';
 
 import { useAppSelector } from '../../redux/hooks';
@@ -24,18 +24,12 @@ const GameListItemPlayerName: React.FunctionComponent<Props> = ({ playerId, last
     const playerName = useAppSelector(state => selectPlayerById(state, playerId)?.playerName);
 
     return (
-        <Text style={isWinner ? [styles.winner, { color: theme.text }] : undefined}>
+        <Text style={isWinner ? { color: theme.text } : undefined}>
             {isWinner && <Icon name="trophy" type="ionicon" size={13} color={theme.warning} />}
             {isWinner && ' '}
             {playerName}{!last && ', '}
         </Text>
     );
 };
-
-const styles = StyleSheet.create({
-    winner: {
-        fontWeight: '600',
-    },
-});
 
 export default GameListItemPlayerName;
