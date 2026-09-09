@@ -145,6 +145,92 @@ describe('GameListItem', () => {
         expect(getByText('Player 2')).toBeTruthy();
     });
 
+    it('should put winners first so a truncated player line still shows them', () => {
+        const store = createMockStore({
+            ...populatedState,
+            games: {
+                entities: {
+                    'game-1': {
+                        ...mockGame,
+                        playerIds: ['player-1', 'player-2', 'player-3'],
+                        winnerIds: ['player-3'],
+                    },
+                },
+                ids: ['game-1'],
+            },
+            players: {
+                entities: {
+                    ...mockPlayers,
+                    'player-3': { id: 'player-3', playerName: 'Player 3', scores: [20] },
+                },
+                ids: ['player-1', 'player-2', 'player-3'],
+            },
+        });
+
+        const { getByTestId } = render(
+            <Provider store={store}>
+                <GameListItem navigation={mockNavigation} gameId="game-1" index={0} />
+            </Provider>
+        );
+
+        // The names render as one Text, so assert the order of the elements
+        // that build it rather than hunting for separate text nodes.
+        const line = getByTestId('game-list-players');
+        const renderedIds = (line.props.children as { props: { playerId: string; }; }[])
+            .map(child => child.props.playerId);
+
+        expect(renderedIds).toEqual(['player-3', 'player-1', 'player-2']);
+    });
+
+    describe('created timestamp', () => {
+        const renderWithDate = (dateCreated: number) => {
+            const store = createMockStore({
+                ...populatedState,
+                games: {
+                    entities: { 'game-1': { ...mockGame, dateCreated } },
+                    ids: ['game-1'],
+                },
+            });
+
+            return render(
+                <Provider store={store}>
+                    <GameListItem navigation={mockNavigation} gameId="game-1" index={0} />
+                </Provider>
+            );
+        };
+
+        it('stays relative under a day, where a date would only say today', () => {
+            const { getByText } = renderWithDate(Date.now() - 3 * 60 * 60 * 1000);
+
+            expect(getByText('3h ago')).toBeTruthy();
+        });
+
+        it('adds the weekday and date once it is days old', () => {
+            const threeDaysAgo = Date.now() - 3 * 86400000;
+            const { getByText } = renderWithDate(threeDaysAgo);
+
+            const expected = new Date(threeDaysAgo).toLocaleDateString(undefined, {
+                weekday: 'short', month: 'short', day: 'numeric',
+            });
+
+            expect(getByText(`3d ago · ${expected}`)).toBeTruthy();
+        });
+
+        it('trades the weekday for the year once out of this year', () => {
+            const date = new Date();
+            date.setFullYear(date.getFullYear() - 2);
+            const twoYearsAgo = date.getTime();
+
+            const { getByText } = renderWithDate(twoYearsAgo);
+
+            const expected = new Date(twoYearsAgo).toLocaleDateString(undefined, {
+                month: 'short', day: 'numeric', year: 'numeric',
+            });
+
+            expect(getByText(`2y ago · ${expected}`)).toBeTruthy();
+        });
+    });
+
     it('should show lock icon when game is locked', () => {
         const store = createMockStore({
             ...populatedState,

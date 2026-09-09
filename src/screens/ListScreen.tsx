@@ -4,7 +4,7 @@ import { useHeaderHeight } from '@react-navigation/elements';
 import { ParamListBase, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import * as Crypto from 'expo-crypto';
-import { Platform, StyleSheet, Text } from 'react-native';
+import { Platform, StyleSheet, Text, View } from 'react-native';
 import Animated, { Easing, LinearTransition } from 'react-native-reanimated';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -89,6 +89,12 @@ const ListScreen: React.FunctionComponent<Props> = ({ navigation }) => {
                 contentInsetAdjustmentBehavior="never"
                 scrollIndicatorInsets={{ top: listHeaderInset, bottom: listBottomInset }}
                 itemLayoutAnimation={LinearTransition.easing(Easing.ease)}
+                ItemSeparatorComponent={() => (
+                    // Inset to the row's leading text rather than run edge to
+                    // edge, which is how iOS draws list separators. Lives on the
+                    // list so it is not drawn under the final row.
+                    <View style={[styles.separator, { backgroundColor: theme.separator }]} />
+                )}
                 ListEmptyComponent={
                     <>
                         <Text style={{ textAlign: 'center', padding: 30, paddingBottom: 10, fontSize: 16, fontWeight: 'bold', color: theme.text }}>No Games</Text>
@@ -110,6 +116,10 @@ const ListScreen: React.FunctionComponent<Props> = ({ navigation }) => {
 
 const styles = StyleSheet.create({
     list: {
+    },
+    separator: {
+        height: StyleSheet.hairlineWidth,
+        marginLeft: 16,
     },
 });
 

@@ -1,4 +1,4 @@
-import React, { memo, useCallback } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 
 import { ParamListBase } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -16,8 +16,9 @@ import { useTheme } from '../theme';
 import GameListItemPlayerName from './GameListItemPlayerName';
 import AbstractPopupMenu from './PopupMenu/AbstractPopupMenu';
 
-function timeAgo(dateMs: number | undefined): string {
-    if (!dateMs) return '';
+const DAY_MS = 86400000;
+
+function timeAgo(dateMs: number): string {
     const diff = Date.now() - dateMs;
     const mins = Math.floor(diff / 60000);
     if (mins < 1) return 'just now';
@@ -29,6 +30,37 @@ function timeAgo(dateMs: number | undefined): string {
     const months = Math.floor(days / 30);
     if (months < 12) return `${months}mo ago`;
     return `${Math.floor(months / 12)}y ago`;
+}
+
+/**
+ * The calendar date behind a fuzzy one.
+ *
+ * Locale-formatted rather than hand-assembled, so the order of the parts
+ * follows the device. Within the current year the weekday earns its place and
+ * the year is redundant; further back that reverses.
+ */
+function shortDate(dateMs: number): string {
+    const date = new Date(dateMs);
+    const sameYear = date.getFullYear() === new Date().getFullYear();
+
+    return date.toLocaleDateString(undefined, sameYear
+        ? { weekday: 'short', month: 'short', day: 'numeric' }
+        : { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+/**
+ * How long ago, plus the date once "3mo ago" stops being enough to place it.
+ *
+ * Under a day the relative form is already the precise one — appending a date
+ * there would only ever say today.
+ */
+function formatCreated(dateMs: number | undefined): string {
+    if (!dateMs) return '';
+
+    const relative = timeAgo(dateMs);
+    if (Date.now() - dateMs < DAY_MS) return relative;
+
+    return `${relative} · ${shortDate(dateMs)}`;
 }
 
 export type Props = {
@@ -70,6 +102,22 @@ const GameListItem: React.FunctionComponent<Props> = ({ navigation, gameId, inde
         dispatch(setCurrentGameId(gameId));
     }, [dispatch, gameId]);
 
+    /**
+     * Winners lead the player line.
+     *
+     * That line truncates, and the result of a finished game is the last thing
+     * that should be cut from it — with the roster in play order a winner far
+     * enough down simply disappeared. Sorting is stable, so within each group
+     * the play order is kept.
+     */
+    const orderedPlayerIds = useMemo(() => {
+        const ids = playerIds ?? [];
+        if (!winnerIds?.length) return ids;
+
+        return [...ids].sort((a, b) =>
+            Number(winnerIds.includes(b)) - Number(winnerIds.includes(a)));
+    }, [playerIds, winnerIds]);
+
     if (gameId == null) { return null; }
     if (gameTitle == null || roundCount == null || playerIds == null) { return null; }
 
@@ -99,32 +147,45 @@ const GameListItem: React.FunctionComponent<Props> = ({ navigation, gameId, inde
                 index={index}
                 onRender={onMenuRender}
             >
-                <ListItem bottomDivider testID="game-list-item"
+                <ListItem testID="game-list-item"
                     onPress={Platform.OS == 'android' ? undefined : chooseGameHandler}
-                    containerStyle={{ backgroundColor: theme.backgroundSecondary, borderBottomColor: theme.separator }}
+                    containerStyle={{ backgroundColor: theme.backgroundSecondary }}
                 >
-                    <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1, gap: 16 }}>
-                        <ListItem.Content style={{ flex: 1 }}>
-                            <ListItem.Title style={{ alignItems: 'center', color: theme.text }}>
+                    <View style={styles.row}>
+                        <ListItem.Content style={styles.content}>
+                            <ListItem.Title style={{ color: theme.text }}>
                                 {gameTitle}
                                 {locked && <Icon name='lock-closed-outline' type='ionicon' size={14} color={theme.success} style={{ paddingHorizontal: 4 }} />}
                             </ListItem.Title>
-                            <ListItem.Subtitle style={{ color: theme.textTertiary }}>
-                                <Text>{timeAgo(dateCreated)}</Text>
-                            </ListItem.Subtitle>
-                            <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
-                                {playerIds.map((playerId, index) => (
-                                    <GameListItemPlayerName key={playerId} playerId={playerId} last={index == playerIds.length - 1} isWinner={winnerIds?.includes(playerId) === true} />
+
+                            {/* One run of text, so the names wrap and truncate
+                              * together instead of each being its own block.
+                              *
+                              * Two lines rather than one: the column is ~29
+                              * characters wide, and players default to names as
+                              * long as "Player 1", so a single line cut an
+                              * ordinary three-player game short. Two covers past
+                              * the 91st percentile of player counts while still
+                              * keeping every row the same height. */}
+                            <Text style={[styles.players, { color: theme.textSecondary }]} numberOfLines={2} testID="game-list-players">
+                                {orderedPlayerIds.map((playerId, index) => (
+                                    <GameListItemPlayerName key={playerId} playerId={playerId} last={index == orderedPlayerIds.length - 1} isWinner={winnerIds?.includes(playerId) === true} />
                                 ))}
-                            </View>
+                            </Text>
+
+                            {/* Metadata trails the content it describes rather
+                              * than splitting the title from the players. */}
+                            <Text style={[styles.timestamp, { color: theme.textTertiary }]}>
+                                {formatCreated(dateCreated)}
+                            </Text>
                         </ListItem.Content>
-                        <Text style={[styles.badgePlayers, { color: theme.badgeBlue }]}>
-                            {playerIds.length} <Icon color={theme.badgeBlue} name='users' type='font-awesome-5' size={16} />
+                        <Text style={[styles.badge, { color: theme.badgeBlue }]}>
+                            {playerIds.length} <Icon color={theme.badgeBlue} name='users' type='font-awesome-5' size={13} />
                         </Text>
-                        <Text style={[styles.badgeRounds, { color: theme.badgeRed }]}>
-                            {roundCount} <Icon color={theme.badgeRed} name='circle-notch' type='font-awesome-5' size={16} />
+                        <Text style={[styles.badge, { color: theme.badgeRed }]}>
+                            {roundCount} <Icon color={theme.badgeRed} name='circle-notch' type='font-awesome-5' size={13} />
                         </Text>
-                        <ListItem.Chevron iconStyle={{ color: theme.separator }} />
+                        <ListItem.Chevron iconStyle={{ color: theme.textTertiary }} />
                     </View>
                 </ListItem>
             </AbstractPopupMenu>
@@ -133,19 +194,30 @@ const GameListItem: React.FunctionComponent<Props> = ({ navigation, gameId, inde
 };
 
 const styles = StyleSheet.create({
-    newGame: {
-        margin: 20,
-        width: 200,
-        alignSelf: 'center',
-    },
-    badgePlayers: {
+    row: {
+        flexDirection: 'row',
         alignItems: 'center',
-        fontSize: 20,
+        flex: 1,
+        gap: 14,
     },
-    badgeRounds: {
-        alignItems: 'center',
-        fontSize: 20,
-    }
+    content: {
+        flex: 1,
+        // Three text lines that were previously flush against each other.
+        gap: 3,
+    },
+    players: {
+        fontSize: 15,
+    },
+    timestamp: {
+        fontSize: 13,
+    },
+    /**
+     * Counts are the least important thing in the row. At 20pt they read before
+     * the game title; at 15 they sit with the secondary text where they belong.
+     */
+    badge: {
+        fontSize: 15,
+    },
 });
 
 export default memo(GameListItem);
