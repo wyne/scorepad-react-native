@@ -8,6 +8,7 @@ import { useAppSelector } from '../../../redux/hooks';
 import { bottomSheetHeight } from '../../components/Sheets/GameSheet';
 import { useTheme } from '../../theme';
 
+import { TILE_BORDER_WIDTH } from './layout';
 import PlayerTile from './PlayerTile';
 
 const TileBoard: React.FC<{ showHint: boolean }> = ({ showHint }) => {
@@ -90,7 +91,12 @@ const TileBoard: React.FC<{ showHint: boolean }> = ({ showHint }) => {
         <SafeAreaView edges={['left', 'right']} style={
             [styles.contentStyle,
             {
-                paddingBottom: fullscreen ? 20 : bottomSheetHeight + 2, // Add 2 to account for the border
+                // A tile contributes only one border at the board's edge, so the
+                // board adds the missing one. Every gutter — against the header,
+                // the sheet, the screen sides, and between tiles — then reads as
+                // TILE_BORDER_WIDTH * 2.
+                padding: TILE_BORDER_WIDTH,
+                paddingBottom: (fullscreen ? 20 : bottomSheetHeight + 2) + TILE_BORDER_WIDTH,
                 backgroundColor: theme.background,
             }]
         } onLayout={layoutHandler} >
