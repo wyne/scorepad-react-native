@@ -2,7 +2,7 @@ import React, { memo, useCallback, useMemo } from 'react';
 
 import { ParamListBase } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { Platform, StyleSheet, Text, View } from 'react-native';
+import { PixelRatio, Platform, StyleSheet, Text, View } from 'react-native';
 import { Icon, ListItem } from 'react-native-elements';
 import Animated, { FadeInUp } from 'react-native-reanimated';
 import { shallowEqual } from 'react-redux';
@@ -67,13 +67,14 @@ export type Props = {
     navigation: NativeStackNavigationProp<ParamListBase, string, undefined>;
     gameId: string;
     index: number;
+    showSeparator?: boolean;
     /** Test-only render probe for selector invalidation regressions. */
     onRender?: (id: string) => void;
     /** Test-only render probe for popup menu selector invalidation regressions. */
     onMenuRender?: (id: string) => void;
 };
 
-const GameListItem: React.FunctionComponent<Props> = ({ navigation, gameId, index, onMenuRender, onRender }) => {
+const GameListItem: React.FunctionComponent<Props> = ({ navigation, gameId, index, showSeparator = false, onMenuRender, onRender }) => {
     onRender?.(gameId);
 
     const theme = useTheme();
@@ -137,7 +138,10 @@ const GameListItem: React.FunctionComponent<Props> = ({ navigation, gameId, inde
     };
 
     return (
-        <Animated.View entering={FadeInUp.duration(200).delay(100 + index * 100)}>
+        <Animated.View collapsable={false} entering={FadeInUp.duration(200).delay(100 + index * 100)}>
+            {showSeparator && (
+                <View testID={`game-list-separator-${gameId}`} pointerEvents="none" style={[styles.separator, { backgroundColor: theme.separator }]} />
+            )}
             <AbstractPopupMenu
                 key={'menu' + gameId}
                 gameId={gameId}
@@ -200,6 +204,12 @@ const GameListItem: React.FunctionComponent<Props> = ({ navigation, gameId, inde
 };
 
 const styles = StyleSheet.create({
+    separator: {
+        marginLeft: 16,
+        flexShrink: 0,
+        // Android densities can be fractional: 1dp is not always a whole pixel.
+        height: PixelRatio.roundToNearestPixel(1),
+    },
     row: {
         flexDirection: 'row',
         alignItems: 'center',
