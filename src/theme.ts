@@ -12,6 +12,8 @@ export interface ThemeColors {
   tint: string;
   separator: string;
   sheetBackground: string;
+  sheetBorder: string;
+  sheetShadow: string;
   sheetHandle: string;
   destructive: string;
   success: string;
@@ -34,6 +36,8 @@ const lightColors: ThemeColors = {
   tint: '#0a84ff',
   separator: '#C8C8CC',
   sheetBackground: '#F2F2F7',
+  sheetBorder: 'rgba(0,0,0,0.16)',
+  sheetShadow: 'rgba(0,0,0,0.14)',
   sheetHandle: '#D1D1D6',
   destructive: '#FF3B30',
   success: '#34C759',
@@ -56,6 +60,8 @@ const darkColors: ThemeColors = {
   tint: '#0a84ff',
   separator: '#38383A',
   sheetBackground: 'rgb(30,40,50)',
+  sheetBorder: 'rgba(255,255,255,0.14)',
+  sheetShadow: 'rgba(0,0,0,0.5)',
   sheetHandle: '#FFFFFF',
   destructive: '#FF453A',
   success: '#30D158',

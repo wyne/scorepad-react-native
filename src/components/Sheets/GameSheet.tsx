@@ -19,6 +19,7 @@ import ScoreLogTable from '../ScoreLogTable';
 
 import { useChooseWinnersSheetContext } from './ChooseWinnersSheetContext';
 import { useGameSheetContext } from './GameSheetContext';
+import SheetBackground from './SheetBackground';
 
 /**
  * Height of the bottom sheet
@@ -249,13 +250,12 @@ const GameSheet: React.FunctionComponent = () => {
             onAnimate={onAnimate}
             snapPoints={snapPoints}
             backdropComponent={renderBackdrop}
-            backgroundStyle={{ backgroundColor: theme.sheetBackground }}
+            backgroundComponent={SheetBackground}
             handleComponent={renderHandle}
             handleIndicatorStyle={{ backgroundColor: theme.sheetHandle }}
             animatedPosition={animatedPosition}
             enablePanDownToClose={false}
             topInset={topInset}
-            style={theme.background === '#000000' ? undefined : styles.sheetShadow}
             accessible={false}
             accessibilityViewIsModal={false}
         >
@@ -393,13 +393,6 @@ const styles = StyleSheet.create({
         backgroundColor: 'rgba(0,0,0,.2)',
         borderRadius: 10,
         alignItems: 'center'
-    },
-    sheetShadow: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: -3 },
-        shadowOpacity: 0.12,
-        shadowRadius: 5,
-        elevation: 8,
     },
 });
 
