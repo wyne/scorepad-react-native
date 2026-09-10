@@ -527,7 +527,7 @@ describe('EditPlayerScreen', () => {
         expect(store.getState().players.entities['player-1']?.playerName).toBe('Test Player');
     });
 
-    it('should dismiss the keyboard before navigating back', async () => {
+    it('should dismiss the keyboard when leaving the screen', () => {
         const dismissSpy = jest.spyOn(Keyboard, 'dismiss').mockImplementation(() => undefined);
         const store = createMockStore({
             settings: {
@@ -560,15 +560,12 @@ describe('EditPlayerScreen', () => {
             </Provider>
         );
 
-        const options = mockNavigation.setOptions.mock.calls[0][0];
-        const backButton = options.headerLeft({ tintColor: '#fff' });
-
-        await act(async () => {
-            await backButton.props.onPress();
-        });
+        const beforeRemove = mockNavigation.addListener.mock.calls
+            .find((call: any[]) => call[0] === 'beforeRemove')?.[1];
+        act(() => beforeRemove?.());
 
         expect(dismissSpy).toHaveBeenCalled();
-        expect(mockNavigation.goBack).toHaveBeenCalled();
+        expect(Analytics.logEvent).toHaveBeenCalledWith('edit_player_back');
     });
 
     it('should limit input to 15 characters', () => {

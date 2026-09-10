@@ -2,7 +2,7 @@ import React, { useEffect, useLayoutEffect } from 'react';
 
 import { ParamListBase, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import DraggableFlatList, { ScaleDecorator } from 'react-native-draggable-flatlist';
 import { Button, Icon } from 'react-native-elements';
 
@@ -46,7 +46,7 @@ const EditGameScreen: React.FunctionComponent<Props> = ({ navigation, route }) =
     useLayoutEffect(() => {
         navigation.setOptions({
             headerRight: () => (
-                <HeaderButton accessibilityLabel='Save Game' onPress={() => {
+                <HeaderButton accessibilityLabel='Done' onPress={() => {
                     void logEvent('save_game', {
                         source: route?.params?.source,
                         game_id: currentGame?.id,
@@ -60,7 +60,10 @@ const EditGameScreen: React.FunctionComponent<Props> = ({ navigation, route }) =
                         navigation.goBack();
                     }
                 }}>
-                    <Text style={{ color: theme.tint, fontSize: 20 }} allowFontScaling={false}>Done</Text>
+                    {Platform.OS === 'android'
+                        ? <Icon name="check" color={theme.tint} size={28} />
+                        : <Text style={{ color: theme.tint, fontSize: 20 }} allowFontScaling={false}>Done</Text>
+                    }
                 </HeaderButton>
             ),
         });

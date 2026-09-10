@@ -12,14 +12,23 @@
 ## Build Commands
 
 ```bash
-npm run android                          # Simulator/emulator (always local)
-APP_VARIANT=development npx expo run:android  # Dev variant
-APP_VARIANT=preview npx expo run:android      # Preview variant
+npm run android          # Production variant on the emulator (local)
+npm run android:dev      # Development client on the emulator (local)
+npm run android:preview  # Preview variant on the emulator (local)
 
 npx eas build --profile development --platform android   # Physical device
 npx eas build --profile preview --platform android       # Physical device
 npx eas build --profile production --platform android    # Store submission
 ```
+
+These local scripts regenerate the Android project, build and install the app, and
+open it on a connected device or an available emulator. Each script passes an
+explicit app ID so Android opens the correct variant when multiple ScorePad builds
+are installed and share the `exp+scorepad` development-client link.
+
+If emulator startup fails with `cannot write to emulator`, start the virtual device
+from Android Studio's Device Manager, wait for its home screen, then rerun
+`npm run android:dev`.
 
 ## Production Build Checklist
 
