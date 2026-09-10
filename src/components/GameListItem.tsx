@@ -179,12 +179,18 @@ const GameListItem: React.FunctionComponent<Props> = ({ navigation, gameId, inde
                                 {formatCreated(dateCreated)}
                             </Text>
                         </ListItem.Content>
-                        <Text style={[styles.badge, { color: theme.badgeBlue }]}>
-                            {playerIds.length} <Icon color={theme.badgeBlue} name='users' type='font-awesome-5' size={13} />
-                        </Text>
-                        <Text style={[styles.badge, { color: theme.badgeRed }]}>
-                            {roundCount} <Icon color={theme.badgeRed} name='circle-notch' type='font-awesome-5' size={13} />
-                        </Text>
+                        <View style={styles.badgeGroup}>
+                            <Text style={[styles.badge, { color: theme.badgeBlue }]}>
+                                {playerIds.length}
+                            </Text>
+                            <Icon color={theme.badgeBlue} name='users' type='font-awesome-5' size={13} />
+                        </View>
+                        <View style={styles.badgeGroup}>
+                            <Text style={[styles.badge, { color: theme.badgeRed }]}>
+                                {roundCount}
+                            </Text>
+                            <Icon color={theme.badgeRed} name='circle-notch' type='font-awesome-5' size={13} />
+                        </View>
                         <ListItem.Chevron iconStyle={{ color: theme.textTertiary }} />
                     </View>
                 </ListItem>
@@ -220,6 +226,11 @@ const styles = StyleSheet.create({
      */
     badge: {
         fontSize: 15,
+    },
+    badgeGroup: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 4,
     },
 });
 

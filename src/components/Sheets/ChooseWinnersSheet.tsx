@@ -171,7 +171,7 @@ const ChooseWinnersSheet: React.FunctionComponent = () => {
                 />
             </View>
 
-            <BottomSheetScrollView contentContainerStyle={styles.scrollContent}>
+            <BottomSheetScrollView contentContainerStyle={styles.scrollContent} overScrollMode="always">
                 <SafeAreaView edges={['right', 'left']}>
                     <Text style={[styles.subtitle, { color: theme.textTertiary }]}>
                         Select winners (optional) to end the game.

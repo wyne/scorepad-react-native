@@ -90,6 +90,7 @@ const ScoreLogTable: React.FunctionComponent<Props> = ({ showScores = true }) =>
                 <ScrollView horizontal={true}
                     nestedScrollEnabled={true}
                     contentContainerStyle={{ flexDirection: 'row' }}
+                    overScrollMode="always"
                     ref={scoreLogScrollViewEl}>
                     {roundsIterator.map((item, round) => (
                         <View key={round} onLayout={e => onLayoutHandler(e, round)}>

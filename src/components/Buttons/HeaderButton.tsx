@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { TouchableOpacity, StyleSheet } from 'react-native';
+import { Platform, Pressable, StyleSheet } from 'react-native';
 
 interface Props {
     children: React.ReactNode;
@@ -10,9 +10,18 @@ interface Props {
 
 const HeaderButton: React.FunctionComponent<Props> = (props) => {
     return (
-        <TouchableOpacity accessibilityRole='button'  {...props} style={[styles.headerButton]}>
+        <Pressable
+            accessibilityRole='button'
+            {...props}
+            android_ripple={{ borderless: true }}
+            style={({ pressed }) => [
+                styles.headerButton,
+                Platform.OS === 'android' && styles.androidHeaderButton,
+                Platform.OS === 'ios' && pressed && styles.iosPressed,
+            ]}
+        >
             {props.children}
-        </TouchableOpacity>
+        </Pressable>
     );
 };
 
@@ -21,6 +30,17 @@ const styles = StyleSheet.create({
         fontSize: 20,
         padding: 10,
         paddingHorizontal: 15,
+    },
+    androidHeaderButton: {
+        width: 48,
+        height: 48,
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 0,
+        paddingHorizontal: 0,
+    },
+    iosPressed: {
+        opacity: 0.45,
     },
 });
 

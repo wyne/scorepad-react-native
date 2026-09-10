@@ -247,7 +247,7 @@ const GameSheet: React.FunctionComponent = () => {
             accessible={false}
             accessibilityViewIsModal={false}
         >
-            <BottomSheetScrollView>
+            <BottomSheetScrollView overScrollMode="always">
                 <SafeAreaView edges={['right', 'left']}>
                     <View style={styles.sheetHeaderContainer}>
                         <TouchableWithoutFeedback onPress={() => sheetTitlePress()}>
