@@ -119,6 +119,7 @@ const EditGameScreen: React.FunctionComponent<Props> = ({ navigation, route }) =
                 containerStyle={{ flex: 1 }}
                 ListFooterComponent={ListFooter}
                 data={playerIds}
+                overScrollMode="always"
                 renderItem={({ item: playerId, getIndex, drag, isActive }) => (
                     <ScaleDecorator activeScale={1.05}>
                         <PlayerListItem
