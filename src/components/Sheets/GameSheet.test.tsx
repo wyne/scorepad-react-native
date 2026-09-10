@@ -29,6 +29,7 @@ jest.mock('@gorhom/bottom-sheet', () => {
         index: number;
         backdropComponent?: React.ComponentType;
         backgroundStyle?: object;
+        handleComponent?: React.ComponentType;
         handleIndicatorStyle?: object;
         animatedPosition?: object;
         enablePanDownToClose?: boolean;
@@ -42,6 +43,7 @@ jest.mock('@gorhom/bottom-sheet', () => {
         
         return (
             <View testID="bottom-sheet" style={{ backgroundColor: 'rgb(30,40,50)' }} topInset={props.topInset}>
+                {props.handleComponent ? <props.handleComponent /> : null}
                 {props.children}
             </View>
         );
@@ -63,6 +65,7 @@ jest.mock('@gorhom/bottom-sheet', () => {
     return {
         __esModule: true,
         default: MockBottomSheet,
+        BottomSheetHandle: () => <View testID="bottom-sheet-default-handle" />,
         BottomSheetScrollView: MockBottomSheetScrollView,
         BottomSheetBackdrop: MockBottomSheetBackdrop,
     };
@@ -290,6 +293,32 @@ describe('GameSheet', () => {
         expect(getByTestId('bottom-sheet')).toBeTruthy();
         expect(getByText('Test Game')).toBeTruthy();
         expect(getByTestId('score-log-table')).toBeTruthy();
+    });
+
+    it('renders a tappable sheet handle', () => {
+        const store = createMockStore({
+            settings: {
+                currentGameId: 'game-1',
+            },
+            games: {
+                entities: {
+                    'game-1': mockGame,
+                },
+                ids: ['game-1'],
+            },
+            players: {
+                entities: mockPlayers,
+                ids: ['player-1', 'player-2'],
+            },
+        });
+
+        const { getByTestId } = render(
+            <Provider store={store}>
+                <GameSheet {...defaultProps} />
+            </Provider>
+        );
+
+        expect(getByTestId('game-sheet-handle')).toBeTruthy();
     });
 
     it('should allow full expansion up to the top safe area', () => {

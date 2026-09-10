@@ -1,9 +1,9 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import BottomSheet, { BottomSheetBackdrop, BottomSheetBackdropProps, BottomSheetScrollView } from '@gorhom/bottom-sheet';
+import BottomSheet, { BottomSheetBackdrop, BottomSheetBackdropProps, BottomSheetHandle, BottomSheetHandleProps, BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { ParamListBase, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { Alert, StyleSheet, Text, TouchableWithoutFeedback, View, useWindowDimensions } from 'react-native';
+import { Alert, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View, useWindowDimensions } from 'react-native';
 import { Button } from 'react-native-elements';
 import Animated, { Extrapolate, FadeIn, interpolate, Layout, useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -180,13 +180,13 @@ const GameSheet: React.FunctionComponent = () => {
     /**
      * Function to snap to the next point when the handle is pressed
      */
-    const sheetTitlePress = () => {
+    const sheetTitlePress = useCallback(() => {
         setSnapPointIndex((prevIndex) => {
             const nextIndex = (prevIndex + 1) % snapPoints.length;
             gameSheetRef?.current?.snapToIndex(nextIndex);
             return nextIndex;
         });
-    };
+    }, [gameSheetRef, snapPoints.length]);
 
     /**
      * Animated position of the bottom sheet
@@ -228,6 +228,17 @@ const GameSheet: React.FunctionComponent = () => {
         []
     );
 
+    const renderHandle = useCallback(
+        (props: BottomSheetHandleProps) => (
+            <TouchableOpacity activeOpacity={0.7} onPress={sheetTitlePress} testID="game-sheet-handle">
+                <View>
+                    <BottomSheetHandle {...props} indicatorStyle={{ backgroundColor: theme.sheetHandle }} />
+                </View>
+            </TouchableOpacity>
+        ),
+        [sheetTitlePress, theme.sheetHandle]
+    );
+
     if (currentGameId == undefined) return null;
 
     return (
@@ -239,6 +250,7 @@ const GameSheet: React.FunctionComponent = () => {
             snapPoints={snapPoints}
             backdropComponent={renderBackdrop}
             backgroundStyle={{ backgroundColor: theme.sheetBackground }}
+            handleComponent={renderHandle}
             handleIndicatorStyle={{ backgroundColor: theme.sheetHandle }}
             animatedPosition={animatedPosition}
             enablePanDownToClose={false}
