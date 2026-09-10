@@ -18,6 +18,7 @@ import { useTheme } from '../../theme';
 import { InteractionType } from '../Interactions/InteractionType';
 
 import { usePointValuesSheetContext } from './PointValuesSheetContext';
+import SheetBackground from './SheetBackground';
 
 const ADDEND_OPTIONS = [...Array(100).keys()].map((index) => ({
     value: index + 1,
@@ -122,7 +123,7 @@ const PointValuesSheet: React.FunctionComponent = () => {
             snapPoints={snapPoints}
             onChange={handleSheetChanges}
             backdropComponent={renderBackdrop}
-            backgroundStyle={{ backgroundColor: theme.sheetBackground }}
+            backgroundComponent={SheetBackground}
             handleIndicatorStyle={{ backgroundColor: theme.sheetHandle }}>
             <BottomSheetScrollView
                 contentContainerStyle={{ alignItems: 'center' }}

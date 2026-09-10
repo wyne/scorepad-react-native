@@ -19,6 +19,7 @@ import { useTheme } from '../../theme';
 
 import { useChooseWinnersSheetContext } from './ChooseWinnersSheetContext';
 import GlassButton from './GlassButton';
+import SheetBackground from './SheetBackground';
 
 const ChooseWinnersSheet: React.FunctionComponent = () => {
     const theme = useTheme();
@@ -137,10 +138,9 @@ const ChooseWinnersSheet: React.FunctionComponent = () => {
             enablePanDownToClose={false}
             snapPoints={snapPoints}
             backdropComponent={renderBackdrop}
-            backgroundStyle={{ backgroundColor: theme.sheetBackground }}
+            backgroundComponent={SheetBackground}
             handleIndicatorStyle={{ backgroundColor: theme.sheetHandle }}
             topInset={topInset}
-            style={theme.background === '#000000' ? undefined : styles.sheetShadow}
             accessible={false}
             accessibilityViewIsModal={false}
         >
@@ -260,13 +260,6 @@ const styles = StyleSheet.create({
     playerScore: {
         fontSize: 16,
         fontWeight: '600',
-    },
-    sheetShadow: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: -3 },
-        shadowOpacity: 0.12,
-        shadowRadius: 5,
-        elevation: 8,
     },
 });
 

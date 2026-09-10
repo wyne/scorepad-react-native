@@ -6,6 +6,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import { useTheme } from '../../theme';
 
 import { useGestureInfoSheetContext } from './GestureInfoSheetContext';
+import SheetBackground from './SheetBackground';
 
 const GestureInfoSheet: React.FunctionComponent = () => {
     const theme = useTheme();
@@ -32,7 +33,7 @@ const GestureInfoSheet: React.FunctionComponent = () => {
             enableDynamicSizing={false}
             enablePanDownToClose={true}
             backdropComponent={renderBackdrop}
-            backgroundStyle={{ backgroundColor: theme.sheetBackground }}
+            backgroundComponent={SheetBackground}
             handleIndicatorStyle={{ backgroundColor: theme.sheetHandle }}
         >
             <BottomSheetScrollView contentContainerStyle={styles.content} overScrollMode="always" style={styles.container}>
