@@ -7,9 +7,10 @@ import { act, fireEvent, render } from '@testing-library/react-native';
 import { Alert } from 'react-native';
 import { Provider } from 'react-redux';
 
-import gamesReducer, { deleteGameAndPlayers, roundNext } from '../../redux/GamesSlice';
+import gamesReducer, { deleteGameAndPlayers, gameSave, roundNext } from '../../redux/GamesSlice';
 import playersReducer from '../../redux/PlayersSlice';
 import settingsReducer from '../../redux/SettingsSlice';
+import ListScreen from '../screens/ListScreen';
 
 import GameListItem from './GameListItem';
 
@@ -17,17 +18,48 @@ jest.mock('../Analytics', () => ({
     logEvent: jest.fn(),
 }));
 
+jest.mock('@react-navigation/elements', () => ({
+    useHeaderHeight: () => 0,
+}));
+
+jest.mock('@react-navigation/native', () => ({
+    ...jest.requireActual('@react-navigation/native'),
+    useFocusEffect: jest.fn(),
+}));
+
+jest.mock('react-native-safe-area-context', () => ({
+    SafeAreaView: jest.requireActual('react-native').View,
+    useSafeAreaInsets: () => ({ top: 0, bottom: 0, left: 0, right: 0 }),
+}));
+
+jest.mock('../hooks/useStoreReviewPrompt', () => ({
+    useStoreReviewPrompt: () => jest.fn(),
+}));
+
+jest.mock('./FloatingActionButton', () => ({
+    __esModule: true,
+    default: () => null,
+    FAB_BOTTOM_MARGIN: 16,
+    FAB_LIST_CLEARANCE: 16,
+    FAB_SIZE: 60,
+}));
+
 jest.mock('react-native-reanimated', () => {
-    const View = jest.requireActual('react-native').View;
+    const { FlatList, View } = jest.requireActual('react-native');
 
     return {
         __esModule: true,
         default: {
             View: View,
+            FlatList,
         },
         FadeInUp: {
             duration: jest.fn(() => ({ delay: jest.fn() })),
         },
+        LinearTransition: {
+            easing: jest.fn(() => ({})),
+        },
+        Easing: { ease: jest.fn() },
     };
 });
 
@@ -128,6 +160,48 @@ describe('GameListItem', () => {
     beforeEach(() => {
         jest.clearAllMocks();
         mockContextMenuProps.current = null;
+    });
+
+    it('keeps separators between games as the mounted list gains and loses rows', () => {
+        const store = createMockStore(populatedState);
+        const { getByTestId, queryByTestId, queryAllByTestId, getByText } = render(
+            <Provider store={store}>
+                <ListScreen navigation={mockNavigation} />
+            </Provider>
+        );
+
+        expect(queryAllByTestId(/^game-list-separator-/)).toHaveLength(0);
+
+        // Prepend twice without remounting the screen, as creation/rematch do.
+        for (const number of [2, 3]) {
+            act(() => {
+                store.dispatch(gameSave({
+                    ...mockGame,
+                    id: `game-${number}`,
+                    title: `Game ${number}`,
+                    dateCreated: mockGame.dateCreated + number * 1000,
+                }));
+            });
+            expect(getByText(`Game ${number}`)).toBeTruthy();
+            // The newest game sorts to the top, so it draws no line of its own;
+            // the line belongs to the row it pushed down.
+            expect(queryByTestId(`game-list-separator-game-${number}`)).toBeNull();
+            expect(getByTestId('game-list-separator-game-1')).toBeTruthy();
+            expect(queryAllByTestId(/^game-list-separator-/)).toHaveLength(number - 1);
+        }
+
+        // Removing the trailing game must also remove the line above it.
+        act(() => {
+            store.dispatch(deleteGameAndPlayers('game-1'));
+        });
+        expect(queryByTestId('game-list-separator-game-1')).toBeNull();
+        expect(getByTestId('game-list-separator-game-2')).toBeTruthy();
+
+        act(() => {
+            store.dispatch(deleteGameAndPlayers('game-3'));
+        });
+        expect(getByText('Game 2')).toBeTruthy();
+        expect(queryAllByTestId(/^game-list-separator-/)).toHaveLength(0);
     });
 
     it('should render game title, players, and badges for a valid game', () => {

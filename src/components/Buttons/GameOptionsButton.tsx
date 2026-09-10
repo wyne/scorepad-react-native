@@ -168,14 +168,30 @@ const GameOptionsButton: React.FunctionComponent = () => {
             testID="game-options-menu"
         >
             <View style={styles.button}>
-                {Platform.OS === 'android' ? (
-                    <View style={styles.androidOverflowButton}>
-                        <MaterialCommunityIcons name="dots-vertical" size={28} color={theme.text} />
+                <View style={styles.content}>
+                    <View style={styles.addendColumn}>
+                        <Text style={[styles.addendText, { color: theme.text }]}>{addendOne}</Text>
+                        <Text style={[styles.addendText, { color: theme.text }]}>{addendTwo}</Text>
+                    </View>
+                    <View>
+                        {Platform.OS === 'ios' ? (
+                            <SymbolView
+                                name={isDial ? 'dial.min' : isSwipe ? 'hand.draw' : 'hand.point.up'}
+                                size={30}
+                                tintColor={theme.text}
+                            />
+                        ) : (
+                            <MaterialCommunityIcons
+                                name={isDial ? 'knob' : isSwipe ? 'gesture-swipe-up' : 'gesture-tap'}
+                                size={30}
+                                color={theme.text}
+                            />
+                        )}
                         {showDialDot && (
                             <View testID="dial-notification-dot" style={{
                                 position: 'absolute',
-                                top: 6,
-                                right: 8,
+                                top: -2,
+                                right: -4,
                                 width: 8,
                                 height: 8,
                                 borderRadius: 4,
@@ -185,34 +201,7 @@ const GameOptionsButton: React.FunctionComponent = () => {
                             }} />
                         )}
                     </View>
-                ) : (
-                    <View style={styles.content}>
-                        <View style={styles.addendColumn}>
-                            <Text style={[styles.addendText, { color: theme.text }]}>{addendOne}</Text>
-                            <Text style={[styles.addendText, { color: theme.text }]}>{addendTwo}</Text>
-                        </View>
-                        <View>
-                            <SymbolView
-                                name={isDial ? 'dial.min' : isSwipe ? 'hand.draw' : 'hand.point.up'}
-                                size={30}
-                                tintColor={theme.text}
-                            />
-                            {showDialDot && (
-                                <View testID="dial-notification-dot" style={{
-                                    position: 'absolute',
-                                    top: -2,
-                                    right: -4,
-                                    width: 8,
-                                    height: 8,
-                                    borderRadius: 4,
-                                    backgroundColor: theme.warning,
-                                    borderWidth: 1,
-                                    borderColor: theme.backgroundSecondary,
-                                }} />
-                            )}
-                        </View>
-                    </View>
-                )}
+                </View>
             </View>
         </MenuView>
     );
@@ -220,13 +209,7 @@ const GameOptionsButton: React.FunctionComponent = () => {
 
 const styles = StyleSheet.create({
     button: {
-        padding: Platform.OS === 'android' ? 0 : 8,
-    },
-    androidOverflowButton: {
-        width: 48,
-        height: 48,
-        alignItems: 'center',
-        justifyContent: 'center',
+        padding: 8,
     },
     content: {
         flexDirection: 'row',
