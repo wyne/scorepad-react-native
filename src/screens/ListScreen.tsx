@@ -101,6 +101,7 @@ const ListScreen: React.FunctionComponent<Props> = ({ navigation }) => {
                         <Text style={{ textAlign: 'center', padding: 10, color: theme.textSecondary }}>Tap the + button to create a new game.</Text>
                     </>
                 }
+                overScrollMode="always"
                 style={[styles.list, { backgroundColor: theme.backgroundSecondary }]}
                 data={gameIds}
                 renderItem={({ item, index }) =>

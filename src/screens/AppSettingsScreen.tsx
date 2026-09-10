@@ -163,7 +163,11 @@ const AppSettingsScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     };
 
     return (
-        <ScrollView style={{ backgroundColor: theme.background, flex: 1 }} contentContainerStyle={{ paddingBottom: 50 }}>
+        <ScrollView
+            contentContainerStyle={{ paddingBottom: 50 }}
+            overScrollMode="always"
+            style={{ backgroundColor: theme.background, flex: 1 }}
+        >
             <View style={[styles.iconWrapper, { alignItems: 'center' }]}>
                 <RotatingIcon />
                 <Text testID="scorepad-title" style={{ color: theme.textTertiary }} onPress={alertWithVersion}>

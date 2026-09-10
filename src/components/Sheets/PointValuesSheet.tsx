@@ -124,7 +124,11 @@ const PointValuesSheet: React.FunctionComponent = () => {
             backdropComponent={renderBackdrop}
             backgroundStyle={{ backgroundColor: theme.sheetBackground }}
             handleIndicatorStyle={{ backgroundColor: theme.sheetHandle }}>
-            <BottomSheetScrollView style={styles.sheetContainer} contentContainerStyle={{ alignItems: 'center' }}>
+            <BottomSheetScrollView
+                contentContainerStyle={{ alignItems: 'center' }}
+                overScrollMode="always"
+                style={styles.sheetContainer}
+            >
                 <View style={{ flex: 1, width: '100%', alignItems: 'center' }}>
                     <Text style={{ color: theme.text, fontSize: 20 }}>Point Values</Text>
                     <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-around', padding: 10 }}>

@@ -35,7 +35,7 @@ const GestureInfoSheet: React.FunctionComponent = () => {
             backgroundStyle={{ backgroundColor: theme.sheetBackground }}
             handleIndicatorStyle={{ backgroundColor: theme.sheetHandle }}
         >
-            <BottomSheetScrollView style={styles.container} contentContainerStyle={styles.content}>
+            <BottomSheetScrollView contentContainerStyle={styles.content} overScrollMode="always" style={styles.container}>
                 <Text style={[styles.title, { color: theme.text }]}>Tap Gesture</Text>
                 <Text style={[styles.paragraph, { color: theme.textSecondary }]}>
                     Tap the top half of a player&apos;s tile to increase their score, or the bottom half
