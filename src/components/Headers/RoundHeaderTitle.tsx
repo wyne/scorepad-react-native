@@ -1,12 +1,15 @@
 import React from 'react';
 
+import { MenuAction, MenuView } from '@react-native-menu/menu';
+import { GlassView } from 'expo-glass-effect';
 import * as Haptics from 'expo-haptics';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Icon } from 'react-native-elements/dist/icons/Icon';
 
-import { roundNext, roundPrevious, selectGameById } from '../../../redux/GamesSlice';
+import { roundNext, roundPrevious, selectGameById, updateGame } from '../../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
 import { logEvent } from '../../Analytics';
+import { LIQUID_GLASS } from '../../platform';
 import { useTheme } from '../../theme';
 
 const RoundHeaderTitle: React.FunctionComponent = () => {
@@ -54,30 +57,121 @@ const RoundHeaderTitle: React.FunctionComponent = () => {
     };
 
     const isLocked = currentGame?.locked === true;
+    const previousDisabled = isLocked || isFirstRound;
+    const nextDisabled = isLocked || isLastRound && (currentGame?.locked ?? false);
+    const roundPickerEnabled = !isLocked && roundCount > 1;
+    const roundLabel = isLocked ? 'Final' : `Round ${currentRoundIndex + 1} of ${roundCount}`;
+    const roundActions: MenuAction[] = Array.from({ length: roundCount }, (_, round) => ({
+        id: round.toString(),
+        title: Platform.OS === 'android' && round === currentRoundIndex
+            ? `✓ Round ${round + 1}`
+            : `Round ${round + 1}`,
+        state: round === currentRoundIndex ? 'on' : 'off',
+    }));
 
-    return (
-        <View style={styles.container}>
-            <TouchableOpacity
-                style={[styles.chevron, { opacity: isLocked || isFirstRound ? 0 : 1 }]}
-                onPress={prevRoundHandler}
-                disabled={isLocked || isFirstRound}
-                testID="previous-round-button"
+    const selectRound = (event: string) => {
+        const round = Number(event);
+        if (!Number.isInteger(round) || round < 0 || round >= roundCount || round === currentRoundIndex) return;
+
+        void Haptics.selectionAsync();
+        dispatch(updateGame({
+            id: currentGameId,
+            changes: { roundCurrent: round },
+        }));
+        void logEvent('round_change', {
+            game_id: currentGameId,
+            source: 'header menu',
+            from_round: currentRoundIndex,
+            to_round: round,
+        });
+    };
+
+    const roundPicker = roundPickerEnabled ? (
+        <MenuView
+            actions={roundActions}
+            onPressAction={({ nativeEvent }) => selectRound(nativeEvent.event)}
+            shouldOpenOnLongPress={false}
+            testID="round-picker-menu"
+        >
+            <View
+                accessibilityLabel={`${roundLabel}. Select round`}
+                accessibilityRole="button"
+                style={styles.roundPicker}
             >
-                <Icon name="arrow-left" type="font-awesome-5" size={18} color={theme.tint} />
-            </TouchableOpacity>
+                <Text style={[styles.title, { color: theme.headerText }]} allowFontScaling={false}>
+                    {roundLabel}
+                </Text>
+                <Icon name="caret-down" type="font-awesome-5" size={10} color={theme.tint} />
+            </View>
+        </MenuView>
+    ) : (
+        <View style={styles.roundPicker}>
             <Text style={[styles.title, { color: theme.headerText }]} allowFontScaling={false}>
-                {isLocked ? 'Final' : `Round ${currentRoundIndex + 1}${isLastRound ? '' : `/${roundCount}`}`}
+                {roundLabel}
             </Text>
-            <TouchableOpacity
-                style={[styles.chevron, { opacity: isLocked || isLastRound && currentGame?.locked ? 0 : 1 }]}
-                onPress={nextRoundHandler}
-                disabled={isLocked || isLastRound && (currentGame?.locked ?? false)}
-                testID="next-round-button"
-            >
-                <Icon name="arrow-right" type="font-awesome-5" size={18} color={theme.tint} />
-            </TouchableOpacity>
         </View>
     );
+
+    const controls = (
+        <>
+            <Pressable
+                accessibilityLabel="Previous round"
+                accessibilityRole="button"
+                accessibilityState={{ disabled: previousDisabled }}
+                android_ripple={{ color: theme.separator }}
+                disabled={previousDisabled}
+                hitSlop={4}
+                onPress={prevRoundHandler}
+                style={({ pressed }) => [
+                    styles.chevron,
+                    { opacity: previousDisabled ? 0 : 1 },
+                    Platform.OS === 'ios' && pressed && styles.pressed,
+                ]}
+                testID="previous-round-button"
+            >
+                <Icon name="chevron-left" type="font-awesome-5" size={16} color={theme.tint} />
+            </Pressable>
+            {roundPicker}
+            <Pressable
+                accessibilityLabel="Next round"
+                accessibilityRole="button"
+                accessibilityState={{ disabled: nextDisabled }}
+                android_ripple={{ color: theme.separator }}
+                disabled={nextDisabled}
+                hitSlop={4}
+                onPress={nextRoundHandler}
+                style={({ pressed }) => [
+                    styles.chevron,
+                    { opacity: nextDisabled ? 0 : 1 },
+                    Platform.OS === 'ios' && pressed && styles.pressed,
+                ]}
+                testID="next-round-button"
+            >
+                <Icon name="chevron-right" type="font-awesome-5" size={16} color={theme.tint} />
+            </Pressable>
+        </>
+    );
+
+    if (LIQUID_GLASS) {
+        return (
+            <GlassView
+                colorScheme={theme.headerText === '#FFFFFF' ? 'dark' : 'light'}
+                glassEffectStyle="regular"
+                isInteractive
+                style={styles.container}
+            >
+                {controls}
+            </GlassView>
+        );
+    }
+
+    const backgroundColor = Platform.OS === 'android'
+        ? theme.backgroundSecondary
+        : theme.headerText === '#FFFFFF'
+            ? 'rgba(255,255,255,0.14)'
+            : 'rgba(118,118,128,0.12)';
+
+    return <View style={[styles.container, styles.fallbackContainer, { backgroundColor }]}>{controls}</View>;
 };
 
 const styles = StyleSheet.create({
@@ -85,18 +179,32 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
+        borderRadius: Platform.OS === 'android' ? 20 : 18,
+        height: Platform.OS === 'android' ? 40 : 36,
+    },
+    fallbackContainer: {
+        overflow: 'hidden',
     },
     title: {
-        fontSize: 20,
+        fontSize: Platform.OS === 'android' ? 18 : 17,
         fontVariant: ['tabular-nums'],
         textAlign: 'center',
-        minWidth: 110,
+    },
+    roundPicker: {
+        alignItems: 'center',
+        flexDirection: 'row',
+        gap: 6,
+        justifyContent: 'center',
+        width: Platform.OS === 'android' ? 130 : 120,
     },
     chevron: {
-        width: 32,
+        width: Platform.OS === 'android' ? 40 : 36,
+        height: Platform.OS === 'android' ? 40 : 36,
         alignItems: 'center',
         justifyContent: 'center',
-        padding: 8,
+    },
+    pressed: {
+        opacity: 0.45,
     },
 });
 
