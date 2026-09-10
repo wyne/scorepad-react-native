@@ -1,5 +1,31 @@
 # Changelog
 
+## [3.1.2](https://github.com/wyne/scorepad-react-native/compare/v3.1.1...v3.1.2) (2026-09-10)
+
+
+### Bug Fixes
+
+* **edit-player:** give the screen a top margin and a full-height scroll area ([#747](https://github.com/wyne/scorepad-react-native/issues/747)) ([d916b92](https://github.com/wyne/scorepad-react-native/commit/d916b922f9d0ec1cf5e61223ee5e94e1a4ba9a83))
+* **fab:** restore SwiftUI floating action button ([#753](https://github.com/wyne/scorepad-react-native/issues/753)) ([698bfbe](https://github.com/wyne/scorepad-react-native/commit/698bfbe29e099fc0abf95493f54cfcb1a042ff20))
+* **fab:** stop an outside tap on the open menu reaching the list ([#746](https://github.com/wyne/scorepad-react-native/issues/746)) ([4cc7a35](https://github.com/wyne/scorepad-react-native/commit/4cc7a353b96637935f6c716a18d83b0288fbbef1))
+* **game-list:** tidy the row's hierarchy, spacing and dates ([#750](https://github.com/wyne/scorepad-react-native/issues/750)) ([d07ce4e](https://github.com/wyne/scorepad-react-native/commit/d07ce4e415f1d4ee38e94873a8b0e523fd57a682))
+* **list:** refine game list hierarchy ([#752](https://github.com/wyne/scorepad-react-native/issues/752)) ([5417264](https://github.com/wyne/scorepad-react-native/commit/54172641d68009a7db0a6b1b2b085ebc80015365))
+* **list:** repair game list separators and revert the android options button ([#756](https://github.com/wyne/scorepad-react-native/issues/756)) ([7d73a70](https://github.com/wyne/scorepad-react-native/commit/7d73a700be2e5332b12baff4710d384353df7b3f))
+* polish android interactions ([#755](https://github.com/wyne/scorepad-react-native/issues/755)) ([d061fe4](https://github.com/wyne/scorepad-react-native/commit/d061fe460c30a8efb6c2132da3b0c0ef2c9c7af2))
+* **settings:** label the analytics state in the version alert ([#745](https://github.com/wyne/scorepad-react-native/issues/745)) ([29a16c2](https://github.com/wyne/scorepad-react-native/commit/29a16c2b89b451ebf3419a152af10facd6b52986))
+* **sheets:** make the sheet edge visible on Android ([#757](https://github.com/wyne/scorepad-react-native/issues/757)) ([cee99ce](https://github.com/wyne/scorepad-react-native/commit/cee99ce86ce257eb695f42616f3396dfb40803ca))
+* **ui:** one section label style across the app ([#748](https://github.com/wyne/scorepad-react-native/issues/748)) ([0e9a7b8](https://github.com/wyne/scorepad-react-native/commit/0e9a7b8cc3dc38ded5c7178ce4ed9b509d82dfe4))
+
+
+### Infrastructure
+
+* drop --what-to-test so the iOS submission can be scheduled ([#743](https://github.com/wyne/scorepad-react-native/issues/743)) ([a7a27bd](https://github.com/wyne/scorepad-react-native/commit/a7a27bdea888d91fd661b3115cb87a73f2e39756))
+
+
+### Miscellaneous
+
+* **deps:** bump expo to 57.0.21 and expo-glass-effect to 57.0.2 ([#751](https://github.com/wyne/scorepad-react-native/issues/751)) ([bcaa6eb](https://github.com/wyne/scorepad-react-native/commit/bcaa6eb41dcc9a8a17815a51a244ab1452445fa6))
+
 ## [3.1.1](https://github.com/wyne/scorepad-react-native/compare/v3.1.0...v3.1.1) (2026-09-08)
 
 
