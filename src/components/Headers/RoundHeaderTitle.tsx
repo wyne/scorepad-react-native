@@ -72,24 +72,12 @@ const RoundHeaderTitle: React.FunctionComponent = () => {
         </Text>
     ) : (
         <View style={styles.roundLabel}>
-            <View style={styles.roundDescriptorRow}>
-                <Text
-                    maxFontSizeMultiplier={1.15}
-                    style={[styles.roundDescriptor, { color: isEarlierRound ? theme.warning : theme.headerText }]}
-                >
-                    {roundDescriptor}
-                </Text>
-                {roundPickerEnabled && (
-                    <View style={styles.menuIndicator}>
-                        <Icon
-                            color={isEarlierRound ? theme.warning : theme.headerText}
-                            name="caret-down"
-                            size={7}
-                            type="font-awesome-5"
-                        />
-                    </View>
-                )}
-            </View>
+            <Text
+                maxFontSizeMultiplier={1.15}
+                style={[styles.roundDescriptor, { color: isEarlierRound ? theme.warning : theme.headerText }]}
+            >
+                {roundDescriptor}
+            </Text>
             <Text
                 maxFontSizeMultiplier={1.3}
                 style={[styles.roundValue, { color: theme.headerText }]}
@@ -250,11 +238,6 @@ const styles = StyleSheet.create({
         lineHeight: Platform.OS === 'android' ? 13 : 12,
         textAlign: 'center',
     },
-    roundDescriptorRow: {
-        alignItems: 'center',
-        flexDirection: 'row',
-        justifyContent: 'center',
-    },
     roundLabel: {
         alignItems: 'center',
         justifyContent: 'center',
@@ -270,10 +253,6 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         width: Platform.OS === 'android' ? 104 : 96,
-    },
-    menuIndicator: {
-        marginLeft: 4,
-        opacity: 0.55,
     },
     chevron: {
         width: Platform.OS === 'android' ? 44 : 40,
