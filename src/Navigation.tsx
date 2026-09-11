@@ -8,7 +8,7 @@ import { useAppSelector } from '../redux/hooks';
 import { logScreenView } from '../src/Analytics';
 import AppSettingsButton from '../src/components/Buttons/AppSettingsButton';
 import GameOptionsButton from '../src/components/Buttons/GameOptionsButton';
-import RoundHeaderTitle from '../src/components/Headers/RoundHeaderTitle';
+import CombinedGameRoundHeader from '../src/components/Headers/CombinedGameRoundHeader';
 import AppSettingsScreen from '../src/screens/AppSettingsScreen';
 import DebugLogScreen from '../src/screens/DebugLogScreen';
 import EditGameScreen from '../src/screens/EditGameScreen';
@@ -101,7 +101,7 @@ export const Navigation = () => {
                         <Stack.Screen name="Game" component={GameScreen}
                             options={{
                                 orientation: 'all',
-                                headerTitle: () => <RoundHeaderTitle />,
+                                headerTitle: () => <CombinedGameRoundHeader />,
                                 headerRight: () => <GameOptionsButton />,
                                 headerTransparent: true,
                                 headerBlurEffect: 'systemChromeMaterial',
