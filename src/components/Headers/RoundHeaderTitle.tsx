@@ -12,7 +12,7 @@ import { logEvent } from '../../Analytics';
 import { LIQUID_GLASS } from '../../platform';
 import { useTheme } from '../../theme';
 
-const RoundHeaderTitle: React.FunctionComponent = () => {
+const RoundHeaderTitle: React.FunctionComponent<{ compact?: boolean }> = ({ compact = false }) => {
     const theme = useTheme();
     const dispatch = useAppDispatch();
 
@@ -135,41 +135,45 @@ const RoundHeaderTitle: React.FunctionComponent = () => {
 
     const controls = (
         <>
-            <Pressable
-                accessibilityLabel="Previous round"
-                accessibilityRole="button"
-                accessibilityState={{ disabled: previousDisabled }}
-                android_ripple={{ color: theme.separator }}
-                disabled={previousDisabled}
-                hitSlop={4}
-                onPress={prevRoundHandler}
-                style={({ pressed }) => [
-                    styles.chevron,
-                    { opacity: previousDisabled ? 0 : 1 },
-                    Platform.OS === 'ios' && pressed && styles.pressed,
-                ]}
-                testID="previous-round-button"
-            >
-                <Icon name="chevron-left" type="font-awesome-5" size={16} color={theme.tint} />
-            </Pressable>
+            {!compact &&
+                <Pressable
+                    accessibilityLabel="Previous round"
+                    accessibilityRole="button"
+                    accessibilityState={{ disabled: previousDisabled }}
+                    android_ripple={{ color: theme.separator }}
+                    disabled={previousDisabled}
+                    hitSlop={4}
+                    onPress={prevRoundHandler}
+                    style={({ pressed }) => [
+                        styles.chevron,
+                        { opacity: previousDisabled ? 0 : 1 },
+                        Platform.OS === 'ios' && pressed && styles.pressed,
+                    ]}
+                    testID="previous-round-button"
+                >
+                    <Icon name="chevron-left" type="font-awesome-5" size={16} color={theme.tint} />
+                </Pressable>
+            }
             {roundPicker}
-            <Pressable
-                accessibilityLabel="Next round"
-                accessibilityRole="button"
-                accessibilityState={{ disabled: nextDisabled }}
-                android_ripple={{ color: theme.separator }}
-                disabled={nextDisabled}
-                hitSlop={4}
-                onPress={nextRoundHandler}
-                style={({ pressed }) => [
-                    styles.chevron,
-                    { opacity: nextDisabled ? 0 : 1 },
-                    Platform.OS === 'ios' && pressed && styles.pressed,
-                ]}
-                testID="next-round-button"
-            >
-                <Icon name="chevron-right" type="font-awesome-5" size={16} color={theme.tint} />
-            </Pressable>
+            {!compact &&
+                <Pressable
+                    accessibilityLabel="Next round"
+                    accessibilityRole="button"
+                    accessibilityState={{ disabled: nextDisabled }}
+                    android_ripple={{ color: theme.separator }}
+                    disabled={nextDisabled}
+                    hitSlop={4}
+                    onPress={nextRoundHandler}
+                    style={({ pressed }) => [
+                        styles.chevron,
+                        { opacity: nextDisabled ? 0 : 1 },
+                        Platform.OS === 'ios' && pressed && styles.pressed,
+                    ]}
+                    testID="next-round-button"
+                >
+                    <Icon name="chevron-right" type="font-awesome-5" size={16} color={theme.tint} />
+                </Pressable>
+            }
         </>
     );
 
@@ -179,7 +183,7 @@ const RoundHeaderTitle: React.FunctionComponent = () => {
                 colorScheme={theme.headerText === '#FFFFFF' ? 'dark' : 'light'}
                 glassEffectStyle="regular"
                 isInteractive
-                style={styles.container}
+                style={[styles.container, compact && styles.compactContainer]}
             >
                 {controls}
             </GlassView>
@@ -192,7 +196,11 @@ const RoundHeaderTitle: React.FunctionComponent = () => {
             ? 'rgba(255,255,255,0.14)'
             : 'rgba(118,118,128,0.12)';
 
-    return <View style={[styles.container, styles.fallbackContainer, { backgroundColor }]}>{controls}</View>;
+    return (
+        <View style={[styles.container, compact && styles.compactContainer, styles.fallbackContainer, { backgroundColor }]}>
+            {controls}
+        </View>
+    );
 };
 
 const styles = StyleSheet.create({
@@ -203,6 +211,9 @@ const styles = StyleSheet.create({
         borderRadius: Platform.OS === 'android' ? 24 : 22,
         height: Platform.OS === 'android' ? 48 : 44,
         width: Platform.OS === 'android' ? 192 : undefined,
+    },
+    compactContainer: {
+        width: Platform.OS === 'android' ? 104 : 96,
     },
     fallbackContainer: {
         overflow: 'hidden',

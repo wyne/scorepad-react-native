@@ -101,7 +101,7 @@ export const Navigation = () => {
                         <Stack.Screen name="Game" component={GameScreen}
                             options={{
                                 orientation: 'all',
-                                headerTitle: () => <RoundHeaderTitle />,
+                                headerTitle: () => <RoundHeaderTitle compact />,
                                 headerRight: () => <GameOptionsButton />,
                                 headerTransparent: true,
                                 headerBlurEffect: 'systemChromeMaterial',
