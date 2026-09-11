@@ -12,6 +12,24 @@ import { logEvent } from '../../Analytics';
 import { LIQUID_GLASS } from '../../platform';
 import { useTheme } from '../../theme';
 
+export const GameHeaderTitle: React.FunctionComponent = () => {
+    const theme = useTheme();
+    const currentGameId = useAppSelector(state => state.settings.currentGameId);
+    const currentGame = useAppSelector(state => selectGameById(state, currentGameId ?? ''));
+
+    if (currentGame == null) return null;
+
+    return (
+        <Text
+            maxFontSizeMultiplier={1.3}
+            numberOfLines={1}
+            style={[styles.gameTitle, { color: theme.headerText }]}
+        >
+            {currentGame.title}
+        </Text>
+    );
+};
+
 const RoundHeaderTitle: React.FunctionComponent = () => {
     const theme = useTheme();
     const dispatch = useAppDispatch();
@@ -212,6 +230,12 @@ const styles = StyleSheet.create({
         fontWeight: '600',
         lineHeight: Platform.OS === 'android' ? 21 : 20,
         fontVariant: ['tabular-nums'],
+        textAlign: 'center',
+    },
+    gameTitle: {
+        fontSize: Platform.OS === 'android' ? 20 : 17,
+        fontWeight: '600',
+        maxWidth: Platform.OS === 'android' ? 190 : 180,
         textAlign: 'center',
     },
     roundDescriptor: {
