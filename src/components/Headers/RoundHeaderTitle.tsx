@@ -57,10 +57,12 @@ const RoundHeaderTitle: React.FunctionComponent = () => {
     };
 
     const isLocked = currentGame?.locked === true;
+    const isEarlierRound = !isLocked && currentRoundIndex < roundCount - 1;
     const previousDisabled = isLocked || isFirstRound;
     const nextDisabled = isLocked || isLastRound && (currentGame?.locked ?? false);
     const roundPickerEnabled = !isLocked && roundCount > 1;
-    const roundLabel = isLocked ? 'Final' : `Round ${currentRoundIndex + 1} of ${roundCount}`;
+    const roundDescriptor = isEarlierRound ? 'Earlier round' : 'Round';
+    const roundLabel = isLocked ? 'Final' : `${roundDescriptor} ${currentRoundIndex + 1} of ${roundCount}`;
     const roundPickerLabel = isLocked ? (
         <Text
             maxFontSizeMultiplier={1.3}
@@ -72,9 +74,9 @@ const RoundHeaderTitle: React.FunctionComponent = () => {
         <View style={styles.roundLabel}>
             <Text
                 maxFontSizeMultiplier={1.15}
-                style={[styles.roundDescriptor, { color: theme.headerText }]}
+                style={[styles.roundDescriptor, { color: isEarlierRound ? theme.warning : theme.headerText }]}
             >
-                Round
+                {roundDescriptor}
             </Text>
             <Text
                 maxFontSizeMultiplier={1.3}
@@ -117,6 +119,7 @@ const RoundHeaderTitle: React.FunctionComponent = () => {
             testID="round-picker-menu"
         >
             <View
+                accessibilityHint={isEarlierRound ? 'Score changes affect an earlier round' : undefined}
                 accessibilityLabel={`${roundLabel}. Select round`}
                 accessibilityRole="button"
                 style={styles.roundPicker}
@@ -179,7 +182,11 @@ const RoundHeaderTitle: React.FunctionComponent = () => {
                 colorScheme={theme.headerText === '#FFFFFF' ? 'dark' : 'light'}
                 glassEffectStyle="regular"
                 isInteractive
-                style={styles.container}
+                style={[
+                    styles.container,
+                    styles.outlinedContainer,
+                    { borderColor: isEarlierRound ? theme.warning : 'transparent' },
+                ]}
             >
                 {controls}
             </GlassView>
@@ -192,7 +199,18 @@ const RoundHeaderTitle: React.FunctionComponent = () => {
             ? 'rgba(255,255,255,0.14)'
             : 'rgba(118,118,128,0.12)';
 
-    return <View style={[styles.container, styles.fallbackContainer, { backgroundColor }]}>{controls}</View>;
+    return (
+        <View
+            style={[
+                styles.container,
+                styles.outlinedContainer,
+                styles.fallbackContainer,
+                { backgroundColor, borderColor: isEarlierRound ? theme.warning : 'transparent' },
+            ]}
+        >
+            {controls}
+        </View>
+    );
 };
 
 const styles = StyleSheet.create({
@@ -203,6 +221,9 @@ const styles = StyleSheet.create({
         borderRadius: Platform.OS === 'android' ? 24 : 22,
         height: Platform.OS === 'android' ? 48 : 44,
         width: Platform.OS === 'android' ? 192 : undefined,
+    },
+    outlinedContainer: {
+        borderWidth: Platform.OS === 'android' ? 2 : 1.5,
     },
     fallbackContainer: {
         overflow: 'hidden',
