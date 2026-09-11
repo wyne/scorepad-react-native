@@ -72,12 +72,24 @@ const RoundHeaderTitle: React.FunctionComponent = () => {
         </Text>
     ) : (
         <View style={styles.roundLabel}>
-            <Text
-                maxFontSizeMultiplier={1.15}
-                style={[styles.roundDescriptor, { color: isEarlierRound ? theme.warning : theme.headerText }]}
-            >
-                {roundDescriptor}
-            </Text>
+            <View style={styles.roundDescriptorRow}>
+                <Text
+                    maxFontSizeMultiplier={1.15}
+                    style={[styles.roundDescriptor, { color: isEarlierRound ? theme.warning : theme.headerText }]}
+                >
+                    {roundDescriptor}
+                </Text>
+                {roundPickerEnabled && (
+                    <View style={styles.menuIndicator}>
+                        <Icon
+                            color={isEarlierRound ? theme.warning : theme.headerText}
+                            name="caret-down"
+                            size={7}
+                            type="font-awesome-5"
+                        />
+                    </View>
+                )}
+            </View>
             <Text
                 maxFontSizeMultiplier={1.3}
                 style={[styles.roundValue, { color: theme.headerText }]}
@@ -125,9 +137,6 @@ const RoundHeaderTitle: React.FunctionComponent = () => {
                 style={styles.roundPicker}
             >
                 {roundPickerLabel}
-                <View style={styles.menuIndicator}>
-                    <Icon name="caret-down" type="font-awesome-5" size={9} color={theme.tint} />
-                </View>
             </View>
         </MenuView>
     ) : (
@@ -241,6 +250,11 @@ const styles = StyleSheet.create({
         lineHeight: Platform.OS === 'android' ? 13 : 12,
         textAlign: 'center',
     },
+    roundDescriptorRow: {
+        alignItems: 'center',
+        flexDirection: 'row',
+        justifyContent: 'center',
+    },
     roundLabel: {
         alignItems: 'center',
         justifyContent: 'center',
@@ -255,12 +269,11 @@ const styles = StyleSheet.create({
     roundPicker: {
         alignItems: 'center',
         justifyContent: 'center',
-        position: 'relative',
         width: Platform.OS === 'android' ? 104 : 96,
     },
     menuIndicator: {
-        position: 'absolute',
-        right: 5,
+        marginLeft: 4,
+        opacity: 0.55,
     },
     chevron: {
         width: Platform.OS === 'android' ? 44 : 40,
