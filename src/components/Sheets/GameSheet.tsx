@@ -3,7 +3,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import BottomSheet, { BottomSheetBackdrop, BottomSheetBackdropProps, BottomSheetHandle, BottomSheetHandleProps, BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { ParamListBase, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { Alert, StyleSheet, Text, TouchableOpacity, View, useWindowDimensions } from 'react-native';
+import { Alert, Platform, StyleSheet, Text, TouchableOpacity, View, useWindowDimensions } from 'react-native';
 import { Button } from 'react-native-elements';
 import Animated, { Extrapolate, FadeIn, interpolate, Layout, useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -231,11 +231,14 @@ const GameSheet: React.FunctionComponent = () => {
 
     const renderHandle = useCallback(
         (props: BottomSheetHandleProps) => (
-            <TouchableOpacity activeOpacity={0.7} onPress={sheetTitlePress} testID="game-sheet-handle">
-                <View>
-                    <BottomSheetHandle {...props} indicatorStyle={{ backgroundColor: theme.sheetHandle }} />
+            <View style={styles.floatingHandleContainer}>
+                <View pointerEvents="box-none" style={styles.floatingRoundDock}>
+                    <RoundHeaderTitle />
                 </View>
-            </TouchableOpacity>
+                <TouchableOpacity activeOpacity={0.7} onPress={sheetTitlePress} testID="game-sheet-handle">
+                    <BottomSheetHandle {...props} indicatorStyle={{ backgroundColor: theme.sheetHandle }} />
+                </TouchableOpacity>
+            </View>
         ),
         [sheetTitlePress, theme.sheetHandle]
     );
@@ -262,10 +265,6 @@ const GameSheet: React.FunctionComponent = () => {
             <BottomSheetScrollView overScrollMode="always">
                 <SafeAreaView edges={['right', 'left']}>
                     <View style={styles.sheetHeaderContainer}>
-                        <View testID="round-control-sheet" style={styles.sheetRoundControl}>
-                            <RoundHeaderTitle />
-                        </View>
-
                         {gameLocked &&
                             <Text style={{ color: theme.textTertiary, fontSize: 20, paddingHorizontal: 10 }}
                                 onPress={() => { gameSheetRef?.current?.snapToIndex(snapPoints.length - 1); }}
@@ -359,14 +358,21 @@ const GameSheet: React.FunctionComponent = () => {
 };
 
 const styles = StyleSheet.create({
+    floatingHandleContainer: {
+        position: 'relative',
+    },
+    floatingRoundDock: {
+        alignItems: 'center',
+        left: 0,
+        position: 'absolute',
+        right: 0,
+        top: Platform.OS === 'android' ? -58 : -54,
+        zIndex: 2,
+    },
     sheetHeaderContainer: {
         flexDirection: 'row',
-        justifyContent: 'center',
+        justifyContent: 'flex-end',
         paddingHorizontal: 10,
-    },
-    sheetRoundControl: {
-        alignItems: 'center',
-        flex: 1,
     },
     sheetTitleView: {
         flex: 1,
