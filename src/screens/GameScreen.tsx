@@ -9,11 +9,13 @@ import { useAppSelector } from '../../redux/hooks';
 import { selectInteractionType } from '../../redux/selectors';
 import ListBoard from '../components/Boards/ListBoard';
 import TileBoard from '../components/Boards/TileBoard';
+import RoundHeaderTitle from '../components/Headers/RoundHeaderTitle';
 import { InteractionType } from '../components/Interactions/InteractionType';
 import ChooseWinnersSheet from '../components/Sheets/ChooseWinnersSheet';
 import GestureInfoSheet from '../components/Sheets/GestureInfoSheet';
 import PointValuesSheet from '../components/Sheets/PointValuesSheet';
 import { useGestureHint } from '../hooks/useGestureHint';
+import { useTheme } from '../theme';
 
 function useKeepScreenAwake(active: boolean): void {
     useEffect(() => {
@@ -28,6 +30,7 @@ function useKeepScreenAwake(active: boolean): void {
 }
 
 const GameScreen: React.FunctionComponent = () => {
+    const theme = useTheme();
     const currentGameId = useAppSelector(state => state.settings.currentGameId);
     const keepScreenAwake = useAppSelector(state => state.settings.keepScreenAwake);
     const interactionType = useAppSelector(state => selectInteractionType(state, currentGameId));
@@ -39,6 +42,14 @@ const GameScreen: React.FunctionComponent = () => {
 
     return (
         <View style={{ flex: 1, paddingTop: headerHeight }} testID="game-screen">
+            <View
+                style={[
+                    styles.roundToolbar,
+                    { backgroundColor: theme.headerBackground, borderBottomColor: theme.separator },
+                ]}
+            >
+                <RoundHeaderTitle />
+            </View>
             <View style={{ flex: 1 }}>
                 {interactionType === InteractionType.Dial
                     ? <Animated.View key="rows" entering={FadeIn.duration(220)} exiting={FadeOut.duration(180)} style={StyleSheet.absoluteFill}>
@@ -56,6 +67,15 @@ const GameScreen: React.FunctionComponent = () => {
         </View>
     );
 };
+
+const styles = StyleSheet.create({
+    roundToolbar: {
+        alignItems: 'center',
+        borderBottomWidth: StyleSheet.hairlineWidth,
+        justifyContent: 'center',
+        paddingVertical: 6,
+    },
+});
 
 
 export default GameScreen;
