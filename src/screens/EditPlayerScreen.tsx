@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { ParamListBase, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -21,7 +21,6 @@ import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { selectAllPlayerNames, updatePlayer } from '../../redux/PlayersSlice';
 import { selectCurrentGame } from '../../redux/selectors';
 import { logEvent } from '../Analytics';
-import HeaderButton from '../components/Buttons/HeaderButton';
 import ColorSelector from '../components/ColorPalettes/ColorSelector';
 import SectionLabel from '../components/SectionLabel';
 import { useTheme } from '../theme';
@@ -65,19 +64,6 @@ const EditPlayerScreen: React.FC<EditPlayerScreenProps> = ({
         Keyboard.dismiss();
     }, []);
 
-    useLayoutEffect(() => {
-        navigation.setOptions({
-            headerLeft: ({ tintColor }) => (
-                <HeaderButton accessibilityLabel='EditPlayerBack' onPress={() => {
-                    dismissInput();
-                    navigation.goBack();
-                    void logEvent('edit_player_back');
-                }}>
-                    <Text style={{ color: tintColor ?? theme.tint, fontSize: 20 }}>Back</Text>
-                </HeaderButton>
-            ),
-        });
-    }, [dismissInput, navigation, theme.tint]);
     const dispatch = useAppDispatch();
     const currentGame = useAppSelector(selectCurrentGame);
     const { index, playerId } = route.params;
@@ -101,6 +87,7 @@ const EditPlayerScreen: React.FC<EditPlayerScreenProps> = ({
     useEffect(() => {
         const onBeforeRemove = () => {
             dismissInput();
+            void logEvent('edit_player_back');
             // Log a rename once per session, on any exit, if the name actually changed.
             if (latestNameRef.current !== originalPlayerName) {
                 logEvent('player_renamed', { game_id: currentGame?.id, player_index: index });
