@@ -3,7 +3,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import BottomSheet, { BottomSheetBackdrop, BottomSheetBackdropProps, BottomSheetHandle, BottomSheetHandleProps, BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { ParamListBase, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { Alert, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View, useWindowDimensions } from 'react-native';
+import { Alert, StyleSheet, Text, TouchableOpacity, View, useWindowDimensions } from 'react-native';
 import { Button } from 'react-native-elements';
 import Animated, { Extrapolate, FadeIn, interpolate, Layout, useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -32,7 +32,6 @@ const GameSheet: React.FunctionComponent = () => {
     const { height: containerHeight } = useWindowDimensions();
     const currentGameId = useAppSelector(state => state.settings.currentGameId);
     const game = useAppSelector(state => selectGameById(state, currentGameId || ''));
-    const gameTitle = game?.title;
     const gameLocked = game?.locked;
     const playerIds = game?.playerIds;
     const chooseWinnersSheetRef = useChooseWinnersSheetContext();
@@ -262,14 +261,6 @@ const GameSheet: React.FunctionComponent = () => {
             <BottomSheetScrollView overScrollMode="always">
                 <SafeAreaView edges={['right', 'left']}>
                     <View style={styles.sheetHeaderContainer}>
-                        <TouchableWithoutFeedback onPress={() => sheetTitlePress()}>
-                            <View testID="game-title-button" style={[styles.sheetTitleView]}>
-                                <Text style={[styles.sheetTitle, { color: theme.text }]} numberOfLines={1}>
-                                    {gameTitle}
-                                </Text>
-                            </View>
-                        </TouchableWithoutFeedback>
-
                         {gameLocked &&
                             <Text style={{ color: theme.textTertiary, fontSize: 20, paddingHorizontal: 10 }}
                                 onPress={() => { gameSheetRef?.current?.snapToIndex(snapPoints.length - 1); }}
@@ -365,7 +356,7 @@ const GameSheet: React.FunctionComponent = () => {
 const styles = StyleSheet.create({
     sheetHeaderContainer: {
         flexDirection: 'row',
-        justifyContent: 'space-between',
+        justifyContent: 'flex-end',
         paddingHorizontal: 10,
     },
     sheetTitleView: {
