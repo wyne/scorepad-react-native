@@ -1,5 +1,18 @@
 # Changelog
 
+## [3.2.0](https://github.com/wyne/scorepad-react-native/compare/v3.1.2...v3.2.0) (2026-09-11)
+
+
+### Features
+
+* add round picker to game header ([#759](https://github.com/wyne/scorepad-react-native/issues/759)) ([e8a8f88](https://github.com/wyne/scorepad-react-native/commit/e8a8f882cf4c0b56923c59e97be29c0558cfe4b6))
+* warn when editing earlier rounds ([#761](https://github.com/wyne/scorepad-react-native/issues/761)) ([c73a086](https://github.com/wyne/scorepad-react-native/commit/c73a08637fd4ee70ba17f67a3d79e3649a731e1a))
+
+
+### Bug Fixes
+
+* polish Android navigation and launch behavior ([#758](https://github.com/wyne/scorepad-react-native/issues/758)) ([f6e4521](https://github.com/wyne/scorepad-react-native/commit/f6e4521ec37aa7a7e4079e7550c88eeae6610ceb))
+
 ## [3.1.2](https://github.com/wyne/scorepad-react-native/compare/v3.1.1...v3.1.2) (2026-09-10)
 
 
