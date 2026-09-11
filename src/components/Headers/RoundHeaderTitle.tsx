@@ -30,7 +30,7 @@ export const GameHeaderTitle: React.FunctionComponent = () => {
     );
 };
 
-const RoundHeaderTitle: React.FunctionComponent = () => {
+const RoundHeaderTitle: React.FunctionComponent<{ wide?: boolean }> = ({ wide = false }) => {
     const theme = useTheme();
     const dispatch = useAppDispatch();
 
@@ -197,7 +197,7 @@ const RoundHeaderTitle: React.FunctionComponent = () => {
                 colorScheme={theme.headerText === '#FFFFFF' ? 'dark' : 'light'}
                 glassEffectStyle="regular"
                 isInteractive
-                style={styles.container}
+                style={[styles.container, wide && styles.wideContainer]}
             >
                 {controls}
             </GlassView>
@@ -210,7 +210,11 @@ const RoundHeaderTitle: React.FunctionComponent = () => {
             ? 'rgba(255,255,255,0.14)'
             : 'rgba(118,118,128,0.12)';
 
-    return <View style={[styles.container, styles.fallbackContainer, { backgroundColor }]}>{controls}</View>;
+    return (
+        <View style={[styles.container, wide && styles.wideContainer, styles.fallbackContainer, { backgroundColor }]}>
+            {controls}
+        </View>
+    );
 };
 
 const styles = StyleSheet.create({
@@ -221,6 +225,10 @@ const styles = StyleSheet.create({
         borderRadius: Platform.OS === 'android' ? 24 : 22,
         height: Platform.OS === 'android' ? 48 : 44,
         width: Platform.OS === 'android' ? 192 : undefined,
+    },
+    wideContainer: {
+        justifyContent: 'space-between',
+        width: 260,
     },
     fallbackContainer: {
         overflow: 'hidden',

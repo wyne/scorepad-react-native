@@ -9,7 +9,9 @@ import { useAppSelector } from '../../redux/hooks';
 import { selectInteractionType } from '../../redux/selectors';
 import ListBoard from '../components/Boards/ListBoard';
 import TileBoard from '../components/Boards/TileBoard';
+import RoundHeaderTitle from '../components/Headers/RoundHeaderTitle';
 import { InteractionType } from '../components/Interactions/InteractionType';
+import { bottomSheetHeight } from '../components/Sheets/GameSheet';
 import ChooseWinnersSheet from '../components/Sheets/ChooseWinnersSheet';
 import GestureInfoSheet from '../components/Sheets/GestureInfoSheet';
 import PointValuesSheet from '../components/Sheets/PointValuesSheet';
@@ -53,9 +55,23 @@ const GameScreen: React.FunctionComponent = () => {
                 <ChooseWinnersSheet />
                 <GestureInfoSheet />
             </View>
+            <View pointerEvents="box-none" style={styles.bottomRoundToolbar}>
+                <RoundHeaderTitle wide />
+            </View>
         </View>
     );
 };
+
+const styles = StyleSheet.create({
+    bottomRoundToolbar: {
+        alignItems: 'center',
+        bottom: bottomSheetHeight + 12,
+        left: 0,
+        position: 'absolute',
+        right: 0,
+        zIndex: 5,
+    },
+});
 
 
 export default GameScreen;

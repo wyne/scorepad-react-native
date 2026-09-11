@@ -14,7 +14,6 @@ import { updatePlayer } from '../../../redux/PlayersSlice';
 import { logEvent } from '../../Analytics';
 import { useTheme } from '../../theme';
 import BigButton from '../BigButtons/BigButton';
-import RoundHeaderTitle from '../Headers/RoundHeaderTitle';
 import RematchIcon from '../Icons/RematchIcon';
 import ScoreLogTable from '../ScoreLogTable';
 
@@ -262,10 +261,6 @@ const GameSheet: React.FunctionComponent = () => {
             <BottomSheetScrollView overScrollMode="always">
                 <SafeAreaView edges={['right', 'left']}>
                     <View style={styles.sheetHeaderContainer}>
-                        <View testID="round-control-sheet" style={styles.sheetRoundControl}>
-                            <RoundHeaderTitle />
-                        </View>
-
                         {gameLocked &&
                             <Text style={{ color: theme.textTertiary, fontSize: 20, paddingHorizontal: 10 }}
                                 onPress={() => { gameSheetRef?.current?.snapToIndex(snapPoints.length - 1); }}
@@ -361,12 +356,8 @@ const GameSheet: React.FunctionComponent = () => {
 const styles = StyleSheet.create({
     sheetHeaderContainer: {
         flexDirection: 'row',
-        justifyContent: 'center',
+        justifyContent: 'flex-end',
         paddingHorizontal: 10,
-    },
-    sheetRoundControl: {
-        alignItems: 'center',
-        flex: 1,
     },
     sheetTitleView: {
         flex: 1,
