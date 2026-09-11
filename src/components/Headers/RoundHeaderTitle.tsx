@@ -202,6 +202,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         borderRadius: Platform.OS === 'android' ? 24 : 22,
         height: Platform.OS === 'android' ? 48 : 44,
+        width: Platform.OS === 'android' ? 192 : undefined,
     },
     fallbackContainer: {
         overflow: 'hidden',
