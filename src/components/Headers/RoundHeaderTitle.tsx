@@ -61,6 +61,29 @@ const RoundHeaderTitle: React.FunctionComponent = () => {
     const nextDisabled = isLocked || isLastRound && (currentGame?.locked ?? false);
     const roundPickerEnabled = !isLocked && roundCount > 1;
     const roundLabel = isLocked ? 'Final' : `Round ${currentRoundIndex + 1} of ${roundCount}`;
+    const roundPickerLabel = isLocked ? (
+        <Text
+            maxFontSizeMultiplier={1.3}
+            style={[styles.finalLabel, { color: theme.headerText }]}
+        >
+            Final
+        </Text>
+    ) : (
+        <View style={styles.roundLabel}>
+            <Text
+                maxFontSizeMultiplier={1.15}
+                style={[styles.roundDescriptor, { color: theme.headerText }]}
+            >
+                Round
+            </Text>
+            <Text
+                maxFontSizeMultiplier={1.3}
+                style={[styles.roundValue, { color: theme.headerText }]}
+            >
+                {currentRoundIndex + 1} of {roundCount}
+            </Text>
+        </View>
+    );
     const roundActions: MenuAction[] = Array.from({ length: roundCount }, (_, round) => ({
         id: round.toString(),
         title: Platform.OS === 'android' && round === currentRoundIndex
@@ -98,17 +121,15 @@ const RoundHeaderTitle: React.FunctionComponent = () => {
                 accessibilityRole="button"
                 style={styles.roundPicker}
             >
-                <Text style={[styles.title, { color: theme.headerText }]} allowFontScaling={false}>
-                    {roundLabel}
-                </Text>
-                <Icon name="caret-down" type="font-awesome-5" size={10} color={theme.tint} />
+                {roundPickerLabel}
+                <View style={styles.menuIndicator}>
+                    <Icon name="caret-down" type="font-awesome-5" size={9} color={theme.tint} />
+                </View>
             </View>
         </MenuView>
     ) : (
         <View style={styles.roundPicker}>
-            <Text style={[styles.title, { color: theme.headerText }]} allowFontScaling={false}>
-                {roundLabel}
-            </Text>
+            {roundPickerLabel}
         </View>
     );
 
@@ -179,27 +200,49 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        borderRadius: Platform.OS === 'android' ? 20 : 18,
-        height: Platform.OS === 'android' ? 40 : 36,
+        borderRadius: Platform.OS === 'android' ? 24 : 22,
+        height: Platform.OS === 'android' ? 48 : 44,
     },
     fallbackContainer: {
         overflow: 'hidden',
     },
-    title: {
-        fontSize: Platform.OS === 'android' ? 18 : 17,
+    finalLabel: {
+        fontSize: Platform.OS === 'android' ? 17 : 16,
+        fontWeight: '600',
+        lineHeight: Platform.OS === 'android' ? 21 : 20,
+        fontVariant: ['tabular-nums'],
+        textAlign: 'center',
+    },
+    roundDescriptor: {
+        fontSize: Platform.OS === 'android' ? 11 : 10,
+        fontWeight: '600',
+        lineHeight: Platform.OS === 'android' ? 13 : 12,
+        textAlign: 'center',
+    },
+    roundLabel: {
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    roundValue: {
+        fontSize: Platform.OS === 'android' ? 15 : 14,
+        fontWeight: '600',
+        lineHeight: Platform.OS === 'android' ? 18 : 17,
         fontVariant: ['tabular-nums'],
         textAlign: 'center',
     },
     roundPicker: {
         alignItems: 'center',
-        flexDirection: 'row',
-        gap: 6,
         justifyContent: 'center',
-        width: Platform.OS === 'android' ? 130 : 120,
+        position: 'relative',
+        width: Platform.OS === 'android' ? 104 : 96,
+    },
+    menuIndicator: {
+        position: 'absolute',
+        right: 5,
     },
     chevron: {
-        width: Platform.OS === 'android' ? 40 : 36,
-        height: Platform.OS === 'android' ? 40 : 36,
+        width: Platform.OS === 'android' ? 44 : 40,
+        height: Platform.OS === 'android' ? 48 : 44,
         alignItems: 'center',
         justifyContent: 'center',
     },
