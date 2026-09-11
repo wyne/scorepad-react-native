@@ -107,6 +107,7 @@ export const Navigation = () => {
                                 headerBlurEffect: 'systemChromeMaterial',
                                 headerShadowVisible: false,
                                 headerBackButtonDisplayMode: 'minimal',
+                                headerTitleAlign: 'center',
                             }}
                             listeners={{
                                 focus: () => setShowGameSheetForActiveRoute(true),
