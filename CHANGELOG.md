@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.2.1](https://github.com/wyne/scorepad-react-native/compare/v3.2.0...v3.2.1) (2026-09-12)
+
+
+### Bug Fixes
+
+* enable Android release code obfuscation and resource shrinking ([#762](https://github.com/wyne/scorepad-react-native/issues/762)) ([16a9f16](https://github.com/wyne/scorepad-react-native/commit/16a9f16259e968b32be7b94ddf82e7bb11b37d2e))
+
 ## [3.2.0](https://github.com/wyne/scorepad-react-native/compare/v3.1.2...v3.2.0) (2026-09-11)
 
 
