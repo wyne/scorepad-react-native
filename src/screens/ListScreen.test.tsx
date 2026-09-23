@@ -31,6 +31,18 @@ jest.mock('@react-navigation/native', () => ({
     },
 }));
 
+// Header items are covered by the button's own tests.
+jest.mock('../components/Buttons/AppSettingsButton', () => ({
+    __esModule: true,
+    default: () => null,
+    useAppSettingsHeaderItems: () => [],
+}));
+
+let mockVerticalBars = false;
+jest.mock('../hooks/useExpandedGameLayout', () => ({
+    useVerticalBarLayout: () => mockVerticalBars,
+}));
+
 jest.mock('../hooks/useStoreReviewPrompt', () => ({
     useStoreReviewPrompt: () => mockPromptForReview,
 }));
@@ -168,6 +180,29 @@ describe('ListScreen', () => {
         expect(getByTestId('safe-area-view')).toBeTruthy();
         expect(getByText('No Games')).toBeTruthy();
         expect(getByText('Tap the + button to create a new game.')).toBeTruthy();
+    });
+
+    it('moves the title into the list and new game into the header with vertical bars', () => {
+        const createStore = () => createMockStore({
+            settings: { appOpens: 1, devMenuEnabled: false, installId: 'existing-id', rollingGameCounter: 0 },
+            games: { entities: {}, ids: [] },
+            players: { entities: {}, ids: [] },
+        });
+
+        mockVerticalBars = false;
+        const regular = render(<Provider store={createStore()}><ListScreen navigation={mockNavigation} /></Provider>);
+        expect(regular.queryByText('ScorePad')).toBeNull();
+        expect(regular.getByTestId('add-game-button-container')).toBeTruthy();
+        regular.unmount();
+
+        mockVerticalBars = true;
+        const duo = render(<Provider store={createStore()}><ListScreen navigation={mockNavigation} /></Provider>);
+        expect(duo.getByText('ScorePad')).toBeTruthy();
+        expect(duo.queryByTestId('add-game-button-container')).toBeNull();
+        expect(mockNavigation.setOptions).toHaveBeenCalledWith(
+            expect.objectContaining({ unstable_headerRightItems: expect.any(Function) })
+        );
+        mockVerticalBars = false;
     });
 
     it('should render games list when games exist', () => {

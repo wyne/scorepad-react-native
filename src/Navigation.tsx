@@ -1,7 +1,7 @@
 import React, { useRef, useState } from 'react';
 
 import { DarkTheme, DefaultTheme, NavigationContainer, useNavigationContainerRef } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { createNativeStackNavigator, NativeStackNavigationOptions } from '@react-navigation/native-stack';
 import { Platform, View } from 'react-native';
 
 import { useAppSelector } from '../redux/hooks';
@@ -19,6 +19,7 @@ import { MenuOpenContextProvider } from './components/MenuOpenContext';
 import GameSheet from './components/Sheets/GameSheet';
 import { GestureInfoSheetContextProvider } from './components/Sheets/GestureInfoSheetContext';
 import { useAnalyticsUserProperties } from './hooks/useAnalyticsUserProperties';
+import { useRoundPickerInBottomStrip, useVerticalBarLayout } from './hooks/useExpandedGameLayout';
 import EditPlayerScreen from './screens/EditPlayerScreen';
 import ShareScreen from './screens/ShareScreen';
 import { useTheme } from './theme';
@@ -40,6 +41,31 @@ export type RootStackParamList = {
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
+/**
+ * Header options for a header with no background. With vertical bars (iPhone
+ * Duo), the native header background starts below a strip at the top of the
+ * screen and stops short of the vertical bar, so it reads as a box. Without
+ * it, the buttons sit in the vertical bar and anything left in the header
+ * (the round picker's glass pill) floats over the content.
+ */
+const bareHeaderOptions: NativeStackNavigationOptions = {
+    headerTransparent: true,
+    headerBlurEffect: 'none',
+    headerStyle: { backgroundColor: 'transparent' },
+    headerShadowVisible: false,
+};
+
+/**
+ * Header options for a header with nothing left in it: its buttons are in the
+ * vertical bar and its title, if any, is in the content. It collapses to a
+ * transparent strip, and the content can fill the screen to the top edge.
+ */
+const collapsedHeaderOptions: NativeStackNavigationOptions = {
+    ...bareHeaderOptions,
+    title: '',
+    headerTitle: undefined,
+};
+
 export const Navigation = () => {
     useAnalyticsUserProperties();
     const navigationRef = useNavigationContainerRef<RootStackParamList>();
@@ -55,6 +81,14 @@ export const Navigation = () => {
         : { ...DefaultTheme, colors: { ...DefaultTheme.colors, background: theme.background, card: theme.backgroundSecondary } };
 
     const fullscreen = useAppSelector(state => state.settings.home_fullscreen);
+    // On the iPhone Duo's inner display the round picker sits beside the game
+    // sheet instead of in the header, and the header collapses (see GameSheet).
+    const roundPickerInHeader = !useRoundPickerInBottomStrip();
+    // With vertical bars (iPhone Duo), headers drop their background (see
+    // bareHeaderOptions). iOS also scrolls the list's header title away with
+    // the content, so that title moves into the list (see ListScreen) and the
+    // list's header collapses.
+    const verticalBars = useVerticalBarLayout();
     const [showGameSheetForActiveRoute, setShowGameSheetForActiveRoute] = useState(false);
 
     // Track the last logged route so we emit one screen_view per actual navigation,
@@ -95,19 +129,25 @@ export const Navigation = () => {
                                 headerBlurEffect: isIOS ? 'systemChromeMaterial' : undefined,
                                 headerShadowVisible: isAndroid,
                                 headerStyle: listHeaderStyle,
-                                headerLeft: () => <AppSettingsButton />,
+                                // iOS uses native items set by the screen (see useAppSettingsHeaderItems).
+                                headerLeft: isIOS ? undefined : () => <AppSettingsButton />,
+                                ...(verticalBars ? collapsedHeaderOptions : undefined),
                             }}
                         />
                         <Stack.Screen name="Game" component={GameScreen}
                             options={{
                                 orientation: 'all',
-                                headerTitle: () => <RoundHeaderTitle />,
-                                headerRight: () => <GameOptionsButton />,
+                                title: '',
+                                headerTitle: roundPickerInHeader ? () => <RoundHeaderTitle /> : undefined,
+                                // iOS uses native items set by the screen (see useGameOptionsHeaderItems).
+                                headerRight: isIOS ? undefined : () => <GameOptionsButton />,
                                 headerTransparent: true,
                                 headerBlurEffect: 'systemChromeMaterial',
                                 headerShadowVisible: false,
                                 headerBackButtonDisplayMode: 'minimal',
                                 headerTitleAlign: 'center',
+                                ...(verticalBars ? bareHeaderOptions : undefined),
+                                ...(roundPickerInHeader ? undefined : collapsedHeaderOptions),
                             }}
                             listeners={{
                                 focus: () => setShowGameSheetForActiveRoute(true),

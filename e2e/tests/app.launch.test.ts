@@ -143,7 +143,7 @@ describe('App Flow', () => {
     await tap('-ios predicate string:label == "Save Game"');
 
     console.log('→ select swipe mode');
-    await tap('~game-options-menu');
+    await tap('~Game Options');
     await tap('-ios predicate string:label == "Swipe"');
 
     console.log('→ swipe up (increase score)');
@@ -155,7 +155,7 @@ describe('App Flow', () => {
     await tap('~next-round-button');
 
     console.log('→ select dial mode');
-    await tap('~game-options-menu');
+    await tap('~Game Options');
     await tap('-ios predicate string:label == "Dial"');
 
     console.log('→ swipe dial (increase score)');
@@ -165,7 +165,7 @@ describe('App Flow', () => {
     await browser.saveScreenshot(path.join(screenshotsDir, 'dial.png'));
 
     console.log('→ open addend modal');
-    await tap('~game-options-menu');
+    await tap('~Game Options');
     await browser.saveScreenshot(path.join(screenshotsDir, 'game-options-menu.png'));
     await tap('-ios predicate string:label CONTAINS "Point Values"');
     await browser.pause(500);
