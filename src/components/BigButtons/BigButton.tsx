@@ -21,29 +21,33 @@ const BigButton: React.FunctionComponent<Props> = ({ icon, text, color, onPress,
     const isDark = theme.background === '#000000';
 
     return (
-        <Animated.View
-            entering={animated ? FadeIn.delay(400) : undefined}
-            exiting={FadeOut}
-            style={style}
-        >
-            <TouchableOpacity activeOpacity={.5} onPress={onPress} testID={testID}>
-                <View style={[styles.bigButton, { backgroundColor: isDark ? 'rgba(0,0,0,.2)' : '#FFFFFF' }]}>
-                    {typeof icon === 'string' ? (<Icon name={icon}
-                        type="ionicon" size={30}
-                        color={color}
-                    />) : (
-                        icon
-                    )}
-                    <Text style={{
-                        color: color,
-                        fontSize: 15,
-                        paddingTop: 5,
-                        textAlign: 'center',
-                    }}>
-                        {text}
-                    </Text>
-                </View>
-            </TouchableOpacity>
+        // `style` may be animated (e.g. collapsing the button), so it lives on an
+        // outer view; the entering/exiting layout animations go on the inner one
+        // so the two don't fight over opacity.
+        <Animated.View style={style}>
+            <Animated.View
+                entering={animated ? FadeIn.delay(400) : undefined}
+                exiting={FadeOut}
+            >
+                <TouchableOpacity activeOpacity={.5} onPress={onPress} testID={testID}>
+                    <View style={[styles.bigButton, { backgroundColor: isDark ? 'rgba(0,0,0,.2)' : '#FFFFFF' }]}>
+                        {typeof icon === 'string' ? (<Icon name={icon}
+                            type="ionicon" size={30}
+                            color={color}
+                        />) : (
+                            icon
+                        )}
+                        <Text style={{
+                            color: color,
+                            fontSize: 15,
+                            paddingTop: 5,
+                            textAlign: 'center',
+                        }}>
+                            {text}
+                        </Text>
+                    </View>
+                </TouchableOpacity>
+            </Animated.View>
         </Animated.View>
     );
 };

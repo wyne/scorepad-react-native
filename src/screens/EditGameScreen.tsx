@@ -5,6 +5,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import DraggableFlatList, { ScaleDecorator } from 'react-native-draggable-flatlist';
 import { Button, Icon } from 'react-native-elements';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { addPlayer, reorderPlayers } from '../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
@@ -113,7 +114,9 @@ const EditGameScreen: React.FunctionComponent<Props> = ({ navigation, route }) =
     );
 
     return (
-        <View style={{ flex: 1 }} testID="edit-game">
+        // Left/right insets keep the content clear of landscape notches and the
+        // iPhone Duo's vertical bar.
+        <SafeAreaView edges={['left', 'right']} style={{ flex: 1 }} testID="edit-game">
 
             <SectionLabel inset={30}>Game title</SectionLabel>
             <EditGame />
@@ -166,7 +169,7 @@ const EditGameScreen: React.FunctionComponent<Props> = ({ navigation, route }) =
                     });
                 }}
             />
-        </View>
+        </SafeAreaView>
     );
 };
 

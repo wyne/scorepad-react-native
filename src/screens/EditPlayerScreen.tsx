@@ -16,6 +16,7 @@ import {
     View
 } from 'react-native';
 import { Input } from 'react-native-elements';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { selectAllPlayerNames, updatePlayer } from '../../redux/PlayersSlice';
@@ -168,64 +169,68 @@ const EditPlayerScreen: React.FC<EditPlayerScreenProps> = ({
     };
 
     return (
-        <ScrollView
-            style={{ flex: 1 }}
-            contentContainerStyle={styles.scrollContent}
-            keyboardShouldPersistTaps="handled"
-        >
+        // Left/right insets keep the content clear of landscape notches and the
+        // iPhone Duo's vertical bar.
+        <SafeAreaView edges={['left', 'right']} style={{ flex: 1 }}>
+            <ScrollView
+                style={{ flex: 1 }}
+                contentContainerStyle={styles.scrollContent}
+                keyboardShouldPersistTaps="handled"
+            >
 
-            <SectionLabel>{`Player ${playerPositionWord(index + 1)} name`}</SectionLabel>
+                <SectionLabel>{`Player ${playerPositionWord(index + 1)} name`}</SectionLabel>
 
-            <View style={{ position: 'relative', zIndex: 1 }}>
-                <Input
-                    ref={inputRef}
-                    clearButtonMode="while-editing"
-                    rightIcon={Platform.OS === 'ios' ? undefined : {
-                        style: { padding: 8 },
-                        disabled: localPlayerName == '',
-                        disabledStyle: { display: 'none' },
-                        color: theme.textTertiary,
-                        size: 15,
-                        name: 'close',
-                        onPress: clearPlayerName,
-                    }}
-                    containerStyle={{ flex: 1 }}
-                    inputContainerStyle={{
-                        backgroundColor: theme.inputBackground,
-                        borderBottomWidth: 0,
-                        borderRadius: 10,
-                        paddingHorizontal: 10,
-                    }}
-                    maxLength={15}
-                    onChangeText={onChangeHandler}
-                    onEndEditing={onEndEditingHandler}
-                    onSubmitEditing={onSubmitEditingHandler}
-                    onFocus={onFocus}
-                    onBlur={onBlur}
-                    placeholder='Player Name'
-                    renderErrorMessage={false}
-                    returnKeyType="done"
-                    selectTextOnFocus={true}
-                    style={[styles.input, { color: theme.textSecondary }]}
-                    value={localPlayerName}
-                />
+                <View style={{ position: 'relative', zIndex: 1 }}>
+                    <Input
+                        ref={inputRef}
+                        clearButtonMode="while-editing"
+                        rightIcon={Platform.OS === 'ios' ? undefined : {
+                            style: { padding: 8 },
+                            disabled: localPlayerName == '',
+                            disabledStyle: { display: 'none' },
+                            color: theme.textTertiary,
+                            size: 15,
+                            name: 'close',
+                            onPress: clearPlayerName,
+                        }}
+                        containerStyle={{ flex: 1 }}
+                        inputContainerStyle={{
+                            backgroundColor: theme.inputBackground,
+                            borderBottomWidth: 0,
+                            borderRadius: 10,
+                            paddingHorizontal: 10,
+                        }}
+                        maxLength={15}
+                        onChangeText={onChangeHandler}
+                        onEndEditing={onEndEditingHandler}
+                        onSubmitEditing={onSubmitEditingHandler}
+                        onFocus={onFocus}
+                        onBlur={onBlur}
+                        placeholder='Player Name'
+                        renderErrorMessage={false}
+                        returnKeyType="done"
+                        selectTextOnFocus={true}
+                        style={[styles.input, { color: theme.textSecondary }]}
+                        value={localPlayerName}
+                    />
 
-                {suggestions.length > 0 && (
-                    <View style={[styles.suggestionsContainer, { backgroundColor: theme.backgroundTertiary }]} testID="suggestions-list">
-                        {suggestions.map((name, idx) => (
-                            <TouchableOpacity key={name} activeOpacity={0.6} onPress={() => onSuggestionSelect(name)}>
-                                <View style={[styles.suggestionItem, idx < suggestions.length - 1 && { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: theme.textTertiary }]}>
-                                    <Text style={[styles.suggestionText, { color: theme.textSecondary }]}>{name}</Text>
-                                </View>
-                            </TouchableOpacity>
-                        ))}
-                    </View>
-                )}
-            </View>
+                    {suggestions.length > 0 && (
+                        <View style={[styles.suggestionsContainer, { backgroundColor: theme.backgroundTertiary }]} testID="suggestions-list">
+                            {suggestions.map((name, idx) => (
+                                <TouchableOpacity key={name} activeOpacity={0.6} onPress={() => onSuggestionSelect(name)}>
+                                    <View style={[styles.suggestionItem, idx < suggestions.length - 1 && { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: theme.textTertiary }]}>
+                                        <Text style={[styles.suggestionText, { color: theme.textSecondary }]}>{name}</Text>
+                                    </View>
+                                </TouchableOpacity>
+                            ))}
+                        </View>
+                    )}
+                </View>
 
-            <ColorSelector playerId={playerId} />
+                <ColorSelector playerId={playerId} />
 
-        </ScrollView>
+            </ScrollView>
+        </SafeAreaView>
     );
 };
 
