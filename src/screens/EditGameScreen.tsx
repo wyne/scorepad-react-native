@@ -44,26 +44,40 @@ const EditGameScreen: React.FunctionComponent<Props> = ({ navigation, route }) =
     }, [playerIds]);
 
     useLayoutEffect(() => {
+        const onDone = () => {
+            void logEvent('save_game', {
+                source: route?.params?.source,
+                game_id: currentGame?.id,
+                palette: currentGame?.palette,
+                player_count: currentGame?.playerIds.length,
+            });
+
+            if (route?.params?.source === 'new_game') {
+                navigation.replace('Game');
+            } else {
+                navigation.goBack();
+            }
+        };
+
+        // On iOS, Done is a native bar item with a symbol so iPhone Duo can
+        // move it into the vertical bar (text-only items stay horizontal).
+        if (Platform.OS === 'ios') {
+            navigation.setOptions({
+                unstable_headerRightItems: () => [{
+                    type: 'button',
+                    label: 'Done',
+                    icon: { type: 'sfSymbol', name: 'checkmark' },
+                    variant: 'done',
+                    onPress: onDone,
+                }],
+            });
+            return;
+        }
+
         navigation.setOptions({
             headerRight: () => (
-                <HeaderButton accessibilityLabel='Done' onPress={() => {
-                    void logEvent('save_game', {
-                        source: route?.params?.source,
-                        game_id: currentGame?.id,
-                        palette: currentGame?.palette,
-                        player_count: currentGame?.playerIds.length,
-                    });
-
-                    if (route?.params?.source === 'new_game') {
-                        navigation.replace('Game');
-                    } else {
-                        navigation.goBack();
-                    }
-                }}>
-                    {Platform.OS === 'android'
-                        ? <Icon name="check" color={theme.tint} size={28} />
-                        : <Text style={{ color: theme.tint, fontSize: 20 }} allowFontScaling={false}>Done</Text>
-                    }
+                <HeaderButton accessibilityLabel='Done' onPress={onDone}>
+                    <Icon name="check" color={theme.tint} size={28} />
                 </HeaderButton>
             ),
         });

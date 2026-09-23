@@ -31,6 +31,13 @@ jest.mock('@react-navigation/native', () => ({
     },
 }));
 
+// Header items are covered by the button's own tests.
+jest.mock('../components/Buttons/AppSettingsButton', () => ({
+    __esModule: true,
+    default: () => null,
+    useAppSettingsHeaderItems: () => [],
+}));
+
 jest.mock('../hooks/useStoreReviewPrompt', () => ({
     useStoreReviewPrompt: () => mockPromptForReview,
 }));

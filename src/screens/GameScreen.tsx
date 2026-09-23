@@ -1,14 +1,17 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useLayoutEffect } from 'react';
 
 import { useHeaderHeight } from '@react-navigation/elements';
+import { ParamListBase } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake';
-import { StyleSheet, View } from 'react-native';
+import { Platform, StyleSheet, View } from 'react-native';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 
 import { useAppSelector } from '../../redux/hooks';
 import { selectInteractionType } from '../../redux/selectors';
 import ListBoard from '../components/Boards/ListBoard';
 import TileBoard from '../components/Boards/TileBoard';
+import { useGameOptionsHeaderItems } from '../components/Buttons/GameOptionsButton';
 import { InteractionType } from '../components/Interactions/InteractionType';
 import ChooseWinnersSheet from '../components/Sheets/ChooseWinnersSheet';
 import GestureInfoSheet from '../components/Sheets/GestureInfoSheet';
@@ -27,13 +30,25 @@ function useKeepScreenAwake(active: boolean): void {
     }, [active]);
 }
 
-const GameScreen: React.FunctionComponent = () => {
+interface Props {
+    navigation: NativeStackNavigationProp<ParamListBase>;
+}
+
+const GameScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     const currentGameId = useAppSelector(state => state.settings.currentGameId);
     const keepScreenAwake = useAppSelector(state => state.settings.keepScreenAwake);
     const interactionType = useAppSelector(state => selectInteractionType(state, currentGameId));
     const headerHeight = useHeaderHeight();
     const showHint = useGestureHint();
     useKeepScreenAwake(keepScreenAwake);
+
+    // On iOS the options menu is a native bar item so iPhone Duo can move it
+    // into the vertical bar. Android keeps the React `headerRight`.
+    const headerRightItems = useGameOptionsHeaderItems();
+    useLayoutEffect(() => {
+        if (Platform.OS !== 'ios') return;
+        navigation.setOptions({ unstable_headerRightItems: () => headerRightItems });
+    }, [navigation, headerRightItems]);
 
     if (typeof currentGameId == 'undefined') return null;
 

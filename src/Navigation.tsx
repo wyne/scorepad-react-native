@@ -19,6 +19,7 @@ import { MenuOpenContextProvider } from './components/MenuOpenContext';
 import GameSheet from './components/Sheets/GameSheet';
 import { GestureInfoSheetContextProvider } from './components/Sheets/GestureInfoSheetContext';
 import { useAnalyticsUserProperties } from './hooks/useAnalyticsUserProperties';
+import { useExpandedGameLayout } from './hooks/useExpandedGameLayout';
 import EditPlayerScreen from './screens/EditPlayerScreen';
 import ShareScreen from './screens/ShareScreen';
 import { useTheme } from './theme';
@@ -55,6 +56,10 @@ export const Navigation = () => {
         : { ...DefaultTheme, colors: { ...DefaultTheme.colors, background: theme.background, card: theme.backgroundSecondary } };
 
     const fullscreen = useAppSelector(state => state.settings.home_fullscreen);
+    // On the iPhone Duo's inner display the round picker sits beside the game
+    // sheet instead of in the header (see GameScreen). Fullscreen hides the
+    // sheet, so the picker stays in the header there.
+    const roundPickerInHeader = !useExpandedGameLayout() || fullscreen;
     const [showGameSheetForActiveRoute, setShowGameSheetForActiveRoute] = useState(false);
 
     // Track the last logged route so we emit one screen_view per actual navigation,
@@ -95,14 +100,17 @@ export const Navigation = () => {
                                 headerBlurEffect: isIOS ? 'systemChromeMaterial' : undefined,
                                 headerShadowVisible: isAndroid,
                                 headerStyle: listHeaderStyle,
-                                headerLeft: () => <AppSettingsButton />,
+                                // iOS uses native items set by the screen (see useAppSettingsHeaderItems).
+                                headerLeft: isIOS ? undefined : () => <AppSettingsButton />,
                             }}
                         />
                         <Stack.Screen name="Game" component={GameScreen}
                             options={{
                                 orientation: 'all',
-                                headerTitle: () => <RoundHeaderTitle />,
-                                headerRight: () => <GameOptionsButton />,
+                                title: '',
+                                headerTitle: roundPickerInHeader ? () => <RoundHeaderTitle /> : undefined,
+                                // iOS uses native items set by the screen (see useGameOptionsHeaderItems).
+                                headerRight: isIOS ? undefined : () => <GameOptionsButton />,
                                 headerTransparent: true,
                                 headerBlurEffect: 'systemChromeMaterial',
                                 headerShadowVisible: false,

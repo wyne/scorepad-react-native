@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useEffect, useRef } from 'react';
+import React, { memo, useCallback, useEffect, useLayoutEffect, useRef } from 'react';
 
 import { useHeaderHeight } from '@react-navigation/elements';
 import { ParamListBase, useFocusEffect } from '@react-navigation/native';
@@ -12,6 +12,7 @@ import { selectGameIds } from '../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { increaseAppOpens, setInstallId, setRollingGameCounter } from '../../redux/SettingsSlice';
 import { logEvent } from '../Analytics';
+import { useAppSettingsHeaderItems } from '../components/Buttons/AppSettingsButton';
 import FloatingActionButton, { FAB_BOTTOM_MARGIN, FAB_LIST_CLEARANCE, FAB_SIZE } from '../components/FloatingActionButton';
 import GameListItem from '../components/GameListItem';
 import { useStoreReviewPrompt } from '../hooks/useStoreReviewPrompt';
@@ -34,6 +35,14 @@ const ListScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     const listHeaderInset = Platform.OS === 'ios' ? headerHeight : 0;
     const insets = useSafeAreaInsets();
     const listBottomInset = insets.bottom + FAB_BOTTOM_MARGIN + FAB_SIZE + FAB_LIST_CLEARANCE;
+
+    // On iOS the settings button is a native bar item so iPhone Duo can move
+    // it into the vertical bar. Android keeps the React `headerLeft`.
+    const headerLeftItems = useAppSettingsHeaderItems(navigation);
+    useLayoutEffect(() => {
+        if (Platform.OS !== 'ios') return;
+        navigation.setOptions({ unstable_headerLeftItems: () => headerLeftItems });
+    }, [navigation, headerLeftItems]);
 
     // Ask for a review when the user comes back to the list from a game — the
     // same moment the pre-3.0.0 prompt used, when it hung off the header's home
