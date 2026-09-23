@@ -9,9 +9,7 @@ import { Keyboard, StyleSheet, View } from 'react-native';
 import { Icon } from 'react-native-elements';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { asyncCreateGame, selectGameIds } from '../../redux/GamesSlice';
-import { useAppDispatch, useAppSelector } from '../../redux/hooks';
-import { MAX_PLAYERS } from '../constants';
+import { playerCountLabel, playerCountOptions, useNewGameMenu } from '../hooks/useNewGameMenu';
 import { LIQUID_GLASS } from '../platform';
 import { useTheme } from '../theme';
 
@@ -24,35 +22,15 @@ interface Props {
     navigation: NativeStackNavigationProp<ParamListBase, string, undefined>;
 }
 
-const playerCountLabel = (count: number) => `${count}${count == 1 ? ' Player' : ' Players'}`;
-
 const FloatingActionButton: React.FunctionComponent<Props> = ({ navigation }) => {
     const theme = useTheme();
-    const dispatch = useAppDispatch();
-    const gameCount = useAppSelector(state => selectGameIds(state).length);
     const insets = useSafeAreaInsets();
+    const { selectPlayerCount } = useNewGameMenu(navigation);
 
-    const playerNumberOptions = [...Array.from(Array(MAX_PLAYERS).keys(), n => n + 1)];
-
-    const menuActions: MenuAction[] = playerNumberOptions.map((number) => ({
+    const menuActions: MenuAction[] = playerCountOptions.map((number) => ({
         id: number.toString(),
         title: playerCountLabel(number),
     }));
-
-    const addGameHandler = async (playerCount: number) => {
-        dispatch(
-            asyncCreateGame({ gameCount, playerCount })
-        ).then(() => {
-            setTimeout(() => {
-                navigation.navigate('EditGame', { source: 'new_game' });
-            }, 500);
-        });
-    };
-
-    const selectPlayerCount = (playerCount: number) => {
-        Keyboard.dismiss();
-        addGameHandler(playerCount);
-    };
 
     return (
         <View testID="add-game-button-container" style={[styles.container, {
@@ -96,7 +74,7 @@ const FloatingActionButton: React.FunctionComponent<Props> = ({ navigation }) =>
                         }
                         modifiers={[buttonStyle('plain')]}
                     >
-                        {playerNumberOptions.map((number) => (
+                        {playerCountOptions.map((number) => (
                             <Button
                                 key={number}
                                 label={playerCountLabel(number)}

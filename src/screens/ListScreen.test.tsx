@@ -182,7 +182,7 @@ describe('ListScreen', () => {
         expect(getByText('Tap the + button to create a new game.')).toBeTruthy();
     });
 
-    it('shows the title in the list only when the header collapses for vertical bars', () => {
+    it('moves the title into the list and new game into the header with vertical bars', () => {
         const createStore = () => createMockStore({
             settings: { appOpens: 1, devMenuEnabled: false, installId: 'existing-id', rollingGameCounter: 0 },
             games: { entities: {}, ids: [] },
@@ -192,11 +192,16 @@ describe('ListScreen', () => {
         mockVerticalBars = false;
         const regular = render(<Provider store={createStore()}><ListScreen navigation={mockNavigation} /></Provider>);
         expect(regular.queryByText('ScorePad')).toBeNull();
+        expect(regular.getByTestId('add-game-button-container')).toBeTruthy();
         regular.unmount();
 
         mockVerticalBars = true;
         const duo = render(<Provider store={createStore()}><ListScreen navigation={mockNavigation} /></Provider>);
         expect(duo.getByText('ScorePad')).toBeTruthy();
+        expect(duo.queryByTestId('add-game-button-container')).toBeNull();
+        expect(mockNavigation.setOptions).toHaveBeenCalledWith(
+            expect.objectContaining({ unstable_headerRightItems: expect.any(Function) })
+        );
         mockVerticalBars = false;
     });
 
