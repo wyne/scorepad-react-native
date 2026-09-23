@@ -1,7 +1,7 @@
 import { renderHook } from '@testing-library/react-native';
 import { Platform } from 'react-native';
 
-import { useExpandedGameLayout } from './useExpandedGameLayout';
+import { useExpandedGameLayout, useVerticalBarLayout } from './useExpandedGameLayout';
 
 jest.mock('react-native/Libraries/Utilities/useWindowDimensions', () => ({
     __esModule: true,
@@ -51,5 +51,41 @@ describe('useExpandedGameLayout', () => {
         setPlatform('android');
         setWindow(951, 669);
         expect(expanded()).toBe(false);
+    });
+});
+
+describe('useVerticalBarLayout', () => {
+    const verticalBars = () => renderHook(() => useVerticalBarLayout()).result.current;
+
+    beforeEach(() => setPlatform('ios'));
+    afterAll(() => setPlatform('ios'));
+
+    it('is true for the iPhone Duo inner display', () => {
+        setWindow(951, 669);
+        expect(verticalBars()).toBe(true);
+    });
+
+    it('is true for the iPhone Duo outer display', () => {
+        setWindow(466, 678);
+        expect(verticalBars()).toBe(true);
+    });
+
+    it('is false for a regular iPhone in either orientation', () => {
+        setWindow(393, 852);
+        expect(verticalBars()).toBe(false);
+        setWindow(852, 393);
+        expect(verticalBars()).toBe(false);
+    });
+
+    it('is false on iPad', () => {
+        setPlatform('ios', true);
+        setWindow(1024, 1366);
+        expect(verticalBars()).toBe(false);
+    });
+
+    it('is false on Android', () => {
+        setPlatform('android');
+        setWindow(466, 678);
+        expect(verticalBars()).toBe(false);
     });
 });

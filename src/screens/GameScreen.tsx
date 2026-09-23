@@ -16,6 +16,7 @@ import { InteractionType } from '../components/Interactions/InteractionType';
 import ChooseWinnersSheet from '../components/Sheets/ChooseWinnersSheet';
 import GestureInfoSheet from '../components/Sheets/GestureInfoSheet';
 import PointValuesSheet from '../components/Sheets/PointValuesSheet';
+import { useRoundPickerInBottomStrip } from '../hooks/useExpandedGameLayout';
 import { useGestureHint } from '../hooks/useGestureHint';
 
 function useKeepScreenAwake(active: boolean): void {
@@ -40,6 +41,11 @@ const GameScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     const interactionType = useAppSelector(state => selectInteractionType(state, currentGameId));
     const headerHeight = useHeaderHeight();
     const showHint = useGestureHint();
+    const isDial = interactionType === InteractionType.Dial;
+    // When the header collapses (iPhone Duo inner display), what is left of it
+    // is transparent: let the dial list scroll up into it instead of clipping
+    // at its edge. The tiles don't scroll, so they stay below it.
+    const scrollUnderHeader = useRoundPickerInBottomStrip() && isDial;
     useKeepScreenAwake(keepScreenAwake);
 
     // On iOS the options menu is a native bar item so iPhone Duo can move it
@@ -53,11 +59,11 @@ const GameScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     if (typeof currentGameId == 'undefined') return null;
 
     return (
-        <View style={{ flex: 1, paddingTop: headerHeight }} testID="game-screen">
+        <View style={{ flex: 1, paddingTop: scrollUnderHeader ? 0 : headerHeight }} testID="game-screen">
             <View style={{ flex: 1 }}>
-                {interactionType === InteractionType.Dial
+                {isDial
                     ? <Animated.View key="rows" entering={FadeIn.duration(220)} exiting={FadeOut.duration(180)} style={StyleSheet.absoluteFill}>
-                        <ListBoard showHint={showHint} />
+                        <ListBoard showHint={showHint} topInset={scrollUnderHeader ? headerHeight : 0} />
                     </Animated.View>
                     : <Animated.View key="flex" entering={FadeIn.duration(220)} exiting={FadeOut.duration(180)} style={StyleSheet.absoluteFill}>
                         <TileBoard showHint={showHint} />

@@ -4,7 +4,7 @@ import { useHeaderHeight } from '@react-navigation/elements';
 import { ParamListBase, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import * as Crypto from 'expo-crypto';
-import { Platform, Text } from 'react-native';
+import { Platform, StyleSheet, Text } from 'react-native';
 import Animated, { Easing, LinearTransition } from 'react-native-reanimated';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -15,6 +15,7 @@ import { logEvent } from '../Analytics';
 import { useAppSettingsHeaderItems } from '../components/Buttons/AppSettingsButton';
 import FloatingActionButton, { FAB_BOTTOM_MARGIN, FAB_LIST_CLEARANCE, FAB_SIZE } from '../components/FloatingActionButton';
 import GameListItem from '../components/GameListItem';
+import { useVerticalBarLayout } from '../hooks/useExpandedGameLayout';
 import { useStoreReviewPrompt } from '../hooks/useStoreReviewPrompt';
 import { useTheme } from '../theme';
 
@@ -35,6 +36,10 @@ const ListScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     const listHeaderInset = Platform.OS === 'ios' ? headerHeight : 0;
     const insets = useSafeAreaInsets();
     const listBottomInset = insets.bottom + FAB_BOTTOM_MARGIN + FAB_SIZE + FAB_LIST_CLEARANCE;
+    // With vertical bars (iPhone Duo), iOS scrolls the header title away with
+    // the content, so the title is part of the list and the header collapses
+    // (see Navigation).
+    const titleInList = useVerticalBarLayout();
 
     // On iOS the settings button is a native bar item so iPhone Duo can move
     // it into the vertical bar. Android keeps the React `headerLeft`.
@@ -98,6 +103,9 @@ const ListScreen: React.FunctionComponent<Props> = ({ navigation }) => {
                 contentInsetAdjustmentBehavior="never"
                 scrollIndicatorInsets={{ top: listHeaderInset, bottom: listBottomInset }}
                 itemLayoutAnimation={LinearTransition.easing(Easing.ease)}
+                ListHeaderComponent={titleInList
+                    ? <Text accessibilityRole="header" style={[styles.listTitle, { color: theme.text }]}>ScorePad</Text>
+                    : undefined}
                 ListEmptyComponent={
                     <>
                         <Text style={{ textAlign: 'center', padding: 30, paddingBottom: 10, fontSize: 16, fontWeight: 'bold', color: theme.text }}>No Games</Text>
@@ -117,5 +125,15 @@ const ListScreen: React.FunctionComponent<Props> = ({ navigation }) => {
         </SafeAreaView>
     );
 };
+
+const styles = StyleSheet.create({
+    // Matches the native header title it stands in for.
+    listTitle: {
+        fontSize: 17,
+        fontWeight: '600',
+        paddingHorizontal: 16,
+        paddingVertical: 12,
+    },
+});
 
 export default memo(ListScreen);

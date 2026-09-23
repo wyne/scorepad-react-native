@@ -171,10 +171,12 @@ const MemoizedPlayerRow = React.memo(PlayerRow);
 
 interface ListBoardProps {
     showHint: boolean;
+    /** Space at the top the rows can scroll under, e.g. a transparent header. */
+    topInset?: number;
     onPlayerRowRender?: (id: string) => void;
 }
 
-const ListBoard: React.FC<ListBoardProps> = ({ showHint, onPlayerRowRender }) => {
+const ListBoard: React.FC<ListBoardProps> = ({ showHint, topInset = 0, onPlayerRowRender }) => {
     const { playerIds, locked } = useAppSelector((state) => {
         const currentGameId = state.settings.currentGameId;
         const currentGame = currentGameId ? selectGameById(state, currentGameId) : undefined;
@@ -222,6 +224,7 @@ const ListBoard: React.FC<ListBoardProps> = ({ showHint, onPlayerRowRender }) =>
 
     if (!playerIds?.length) return null;
     const scrollInsets = {
+        top: topInset,
         bottom: fullscreen ? insets.bottom + 10 : bottomSheetHeight + 10,
         left: insets.left + ROW_BOARD_PADDING,
         right: insets.right + ROW_BOARD_PADDING,
@@ -233,6 +236,7 @@ const ListBoard: React.FC<ListBoardProps> = ({ showHint, onPlayerRowRender }) =>
                 testID="list-board-scroll"
                 style={styles.scroll}
                 contentContainerStyle={[styles.scrollContent, {
+                    paddingTop: styles.scrollContent.paddingTop + topInset,
                     paddingBottom: scrollInsets.bottom,
                     paddingLeft: scrollInsets.left,
                     paddingRight: scrollInsets.right,
@@ -260,7 +264,7 @@ const ListBoard: React.FC<ListBoardProps> = ({ showHint, onPlayerRowRender }) =>
                     initialIndex={playerIds.indexOf(selectedId)}
                     boardWidth={boardLayout.width}
                     boardHeight={boardLayout.height - (fullscreen ? 0 : bottomSheetHeight)}
-                    safeAreaTop={insets.top}
+                    safeAreaTop={insets.top + topInset}
                     showHint={showHint}
                     onClose={handleClose}
                     svOpacity={svOverlayOpacity}

@@ -167,6 +167,20 @@ describe('ListBoard', () => {
         );
     });
 
+    it('lets the rows scroll under a top inset such as a transparent header', () => {
+        mockSafeAreaInsets = { top: 0, bottom: 0, left: 0, right: 0 };
+        const store = createStore();
+        const { getByTestId } = render(
+            <Provider store={store}><ListBoard showHint={false} topInset={24} /></Provider>
+        );
+        const scroll = getByTestId('list-board-scroll');
+
+        expect(StyleSheet.flatten(scroll.props.contentContainerStyle)).toEqual(
+            expect.objectContaining({ paddingTop: 34 })
+        );
+        expect(scroll.props.scrollIndicatorInsets).toEqual(expect.objectContaining({ top: 24 }));
+    });
+
     it('does not re-render player rows when advancing to an empty round keeps displayed row data unchanged', () => {
         const store = createStore();
         const onPlayerRowRender = jest.fn();

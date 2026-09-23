@@ -1,7 +1,7 @@
 import React, { useRef, useState } from 'react';
 
 import { DarkTheme, DefaultTheme, NavigationContainer, useNavigationContainerRef } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { createNativeStackNavigator, NativeStackNavigationOptions } from '@react-navigation/native-stack';
 import { Platform, View } from 'react-native';
 
 import { useAppSelector } from '../redux/hooks';
@@ -19,7 +19,7 @@ import { MenuOpenContextProvider } from './components/MenuOpenContext';
 import GameSheet from './components/Sheets/GameSheet';
 import { GestureInfoSheetContextProvider } from './components/Sheets/GestureInfoSheetContext';
 import { useAnalyticsUserProperties } from './hooks/useAnalyticsUserProperties';
-import { useExpandedGameLayout } from './hooks/useExpandedGameLayout';
+import { useRoundPickerInBottomStrip, useVerticalBarLayout } from './hooks/useExpandedGameLayout';
 import EditPlayerScreen from './screens/EditPlayerScreen';
 import ShareScreen from './screens/ShareScreen';
 import { useTheme } from './theme';
@@ -41,6 +41,21 @@ export type RootStackParamList = {
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
+/**
+ * Header options for a screen whose header has nothing left in it: its buttons
+ * are in the iPhone Duo's vertical bar and its title, if any, is in the
+ * content. The header collapses to a strip at the top; keep that strip
+ * transparent so the content can fill the screen to the top edge.
+ */
+const collapsedHeaderOptions: NativeStackNavigationOptions = {
+    title: '',
+    headerTitle: undefined,
+    headerTransparent: true,
+    headerBlurEffect: 'none',
+    headerStyle: { backgroundColor: 'transparent' },
+    headerShadowVisible: false,
+};
+
 export const Navigation = () => {
     useAnalyticsUserProperties();
     const navigationRef = useNavigationContainerRef<RootStackParamList>();
@@ -57,9 +72,12 @@ export const Navigation = () => {
 
     const fullscreen = useAppSelector(state => state.settings.home_fullscreen);
     // On the iPhone Duo's inner display the round picker sits beside the game
-    // sheet instead of in the header (see GameScreen). Fullscreen hides the
-    // sheet, so the picker stays in the header there.
-    const roundPickerInHeader = !useExpandedGameLayout() || fullscreen;
+    // sheet instead of in the header, and the header collapses (see GameSheet).
+    const roundPickerInHeader = !useRoundPickerInBottomStrip();
+    // With vertical bars (iPhone Duo), iOS scrolls the list's header title
+    // away with the content, so the title moves into the list instead (see
+    // ListScreen) and the header collapses.
+    const verticalBars = useVerticalBarLayout();
     const [showGameSheetForActiveRoute, setShowGameSheetForActiveRoute] = useState(false);
 
     // Track the last logged route so we emit one screen_view per actual navigation,
@@ -102,6 +120,7 @@ export const Navigation = () => {
                                 headerStyle: listHeaderStyle,
                                 // iOS uses native items set by the screen (see useAppSettingsHeaderItems).
                                 headerLeft: isIOS ? undefined : () => <AppSettingsButton />,
+                                ...(verticalBars ? collapsedHeaderOptions : undefined),
                             }}
                         />
                         <Stack.Screen name="Game" component={GameScreen}
@@ -116,6 +135,7 @@ export const Navigation = () => {
                                 headerShadowVisible: false,
                                 headerBackButtonDisplayMode: 'minimal',
                                 headerTitleAlign: 'center',
+                                ...(roundPickerInHeader ? undefined : collapsedHeaderOptions),
                             }}
                             listeners={{
                                 focus: () => setShowGameSheetForActiveRoute(true),
