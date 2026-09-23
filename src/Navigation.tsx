@@ -42,18 +42,28 @@ export type RootStackParamList = {
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 /**
- * Header options for a screen whose header has nothing left in it: its buttons
- * are in the iPhone Duo's vertical bar and its title, if any, is in the
- * content. The header collapses to a strip at the top; keep that strip
- * transparent so the content can fill the screen to the top edge.
+ * Header options for a header with no background. With vertical bars (iPhone
+ * Duo), the native header background starts below a strip at the top of the
+ * screen and stops short of the vertical bar, so it reads as a box. Without
+ * it, the buttons sit in the vertical bar and anything left in the header
+ * (the round picker's glass pill) floats over the content.
  */
-const collapsedHeaderOptions: NativeStackNavigationOptions = {
-    title: '',
-    headerTitle: undefined,
+const bareHeaderOptions: NativeStackNavigationOptions = {
     headerTransparent: true,
     headerBlurEffect: 'none',
     headerStyle: { backgroundColor: 'transparent' },
     headerShadowVisible: false,
+};
+
+/**
+ * Header options for a header with nothing left in it: its buttons are in the
+ * vertical bar and its title, if any, is in the content. It collapses to a
+ * transparent strip, and the content can fill the screen to the top edge.
+ */
+const collapsedHeaderOptions: NativeStackNavigationOptions = {
+    ...bareHeaderOptions,
+    title: '',
+    headerTitle: undefined,
 };
 
 export const Navigation = () => {
@@ -74,9 +84,10 @@ export const Navigation = () => {
     // On the iPhone Duo's inner display the round picker sits beside the game
     // sheet instead of in the header, and the header collapses (see GameSheet).
     const roundPickerInHeader = !useRoundPickerInBottomStrip();
-    // With vertical bars (iPhone Duo), iOS scrolls the list's header title
-    // away with the content, so the title moves into the list instead (see
-    // ListScreen) and the header collapses.
+    // With vertical bars (iPhone Duo), headers drop their background (see
+    // bareHeaderOptions). iOS also scrolls the list's header title away with
+    // the content, so that title moves into the list (see ListScreen) and the
+    // list's header collapses.
     const verticalBars = useVerticalBarLayout();
     const [showGameSheetForActiveRoute, setShowGameSheetForActiveRoute] = useState(false);
 
@@ -135,6 +146,7 @@ export const Navigation = () => {
                                 headerShadowVisible: false,
                                 headerBackButtonDisplayMode: 'minimal',
                                 headerTitleAlign: 'center',
+                                ...(verticalBars ? bareHeaderOptions : undefined),
                                 ...(roundPickerInHeader ? undefined : collapsedHeaderOptions),
                             }}
                             listeners={{

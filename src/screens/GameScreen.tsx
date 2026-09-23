@@ -16,7 +16,7 @@ import { InteractionType } from '../components/Interactions/InteractionType';
 import ChooseWinnersSheet from '../components/Sheets/ChooseWinnersSheet';
 import GestureInfoSheet from '../components/Sheets/GestureInfoSheet';
 import PointValuesSheet from '../components/Sheets/PointValuesSheet';
-import { useRoundPickerInBottomStrip } from '../hooks/useExpandedGameLayout';
+import { useVerticalBarLayout } from '../hooks/useExpandedGameLayout';
 import { useGestureHint } from '../hooks/useGestureHint';
 
 function useKeepScreenAwake(active: boolean): void {
@@ -42,10 +42,11 @@ const GameScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     const headerHeight = useHeaderHeight();
     const showHint = useGestureHint();
     const isDial = interactionType === InteractionType.Dial;
-    // When the header collapses (iPhone Duo inner display), what is left of it
-    // is transparent: let the dial list scroll up into it instead of clipping
-    // at its edge. The tiles don't scroll, so they stay below it.
-    const scrollUnderHeader = useRoundPickerInBottomStrip() && isDial;
+    // With vertical bars (iPhone Duo) the header has no background (see
+    // Navigation): let the dial list scroll up under it, and under the round
+    // picker when that is still in the header, instead of clipping at its
+    // edge. The tiles don't scroll, so they stay below it.
+    const scrollUnderHeader = useVerticalBarLayout() && isDial;
     useKeepScreenAwake(keepScreenAwake);
 
     // On iOS the options menu is a native bar item so iPhone Duo can move it
