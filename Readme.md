@@ -1,4 +1,6 @@
-<img src="assets/icon.png" height="25"> ScorePad with Rounds
+
+
+<img src="assets/icon.png" alt="ScorePad with Rounds" height="25"> ScorePad with Rounds
 ---
 
 An open-source, multi-platform score keeping app with per-round score history.
