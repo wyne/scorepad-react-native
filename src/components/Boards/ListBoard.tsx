@@ -265,6 +265,8 @@ const ListBoard: React.FC<ListBoardProps> = ({ showHint, topInset = 0, onPlayerR
                     boardWidth={boardLayout.width}
                     boardHeight={boardLayout.height - (fullscreen ? 0 : bottomSheetHeight)}
                     safeAreaTop={insets.top + topInset}
+                    safeAreaLeft={insets.left}
+                    safeAreaRight={insets.right}
                     showHint={showHint}
                     onClose={handleClose}
                     svOpacity={svOverlayOpacity}

@@ -253,6 +253,18 @@ describe('DialOverlay', () => {
         expect(StyleSheet.flatten(getByTestId('dial-control').props.style).width).toBeGreaterThan(240);
     });
 
+    it('keeps the page and card within the side safe area', () => {
+        // iPhone Duo outer display: the vertical bar takes the right edge.
+        const { getByTestId } = render(wrap(createStore(), jest.fn(), {
+            boardWidth: 466,
+            boardHeight: 600,
+            safeAreaRight: 60,
+        }));
+
+        expect(StyleSheet.flatten(getByTestId('dial-page-frame').props.style).width).toBe(406);
+        expect(StyleSheet.flatten(getByTestId('dial-card').props.style).width).toBe(406 - 24);
+    });
+
     it('uses the landscape card dimensions instead of raw board width for dial sizing', () => {
         const { getByTestId } = render(wrap(createStore(), jest.fn(), {
             boardWidth: 1100,

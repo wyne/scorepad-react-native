@@ -89,6 +89,12 @@ export const Navigation = () => {
     // the content, so that title moves into the list (see ListScreen) and the
     // list's header collapses.
     const verticalBars = useVerticalBarLayout();
+    // Opaque headers (pushed screens) have the same problem: their background
+    // starts below the strip and stops short of the vertical bar, so it reads
+    // as a box. Give them the page's own background so they blend in.
+    const flatHeaderOptions: NativeStackNavigationOptions | undefined = verticalBars
+        ? { headerStyle: { backgroundColor: theme.background }, headerShadowVisible: false }
+        : undefined;
     const [showGameSheetForActiveRoute, setShowGameSheetForActiveRoute] = useState(false);
 
     // Track the last logged route so we emit one screen_view per actual navigation,
@@ -164,12 +170,14 @@ export const Navigation = () => {
                                 orientation: 'all',
                                 title: 'Edit Game',
                                 headerBackButtonDisplayMode: 'minimal',
+                                ...flatHeaderOptions,
                             }}
                         />
                         <Stack.Screen name="Share" component={ShareScreen}
                             options={{
                                 orientation: 'all',
                                 title: 'Share',
+                                ...flatHeaderOptions,
                             }}
                         />
                         <Stack.Screen name="EditPlayer" component={EditPlayerScreen}
@@ -177,6 +185,7 @@ export const Navigation = () => {
                             options={{
                                 orientation: 'portrait',
                                 title: 'Edit Player',
+                                ...flatHeaderOptions,
                             }}
                         />
                         <Stack.Screen name="AppSettings" component={AppSettingsScreen}
