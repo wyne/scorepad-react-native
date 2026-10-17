@@ -1,10 +1,10 @@
-import React, { memo, useCallback, useEffect, useRef } from 'react';
+import React, { memo, useCallback, useEffect, useLayoutEffect, useRef } from 'react';
 
 import { useHeaderHeight } from '@react-navigation/elements';
 import { ParamListBase, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import * as Crypto from 'expo-crypto';
-import { Platform, Text } from 'react-native';
+import { Platform, StyleSheet, Text } from 'react-native';
 import Animated, { Easing, LinearTransition } from 'react-native-reanimated';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -12,8 +12,11 @@ import { selectGameIds } from '../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { increaseAppOpens, setInstallId, setRollingGameCounter } from '../../redux/SettingsSlice';
 import { logEvent } from '../Analytics';
+import { useAppSettingsHeaderItems } from '../components/Buttons/AppSettingsButton';
 import FloatingActionButton, { FAB_BOTTOM_MARGIN, FAB_LIST_CLEARANCE, FAB_SIZE } from '../components/FloatingActionButton';
 import GameListItem from '../components/GameListItem';
+import { useVerticalBarLayout } from '../hooks/useExpandedGameLayout';
+import { useNewGameHeaderItems } from '../hooks/useNewGameMenu';
 import { useStoreReviewPrompt } from '../hooks/useStoreReviewPrompt';
 import { useTheme } from '../theme';
 
@@ -33,7 +36,27 @@ const ListScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     const headerHeight = useHeaderHeight();
     const listHeaderInset = Platform.OS === 'ios' ? headerHeight : 0;
     const insets = useSafeAreaInsets();
-    const listBottomInset = insets.bottom + FAB_BOTTOM_MARGIN + FAB_SIZE + FAB_LIST_CLEARANCE;
+    // With vertical bars (iPhone Duo), iOS scrolls the header title away with
+    // the content, so the title is part of the list and the header collapses
+    // (see Navigation). The new game button moves from the floating action
+    // button into the vertical bar, next to the other controls.
+    const verticalBars = useVerticalBarLayout();
+    const listBottomInset = verticalBars
+        ? insets.bottom + FAB_LIST_CLEARANCE
+        : insets.bottom + FAB_BOTTOM_MARGIN + FAB_SIZE + FAB_LIST_CLEARANCE;
+
+    // On iOS the settings button is a native bar item so iPhone Duo can move
+    // it into the vertical bar. Android keeps the React `headerLeft`.
+    const headerLeftItems = useAppSettingsHeaderItems(navigation);
+    useLayoutEffect(() => {
+        if (Platform.OS !== 'ios') return;
+        navigation.setOptions({ unstable_headerLeftItems: () => headerLeftItems });
+    }, [navigation, headerLeftItems]);
+
+    const newGameItems = useNewGameHeaderItems(navigation);
+    useLayoutEffect(() => {
+        navigation.setOptions({ unstable_headerRightItems: verticalBars ? () => newGameItems : undefined });
+    }, [navigation, newGameItems, verticalBars]);
 
     // Ask for a review when the user comes back to the list from a game — the
     // same moment the pre-3.0.0 prompt used, when it hung off the header's home
@@ -89,6 +112,9 @@ const ListScreen: React.FunctionComponent<Props> = ({ navigation }) => {
                 contentInsetAdjustmentBehavior="never"
                 scrollIndicatorInsets={{ top: listHeaderInset, bottom: listBottomInset }}
                 itemLayoutAnimation={LinearTransition.easing(Easing.ease)}
+                ListHeaderComponent={verticalBars
+                    ? <Text accessibilityRole="header" style={[styles.listTitle, { color: theme.text }]}>ScorePad</Text>
+                    : undefined}
                 ListEmptyComponent={
                     <>
                         <Text style={{ textAlign: 'center', padding: 30, paddingBottom: 10, fontSize: 16, fontWeight: 'bold', color: theme.text }}>No Games</Text>
@@ -104,9 +130,19 @@ const ListScreen: React.FunctionComponent<Props> = ({ navigation }) => {
                 keyExtractor={item => item as string}
             >
             </Animated.FlatList>
-            <FloatingActionButton navigation={navigation} />
+            {!verticalBars && <FloatingActionButton navigation={navigation} />}
         </SafeAreaView>
     );
 };
+
+const styles = StyleSheet.create({
+    // Matches the native header title it stands in for.
+    listTitle: {
+        fontSize: 17,
+        fontWeight: '600',
+        paddingHorizontal: 16,
+        paddingVertical: 12,
+    },
+});
 
 export default memo(ListScreen);

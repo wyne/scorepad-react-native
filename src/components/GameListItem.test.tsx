@@ -32,6 +32,13 @@ jest.mock('react-native-safe-area-context', () => ({
     useSafeAreaInsets: () => ({ top: 0, bottom: 0, left: 0, right: 0 }),
 }));
 
+// Header items are covered by the button's own tests.
+jest.mock('./Buttons/AppSettingsButton', () => ({
+    __esModule: true,
+    default: () => null,
+    useAppSettingsHeaderItems: () => [],
+}));
+
 jest.mock('../hooks/useStoreReviewPrompt', () => ({
     useStoreReviewPrompt: () => jest.fn(),
 }));
@@ -127,6 +134,7 @@ const createMockStore = (initialState: Parameters<typeof configureStore>[0]['pre
 const mockNavigation = {
     navigate: jest.fn(),
     goBack: jest.fn(),
+    setOptions: jest.fn(),
 } as unknown as NativeStackNavigationProp<ParamListBase, string, undefined>;
 
 describe('GameListItem', () => {

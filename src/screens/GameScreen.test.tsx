@@ -7,11 +7,18 @@ import { Provider } from 'react-redux';
 import gamesReducer from '../../redux/GamesSlice';
 import playersReducer from '../../redux/PlayersSlice';
 import settingsReducer from '../../redux/SettingsSlice';
+import { useNavigationMock } from '../../test/test-helpers';
 
 import GameScreen from './GameScreen';
 
+const mockHeaderItems = [{ type: 'menu', label: 'Game Options' }];
+
 jest.mock('@react-navigation/elements', () => ({
     useHeaderHeight: () => 88,
+}));
+
+jest.mock('react-native-safe-area-context', () => ({
+    useSafeAreaInsets: () => ({ top: 0, bottom: 0, left: 0, right: 0 }),
 }));
 
 jest.mock('react-native-reanimated', () => {
@@ -51,6 +58,12 @@ jest.mock('@gorhom/bottom-sheet', () => {
 });
 
 // Mock the components that GameScreen uses
+jest.mock('../components/Buttons/GameOptionsButton', () => ({
+    __esModule: true,
+    default: () => null,
+    useGameOptionsHeaderItems: () => mockHeaderItems,
+}));
+
 jest.mock('../components/Boards/TileBoard', () => {
     return function MockTileBoard() {
         const { View, Text } = jest.requireActual('react-native');
@@ -99,6 +112,8 @@ const createMockStore = (initialState: Parameters<typeof configureStore>[0]['pre
 };
 
 describe('GameScreen', () => {
+    const navigation = useNavigationMock();
+
     const mockGame = {
         id: 'game-1',
         title: 'Test Game',
@@ -138,7 +153,7 @@ describe('GameScreen', () => {
 
         const { toJSON } = render(
             <Provider store={store}>
-                <GameScreen />
+                <GameScreen navigation={navigation} />
             </Provider>
         );
 
@@ -164,7 +179,7 @@ describe('GameScreen', () => {
 
         const { getByTestId } = render(
             <Provider store={store}>
-                <GameScreen />
+                <GameScreen navigation={navigation} />
             </Provider>
         );
 
@@ -190,10 +205,27 @@ describe('GameScreen', () => {
 
         const { getByTestId } = render(
             <Provider store={store}>
-                <GameScreen />
+                <GameScreen navigation={navigation} />
             </Provider>
         );
 
         expect(getByTestId('list-board')).toBeTruthy();
+    });
+
+    it('sets native header items so iPhone Duo can move them into the vertical bar', () => {
+        const store = createMockStore({
+            settings: { currentGameId: 'game-1' },
+            games: { entities: { 'game-1': mockGame }, ids: ['game-1'] },
+            players: { entities: mockPlayers, ids: ['player-1', 'player-2'] },
+        });
+
+        render(
+            <Provider store={store}>
+                <GameScreen navigation={navigation} />
+            </Provider>
+        );
+
+        const options = (navigation.setOptions as jest.Mock).mock.calls.at(-1)[0];
+        expect(options.unstable_headerRightItems()).toBe(mockHeaderItems);
     });
 });

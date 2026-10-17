@@ -369,6 +369,9 @@ interface Props {
     boardWidth: number;
     boardHeight: number;
     safeAreaTop: number;
+    /** Side insets the card keeps clear of, e.g. a landscape notch or the iPhone Duo's vertical bar. */
+    safeAreaLeft?: number;
+    safeAreaRight?: number;
     showHint: boolean;
     onClose: () => void;
     svOpacity: SharedValue<number>;
@@ -381,6 +384,8 @@ const DialOverlay: React.FC<Props> = ({
     boardWidth,
     boardHeight,
     safeAreaTop,
+    safeAreaLeft = 0,
+    safeAreaRight = 0,
     showHint,
     onClose,
     svOpacity,
@@ -400,9 +405,10 @@ const DialOverlay: React.FC<Props> = ({
 
     const marginTop = Math.max(12, safeAreaTop);
     const targetTop = marginTop;
-    const targetWidth = boardWidth;
+    const targetLeft = safeAreaLeft;
+    const targetWidth = Math.max(0, boardWidth - safeAreaLeft - safeAreaRight);
     const targetHeight = boardHeight - marginTop - MARGIN_BOTTOM;
-    const cardLayout = getDialCardLayout(boardWidth, targetHeight);
+    const cardLayout = getDialCardLayout(targetWidth, targetHeight);
 
     const swipeDragY = useSharedValue(0);
     const swipeDragX = useSharedValue(0);
@@ -410,7 +416,7 @@ const DialOverlay: React.FC<Props> = ({
     const panelStyle = useAnimatedStyle(() => ({
         position: 'absolute',
         top: targetTop,
-        left: 0,
+        left: targetLeft,
         width: targetWidth,
         height: targetHeight,
         opacity: svOpacity.value,

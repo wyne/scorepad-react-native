@@ -89,11 +89,11 @@ jest.mock('react-native-reanimated', () => {
         },
         useSharedValue: jest.fn((value) => ({ value })),
         useAnimatedStyle: jest.fn((callback) => callback()),
+        useAnimatedReaction: jest.fn(),
+        useDerivedValue: jest.fn((callback) => ({ value: callback() })),
+        runOnJS: jest.fn((fn) => fn),
         withTiming: jest.fn((value) => value),
         FadeIn: {
-            delay: jest.fn(() => ({ delay: jest.fn() })),
-        },
-        Layout: {
             delay: jest.fn(() => ({ delay: jest.fn() })),
         },
         interpolate: jest.fn(),
