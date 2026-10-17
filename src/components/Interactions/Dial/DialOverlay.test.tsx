@@ -117,6 +117,8 @@ const defaultProps = {
     boardWidth: 400,
     boardHeight: 700,
     safeAreaTop: 0,
+    safeAreaLeft: 0,
+    safeAreaRight: 0,
     showHint: false,
     onClose: jest.fn(),
     svOpacity: mkSv(1),
