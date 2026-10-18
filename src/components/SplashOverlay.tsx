@@ -2,7 +2,7 @@ import React, { useCallback, useEffect } from 'react';
 
 import { Image } from 'expo-image';
 import * as SplashScreen from 'expo-splash-screen';
-import { StyleSheet, useColorScheme } from 'react-native';
+import { StyleSheet } from 'react-native';
 import Animated, {
     Easing,
     runOnJS,
@@ -16,13 +16,12 @@ import Animated, {
 import icon from '../../assets/icon.png';
 
 interface Props {
+    backgroundColor: string;
     onDone: () => void;
+    ready: boolean;
 }
 
-export const SplashOverlay: React.FC<Props> = ({ onDone }) => {
-    const colorScheme = useColorScheme();
-    const bgColor = colorScheme === 'dark' ? '#000000' : '#F2F2F7';
-
+export const SplashOverlay: React.FC<Props> = ({ backgroundColor, onDone, ready }) => {
     const overlayOpacity = useSharedValue(1);
     const iconOpacity = useSharedValue(0);
     const iconScale = useSharedValue(0.92);
@@ -30,7 +29,11 @@ export const SplashOverlay: React.FC<Props> = ({ onDone }) => {
     const runDone = useCallback(() => onDone(), [onDone]);
 
     useEffect(() => {
-        SplashScreen.hideAsync();
+        void SplashScreen.hideAsync().catch(() => undefined);
+    }, []);
+
+    useEffect(() => {
+        if (!ready) return;
 
         iconOpacity.value = withTiming(1, { duration: 350 });
 
@@ -44,7 +47,7 @@ export const SplashOverlay: React.FC<Props> = ({ onDone }) => {
             withTiming(1, { duration: 450, easing: Easing.out(Easing.cubic) }),
             withDelay(250, withTiming(1.04, { duration: 350, easing: Easing.in(Easing.quad) }))
         );
-    }, []);
+    }, [ready]);
 
     const overlayStyle = useAnimatedStyle(() => ({
         opacity: overlayOpacity.value,
@@ -57,8 +60,9 @@ export const SplashOverlay: React.FC<Props> = ({ onDone }) => {
 
     return (
         <Animated.View
-            style={[styles.container, { backgroundColor: bgColor }, overlayStyle]}
+            style={[styles.container, { backgroundColor }, overlayStyle]}
             pointerEvents="none"
+            testID="splash-overlay"
         >
             <Animated.View style={iconStyle}>
                 <Image
