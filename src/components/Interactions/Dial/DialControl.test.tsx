@@ -2,7 +2,7 @@
 import React from 'react';
 
 import { fireEvent, render } from '@testing-library/react-native';
-import { SharedValue } from 'react-native-reanimated';
+import { cancelAnimation, SharedValue } from 'react-native-reanimated';
 
 jest.mock('react-native-reanimated', () => {
     const React = jest.requireActual('react');
@@ -33,6 +33,7 @@ jest.mock('react-native-reanimated', () => {
         withDelay: (_ms: number, v: unknown) => v,
         withSequence: (...vals: unknown[]) => vals[0],
         withRepeat: (v: unknown) => v,
+        cancelAnimation: jest.fn(),
         runOnJS: (fn: (...args: unknown[]) => unknown) => fn,
         Easing: {
             out: () => () => 0,
@@ -108,6 +109,43 @@ describe('getCenterValueFontScale', () => {
 
     it('does not shrink below the minimum scale for very long values', () => {
         expect(getCenterValueFontScale(123456789)).toBe(0.62);
+    });
+});
+
+describe('DialControl — gesture hint animation', () => {
+    // Both hint loops are withRepeat(..., -1): infinite. showHint only gates whether
+    // the arrows render, so without an effect cleanup the loops keep running on the
+    // UI thread for the life of the dial once the hint is dismissed.
+    const cancelAnimationMock = cancelAnimation as unknown as jest.Mock;
+
+    it('does not cancel while the hint is still showing', () => {
+        render(<DialControl {...defaultProps} showHint={true} />);
+        expect(cancelAnimationMock).not.toHaveBeenCalled();
+    });
+
+    it('cancels both hint loops when the hint is dismissed', () => {
+        const { rerender } = render(<DialControl {...defaultProps} showHint={true} />);
+        cancelAnimationMock.mockClear();
+
+        rerender(<DialControl {...defaultProps} showHint={false} />);
+
+        // one for arrowBob, one for arrowOpacity
+        expect(cancelAnimationMock).toHaveBeenCalledTimes(2);
+    });
+
+    it('cancels both hint loops on unmount', () => {
+        const { unmount } = render(<DialControl {...defaultProps} showHint={true} />);
+        cancelAnimationMock.mockClear();
+
+        unmount();
+
+        expect(cancelAnimationMock).toHaveBeenCalledTimes(2);
+    });
+
+    it('starts no hint loop when the hint is never shown', () => {
+        const { unmount } = render(<DialControl {...defaultProps} showHint={false} />);
+        unmount();
+        expect(cancelAnimationMock).not.toHaveBeenCalled();
     });
 });
 
