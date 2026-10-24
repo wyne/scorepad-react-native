@@ -3,15 +3,12 @@
 
 An open-source, multi-platform score keeping app with per-round score history.
 
+<img src="assets-stores/apple/iOS%20Phones%20-%206.7%20(Island)/01.png" height="500" alt="ScorePad game board">
+
 ## Download
 
-- [Apple App Store (iPhone, iPad, and M1 Mac)](https://apps.apple.com/us/app/scorepad-with-rounds/id1577906063)
+- [Apple App Store (iPhone, iPad, and Mac)](https://apps.apple.com/us/app/scorepad-with-rounds/id1577906063)
 - [Google Play Store (Android phones and tablets)](https://play.google.com/store/apps/details?id=com.wyne.scorepad)
-- [Web App](https://wyne.github.io/scorepad-app/)
-
-## Demo
-
-https://github.com/wyne/scorepad-react-native/assets/1986068/05bde405-3025-4156-8c52-477d4b1f5912
 
 ## Website
 
