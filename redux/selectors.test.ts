@@ -1,6 +1,11 @@
 import { InteractionType } from '../src/components/Interactions/InteractionType';
 
-import { selectInteractionType, selectCurrentGame, selectLastStoreReviewPrompt } from './selectors';
+import {
+  selectInteractionType,
+  selectCurrentGame,
+  selectLastStoreReviewPrompt,
+  selectRecentPlayerNames,
+} from './selectors';
 import { RootState } from './store';
 
 // Mock data for testing
@@ -194,5 +199,54 @@ describe('Redux selectors', () => {
       const result = selectLastStoreReviewPrompt(state);
       expect(result).toBe(9876543210);
     });
+  });
+});
+
+describe('selectRecentPlayerNames', () => {
+  const game = (id: string, dateCreated: number, playerIds: string[]) => ({
+    id,
+    title: id,
+    dateCreated,
+    roundCurrent: 0,
+    roundTotal: 1,
+    playerIds,
+  });
+  const player = (id: string, playerName: string) => ({ id, playerName, scores: [] });
+
+  const state = {
+    games: {
+      // Deliberately out of date order to show the selector sorts.
+      ids: ['old', 'new'],
+      entities: {
+        old: game('old', 1000, ['p1', 'p2', 'p3']),
+        new: game('new', 2000, ['p4', 'p5', 'p6']),
+      },
+    },
+    players: {
+      ids: ['p1', 'p2', 'p3', 'p4', 'p5', 'p6'],
+      entities: {
+        p1: player('p1', 'Alice'),
+        p2: player('p2', 'Bob'),
+        p3: player('p3', 'Player 3'),
+        p4: player('p4', 'Carol'),
+        p5: player('p5', 'Alice'),
+        p6: player('p6', 'Player 2'),
+      },
+    },
+  } as unknown as RootState;
+
+  it('orders names by most recent game, then seat order', () => {
+    expect(selectRecentPlayerNames(state)).toEqual(['Carol', 'Alice', 'Bob']);
+  });
+
+  it('lists each name once and leaves out default player names', () => {
+    const names = selectRecentPlayerNames(state);
+    expect(names.filter((name) => name === 'Alice')).toHaveLength(1);
+    expect(names).not.toContain('Player 2');
+    expect(names).not.toContain('Player 3');
+  });
+
+  it('returns a stable memoized reference', () => {
+    expect(selectRecentPlayerNames(state)).toBe(selectRecentPlayerNames(state));
   });
 });
