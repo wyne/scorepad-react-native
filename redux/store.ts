@@ -48,6 +48,7 @@ const settingsPersistConfig = {
         'lastUsedInteractionType',
         'lastStoreReviewPrompt',
         'devMenuEnabled',
+        'gameModesEnabled',
         'appOpens',
         'installId',
         'rollingGameCounter',

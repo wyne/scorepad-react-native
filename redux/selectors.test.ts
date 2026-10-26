@@ -1,6 +1,6 @@
 import { InteractionType } from '../src/components/Interactions/InteractionType';
 
-import { selectInteractionType, selectCurrentGame, selectLastStoreReviewPrompt } from './selectors';
+import { selectInteractionType, selectCurrentGame, selectGameModesVisible, selectLastStoreReviewPrompt } from './selectors';
 import { RootState } from './store';
 
 // Mock data for testing
@@ -193,6 +193,31 @@ describe('Redux selectors', () => {
       
       const result = selectLastStoreReviewPrompt(state);
       expect(result).toBe(9876543210);
+    });
+  });
+
+  describe('selectGameModesVisible', () => {
+    const withGame = (gameModesEnabled: boolean, scoring?: { winner: 'high' | 'low' }) => ({
+      ...mockState,
+      settings: { ...mockState.settings!, gameModesEnabled },
+      games: {
+        entities: { 'game-1': { ...mockState.games!.entities['game-1']!, scoring } },
+        ids: ['game-1'],
+      },
+    }) as RootState;
+
+    it('shows modes for any game while the flag is on', () => {
+      expect(selectGameModesVisible(withGame(true), 'game-1')).toBe(true);
+      expect(selectGameModesVisible(withGame(true))).toBe(true);
+    });
+
+    it('hides modes for games without rules while the flag is off', () => {
+      expect(selectGameModesVisible(withGame(false), 'game-1')).toBe(false);
+      expect(selectGameModesVisible(withGame(false))).toBe(false);
+    });
+
+    it('keeps modes for a game that has rules after the flag is turned off', () => {
+      expect(selectGameModesVisible(withGame(false, { winner: 'low' }), 'game-1')).toBe(true);
     });
   });
 });

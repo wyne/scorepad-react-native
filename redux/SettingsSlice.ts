@@ -16,6 +16,9 @@ export interface SettingsState {
     lastUsedInteractionType?: InteractionType;
     lastStoreReviewPrompt: number;
     devMenuEnabled?: boolean;
+    // Developer flag: offer game modes when setting up a game. Games that
+    // already have a mode keep it when this is turned off.
+    gameModesEnabled?: boolean;
     appOpens: number;
     installId: string | undefined;
     rollingGameCounter?: number;
@@ -39,6 +42,7 @@ export const initialState: SettingsState = {
     // Seeded so the flag is always defined: logEvent strips undefined params,
     // which meant dev_menu_enabled only ever reached analytics as true.
     devMenuEnabled: false,
+    gameModesEnabled: false,
     installId: undefined,
     rollingGameCounter: 0,
     keepScreenAwake: false,
@@ -87,6 +91,9 @@ const settingsSlice = createSlice({
         toggleDevMenuEnabled(state) {
             state.devMenuEnabled = !state.devMenuEnabled;
         },
+        setGameModesEnabled(state, action: PayloadAction<boolean>) {
+            state.gameModesEnabled = action.payload;
+        },
         increaseAppOpens(state) {
             state.appOpens += 1;
         },
@@ -131,6 +138,7 @@ export const {
     setLastUsedInteractionType,
     setLastStoreReviewPrompt,
     toggleDevMenuEnabled,
+    setGameModesEnabled,
     increaseAppOpens,
     setInstallId,
     incrementRollingGameCounter,

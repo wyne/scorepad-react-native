@@ -75,6 +75,7 @@ describe('ChooseWinnersSheet', () => {
         players: Record<string, { id: string; playerName: string; scores: number[] }>,
         gameId?: string,
         playerIds?: string[],
+        scoring?: { winner: 'high' | 'low' },
     ) => {
         return configureStore({
             reducer: {
@@ -95,6 +96,7 @@ describe('ChooseWinnersSheet', () => {
                             playerIds: playerIds || [],
                             locked: false,
                             winnerIds: [],
+                            ...(scoring ? { scoring } : {}),
                         },
                     } : {},
                     ids: gameId ? [gameId] : [],
@@ -142,6 +144,28 @@ describe('ChooseWinnersSheet', () => {
         expect(within(rows[0]).getByText('Bob')).toBeTruthy();    // 15
         expect(within(rows[1]).getByText('Alice')).toBeTruthy();  // 10
         expect(within(rows[2]).getByText('Charlie')).toBeTruthy(); // 8
+    });
+
+    it('should sort players by total score ascending when lowest wins', () => {
+        const store = createMockStore(mockPlayers, 'game-1', ['player-1', 'player-2', 'player-3'], { winner: 'low' });
+        const { getAllByTestId } = render(<Provider store={store}><ChooseWinnersSheet /></Provider>);
+
+        const rows = getAllByTestId(/^winner-player-row-\d+$/);
+        expect(within(rows[0]).getByText('Charlie')).toBeTruthy(); // 8
+        expect(within(rows[1]).getByText('Alice')).toBeTruthy();   // 10
+        expect(within(rows[2]).getByText('Bob')).toBeTruthy();     // 15
+    });
+
+    it('should mark the leader only for games with scoring rules', () => {
+        const players = ['player-1', 'player-2', 'player-3'];
+        const freePlay = render(<Provider store={createMockStore(mockPlayers, 'game-1', players)}><ChooseWinnersSheet /></Provider>);
+        expect(freePlay.queryByText('Leading')).toBeNull();
+        freePlay.unmount();
+
+        const lowWins = render(<Provider store={createMockStore(mockPlayers, 'game-1', players, { winner: 'low' })}><ChooseWinnersSheet /></Provider>);
+        const rows = lowWins.getAllByTestId(/^winner-player-row-\d+$/);
+        expect(within(rows[0]).getByText('Leading')).toBeTruthy();
+        expect(lowWins.getAllByText('Leading')).toHaveLength(1);
     });
 
     it('should display total scores for each player', () => {

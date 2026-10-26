@@ -13,6 +13,7 @@ import { shallowEqual } from 'react-redux';
 
 import { selectGameById, updateGame } from '../../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
+import { compareTotals, leadingPlayerIds } from '../../../redux/ScoringRules';
 import { selectInteractionType } from '../../../redux/selectors';
 import { logEvent } from '../../Analytics';
 import { useTheme } from '../../theme';
@@ -45,10 +46,10 @@ const ChooseWinnersSheet: React.FunctionComponent = () => {
             };
         });
 
-        withScores.sort((a, b) => b.totalScore - a.totalScore);
+        withScores.sort((a, b) => compareTotals(currentGame?.scoring, a.totalScore, b.totalScore));
 
         return withScores.map((p) => p.id);
-    }, [allPlayers, playerIds]);
+    }, [allPlayers, playerIds, currentGame?.scoring]);
     const playerInfo = useMemo(
         () =>
             Object.fromEntries(
@@ -61,6 +62,14 @@ const ChooseWinnersSheet: React.FunctionComponent = () => {
                 ])),
         [allPlayers]
     );
+    // Only games with a mode suggest a leader; free play leaves the choice open.
+    const leaderIds = useMemo(() => {
+        if (!currentGame?.scoring) return new Set<string>();
+        return new Set(leadingPlayerIds(
+            currentGame.scoring,
+            sortedPlayerIds.map((id) => ({ id, total: playerInfo[id]?.totalScore ?? 0 })),
+        ));
+    }, [currentGame?.scoring, sortedPlayerIds, playerInfo]);
 
     const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
@@ -200,6 +209,11 @@ const ChooseWinnersSheet: React.FunctionComponent = () => {
                                         <Text style={[styles.playerName, { color: theme.text }]} numberOfLines={1}>
                                             {info?.name}
                                         </Text>
+                                        {leaderIds.has(playerId) && (
+                                            <Text style={[styles.leaderTag, { color: theme.textSecondary }]}>
+                                                Leading
+                                            </Text>
+                                        )}
                                         <Text style={[styles.playerScore, { color: theme.textSecondary }]}>
                                             {info?.totalScore}
                                         </Text>
@@ -256,6 +270,9 @@ const styles = StyleSheet.create({
     playerName: {
         fontSize: 16,
         flex: 1,
+    },
+    leaderTag: {
+        fontSize: 13,
     },
     playerScore: {
         fontSize: 16,

@@ -9,6 +9,7 @@ import { SortDirectionKey, SortSelectorKey } from '../src/components/ScoreLog/So
 import logger from '../src/Logger';
 
 import { playerAdd, removePlayer, selectPlayerById, updatePlayer } from './PlayersSlice';
+import { ScoringRules } from './ScoringRules';
 import { incrementRollingGameCounter, setCurrentGameId } from './SettingsSlice';
 import { RootState } from './store';
 
@@ -27,6 +28,10 @@ export interface GameState {
     // Per-game gesture. When unset, falls back to the global default
     // (settings.interactionType) via selectInteractionType.
     interactionType?: InteractionType;
+    // Game mode rules. Unset means the original free play: highest wins and
+    // the player picks winners. Set only while the game modes flag is on, but
+    // kept (and honoured) after the flag is turned off.
+    scoring?: ScoringRules;
 }
 
 const gamesAdapter = createEntityAdapter({
@@ -122,6 +127,17 @@ const gamesSlice = createSlice({
                 }
             });
         },
+        setGameScoring(state, action: PayloadAction<{ gameId: string, scoring: ScoringRules; }>) {
+            const game = state.entities[action.payload.gameId];
+            if (!game) { return; }
+
+            gamesAdapter.updateOne(state, {
+                id: action.payload.gameId,
+                changes: {
+                    scoring: action.payload.scoring,
+                }
+            });
+        },
         restoreAllGames(state, action: PayloadAction<Record<string, GameState>>) {
             gamesAdapter.setAll(state, action.payload);
         },
@@ -198,6 +214,7 @@ export const asyncRematchGame = createAsyncThunk(
             title: game.title,
             dateCreated: Date.now(),
             playerIds: playerIds,
+            ...(game.scoring ? { scoring: { ...game.scoring } } : {}),
         }));
 
         dispatch(setCurrentGameId(newGameId));
@@ -366,6 +383,7 @@ export const {
     setSortSelector,
     reorderPlayers,
     setGameInteractionType,
+    setGameScoring,
     restoreAllGames,
 } = gamesSlice.actions;
 
