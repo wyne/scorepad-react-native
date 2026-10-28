@@ -13,6 +13,7 @@ jest.mock('../Sheets/GameSheet', () => ({
     bottomSheetHeight: 80,
 }));
 
+import { TILE_BORDER_WIDTH } from './layout';
 import TileBoard from './TileBoard';
 
 // Mock react-native-safe-area-context
@@ -470,7 +471,10 @@ describe('TileBoard', () => {
         expect(safeAreaView.props.style).toEqual(
             expect.arrayContaining([
                 expect.objectContaining({
-                    paddingBottom: 82, // bottomSheetHeight (80) + 2
+                    // Every edge is padded by one tile border, so the gutter
+                    // against the sheet matches the gutter between tiles.
+                    padding: TILE_BORDER_WIDTH,
+                    paddingBottom: 82 + TILE_BORDER_WIDTH, // bottomSheetHeight (80) + 2
                 }),
             ])
         );

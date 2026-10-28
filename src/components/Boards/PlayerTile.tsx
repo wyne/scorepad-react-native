@@ -16,6 +16,8 @@ import AdditionTile from '../PlayerTiles/AdditionTile/AdditionTile';
 import PlayerIndexLabel from '../PlayerTiles/PlayerIndexLabel';
 import PlayerWinnerLabel from '../PlayerTiles/PlayerWinnerLabel';
 
+import { TILE_BORDER_WIDTH } from './layout';
+
 interface Props {
     index: number;
     playerId: string;
@@ -98,7 +100,7 @@ const PlayerTile: React.FunctionComponent<Props> = React.memo(({
 const styles = StyleSheet.create({
     playerCard: {
         borderRadius: 20,
-        borderWidth: 3,
+        borderWidth: TILE_BORDER_WIDTH,
         flexGrow: 1,
         justifyContent: 'center',
         alignItems: 'center',
