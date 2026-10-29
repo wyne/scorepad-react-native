@@ -2,6 +2,7 @@ import React from 'react';
 
 import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Icon } from 'react-native-elements';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { setGameScoring } from '../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
@@ -66,30 +67,34 @@ const ScoringRulesScreen: React.FunctionComponent = () => {
 
     return (
         <ScrollView contentContainerStyle={{ paddingBottom: 50 }} testID="scoring-rules">
-            <SectionLabel inset={30}>Winner</SectionLabel>
-            <View style={[styles.section, { backgroundColor: theme.backgroundSecondary }]}>
-                {winnerOptions.map((option, index) => {
-                    const selected = rules.winner === option.value;
-                    return (
-                        <React.Fragment key={option.value}>
-                            {index > 0 && <View style={[styles.separator, { backgroundColor: theme.separator }]} />}
-                            <TouchableOpacity
-                                testID={`scoring-winner-${option.value}`}
-                                accessibilityRole="radio"
-                                accessibilityState={{ selected }}
-                                style={styles.row}
-                                onPress={() => selectWinner(option.value)}
-                            >
-                                <Text style={[styles.rowLabel, { color: theme.text }]}>{option.label}</Text>
-                                {selected && <Icon name="checkmark" type="ionicon" color={theme.tint} size={22} />}
-                            </TouchableOpacity>
-                        </React.Fragment>
-                    );
-                })}
-            </View>
-            <Text style={[styles.footnote, { color: theme.textSecondary }]}>
-                Sets who leads, how players are ranked by score, and who is suggested when you choose winners.
-            </Text>
+            {/* Left/right insets keep the rows clear of landscape notches and the
+                iPhone Duo's vertical bar, as on Edit Game. */}
+            <SafeAreaView edges={['left', 'right']}>
+                <SectionLabel inset={30}>Winner</SectionLabel>
+                <View style={[styles.section, { backgroundColor: theme.backgroundSecondary }]}>
+                    {winnerOptions.map((option, index) => {
+                        const selected = rules.winner === option.value;
+                        return (
+                            <React.Fragment key={option.value}>
+                                {index > 0 && <View style={[styles.separator, { backgroundColor: theme.separator }]} />}
+                                <TouchableOpacity
+                                    testID={`scoring-winner-${option.value}`}
+                                    accessibilityRole="radio"
+                                    accessibilityState={{ selected }}
+                                    style={styles.row}
+                                    onPress={() => selectWinner(option.value)}
+                                >
+                                    <Text style={[styles.rowLabel, { color: theme.text }]}>{option.label}</Text>
+                                    {selected && <Icon name="checkmark" type="ionicon" color={theme.tint} size={22} />}
+                                </TouchableOpacity>
+                            </React.Fragment>
+                        );
+                    })}
+                </View>
+                <Text style={[styles.footnote, { color: theme.textSecondary }]}>
+                    Sets who leads, how players are ranked by score, and who is suggested when you choose winners.
+                </Text>
+            </SafeAreaView>
         </ScrollView>
     );
 };
