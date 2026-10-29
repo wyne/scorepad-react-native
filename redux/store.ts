@@ -28,11 +28,17 @@ const settingsMigrations: any = {
         // users aren't shown the hint for a gesture they already use.
         return { ...state, lastUsedInteractionType: state?.interactionType };
     },
+    5: (state: Record<string, unknown> | undefined) => {
+        // Fresh installs default to every feature notification seen. Saved
+        // settings that predate the list must not inherit that default, or
+        // returning users would lose their badges.
+        return { ...state, seenFeatureNotifications: state?.seenFeatureNotifications ?? [] };
+    },
 };
 
-const settingsPersistConfig = {
+export const settingsPersistConfig = {
     key: 'settings',
-    version: 4,
+    version: 5,
     storage: AsyncStorage,
     migrate: createMigrate(settingsMigrations),
     whitelist: [
