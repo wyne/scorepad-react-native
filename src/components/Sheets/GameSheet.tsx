@@ -11,6 +11,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { asyncRematchGame, selectGameById, updateGame } from '../../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
 import { updatePlayer } from '../../../redux/PlayersSlice';
+import { selectGameModesVisible } from '../../../redux/selectors';
 import { logEvent } from '../../Analytics';
 import { useExpandedGameLayout, useExpandedGameSplit } from '../../hooks/useExpandedGameLayout';
 import { useTheme } from '../../theme';
@@ -18,6 +19,7 @@ import BigButton from '../BigButtons/BigButton';
 import RoundHeaderTitle from '../Headers/RoundHeaderTitle';
 import RematchIcon from '../Icons/RematchIcon';
 import ScoreLogTable from '../ScoreLogTable';
+import { scoringShortSummary } from '../ScoringRow';
 
 import { useChooseWinnersSheetContext } from './ChooseWinnersSheetContext';
 import { useGameSheetContext } from './GameSheetContext';
@@ -43,6 +45,7 @@ const GameSheet: React.FunctionComponent = () => {
     const game = useAppSelector(state => selectGameById(state, currentGameId || ''));
     const gameTitle = game?.title;
     const gameLocked = game?.locked;
+    const showScoringRule = useAppSelector(state => selectGameModesVisible(state, currentGameId));
     const playerIds = game?.playerIds;
     const chooseWinnersSheetRef = useChooseWinnersSheetContext();
 
@@ -383,6 +386,20 @@ const GameSheet: React.FunctionComponent = () => {
                                 </View>
                             </TouchableWithoutFeedback>
 
+                            {showScoringRule &&
+                                <TouchableOpacity
+                                    testID="game-sheet-scoring-rule"
+                                    accessibilityRole="button"
+                                    accessibilityLabel={`Scoring: ${scoringShortSummary(game?.scoring)}`}
+                                    disabled={gameLocked}
+                                    onPress={() => navigation.navigate('ScoringRules')}
+                                    style={styles.scoringRule}
+                                >
+                                    <Text style={[styles.scoringRuleText, { color: theme.textSecondary }]}>
+                                        {scoringShortSummary(game?.scoring)}
+                                    </Text>
+                                </TouchableOpacity>
+                            }
                             {gameLocked &&
                                 <Text style={{ color: theme.textTertiary, fontSize: 20, paddingHorizontal: 10 }}
                                     onPress={() => { gameSheetRef?.current?.snapToIndex(snapPoints.length - 1); }}
@@ -503,6 +520,14 @@ const styles = StyleSheet.create({
     sheetTitle: {
         fontSize: 20,
         fontWeight: 'bold',
+    },
+    scoringRule: {
+        justifyContent: 'center',
+        paddingHorizontal: 10,
+        minHeight: 28,
+    },
+    scoringRuleText: {
+        fontSize: 15,
     },
     editButton: {
         fontSize: 20,

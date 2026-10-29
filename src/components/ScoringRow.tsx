@@ -14,6 +14,12 @@ export const scoringSummary = (rules: ScoringRules | undefined): string => {
     return rules.winner === 'low' ? 'Lowest score wins' : 'Highest score wins';
 };
 
+/** The rule in two words, for tight spots like the game sheet header. */
+export const scoringShortSummary = (rules: ScoringRules | undefined): string => {
+    if (!rules) return 'Free play';
+    return rules.winner === 'low' ? 'Lowest wins' : 'Highest wins';
+};
+
 /**
  * The Scoring row on Edit Game. Opens the game's scoring rules. Hidden unless
  * the game modes flag is on or the game already has rules.
