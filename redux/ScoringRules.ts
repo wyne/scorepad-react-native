@@ -57,3 +57,35 @@ export const leadingPlayerIds = (
 
     return totals.filter(player => player.total === best).map(player => player.id);
 };
+
+export interface PlayerRank {
+    rank: number;
+    tied: boolean;
+}
+
+/**
+ * Standings under the rules, using standard competition ranking: tied
+ * players share a place and the next place is skipped (1, 2, 2, 4).
+ */
+export const rankPlayers = (
+    rules: ScoringRules | undefined,
+    totals: { id: string; total: number; }[],
+): Record<string, PlayerRank> => {
+    const sorted = [...totals].sort((a, b) => compareTotals(rules, a.total, b.total));
+    const countByTotal = new Map<number, number>();
+    totals.forEach(({ total }) => countByTotal.set(total, (countByTotal.get(total) ?? 0) + 1));
+
+    const ranks: Record<string, PlayerRank> = {};
+    sorted.forEach((player, index) => {
+        const previous = sorted[index - 1];
+        const rank = previous && previous.total === player.total
+            ? ranks[previous.id].rank
+            : index + 1;
+        ranks[player.id] = { rank, tied: (countByTotal.get(player.total) ?? 0) > 1 };
+    });
+
+    return ranks;
+};
+
+/** A place as the score sheet shows it: "1", or "T2" for a tie. */
+export const rankLabel = ({ rank, tied }: PlayerRank): string => `${tied ? 'T' : ''}${rank}`;

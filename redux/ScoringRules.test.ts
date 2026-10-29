@@ -1,4 +1,4 @@
-import { compareTotals, defaultScoringRules, isScoringRules, leadingPlayerIds } from './ScoringRules';
+import { compareTotals, defaultScoringRules, isScoringRules, leadingPlayerIds, rankLabel, rankPlayers } from './ScoringRules';
 
 describe('ScoringRules', () => {
     describe('isScoringRules', () => {
@@ -45,6 +45,37 @@ describe('ScoringRules', () => {
 
         it('returns nothing without players', () => {
             expect(leadingPlayerIds({ winner: 'low' }, [])).toEqual([]);
+        });
+    });
+
+    describe('rankPlayers', () => {
+        const totals = [
+            { id: 'a', total: 40 },
+            { id: 'b', total: 25 },
+            { id: 'c', total: 25 },
+            { id: 'd', total: 10 },
+        ];
+
+        it('skips the place after a tie when highest wins', () => {
+            const ranks = rankPlayers(undefined, totals);
+            expect(ranks).toEqual({
+                a: { rank: 1, tied: false },
+                b: { rank: 2, tied: true },
+                c: { rank: 2, tied: true },
+                d: { rank: 4, tied: false },
+            });
+        });
+
+        it('ranks the lowest total first when lowest wins', () => {
+            const ranks = rankPlayers({ winner: 'low' }, totals);
+            expect(ranks.d).toEqual({ rank: 1, tied: false });
+            expect(ranks.b).toEqual({ rank: 2, tied: true });
+            expect(ranks.a).toEqual({ rank: 4, tied: false });
+        });
+
+        it('labels ties with a T', () => {
+            expect(rankLabel({ rank: 1, tied: false })).toBe('1');
+            expect(rankLabel({ rank: 2, tied: true })).toBe('T2');
         });
     });
 });
