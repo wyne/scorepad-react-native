@@ -417,7 +417,7 @@ const GameSheet: React.FunctionComponent = () => {
                         <Animated.View style={[styles.sheetContent, animatedSheetStyle]}>
                             <ScoreLogTable showScores={shouldRenderContent} />
 
-                            <Text style={{ color: theme.text, margin: 10, marginTop: 0 }}>
+                            <Text style={{ color: theme.text, marginHorizontal: 5, marginBottom: 10 }}>
                                 Tap the player column or total score column to change sorting.
                             </Text>
 
@@ -551,9 +551,11 @@ const styles = StyleSheet.create({
     noShrink: {
         flexShrink: 0,
     },
+    // 15 plus each child's own 5pt margin lines content up with the title
+    // at the app's 20pt gutter.
     sheetContent: {
         paddingVertical: 10,
-        paddingHorizontal: 20,
+        paddingHorizontal: 15,
     },
     shareButton: {
         width: 100,

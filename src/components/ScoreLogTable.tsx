@@ -122,7 +122,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         borderRadius: 12,
         overflow: 'hidden',
-        marginHorizontal: 10,
+        marginHorizontal: 5,
         marginBottom: 10,
     }
 });
