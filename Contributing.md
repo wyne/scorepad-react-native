@@ -5,7 +5,7 @@
 | Tool | Version | Notes |
 |------|---------|-------|
 | nvm | latest | Node version manager |
-| Node.js | 20.18 (via `.nvmrc`) | Installed via `nvm` |
+| Node.js | 20.19.4 (via `.nvmrc`) | Installed via `nvm` |
 | npm | (bundled with Node) | Used for all JS dependencies |
 | EAS CLI | latest | Required for building and submitting |
 | JDK | 17 | Android builds only |
@@ -19,7 +19,7 @@
 # Install nvm — https://github.com/nvm-sh/nvm
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
 
-# From the project root — installs and activates the version in .nvmrc (20.18)
+# From the project root — installs and activates the version in .nvmrc (20.19.4)
 nvm install
 nvm use
 ```
@@ -30,7 +30,7 @@ nvm use
 npm install
 ```
 
-> `--legacy-peer-deps` is required because some packages (e.g. `@reduxjs/toolkit`) have not yet declared React 19 peer dependency support, though they are compatible.
+> `.npmrc` sets `legacy-peer-deps=true`, so a plain `npm install` works. It is needed because some packages (e.g. `@reduxjs/toolkit`) have not yet declared React 19 peer dependency support, though they are compatible.
 
 ### Install EAS CLI
 

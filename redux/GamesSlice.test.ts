@@ -9,7 +9,8 @@ import gamesReducer, {
     GameState,
     roundNext,
     roundPrevious,
-    selectAllGames
+    selectAllGames,
+    setGameScoring
 } from './GamesSlice';
 import playersReducer, { playerAdd } from './PlayersSlice';
 import settingsReducer, { initialState as initialSettings } from './SettingsSlice';
@@ -199,6 +200,50 @@ describe('asyncRematchGame', () => {
 
         expect(finalState.players.entities[finalState.players.ids[2]]?.scores).toEqual([0]);
         expect(finalState.players.entities[finalState.players.ids[3]]?.scores).toEqual([0]);
+    });
+});
+
+describe('game scoring rules', () => {
+    const createStore = () => configureStore({
+        reducer: {
+            games: gamesReducer,
+            players: playersReducer,
+        },
+    });
+
+    it('sets the rules on a game', async () => {
+        const store = createStore();
+        await store.dispatch(asyncCreateGame({ gameCount: 0, playerCount: 2 }));
+        const gameId: string = store.getState().games.ids[0];
+
+        expect(store.getState().games.entities[gameId]?.scoring).toBeUndefined();
+
+        store.dispatch(setGameScoring({ gameId, scoring: { winner: 'low' } }));
+
+        expect(store.getState().games.entities[gameId]?.scoring).toEqual({ winner: 'low' });
+    });
+
+    it('carries the rules into a rematch', async () => {
+        const store = createStore();
+        await store.dispatch(asyncCreateGame({ gameCount: 0, playerCount: 2 }));
+        const gameId: string = store.getState().games.ids[0];
+        store.dispatch(setGameScoring({ gameId, scoring: { winner: 'low' } }));
+
+        await store.dispatch(asyncRematchGame({ gameId }));
+
+        const rematchId = store.getState().games.ids.find(id => id !== gameId) as string;
+        expect(store.getState().games.entities[rematchId]?.scoring).toEqual({ winner: 'low' });
+    });
+
+    it('leaves a free play rematch without rules', async () => {
+        const store = createStore();
+        await store.dispatch(asyncCreateGame({ gameCount: 0, playerCount: 2 }));
+        const gameId: string = store.getState().games.ids[0];
+
+        await store.dispatch(asyncRematchGame({ gameId }));
+
+        const rematchId = store.getState().games.ids.find(id => id !== gameId) as string;
+        expect(store.getState().games.entities[rematchId]).not.toHaveProperty('scoring');
     });
 });
 

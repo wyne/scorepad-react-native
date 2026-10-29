@@ -7,7 +7,7 @@ import { Alert, Linking, Platform, ScrollView, StyleSheet, Switch, Text, Touchab
 
 import { exportBackup, importBackup } from '../../redux/backup';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
-import { markFeatureNotificationSeen, resetSeenFeatureNotifications, setColorScheme, setKeepScreenAwake, toggleShowPlayerIndex, toggleShowPointParticles } from '../../redux/SettingsSlice';
+import { markFeatureNotificationSeen, resetSeenFeatureNotifications, setColorScheme, setGameModesEnabled, setKeepScreenAwake, toggleShowPlayerIndex, toggleShowPointParticles } from '../../redux/SettingsSlice';
 import { logEvent } from '../Analytics';
 import RotatingIcon from '../components/AppInfo/RotatingIcon';
 import { loadSeedData } from '../components/AppInfo/SeedData';
@@ -67,6 +67,7 @@ const AppSettingsScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     const installId = useAppSelector(state => state.settings.installId);
     const seenFeatureNotifications = useAppSelector(state => state.settings.seenFeatureNotifications);
     const keepScreenAwake = useAppSelector(state => state.settings.keepScreenAwake);
+    const gameModesEnabled = useAppSelector(state => state.settings.gameModesEnabled ?? false);
     const colorScheme = useAppSelector(state => state.settings.colorScheme ?? 'system');
 
     const dispatch = useAppDispatch();
@@ -125,6 +126,14 @@ const AppSettingsScreen: React.FunctionComponent<Props> = ({ navigation }) => {
                 install_id: installId
             });
         }
+    };
+    const toggleGameModes = () => {
+        dispatch(setGameModesEnabled(!gameModesEnabled));
+        logEvent('toggle_feature', {
+            feature: 'game_modes',
+            value: !gameModesEnabled,
+            install_id: installId
+        });
     };
     const handleRestore = () => {
         Alert.alert(
@@ -227,6 +236,16 @@ const AppSettingsScreen: React.FunctionComponent<Props> = ({ navigation }) => {
 
             {devMenuEnabled && (
                 <Section title="Developer">
+                    <SectionItem>
+                        <View style={styles.labelRow}>
+                            <SectionItemText text="Game Modes" />
+                            <View style={[styles.betaPill, { backgroundColor: theme.separator }]}>
+                                <Text style={[styles.betaPillText, { color: theme.text }]}>Beta</Text>
+                            </View>
+                        </View>
+                        <Switch testID="game-modes-switch" onValueChange={toggleGameModes} value={gameModesEnabled} ios_backgroundColor={theme.separator} />
+                    </SectionItem>
+                    <SectionSeparator />
                     <DisclosureRow label="Reset Feature Notifications" onPress={() => {
                         Alert.alert(
                             'Reset Feature Notifications',

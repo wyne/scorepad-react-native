@@ -58,6 +58,8 @@ export interface AnalyticsEventParams {
         interaction: InteractionType;
     };
     edit_game: { game_id?: string };
+    /** Game mode rules were set on a game. `mid_game`: players had already scored. */
+    set_game_scoring: { game_id: string; winner: 'high' | 'low'; mid_game: boolean };
 
     // ── Players ─────────────────────────────────────────────────────────────
     add_player: { game_id?: string; player_count: number };

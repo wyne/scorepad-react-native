@@ -55,3 +55,13 @@ export const selectRecentPlayerNames = createSelector(
         return [...names];
     }
 );
+
+/**
+ * Whether a game shows game mode UI: always for a game that already has
+ * rules, otherwise only while the developer flag is on. Turning the flag off
+ * hides modes for new games without taking them away from existing ones.
+ */
+export const selectGameModesVisible = (state: RootState, gameId?: string): boolean => {
+    if (state.settings.gameModesEnabled) return true;
+    return gameId ? selectGameById(state, gameId)?.scoring !== undefined : false;
+};

@@ -8,6 +8,7 @@ import { SortDirectionKey, SortSelectorKey } from '../src/components/ScoreLog/So
 
 import { GameState, restoreAllGames } from './GamesSlice';
 import { ScoreState, restoreAllPlayers } from './PlayersSlice';
+import { isScoringRules } from './ScoringRules';
 import { initialState as initialSettings, restoreSettings, SettingsState } from './SettingsSlice';
 import { store } from './store';
 
@@ -80,6 +81,7 @@ const isGameState = (
     ) return false;
     if (value.palette !== undefined && typeof value.palette !== 'string') return false;
     if (value.interactionType !== undefined && !isInteractionType(value.interactionType)) return false;
+    if (value.scoring !== undefined && !isScoringRules(value.scoring)) return false;
 
     return true;
 };
@@ -113,6 +115,7 @@ const isSettingsState = (value: unknown, gameEntities: Record<string, unknown>):
         && (value.lastUsedInteractionType === undefined || isInteractionType(value.lastUsedInteractionType))
         && isFiniteNumber(value.lastStoreReviewPrompt)
         && (value.devMenuEnabled === undefined || typeof value.devMenuEnabled === 'boolean')
+        && (value.gameModesEnabled === undefined || typeof value.gameModesEnabled === 'boolean')
         && Number.isInteger(value.appOpens)
         && (value.installId === undefined || typeof value.installId === 'string')
         && (value.rollingGameCounter === undefined || Number.isInteger(value.rollingGameCounter))
