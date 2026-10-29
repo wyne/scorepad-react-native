@@ -7,6 +7,7 @@ import { selectCurrentGame } from '../../../redux/selectors';
 import { useTheme } from '../../theme';
 
 import { SortDirectionKey, SortSelectorKey, sortSelectors } from './SortHelper';
+import { TABLE_RULE_WIDTH, tableStyles } from './tableMetrics';
 import TotalScoreCell from './TotalScoreCell';
 
 const TotalScoreColumn: React.FunctionComponent = () => {
@@ -26,8 +27,8 @@ const TotalScoreColumn: React.FunctionComponent = () => {
     }
 
     return (
-        <View key={'total'} style={{ padding: 10 }}>
-            <Text style={[styles.totalHeader, { color: theme.text }]}>
+        <View key={'total'} style={[styles.column, { borderColor: theme.separator }]}>
+            <Text style={[tableStyles.header, styles.header, { color: theme.textSecondary }]}>
                 Total {sortLabel}
             </Text>
             {sortedPlayerIds.map((playerId) => (
@@ -38,10 +39,14 @@ const TotalScoreColumn: React.FunctionComponent = () => {
 };
 
 const styles = StyleSheet.create({
-    totalHeader: {
-        textAlign: 'center',
-        fontSize: 20,
-    }
+    // Rules either side set the frozen columns apart from the rounds.
+    column: {
+        borderLeftWidth: TABLE_RULE_WIDTH,
+        borderRightWidth: TABLE_RULE_WIDTH,
+    },
+    header: {
+        paddingHorizontal: 10,
+    },
 });
 
 export default memo(TotalScoreColumn);

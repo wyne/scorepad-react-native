@@ -10,6 +10,7 @@ import { selectCurrentGame } from '../../../redux/selectors';
 import { useTheme } from '../../theme';
 
 import { SortDirectionKey, SortSelectorKey, sortSelectors } from './SortHelper';
+import { TABLE_CELL_PADDING, TABLE_FONT_SIZE, TABLE_HEADER_HEIGHT, TABLE_ROW_HEIGHT, TABLE_RULE_WIDTH } from './tableMetrics';
 
 
 interface CellProps {
@@ -25,8 +26,9 @@ const PlayerNameCell: React.FunctionComponent<CellProps> = ({ index, playerId })
     const playerName = useAppSelector(state => selectPlayerById(state, playerId)?.playerName);
 
     return (
-        <View key={index} style={{ paddingLeft: 5, borderLeftWidth: 5, borderColor: playerColors[0] }}>
-            <Text key={index} style={{ color: theme.text, maxWidth: 100, fontSize: 20 }}
+        <View key={index} style={[styles.cell, { borderColor: theme.separator }]}>
+            <View style={[styles.colorBar, { backgroundColor: playerColors[0] }]} />
+            <Text key={index} style={[styles.name, { color: theme.text }]}
                 numberOfLines={1}
             >{playerName}</Text>
         </View>
@@ -47,15 +49,15 @@ const PlayerHeaderCell: React.FunctionComponent = () => {
 
     return (
 
-        <Text style={[styles.editRow, { color: theme.text }]}>
-            &nbsp;
+        <View style={styles.header}>
             <Icon name="users"
                 type="font-awesome-5"
-                size={19}
-                color={theme.text} /> {
-                sortLabel
+                size={14}
+                color={theme.textSecondary} />
+            {sortLabel !== '' &&
+                <Text style={[styles.sortLabel, { color: theme.textSecondary }]}>{sortLabel}</Text>
             }
-        </Text>
+        </View>
     );
 };
 
@@ -67,7 +69,7 @@ const PlayerNameColumn: React.FunctionComponent = () => {
     const sortedPlayerIds = useAppSelector(sortSelector);
 
     return (
-        <View style={{ paddingVertical: 10 }}>
+        <View>
             <PlayerHeaderCell />
 
             {sortedPlayerIds.map((playerId, index) => (
@@ -78,10 +80,36 @@ const PlayerNameColumn: React.FunctionComponent = () => {
 };
 
 const styles = StyleSheet.create({
-    editRow: {
-        fontSize: 20,
-        textAlign: 'center',
-    }
+    header: {
+        height: TABLE_HEADER_HEIGHT,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 4,
+        paddingHorizontal: TABLE_CELL_PADDING,
+    },
+    sortLabel: {
+        fontSize: 13,
+        fontWeight: '600',
+    },
+    cell: {
+        height: TABLE_ROW_HEIGHT,
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+        paddingLeft: TABLE_CELL_PADDING,
+        paddingRight: TABLE_CELL_PADDING,
+        borderTopWidth: TABLE_RULE_WIDTH,
+    },
+    colorBar: {
+        width: 4,
+        height: 20,
+        borderRadius: 2,
+    },
+    name: {
+        fontSize: TABLE_FONT_SIZE,
+        maxWidth: 90,
+    },
 });
 
 export default memo(PlayerNameColumn);

@@ -534,4 +534,36 @@ describe('ScoreLogTable', () => {
         expect(scrollView.props.nestedScrollEnabled).toBe(true);
         expect(scrollView.props.contentContainerStyle).toEqual({ flexDirection: 'row' });
     });
+
+    describe('rank column', () => {
+        const renderWith = (gameModesEnabled: boolean, scoring?: { winner: 'high' | 'low' }) => render(
+            <Provider store={createMockStore({
+                settings: { currentGameId: 'game-1', gameModesEnabled },
+                games: {
+                    entities: { 'game-1': { ...mockGame, ...(scoring ? { scoring } : {}) } },
+                    ids: ['game-1'],
+                },
+                players: { entities: mockPlayers, ids: ['player-1', 'player-2'] },
+            })}>
+                <ScoreLogTable />
+            </Provider>
+        );
+
+        it('is hidden while the game modes flag is off', () => {
+            const { queryByTestId } = renderWith(false);
+            expect(queryByTestId('rank-column')).toBeNull();
+        });
+
+        it('ranks the highest total first while the flag is on', () => {
+            const { getByTestId } = renderWith(true);
+            expect(getByTestId('rank-cell-player-1')).toHaveTextContent('1'); // 45
+            expect(getByTestId('rank-cell-player-2')).toHaveTextContent('2'); // 38
+        });
+
+        it('follows a lowest wins rule, even after the flag is turned off', () => {
+            const { getByTestId } = renderWith(false, { winner: 'low' });
+            expect(getByTestId('rank-cell-player-1')).toHaveTextContent('2');
+            expect(getByTestId('rank-cell-player-2')).toHaveTextContent('1');
+        });
+    });
 });

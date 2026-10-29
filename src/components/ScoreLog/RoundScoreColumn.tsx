@@ -6,9 +6,11 @@ import { updateGame } from '../../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector, useAppStore } from '../../../redux/hooks';
 import { selectCurrentGame } from '../../../redux/selectors';
 import { logEvent } from '../../Analytics';
+import { useTheme } from '../../theme';
 
 import RoundScoreCell from './RoundScoreCell';
 import { SortSelectorKey, sortSelectors } from './SortHelper';
+import { CURRENT_ROUND_BACKGROUND, tableStyles } from './tableMetrics';
 
 interface Props {
     round: number;
@@ -23,6 +25,7 @@ const RoundScoreColumn: React.FunctionComponent<Props> = ({
     disabled = false,
     onLayout,
 }) => {
+    const theme = useTheme();
     const dispatch = useAppDispatch();
     const store = useAppStore();
 
@@ -50,29 +53,15 @@ const RoundScoreColumn: React.FunctionComponent<Props> = ({
         });
     }, [currentGameId, disabled, dispatch, round, store]);
 
-    let backgroundColor = 'rgba(0,0,0,0)';
-
-    if (isCurrentRound) {
-        backgroundColor = 'rgba(255,0,0,.1)';
-    } else if (round % 2 == 0) {
-        backgroundColor = 'rgba(0,0,0,.1)';
-    }
-
     return (
         <TouchableWithoutFeedback onPress={onPressHandler}>
             <View
                 onLayout={(e) => onLayout?.(e, round)}
-                style={{
-                    padding: 10,
-                    paddingBottom: 0,
-                    backgroundColor: backgroundColor,
-                }}>
-                <Text style={{
-                    color: isCurrentRound ? 'red' : '#AAA',
-                    fontWeight: 'bold',
-                    textAlign: 'center',
-                    fontSize: 20,
-                }}>
+                style={{ backgroundColor: isCurrentRound ? CURRENT_ROUND_BACKGROUND : 'transparent' }}>
+                <Text style={[tableStyles.header, {
+                    color: isCurrentRound ? theme.tint : theme.textTertiary,
+                    fontWeight: isCurrentRound ? '700' : '600',
+                }]}>
                     {round + 1}
                 </Text>
                 {sortedPlayerIds.map((playerId, playerIndex) => (

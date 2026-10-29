@@ -14,6 +14,7 @@ import { logEvent } from '../Analytics';
 import HeaderButton from '../components/Buttons/HeaderButton';
 import EditGame from '../components/EditGame';
 import PlayerListItem from '../components/PlayerListItem';
+import ScoringRow from '../components/ScoringRow';
 import SectionLabel from '../components/SectionLabel';
 import { MAX_PLAYERS } from '../constants';
 import { useTheme } from '../theme';
@@ -120,6 +121,7 @@ const EditGameScreen: React.FunctionComponent<Props> = ({ navigation, route }) =
 
             <SectionLabel inset={30}>Game title</SectionLabel>
             <EditGame />
+            <ScoringRow onPress={() => navigation.navigate('ScoringRules')} />
             <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                 <SectionLabel inset={25}>Players</SectionLabel>
                 {playerIds.length > 1 &&

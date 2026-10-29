@@ -103,6 +103,14 @@ describe('SortHelper', () => {
   });
 
   describe('selectSortedPlayerIdsByScore', () => {
+    it('should put the lowest total first when the game is lowest wins', () => {
+      const state = createMockState({ scoring: { winner: 'low' } });
+      const result = selectSortedPlayerIdsByScore(state);
+
+      // Ties still fall back to player index
+      expect(result).toEqual(['player-1', 'player-2', 'player-3']);
+    });
+
     it('should return players sorted by score in descending order (normal)', () => {
       const state = createMockState();
       const result = selectSortedPlayerIdsByScore(state);

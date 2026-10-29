@@ -443,4 +443,37 @@ describe('EditGameScreen', () => {
         expect(getByTestId('player-list-item-player-1')).toBeTruthy();
         expect(getByTestId('player-list-item-player-2')).toBeTruthy();
     });
+
+    describe('scoring row', () => {
+        const renderWith = (gameModesEnabled: boolean, scoring?: { winner: 'high' | 'low' }) => render(
+            <Provider store={createMockStore({
+                settings: { currentGameId: 'game-1', gameModesEnabled },
+                games: {
+                    entities: { 'game-1': { ...mockGame, ...(scoring ? { scoring } : {}) } },
+                    ids: ['game-1'],
+                },
+                players: { entities: mockPlayers, ids: ['player-1', 'player-2'] },
+            })}>
+                <EditGameScreen navigation={mockNavigation} route={mockRoute} />
+            </Provider>
+        );
+
+        it('is hidden while the game modes flag is off', () => {
+            const { queryByTestId } = renderWith(false);
+            expect(queryByTestId('scoring-row')).toBeNull();
+        });
+
+        it('shows free play and opens the rules while the flag is on', () => {
+            const { getByTestId, getByText } = renderWith(true);
+
+            expect(getByText('Free play')).toBeTruthy();
+            fireEvent.press(getByTestId('scoring-row'));
+            expect(mockNavigation.navigate).toHaveBeenCalledWith('ScoringRules');
+        });
+
+        it('stays for a game that already has rules after the flag is turned off', () => {
+            const { getByText } = renderWith(false, { winner: 'low' });
+            expect(getByText('Lowest score wins')).toBeTruthy();
+        });
+    });
 });

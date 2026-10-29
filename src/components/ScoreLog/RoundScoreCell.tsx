@@ -6,6 +6,8 @@ import { useAppSelector } from '../../../redux/hooks';
 import { selectPlayerScoreByRound } from '../../../redux/PlayersSlice';
 import { useTheme } from '../../theme';
 
+import { TABLE_CELL_PADDING, tableStyles } from './tableMetrics';
+
 interface Props {
     playerId: string;
     round: number;
@@ -18,23 +20,18 @@ const RoundScoreCell: React.FunctionComponent<Props> = ({ playerId, round, playe
 
     return (
         <Text key={playerIndex} style={[
+            tableStyles.cell,
             styles.scoreEntry,
-            { color: scoreRound == 0 ? theme.textTertiary : theme.text }]}>
+            { color: scoreRound == 0 ? theme.textTertiary : theme.text, borderColor: theme.separator }]}>
             {scoreRound}
         </Text>
     );
 };
 
 const styles = StyleSheet.create({
-    totalHeader: {
-        fontWeight: 'bold',
-        textAlign: 'center',
-        fontSize: 20,
-    },
     scoreEntry: {
-        fontVariant: ['tabular-nums'],
-        textAlign: 'center',
-        fontSize: 20,
+        minWidth: 44,
+        paddingHorizontal: TABLE_CELL_PADDING,
     }
 });
 

@@ -768,4 +768,39 @@ describe('GameSheet', () => {
 
         expect(getByText('Tap the player column or total score column to change sorting.')).toBeTruthy();
     });
+
+    describe('scoring rule label', () => {
+        const renderWith = (gameModesEnabled: boolean, game: Record<string, unknown> = {}) => render(
+            <Provider store={createMockStore({
+                settings: { currentGameId: 'game-1', gameModesEnabled },
+                games: { entities: { 'game-1': { ...mockGame, ...game } }, ids: ['game-1'] },
+                players: { entities: mockPlayers, ids: ['player-1', 'player-2'] },
+            })}>
+                <GameSheet {...defaultProps} />
+            </Provider>
+        );
+
+        it('is hidden while the game modes flag is off', () => {
+            const { queryByTestId } = renderWith(false);
+            expect(queryByTestId('game-sheet-scoring-rule')).toBeNull();
+        });
+
+        it('shows the rule and opens the rules screen while the flag is on', () => {
+            const { getByTestId, getByText } = renderWith(true, { scoring: { winner: 'low' } });
+
+            expect(getByText('Lowest wins')).toBeTruthy();
+            fireEvent.press(getByTestId('game-sheet-scoring-rule'));
+            expect(mockNavigate).toHaveBeenCalledWith('ScoringRules');
+        });
+
+        it('shows free play for a game without rules', () => {
+            const { getByText } = renderWith(true);
+            expect(getByText('Free play')).toBeTruthy();
+        });
+
+        it('stays for a game with rules after the flag is turned off', () => {
+            const { getByText } = renderWith(false, { scoring: { winner: 'high' } });
+            expect(getByText('Highest wins')).toBeTruthy();
+        });
+    });
 });
