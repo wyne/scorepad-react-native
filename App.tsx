@@ -17,6 +17,7 @@ configureReanimatedLogger({ level: ReanimatedLogLevel.warn, strict: false });
 
 import { persistor, store } from './redux/store';
 import { ChooseWinnersSheetContextProvider } from './src/components/Sheets/ChooseWinnersSheetContext';
+import { GameOverSheetContextProvider } from './src/components/Sheets/GameOverSheetContext';
 import { GameSheetContextProvider } from './src/components/Sheets/GameSheetContext';
 import { PointValuesSheetContextProvider } from './src/components/Sheets/PointValuesSheetContext';
 import { SplashOverlay } from './src/components/SplashOverlay';
@@ -45,10 +46,12 @@ export default function App() {
                             <MenuProvider>
                                 <PointValuesSheetContextProvider>
                                     <ChooseWinnersSheetContextProvider>
+                                    <GameOverSheetContextProvider>
                                     <PersistGate loading={null} persistor={persistor}>
                                         <StatusBar />
                                         <Navigation />
                                     </PersistGate>
+                                    </GameOverSheetContextProvider>
                                     </ChooseWinnersSheetContextProvider>
                                 </PointValuesSheetContextProvider>
                             </MenuProvider>

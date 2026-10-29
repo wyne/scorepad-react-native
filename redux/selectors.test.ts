@@ -1,6 +1,12 @@
 import { InteractionType } from '../src/components/Interactions/InteractionType';
 
-import { selectInteractionType, selectCurrentGame, selectGameModesVisible, selectLastStoreReviewPrompt } from './selectors';
+import {
+  selectInteractionType,
+  selectCurrentGame,
+  selectCurrentGameOverReason,
+  selectGameModesVisible,
+  selectLastStoreReviewPrompt,
+} from './selectors';
 import { RootState } from './store';
 
 // Mock data for testing
@@ -218,6 +224,59 @@ describe('Redux selectors', () => {
 
     it('keeps modes for a game that has rules after the flag is turned off', () => {
       expect(selectGameModesVisible(withGame(false, { winner: 'low' }), 'game-1')).toBe(true);
+    });
+  });
+
+  describe('selectCurrentGameOverReason', () => {
+    const withRound = (
+      roundCurrent: number,
+      roundTotal: number,
+      changes: { locked?: boolean; scoring?: RootState['games']['entities'][string]['scoring'] } = {},
+    ) => ({
+      ...mockState,
+      games: {
+        entities: {
+          'game-1': {
+            ...mockState.games!.entities['game-1']!,
+            roundCurrent,
+            roundTotal,
+            playerIds: ['player-1', 'player-2'],
+            scoring: { winner: 'high', end: { type: 'rounds', rounds: 3 } },
+            ...changes,
+          },
+        },
+        ids: ['game-1'],
+      },
+      players: {
+        entities: {
+          'player-1': { id: 'player-1', playerName: 'A', scores: [10, 20, 30] },
+          'player-2': { id: 'player-2', playerName: 'B', scores: [5, 5, 5] },
+        },
+        ids: ['player-1', 'player-2'],
+      },
+    }) as RootState;
+
+    it('is over once the last round of the limit is the latest round', () => {
+      expect(selectCurrentGameOverReason(withRound(1, 2))).toBeUndefined();
+      expect(selectCurrentGameOverReason(withRound(2, 3))).toEqual({ type: 'rounds', rounds: 3 });
+    });
+
+    it('never ends while stepping through an earlier round', () => {
+      expect(selectCurrentGameOverReason(withRound(2, 5))).toBeUndefined();
+    });
+
+    it('is not over for a locked game or a game without an end condition', () => {
+      expect(selectCurrentGameOverReason(withRound(2, 3, { locked: true }))).toBeUndefined();
+      expect(selectCurrentGameOverReason(withRound(2, 3, { scoring: { winner: 'high' } }))).toBeUndefined();
+    });
+
+    it('uses the totals for a target score', () => {
+      const scoring = { winner: 'high' as const, end: { type: 'target' as const, target: 60 } };
+      expect(selectCurrentGameOverReason(withRound(0, 1, { scoring }))).toEqual({
+        type: 'target',
+        target: 60,
+        playerIds: ['player-1'],
+      });
     });
   });
 });

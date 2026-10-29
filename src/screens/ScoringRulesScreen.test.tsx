@@ -1,12 +1,13 @@
 import React from 'react';
 
 import { configureStore } from '@reduxjs/toolkit';
-import { fireEvent, render } from '@testing-library/react-native';
+import { act, fireEvent, render } from '@testing-library/react-native';
 import { Alert } from 'react-native';
 import { Provider } from 'react-redux';
 
 import gamesReducer from '../../redux/GamesSlice';
 import playersReducer from '../../redux/PlayersSlice';
+import { ScoringRules } from '../../redux/ScoringRules';
 import settingsReducer, { initialState as initialSettings } from '../../redux/SettingsSlice';
 import { logEvent } from '../Analytics';
 
@@ -23,7 +24,7 @@ jest.mock('react-native-elements', () => {
     };
 });
 
-const createStore = (scores: number[], scoring?: { winner: 'high' | 'low'; }) => configureStore({
+const createStore = (scores: number[], scoring?: ScoringRules) => configureStore({
     reducer: {
         settings: settingsReducer,
         games: gamesReducer,
@@ -82,6 +83,7 @@ describe('ScoringRulesScreen', () => {
         expect(logEvent).toHaveBeenCalledWith('set_game_scoring', {
             game_id: 'game-1',
             winner: 'low',
+            end: 'none',
             mid_game: false,
         });
     });
@@ -125,7 +127,124 @@ describe('ScoringRulesScreen', () => {
         expect(logEvent).toHaveBeenCalledWith('set_game_scoring', {
             game_id: 'game-1',
             winner: 'low',
+            end: 'none',
             mid_game: true,
+        });
+    });
+
+    describe('game ends', () => {
+        const confirm = (alertSpy: jest.SpyInstance) => {
+            const buttons = alertSpy.mock.calls[alertSpy.mock.calls.length - 1][2] as { text: string; onPress?: () => void; }[];
+            act(() => buttons.find(button => button.text === 'Change Rules')?.onPress?.());
+        };
+
+        it('defaults to never, with no value to edit', () => {
+            const { getByTestId, queryByTestId } = renderScreen(createStore([0]));
+
+            expect(getByTestId('scoring-end-none').props.accessibilityState).toEqual({ selected: true });
+            expect(queryByTestId('scoring-end-value')).toBeNull();
+        });
+
+        it('sets a round limit of 10 and a target of 100 to start', () => {
+            const store = createStore([0], { winner: 'low' });
+            const { getByTestId } = renderScreen(store);
+
+            fireEvent.press(getByTestId('scoring-end-rounds'));
+            expect(store.getState().games.entities['game-1']?.scoring).toEqual({
+                winner: 'low',
+                end: { type: 'rounds', rounds: 10 },
+            });
+            expect(getByTestId('scoring-end-value').props.value).toBe('10');
+
+            fireEvent.press(getByTestId('scoring-end-target'));
+            expect(store.getState().games.entities['game-1']?.scoring).toEqual({
+                winner: 'low',
+                end: { type: 'target', target: 100 },
+            });
+            expect(getByTestId('scoring-end-footnote').props.children).toContain('reaches 100');
+
+            fireEvent.press(getByTestId('scoring-end-none'));
+            expect(store.getState().games.entities['game-1']?.scoring).toEqual({ winner: 'low' });
+        });
+
+        it('keeps the end condition when the winner changes', () => {
+            const store = createStore([0], { winner: 'high', end: { type: 'rounds', rounds: 9 } });
+            const { getByTestId } = renderScreen(store);
+
+            fireEvent.press(getByTestId('scoring-winner-low'));
+
+            expect(store.getState().games.entities['game-1']?.scoring).toEqual({
+                winner: 'low',
+                end: { type: 'rounds', rounds: 9 },
+            });
+        });
+
+        it('steps the limit and commits a typed value within bounds', () => {
+            const store = createStore([0], { winner: 'high', end: { type: 'rounds', rounds: 2 } });
+            const { getByTestId } = renderScreen(store);
+            const end = () => store.getState().games.entities['game-1']?.scoring?.end;
+
+            fireEvent.press(getByTestId('scoring-end-increase'));
+            expect(end()).toEqual({ type: 'rounds', rounds: 3 });
+
+            fireEvent.press(getByTestId('scoring-end-decrease'));
+            fireEvent.press(getByTestId('scoring-end-decrease'));
+            fireEvent.press(getByTestId('scoring-end-decrease'));
+            expect(end()).toEqual({ type: 'rounds', rounds: 1 });
+
+            fireEvent.changeText(getByTestId('scoring-end-value'), '12');
+            fireEvent(getByTestId('scoring-end-value'), 'endEditing');
+            expect(end()).toEqual({ type: 'rounds', rounds: 12 });
+
+            fireEvent.changeText(getByTestId('scoring-end-value'), '');
+            fireEvent(getByTestId('scoring-end-value'), 'endEditing');
+            expect(end()).toEqual({ type: 'rounds', rounds: 12 });
+            expect(getByTestId('scoring-end-value').props.value).toBe('12');
+        });
+
+        it('steps a target score by 10', () => {
+            const store = createStore([0], { winner: 'high', end: { type: 'target', target: 100 } });
+            const { getByTestId } = renderScreen(store);
+
+            fireEvent.press(getByTestId('scoring-end-increase'));
+
+            expect(store.getState().games.entities['game-1']?.scoring?.end).toEqual({ type: 'target', target: 110 });
+        });
+
+        it('warns once mid-game, then lets the value be adjusted', () => {
+            const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(jest.fn());
+            const store = createStore([5], { winner: 'high', end: { type: 'rounds', rounds: 9 } });
+            const { getByTestId } = renderScreen(store);
+            const end = () => store.getState().games.entities['game-1']?.scoring?.end;
+
+            fireEvent.press(getByTestId('scoring-end-increase'));
+            expect(alertSpy).toHaveBeenCalledWith(
+                'Change rules mid-game?',
+                expect.stringContaining('end it sooner or later'),
+                expect.any(Array),
+            );
+            expect(end()).toEqual({ type: 'rounds', rounds: 9 });
+
+            confirm(alertSpy);
+            expect(end()).toEqual({ type: 'rounds', rounds: 10 });
+
+            fireEvent.press(getByTestId('scoring-end-increase'));
+            expect(alertSpy).toHaveBeenCalledTimes(1);
+            expect(end()).toEqual({ type: 'rounds', rounds: 11 });
+        });
+
+        it('puts the typed value back when a mid-game change is cancelled', () => {
+            const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(jest.fn());
+            const store = createStore([5], { winner: 'high', end: { type: 'rounds', rounds: 9 } });
+            const { getByTestId } = renderScreen(store);
+
+            fireEvent.changeText(getByTestId('scoring-end-value'), '4');
+            fireEvent(getByTestId('scoring-end-value'), 'endEditing');
+            const buttons = alertSpy.mock.calls[0][2] as { text: string; onPress?: () => void; }[];
+            act(() => buttons.find(button => button.text === 'Keep Current Rules')?.onPress?.());
+
+            expect(store.getState().games.entities['game-1']?.scoring?.end).toEqual({ type: 'rounds', rounds: 9 });
+            expect(getByTestId('scoring-end-value').props.value).toBe('9');
         });
     });
 });

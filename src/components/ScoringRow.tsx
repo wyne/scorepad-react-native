@@ -9,15 +9,28 @@ import { useTheme } from '../theme';
 
 import SectionLabel from './SectionLabel';
 
-export const scoringSummary = (rules: ScoringRules | undefined): string => {
-    if (!rules) return 'Free play';
-    return rules.winner === 'low' ? 'Lowest score wins' : 'Highest score wins';
+/** How the game ends, or undefined when the players decide. */
+export const endSummary = (rules: ScoringRules | undefined): string | undefined => {
+    const end = rules?.end;
+    if (!end) return undefined;
+    if (end.type === 'rounds') return `${end.rounds} ${end.rounds === 1 ? 'round' : 'rounds'}`;
+    return `ends at ${end.target}`;
 };
 
-/** The rule in two words, for tight spots like the game sheet header. */
+const withEnd = (winner: string, rules: ScoringRules): string => {
+    const end = endSummary(rules);
+    return end ? `${winner} · ${end}` : winner;
+};
+
+export const scoringSummary = (rules: ScoringRules | undefined): string => {
+    if (!rules) return 'Free play';
+    return withEnd(rules.winner === 'low' ? 'Lowest score wins' : 'Highest score wins', rules);
+};
+
+/** The rule in a few words, for tight spots like the game sheet header. */
 export const scoringShortSummary = (rules: ScoringRules | undefined): string => {
     if (!rules) return 'Free play';
-    return rules.winner === 'low' ? 'Lowest wins' : 'Highest wins';
+    return withEnd(rules.winner === 'low' ? 'Lowest wins' : 'Highest wins', rules);
 };
 
 /**
