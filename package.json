@@ -95,7 +95,7 @@
     "@babel/preset-react": "^7.24.1",
     "@babel/preset-typescript": "^7.22.5",
     "@jest/globals": "^29.6.2",
-    "@react-native/jest-preset": "^0.85.3",
+    "@react-native/jest-preset": "^0.87.1",
     "@testing-library/jest-native": "^5.4.2",
     "@testing-library/react-native": "^13.0.0",
     "@types/jest": "^29.5.14",
