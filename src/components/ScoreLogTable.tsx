@@ -7,6 +7,7 @@ import { selectGameById, setSortSelector } from '../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { selectGameModesVisible } from '../../redux/selectors';
 import { logEvent } from '../Analytics';
+import { useTheme } from '../theme';
 
 import PlayerNameColumn from './ScoreLog/PlayerNameColumn';
 import RankColumn from './ScoreLog/RankColumn';
@@ -37,6 +38,8 @@ const ScoreLogTable: React.FunctionComponent<Props> = ({ showScores = true }) =>
 
     // Places are part of game modes, so they follow the same flag.
     const showRanks = useAppSelector(state => selectGameModesVisible(state, currentGameId));
+
+    const theme = useTheme();
 
     const scoreLogScrollViewEl = useRef<ScrollView>(null);
 
@@ -80,7 +83,7 @@ const ScoreLogTable: React.FunctionComponent<Props> = ({ showScores = true }) =>
     if (typeof currentGameId == 'undefined') return null;
 
     return (
-        <View style={[styles.scoreTableContainer]}>
+        <View style={[styles.scoreTableContainer, { backgroundColor: theme.backgroundSecondary }]}>
             {showScores && showRanks && <RankColumn />}
 
             <TouchableOpacity onPress={sortByPlayerIndex}>
@@ -117,6 +120,10 @@ const ScoreLogTable: React.FunctionComponent<Props> = ({ showScores = true }) =>
 const styles = StyleSheet.create({
     scoreTableContainer: {
         flexDirection: 'row',
+        borderRadius: 12,
+        overflow: 'hidden',
+        marginHorizontal: 10,
+        marginBottom: 10,
     }
 });
 

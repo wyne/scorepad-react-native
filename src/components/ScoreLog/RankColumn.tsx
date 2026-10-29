@@ -11,6 +11,7 @@ import { RootState } from '../../../redux/store';
 import { useTheme } from '../../theme';
 
 import { SortSelectorKey, sortSelectors } from './SortHelper';
+import { TABLE_CELL_PADDING, tableStyles } from './tableMetrics';
 
 const selectCurrentGameRanks = createSelector(
     [
@@ -35,9 +36,10 @@ const RankColumn: React.FunctionComponent = () => {
 
     return (
         <View style={styles.column} testID="rank-column">
-            <Text style={[styles.cell, { color: theme.textSecondary }]}>#</Text>
+            <Text style={[tableStyles.header, styles.cell, { color: theme.textSecondary }]}>#</Text>
             {sortedPlayerIds.map((playerId) => (
-                <Text key={playerId} style={[styles.cell, { color: theme.textSecondary }]}
+                <Text key={playerId}
+                    style={[tableStyles.cell, styles.cell, { color: theme.textSecondary, borderColor: theme.separator }]}
                     testID={`rank-cell-${playerId}`}>
                     {ranks[playerId] ? rankLabel(ranks[playerId]) : ''}
                 </Text>
@@ -48,16 +50,13 @@ const RankColumn: React.FunctionComponent = () => {
 
 const styles = StyleSheet.create({
     column: {
-        paddingVertical: 10,
-        paddingLeft: 10,
-        // Room between the place and the player's color bar.
-        paddingRight: 8,
-        minWidth: 44,
+        minWidth: 40,
     },
     cell: {
-        fontSize: 20,
-        fontVariant: ['tabular-nums'],
         textAlign: 'right',
+        paddingLeft: TABLE_CELL_PADDING,
+        // The name cell's own left padding sets the gap to the color bar.
+        paddingRight: 2,
     },
 });
 
