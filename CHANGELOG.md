@@ -1,5 +1,36 @@
 # Changelog
 
+## [3.3.0](https://github.com/wyne/scorepad-react-native/compare/v3.2.0...v3.3.0) (2026-10-29)
+
+
+### Features
+
+* adapt game screen for iPhone Duo expanded mode ([#764](https://github.com/wyne/scorepad-react-native/issues/764)) ([d0e3817](https://github.com/wyne/scorepad-react-native/commit/d0e381785c4103dcdcd544bfcccf9e179dc386a4))
+* add game modes behind a developer flag, starting with lowest-score-wins ([#778](https://github.com/wyne/scorepad-react-native/issues/778)) ([f61290f](https://github.com/wyne/scorepad-react-native/commit/f61290fdf173588f174e165b7ceb779f64c66d2a))
+
+
+### Bug Fixes
+
+* **deps:** align Expo SDK 57 patch versions for expo-doctor ([#779](https://github.com/wyne/scorepad-react-native/issues/779)) ([0f0a58d](https://github.com/wyne/scorepad-react-native/commit/0f0a58df08697cda04267d2054741a32c6786019))
+* enable Android release code obfuscation and resource shrinking ([#762](https://github.com/wyne/scorepad-react-native/issues/762)) ([16a9f16](https://github.com/wyne/scorepad-react-native/commit/16a9f16259e968b32be7b94ddf82e7bb11b37d2e))
+
+
+### Documentation
+
+* update outdated README info ([#774](https://github.com/wyne/scorepad-react-native/issues/774)) ([138d116](https://github.com/wyne/scorepad-react-native/commit/138d116a28ba6e2d93286e9b2d7bc2e889b0a930))
+
+
+### Miscellaneous
+
+* **deps-dev:** bump brace-expansion from 1.1.18 to 1.1.21 ([#767](https://github.com/wyne/scorepad-react-native/issues/767)) ([3a2ee14](https://github.com/wyne/scorepad-react-native/commit/3a2ee14df1f7e96684b7dac4bb663523d753c87e))
+* **deps-dev:** bump ip-address from 10.7.0 to 10.7.3 ([#768](https://github.com/wyne/scorepad-react-native/issues/768)) ([7ec6e98](https://github.com/wyne/scorepad-react-native/commit/7ec6e98ab63ceca5b7b6e0d10df8ef52ab64e5fb))
+* **deps:** bump actions/upload-artifact from 7.0.1 to 7.0.2 ([#770](https://github.com/wyne/scorepad-react-native/issues/770)) ([15f1174](https://github.com/wyne/scorepad-react-native/commit/15f1174d6f0ce1387ac0d4ff0e344d689130917c))
+* **deps:** bump compression from 1.8.1 to 1.8.2 ([#773](https://github.com/wyne/scorepad-react-native/issues/773)) ([c27b3ba](https://github.com/wyne/scorepad-react-native/commit/c27b3ba31638ef2934b3e68d50dcf4be096ea6a2))
+* **deps:** bump serialize-javascript and @wdio/mocha-framework ([#777](https://github.com/wyne/scorepad-react-native/issues/777)) ([f9f1892](https://github.com/wyne/scorepad-react-native/commit/f9f1892a7e3491ecc4fa8ead9c8f928a551a858d))
+* **deps:** bump shell-quote from 1.10.0 to 1.12.0 ([#769](https://github.com/wyne/scorepad-react-native/issues/769)) ([693e91f](https://github.com/wyne/scorepad-react-native/commit/693e91f5e837d5ca82a50f7b5b053f736fa321d1))
+* **deps:** bump source-map-js from 1.2.1 to 1.2.2 ([#771](https://github.com/wyne/scorepad-react-native/issues/771)) ([aa2fda9](https://github.com/wyne/scorepad-react-native/commit/aa2fda939f6e41476df302828107902dc17b7080))
+* **deps:** bump undici ([#775](https://github.com/wyne/scorepad-react-native/issues/775)) ([3477f4a](https://github.com/wyne/scorepad-react-native/commit/3477f4a7b142709e09ccbeb8f658d7b60b11a9ec))
+
 ## [3.2.0](https://github.com/wyne/scorepad-react-native/compare/v3.1.2...v3.2.0) (2026-09-11)
 
 
