@@ -6,6 +6,7 @@ import { Provider } from 'react-redux';
 
 import gamesReducer from '../../redux/GamesSlice';
 import playersReducer from '../../redux/PlayersSlice';
+import { ScoringRules } from '../../redux/ScoringRules';
 import settingsReducer from '../../redux/SettingsSlice';
 import { logEvent } from '../Analytics';
 
@@ -445,7 +446,7 @@ describe('EditGameScreen', () => {
     });
 
     describe('scoring row', () => {
-        const renderWith = (gameModesEnabled: boolean, scoring?: { winner: 'high' | 'low' }) => render(
+        const renderWith = (gameModesEnabled: boolean, scoring?: ScoringRules) => render(
             <Provider store={createMockStore({
                 settings: { currentGameId: 'game-1', gameModesEnabled },
                 games: {
@@ -463,17 +464,28 @@ describe('EditGameScreen', () => {
             expect(queryByTestId('scoring-row')).toBeNull();
         });
 
-        it('shows free play and opens the rules while the flag is on', () => {
+        it('shows free play and opens the game mode list while the flag is on', () => {
             const { getByTestId, getByText } = renderWith(true);
 
             expect(getByText('Free play')).toBeTruthy();
             fireEvent.press(getByTestId('scoring-row'));
-            expect(mockNavigation.navigate).toHaveBeenCalledWith('ScoringRules');
+            expect(mockNavigation.navigate).toHaveBeenCalledWith('GameMode');
         });
 
         it('stays for a game that already has rules after the flag is turned off', () => {
             const { getByText } = renderWith(false, { winner: 'low' });
             expect(getByText('Lowest score wins')).toBeTruthy();
+        });
+
+        it('names the game a preset came from, with its rules underneath', () => {
+            const { getByText, getByTestId } = renderWith(true, {
+                winner: 'low',
+                end: { type: 'target', target: 100 },
+                name: 'Hearts',
+            });
+
+            expect(getByText('Hearts')).toBeTruthy();
+            expect(getByTestId('scoring-row-detail')).toHaveTextContent('Lowest score wins · ends at 100');
         });
     });
 });

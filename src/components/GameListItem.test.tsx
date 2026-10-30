@@ -227,6 +227,24 @@ describe('GameListItem', () => {
         expect(getByText('Player 2')).toBeTruthy();
     });
 
+    it('labels a game with its mode, and leaves free play games as they were', () => {
+        const withScoring = (scoring?: object) => createMockStore({
+            ...populatedState,
+            games: { entities: { 'game-1': { ...mockGame, ...(scoring ? { scoring } : {}) } }, ids: ['game-1'] },
+        });
+        const renderItem = (store: ReturnType<typeof createMockStore>) => render(
+            <Provider store={store}>
+                <GameListItem navigation={mockNavigation} gameId="game-1" index={0} />
+            </Provider>
+        );
+
+        expect(renderItem(withScoring()).queryByTestId('game-list-mode')).toBeNull();
+        expect(renderItem(withScoring({ winner: 'low', name: 'Hearts' })).getByTestId('game-list-mode'))
+            .toHaveTextContent('Hearts ·');
+        expect(renderItem(withScoring({ winner: 'low' })).getByTestId('game-list-mode'))
+            .toHaveTextContent('Lowest wins ·');
+    });
+
     it('should emphasize the game title', () => {
         const store = createMockStore(populatedState);
 

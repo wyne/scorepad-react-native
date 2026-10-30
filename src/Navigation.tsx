@@ -21,6 +21,7 @@ import { GestureInfoSheetContextProvider } from './components/Sheets/GestureInfo
 import { useAnalyticsUserProperties } from './hooks/useAnalyticsUserProperties';
 import { useRoundPickerInBottomStrip, useVerticalBarLayout } from './hooks/useExpandedGameLayout';
 import EditPlayerScreen from './screens/EditPlayerScreen';
+import GameModeScreen from './screens/GameModeScreen';
 import ScoringRulesScreen from './screens/ScoringRulesScreen';
 import ShareScreen from './screens/ShareScreen';
 import { useTheme } from './theme';
@@ -31,6 +32,7 @@ export type RootStackParamList = {
     EditGame: {
         source?: string;
     };
+    GameMode: undefined;
     ScoringRules: undefined;
     AppSettings: undefined;
     DebugLog: undefined;
@@ -171,6 +173,14 @@ export const Navigation = () => {
                             options={{
                                 orientation: 'all',
                                 title: 'Edit Game',
+                                headerBackButtonDisplayMode: 'minimal',
+                                ...flatHeaderOptions,
+                            }}
+                        />
+                        <Stack.Screen name="GameMode" component={GameModeScreen}
+                            options={{
+                                orientation: 'all',
+                                title: 'Game Mode',
                                 headerBackButtonDisplayMode: 'minimal',
                                 ...flatHeaderOptions,
                             }}

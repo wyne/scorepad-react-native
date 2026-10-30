@@ -121,7 +121,7 @@ const EditGameScreen: React.FunctionComponent<Props> = ({ navigation, route }) =
 
             <SectionLabel inset={30}>Game title</SectionLabel>
             <EditGame />
-            <ScoringRow onPress={() => navigation.navigate('ScoringRules')} />
+            <ScoringRow onPress={() => navigation.navigate('GameMode')} />
             <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                 <SectionLabel inset={25}>Players</SectionLabel>
                 {playerIds.length > 1 &&

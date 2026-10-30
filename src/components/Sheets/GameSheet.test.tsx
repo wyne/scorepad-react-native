@@ -785,12 +785,17 @@ describe('GameSheet', () => {
             expect(queryByTestId('game-sheet-scoring-rule')).toBeNull();
         });
 
-        it('shows the rule and opens the rules screen while the flag is on', () => {
+        it('shows the rule and opens the game mode list while the flag is on', () => {
             const { getByTestId, getByText } = renderWith(true, { scoring: { winner: 'low' } });
 
             expect(getByText('Lowest wins')).toBeTruthy();
             fireEvent.press(getByTestId('game-sheet-scoring-rule'));
-            expect(mockNavigate).toHaveBeenCalledWith('ScoringRules');
+            expect(mockNavigate).toHaveBeenCalledWith('GameMode');
+        });
+
+        it('shows the name of the game a preset came from', () => {
+            const { getByText } = renderWith(true, { scoring: { winner: 'low', name: 'Golf' } });
+            expect(getByText('Golf')).toBeTruthy();
         });
 
         it('shows free play for a game without rules', () => {

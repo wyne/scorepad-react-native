@@ -28,6 +28,13 @@ describe('ScoringRules', () => {
             expect(isScoringRules({ winner: 'low', end: { type: 'target', target: 100 } })).toBe(true);
         });
 
+        it('accepts a short mode name and rejects anything else', () => {
+            expect(isScoringRules({ winner: 'low', name: 'Hearts' })).toBe(true);
+            expect(isScoringRules({ winner: 'low', name: '' })).toBe(false);
+            expect(isScoringRules({ winner: 'low', name: 'x'.repeat(41) })).toBe(false);
+            expect(isScoringRules({ winner: 'low', name: 7 })).toBe(false);
+        });
+
         it('rejects an end condition that is not a positive whole number', () => {
             expect(isScoringRules({ winner: 'high', end: { type: 'rounds', rounds: 0 } })).toBe(false);
             expect(isScoringRules({ winner: 'high', end: { type: 'rounds', rounds: 2.5 } })).toBe(false);

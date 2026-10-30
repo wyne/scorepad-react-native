@@ -127,16 +127,16 @@ const gamesSlice = createSlice({
                 }
             });
         },
-        setGameScoring(state, action: PayloadAction<{ gameId: string, scoring: ScoringRules; }>) {
+        // Undefined goes back to free play.
+        setGameScoring(state, action: PayloadAction<{ gameId: string, scoring: ScoringRules | undefined; }>) {
             const game = state.entities[action.payload.gameId];
             if (!game) { return; }
 
-            gamesAdapter.updateOne(state, {
-                id: action.payload.gameId,
-                changes: {
-                    scoring: action.payload.scoring,
-                }
-            });
+            if (action.payload.scoring) {
+                game.scoring = action.payload.scoring;
+            } else {
+                delete game.scoring;
+            }
         },
         restoreAllGames(state, action: PayloadAction<Record<string, GameState>>) {
             gamesAdapter.setAll(state, action.payload);

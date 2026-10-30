@@ -84,7 +84,10 @@ const ScoringRulesScreen: React.FunctionComponent = () => {
 
     const rules = scoringRulesOrDefault(currentGame.scoring);
 
-    const applyRules = (next: ScoringRules) => {
+    const applyRules = (edited: ScoringRules) => {
+        // Hand-edited rules no longer match the named game they came from.
+        const next = { ...edited };
+        delete next.name;
         dispatch(setGameScoring({ gameId: currentGame.id, scoring: next }));
         void logEvent('set_game_scoring', {
             game_id: currentGame.id,
