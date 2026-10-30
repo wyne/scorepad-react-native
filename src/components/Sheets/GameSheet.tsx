@@ -395,17 +395,10 @@ const GameSheet: React.FunctionComponent = () => {
                                     onPress={() => navigation.navigate('ScoringRules')}
                                     style={styles.scoringRule}
                                 >
-                                    <Text style={[styles.scoringRuleText, { color: theme.textSecondary }]}>
+                                    <Text style={[styles.scoringRuleText, { color: gameLocked ? theme.textTertiary : theme.textSecondary }]}>
                                         {scoringShortSummary(game?.scoring)}
                                     </Text>
                                 </TouchableOpacity>
-                            }
-                            {gameLocked &&
-                                <Text style={{ color: theme.textTertiary, fontSize: 20, paddingHorizontal: 10 }}
-                                    onPress={() => { gameSheetRef?.current?.snapToIndex(snapPoints.length - 1); }}
-                                >
-                                    Locked
-                                </Text>
                             }
                             {false &&
                                 <Text style={styles.editButton} onPress={() => navigation.navigate('EditGame')}>

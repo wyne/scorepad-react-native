@@ -27,8 +27,14 @@ jest.mock('../../MenuOpenContext', () => ({
   useMenuOpen: function () { return { menuOpen: mockMenuOpen, setMenuOpen: function () { } }; },
 }));
 
+const mockShowLockedHint = jest.fn();
+jest.mock('../../LockedHintContext', () => ({
+  useLockedHint: function () { return { lockedHintVisible: false, showLockedHint: mockShowLockedHint, hideLockedHint: function () { } }; },
+}));
+
 beforeEach(() => {
   mockMenuOpen = false;
+  mockShowLockedHint.mockClear();
 });
 
 type RenderOptions = {
@@ -153,6 +159,18 @@ describe('HalfTileTouchSurface', () => {
     fireEvent.press(surface);
     fireEvent(surface, 'longPress');
     expect(dispatch).not.toHaveBeenCalled();
+  });
+
+  it('explains how to unlock when tapped in a locked game', () => {
+    const { surface } = renderSurface({ locked: true });
+    fireEvent.press(surface);
+    expect(mockShowLockedHint).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not show the locked hint in an unlocked game', () => {
+    const { surface } = renderSurface();
+    fireEvent.press(surface);
+    expect(mockShowLockedHint).not.toHaveBeenCalled();
   });
 
   it('does not dispatch while the menu is open', () => {

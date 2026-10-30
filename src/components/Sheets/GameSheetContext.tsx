@@ -3,6 +3,11 @@ import React, { createContext, useContext, useRef } from 'react';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import BottomSheet from '@gorhom/bottom-sheet/lib/typescript/components/bottomSheet/BottomSheet';
 
+/**
+ * Snap index of the fully open game sheet, where the Unlock button is
+ */
+export const gameSheetExpandedIndex = 2;
+
 const GameSheetContext = createContext<React.RefObject<BottomSheet | null> | null>(null);
 
 export const GameSheetContextProvider: React.FC<React.PropsWithChildren> = (props) => {

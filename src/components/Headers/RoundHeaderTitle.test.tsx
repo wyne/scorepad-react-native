@@ -4,7 +4,7 @@ import { configureStore } from '@reduxjs/toolkit';
 import { fireEvent, render } from '@testing-library/react-native';
 import { Provider } from 'react-redux';
 
-import gamesReducer from '../../../redux/GamesSlice';
+import gamesReducer, { updateGame } from '../../../redux/GamesSlice';
 import playersReducer from '../../../redux/PlayersSlice';
 import { ScoringRules } from '../../../redux/ScoringRules';
 import settingsReducer, { initialState as initialSettings } from '../../../redux/SettingsSlice';
@@ -47,6 +47,18 @@ jest.mock('../Sheets/GameOverSheetContext', () => ({
     useGameOverSheetContext: jest.fn(() => ({ current: { present: mockPresent, close: jest.fn() } })),
 }));
 
+const mockSnapToIndex = jest.fn();
+jest.mock('../Sheets/GameSheetContext', () => ({
+    gameSheetExpandedIndex: 2,
+    useGameSheetContext: () => ({ current: { snapToIndex: mockSnapToIndex } }),
+}));
+
+const mockHideLockedHint = jest.fn();
+let mockLockedHintVisible = false;
+jest.mock('../LockedHintContext', () => ({
+    useLockedHint: () => ({ lockedHintVisible: mockLockedHintVisible, showLockedHint: jest.fn(), hideLockedHint: mockHideLockedHint }),
+}));
+
 const createStore = (roundCurrent: number, roundTotal: number, scoring?: ScoringRules, scores = [10, 10, 10]) => configureStore({
     reducer: { settings: settingsReducer, games: gamesReducer, players: playersReducer },
     preloadedState: {
@@ -79,6 +91,28 @@ const renderTitle = (store: ReturnType<typeof createStore>) => render(
 describe('RoundHeaderTitle', () => {
     beforeEach(() => {
         jest.clearAllMocks();
+        mockLockedHintVisible = false;
+    });
+
+    const lock = (store: ReturnType<typeof createStore>) => {
+        store.dispatch(updateGame({ id: 'game-1', changes: { locked: true } }));
+        return store;
+    };
+
+    it('opens the game sheet to unlock when Final is tapped', () => {
+        const { getByTestId, getByText } = renderTitle(lock(createStore(2, 3)));
+
+        expect(getByText('Final')).toBeTruthy();
+        fireEvent.press(getByTestId('final-pill'));
+
+        expect(mockSnapToIndex).toHaveBeenCalledWith(2);
+        expect(mockHideLockedHint).toHaveBeenCalled();
+    });
+
+    it('does not offer the Final pill while the game is unlocked', () => {
+        const { queryByTestId } = renderTitle(createStore(2, 3));
+
+        expect(queryByTestId('final-pill')).toBeNull();
     });
 
     it('counts rounds played so far without a round limit', () => {

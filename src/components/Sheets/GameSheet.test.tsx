@@ -347,7 +347,7 @@ describe('GameSheet', () => {
         expect(getByTestId('bottom-sheet').props.topInset).toBe(50);
     });
 
-    it('should show locked text when game is locked', () => {
+    it('leaves the locked state to the header pill when game is locked', () => {
         const lockedGame = { ...mockGame, locked: true };
         const store = createMockStore({
             settings: {
@@ -365,13 +365,13 @@ describe('GameSheet', () => {
             },
         });
 
-        const { getByText } = render(
+        const { getByText, queryByText } = render(
             <Provider store={store}>
                 <GameSheet {...defaultProps} />
             </Provider>
         );
 
-        expect(getByText('Locked')).toBeTruthy();
+        expect(queryByText('Locked')).toBeNull();
         expect(getByText('Unlock')).toBeTruthy();
     });
 

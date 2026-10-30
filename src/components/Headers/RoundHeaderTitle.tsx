@@ -12,7 +12,9 @@ import { selectCurrentGameOverReason } from '../../../redux/selectors';
 import { logEvent } from '../../Analytics';
 import { LIQUID_GLASS } from '../../platform';
 import { useTheme } from '../../theme';
+import { useLockedHint } from '../LockedHintContext';
 import { useGameOverSheetContext } from '../Sheets/GameOverSheetContext';
+import { gameSheetExpandedIndex, useGameSheetContext } from '../Sheets/GameSheetContext';
 
 const RoundHeaderTitle: React.FunctionComponent = () => {
     const theme = useTheme();
@@ -28,6 +30,8 @@ const RoundHeaderTitle: React.FunctionComponent = () => {
     const roundsShown = end?.type === 'rounds' ? Math.max(end.rounds, roundCount) : roundCount;
     const gameOverReason = useAppSelector(selectCurrentGameOverReason);
     const gameOverSheetRef = useGameOverSheetContext();
+    const gameSheetRef = useGameSheetContext();
+    const { lockedHintVisible, hideLockedHint } = useLockedHint();
 
     if (currentGameId == null) return null;
 
@@ -74,18 +78,23 @@ const RoundHeaderTitle: React.FunctionComponent = () => {
 
     const isLocked = currentGame?.locked === true;
     const isEarlierRound = !isLocked && currentRoundIndex < roundCount - 1;
+    // Ring the pill while the locked hint points at it.
+    const outlined = isEarlierRound || (isLocked && lockedHintVisible);
     const previousDisabled = isLocked || isFirstRound;
     const nextDisabled = isLocked || isLastRound && (currentGame?.locked ?? false);
     const roundPickerEnabled = !isLocked && roundCount > 1;
     const roundDescriptor = isEarlierRound ? 'Earlier round' : 'Round';
     const roundLabel = isLocked ? 'Final' : `${roundDescriptor} ${currentRoundIndex + 1} of ${roundsShown}`;
     const roundPickerLabel = isLocked ? (
-        <Text
-            maxFontSizeMultiplier={1.3}
-            style={[styles.finalLabel, { color: theme.headerText }]}
-        >
-            Final
-        </Text>
+        <View style={styles.finalLabelRow}>
+            <Icon name="lock-closed" type="ionicon" size={14} color={theme.warning} />
+            <Text
+                maxFontSizeMultiplier={1.3}
+                style={[styles.finalLabel, { color: theme.headerText }]}
+            >
+                Final
+            </Text>
+        </View>
     ) : (
         <View style={styles.roundLabel}>
             <Text
@@ -127,7 +136,27 @@ const RoundHeaderTitle: React.FunctionComponent = () => {
         });
     };
 
-    const roundPicker = roundPickerEnabled ? (
+    // A locked game has no rounds to pick, so the pill opens the game sheet
+    // to the Unlock button instead.
+    const openUnlock = () => {
+        hideLockedHint();
+        void Haptics.selectionAsync();
+        gameSheetRef?.current?.snapToIndex(gameSheetExpandedIndex);
+    };
+
+    const roundPicker = isLocked ? (
+        <Pressable
+            accessibilityHint="Opens the game sheet to unlock the game"
+            accessibilityLabel="Final. Game locked"
+            accessibilityRole="button"
+            hitSlop={4}
+            onPress={openUnlock}
+            style={({ pressed }) => [styles.roundPicker, Platform.OS === 'ios' && pressed && styles.pressed]}
+            testID="final-pill"
+        >
+            {roundPickerLabel}
+        </Pressable>
+    ) : roundPickerEnabled ? (
         <MenuView
             actions={roundActions}
             onPressAction={({ nativeEvent }) => selectRound(nativeEvent.event)}
@@ -198,7 +227,7 @@ const RoundHeaderTitle: React.FunctionComponent = () => {
                 style={[
                     styles.container,
                     styles.outlinedContainer,
-                    { borderColor: isEarlierRound ? theme.warning : 'transparent' },
+                    { borderColor: outlined ? theme.warning : 'transparent' },
                 ]}
             >
                 {controls}
@@ -218,7 +247,7 @@ const RoundHeaderTitle: React.FunctionComponent = () => {
                 styles.container,
                 styles.outlinedContainer,
                 styles.fallbackContainer,
-                { backgroundColor, borderColor: isEarlierRound ? theme.warning : 'transparent' },
+                { backgroundColor, borderColor: outlined ? theme.warning : 'transparent' },
             ]}
         >
             {controls}
@@ -240,6 +269,11 @@ const styles = StyleSheet.create({
     },
     fallbackContainer: {
         overflow: 'hidden',
+    },
+    finalLabelRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 5,
     },
     finalLabel: {
         fontSize: Platform.OS === 'android' ? 17 : 16,

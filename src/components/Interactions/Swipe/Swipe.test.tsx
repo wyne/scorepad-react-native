@@ -5,7 +5,7 @@ import { configureStore } from '@reduxjs/toolkit';
 import { act, render } from '@testing-library/react-native';
 import { Provider } from 'react-redux';
 
-import gamesReducer, { roundNext } from '../../../../redux/GamesSlice';
+import gamesReducer, { roundNext, updateGame } from '../../../../redux/GamesSlice';
 import playersReducer, { playerRoundScoreIncrement } from '../../../../redux/PlayersSlice';
 import settingsReducer, { initialState as settingsInitialState } from '../../../../redux/SettingsSlice';
 
@@ -46,6 +46,13 @@ jest.mock('react-native-gesture-handler', () => ({
       b.onFinalize = function (fn: any) { ph.onFinalize = fn; return b; };
       return b;
     },
+    Tap: function () {
+      const b: any = {};
+      b.enabled = function (enabled: boolean) { (globalThis as any).__tapEnabled = enabled; return b; };
+      b.onEnd = function (fn: any) { (globalThis as any).__tapEnd = fn; return b; };
+      return b;
+    },
+    Race: function (...gestures: unknown[]) { return gestures; },
   },
   GestureDetector: function (p: any) {
     const ch = p.children;
@@ -54,7 +61,13 @@ jest.mock('react-native-gesture-handler', () => ({
   State: {},
 }));
 
+const mockShowLockedHint = jest.fn();
+jest.mock('../../LockedHintContext', () => ({
+  useLockedHint: function () { return { lockedHintVisible: false, showLockedHint: mockShowLockedHint, hideLockedHint: function () { } }; },
+}));
+
 beforeEach(() => {
+  mockShowLockedHint.mockClear();
   (globalThis as any).__ph = {};
   (globalThis as any).__react = undefined;
   jest.useRealTimers();
@@ -220,5 +233,18 @@ describe('SwipeVertical', () => {
     expect(dispatch).toHaveBeenCalledWith(
       playerRoundScoreIncrement('player-1', 1, 2)
     );
+  });
+
+  it('explains how to unlock when a locked tile is tapped', () => {
+    const { store } = renderSwipe();
+    expect((globalThis as any).__tapEnabled).toBe(false);
+
+    act(() => {
+      store.dispatch(updateGame({ id: 'game-1', changes: { locked: true } }));
+    });
+    expect((globalThis as any).__tapEnabled).toBe(true);
+
+    (globalThis as any).__tapEnd();
+    expect(mockShowLockedHint).toHaveBeenCalledTimes(1);
   });
 });

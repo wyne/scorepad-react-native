@@ -9,6 +9,7 @@ import { shallowEqual } from 'react-redux';
 import { selectGameById } from '../../../redux/GamesSlice';
 import { useAppSelector } from '../../../redux/hooks';
 import DialOverlay from '../Interactions/Dial/DialOverlay';
+import { useLockedHint } from '../LockedHintContext';
 import { useMenuOpen } from '../MenuOpenContext';
 import { bottomSheetHeight } from '../Sheets/GameSheet';
 
@@ -120,7 +121,7 @@ const PlayerRow: React.FC<PlayerRowProps> = ({ playerId, index, svDimmed, disabl
             <Pressable
                 onPress={() => onRowPress(playerId)}
                 disabled={disabled}
-                style={({ pressed }) => [styles.row, { backgroundColor: color, opacity: pressed ? 0.78 : 1 }]}>
+                style={({ pressed }) => [styles.row, { backgroundColor: color, opacity: pressed && !locked ? 0.78 : 1 }]}>
                 <View style={styles.rowInner}>
                     {/* Player name */}
                     <Text
@@ -188,6 +189,7 @@ const ListBoard: React.FC<ListBoardProps> = ({ showHint, topInset = 0, onPlayerR
     }, shallowEqual);
     const fullscreen = useAppSelector(state => state.settings.home_fullscreen);
     const { menuOpen } = useMenuOpen();
+    const { showLockedHint } = useLockedHint();
     const insets = useSafeAreaInsets();
     const [selectedId, setSelectedId] = useState<string | null>(null);
     const [boardLayout, setBoardLayout] = useState<LayoutRectangle | null>(null);
@@ -205,7 +207,11 @@ const ListBoard: React.FC<ListBoardProps> = ({ showHint, topInset = 0, onPlayerR
 
     const handleRowPress = useCallback(
         (id: string) => {
-            if (locked || menuOpen) return;
+            if (menuOpen) return;
+            if (locked) {
+                showLockedHint();
+                return;
+            }
             if (!boardLayout) return;
             // Start entrance animation before React schedules the re-render so the
             // overlay is already mid-animation by the time it first paints.
@@ -215,7 +221,7 @@ const ListBoard: React.FC<ListBoardProps> = ({ showHint, topInset = 0, onPlayerR
             svOverlaySlideY.value = withTiming(0, { duration: 200, easing: Easing.out(Easing.cubic) });
             setSelectedId(id);
         },
-        [boardLayout, locked, menuOpen]
+        [boardLayout, locked, menuOpen, showLockedHint]
     );
 
     const handleClose = useCallback(() => {
@@ -251,7 +257,7 @@ const ListBoard: React.FC<ListBoardProps> = ({ showHint, topInset = 0, onPlayerR
                         playerId={id}
                         index={index}
                         svDimmed={svDimmed}
-                        disabled={!!(locked || menuOpen)}
+                        disabled={menuOpen}
                         onRowPress={handleRowPress}
                         onRender={onPlayerRowRender}
                     />

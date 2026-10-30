@@ -16,6 +16,7 @@ import { PersistGate } from 'redux-persist/integration/react';
 configureReanimatedLogger({ level: ReanimatedLogLevel.warn, strict: false });
 
 import { persistor, store } from './redux/store';
+import { LockedHintContextProvider } from './src/components/LockedHintContext';
 import { ChooseWinnersSheetContextProvider } from './src/components/Sheets/ChooseWinnersSheetContext';
 import { GameOverSheetContextProvider } from './src/components/Sheets/GameOverSheetContext';
 import { GameSheetContextProvider } from './src/components/Sheets/GameSheetContext';
@@ -47,10 +48,12 @@ export default function App() {
                                 <PointValuesSheetContextProvider>
                                     <ChooseWinnersSheetContextProvider>
                                     <GameOverSheetContextProvider>
+                                    <LockedHintContextProvider>
                                     <PersistGate loading={null} persistor={persistor}>
                                         <StatusBar />
                                         <Navigation />
                                     </PersistGate>
+                                    </LockedHintContextProvider>
                                     </GameOverSheetContextProvider>
                                     </ChooseWinnersSheetContextProvider>
                                 </PointValuesSheetContextProvider>
