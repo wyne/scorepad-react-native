@@ -110,11 +110,11 @@ const EditPlayerScreen: React.FC<EditPlayerScreenProps> = ({
     const suggestions = useMemo(() => {
         if (!isFocused) return [];
 
+        // Names already seated in this game would only duplicate a player.
+        const namesInGame = new Set(
+            currentGame?.playerIds.map(id => playerEntities[id]?.playerName)
+        );
         if (query.length === 0) {
-            // Names already seated in this game would only duplicate a player.
-            const namesInGame = new Set(
-                currentGame?.playerIds.map(id => playerEntities[id]?.playerName)
-            );
             return recentPlayerNames
                 .filter(name => !namesInGame.has(name))
                 .slice(0, 8);
@@ -122,7 +122,7 @@ const EditPlayerScreen: React.FC<EditPlayerScreenProps> = ({
 
         const lower = query.toLowerCase();
         return allPlayerNames
-            .filter(name => name !== player?.playerName && name.toLowerCase().includes(lower))
+            .filter(name => !namesInGame.has(name) && name !== player?.playerName && name.toLowerCase().includes(lower))
             .slice(0, 8);
     }, [isFocused, query, recentPlayerNames, allPlayerNames, currentGame?.playerIds, playerEntities, player?.playerName]);
 
@@ -239,7 +239,12 @@ const EditPlayerScreen: React.FC<EditPlayerScreenProps> = ({
                     />
 
                     {suggestions.length > 0 && (
-                        <View style={[styles.suggestionsContainer, { backgroundColor: theme.backgroundTertiary }]} testID="suggestions-list">
+                        <ScrollView
+                            style={[styles.suggestionsContainer, { backgroundColor: theme.backgroundTertiary }]}
+                            keyboardShouldPersistTaps="handled"
+                            nestedScrollEnabled
+                            testID="suggestions-list"
+                        >
                             {showingRecent && (
                                 <Text style={[styles.suggestionsHeader, { color: theme.textTertiary }]}>
                                     Recent players
@@ -252,7 +257,7 @@ const EditPlayerScreen: React.FC<EditPlayerScreenProps> = ({
                                     </View>
                                 </TouchableOpacity>
                             ))}
-                        </View>
+                        </ScrollView>
                     )}
                 </View>
 
@@ -277,6 +282,8 @@ const styles = StyleSheet.create({
     input: {
     },
     suggestionsContainer: {
+        // Leave a partial row visible to hint that more names can be scrolled.
+        maxHeight: 240,
         position: 'absolute',
         top: '100%',
         left: 0,

@@ -2,7 +2,7 @@ import { createSelector } from '@reduxjs/toolkit';
 
 import { InteractionType } from '../src/components/Interactions/InteractionType';
 
-import { selectGameById } from './GamesSlice';
+import { selectAllGames, selectGameById } from './GamesSlice';
 import { RootState } from './store';
 
 export const selectInteractionType = (state: RootState, gameId?: string): InteractionType => {
@@ -37,14 +37,10 @@ const DEFAULT_PLAYER_NAME = /^Player \d+$/;
  */
 export const selectRecentPlayerNames = createSelector(
     [
-        (state: RootState) => state.games.entities,
+        selectAllGames,
         (state: RootState) => state.players.entities,
     ],
-    (gameEntities, playerEntities) => {
-        const games = Object.values(gameEntities)
-            .filter((game) => game != null)
-            .sort((a, b) => b.dateCreated - a.dateCreated);
-
+    (games, playerEntities) => {
         const names = new Set<string>();
         for (const game of games) {
             for (const playerId of game.playerIds) {

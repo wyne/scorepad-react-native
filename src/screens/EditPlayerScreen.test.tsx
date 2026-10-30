@@ -809,7 +809,7 @@ describe('EditPlayerScreen', () => {
                 entities: {
                     'game-1': {
                         ...mockGame,
-                        playerIds: ['player-1', 'player-2', 'player-3', 'player-4', 'player-5'],
+                        playerIds: ['player-1'],
                     },
                 },
                 ids: ['game-1'],
@@ -956,7 +956,7 @@ describe('EditPlayerScreen', () => {
                 settings: { currentGameId: 'game-1' },
                 games: {
                     entities: {
-                        'game-1': { ...mockGame, playerIds: ['player-1', 'player-2'] },
+                        'game-1': { ...mockGame, playerIds: ['player-1'] },
                     },
                     ids: ['game-1'],
                 },
@@ -1117,13 +1117,22 @@ describe('EditPlayerScreen', () => {
                 const { getByTestId, getByText, queryByText } = renderRecent();
                 const input = getByTestId('RNE__Input__text-input');
 
-                await focusAndType(input, 'Al');
+                await focusAndType(input, 'Da');
 
                 await waitFor(() => {
-                    expect(getByText('Alice')).toBeTruthy();
+                    expect(getByText('Dana')).toBeTruthy();
                 });
                 expect(queryByText('Recent players')).toBeNull();
                 expect(queryByText('Bob')).toBeNull();
+            });
+
+            it('should exclude seated names from typed matches even when saved in an older game', async () => {
+                const { getByTestId, queryByText, queryByTestId } = renderRecent();
+
+                await focusAndType(getByTestId('RNE__Input__text-input'), 'Al');
+
+                expect(queryByText('Alice')).toBeNull();
+                expect(queryByTestId('suggestions-list')).toBeNull();
             });
 
             it('should list recent players again after the field is cleared', async () => {
@@ -1186,7 +1195,7 @@ describe('EditPlayerScreen', () => {
                     entities: {
                         'game-1': {
                             ...mockGame,
-                            playerIds: ['player-1', ...Object.keys(manyPlayers)],
+                            playerIds: ['player-1'],
                         },
                     },
                     ids: ['game-1'],

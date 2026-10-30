@@ -1,5 +1,6 @@
 import { InteractionType } from '../src/components/Interactions/InteractionType';
 
+import gamesReducer, { gameSave, selectAllGames } from './GamesSlice';
 import {
   selectInteractionType,
   selectCurrentGame,
@@ -240,14 +241,11 @@ describe('selectRecentPlayerNames', () => {
   const player = (id: string, playerName: string) => ({ id, playerName, scores: [] });
 
   const state = {
-    games: {
-      // Deliberately out of date order to show the selector sorts.
-      ids: ['old', 'new'],
-      entities: {
-        old: game('old', 1000, ['p1', 'p2', 'p3']),
-        new: game('new', 2000, ['p4', 'p5', 'p6']),
-      },
-    },
+    // Insert oldest first; the adapter maintains newest-first ordering.
+    games: gamesReducer(
+      gamesReducer(undefined, gameSave(game('old', 1000, ['p1', 'p2', 'p3']))),
+      gameSave(game('new', 2000, ['p4', 'p5', 'p6']))
+    ),
     players: {
       ids: ['p1', 'p2', 'p3', 'p4', 'p5', 'p6'],
       entities: {
@@ -274,5 +272,19 @@ describe('selectRecentPlayerNames', () => {
 
   it('returns a stable memoized reference', () => {
     expect(selectRecentPlayerNames(state)).toBe(selectRecentPlayerNames(state));
+  });
+
+  it('updates names after a rename while reusing the ordered games', () => {
+    const games = selectAllGames(state);
+    const renamedState = {
+      ...state,
+      players: {
+        ...state.players,
+        entities: { ...state.players.entities, p4: player('p4', 'Caroline') },
+      },
+    };
+
+    expect(selectAllGames(renamedState)).toBe(games);
+    expect(selectRecentPlayerNames(renamedState)).toEqual(['Caroline', 'Alice', 'Bob']);
   });
 });
