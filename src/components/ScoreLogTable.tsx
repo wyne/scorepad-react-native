@@ -2,6 +2,7 @@ import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
 
 import { LayoutChangeEvent, Platform, StyleSheet, View } from 'react-native';
 import { TouchableOpacity, ScrollView } from 'react-native-gesture-handler';
+import Animated, { FadeIn } from 'react-native-reanimated';
 
 import { selectGameById, setSortSelector } from '../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
@@ -16,7 +17,12 @@ import { SortSelectorKey } from './ScoreLog/SortHelper';
 import TotalScoreColumn from './ScoreLog/TotalScoreColumn';
 
 interface Props {
-    showScores?: boolean;
+    /**
+     * Whether to render the round columns. The game sheet holds them back
+     * while it opens; the frozen columns always render so the table keeps
+     * its shape, and the rounds fade in beside them.
+     */
+    showRounds?: boolean;
 }
 
 interface RoundScrollOffset {
@@ -25,7 +31,7 @@ interface RoundScrollOffset {
 
 const MemoizedRoundScoreColumn = React.memo(RoundScoreColumn);
 
-const ScoreLogTable: React.FunctionComponent<Props> = ({ showScores = true }) => {
+const ScoreLogTable: React.FunctionComponent<Props> = ({ showRounds = true }) => {
     const [roundScrollOffset, setRoundScrollOffset] = useState<RoundScrollOffset>({});
 
     const currentGameId = useAppSelector(state => state.settings.currentGameId);
@@ -84,34 +90,34 @@ const ScoreLogTable: React.FunctionComponent<Props> = ({ showScores = true }) =>
 
     return (
         <View style={[styles.scoreTableContainer, { backgroundColor: theme.backgroundSecondary }]}>
-            {showScores && showRanks && <RankColumn />}
+            {showRanks && <RankColumn />}
 
             <TouchableOpacity onPress={sortByPlayerIndex}>
                 <PlayerNameColumn />
             </TouchableOpacity>
 
-            {showScores && (
-                <TouchableOpacity onPress={sortByTotalScore}>
-                    <TotalScoreColumn />
-                </TouchableOpacity>
-            )}
+            <TouchableOpacity onPress={sortByTotalScore}>
+                <TotalScoreColumn />
+            </TouchableOpacity>
 
-            {showScores && (
-                <ScrollView horizontal={true}
-                    nestedScrollEnabled={true}
-                    contentContainerStyle={{ flexDirection: 'row' }}
-                    overScrollMode="always"
-                    ref={scoreLogScrollViewEl}>
-                    {roundsIterator.map((item, round) => (
-                        <View key={round} onLayout={e => onLayoutHandler(e, round)}>
-                            <MemoizedRoundScoreColumn
-                                round={round}
-                                key={round}
-                                isCurrentRound={round == currentRoundIndex}
-                            />
-                        </View>
-                    ))}
-                </ScrollView>
+            {showRounds && (
+                <Animated.View entering={FadeIn.duration(200)} style={styles.rounds}>
+                    <ScrollView horizontal={true}
+                        nestedScrollEnabled={true}
+                        contentContainerStyle={{ flexDirection: 'row' }}
+                        overScrollMode="always"
+                        ref={scoreLogScrollViewEl}>
+                        {roundsIterator.map((item, round) => (
+                            <View key={round} onLayout={e => onLayoutHandler(e, round)}>
+                                <MemoizedRoundScoreColumn
+                                    round={round}
+                                    key={round}
+                                    isCurrentRound={round == currentRoundIndex}
+                                />
+                            </View>
+                        ))}
+                    </ScrollView>
+                </Animated.View>
             )}
         </View>
     );
@@ -124,7 +130,10 @@ const styles = StyleSheet.create({
         overflow: 'hidden',
         marginHorizontal: 5,
         marginBottom: 10,
-    }
+    },
+    rounds: {
+        flex: 1,
+    },
 });
 
 export default memo(ScoreLogTable);

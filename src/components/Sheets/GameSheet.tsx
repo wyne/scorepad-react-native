@@ -415,7 +415,7 @@ const GameSheet: React.FunctionComponent = () => {
                         </View>
 
                         <Animated.View style={[styles.sheetContent, animatedSheetStyle]}>
-                            <ScoreLogTable showScores={shouldRenderContent} />
+                            <ScoreLogTable showRounds={shouldRenderContent} />
 
                             <Text style={{ color: theme.text, marginHorizontal: 5, marginBottom: 10 }}>
                                 Tap the player column or total score column to change sorting.
