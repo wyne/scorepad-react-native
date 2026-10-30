@@ -1,6 +1,10 @@
+import { createSelector } from '@reduxjs/toolkit';
+
 import { InteractionType } from '../src/components/Interactions/InteractionType';
 
 import { selectGameById } from './GamesSlice';
+import { grandTotalScore } from './scoreUtils';
+import { gameOverReason } from './ScoringRules';
 import { RootState } from './store';
 
 export const selectInteractionType = (state: RootState, gameId?: string): InteractionType => {
@@ -34,3 +38,29 @@ export const selectGameModesVisible = (state: RootState, gameId?: string): boole
     if (state.settings.gameModesEnabled) return true;
     return gameId ? selectGameById(state, gameId)?.scoring !== undefined : false;
 };
+
+/** Each player's total in the current game, in seat order. */
+export const selectCurrentGameTotals = createSelector(
+    [
+        (state: RootState) => selectCurrentGame(state),
+        (state: RootState) => state.players.entities,
+    ],
+    (game, players) => (game?.playerIds ?? []).map(id => ({ id, total: grandTotalScore(players[id]?.scores) })),
+);
+
+/**
+ * Why the current game is over once its current round is finished, or
+ * undefined while play goes on. Only the latest round counts: stepping
+ * forward through earlier rounds never ends a game.
+ */
+export const selectCurrentGameOverReason = createSelector(
+    [
+        (state: RootState) => selectCurrentGame(state),
+        selectCurrentGameTotals,
+    ],
+    (game, totals) => {
+        if (!game || game.locked) return undefined;
+        if (game.roundCurrent + 1 < game.roundTotal) return undefined;
+        return gameOverReason(game.scoring, game.roundCurrent + 1, totals);
+    },
+);

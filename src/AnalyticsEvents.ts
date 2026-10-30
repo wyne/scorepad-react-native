@@ -59,7 +59,8 @@ export interface AnalyticsEventParams {
     };
     edit_game: { game_id?: string };
     /** Game mode rules were set on a game. `mid_game`: players had already scored. */
-    set_game_scoring: { game_id: string; winner: 'high' | 'low'; mid_game: boolean };
+    set_game_scoring: { game_id: string; winner: 'high' | 'low'; end: 'none' | 'rounds' | 'target'; mid_game: boolean };
+    game_over: { game_id: string; action: 'end' | 'keep_playing'; reason: 'rounds' | 'target'; tied: boolean };
 
     // ── Players ─────────────────────────────────────────────────────────────
     add_player: { game_id?: string; player_count: number };

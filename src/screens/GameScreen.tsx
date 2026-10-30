@@ -14,6 +14,7 @@ import TileBoard from '../components/Boards/TileBoard';
 import { useGameOptionsHeaderItems } from '../components/Buttons/GameOptionsButton';
 import { InteractionType } from '../components/Interactions/InteractionType';
 import ChooseWinnersSheet from '../components/Sheets/ChooseWinnersSheet';
+import GameOverSheet from '../components/Sheets/GameOverSheet';
 import GestureInfoSheet from '../components/Sheets/GestureInfoSheet';
 import PointValuesSheet from '../components/Sheets/PointValuesSheet';
 import { useVerticalBarLayout } from '../hooks/useExpandedGameLayout';
@@ -73,6 +74,7 @@ const GameScreen: React.FunctionComponent<Props> = ({ navigation }) => {
 
                 <PointValuesSheet />
                 <ChooseWinnersSheet />
+                <GameOverSheet />
                 <GestureInfoSheet />
             </View>
         </View>
