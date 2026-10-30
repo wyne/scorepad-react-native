@@ -39,6 +39,15 @@ jest.mock('react-native-gesture-handler', () => {
     };
 });
 
+jest.mock('react-native-reanimated', () => {
+    const { View } = jest.requireActual('react-native');
+    return {
+        __esModule: true,
+        default: { View },
+        FadeIn: { duration: jest.fn() },
+    };
+});
+
 jest.mock('../Analytics', () => ({
     logEvent: jest.fn(),
 }));
@@ -201,6 +210,25 @@ describe('ScoreLogTable', () => {
         expect(getByTestId('player-name-column')).toBeTruthy();
         expect(getByTestId('total-score-column')).toBeTruthy();
         expect(getByTestId('score-log-scroll-view')).toBeTruthy();
+    });
+
+    it('keeps the frozen columns while the rounds are held back', () => {
+        const store = createMockStore({
+            settings: { currentGameId: 'game-1', gameModesEnabled: true },
+            games: { entities: { 'game-1': mockGame }, ids: ['game-1'] },
+            players: { entities: mockPlayers, ids: ['player-1', 'player-2'] },
+        });
+
+        const { getByTestId, queryByTestId } = render(
+            <Provider store={store}>
+                <ScoreLogTable showRounds={false} />
+            </Provider>
+        );
+
+        expect(getByTestId('rank-column')).toBeTruthy();
+        expect(getByTestId('player-name-column')).toBeTruthy();
+        expect(getByTestId('total-score-column')).toBeTruthy();
+        expect(queryByTestId('score-log-scroll-view')).toBeNull();
     });
 
     it('should render all round score columns based on roundTotal', () => {

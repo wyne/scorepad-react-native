@@ -20,7 +20,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { selectAllPlayerNames, updatePlayer } from '../../redux/PlayersSlice';
-import { selectCurrentGame } from '../../redux/selectors';
+import { selectCurrentGame, selectRecentPlayerNames } from '../../redux/selectors';
 import { logEvent } from '../Analytics';
 import ColorSelector from '../components/ColorPalettes/ColorSelector';
 import SectionLabel from '../components/SectionLabel';
@@ -79,11 +79,17 @@ const EditPlayerScreen: React.FC<EditPlayerScreenProps> = ({
     const [originalPlayerName] = useState<string>(player?.playerName || '');
     const [localPlayerName, setLocalPlayerName] = useState<string>(player?.playerName || '');
     const [isFocused, setIsFocused] = useState(false);
+    // Whether the name has been edited since the field was focused. Until it
+    // has, the field still holds the name it opened with, so recent players
+    // are offered instead of matches for that name.
+    const [hasTyped, setHasTyped] = useState(false);
 
     // Latest committed name, kept current so the leave handler isn't a stale closure.
     const latestNameRef = useRef<string>(player?.playerName || '');
 
     const allPlayerNames = useAppSelector(selectAllPlayerNames);
+    const recentPlayerNames = useAppSelector(selectRecentPlayerNames);
+    const playerEntities = useAppSelector(state => state.players.entities);
 
     useEffect(() => {
         const onBeforeRemove = () => {
@@ -98,13 +104,27 @@ const EditPlayerScreen: React.FC<EditPlayerScreenProps> = ({
         return unsubscribe;
     }, [dismissInput, navigation, originalPlayerName, currentGame?.id, index]);
 
+    const query = hasTyped ? localPlayerName : '';
+    const showingRecent = query.length === 0;
+
     const suggestions = useMemo(() => {
-        if (!isFocused || localPlayerName.length === 0) return [];
-        const lower = localPlayerName.toLowerCase();
+        if (!isFocused) return [];
+
+        // Names already seated in this game would only duplicate a player.
+        const namesInGame = new Set(
+            currentGame?.playerIds.map(id => playerEntities[id]?.playerName)
+        );
+        if (query.length === 0) {
+            return recentPlayerNames
+                .filter(name => !namesInGame.has(name))
+                .slice(0, 8);
+        }
+
+        const lower = query.toLowerCase();
         return allPlayerNames
-            .filter(name => name !== player?.playerName && name.toLowerCase().includes(lower))
+            .filter(name => !namesInGame.has(name) && name !== player?.playerName && name.toLowerCase().includes(lower))
             .slice(0, 8);
-    }, [isFocused, localPlayerName, allPlayerNames, player?.playerName]);
+    }, [isFocused, query, recentPlayerNames, allPlayerNames, currentGame?.playerIds, playerEntities, player?.playerName]);
 
     if (playerId == null) { return null; }
     if (player == null) return null;
@@ -123,6 +143,7 @@ const EditPlayerScreen: React.FC<EditPlayerScreenProps> = ({
     };
 
     const onChangeHandler = (text: string) => {
+        setHasTyped(true);
         if (text != '') {
             savePlayerName(text);
         }
@@ -149,7 +170,10 @@ const EditPlayerScreen: React.FC<EditPlayerScreenProps> = ({
         }));
     };
 
-    const onFocus = () => setIsFocused(true);
+    const onFocus = () => {
+        setIsFocused(true);
+        setHasTyped(false);
+    };
     const onBlur = () => {
         setIsFocused(false);
         if (localPlayerName == '') {
@@ -176,11 +200,12 @@ const EditPlayerScreen: React.FC<EditPlayerScreenProps> = ({
                 style={{ flex: 1 }}
                 contentContainerStyle={styles.scrollContent}
                 keyboardShouldPersistTaps="handled"
+                nestedScrollEnabled
             >
 
                 <SectionLabel>{`Player ${playerPositionWord(index + 1)} name`}</SectionLabel>
 
-                <View style={{ position: 'relative', zIndex: 1 }}>
+                <View>
                     <Input
                         ref={inputRef}
                         clearButtonMode="while-editing"
@@ -213,9 +238,24 @@ const EditPlayerScreen: React.FC<EditPlayerScreenProps> = ({
                         style={[styles.input, { color: theme.textSecondary }]}
                         value={localPlayerName}
                     />
+                </View>
 
+                {/* Keep the overlay inside its parent's bounds so Android can
+                    deliver native scroll gestures as well as row presses. */}
+                <View style={suggestions.length > 0 ? styles.paletteWithSuggestions : undefined}>
+                    <ColorSelector playerId={playerId} />
                     {suggestions.length > 0 && (
-                        <View style={[styles.suggestionsContainer, { backgroundColor: theme.backgroundTertiary }]} testID="suggestions-list">
+                        <ScrollView
+                            style={[styles.suggestionsContainer, { backgroundColor: theme.backgroundTertiary }]}
+                            keyboardShouldPersistTaps="handled"
+                            nestedScrollEnabled
+                            testID="suggestions-list"
+                        >
+                            {showingRecent && (
+                                <Text style={[styles.suggestionsHeader, { color: theme.textTertiary }]}>
+                                    Recent players
+                                </Text>
+                            )}
                             {suggestions.map((name, idx) => (
                                 <TouchableOpacity key={name} activeOpacity={0.6} onPress={() => onSuggestionSelect(name)}>
                                     <View style={[styles.suggestionItem, idx < suggestions.length - 1 && { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: theme.textTertiary }]}>
@@ -223,11 +263,9 @@ const EditPlayerScreen: React.FC<EditPlayerScreenProps> = ({
                                     </View>
                                 </TouchableOpacity>
                             ))}
-                        </View>
+                        </ScrollView>
                     )}
                 </View>
-
-                <ColorSelector playerId={playerId} />
 
             </ScrollView>
         </SafeAreaView>
@@ -247,14 +285,27 @@ const styles = StyleSheet.create({
     },
     input: {
     },
+    paletteWithSuggestions: {
+        // The palettes normally exceed this height. Reserve enough space even
+        // if they are shorter, keeping the entire capped overlay touchable.
+        minHeight: 240,
+    },
     suggestionsContainer: {
+        // Leave a partial row visible to hint that more names can be scrolled.
+        maxHeight: 240,
         position: 'absolute',
-        top: '100%',
+        top: 0,
         left: 0,
         right: 0,
         borderRadius: 10,
         marginHorizontal: 20,
         overflow: 'hidden',
+    },
+    suggestionsHeader: {
+        fontSize: 13,
+        paddingTop: 10,
+        paddingBottom: 4,
+        paddingHorizontal: 16,
     },
     suggestionItem: {
         paddingVertical: 12,

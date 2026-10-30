@@ -2,7 +2,7 @@ import { createSelector } from '@reduxjs/toolkit';
 
 import { InteractionType } from '../src/components/Interactions/InteractionType';
 
-import { selectGameById } from './GamesSlice';
+import { selectAllGames, selectGameById } from './GamesSlice';
 import { grandTotalScore } from './scoreUtils';
 import { gameOverReason } from './ScoringRules';
 import { RootState } from './store';
@@ -28,6 +28,31 @@ export const selectCurrentGame = (state: RootState) => {
     return selectGameById(state, currentGameId);
 };
 export const selectLastStoreReviewPrompt = (state: RootState) => state.settings.lastStoreReviewPrompt;
+
+/** Names the app assigns to new players, e.g. "Player 3". */
+const DEFAULT_PLAYER_NAME = /^Player \d+$/;
+
+/**
+ * Player names from every game, most recently created game first, in seat
+ * order within a game. Each name appears once, at its most recent use, and
+ * default "Player N" names are left out.
+ */
+export const selectRecentPlayerNames = createSelector(
+    [
+        selectAllGames,
+        (state: RootState) => state.players.entities,
+    ],
+    (games, playerEntities) => {
+        const names = new Set<string>();
+        for (const game of games) {
+            for (const playerId of game.playerIds) {
+                const name = playerEntities[playerId]?.playerName;
+                if (name && !DEFAULT_PLAYER_NAME.test(name)) names.add(name);
+            }
+        }
+        return [...names];
+    }
+);
 
 /**
  * Whether a game shows game mode UI: always for a game that already has

@@ -809,7 +809,7 @@ describe('EditPlayerScreen', () => {
                 entities: {
                     'game-1': {
                         ...mockGame,
-                        playerIds: ['player-1', 'player-2', 'player-3', 'player-4', 'player-5'],
+                        playerIds: ['player-1'],
                     },
                 },
                 ids: ['game-1'],
@@ -956,7 +956,7 @@ describe('EditPlayerScreen', () => {
                 settings: { currentGameId: 'game-1' },
                 games: {
                     entities: {
-                        'game-1': { ...mockGame, playerIds: ['player-1', 'player-2'] },
+                        'game-1': { ...mockGame, playerIds: ['player-1'] },
                     },
                     ids: ['game-1'],
                 },
@@ -1045,6 +1045,143 @@ describe('EditPlayerScreen', () => {
             });
         });
 
+        describe('recent players', () => {
+            // The current game seats Test Player and Alice; an older game
+            // seated Bob, Alice and an unnamed player, and an older one still
+            // seated Dana.
+            const createRecentStore = () => createMockStore({
+                settings: { currentGameId: 'game-1' },
+                games: {
+                    entities: {
+                        'game-1': { ...mockGame, dateCreated: 3000, playerIds: ['player-1', 'player-2'] },
+                        'game-2': { ...mockGame, id: 'game-2', dateCreated: 2000, playerIds: ['player-3', 'player-4', 'player-5'] },
+                        'game-3': { ...mockGame, id: 'game-3', dateCreated: 1000, playerIds: ['player-6'] },
+                    },
+                    ids: ['game-1', 'game-2', 'game-3'],
+                },
+                players: {
+                    entities: {
+                        'player-1': { ...mockPlayer },
+                        'player-2': { id: 'player-2', playerName: 'Alice', scores: [] },
+                        'player-3': { id: 'player-3', playerName: 'Bob', scores: [] },
+                        'player-4': { id: 'player-4', playerName: 'Alice', scores: [] },
+                        'player-5': { id: 'player-5', playerName: 'Player 3', scores: [] },
+                        'player-6': { id: 'player-6', playerName: 'Dana', scores: [] },
+                    },
+                    ids: ['player-1', 'player-2', 'player-3', 'player-4', 'player-5', 'player-6'],
+                },
+            });
+
+            const renderRecent = (store = createRecentStore()) => render(
+                <Provider store={store}>
+                    <EditPlayerScreen navigation={mockNavigation} route={mockRoute as any} />
+                </Provider>
+            );
+
+            it('should list recent players as soon as the field is focused', async () => {
+                const { getByTestId, getByText } = renderRecent();
+
+                await focusInput(getByTestId('RNE__Input__text-input'));
+
+                await waitFor(() => {
+                    expect(getByTestId('suggestions-list')).toBeTruthy();
+                    expect(getByText('Recent players')).toBeTruthy();
+                    expect(getByText('Bob')).toBeTruthy();
+                    expect(getByText('Dana')).toBeTruthy();
+                });
+            });
+
+            it('should order recent players by most recent game', async () => {
+                const { getByTestId, getAllByText } = renderRecent();
+
+                await focusInput(getByTestId('RNE__Input__text-input'));
+
+                await waitFor(() => {
+                    expect(getAllByText(/^(Bob|Dana)$/).map(node => node.props.children)).toEqual(['Bob', 'Dana']);
+                });
+            });
+
+            it('should leave out players already in this game and default names', async () => {
+                const { getByTestId, queryByText } = renderRecent();
+
+                await focusInput(getByTestId('RNE__Input__text-input'));
+
+                await waitFor(() => {
+                    expect(getByTestId('suggestions-list')).toBeTruthy();
+                });
+                expect(queryByText('Alice')).toBeNull();
+                expect(queryByText('Player 3')).toBeNull();
+            });
+
+            it('should switch to matching names once typing starts', async () => {
+                const { getByTestId, getByText, queryByText } = renderRecent();
+                const input = getByTestId('RNE__Input__text-input');
+
+                await focusAndType(input, 'Da');
+
+                await waitFor(() => {
+                    expect(getByText('Dana')).toBeTruthy();
+                });
+                expect(queryByText('Recent players')).toBeNull();
+                expect(queryByText('Bob')).toBeNull();
+            });
+
+            it('should exclude seated names from typed matches even when saved in an older game', async () => {
+                const { getByTestId, queryByText, queryByTestId } = renderRecent();
+
+                await focusAndType(getByTestId('RNE__Input__text-input'), 'Al');
+
+                expect(queryByText('Alice')).toBeNull();
+                expect(queryByTestId('suggestions-list')).toBeNull();
+            });
+
+            it('should list recent players again after the field is cleared', async () => {
+                const { getByTestId, getByText } = renderRecent();
+                const input = getByTestId('RNE__Input__text-input');
+
+                await focusAndType(input, 'Zed');
+                await act(async () => { fireEvent.changeText(input, ''); });
+
+                await waitFor(() => {
+                    expect(getByText('Recent players')).toBeTruthy();
+                    expect(getByText('Dana')).toBeTruthy();
+                });
+            });
+
+            it('should save a recent player when tapped', async () => {
+                const store = createRecentStore();
+                const { getByTestId, getByText, queryByTestId } = renderRecent(store);
+
+                await focusInput(getByTestId('RNE__Input__text-input'));
+                await waitFor(() => {
+                    expect(getByText('Dana')).toBeTruthy();
+                });
+
+                await act(async () => { fireEvent.press(getByText('Dana')); });
+
+                await waitFor(() => {
+                    expect(store.getState().players.entities['player-1']?.playerName).toBe('Dana');
+                    expect(queryByTestId('suggestions-list')).toBeNull();
+                });
+            });
+
+            it('should not show the list when there are no recent players', async () => {
+                const { getByTestId, queryByTestId } = render(
+                    <Provider store={createMockStore({
+                        settings: { currentGameId: 'game-1' },
+                        games: { entities: { 'game-1': mockGame }, ids: ['game-1'] },
+                        players: { entities: { 'player-1': { ...mockPlayer } }, ids: ['player-1'] },
+                    })}>
+                        <EditPlayerScreen navigation={mockNavigation} route={mockRoute as any} />
+                    </Provider>
+                );
+
+                await focusInput(getByTestId('RNE__Input__text-input'));
+
+                expect(queryByTestId('suggestions-list')).toBeNull();
+            });
+        });
+
         it('should limit suggestions to 8 items', async () => {
             const manyPlayers: Record<string, { id: string; playerName: string; scores: number[] }> = {};
             for (let i = 0; i < 12; i++) {
@@ -1058,7 +1195,7 @@ describe('EditPlayerScreen', () => {
                     entities: {
                         'game-1': {
                             ...mockGame,
-                            playerIds: ['player-1', ...Object.keys(manyPlayers)],
+                            playerIds: ['player-1'],
                         },
                     },
                     ids: ['game-1'],
