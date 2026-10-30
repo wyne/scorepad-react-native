@@ -8,6 +8,7 @@ import { shallowEqual } from 'react-redux';
 
 import { selectGameById } from '../../../redux/GamesSlice';
 import { useAppSelector } from '../../../redux/hooks';
+import { grandTotalScore } from '../../../redux/scoreUtils';
 import DialOverlay from '../Interactions/Dial/DialOverlay';
 import { useLockedHint } from '../LockedHintContext';
 import { useMenuOpen } from '../MenuOpenContext';
@@ -65,14 +66,17 @@ const PlayerRow: React.FC<PlayerRowProps> = ({ playerId, index, svDimmed, disabl
             (sum, s, i) => (i < currentRoundIndex ? sum + (s || 0) : sum), 0
         );
 
+        const locked = currentGame?.locked === true;
+
         return {
             playerName: player?.playerName,
             color: player?.color ?? '#555',
-            locked: currentGame?.locked === true,
+            locked,
             isWinner: !!(currentGame?.locked && currentGame?.winnerIds?.includes(playerId)),
             currentRoundScore,
             previousTotal,
-            currentRoundTotalScore: previousTotal + currentRoundScore,
+            // A locked game shows the final total, whichever round is current.
+            currentRoundTotalScore: locked ? grandTotalScore(scores) : previousTotal + currentRoundScore,
         };
     }, shallowEqual);
     const breakdownOpacity = useSharedValue(1);
