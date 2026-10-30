@@ -2,6 +2,7 @@ import { configureStore } from '@reduxjs/toolkit';
 import { Store } from 'redux';
 
 import { InteractionType } from '../src/components/Interactions/InteractionType';
+import { FEATURE_NOTIFICATIONS } from '../src/constants';
 
 import settingsReducer, {
     setCurrentGameId,
@@ -21,6 +22,10 @@ describe('settings reducer', () => {
         const gameId = '123';
         store.dispatch(setCurrentGameId(gameId));
         expect(store.getState().currentGameId).toEqual(gameId);
+    });
+
+    it('marks every feature notification seen on a fresh install', () => {
+        expect(store.getState().seenFeatureNotifications).toEqual(FEATURE_NOTIFICATIONS);
     });
 
     it('should handle setMultiplier', () => {

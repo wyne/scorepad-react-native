@@ -97,6 +97,14 @@ describe('backup validation', () => {
         expect(parsed?.settings.gameModesEnabled).toBe(true);
     });
 
+    it('keeps a game\'s end condition', () => {
+        const backup = createValidBackup();
+        const scoring = { winner: 'low', end: { type: 'target', target: 100 } };
+        (backup.games.entities['game-1'] as Record<string, unknown>).scoring = scoring;
+
+        expect(parseBackupData(backup)?.games.entities['game-1'].scoring).toEqual(scoring);
+    });
+
     it.each([
         ['unsupported version', (backup: ReturnType<typeof createValidBackup>) => {
             backup.version = 99;
@@ -118,6 +126,12 @@ describe('backup validation', () => {
         }],
         ['invalid scoring rules', (backup: ReturnType<typeof createValidBackup>) => {
             (backup.games.entities['game-1'] as Record<string, unknown>).scoring = { winner: 'middle' };
+        }],
+        ['invalid end condition', (backup: ReturnType<typeof createValidBackup>) => {
+            (backup.games.entities['game-1'] as Record<string, unknown>).scoring = {
+                winner: 'high',
+                end: { type: 'rounds', rounds: -1 },
+            };
         }],
         ['non-boolean game modes flag', (backup: ReturnType<typeof createValidBackup>) => {
             (backup.settings as Record<string, unknown>).gameModesEnabled = 'yes';

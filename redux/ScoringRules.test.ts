@@ -1,4 +1,12 @@
-import { compareTotals, defaultScoringRules, isScoringRules, leadingPlayerIds, rankLabel, rankPlayers } from './ScoringRules';
+import {
+    compareTotals,
+    defaultScoringRules,
+    gameOverReason,
+    isScoringRules,
+    leadingPlayerIds,
+    rankLabel,
+    rankPlayers,
+} from './ScoringRules';
 
 describe('ScoringRules', () => {
     describe('isScoringRules', () => {
@@ -13,6 +21,50 @@ describe('ScoringRules', () => {
             expect(isScoringRules([])).toBe(false);
             expect(isScoringRules({})).toBe(false);
             expect(isScoringRules({ winner: 'middle' })).toBe(false);
+        });
+
+        it('accepts a round limit or a target score', () => {
+            expect(isScoringRules({ winner: 'high', end: { type: 'rounds', rounds: 9 } })).toBe(true);
+            expect(isScoringRules({ winner: 'low', end: { type: 'target', target: 100 } })).toBe(true);
+        });
+
+        it('rejects an end condition that is not a positive whole number', () => {
+            expect(isScoringRules({ winner: 'high', end: { type: 'rounds', rounds: 0 } })).toBe(false);
+            expect(isScoringRules({ winner: 'high', end: { type: 'rounds', rounds: 2.5 } })).toBe(false);
+            expect(isScoringRules({ winner: 'high', end: { type: 'target', target: '100' } })).toBe(false);
+            expect(isScoringRules({ winner: 'high', end: { type: 'forever' } })).toBe(false);
+            expect(isScoringRules({ winner: 'high', end: null })).toBe(false);
+        });
+    });
+
+    describe('gameOverReason', () => {
+        const totals = [
+            { id: 'a', total: 64 },
+            { id: 'b', total: 104 },
+            { id: 'c', total: 88 },
+        ];
+
+        it('never ends a game without an end condition', () => {
+            expect(gameOverReason(undefined, 50, totals)).toBeUndefined();
+            expect(gameOverReason({ winner: 'high' }, 50, totals)).toBeUndefined();
+        });
+
+        it('ends after the last round of a round limit', () => {
+            const rules = { winner: 'high' as const, end: { type: 'rounds' as const, rounds: 9 } };
+            expect(gameOverReason(rules, 8, totals)).toBeUndefined();
+            expect(gameOverReason(rules, 9, totals)).toEqual({ type: 'rounds', rounds: 9 });
+            expect(gameOverReason(rules, 10, totals)).toEqual({ type: 'rounds', rounds: 9 });
+        });
+
+        it('ends when anyone reaches the target, naming who reached it', () => {
+            const rules = { winner: 'low' as const, end: { type: 'target' as const, target: 100 } };
+            expect(gameOverReason(rules, 4, totals)).toEqual({ type: 'target', target: 100, playerIds: ['b'] });
+
+            const lower = { ...rules, end: { type: 'target' as const, target: 88 } };
+            expect(gameOverReason(lower, 4, totals)).toEqual({ type: 'target', target: 88, playerIds: ['b', 'c'] });
+
+            const higher = { ...rules, end: { type: 'target' as const, target: 105 } };
+            expect(gameOverReason(higher, 4, totals)).toBeUndefined();
         });
     });
 

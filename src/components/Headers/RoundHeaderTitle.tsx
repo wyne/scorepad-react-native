@@ -8,9 +8,11 @@ import { Icon } from 'react-native-elements/dist/icons/Icon';
 
 import { roundNext, roundPrevious, selectGameById, updateGame } from '../../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
+import { selectCurrentGameOverReason } from '../../../redux/selectors';
 import { logEvent } from '../../Analytics';
 import { LIQUID_GLASS } from '../../platform';
 import { useTheme } from '../../theme';
+import { useGameOverSheetContext } from '../Sheets/GameOverSheetContext';
 
 const RoundHeaderTitle: React.FunctionComponent = () => {
     const theme = useTheme();
@@ -20,6 +22,12 @@ const RoundHeaderTitle: React.FunctionComponent = () => {
     const currentGame = useAppSelector(state => selectGameById(state, currentGameId ?? ''));
     const currentRoundIndex = currentGame?.roundCurrent ?? 0;
     const roundCount = currentGame?.roundTotal ?? 0;
+    // With a round limit the header counts toward it ("3 of 9") until play
+    // goes past it.
+    const end = currentGame?.scoring?.end;
+    const roundsShown = end?.type === 'rounds' ? Math.max(end.rounds, roundCount) : roundCount;
+    const gameOverReason = useAppSelector(selectCurrentGameOverReason);
+    const gameOverSheetRef = useGameOverSheetContext();
 
     if (currentGameId == null) return null;
 
@@ -28,6 +36,14 @@ const RoundHeaderTitle: React.FunctionComponent = () => {
 
     const nextRoundHandler = async () => {
         if (isLastRound && currentGame?.locked) return;
+
+        // The game's end condition is met: offer to end it instead of
+        // starting another round. Keep Playing in the sheet moves on.
+        if (gameOverReason) {
+            void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+            gameOverSheetRef?.current?.present();
+            return;
+        }
 
         Haptics.impactAsync(
             isLastRound ? Haptics.ImpactFeedbackStyle.Medium : Haptics.ImpactFeedbackStyle.Light
@@ -62,7 +78,7 @@ const RoundHeaderTitle: React.FunctionComponent = () => {
     const nextDisabled = isLocked || isLastRound && (currentGame?.locked ?? false);
     const roundPickerEnabled = !isLocked && roundCount > 1;
     const roundDescriptor = isEarlierRound ? 'Earlier round' : 'Round';
-    const roundLabel = isLocked ? 'Final' : `${roundDescriptor} ${currentRoundIndex + 1} of ${roundCount}`;
+    const roundLabel = isLocked ? 'Final' : `${roundDescriptor} ${currentRoundIndex + 1} of ${roundsShown}`;
     const roundPickerLabel = isLocked ? (
         <Text
             maxFontSizeMultiplier={1.3}
@@ -82,7 +98,7 @@ const RoundHeaderTitle: React.FunctionComponent = () => {
                 maxFontSizeMultiplier={1.3}
                 style={[styles.roundValue, { color: theme.headerText }]}
             >
-                {currentRoundIndex + 1} of {roundCount}
+                {currentRoundIndex + 1} of {roundsShown}
             </Text>
         </View>
     );
