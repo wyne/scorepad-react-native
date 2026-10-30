@@ -10,7 +10,16 @@ import { MAX_PLAYERS } from '../constants';
 
 type Navigation = NativeStackNavigationProp<ParamListBase, string, undefined>;
 
-export const playerCountOptions = Array.from(Array(MAX_PLAYERS).keys(), n => n + 1);
+/** Player counts listed at the top level of the new game menu. */
+export const playerCountOptions = Array.from(Array(12).keys(), n => n + 1);
+
+/**
+ * Bigger counts, in steps, under a "More" submenu so the menu stays short.
+ * Edit Game can add or remove players from there.
+ */
+export const morePlayerCountOptions = [15, 20, 25, 30, 40, MAX_PLAYERS];
+
+export const MORE_PLAYERS_LABEL = 'More';
 
 export const playerCountLabel = (count: number) => `${count}${count == 1 ? ' Player' : ' Players'}`;
 
@@ -59,11 +68,22 @@ export const useNewGameHeaderItems = (navigation: Navigation): NativeStackHeader
         variant: 'prominent',
         menu: {
             title: 'Players',
-            items: playerCountOptions.map((count) => ({
-                type: 'action',
-                label: playerCountLabel(count),
-                onPress: () => selectRef.current(count),
-            })),
+            items: [
+                ...playerCountOptions.map((count) => ({
+                    type: 'action' as const,
+                    label: playerCountLabel(count),
+                    onPress: () => selectRef.current(count),
+                })),
+                {
+                    type: 'submenu' as const,
+                    label: MORE_PLAYERS_LABEL,
+                    items: morePlayerCountOptions.map((count) => ({
+                        type: 'action' as const,
+                        label: playerCountLabel(count),
+                        onPress: () => selectRef.current(count),
+                    })),
+                },
+            ],
         },
     }], []);
 };

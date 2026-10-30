@@ -9,7 +9,7 @@ import { Keyboard, StyleSheet, View } from 'react-native';
 import { Icon } from 'react-native-elements';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { playerCountLabel, playerCountOptions, useNewGameMenu } from '../hooks/useNewGameMenu';
+import { MORE_PLAYERS_LABEL, morePlayerCountOptions, playerCountLabel, playerCountOptions, useNewGameMenu } from '../hooks/useNewGameMenu';
 import { LIQUID_GLASS } from '../platform';
 import { useTheme } from '../theme';
 
@@ -27,10 +27,18 @@ const FloatingActionButton: React.FunctionComponent<Props> = ({ navigation }) =>
     const insets = useSafeAreaInsets();
     const { selectPlayerCount } = useNewGameMenu(navigation);
 
-    const menuActions: MenuAction[] = playerCountOptions.map((number) => ({
+    const toMenuAction = (number: number): MenuAction => ({
         id: number.toString(),
         title: playerCountLabel(number),
-    }));
+    });
+    const menuActions: MenuAction[] = [
+        ...playerCountOptions.map(toMenuAction),
+        {
+            id: 'more',
+            title: MORE_PLAYERS_LABEL,
+            subactions: morePlayerCountOptions.map(toMenuAction),
+        },
+    ];
 
     return (
         <View testID="add-game-button-container" style={[styles.container, {
@@ -81,6 +89,15 @@ const FloatingActionButton: React.FunctionComponent<Props> = ({ navigation }) =>
                                 onPress={() => selectPlayerCount(number)}
                             />
                         ))}
+                        <Menu label={MORE_PLAYERS_LABEL}>
+                            {morePlayerCountOptions.map((number) => (
+                                <Button
+                                    key={number}
+                                    label={playerCountLabel(number)}
+                                    onPress={() => selectPlayerCount(number)}
+                                />
+                            ))}
+                        </Menu>
                     </Menu>
                 </Host>
             ) : (

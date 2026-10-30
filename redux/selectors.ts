@@ -1,13 +1,24 @@
 import { createSelector } from '@reduxjs/toolkit';
 
 import { InteractionType } from '../src/components/Interactions/InteractionType';
+import { MAX_TILE_PLAYERS } from '../src/constants';
 
 import { selectAllGames, selectGameById } from './GamesSlice';
 import { grandTotalScore } from './scoreUtils';
 import { gameOverReason } from './ScoringRules';
 import { RootState } from './store';
 
+/** Whether the game has too many players for the tile gestures (tap and swipe). */
+export const selectIsDialOnly = (state: RootState, gameId?: string): boolean => {
+    const playerCount = gameId ? selectGameById(state, gameId)?.playerIds.length ?? 0 : 0;
+    return playerCount > MAX_TILE_PLAYERS;
+};
+
 export const selectInteractionType = (state: RootState, gameId?: string): InteractionType => {
+    // Games too big for tiles always use the Dial. The saved gesture is left
+    // alone, so it comes back if the game drops to MAX_TILE_PLAYERS or fewer.
+    if (selectIsDialOnly(state, gameId)) return InteractionType.Dial;
+
     // Prefer the game-level gesture; fall back to the global default for new games.
     const gameLevel = gameId ? selectGameById(state, gameId)?.interactionType : undefined;
     const interactionType: InteractionType = gameLevel ?? state.settings.interactionType;

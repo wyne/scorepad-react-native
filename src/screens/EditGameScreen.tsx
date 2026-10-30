@@ -16,7 +16,7 @@ import EditGame from '../components/EditGame';
 import PlayerListItem from '../components/PlayerListItem';
 import ScoringRow from '../components/ScoringRow';
 import SectionLabel from '../components/SectionLabel';
-import { MAX_PLAYERS } from '../constants';
+import { MAX_PLAYERS, MAX_TILE_PLAYERS } from '../constants';
 import { useTheme } from '../theme';
 
 type RouteParams = {
@@ -46,6 +46,10 @@ const EditGameScreen: React.FunctionComponent<Props> = ({ navigation, route }) =
     }, [playerIds]);
 
     useLayoutEffect(() => {
+        // Edits save as they're made, so an existing game only needs the back
+        // button. A new game gets Done to move on to the scoreboard.
+        if (route?.params?.source !== 'new_game') return;
+
         const onDone = () => {
             void logEvent('save_game', {
                 source: route?.params?.source,
@@ -54,11 +58,7 @@ const EditGameScreen: React.FunctionComponent<Props> = ({ navigation, route }) =
                 player_count: currentGame?.playerIds.length,
             });
 
-            if (route?.params?.source === 'new_game') {
-                navigation.replace('Game');
-            } else {
-                navigation.goBack();
-            }
+            navigation.replace('Game');
         };
 
         // On iOS, Done is a native bar item with a symbol so iPhone Duo can
@@ -110,6 +110,11 @@ const EditGameScreen: React.FunctionComponent<Props> = ({ navigation, route }) =
             }
             {playerIds.length >= MAX_PLAYERS &&
                 <Text style={[styles.text, { color: theme.textSecondary }]}>Max players reached.</Text>
+            }
+            {playerIds.length >= MAX_TILE_PLAYERS &&
+                <Text style={[styles.note, { color: theme.textSecondary }]} testID="dial-only-note">
+                    Games with more than {MAX_TILE_PLAYERS} players use the Dial gesture.
+                </Text>
             }
         </View>
     );
@@ -182,6 +187,11 @@ const styles = StyleSheet.create({
     text: {
         fontSize: 18,
         margin: 15,
+    },
+    note: {
+        fontSize: 14,
+        marginHorizontal: 15,
+        textAlign: 'center',
     },
     editAction: {
         fontSize: 13,
