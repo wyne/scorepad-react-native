@@ -16,7 +16,7 @@ import EditGame from '../components/EditGame';
 import PlayerListItem from '../components/PlayerListItem';
 import ScoringRow from '../components/ScoringRow';
 import SectionLabel from '../components/SectionLabel';
-import { MAX_PLAYERS } from '../constants';
+import { MAX_PLAYERS, MAX_TILE_PLAYERS } from '../constants';
 import { useTheme } from '../theme';
 
 type RouteParams = {
@@ -111,6 +111,11 @@ const EditGameScreen: React.FunctionComponent<Props> = ({ navigation, route }) =
             {playerIds.length >= MAX_PLAYERS &&
                 <Text style={[styles.text, { color: theme.textSecondary }]}>Max players reached.</Text>
             }
+            {playerIds.length >= MAX_TILE_PLAYERS &&
+                <Text style={[styles.note, { color: theme.textSecondary }]} testID="dial-only-note">
+                    Games with more than {MAX_TILE_PLAYERS} players use the Dial gesture.
+                </Text>
+            }
         </View>
     );
 
@@ -182,6 +187,11 @@ const styles = StyleSheet.create({
     text: {
         fontSize: 18,
         margin: 15,
+    },
+    note: {
+        fontSize: 14,
+        marginHorizontal: 15,
+        textAlign: 'center',
     },
     editAction: {
         fontSize: 13,

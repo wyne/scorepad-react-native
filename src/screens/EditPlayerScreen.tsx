@@ -34,9 +34,8 @@ type RouteParams = {
 };
 
 /**
- * Spelled-out player positions. MAX_PLAYERS is 20, so the list covers every
- * position a game can have; the numeral fallback keeps the label sensible if
- * that cap is ever raised.
+ * Spelled-out player positions up to twenty. Past that the label falls back
+ * to the numeral.
  */
 const NUMBER_WORDS = [
     'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten',

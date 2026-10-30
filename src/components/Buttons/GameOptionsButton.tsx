@@ -8,10 +8,10 @@ import { StyleSheet, View, Text, Platform } from 'react-native';
 
 import { setGameInteractionType } from '../../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
-import { selectInteractionType } from '../../../redux/selectors';
+import { selectInteractionType, selectIsDialOnly } from '../../../redux/selectors';
 import { toggleHomeFullscreen, setInteractionType, markFeatureNotificationSeen } from '../../../redux/SettingsSlice';
 import { logEvent } from '../../Analytics';
-import { FEATURE_DIAL_GESTURE } from '../../constants';
+import { FEATURE_DIAL_GESTURE, MAX_TILE_PLAYERS } from '../../constants';
 import { useTheme } from '../../theme';
 import { InteractionType } from '../Interactions/InteractionType';
 import { useMenuOpen } from '../MenuOpenContext';
@@ -25,6 +25,7 @@ type GameOptionAction = {
     subtitle?: string;
     image: SFSymbol;
     state?: 'on' | 'off';
+    disabled?: boolean;
 };
 
 /**
@@ -37,6 +38,7 @@ const useGameOptions = () => {
 
     const currentGameId = useAppSelector(state => state.settings.currentGameId);
     const interactionType = useAppSelector(state => selectInteractionType(state, currentGameId));
+    const dialOnly = useAppSelector(state => selectIsDialOnly(state, currentGameId));
     const fullscreen = useAppSelector(state => state.settings.home_fullscreen);
     const installId = useAppSelector(state => state.settings.installId);
     const addendOne = useAppSelector(state => state.settings.addendOne);
@@ -59,9 +61,12 @@ const useGameOptions = () => {
             ? `Spin: ${addendOne} / Hold: ${addendTwo}`
             : `Swipe: ${addendOne} / Hold: ${addendTwo}`;
 
+    // Swipe and tap work on the tile board, which only fits so many players.
+    const tileSubtitle = dialOnly ? `Up to ${MAX_TILE_PLAYERS} players` : undefined;
+
     const gestureActions: GameOptionAction[] = [
-        { id: 'swipe', title: 'Swipe', image: 'hand.draw', state: isSwipe ? 'on' : 'off' },
-        { id: 'tap', title: 'Tap', image: 'hand.point.up', state: isTap ? 'on' : 'off' },
+        { id: 'swipe', title: 'Swipe', subtitle: tileSubtitle, image: 'hand.draw', state: isSwipe ? 'on' : 'off', disabled: dialOnly },
+        { id: 'tap', title: 'Tap', subtitle: tileSubtitle, image: 'hand.point.up', state: isTap ? 'on' : 'off', disabled: dialOnly },
         {
             id: 'dial',
             title: 'Dial',
@@ -174,6 +179,7 @@ export const useGameOptionsHeaderItems = (): NativeStackHeaderItem[] => {
             description: action.subtitle,
             icon: { type: 'sfSymbol', name: action.image },
             state: action.state,
+            disabled: action.disabled,
             onPress: () => onActionRef.current(action.id),
         });
 
@@ -218,8 +224,9 @@ const GameOptionsButton: React.FunctionComponent = () => {
 
     if (currentGameId == null) return null;
 
-    const toMenuAction = (action: GameOptionAction): MenuAction => ({
+    const toMenuAction = ({ disabled, ...action }: GameOptionAction): MenuAction => ({
         ...action,
+        attributes: disabled ? { disabled: true } : undefined,
         imageColor: theme.text,
     });
 

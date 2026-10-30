@@ -1,8 +1,10 @@
 import { InteractionType } from '../src/components/Interactions/InteractionType';
+import { MAX_TILE_PLAYERS } from '../src/constants';
 
 import gamesReducer, { gameSave, selectAllGames } from './GamesSlice';
 import {
   selectInteractionType,
+  selectIsDialOnly,
   selectCurrentGame,
   selectCurrentGameOverReason,
   selectGameModesVisible,
@@ -103,6 +105,44 @@ describe('Redux selectors', () => {
       } as RootState;
 
       expect(selectInteractionType(state, 'game-1')).toBe(InteractionType.Dial);
+    });
+
+    it('should use the Dial for games with more players than the tile board fits', () => {
+      const state = {
+        ...mockState,
+        games: {
+          ...mockState.games!,
+          entities: {
+            'game-1': {
+              ...mockState.games!.entities['game-1']!,
+              interactionType: InteractionType.HalfTap,
+              playerIds: Array.from({ length: MAX_TILE_PLAYERS + 1 }, (_, i) => `player-${i}`),
+            },
+          },
+        },
+      } as RootState;
+
+      expect(selectIsDialOnly(state, 'game-1')).toBe(true);
+      expect(selectInteractionType(state, 'game-1')).toBe(InteractionType.Dial);
+    });
+
+    it('should keep the saved gesture for games at the tile board limit', () => {
+      const state = {
+        ...mockState,
+        games: {
+          ...mockState.games!,
+          entities: {
+            'game-1': {
+              ...mockState.games!.entities['game-1']!,
+              interactionType: InteractionType.HalfTap,
+              playerIds: Array.from({ length: MAX_TILE_PLAYERS }, (_, i) => `player-${i}`),
+            },
+          },
+        },
+      } as RootState;
+
+      expect(selectIsDialOnly(state, 'game-1')).toBe(false);
+      expect(selectInteractionType(state, 'game-1')).toBe(InteractionType.HalfTap);
     });
 
     it('should fall back to the global default when the game has no interaction type', () => {
