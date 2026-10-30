@@ -164,6 +164,14 @@ const ScoringRulesScreen: React.FunctionComponent = () => {
         );
     };
 
+    // The stepper can be tapped while the field is still being edited, so it
+    // steps from the typed value when there is one, not the saved one.
+    const editedValue = (): number => {
+        const typed = parseInt(draft, 10);
+        if (!Number.isNaN(typed)) return typed;
+        return rules.end ? endValue(rules.end) : 0;
+    };
+
     const commitDraft = () => {
         if (!rules.end) return;
         const value = parseInt(draft, 10);
@@ -179,6 +187,9 @@ const ScoringRulesScreen: React.FunctionComponent = () => {
 
     return (
         <ScrollView
+            // The value field sits low on the screen: on iOS the keyboard
+            // overlays it unless the scroll insets follow the keyboard.
+            automaticallyAdjustKeyboardInsets
             contentContainerStyle={{ paddingBottom: 50 }}
             keyboardShouldPersistTaps="handled"
             testID="scoring-rules"
@@ -261,7 +272,7 @@ const ScoringRulesScreen: React.FunctionComponent = () => {
                                             accessibilityLabel="Decrease"
                                             accessibilityRole="button"
                                             style={styles.stepperButton}
-                                            onPress={() => commitValue(endValue(rules.end as EndCondition) - step)}
+                                            onPress={() => commitValue(editedValue() - step)}
                                         >
                                             <Text style={[styles.stepperLabel, { color: theme.tint }]}>−</Text>
                                         </TouchableOpacity>
@@ -271,7 +282,7 @@ const ScoringRulesScreen: React.FunctionComponent = () => {
                                             accessibilityLabel="Increase"
                                             accessibilityRole="button"
                                             style={styles.stepperButton}
-                                            onPress={() => commitValue(endValue(rules.end as EndCondition) + step)}
+                                            onPress={() => commitValue(editedValue() + step)}
                                         >
                                             <Text style={[styles.stepperLabel, { color: theme.tint }]}>+</Text>
                                         </TouchableOpacity>

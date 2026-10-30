@@ -202,6 +202,22 @@ describe('ScoringRulesScreen', () => {
             expect(getByTestId('scoring-end-value').props.value).toBe('12');
         });
 
+        it('steps from a typed value that has not been committed yet', () => {
+            const store = createStore([0], { winner: 'high', end: { type: 'rounds', rounds: 10 } });
+            const { getByTestId } = renderScreen(store);
+
+            fireEvent.changeText(getByTestId('scoring-end-value'), '42');
+            fireEvent.press(getByTestId('scoring-end-increase'));
+
+            expect(store.getState().games.entities['game-1']?.scoring?.end).toEqual({ type: 'rounds', rounds: 43 });
+            expect(getByTestId('scoring-end-value').props.value).toBe('43');
+
+            fireEvent.changeText(getByTestId('scoring-end-value'), '20');
+            fireEvent.press(getByTestId('scoring-end-decrease'));
+
+            expect(store.getState().games.entities['game-1']?.scoring?.end).toEqual({ type: 'rounds', rounds: 19 });
+        });
+
         it('steps a target score by 10', () => {
             const store = createStore([0], { winner: 'high', end: { type: 'target', target: 100 } });
             const { getByTestId } = renderScreen(store);
