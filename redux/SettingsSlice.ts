@@ -1,6 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 import { InteractionType } from '../src/components/Interactions/InteractionType';
+import { FEATURE_NOTIFICATIONS } from '../src/constants';
 
 export interface SettingsState {
     home_fullscreen: boolean;
@@ -46,7 +47,8 @@ export const initialState: SettingsState = {
     installId: undefined,
     rollingGameCounter: 0,
     keepScreenAwake: false,
-    seenFeatureNotifications: [],
+    // Only used on a fresh install; existing users rehydrate their own list.
+    seenFeatureNotifications: [...FEATURE_NOTIFICATIONS],
     colorScheme: 'system',
 };
 
