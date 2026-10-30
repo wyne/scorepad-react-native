@@ -200,11 +200,12 @@ const EditPlayerScreen: React.FC<EditPlayerScreenProps> = ({
                 style={{ flex: 1 }}
                 contentContainerStyle={styles.scrollContent}
                 keyboardShouldPersistTaps="handled"
+                nestedScrollEnabled
             >
 
                 <SectionLabel>{`Player ${playerPositionWord(index + 1)} name`}</SectionLabel>
 
-                <View style={{ position: 'relative', zIndex: 1 }}>
+                <View>
                     <Input
                         ref={inputRef}
                         clearButtonMode="while-editing"
@@ -237,7 +238,12 @@ const EditPlayerScreen: React.FC<EditPlayerScreenProps> = ({
                         style={[styles.input, { color: theme.textSecondary }]}
                         value={localPlayerName}
                     />
+                </View>
 
+                {/* Keep the overlay inside its parent's bounds so Android can
+                    deliver native scroll gestures as well as row presses. */}
+                <View style={suggestions.length > 0 ? styles.paletteWithSuggestions : undefined}>
+                    <ColorSelector playerId={playerId} />
                     {suggestions.length > 0 && (
                         <ScrollView
                             style={[styles.suggestionsContainer, { backgroundColor: theme.backgroundTertiary }]}
@@ -261,8 +267,6 @@ const EditPlayerScreen: React.FC<EditPlayerScreenProps> = ({
                     )}
                 </View>
 
-                <ColorSelector playerId={playerId} />
-
             </ScrollView>
         </SafeAreaView>
     );
@@ -281,11 +285,16 @@ const styles = StyleSheet.create({
     },
     input: {
     },
+    paletteWithSuggestions: {
+        // The palettes normally exceed this height. Reserve enough space even
+        // if they are shorter, keeping the entire capped overlay touchable.
+        minHeight: 240,
+    },
     suggestionsContainer: {
         // Leave a partial row visible to hint that more names can be scrolled.
         maxHeight: 240,
         position: 'absolute',
-        top: '100%',
+        top: 0,
         left: 0,
         right: 0,
         borderRadius: 10,
