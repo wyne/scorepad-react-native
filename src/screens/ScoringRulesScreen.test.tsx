@@ -263,4 +263,16 @@ describe('ScoringRulesScreen', () => {
             expect(getByTestId('scoring-end-value').props.value).toBe('9');
         });
     });
+
+    it('drops the preset name once the rules are edited by hand', () => {
+        const store = createStore([0], { winner: 'low', end: { type: 'rounds', rounds: 9 }, name: 'Golf' });
+        const { getByTestId } = renderScreen(store);
+
+        fireEvent.press(getByTestId('scoring-end-increase'));
+
+        expect(store.getState().games.entities['game-1']?.scoring).toEqual({
+            winner: 'low',
+            end: { type: 'rounds', rounds: 10 },
+        });
+    });
 });

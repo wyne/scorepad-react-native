@@ -34,6 +34,14 @@ export const scoringShortSummary = (rules: ScoringRules | undefined): string => 
 };
 
 /**
+ * The game's mode as a list label: the named game when the rules came from
+ * one ("Hearts"), otherwise the short rule ("Lowest wins").
+ */
+export const modeLabel = (rules: ScoringRules | undefined): string => (
+    rules?.name ?? scoringShortSummary(rules)
+);
+
+/**
  * The Scoring row on Edit Game. Opens the game's scoring rules. Hidden unless
  * the game modes flag is on or the game already has rules.
  */
@@ -48,19 +56,28 @@ const ScoringRow: React.FunctionComponent<Props> = ({ onPress }) => {
 
     if (!currentGame || !visible) return null;
 
+    const name = currentGame.scoring?.name;
+
     return (
         <View>
             <SectionLabel inset={30}>Scoring</SectionLabel>
             <TouchableOpacity
                 testID="scoring-row"
                 accessibilityRole="button"
-                accessibilityLabel={`Scoring: ${scoringSummary(currentGame.scoring)}`}
+                accessibilityLabel={`Scoring: ${name ? `${name}, ` : ''}${scoringSummary(currentGame.scoring)}`}
                 style={[styles.row, { backgroundColor: theme.inputBackground }]}
                 onPress={onPress}
             >
-                <Text style={[styles.label, { color: theme.text }]}>
-                    {scoringSummary(currentGame.scoring)}
-                </Text>
+                <View style={styles.text}>
+                    <Text style={[styles.label, { color: theme.text }]}>
+                        {name ?? scoringSummary(currentGame.scoring)}
+                    </Text>
+                    {name && (
+                        <Text style={[styles.detail, { color: theme.textSecondary }]} testID="scoring-row-detail">
+                            {scoringSummary(currentGame.scoring)}
+                        </Text>
+                    )}
+                </View>
                 <Text style={[styles.arrow, { color: theme.separator }]}>›</Text>
             </TouchableOpacity>
         </View>
@@ -78,8 +95,15 @@ const styles = StyleSheet.create({
         marginVertical: 5,
         marginHorizontal: 10,
     },
+    text: {
+        flex: 1,
+        gap: 2,
+    },
     label: {
         fontSize: 18,
+    },
+    detail: {
+        fontSize: 13,
     },
     arrow: {
         fontSize: 22,

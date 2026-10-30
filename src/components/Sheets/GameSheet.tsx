@@ -19,7 +19,7 @@ import BigButton from '../BigButtons/BigButton';
 import RoundHeaderTitle from '../Headers/RoundHeaderTitle';
 import RematchIcon from '../Icons/RematchIcon';
 import ScoreLogTable from '../ScoreLogTable';
-import { scoringShortSummary } from '../ScoringRow';
+import { modeLabel } from '../ScoringRow';
 
 import { useChooseWinnersSheetContext } from './ChooseWinnersSheetContext';
 import { useGameSheetContext } from './GameSheetContext';
@@ -135,7 +135,9 @@ const GameSheet: React.FunctionComponent = () => {
 
         Alert.alert(
             'Rematch',
-            'This will create a new game with the same players and empty scores.',
+            game?.scoring
+                ? 'This will create a new game with the same players, the same rules, and empty scores.'
+                : 'This will create a new game with the same players and empty scores.',
             [
                 {
                     text: 'Cancel',
@@ -390,13 +392,13 @@ const GameSheet: React.FunctionComponent = () => {
                                 <TouchableOpacity
                                     testID="game-sheet-scoring-rule"
                                     accessibilityRole="button"
-                                    accessibilityLabel={`Scoring: ${scoringShortSummary(game?.scoring)}`}
+                                    accessibilityLabel={`Scoring: ${modeLabel(game?.scoring)}`}
                                     disabled={gameLocked}
-                                    onPress={() => navigation.navigate('ScoringRules')}
+                                    onPress={() => navigation.navigate('GameMode')}
                                     style={styles.scoringRule}
                                 >
                                     <Text style={[styles.scoringRuleText, { color: theme.textSecondary }]}>
-                                        {scoringShortSummary(game?.scoring)}
+                                        {modeLabel(game?.scoring)}
                                     </Text>
                                 </TouchableOpacity>
                             }

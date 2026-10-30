@@ -97,9 +97,9 @@ describe('backup validation', () => {
         expect(parsed?.settings.gameModesEnabled).toBe(true);
     });
 
-    it('keeps a game\'s end condition', () => {
+    it('keeps a game\'s end condition and mode name', () => {
         const backup = createValidBackup();
-        const scoring = { winner: 'low', end: { type: 'target', target: 100 } };
+        const scoring = { winner: 'low', end: { type: 'target', target: 100 }, name: 'Hearts' };
         (backup.games.entities['game-1'] as Record<string, unknown>).scoring = scoring;
 
         expect(parseBackupData(backup)?.games.entities['game-1'].scoring).toEqual(scoring);

@@ -223,16 +223,28 @@ describe('game scoring rules', () => {
         expect(store.getState().games.entities[gameId]?.scoring).toEqual({ winner: 'low' });
     });
 
-    it('carries the rules into a rematch', async () => {
+    it('goes back to free play without rules', async () => {
         const store = createStore();
         await store.dispatch(asyncCreateGame({ gameCount: 0, playerCount: 2 }));
         const gameId: string = store.getState().games.ids[0];
         store.dispatch(setGameScoring({ gameId, scoring: { winner: 'low' } }));
 
+        store.dispatch(setGameScoring({ gameId, scoring: undefined }));
+
+        expect(store.getState().games.entities[gameId]).not.toHaveProperty('scoring');
+    });
+
+    it('carries the rules into a rematch', async () => {
+        const store = createStore();
+        await store.dispatch(asyncCreateGame({ gameCount: 0, playerCount: 2 }));
+        const gameId: string = store.getState().games.ids[0];
+        const hearts = { winner: 'low' as const, end: { type: 'target' as const, target: 100 }, name: 'Hearts' };
+        store.dispatch(setGameScoring({ gameId, scoring: hearts }));
+
         await store.dispatch(asyncRematchGame({ gameId }));
 
         const rematchId = store.getState().games.ids.find(id => id !== gameId) as string;
-        expect(store.getState().games.entities[rematchId]?.scoring).toEqual({ winner: 'low' });
+        expect(store.getState().games.entities[rematchId]?.scoring).toEqual(hearts);
     });
 
     it('leaves a free play rematch without rules', async () => {

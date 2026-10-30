@@ -15,6 +15,7 @@ import { useTheme } from '../theme';
 
 import GameListItemPlayerName from './GameListItemPlayerName';
 import AbstractPopupMenu from './PopupMenu/AbstractPopupMenu';
+import { modeLabel } from './ScoringRow';
 
 const DAY_MS = 86400000;
 
@@ -86,6 +87,7 @@ const GameListItem: React.FunctionComponent<Props> = ({ navigation, gameId, inde
         playerIds,
         roundCount,
         winnerIds,
+        mode,
     } = useAppSelector(state => {
         const game = selectGameById(state, gameId);
 
@@ -96,6 +98,8 @@ const GameListItem: React.FunctionComponent<Props> = ({ navigation, gameId, inde
             playerIds: game?.playerIds,
             roundCount: game?.roundTotal,
             winnerIds: game?.winnerIds,
+            // Free play games keep the row as it always was.
+            mode: game?.scoring ? modeLabel(game.scoring) : undefined,
         };
     }, shallowEqual);
 
@@ -179,7 +183,12 @@ const GameListItem: React.FunctionComponent<Props> = ({ navigation, gameId, inde
 
                             {/* Metadata trails the content it describes rather
                               * than splitting the title from the players. */}
-                            <Text style={[styles.timestamp, { color: theme.textTertiary }]}>
+                            <Text style={[styles.timestamp, { color: theme.textTertiary }]} numberOfLines={1}>
+                                {mode && (
+                                    <Text style={{ color: theme.textSecondary }} testID="game-list-mode">
+                                        {mode}{' · '}
+                                    </Text>
+                                )}
                                 {formatCreated(dateCreated)}
                             </Text>
                         </ListItem.Content>

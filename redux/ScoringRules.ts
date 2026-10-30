@@ -22,6 +22,12 @@ export type EndCondition =
 export interface ScoringRules {
     winner: WinCondition;
     end?: EndCondition;
+    /**
+     * The named game these rules were copied from ("Hearts"), as a label for
+     * lists. Only a label: nothing plays differently because of it, and any
+     * edit to the rules clears it, since they no longer match that game.
+     */
+    name?: string;
 }
 
 /** How every game without rules plays: highest total wins. */
@@ -34,6 +40,7 @@ const winConditions: WinCondition[] = ['high', 'low'];
 /** Limits for the Scoring Rules inputs, and for restored backups. */
 export const MAX_ROUND_LIMIT = 999;
 export const MAX_TARGET_SCORE = 999999;
+export const MAX_MODE_NAME_LENGTH = 40;
 
 const isRecord = (value: unknown): value is Record<string, unknown> => (
     typeof value === 'object' && value !== null && !Array.isArray(value)
@@ -54,6 +61,8 @@ export const isScoringRules = (value: unknown): value is ScoringRules => (
     isRecord(value)
     && winConditions.includes(value.winner as WinCondition)
     && (value.end === undefined || isEndCondition(value.end))
+    && (value.name === undefined
+        || (typeof value.name === 'string' && value.name.length > 0 && value.name.length <= MAX_MODE_NAME_LENGTH))
 );
 
 export const scoringRulesOrDefault = (rules: ScoringRules | undefined): ScoringRules => (
