@@ -256,4 +256,15 @@ describe('ListBoard — winner pill', () => {
         expect(getAllByText('PREV').length).toBeGreaterThanOrEqual(1);
         expect(getAllByText('RND').length).toBeGreaterThanOrEqual(1);
     });
+
+    it('shows the final total when the game is locked on an earlier round', () => {
+        const store = createStore(
+            { locked: true, roundCurrent: 0, roundTotal: 3 },
+            ['player-1'],
+            { 'player-1': { scores: [5, 7, 11] } },
+        );
+        const { getByText, queryByText } = render(<Provider store={store}><ListBoard showHint={false} /></Provider>);
+        expect(getByText('23')).toBeTruthy();
+        expect(queryByText('5')).toBeNull();
+    });
 });
