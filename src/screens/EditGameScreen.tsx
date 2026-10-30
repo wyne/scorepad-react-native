@@ -46,6 +46,10 @@ const EditGameScreen: React.FunctionComponent<Props> = ({ navigation, route }) =
     }, [playerIds]);
 
     useLayoutEffect(() => {
+        // Edits save as they're made, so an existing game only needs the back
+        // button. A new game gets Done to move on to the scoreboard.
+        if (route?.params?.source !== 'new_game') return;
+
         const onDone = () => {
             void logEvent('save_game', {
                 source: route?.params?.source,
@@ -54,11 +58,7 @@ const EditGameScreen: React.FunctionComponent<Props> = ({ navigation, route }) =
                 player_count: currentGame?.playerIds.length,
             });
 
-            if (route?.params?.source === 'new_game') {
-                navigation.replace('Game');
-            } else {
-                navigation.goBack();
-            }
+            navigation.replace('Game');
         };
 
         // On iOS, Done is a native bar item with a symbol so iPhone Duo can
