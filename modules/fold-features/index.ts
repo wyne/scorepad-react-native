@@ -19,6 +19,13 @@ interface FoldFeaturesModule {
 // Android only: iOS has no API for the fold's position yet.
 const FoldFeatures = requireOptionalNativeModule<FoldFeaturesModule>('FoldFeatures');
 
+/** The fold crossing the app's window right now, or null (see useFold). */
+export const getFold = (): Fold | null => FoldFeatures?.getFold() ?? null;
+
+/** Calls `listener` whenever the fold crossing the window changes. */
+export const addFoldListener = (listener: (event: { fold: Fold | null }) => void): { remove: () => void } =>
+    FoldFeatures?.addListener('foldChange', listener) ?? { remove: () => {} };
+
 /**
  * The fold crossing the app's window, or null when there is none (no fold, the
  * window is on one side of it, or not Android).

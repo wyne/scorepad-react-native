@@ -196,6 +196,12 @@ jest.mock('react-native-safe-area-context', () => ({
 
 // Mock GameSheetContext
 const mockPendingIndex: { current: number | null } = { current: null };
+let mockFoldSplit: 'columns' | 'rows' | null = null;
+jest.mock('../../hooks/useExpandedGameLayout', () => ({
+    ...jest.requireActual('../../hooks/useExpandedGameLayout'),
+    useGameFoldSplit: () => mockFoldSplit,
+}));
+
 jest.mock('./GameSheetContext', () => ({
     useGameSheetContext: jest.fn(() => ({
         current: {
@@ -247,6 +253,7 @@ describe('GameSheet', () => {
     const defaultProps = {};
 
     beforeEach(() => {
+        mockFoldSplit = null;
         jest.clearAllMocks();
     });
 
@@ -435,6 +442,30 @@ describe('GameSheet', () => {
 
         expect(getByTestId('bottom-sheet').props.initialIndex).toBe(2);
         expect(mockPendingIndex.current).toBeNull();
+    });
+
+    it('starts collapsed after unfolding, even if it first opened to a point asked for', () => {
+        mockPendingIndex.current = 2;
+        const store = createMockStore({
+            settings: { currentGameId: 'game-1' },
+            games: { entities: { 'game-1': mockGame }, ids: ['game-1'] },
+            players: { entities: mockPlayers, ids: ['player-1', 'player-2'] },
+        });
+        const sheet = () => (
+            <Provider store={store}>
+                <GameSheet {...defaultProps} />
+            </Provider>
+        );
+        const { getByTestId, rerender } = render(sheet());
+        expect(getByTestId('bottom-sheet').props.initialIndex).toBe(2);
+
+        mockFoldSplit = 'rows';
+        rerender(sheet());
+        expect(getByTestId('bottom-sheet').props.initialIndex).toBe(0);
+
+        mockFoldSplit = null;
+        rerender(sheet());
+        expect(getByTestId('bottom-sheet').props.initialIndex).toBe(0);
     });
 
     it('should show choose winners button when game is unlocked', () => {

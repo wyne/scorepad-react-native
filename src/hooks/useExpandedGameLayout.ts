@@ -5,7 +5,7 @@ import type { Hinge as HingeState } from 'expo-hinge';
 import { Platform, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { useFold } from '../../modules/fold-features';
+import { addFoldListener, getFold, useFold, type Fold } from '../../modules/fold-features';
 import { useAppSelector } from '../../redux/hooks';
 
 // The shortest landscape iPhone window is well under this; the iPhone Duo's
@@ -70,9 +70,8 @@ export const useExpandedGameSplit = (): { sheetWidth: number; pickerWidth: numbe
 };
 
 /**
- * Space kept clear across the fold when the game screen splits around it.
- * There is no public signal yet for where the folding region is or how wide
- * it is, so the split assumes it runs through the middle of the window.
+ * The least space kept clear across the fold when the game screen splits
+ * around it. On Android the fold's own width is used when it's wider.
  */
 export const FOLD_GAP = 32;
 
@@ -92,10 +91,12 @@ export type GameFoldSplit = 'columns' | 'rows';
 // samples stay outside React, and an active split remains stable until the hinge
 // leaves `partiallyOpen`.
 const FOLD_SETTLE_DELAY_MS = 250;
-const MEANINGFUL_HINGE_ANGLE_DELTA = 0.5;
+// Hinge angle sensors jitter by a degree or so at rest; a smaller threshold
+// would keep restarting the settle timer on a device sitting half open.
+const MEANINGFUL_HINGE_ANGLE_DELTA = 3;
 
 let foldSplitActive = false;
-let hingeSubscription: ReturnType<typeof Hinge.addHingeListener> | null = null;
+let hingeSubscription: { remove: () => void } | null = null;
 let foldSettleTimer: ReturnType<typeof setTimeout> | null = null;
 let lastMotionAngle: number | null = null;
 const foldSplitListeners = new Set<() => void>();
@@ -137,6 +138,24 @@ const updateFoldSplitFromHinge = (hinge: HingeState | null) => {
     }, FOLD_SETTLE_DELAY_MS);
 };
 
+// On Android the window manager's fold state decides on its own: it's the same
+// source the split's direction and position come from, so the three never
+// disagree. It has no angle, so each change restarts the settle delay.
+const updateFoldSplitFromFold = (fold: Fold | null) => {
+    if (fold?.state !== 'halfOpened') {
+        cancelPendingFoldSplit();
+        publishFoldSplit(false);
+        return;
+    }
+    if (foldSplitActive) return;
+
+    if (foldSettleTimer != null) clearTimeout(foldSettleTimer);
+    foldSettleTimer = setTimeout(() => {
+        foldSettleTimer = null;
+        publishFoldSplit(true);
+    }, FOLD_SETTLE_DELAY_MS);
+};
+
 const getFoldSplitSnapshot = (): boolean => foldSplitActive;
 
 const subscribeToSettledFoldSplit = (listener: () => void): (() => void) => {
@@ -144,8 +163,13 @@ const subscribeToSettledFoldSplit = (listener: () => void): (() => void) => {
 
     foldSplitListeners.add(listener);
     if (hingeSubscription == null) {
-        hingeSubscription = Hinge.addHingeListener(({ hinge }) => updateFoldSplitFromHinge(hinge));
-        updateFoldSplitFromHinge(Hinge.getHinge());
+        if (Platform.OS === 'android') {
+            hingeSubscription = addFoldListener(({ fold }) => updateFoldSplitFromFold(fold));
+            updateFoldSplitFromFold(getFold());
+        } else {
+            hingeSubscription = Hinge.addHingeListener(({ hinge }) => updateFoldSplitFromHinge(hinge));
+            updateFoldSplitFromHinge(Hinge.getHinge());
+        }
     }
 
     return () => {
@@ -171,7 +195,7 @@ export const useGameFoldSplit = (): GameFoldSplit | null => {
 
     if (fullscreen || !settledFoldSplit) return null;
 
-    // On Android the window manager says which way the fold runs: a fold line
+    // On Android the window manager also says which way the fold runs: a fold line
     // running top to bottom splits the window into columns. The shape of the
     // window doesn't tell: the Pixel Fold's inner screen is nearly square.
     if (Platform.OS === 'android') {
@@ -207,4 +231,28 @@ export const useRoundPickerOutOfHeader = (): boolean => {
     const foldSplit = useGameFoldSplit();
 
     return inBottomStrip || foldSplit === 'columns';
+};
+
+/**
+ * Where the game screen splits around the fold, along the split's axis (x for
+ * columns, y for rows), in window coordinates: the board ends at `boardEnd`
+ * and the docked sheet starts at `sheetStart`. Android reports where the fold
+ * is; iOS has no API for it yet, so the iPhone Duo's fold is assumed to run
+ * through the middle of the window.
+ */
+export const useFoldSplitBounds = (foldSplit: GameFoldSplit | null): { boardEnd: number; sheetStart: number } => {
+    const { width, height } = useWindowDimensions();
+    const fold = useFold();
+    const length = foldSplit === 'rows' ? height : width;
+
+    let center = length / 2;
+    let size = 0;
+    if (Platform.OS === 'android' && fold != null) {
+        const { x, y, width: foldWidth, height: foldHeight } = fold.bounds;
+        center = foldSplit === 'rows' ? y + foldHeight / 2 : x + foldWidth / 2;
+        size = foldSplit === 'rows' ? foldHeight : foldWidth;
+    }
+    const half = Math.max(size, FOLD_GAP) / 2;
+
+    return { boardEnd: center - half, sheetStart: center + half };
 };

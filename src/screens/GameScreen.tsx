@@ -19,7 +19,7 @@ import GameOverSheet from '../components/Sheets/GameOverSheet';
 import { bottomSheetHeight } from '../components/Sheets/GameSheet';
 import GestureInfoSheet from '../components/Sheets/GestureInfoSheet';
 import PointValuesSheet from '../components/Sheets/PointValuesSheet';
-import { FOLD_GAP, useGameFoldSplit, useRoundPickerInBottomStrip, useVerticalBarLayout } from '../hooks/useExpandedGameLayout';
+import { useFoldSplitBounds, useGameFoldSplit, useRoundPickerInBottomStrip, useVerticalBarLayout } from '../hooks/useExpandedGameLayout';
 import { useGestureHint } from '../hooks/useGestureHint';
 
 function useKeepScreenAwake(active: boolean): void {
@@ -124,6 +124,7 @@ const GameScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     // fold; the game sheet docks on the other half (see GameSheet).
     const foldSplit = useGameFoldSplit();
     const { width: windowWidth, height: windowHeight } = useWindowDimensions();
+    const { boardEnd } = useFoldSplitBounds(foldSplit);
     // On the iPhone Duo's inner display in landscape the round picker moves out
     // of the header (see GameSheet), which leaves it empty. The tiles take
     // that band, so their top margin matches the small one at the bottom.
@@ -136,9 +137,9 @@ const GameScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     // Give the board and its tiles the same geometry in this render. Measuring
     // the resized native board first exposes an old grid inside the new bounds.
     const boardSize = useMemo(() => ({
-        width: Math.max(0, foldSplit === 'columns' ? windowWidth / 2 - FOLD_GAP / 2 : windowWidth),
-        height: Math.max(0, (foldSplit === 'rows' ? windowHeight / 2 - FOLD_GAP / 2 : windowHeight) - paddingTop - boardBottomInset),
-    }), [foldSplit, windowWidth, windowHeight, paddingTop, boardBottomInset]);
+        width: Math.max(0, foldSplit === 'columns' ? boardEnd : windowWidth),
+        height: Math.max(0, (foldSplit === 'rows' ? boardEnd : windowHeight) - paddingTop - boardBottomInset),
+    }), [foldSplit, boardEnd, windowWidth, windowHeight, paddingTop, boardBottomInset]);
     const boardOrigin = useMemo(() => ({ x: 0, y: paddingTop }), [paddingTop]);
 
     // Animate the board's resize only when folding or unfolding changes it,

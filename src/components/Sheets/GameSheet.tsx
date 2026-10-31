@@ -14,7 +14,7 @@ import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
 import { updatePlayer } from '../../../redux/PlayersSlice';
 import { selectGameModesVisible } from '../../../redux/selectors';
 import { logEvent } from '../../Analytics';
-import { FOLD_GAP, useExpandedGameLayout, useExpandedGameSplit, useGameFoldSplit, useVerticalBarLayout } from '../../hooks/useExpandedGameLayout';
+import { useExpandedGameLayout, useExpandedGameSplit, useFoldSplitBounds, useGameFoldSplit, useVerticalBarLayout } from '../../hooks/useExpandedGameLayout';
 import { useTheme } from '../../theme';
 import BigButton from '../BigButtons/BigButton';
 import RoundHeaderTitle from '../Headers/RoundHeaderTitle';
@@ -52,6 +52,7 @@ const GameSheet: React.FunctionComponent = () => {
     // in landscape it carries the round picker.
     const foldSplit = useGameFoldSplit();
     const docked = foldSplit != null;
+    const { sheetStart } = useFoldSplitBounds(foldSplit);
     const currentGameId = useAppSelector(state => state.settings.currentGameId);
     const game = useAppSelector(state => selectGameById(state, currentGameId || ''));
     const gameTitle = game?.title;
@@ -66,10 +67,10 @@ const GameSheet: React.FunctionComponent = () => {
 
     // variables
     const snapPoints = useMemo(() => {
-        if (foldSplit === 'rows') return [containerHeight / 2 - FOLD_GAP / 2];
+        if (foldSplit === 'rows') return [containerHeight - sheetStart];
         if (foldSplit === 'columns') return ['100%'];
         return [bottomSheetHeight, '60%', '100%'];
-    }, [foldSplit, containerHeight]);
+    }, [foldSplit, containerHeight, sheetStart]);
 
     const dispatch = useAppDispatch();
 
@@ -192,7 +193,27 @@ const GameSheet: React.FunctionComponent = () => {
     const [shouldRenderContent, setShouldRenderContent] = useState(initialIndex > 0);
     const hasMountedRef = useRef(false);
 
+    // Docking and undocking rebuild the sheet (it's keyed by the fold split
+    // below), and it starts over at its first snap point: collapsed when flat,
+    // open when docked. Reset what this component tracks about the old sheet
+    // to match, so a title tap cycles from the right place. The reset isn't
+    // the user closing the sheet, so it isn't logged.
+    const [sheetStartIndex, setSheetStartIndex] = useState(initialIndex);
+    const [lastFoldSplit, setLastFoldSplit] = useState(foldSplit);
+    const skipSnapLogRef = useRef(false);
+    if (lastFoldSplit !== foldSplit) {
+        setLastFoldSplit(foldSplit);
+        setSheetStartIndex(0);
+        if (snapPointIndex !== 0) skipSnapLogRef.current = true;
+        setSnapPointIndex(0);
+        setShouldRenderContent(false);
+    }
+
     useEffect(() => {
+        if (skipSnapLogRef.current) {
+            skipSnapLogRef.current = false;
+            return;
+        }
         if (hasMountedRef.current) {
             if (snapPointIndex == 0) {
                 logEvent('game_sheet_close');
@@ -273,7 +294,7 @@ const GameSheet: React.FunctionComponent = () => {
         // Docked on the right half, stop short of the vertical bar: the sheet
         // sits above the navigator, so it would cover Back and the other bar
         // buttons.
-        if (foldSplit === 'columns') return containerWidth / 2 - FOLD_GAP / 2 - insets.right;
+        if (foldSplit === 'columns') return containerWidth - sheetStart - insets.right;
         if (!expandedLayout) return containerWidth;
 
         return interpolate(
@@ -287,7 +308,7 @@ const GameSheet: React.FunctionComponent = () => {
         width: animatedWidth.value,
         // Past the fold. The library pins the sheet's left edge, so offset it
         // with a margin rather than `left`.
-        marginLeft: foldSplit === 'columns' ? containerWidth / 2 + FOLD_GAP / 2 : 0,
+        marginLeft: foldSplit === 'columns' ? sheetStart : 0,
     }));
 
     // Safe area padding, applied only where the sheet actually reaches into the
@@ -393,7 +414,7 @@ const GameSheet: React.FunctionComponent = () => {
             )}
             <BottomSheet
                 ref={gameSheetRef}
-                index={docked ? 0 : initialIndex}
+                index={docked ? 0 : sheetStartIndex}
                 onChange={onSheetChange}
                 onAnimate={onAnimate}
                 snapPoints={snapPoints}
