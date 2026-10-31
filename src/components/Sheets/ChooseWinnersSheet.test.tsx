@@ -51,7 +51,7 @@ jest.mock('./ChooseWinnersSheetContext', () => ({
     })),
 }));
 
-jest.mock('react-native-elements', () => {
+jest.mock('@rneui/base', () => {
     const { View, Text } = jest.requireActual('react-native');
     return {
         Icon: ({ name, color, style }: { name: string; color: string; style?: object }) => (

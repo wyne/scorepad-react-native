@@ -6,8 +6,8 @@ import {
     BottomSheetModal,
     BottomSheetScrollView
 } from '@gorhom/bottom-sheet';
+import { Icon } from '@rneui/base';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { Icon } from 'react-native-elements';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { shallowEqual } from 'react-redux';
 

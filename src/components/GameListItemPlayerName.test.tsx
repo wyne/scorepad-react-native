@@ -9,8 +9,8 @@ import settingsReducer from '../../redux/SettingsSlice';
 
 import GameListItemPlayerName from './GameListItemPlayerName';
 
-// Mock react-native-elements Icon
-jest.mock('react-native-elements', () => {
+// Mock @rneui/base Icon
+jest.mock('@rneui/base', () => {
     const { View, Text } = jest.requireActual('react-native');
 
     return {

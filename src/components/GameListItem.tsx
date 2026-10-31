@@ -2,8 +2,8 @@ import React, { memo, useCallback, useMemo } from 'react';
 
 import { ParamListBase } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { Icon, ListItem } from '@rneui/base';
 import { PixelRatio, Platform, StyleSheet, Text, View } from 'react-native';
-import { Icon, ListItem } from 'react-native-elements';
 import Animated, { FadeInUp } from 'react-native-reanimated';
 import { shallowEqual } from 'react-redux';
 

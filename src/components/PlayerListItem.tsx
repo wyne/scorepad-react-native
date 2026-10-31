@@ -2,8 +2,8 @@ import React, { memo, useMemo } from 'react';
 
 import { ParamListBase } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { Icon, ListItem } from '@rneui/base';
 import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { Icon, ListItem } from 'react-native-elements';
 
 import { makeSelectPlayerColors, selectGameById, updateGame } from '../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';

@@ -17,7 +17,7 @@ jest.mock('../Analytics', () => ({
     logEvent: jest.fn(),
 }));
 
-jest.mock('react-native-elements', () => {
+jest.mock('@rneui/base', () => {
     const { Text } = jest.requireActual('react-native');
     return {
         Icon: ({ name }: { name: string; }) => <Text>{name}</Text>,

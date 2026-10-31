@@ -37,7 +37,7 @@ jest.mock('./GameOverSheetContext', () => ({
     useGameOverSheetContext: jest.fn(() => ({ current: { present: jest.fn(), close: mockClose } })),
 }));
 
-jest.mock('react-native-elements', () => {
+jest.mock('@rneui/base', () => {
     const { Text } = jest.requireActual('react-native');
     return {
         Icon: ({ name }: { name: string }) => <Text>{name}</Text>,

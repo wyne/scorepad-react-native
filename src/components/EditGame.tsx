@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
 import { useNavigation } from '@react-navigation/native';
+import { Input } from '@rneui/base';
 import {
     Platform,
     StyleSheet,
@@ -10,7 +11,6 @@ import {
     TextInputSubmitEditingEvent,
     View
 } from 'react-native';
-import { Input } from 'react-native-elements';
 
 import { updateGame } from '../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
@@ -26,7 +26,9 @@ const EditGame = ({ }) => {
     const dispatch = useAppDispatch();
     const currentGame = useAppSelector(selectCurrentGame);
     const [localTitle, setLocalTitle] = useState(currentGame?.title ?? '');
-    const inputRef = React.useRef<TextInputInstance>(null);
+    // @rneui/base types Input's ref as both the Input instance and a TextInput
+    // instance, so the ref has to satisfy both. Only focus()/blur() are used.
+    const inputRef = React.useRef<Input & TextInputInstance>(null);
 
     const navigation = useNavigation();
 

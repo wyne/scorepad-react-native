@@ -2,9 +2,9 @@ import React, { useRef } from 'react';
 
 import { ParamListBase } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { Button, Icon } from '@rneui/base';
 import * as Sharing from 'expo-sharing';
 import { Platform, ScrollView, StyleSheet, Text, View, ViewInstance } from 'react-native';
-import { Button, Icon } from 'react-native-elements';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { captureRef } from 'react-native-view-shot';
 

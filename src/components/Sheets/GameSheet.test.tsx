@@ -111,8 +111,8 @@ jest.mock('react-native-safe-area-context', () => ({
     },
 }));
 
-// Mock react-native-elements
-jest.mock('react-native-elements', () => ({
+// Mock @rneui/base
+jest.mock('@rneui/base', () => ({
     Button: ({ title, onPress, testID }: {
         title: string;
         onPress: () => void;

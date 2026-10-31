@@ -22,6 +22,7 @@ import { GameOverSheetContextProvider } from './src/components/Sheets/GameOverSh
 import { GameSheetContextProvider } from './src/components/Sheets/GameSheetContext';
 import { PointValuesSheetContextProvider } from './src/components/Sheets/PointValuesSheetContext';
 import { SplashOverlay } from './src/components/SplashOverlay';
+import './src/iconTypes';
 import { Navigation } from './src/Navigation';
 
 // Keep the native splash screen up until our animated SplashOverlay mounts and

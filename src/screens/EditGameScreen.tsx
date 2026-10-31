@@ -2,9 +2,9 @@ import React, { useEffect, useLayoutEffect } from 'react';
 
 import { ParamListBase, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { Button, Icon } from '@rneui/base';
 import { Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import DraggableFlatList, { ScaleDecorator } from 'react-native-draggable-flatlist';
-import { Button, Icon } from 'react-native-elements';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { addPlayer, reorderPlayers } from '../../redux/GamesSlice';

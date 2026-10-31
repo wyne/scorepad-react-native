@@ -1,8 +1,8 @@
 import React from 'react';
 
+import { Icon } from '@rneui/base';
 import { GlassView } from 'expo-glass-effect';
 import { Pressable, StyleSheet } from 'react-native';
-import { Icon } from 'react-native-elements';
 
 import { LIQUID_GLASS } from '../../platform';
 import { useTheme } from '../../theme';

@@ -1,5 +1,5 @@
+import { Icon } from '@rneui/base';
 import { Text } from 'react-native';
-import { Icon } from 'react-native-elements';
 
 import { useAppSelector } from '../../redux/hooks';
 import { selectPlayerById } from '../../redux/PlayersSlice';
