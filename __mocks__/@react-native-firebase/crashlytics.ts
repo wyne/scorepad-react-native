@@ -1,5 +1,3 @@
-export default () => ({
-    __esModule: true,
-    log: jest.fn(),
-    recordError: jest.fn(),
-});
+export const getCrashlytics = jest.fn(() => ({}));
+export const log = jest.fn();
+export const recordError = jest.fn();
