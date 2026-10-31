@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-import analytics from '@react-native-firebase/analytics';
+import { getAnalytics, setAnalyticsCollectionEnabled } from '@react-native-firebase/analytics';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { View, useColorScheme } from 'react-native';
@@ -30,7 +30,7 @@ import { Navigation } from './src/Navigation';
 SplashScreen.preventAutoHideAsync();
 
 if (process.env.EXPO_PUBLIC_FIREBASE_ANALYTICS == 'false') {
-    analytics().setAnalyticsCollectionEnabled(false);
+    setAnalyticsCollectionEnabled(getAnalytics(), false);
 }
 
 export default function App() {

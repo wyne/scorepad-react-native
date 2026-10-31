@@ -144,8 +144,9 @@ export default {
           enableShrinkResourcesInReleaseBuilds: true,
         },
         ios: {
-          useFrameworks: 'static',
-          forceStaticLinking: ['RNFBApp', 'RNFBAnalytics', 'RNFBCrashlytics'],
+          // React Native Firebase 27+ pulls Firebase in via Swift Package
+          // Manager, which needs dynamic frameworks.
+          useFrameworks: 'dynamic',
         },
       },
     ],
