@@ -125,13 +125,19 @@ describe('useGameFoldSplit', () => {
         mockCurrentHinge = hinge;
         mockHingeListener?.({ hinge });
     };
+    const settleHinge = () => act(() => jest.advanceTimersByTime(250));
 
     beforeEach(() => {
+        jest.useFakeTimers();
         setPlatform('ios');
         mockFullscreen = false;
         mockCurrentHinge = null;
         mockHingeListener = null;
         addHingeListener.mockClear();
+    });
+    afterEach(() => {
+        jest.clearAllTimers();
+        jest.useRealTimers();
     });
     afterAll(() => {
         setPlatform('ios');
@@ -141,13 +147,20 @@ describe('useGameFoldSplit', () => {
     it('splits into columns when partially open in landscape', () => {
         setHinge('partiallyOpen');
         setWindow(951, 669);
-        expect(renderSplit().result.current).toBe('columns');
+        const split = renderSplit();
+
+        expect(split.result.current).toBeNull();
+        settleHinge();
+        expect(split.result.current).toBe('columns');
     });
 
     it('splits into rows when partially open in portrait', () => {
         setHinge('partiallyOpen');
         setWindow(669, 951);
-        expect(renderSplit().result.current).toBe('rows');
+        const split = renderSplit();
+
+        settleHinge();
+        expect(split.result.current).toBe('rows');
     });
 
     it('does not split when flat or closed', () => {
@@ -170,7 +183,10 @@ describe('useGameFoldSplit', () => {
         mockFullscreen = true;
         setHinge('partiallyOpen');
         setWindow(951, 669);
-        expect(renderSplit().result.current).toBeNull();
+        const split = renderSplit();
+
+        settleHinge();
+        expect(split.result.current).toBeNull();
     });
 
     it('does not split on Android', () => {
@@ -179,6 +195,43 @@ describe('useGameFoldSplit', () => {
         setWindow(951, 669);
         expect(renderSplit().result.current).toBeNull();
         expect(addHingeListener).not.toHaveBeenCalled();
+    });
+
+    it('does not expose transient book mode while the hinge continues to fully open', () => {
+        setHinge('closed');
+        setWindow(951, 669);
+        let renderCount = 0;
+        const split = renderHook(() => {
+            renderCount += 1;
+            return useGameFoldSplit();
+        });
+
+        act(() => emitHinge({ status: 'partiallyOpen', angle: 90 }));
+        act(() => jest.advanceTimersByTime(150));
+        act(() => emitHinge({ status: 'partiallyOpen', angle: 140 }));
+        act(() => jest.advanceTimersByTime(150));
+
+        expect(split.result.current).toBeNull();
+        act(() => emitHinge({ status: 'fullyOpen', angle: 180 }));
+        act(() => jest.advanceTimersByTime(250));
+
+        expect(split.result.current).toBeNull();
+        expect(renderCount).toBe(1);
+    });
+
+    it('enters book mode only after hinge motion has settled', () => {
+        setHinge('closed');
+        setWindow(951, 669);
+        const split = renderSplit();
+
+        act(() => emitHinge({ status: 'partiallyOpen', angle: 90 }));
+        act(() => jest.advanceTimersByTime(200));
+        act(() => emitHinge({ status: 'partiallyOpen', angle: 120 }));
+        act(() => jest.advanceTimersByTime(249));
+        expect(split.result.current).toBeNull();
+
+        act(() => jest.advanceTimersByTime(1));
+        expect(split.result.current).toBe('columns');
     });
 
     it('shares one native subscription and ignores angle-only changes', () => {
@@ -192,16 +245,21 @@ describe('useGameFoldSplit', () => {
         });
         const second = renderSplit();
 
-        expect(first.result.current).toBe('columns');
-        expect(second.result.current).toBe('columns');
+        expect(first.result.current).toBeNull();
+        expect(second.result.current).toBeNull();
         expect(addHingeListener).toHaveBeenCalledTimes(1);
 
+        settleHinge();
+        expect(first.result.current).toBe('columns');
+        expect(second.result.current).toBe('columns');
+        expect(renderCount).toBe(2);
+
         act(() => emitHinge({ status: 'partiallyOpen', angle: 121 }));
-        expect(renderCount).toBe(1);
+        expect(renderCount).toBe(2);
 
         act(() => emitHinge({ status: 'fullyOpen', angle: 180 }));
         expect(first.result.current).toBeNull();
         expect(second.result.current).toBeNull();
-        expect(renderCount).toBe(2);
+        expect(renderCount).toBe(3);
     });
 });

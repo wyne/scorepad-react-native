@@ -39,6 +39,9 @@ jest.mock('react-native-reanimated', () => {
         FadeIn: {
             delay: jest.fn(() => ({ duration: jest.fn(() => ({ easing: jest.fn() })) })),
         },
+        FadeOut: {
+            duration: jest.fn(() => ({})),
+        },
         Easing: {
             ease: jest.fn(),
         },
@@ -561,6 +564,7 @@ describe('TileBoard', () => {
 
         // Should initially have certain dimensions (1x2 grid: width=200/1=200, height=400/2=200)
         expect(getAllByText('Width: 200')).toHaveLength(2);
+        expect(getByTestId('tile-grid-2x1')).toBeTruthy();
 
         // Change layout dimensions
         mockPlayerTileRender.mockClear();
@@ -575,6 +579,7 @@ describe('TileBoard', () => {
 
         // Should recalculate and update dimensions (2x1 grid: width=400/2=200, height=200/1=200)
         expect(getAllByText('Width: 200')).toHaveLength(2);
+        expect(getByTestId('tile-grid-1x2')).toBeTruthy();
         // One render per tile: there is no stale-grid intermediate pass.
         expect(mockPlayerTileRender).toHaveBeenCalledTimes(2);
 

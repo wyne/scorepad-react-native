@@ -1,6 +1,7 @@
 import React, { memo, useCallback, useMemo, useState } from 'react';
 
 import { LayoutChangeEvent, StyleSheet } from 'react-native';
+import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { selectGameById } from '../../../redux/GamesSlice';
@@ -92,19 +93,28 @@ const TileBoard: React.FC<TileBoardProps> = ({ showHint, foldSplit = null }) => 
                 backgroundColor: theme.background,
             }]
         } onLayout={layoutHandler} >
-            {visiblePlayerIds.map((id, index) => (
-                grid != null &&
-                <PlayerTile
-                    key={id}
-                    playerId={id}
-                    cols={grid.cols}
-                    rows={grid.rows}
-                    width={grid.tileWidth}
-                    height={grid.tileHeight}
-                    index={index}
-                    showHint={showHint}
-                />
-            ))}
+            {grid != null && (
+                <Animated.View
+                    entering={FadeIn.delay(90).duration(140)}
+                    exiting={FadeOut.duration(90)}
+                    key={`${grid.rows}x${grid.cols}`}
+                    style={styles.tileGrid}
+                    testID={`tile-grid-${grid.rows}x${grid.cols}`}
+                >
+                    {visiblePlayerIds.map((id, index) => (
+                        <PlayerTile
+                            key={id}
+                            playerId={id}
+                            cols={grid.cols}
+                            rows={grid.rows}
+                            width={grid.tileWidth}
+                            height={grid.tileHeight}
+                            index={index}
+                            showHint={showHint}
+                        />
+                    ))}
+                </Animated.View>
+            )}
         </SafeAreaView>
     );
 };
@@ -112,14 +122,15 @@ const TileBoard: React.FC<TileBoardProps> = ({ showHint, foldSplit = null }) => 
 const styles = StyleSheet.create({
     contentStyle: {
         flex: 1,
-        flexGrow: 1,
-        flexWrap: 'wrap',
-        alignContent: 'stretch',
-        flexDirection: 'row',
         maxWidth: '100%',
     },
-    contentContainer: {
+    tileGrid: {
+        alignContent: 'stretch',
         flex: 1,
+        flexDirection: 'row',
+        flexGrow: 1,
+        flexWrap: 'wrap',
+        maxWidth: '100%',
     },
 });
 

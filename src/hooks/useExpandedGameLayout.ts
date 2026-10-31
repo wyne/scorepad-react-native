@@ -1,7 +1,7 @@
 import { useSyncExternalStore } from 'react';
 
 import * as Hinge from 'expo-hinge';
-import type { HingeStatus } from 'expo-hinge';
+import type { Hinge as HingeState } from 'expo-hinge';
 import { Platform, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -85,62 +85,91 @@ export const FOLD_GAP = 32;
  */
 export type GameFoldSplit = 'columns' | 'rows';
 
-// `useHinge()` publishes the full hinge object, so every distinct angle sample
-// re-renders each consumer even when the status used by this layout is unchanged.
-// Keep one native subscription for the app and only notify React when the coarse
-// status changes.
-let currentHingeStatus: HingeStatus | null = null;
+// A quick outer-display-to-flat opening passes through `partiallyOpen`, but that
+// transient state is not a useful destination for the layout. Only publish a
+// fold split after the hinge has stopped moving for a short interval. Raw angle
+// samples stay outside React, and an active split remains stable until the hinge
+// leaves `partiallyOpen`.
+const FOLD_SETTLE_DELAY_MS = 250;
+const MEANINGFUL_HINGE_ANGLE_DELTA = 0.5;
+
+let foldSplitActive = false;
 let hingeSubscription: ReturnType<typeof Hinge.addHingeListener> | null = null;
-const hingeStatusListeners = new Set<() => void>();
+let foldSettleTimer: ReturnType<typeof setTimeout> | null = null;
+let lastMotionAngle: number | null = null;
+const foldSplitListeners = new Set<() => void>();
 
-const readHingeStatus = (): HingeStatus | null => {
-    if (Platform.OS !== 'ios') return null;
-    return Hinge.getHinge()?.status ?? null;
+const publishFoldSplit = (active: boolean) => {
+    if (active === foldSplitActive) return;
+
+    foldSplitActive = active;
+    foldSplitListeners.forEach(notify => notify());
 };
 
-const getHingeStatusSnapshot = (): HingeStatus | null => {
-    // Refresh after a period with no consumers, when the native subscription is
-    // intentionally stopped and the cached value may be stale.
-    if (hingeSubscription == null) currentHingeStatus = readHingeStatus();
-    return currentHingeStatus;
+const cancelPendingFoldSplit = () => {
+    if (foldSettleTimer != null) clearTimeout(foldSettleTimer);
+    foldSettleTimer = null;
+    lastMotionAngle = null;
 };
 
-const subscribeToHingeStatus = (listener: () => void): (() => void) => {
+const updateFoldSplitFromHinge = (hinge: HingeState | null) => {
+    if (hinge?.status !== 'partiallyOpen') {
+        cancelPendingFoldSplit();
+        publishFoldSplit(false);
+        return;
+    }
+
+    // Once book mode is visible, angle samples should not disturb it. Leaving
+    // the partial status above dismisses it immediately.
+    if (foldSplitActive) return;
+
+    const movedMeaningfully = lastMotionAngle == null
+        || Math.abs(hinge.angle - lastMotionAngle) >= MEANINGFUL_HINGE_ANGLE_DELTA;
+    if (!movedMeaningfully && foldSettleTimer != null) return;
+
+    lastMotionAngle = hinge.angle;
+    if (foldSettleTimer != null) clearTimeout(foldSettleTimer);
+    foldSettleTimer = setTimeout(() => {
+        foldSettleTimer = null;
+        lastMotionAngle = null;
+        publishFoldSplit(true);
+    }, FOLD_SETTLE_DELAY_MS);
+};
+
+const getFoldSplitSnapshot = (): boolean => foldSplitActive;
+
+const subscribeToSettledFoldSplit = (listener: () => void): (() => void) => {
     if (Platform.OS !== 'ios') return () => {};
 
-    hingeStatusListeners.add(listener);
+    foldSplitListeners.add(listener);
     if (hingeSubscription == null) {
-        currentHingeStatus = readHingeStatus();
-        hingeSubscription = Hinge.addHingeListener(({ hinge }) => {
-            const nextStatus = hinge?.status ?? null;
-            if (nextStatus === currentHingeStatus) return;
-
-            currentHingeStatus = nextStatus;
-            hingeStatusListeners.forEach(notify => notify());
-        });
+        hingeSubscription = Hinge.addHingeListener(({ hinge }) => updateFoldSplitFromHinge(hinge));
+        updateFoldSplitFromHinge(Hinge.getHinge());
     }
 
     return () => {
-        hingeStatusListeners.delete(listener);
-        if (hingeStatusListeners.size === 0) {
+        foldSplitListeners.delete(listener);
+        if (foldSplitListeners.size === 0) {
             hingeSubscription?.remove();
             hingeSubscription = null;
+            cancelPendingFoldSplit();
+            foldSplitActive = false;
         }
     };
 };
 
 export const useGameFoldSplit = (): GameFoldSplit | null => {
-    const hingeStatus = useSyncExternalStore(
-        subscribeToHingeStatus,
-        getHingeStatusSnapshot,
-        () => null
+    const settledFoldSplit = useSyncExternalStore(
+        subscribeToSettledFoldSplit,
+        getFoldSplitSnapshot,
+        () => false
     );
     const { width, height } = useWindowDimensions();
     const fullscreen = useAppSelector(state => state.settings.home_fullscreen);
 
     // Android foldables fold along a different axis for the same window
     // shape, so this only covers the iPhone Duo for now.
-    if (Platform.OS !== 'ios' || fullscreen || hingeStatus !== 'partiallyOpen') return null;
+    if (Platform.OS !== 'ios' || fullscreen || !settledFoldSplit) return null;
 
     return width > height ? 'columns' : 'rows';
 };

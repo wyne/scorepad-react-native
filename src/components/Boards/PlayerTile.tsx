@@ -1,8 +1,7 @@
 import React from 'react';
 
 import { getContrastRatio } from 'colorsheet';
-import { DimensionValue, StyleSheet } from 'react-native';
-import Animated, { Easing, FadeIn, LinearTransition } from 'react-native-reanimated';
+import { DimensionValue, StyleSheet, View } from 'react-native';
 import { shallowEqual } from 'react-redux';
 
 import { selectGameById } from '../../../redux/GamesSlice';
@@ -25,10 +24,6 @@ interface Props {
     height: number;
     showHint: boolean;
 }
-
-const TILE_LAYOUT_TRANSITION = LinearTransition
-    .duration(280)
-    .easing(Easing.out(Easing.cubic));
 
 const PlayerTile: React.FunctionComponent<Props> = React.memo(({
     index,
@@ -73,9 +68,7 @@ const PlayerTile: React.FunctionComponent<Props> = React.memo(({
     if (Number.isNaN(width) || Number.isNaN(height)) return null;
 
     return (
-        <Animated.View
-            entering={FadeIn.delay(25 * index + 50).duration(400).easing(Easing.ease)}
-            layout={TILE_LAYOUT_TRANSITION}
+        <View
             style={[
                 styles.playerCard,
                 {
@@ -96,7 +89,7 @@ const PlayerTile: React.FunctionComponent<Props> = React.memo(({
                     index={index}
                 />
             </InteractionComponent>
-        </Animated.View>
+        </View>
     );
 });
 
