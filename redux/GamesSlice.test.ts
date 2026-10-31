@@ -10,7 +10,8 @@ import gamesReducer, {
     roundNext,
     roundPrevious,
     selectAllGames,
-    setGameScoring
+    setGameScoring,
+    updateGame
 } from './GamesSlice';
 import playersReducer, { playerAdd } from './PlayersSlice';
 import settingsReducer, { initialState as initialSettings } from './SettingsSlice';
@@ -46,6 +47,24 @@ describe('games reducer', () => {
                 ids: ['game1'],
             }
         });
+    });
+
+    it('moves a game to its last round when it locks', () => {
+        store.dispatch(roundNext('game1'));
+        store.dispatch(roundNext('game1'));
+        store.dispatch(roundPrevious('game1'));
+        store.dispatch(roundPrevious('game1'));
+        store.dispatch(updateGame({ id: 'game1', changes: { locked: true } }));
+
+        expect(store.getState().entities.game1?.roundCurrent).toBe(2);
+    });
+
+    it('leaves the round alone for other updates', () => {
+        store.dispatch(roundNext('game1'));
+        store.dispatch(roundPrevious('game1'));
+        store.dispatch(updateGame({ id: 'game1', changes: { title: 'Renamed' } }));
+
+        expect(store.getState().entities.game1?.roundCurrent).toBe(0);
     });
 
     it('should handle roundNext', () => {

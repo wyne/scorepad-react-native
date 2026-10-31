@@ -289,7 +289,7 @@ describe('ScoreLogTable', () => {
         expect(getByText('Round 3 (Current)')).toBeTruthy();
     });
 
-    it('neither highlights nor lets you pick a round once the game is locked', () => {
+    it('does not let you pick a round once the game is locked', () => {
         const store = createMockStore({
             settings: {
                 currentGameId: 'game-1',
@@ -312,8 +312,8 @@ describe('ScoreLogTable', () => {
             </Provider>
         );
 
-        expect(queryByText(/\(Current\)/)).toBeNull();
-        expect(getByText('Round 3 (Disabled)')).toBeTruthy();
+        expect(getByText('Round 3 (Current)(Disabled)')).toBeTruthy();
+        expect(queryByText('Round 1 (Disabled)')).toBeTruthy();
     });
 
     it('should handle sort by player index when player name column is pressed', () => {

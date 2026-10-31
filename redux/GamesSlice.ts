@@ -1,4 +1,4 @@
-import { PayloadAction, ThunkAction, UnknownAction, createAsyncThunk, createEntityAdapter, createSelector, createSlice } from '@reduxjs/toolkit';
+import { PayloadAction, ThunkAction, UnknownAction, Update, createAsyncThunk, createEntityAdapter, createSelector, createSlice } from '@reduxjs/toolkit';
 import { getContrastRatio } from 'colorsheet';
 import * as Crypto from 'expo-crypto';
 
@@ -57,7 +57,14 @@ const gamesSlice = createSlice({
     name: 'games',
     initialState,
     reducers: {
-        updateGame: gamesAdapter.updateOne,
+        updateGame(state, action: PayloadAction<Update<GameState, string>>) {
+            gamesAdapter.updateOne(state, action.payload);
+            // A finished game rests on its last round, where the header's Final is.
+            const game = state.entities[action.payload.id];
+            if (game && action.payload.changes.locked) {
+                game.roundCurrent = Math.max(game.roundTotal - 1, 0);
+            }
+        },
         roundNext(state, action: PayloadAction<string>) {
             const game = state.entities[action.payload];
             if (!game) { return; }

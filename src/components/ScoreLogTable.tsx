@@ -41,7 +41,7 @@ const ScoreLogTable: React.FunctionComponent<Props> = ({ showRounds = true }) =>
     const roundCount = useAppSelector(
         state => selectGameById(state, currentGameId ?? '')?.roundTotal || 1
     );
-    // A locked game shows final totals, so no round is picked or highlighted.
+    // A locked game stays on its last round, so its columns can't pick another.
     const locked = useAppSelector(
         state => selectGameById(state, currentGameId ?? '')?.locked === true
     );
@@ -116,7 +116,7 @@ const ScoreLogTable: React.FunctionComponent<Props> = ({ showRounds = true }) =>
                                 <MemoizedRoundScoreColumn
                                     round={round}
                                     key={round}
-                                    isCurrentRound={!locked && round == currentRoundIndex}
+                                    isCurrentRound={round == currentRoundIndex}
                                     disabled={locked}
                                 />
                             </View>
