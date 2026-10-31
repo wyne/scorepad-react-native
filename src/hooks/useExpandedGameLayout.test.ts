@@ -1,7 +1,18 @@
 import { renderHook } from '@testing-library/react-native';
 import { Platform } from 'react-native';
 
-import { useExpandedGameLayout, useVerticalBarLayout } from './useExpandedGameLayout';
+import { useExpandedGameLayout, useGameFoldSplit, useVerticalBarLayout } from './useExpandedGameLayout';
+
+jest.mock('expo-hinge', () => ({ useHinge: jest.fn(() => null) }));
+
+jest.mock('../../redux/hooks', () => ({
+    useAppSelector: jest.fn((selector: (state: unknown) => unknown) =>
+        selector({ settings: { home_fullscreen: mockFullscreen } })),
+}));
+
+let mockFullscreen = false;
+
+const useHinge: jest.Mock = jest.requireMock('expo-hinge').useHinge;
 
 jest.mock('react-native/Libraries/Utilities/useWindowDimensions', () => ({
     __esModule: true,
@@ -87,5 +98,61 @@ describe('useVerticalBarLayout', () => {
         setPlatform('android');
         setWindow(466, 678);
         expect(verticalBars()).toBe(false);
+    });
+});
+
+describe('useGameFoldSplit', () => {
+    const split = () => renderHook(() => useGameFoldSplit()).result.current;
+    const setHinge = (status: string | null) => {
+        useHinge.mockReturnValue(status == null ? null : { status, angle: 120 });
+    };
+
+    beforeEach(() => {
+        setPlatform('ios');
+        mockFullscreen = false;
+    });
+    afterAll(() => {
+        setPlatform('ios');
+        useHinge.mockReturnValue(null);
+    });
+
+    it('splits into columns when partially open in landscape', () => {
+        setHinge('partiallyOpen');
+        setWindow(951, 669);
+        expect(split()).toBe('columns');
+    });
+
+    it('splits into rows when partially open in portrait', () => {
+        setHinge('partiallyOpen');
+        setWindow(669, 951);
+        expect(split()).toBe('rows');
+    });
+
+    it('does not split when flat or closed', () => {
+        setWindow(951, 669);
+        setHinge('fullyOpen');
+        expect(split()).toBeNull();
+        setHinge('closed');
+        expect(split()).toBeNull();
+    });
+
+    it('does not split without a hinge', () => {
+        setHinge(null);
+        setWindow(951, 669);
+        expect(split()).toBeNull();
+    });
+
+    it('does not split in fullscreen, which hides the sheet', () => {
+        mockFullscreen = true;
+        setHinge('partiallyOpen');
+        setWindow(951, 669);
+        expect(split()).toBeNull();
+    });
+
+    it('does not split on Android', () => {
+        setPlatform('android');
+        setHinge('partiallyOpen');
+        setWindow(951, 669);
+        expect(split()).toBeNull();
     });
 });

@@ -13,7 +13,7 @@ import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
 import { updatePlayer } from '../../../redux/PlayersSlice';
 import { selectGameModesVisible } from '../../../redux/selectors';
 import { logEvent } from '../../Analytics';
-import { useExpandedGameLayout, useExpandedGameSplit } from '../../hooks/useExpandedGameLayout';
+import { FOLD_GAP, useExpandedGameLayout, useExpandedGameSplit, useGameFoldSplit } from '../../hooks/useExpandedGameLayout';
 import { useTheme } from '../../theme';
 import BigButton from '../BigButtons/BigButton';
 import RoundHeaderTitle from '../Headers/RoundHeaderTitle';
@@ -41,6 +41,12 @@ const GameSheet: React.FunctionComponent = () => {
     // round picker takes the right half (see GameScreen).
     const expandedLayout = useExpandedGameLayout();
     const { sheetWidth, pickerWidth, pickerRight } = useExpandedGameSplit();
+    // On a partially open iPhone Duo the sheet docks open on the half after
+    // the fold, with the board on the other half (see GameScreen): the right
+    // half in landscape, the bottom half in portrait. It can't be dragged, and
+    // in landscape it carries the round picker.
+    const foldSplit = useGameFoldSplit();
+    const docked = foldSplit != null;
     const currentGameId = useAppSelector(state => state.settings.currentGameId);
     const game = useAppSelector(state => selectGameById(state, currentGameId || ''));
     const gameTitle = game?.title;
@@ -54,7 +60,11 @@ const GameSheet: React.FunctionComponent = () => {
     const pendingIndexRef = useGameSheetPendingIndex();
 
     // variables
-    const snapPoints = useMemo(() => [bottomSheetHeight, '60%', '100%'], []);
+    const snapPoints = useMemo(() => {
+        if (foldSplit === 'rows') return [containerHeight / 2 - FOLD_GAP / 2];
+        if (foldSplit === 'columns') return ['100%'];
+        return [bottomSheetHeight, '60%', '100%'];
+    }, [foldSplit, containerHeight]);
 
     const dispatch = useAppDispatch();
 
@@ -218,6 +228,8 @@ const GameSheet: React.FunctionComponent = () => {
      * Animated style for the bottom sheet
      */
     const animatedSheetStyle = useAnimatedStyle(() => {
+        if (docked) return { opacity: 1 };
+
         const snapPoint0: number = typeof snapPoints[0] === 'string'
             ? parseFloat(snapPoints[0]) / 100 * containerHeight
             : containerHeight - snapPoints[0];
@@ -261,6 +273,7 @@ const GameSheet: React.FunctionComponent = () => {
      * next one. Tied to the sheet's index, so it tracks the drag.
      */
     const animatedWidth = useDerivedValue(() => {
+        if (foldSplit === 'columns') return containerWidth / 2 - FOLD_GAP / 2;
         if (!expandedLayout) return containerWidth;
 
         return interpolate(
@@ -270,15 +283,26 @@ const GameSheet: React.FunctionComponent = () => {
             Extrapolate.CLAMP
         );
     });
-    const animatedWidthStyle = useAnimatedStyle(() => ({ width: animatedWidth.value }));
+    const animatedWidthStyle = useAnimatedStyle(() => ({
+        width: animatedWidth.value,
+        // Past the fold. The library pins the sheet's left edge, so offset it
+        // with a margin rather than `left`.
+        marginLeft: foldSplit === 'columns' ? containerWidth / 2 + FOLD_GAP / 2 : 0,
+    }));
 
     // Safe area padding, applied only where the sheet actually reaches into the
     // inset: on the iPhone Duo the vertical bar's inset on the right only
     // matters once the sheet is wide enough to extend under it.
-    const animatedSafeAreaStyle = useAnimatedStyle(() => ({
-        paddingLeft: insets.left,
-        paddingRight: Math.max(0, insets.right - (containerWidth - animatedWidth.value)),
-    }));
+    const animatedSafeAreaStyle = useAnimatedStyle(() => {
+        // Docked on the right half, the sheet reaches the vertical bar but not
+        // the left edge.
+        if (foldSplit === 'columns') return { paddingLeft: 0, paddingRight: insets.right };
+
+        return {
+            paddingLeft: insets.left,
+            paddingRight: Math.max(0, insets.right - (containerWidth - animatedWidth.value)),
+        };
+    });
 
     /**
      * Locking the game removes Edit Game and Reset, and the remaining buttons
@@ -345,7 +369,7 @@ const GameSheet: React.FunctionComponent = () => {
 
     return (
         <>
-            {expandedLayout && (
+            {expandedLayout && !docked && (
                 <Animated.View
                     style={[
                         styles.bottomStripRoundPicker,
@@ -358,14 +382,19 @@ const GameSheet: React.FunctionComponent = () => {
                 </Animated.View>
             )}
             <BottomSheet
+                // Docking and undocking change the snap points, so start the
+                // sheet over at its first point rather than carry an index over.
+                key={foldSplit ?? 'flat'}
                 ref={gameSheetRef}
-                index={initialIndex}
+                index={docked ? 0 : initialIndex}
                 onChange={onSheetChange}
                 onAnimate={onAnimate}
                 snapPoints={snapPoints}
                 backdropComponent={renderBackdrop}
                 backgroundComponent={SheetBackground}
-                handleComponent={renderHandle}
+                handleComponent={docked ? null : renderHandle}
+                enableHandlePanningGesture={!docked}
+                enableContentPanningGesture={!docked}
                 handleIndicatorStyle={{ backgroundColor: theme.sheetHandle }}
                 animatedPosition={animatedPosition}
                 animatedIndex={animatedIndex}
@@ -373,7 +402,7 @@ const GameSheet: React.FunctionComponent = () => {
                 // expanded layout the width animation changes that height mid-drag,
                 // which moves the snap points under the finger (the sheet snaps back
                 // to half width and the backdrop drops out). Use the fixed points.
-                enableDynamicSizing={!expandedLayout}
+                enableDynamicSizing={!expandedLayout && !docked}
                 enablePanDownToClose={false}
                 topInset={topInset}
                 // The library appends its own `left: 0, right: 0` after this style, so
@@ -415,7 +444,13 @@ const GameSheet: React.FunctionComponent = () => {
                         </View>
 
                         <Animated.View style={[styles.sheetContent, animatedSheetStyle]}>
-                            <ScoreLogTable showRounds={shouldRenderContent} />
+                            {foldSplit === 'columns' &&
+                                <View style={styles.dockedRoundPicker} testID="docked-round-picker">
+                                    <RoundHeaderTitle />
+                                </View>
+                            }
+
+                            <ScoreLogTable showRounds={docked || shouldRenderContent} />
 
                             <Text style={{ color: theme.text, marginHorizontal: 5, marginBottom: 10 }}>
                                 Tap the player column or total score column to change sorting.
@@ -506,6 +541,10 @@ const styles = StyleSheet.create({
         height: bottomSheetHeight,
         alignItems: 'center',
         justifyContent: 'center',
+    },
+    dockedRoundPicker: {
+        alignItems: 'center',
+        paddingBottom: 10,
     },
     sheetHeaderContainer: {
         flexDirection: 'row',

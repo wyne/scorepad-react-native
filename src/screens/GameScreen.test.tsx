@@ -2,6 +2,7 @@ import React from 'react';
 
 import { configureStore } from '@reduxjs/toolkit';
 import { render } from '@testing-library/react-native';
+import { Dimensions, StyleSheet } from 'react-native';
 import { Provider } from 'react-redux';
 
 import gamesReducer from '../../redux/GamesSlice';
@@ -56,6 +57,13 @@ jest.mock('@gorhom/bottom-sheet', () => {
         BottomSheetBackdrop: () => <View />,
     };
 });
+
+jest.mock('../hooks/useExpandedGameLayout', () => ({
+    ...jest.requireActual('../hooks/useExpandedGameLayout'),
+    useGameFoldSplit: jest.fn(() => null),
+}));
+
+const mockUseGameFoldSplit: jest.Mock = jest.requireMock('../hooks/useExpandedGameLayout').useGameFoldSplit;
 
 // Mock the components that GameScreen uses
 jest.mock('../components/Buttons/GameOptionsButton', () => ({
@@ -227,5 +235,47 @@ describe('GameScreen', () => {
 
         const options = (navigation.setOptions as jest.Mock).mock.calls.at(-1)[0];
         expect(options.unstable_headerRightItems()).toBe(mockHeaderItems);
+    });
+
+    describe('on a partially open iPhone Duo', () => {
+        const renderGame = () => {
+            const store = createMockStore({
+                settings: { currentGameId: 'game-1' },
+                games: { entities: { 'game-1': mockGame }, ids: ['game-1'] },
+                players: { entities: mockPlayers, ids: ['player-1', 'player-2'] },
+            });
+
+            return render(
+                <Provider store={store}>
+                    <GameScreen navigation={navigation} />
+                </Provider>
+            );
+        };
+
+        afterEach(() => mockUseGameFoldSplit.mockReturnValue(null));
+
+        it('fills the screen with the board when flat', () => {
+            const { getByTestId } = renderGame();
+
+            expect(StyleSheet.flatten(getByTestId('game-board-area').props.style)).toEqual({ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0 });
+        });
+
+        it('keeps the board to the left of the fold in landscape', () => {
+            mockUseGameFoldSplit.mockReturnValue('columns');
+            const { width } = Dimensions.get('window');
+            const { getByTestId } = renderGame();
+
+            const style = StyleSheet.flatten(getByTestId('game-board-area').props.style);
+            expect(style).toMatchObject({ left: 0, top: 0, bottom: 0, width: width / 2 - 16 });
+        });
+
+        it('keeps the board above the fold in portrait, below the header', () => {
+            mockUseGameFoldSplit.mockReturnValue('rows');
+            const { height } = Dimensions.get('window');
+            const { getByTestId } = renderGame();
+
+            const style = StyleSheet.flatten(getByTestId('game-board-area').props.style);
+            expect(style).toMatchObject({ left: 0, right: 0, top: 0, height: height / 2 - 16 - 88 });
+        });
     });
 });

@@ -1,3 +1,4 @@
+import { useHinge } from 'expo-hinge';
 import { Platform, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -62,6 +63,35 @@ export const useExpandedGameSplit = (): { sheetWidth: number; pickerWidth: numbe
         pickerWidth: half,
         pickerRight: insets.right,
     };
+};
+
+/**
+ * Space kept clear across the fold when the game screen splits around it.
+ * There is no public signal yet for where the folding region is or how wide
+ * it is, so the split assumes it runs through the middle of the window.
+ */
+export const FOLD_GAP = 32;
+
+/**
+ * How the game screen splits across a partially open iPhone Duo: the board
+ * on one half and the game sheet, docked open, on the other (Apple's overlay
+ * arrangement). In landscape the fold runs top to bottom, so the halves are
+ * columns; in portrait it runs across, so they are rows. Null when the device
+ * is flat or closed, in fullscreen (which hides the sheet), and on devices
+ * without a hinge.
+ */
+export type GameFoldSplit = 'columns' | 'rows';
+
+export const useGameFoldSplit = (): GameFoldSplit | null => {
+    const hinge = useHinge();
+    const { width, height } = useWindowDimensions();
+    const fullscreen = useAppSelector(state => state.settings.home_fullscreen);
+
+    // Android foldables fold along a different axis for the same window
+    // shape, so this only covers the iPhone Duo for now.
+    if (Platform.OS !== 'ios' || fullscreen || hinge?.status !== 'partiallyOpen') return null;
+
+    return width > height ? 'columns' : 'rows';
 };
 
 /**

@@ -8,6 +8,7 @@ import { shallowEqual } from 'react-redux';
 
 import { selectGameById } from '../../../redux/GamesSlice';
 import { useAppSelector } from '../../../redux/hooks';
+import { useGameFoldSplit } from '../../hooks/useExpandedGameLayout';
 import DialOverlay from '../Interactions/Dial/DialOverlay';
 import { useLockedHint } from '../LockedHintContext';
 import { useMenuOpen } from '../MenuOpenContext';
@@ -188,6 +189,10 @@ const ListBoard: React.FC<ListBoardProps> = ({ showHint, topInset = 0, onPlayerR
         };
     }, shallowEqual);
     const fullscreen = useAppSelector(state => state.settings.home_fullscreen);
+    // The game sheet covers the bottom of the board unless it is hidden
+    // (fullscreen) or docked beside it on a partially open iPhone Duo.
+    const foldSplit = useGameFoldSplit();
+    const sheetOverBoard = !fullscreen && foldSplit == null;
     const { menuOpen } = useMenuOpen();
     const { showLockedHint } = useLockedHint();
     const insets = useSafeAreaInsets();
@@ -231,7 +236,7 @@ const ListBoard: React.FC<ListBoardProps> = ({ showHint, topInset = 0, onPlayerR
     if (!playerIds?.length) return null;
     const scrollInsets = {
         top: topInset,
-        bottom: fullscreen ? insets.bottom + 10 : bottomSheetHeight + 10,
+        bottom: sheetOverBoard ? bottomSheetHeight + 10 : insets.bottom + 10,
         left: insets.left + ROW_BOARD_PADDING,
         right: insets.right + ROW_BOARD_PADDING,
     };
@@ -269,7 +274,7 @@ const ListBoard: React.FC<ListBoardProps> = ({ showHint, topInset = 0, onPlayerR
                     playerIds={playerIds}
                     initialIndex={playerIds.indexOf(selectedId)}
                     boardWidth={boardLayout.width}
-                    boardHeight={boardLayout.height - (fullscreen ? 0 : bottomSheetHeight)}
+                    boardHeight={boardLayout.height - (sheetOverBoard ? bottomSheetHeight : 0)}
                     safeAreaTop={insets.top + topInset}
                     safeAreaLeft={insets.left}
                     safeAreaRight={insets.right}

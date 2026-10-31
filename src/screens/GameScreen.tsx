@@ -4,7 +4,7 @@ import { useHeaderHeight } from '@react-navigation/elements';
 import { ParamListBase } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake';
-import { Platform, StyleSheet, View } from 'react-native';
+import { Platform, StyleSheet, View, useWindowDimensions } from 'react-native';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 
 import { useAppSelector } from '../../redux/hooks';
@@ -18,7 +18,7 @@ import ChooseWinnersSheet from '../components/Sheets/ChooseWinnersSheet';
 import GameOverSheet from '../components/Sheets/GameOverSheet';
 import GestureInfoSheet from '../components/Sheets/GestureInfoSheet';
 import PointValuesSheet from '../components/Sheets/PointValuesSheet';
-import { useVerticalBarLayout } from '../hooks/useExpandedGameLayout';
+import { FOLD_GAP, useGameFoldSplit, useVerticalBarLayout } from '../hooks/useExpandedGameLayout';
 import { useGestureHint } from '../hooks/useGestureHint';
 
 function useKeepScreenAwake(active: boolean): void {
@@ -59,19 +59,32 @@ const GameScreen: React.FunctionComponent<Props> = ({ navigation }) => {
         navigation.setOptions({ unstable_headerRightItems: () => headerRightItems });
     }, [navigation, headerRightItems]);
 
+    // On a partially open iPhone Duo the board keeps to the half before the
+    // fold; the game sheet docks on the other half (see GameSheet).
+    const foldSplit = useGameFoldSplit();
+    const { width: windowWidth, height: windowHeight } = useWindowDimensions();
+    const paddingTop = scrollUnderHeader ? 0 : headerHeight;
+    const boardStyle = foldSplit === 'columns'
+        ? [styles.boardFirstColumn, { width: windowWidth / 2 - FOLD_GAP / 2 }]
+        : foldSplit === 'rows'
+            ? [styles.boardFirstRow, { height: windowHeight / 2 - FOLD_GAP / 2 - paddingTop }]
+            : StyleSheet.absoluteFill;
+
     if (typeof currentGameId == 'undefined') return null;
 
     return (
-        <View style={{ flex: 1, paddingTop: scrollUnderHeader ? 0 : headerHeight }} testID="game-screen">
+        <View style={{ flex: 1, paddingTop }} testID="game-screen">
             <View style={{ flex: 1 }}>
-                {isDial
-                    ? <Animated.View key="rows" entering={FadeIn.duration(220)} exiting={FadeOut.duration(180)} style={StyleSheet.absoluteFill}>
-                        <ListBoard showHint={showHint} topInset={scrollUnderHeader ? headerHeight : 0} />
-                    </Animated.View>
-                    : <Animated.View key="flex" entering={FadeIn.duration(220)} exiting={FadeOut.duration(180)} style={StyleSheet.absoluteFill}>
-                        <TileBoard showHint={showHint} />
-                    </Animated.View>
-                }
+                <View style={boardStyle} testID="game-board-area">
+                    {isDial
+                        ? <Animated.View key="rows" entering={FadeIn.duration(220)} exiting={FadeOut.duration(180)} style={StyleSheet.absoluteFill}>
+                            <ListBoard showHint={showHint} topInset={scrollUnderHeader ? headerHeight : 0} />
+                        </Animated.View>
+                        : <Animated.View key="flex" entering={FadeIn.duration(220)} exiting={FadeOut.duration(180)} style={StyleSheet.absoluteFill}>
+                            <TileBoard showHint={showHint} />
+                        </Animated.View>
+                    }
+                </View>
 
                 <LockedGameHint top={(scrollUnderHeader ? headerHeight : 0) + 8} />
 
@@ -84,5 +97,19 @@ const GameScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     );
 };
 
+const styles = StyleSheet.create({
+    boardFirstColumn: {
+        position: 'absolute',
+        top: 0,
+        bottom: 0,
+        left: 0,
+    },
+    boardFirstRow: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+    },
+});
 
 export default GameScreen;

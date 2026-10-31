@@ -6,6 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { selectGameById } from '../../../redux/GamesSlice';
 import { useAppSelector } from '../../../redux/hooks';
 import { bottomSheetHeight } from '../../components/Sheets/GameSheet';
+import { useGameFoldSplit } from '../../hooks/useExpandedGameLayout';
 import { useTheme } from '../../theme';
 
 import PlayerTile from './PlayerTile';
@@ -13,6 +14,9 @@ import PlayerTile from './PlayerTile';
 const TileBoard: React.FC<{ showHint: boolean }> = ({ showHint }) => {
     const theme = useTheme();
     const fullscreen = useAppSelector(state => state.settings.home_fullscreen);
+    // Docked beside the board on a partially open iPhone Duo, the game sheet
+    // no longer covers the bottom of the board.
+    const foldSplit = useGameFoldSplit();
     const playerIds = useAppSelector(state => {
         const currentGameId = state.settings.currentGameId;
         return currentGameId ? selectGameById(state, currentGameId)?.playerIds : undefined;
@@ -90,7 +94,7 @@ const TileBoard: React.FC<{ showHint: boolean }> = ({ showHint }) => {
         <SafeAreaView edges={['left', 'right']} style={
             [styles.contentStyle,
             {
-                paddingBottom: fullscreen ? 20 : bottomSheetHeight + 2, // Add 2 to account for the border
+                paddingBottom: foldSplit ? 0 : fullscreen ? 20 : bottomSheetHeight + 2, // Add 2 to account for the border
                 backgroundColor: theme.background,
             }]
         } onLayout={layoutHandler} >
