@@ -58,7 +58,7 @@ describe('TileBoard', () => {
 
     const renderBoard = ({
         ids = playerIds,
-        size = { width: 400, height: 682 },
+        size = { width: 400, height: 600 },
         fullscreen = false,
         foldSplit = null,
     }: {
@@ -115,26 +115,27 @@ describe('TileBoard', () => {
 
     it('uses the same inset snapshot for native padding and tile geometry', () => {
         mockInsets = { top: 0, bottom: 0, left: 12, right: 28 };
-        const { getByTestId, getAllByText } = renderBoard({ size: { width: 440, height: 682 } });
+        const { getByTestId, getAllByText } = renderBoard({ size: { width: 440, height: 600 } });
         expect(StyleSheet.flatten(getByTestId('tile-board').props.style)).toMatchObject({
-            paddingLeft: 12, paddingRight: 28, paddingBottom: 82,
+            paddingLeft: 12, paddingRight: 28,
         });
         expect(getAllByText('Width: 200')).toHaveLength(4);
         expect(getAllByText('Height: 300')).toHaveLength(4);
     });
 
-    it('excludes the bottom-sheet strip from tile heights', () => {
-        const { getAllByText } = renderBoard({ size: { width: 400, height: 600 } });
-        expect(getAllByText('Height: 259')).toHaveLength(4);
+    it('leaves room for the game sheet to the board size it is given', () => {
+        const { getByTestId, getAllByText } = renderBoard({ size: { width: 400, height: 600 } });
+        expect(StyleSheet.flatten(getByTestId('tile-board').props.style).paddingBottom).toBeUndefined();
+        expect(getAllByText('Height: 300')).toHaveLength(4);
     });
 
-    it('uses only the left inset in a column split and removes bottom-sheet padding', () => {
+    it('uses only the left inset in a column split', () => {
         mockInsets = { top: 0, bottom: 0, left: 12, right: 28 };
         const { getByTestId, getAllByText } = renderBoard({
             foldSplit: 'columns', size: { width: 412, height: 600 },
         });
         expect(StyleSheet.flatten(getByTestId('tile-board').props.style)).toMatchObject({
-            paddingLeft: 12, paddingRight: 0, paddingBottom: 0,
+            paddingLeft: 12, paddingRight: 0,
         });
         expect(getAllByText('Width: 200')).toHaveLength(4);
         expect(getAllByText('Height: 300')).toHaveLength(4);
@@ -144,12 +145,6 @@ describe('TileBoard', () => {
         mockInsets = { top: 0, bottom: 0, left: 12, right: 28 };
         const { getAllByText } = renderBoard({ foldSplit: 'rows', size: { width: 440, height: 600 } });
         expect(getAllByText('Width: 200')).toHaveLength(4);
-        expect(getAllByText('Height: 300')).toHaveLength(4);
-    });
-
-    it('keeps only the fullscreen bottom margin when the sheet is hidden', () => {
-        const { getByTestId, getAllByText } = renderBoard({ fullscreen: true, size: { width: 400, height: 620 } });
-        expect(StyleSheet.flatten(getByTestId('tile-board').props.style).paddingBottom).toBe(20);
         expect(getAllByText('Height: 300')).toHaveLength(4);
     });
 
@@ -171,12 +166,12 @@ describe('TileBoard', () => {
 
     it('commits new grid and text bounds in one render without remounting any tile', () => {
         const { getByTestId, getAllByText, rerender, element } = renderBoard({
-            ids: ['player-1', 'player-2'], size: { width: 200, height: 482 },
+            ids: ['player-1', 'player-2'], size: { width: 200, height: 400 },
         });
         expect(getByTestId('tile-grid-2x1')).toBeTruthy();
         mockPlayerTileRender.mockClear();
 
-        const nextSize = { width: 400, height: 282 };
+        const nextSize = { width: 400, height: 200 };
         rerender(element(nextSize));
 
         expect(getByTestId('tile-grid-1x2')).toBeTruthy();

@@ -5,7 +5,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { selectGameById } from '../../../redux/GamesSlice';
 import { useAppSelector } from '../../../redux/hooks';
-import { bottomSheetHeight } from '../../components/Sheets/GameSheet';
 import type { GameFoldSplit } from '../../hooks/useExpandedGameLayout';
 import { useTheme } from '../../theme';
 
@@ -25,17 +24,17 @@ interface BoardSize {
 const TileBoard: React.FC<TileBoardProps> = ({ boardSize, showHint, foldSplit = null }) => {
     const theme = useTheme();
     const insets = useSafeAreaInsets();
-    const fullscreen = useAppSelector(state => state.settings.home_fullscreen);
     const playerIds = useAppSelector(state => {
         const currentGameId = state.settings.currentGameId;
         return currentGameId ? selectGameById(state, currentGameId)?.playerIds : undefined;
     });
     const visiblePlayerIds = playerIds ?? [];
     const playerCount = visiblePlayerIds.length;
-    const paddingBottom = foldSplit ? 0 : fullscreen ? 20 : bottomSheetHeight + 2;
     const paddingRight = foldSplit === 'columns' ? 0 : insets.right;
     const contentWidth = Math.max(0, boardSize.width - insets.left - paddingRight);
-    const contentHeight = Math.max(0, boardSize.height - paddingBottom);
+    // The space for the collapsed game sheet is already outside `boardSize`
+    // (see GameScreen), so folding animates it with the board's frame.
+    const contentHeight = Math.max(0, boardSize.height);
 
     // Insets, grid geometry, and text bounds use the same render snapshot.
     // Native safe-area padding and onLayout-driven grid state otherwise resize
@@ -81,7 +80,6 @@ const TileBoard: React.FC<TileBoardProps> = ({ boardSize, showHint, foldSplit = 
         <View testID="tile-board" style={
             [styles.contentStyle,
             {
-                paddingBottom,
                 paddingLeft: insets.left,
                 paddingRight,
                 backgroundColor: theme.background,

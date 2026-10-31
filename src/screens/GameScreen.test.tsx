@@ -66,6 +66,8 @@ jest.mock('@gorhom/bottom-sheet', () => {
     };
 });
 
+jest.mock('../components/Sheets/GameSheet', () => ({ bottomSheetHeight: 80 }));
+
 jest.mock('../hooks/useExpandedGameLayout', () => ({
     ...jest.requireActual('../hooks/useExpandedGameLayout'),
     useGameFoldSplit: jest.fn(() => null),
@@ -253,9 +255,9 @@ describe('GameScreen', () => {
     });
 
     describe('on a partially open iPhone Duo', () => {
-        const renderGame = () => {
+        const renderGame = (settings: Record<string, unknown> = {}) => {
             const store = createMockStore({
-                settings: { currentGameId: 'game-1' },
+                settings: { currentGameId: 'game-1', ...settings },
                 games: { entities: { 'game-1': mockGame }, ids: ['game-1'] },
                 players: { entities: mockPlayers, ids: ['player-1', 'player-2'] },
             });
@@ -269,14 +271,22 @@ describe('GameScreen', () => {
 
         afterEach(() => mockUseGameFoldSplit.mockReturnValue(null));
 
-        it('fills the screen with the board when flat', () => {
+        it('fills the screen with the board when flat, above the collapsed sheet', () => {
             const { getByTestId } = renderGame();
             const { width, height } = Dimensions.get('window');
 
+            // Header (88) and the collapsed sheet (80 + 2) are outside the board's frame.
             expect(StyleSheet.flatten(getByTestId('game-board-area').props.style)).toEqual({
-                position: 'absolute', top: 0, left: 0, width, height: height - 88,
+                position: 'absolute', top: 0, left: 0, width, height: height - 88 - 82,
             });
-            expect(getByTestId('tile-board').props.boardSize).toEqual({ width, height: height - 88 });
+            expect(getByTestId('tile-board').props.boardSize).toEqual({ width, height: height - 88 - 82 });
+        });
+
+        it('keeps only a small bottom margin in fullscreen, which hides the sheet', () => {
+            const { getByTestId } = renderGame({ home_fullscreen: true });
+            const { height } = Dimensions.get('window');
+
+            expect(getByTestId('tile-board').props.boardSize.height).toBe(height - 88 - 20);
         });
 
         it('keeps the board to the left of the fold in landscape', () => {

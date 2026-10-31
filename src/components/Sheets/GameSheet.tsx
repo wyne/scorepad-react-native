@@ -5,7 +5,7 @@ import { ParamListBase, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Button } from '@rneui/base';
 import { Alert, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View, useWindowDimensions } from 'react-native';
-import Animated, { Extrapolate, FadeIn, interpolate, runOnJS, useAnimatedReaction, useAnimatedStyle, useDerivedValue, useSharedValue, withTiming } from 'react-native-reanimated';
+import Animated, { Extrapolate, FadeIn, FadeOut, interpolate, ReduceMotion, runOnJS, useAnimatedReaction, useAnimatedStyle, useDerivedValue, useSharedValue, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { asyncRematchGame, selectGameById, updateGame } from '../../../redux/GamesSlice';
@@ -31,6 +31,10 @@ import SheetBackground from './SheetBackground';
 export const bottomSheetHeight = 80;
 
 const BUTTON_TILE_MAX_WIDTH = 260;
+
+// A fade is gentle enough to keep with Reduce Motion on.
+const SHEET_FADE_IN = FadeIn.duration(200).reduceMotion(ReduceMotion.Never);
+const SHEET_FADE_OUT = FadeOut.duration(150).reduceMotion(ReduceMotion.Never);
 const BUTTON_TILE_MARGIN = 5;
 
 const GameSheet: React.FunctionComponent = () => {
@@ -219,10 +223,10 @@ const GameSheet: React.FunctionComponent = () => {
     }, [gameSheetRef, snapPoints.length]);
 
     /**
-     * Animated position of the bottom sheet
-     * Calculated as the difference between the current position and the first snap point
+     * Animated snap index of the bottom sheet: 0 collapsed, 1 at 60%, 2 at the
+     * next stop up (the content height, from the sheet's dynamic sizing, or 100%).
      */
-    const animatedPosition = useSharedValue(0);
+    const animatedIndex = useSharedValue(0);
 
     /**
      * Animated style for the bottom sheet
@@ -230,29 +234,13 @@ const GameSheet: React.FunctionComponent = () => {
     const animatedSheetStyle = useAnimatedStyle(() => {
         if (docked) return { opacity: 1 };
 
-        const snapPoint0: number = typeof snapPoints[0] === 'string'
-            ? parseFloat(snapPoints[0]) / 100 * containerHeight
-            : containerHeight - snapPoints[0];
-
-        const delta = snapPoint0 - animatedPosition.value;
-
-        const interpolatedValue = interpolate(
-            delta,
-            [0, 100], // Pixel distance
-            [0, 1], // Opacity
-            Extrapolate.CLAMP
-        );
-
+        // Track the snap index rather than the position: the index starts at
+        // collapsed, while a freshly mounted sheet's position reads as fully
+        // open until it is laid out, which flashed the buttons on undocking.
         return {
-            opacity: interpolatedValue
+            opacity: interpolate(animatedIndex.value, [0, 0.3], [0, 1], Extrapolate.CLAMP),
         };
     });
-
-    /**
-     * Animated snap index of the bottom sheet: 0 collapsed, 1 at 60%, 2 at the
-     * next stop up (the content height, from the sheet's dynamic sizing, or 100%).
-     */
-    const animatedIndex = useSharedValue(0);
 
     // A manual drag only calls onAnimate on release, so in the expanded layout
     // render the content as soon as the drag starts; otherwise the score table
@@ -368,7 +356,17 @@ const GameSheet: React.FunctionComponent = () => {
     if (currentGameId == undefined) return null;
 
     return (
-        <>
+        // Docking and undocking cross-fade the whole sheet, round picker
+        // included, as one layer while the board resizes (see GameScreen).
+        // Keyed: the snap points change, so the sheet starts over at its first
+        // point rather than carry an index over.
+        <Animated.View
+            key={foldSplit ?? 'flat'}
+            entering={hasMountedRef.current ? SHEET_FADE_IN : undefined}
+            exiting={SHEET_FADE_OUT}
+            pointerEvents="box-none"
+            style={StyleSheet.absoluteFill}
+        >
             {expandedLayout && !docked && (
                 <Animated.View
                     style={[
@@ -382,9 +380,6 @@ const GameSheet: React.FunctionComponent = () => {
                 </Animated.View>
             )}
             <BottomSheet
-                // Docking and undocking change the snap points, so start the
-                // sheet over at its first point rather than carry an index over.
-                key={foldSplit ?? 'flat'}
                 ref={gameSheetRef}
                 index={docked ? 0 : initialIndex}
                 onChange={onSheetChange}
@@ -396,7 +391,6 @@ const GameSheet: React.FunctionComponent = () => {
                 enableHandlePanningGesture={!docked}
                 enableContentPanningGesture={!docked}
                 handleIndicatorStyle={{ backgroundColor: theme.sheetHandle }}
-                animatedPosition={animatedPosition}
                 animatedIndex={animatedIndex}
                 // Dynamic sizing adds a snap point at the content height. In the
                 // expanded layout the width animation changes that height mid-drag,
@@ -530,7 +524,7 @@ const GameSheet: React.FunctionComponent = () => {
                 </BottomSheetScrollView>
 
             </BottomSheet>
-        </>
+        </Animated.View>
     );
 };
 

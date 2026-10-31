@@ -16,6 +16,7 @@ import { InteractionType } from '../components/Interactions/InteractionType';
 import LockedGameHint from '../components/LockedGameHint';
 import ChooseWinnersSheet from '../components/Sheets/ChooseWinnersSheet';
 import GameOverSheet from '../components/Sheets/GameOverSheet';
+import { bottomSheetHeight } from '../components/Sheets/GameSheet';
 import GestureInfoSheet from '../components/Sheets/GestureInfoSheet';
 import PointValuesSheet from '../components/Sheets/PointValuesSheet';
 import { FOLD_GAP, useGameFoldSplit, useVerticalBarLayout } from '../hooks/useExpandedGameLayout';
@@ -92,6 +93,7 @@ interface Props {
 const GameScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     const currentGameId = useAppSelector(state => state.settings.currentGameId);
     const keepScreenAwake = useAppSelector(state => state.settings.keepScreenAwake);
+    const fullscreen = useAppSelector(state => state.settings.home_fullscreen);
     const interactionType = useAppSelector(state => selectInteractionType(state, currentGameId));
     const headerHeight = useHeaderHeight();
     const showHint = useGestureHint();
@@ -116,12 +118,16 @@ const GameScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     const foldSplit = useGameFoldSplit();
     const { width: windowWidth, height: windowHeight } = useWindowDimensions();
     const paddingTop = scrollUnderHeader ? 0 : headerHeight;
+    // Room for the collapsed game sheet below the tiles (the dial list scrolls
+    // under it instead). It's part of the board's frame rather than padding
+    // inside the board, so folding and unfolding animate it with the board.
+    const boardBottomInset = isDial || foldSplit ? 0 : fullscreen ? 20 : bottomSheetHeight + 2;
     // Give the board and its tiles the same geometry in this render. Measuring
     // the resized native board first exposes an old grid inside the new bounds.
     const boardSize = useMemo(() => ({
         width: Math.max(0, foldSplit === 'columns' ? windowWidth / 2 - FOLD_GAP / 2 : windowWidth),
-        height: Math.max(0, (foldSplit === 'rows' ? windowHeight / 2 - FOLD_GAP / 2 : windowHeight) - paddingTop),
-    }), [foldSplit, windowWidth, windowHeight, paddingTop]);
+        height: Math.max(0, (foldSplit === 'rows' ? windowHeight / 2 - FOLD_GAP / 2 : windowHeight) - paddingTop - boardBottomInset),
+    }), [foldSplit, windowWidth, windowHeight, paddingTop, boardBottomInset]);
 
     // Animate the board's resize only when folding or unfolding changes it,
     // not when the window rotates or the header changes height.
