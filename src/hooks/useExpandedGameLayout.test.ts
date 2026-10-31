@@ -1,9 +1,24 @@
-import { renderHook } from '@testing-library/react-native';
+import { act, renderHook } from '@testing-library/react-native';
 import { Platform } from 'react-native';
 
 import { useExpandedGameLayout, useGameFoldSplit, useVerticalBarLayout } from './useExpandedGameLayout';
 
-jest.mock('expo-hinge', () => ({ useHinge: jest.fn(() => null) }));
+type MockHinge = {
+    angle: number;
+    status: 'closed' | 'partiallyOpen' | 'fullyOpen' | 'unknown';
+} | null;
+type MockHingeStatus = NonNullable<MockHinge>['status'];
+
+let mockCurrentHinge: MockHinge = null;
+let mockHingeListener: ((event: { hinge: MockHinge }) => void) | null = null;
+
+jest.mock('expo-hinge', () => ({
+    getHinge: jest.fn(() => mockCurrentHinge),
+    addHingeListener: jest.fn((listener: (event: { hinge: MockHinge }) => void) => {
+        mockHingeListener = listener;
+        return { remove: jest.fn() };
+    }),
+}));
 
 jest.mock('../../redux/hooks', () => ({
     useAppSelector: jest.fn((selector: (state: unknown) => unknown) =>
@@ -12,7 +27,7 @@ jest.mock('../../redux/hooks', () => ({
 
 let mockFullscreen = false;
 
-const useHinge: jest.Mock = jest.requireMock('expo-hinge').useHinge;
+const addHingeListener: jest.Mock = jest.requireMock('expo-hinge').addHingeListener;
 
 jest.mock('react-native/Libraries/Utilities/useWindowDimensions', () => ({
     __esModule: true,
@@ -102,57 +117,91 @@ describe('useVerticalBarLayout', () => {
 });
 
 describe('useGameFoldSplit', () => {
-    const split = () => renderHook(() => useGameFoldSplit()).result.current;
-    const setHinge = (status: string | null) => {
-        useHinge.mockReturnValue(status == null ? null : { status, angle: 120 });
+    const renderSplit = () => renderHook(() => useGameFoldSplit());
+    const setHinge = (status: MockHingeStatus | null) => {
+        mockCurrentHinge = status == null ? null : { status, angle: 120 };
+    };
+    const emitHinge = (hinge: MockHinge) => {
+        mockCurrentHinge = hinge;
+        mockHingeListener?.({ hinge });
     };
 
     beforeEach(() => {
         setPlatform('ios');
         mockFullscreen = false;
+        mockCurrentHinge = null;
+        mockHingeListener = null;
+        addHingeListener.mockClear();
     });
     afterAll(() => {
         setPlatform('ios');
-        useHinge.mockReturnValue(null);
+        mockCurrentHinge = null;
     });
 
     it('splits into columns when partially open in landscape', () => {
         setHinge('partiallyOpen');
         setWindow(951, 669);
-        expect(split()).toBe('columns');
+        expect(renderSplit().result.current).toBe('columns');
     });
 
     it('splits into rows when partially open in portrait', () => {
         setHinge('partiallyOpen');
         setWindow(669, 951);
-        expect(split()).toBe('rows');
+        expect(renderSplit().result.current).toBe('rows');
     });
 
     it('does not split when flat or closed', () => {
         setWindow(951, 669);
         setHinge('fullyOpen');
-        expect(split()).toBeNull();
+        const flat = renderSplit();
+        expect(flat.result.current).toBeNull();
+        flat.unmount();
         setHinge('closed');
-        expect(split()).toBeNull();
+        expect(renderSplit().result.current).toBeNull();
     });
 
     it('does not split without a hinge', () => {
         setHinge(null);
         setWindow(951, 669);
-        expect(split()).toBeNull();
+        expect(renderSplit().result.current).toBeNull();
     });
 
     it('does not split in fullscreen, which hides the sheet', () => {
         mockFullscreen = true;
         setHinge('partiallyOpen');
         setWindow(951, 669);
-        expect(split()).toBeNull();
+        expect(renderSplit().result.current).toBeNull();
     });
 
     it('does not split on Android', () => {
         setPlatform('android');
         setHinge('partiallyOpen');
         setWindow(951, 669);
-        expect(split()).toBeNull();
+        expect(renderSplit().result.current).toBeNull();
+        expect(addHingeListener).not.toHaveBeenCalled();
+    });
+
+    it('shares one native subscription and ignores angle-only changes', () => {
+        setHinge('partiallyOpen');
+        setWindow(951, 669);
+        let renderCount = 0;
+
+        const first = renderHook(() => {
+            renderCount += 1;
+            return useGameFoldSplit();
+        });
+        const second = renderSplit();
+
+        expect(first.result.current).toBe('columns');
+        expect(second.result.current).toBe('columns');
+        expect(addHingeListener).toHaveBeenCalledTimes(1);
+
+        act(() => emitHinge({ status: 'partiallyOpen', angle: 121 }));
+        expect(renderCount).toBe(1);
+
+        act(() => emitHinge({ status: 'fullyOpen', angle: 180 }));
+        expect(first.result.current).toBeNull();
+        expect(second.result.current).toBeNull();
+        expect(renderCount).toBe(2);
     });
 });

@@ -86,6 +86,13 @@ jest.mock('../components/Boards/ListBoard', () => {
     };
 });
 
+jest.mock('../components/LockedGameHint', () => {
+    return function MockLockedGameHint() {
+        const { View } = jest.requireActual('react-native');
+        return <View testID="locked-game-hint" />;
+    };
+});
+
 jest.mock('../components/Sheets/PointValuesSheet', () => {
     return function MockPointValuesSheet() {
         const { View, Text } = jest.requireActual('react-native');
@@ -267,6 +274,7 @@ describe('GameScreen', () => {
 
             const style = StyleSheet.flatten(getByTestId('game-board-area').props.style);
             expect(style).toMatchObject({ left: 0, top: 0, bottom: 0, width: width / 2 - 16 });
+            expect(getByTestId('game-board-area').findByProps({ testID: 'locked-game-hint' })).toBeTruthy();
         });
 
         it('keeps the board above the fold in portrait, below the header', () => {

@@ -84,9 +84,9 @@ const GameScreen: React.FunctionComponent<Props> = ({ navigation }) => {
                             <TileBoard showHint={showHint} />
                         </Animated.View>
                     }
-                </View>
 
-                <LockedGameHint top={(scrollUnderHeader ? headerHeight : 0) + 8} />
+                    <LockedGameHint top={(scrollUnderHeader ? headerHeight : 0) + 8} />
+                </View>
 
                 <PointValuesSheet />
                 <ChooseWinnersSheet />
