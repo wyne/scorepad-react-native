@@ -139,6 +139,7 @@ const GameScreen: React.FunctionComponent<Props> = ({ navigation }) => {
         width: Math.max(0, foldSplit === 'columns' ? windowWidth / 2 - FOLD_GAP / 2 : windowWidth),
         height: Math.max(0, (foldSplit === 'rows' ? windowHeight / 2 - FOLD_GAP / 2 : windowHeight) - paddingTop - boardBottomInset),
     }), [foldSplit, windowWidth, windowHeight, paddingTop, boardBottomInset]);
+    const boardOrigin = useMemo(() => ({ x: 0, y: paddingTop }), [paddingTop]);
 
     // Animate the board's resize only when folding or unfolding changes it,
     // not when the window rotates or the header changes height.
@@ -170,7 +171,7 @@ const GameScreen: React.FunctionComponent<Props> = ({ navigation }) => {
                             <ListBoard foldSplit={foldSplit} showHint={showHint} topInset={scrollUnderHeader ? headerHeight : 0} />
                         </Animated.View>
                         : <Animated.View key="flex" entering={FadeIn.duration(220)} exiting={FadeOut.duration(180)} style={StyleSheet.absoluteFill}>
-                            <TileBoard boardSize={boardSize} foldSplit={foldSplit} showHint={showHint} />
+                            <TileBoard boardOrigin={boardOrigin} boardSize={boardSize} foldSplit={foldSplit} showHint={showHint} />
                         </Animated.View>
                     }
 

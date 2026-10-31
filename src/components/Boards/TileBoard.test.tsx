@@ -21,9 +21,26 @@ jest.mock('react-native-safe-area-context', () => ({
 const mockPlayerTileRender = jest.fn();
 const mockPlayerTileMount = jest.fn();
 const mockPlayerTileUnmount = jest.fn();
-jest.mock('./PlayerTile', () => {
-    return function MockPlayerTile({ playerId, cols, rows, width, height, index }: {
+let mockDisplayRadius = 0;
+jest.mock('../../../modules/display-corners', () => ({
+    useDisplayCornerRadius: () => mockDisplayRadius,
+}));
+
+let mockVerticalBars = false;
+jest.mock('../../hooks/useExpandedGameLayout', () => ({
+    useVerticalBarLayout: () => mockVerticalBars,
+}));
+
+jest.mock('./PlayerTile', () => ({
+    __esModule: true,
+    TILE_BORDER: 3,
+    TILE_RADIUS: 20,
+    default: function MockPlayerTile({
+        playerId, cols, rows, width, height, index,
+        radiusTopLeft, radiusTopRight, radiusBottomLeft, radiusBottomRight,
+    }: {
         playerId: string; cols: number; rows: number; width: number; height: number; index: number;
+        radiusTopLeft?: number; radiusTopRight?: number; radiusBottomLeft?: number; radiusBottomRight?: number;
     }) {
         const { useEffect } = jest.requireActual('react');
         const { View, Text } = jest.requireActual('react-native');
@@ -39,10 +56,11 @@ jest.mock('./PlayerTile', () => {
                 <Text>Width: {width}</Text>
                 <Text>Height: {height}</Text>
                 <Text>Index: {index}</Text>
+                <Text testID={`radii-${playerId}`}>{[radiusTopLeft, radiusTopRight, radiusBottomLeft, radiusBottomRight].join(',')}</Text>
             </View>
         );
-    };
-});
+    },
+}));
 
 const createMockStore = (initialState: Parameters<typeof configureStore>[0]['preloadedState']) => configureStore({
     reducer: { settings: settingsReducer, games: gamesReducer, players: playersReducer },
@@ -82,6 +100,8 @@ describe('TileBoard', () => {
 
     beforeEach(() => {
         mockInsets = { top: 0, bottom: 0, left: 0, right: 0 };
+        mockDisplayRadius = 0;
+        mockVerticalBars = false;
         mockPlayerTileRender.mockClear();
         mockPlayerTileMount.mockClear();
         mockPlayerTileUnmount.mockClear();
@@ -189,5 +209,42 @@ describe('TileBoard', () => {
     it('does not render invalid tile bounds in a collapsed viewport', () => {
         const { queryByTestId } = renderBoard({ size: { width: 0, height: 0 } });
         expect(queryByTestId('player-tile-player-1')).toBeNull();
+    });
+
+    describe('on the iPhone Duo', () => {
+        // The jest window is 750 × 1334; the board fills it from the top left.
+        const fullWindow = { width: 750, height: 1334 };
+        const radii = (getByTestId: (id: string) => { props: Record<string, unknown> }, id: string) =>
+            String(getByTestId(`radii-${id}`).props.children).split(',').map(Number);
+
+        beforeEach(() => {
+            mockVerticalBars = true;
+        });
+
+        it('makes the margin around the board match the gap between tiles', () => {
+            const { getByTestId, getAllByText } = renderBoard({ size: fullWindow });
+
+            expect(StyleSheet.flatten(getByTestId('tile-board-viewport').props.style)).toMatchObject({
+                margin: 3, width: 744, height: 1328,
+            });
+            expect(getAllByText('Width: 372')).toHaveLength(4);
+        });
+
+        it('draws tile corners in a screen corner concentric with the display', () => {
+            mockDisplayRadius = 50;
+            const { getByTestId } = renderBoard({ size: fullWindow });
+
+            // Each tile's outer edge sits 3pt in from the screen's edge.
+            expect(radii(getByTestId, 'player-1')).toEqual([47, 20, 20, 20]);
+            expect(radii(getByTestId, 'player-2')).toEqual([20, 47, 20, 20]);
+            expect(radii(getByTestId, 'player-3')).toEqual([20, 20, 47, 20]);
+            expect(radii(getByTestId, 'player-4')).toEqual([20, 20, 20, 47]);
+        });
+
+        it('keeps the usual radius when the display reports none', () => {
+            const { getByTestId } = renderBoard({ size: fullWindow });
+
+            expect(radii(getByTestId, 'player-1')).toEqual([20, 20, 20, 20]);
+        });
     });
 });
