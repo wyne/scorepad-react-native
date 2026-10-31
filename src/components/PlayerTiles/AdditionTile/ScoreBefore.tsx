@@ -23,22 +23,21 @@ const ScoreBefore: React.FunctionComponent<Props> = ({
 }) => {
     const scoreBefore = currentRoundTotalScore - currentRoundScore;
 
-    const fontSize = useSharedValue(calculateFontSize(containerWidth));
+    const fontScale = useSharedValue(currentRoundScore == 0 ? singleLineScoreSizeMultiplier : multiLineScoreSizeMultiplier);
     const fontOpacity = useSharedValue(100);
+    const baseFontSize = calculateFontSize(containerWidth);
 
     const animatedStyles = useAnimatedStyle(() => {
         return {
-            fontSize: fontSize.value,
+            fontSize: baseFontSize * fontScale.value,
             fontWeight: currentRoundScore == 0 ? 'bold' : 'normal',
             opacity: fontOpacity.value / 100,
         };
     });
 
-    const scaleFactor = currentRoundScore == 0 ? singleLineScoreSizeMultiplier : multiLineScoreSizeMultiplier;
-
     useEffect(() => {
-        fontSize.value = withTiming(
-            calculateFontSize(containerWidth) * scaleFactor,
+        fontScale.value = withTiming(
+            currentRoundScore == 0 ? singleLineScoreSizeMultiplier : multiLineScoreSizeMultiplier,
             { duration: animationDuration }
         );
 
@@ -46,7 +45,7 @@ const ScoreBefore: React.FunctionComponent<Props> = ({
             currentRoundScore == 0 ? 100 : scoreMathOpacity * 100,
             { duration: animationDuration }
         );
-    }, [currentRoundScore, containerWidth]);
+    }, [currentRoundScore, fontOpacity, fontScale]);
 
     return (
         <Animated.View entering={enteringAnimation}>

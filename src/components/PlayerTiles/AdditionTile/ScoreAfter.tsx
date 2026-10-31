@@ -17,26 +17,27 @@ interface Props {
 }
 
 const ScoreAfter: React.FunctionComponent<Props> = ({ containerWidth, currentRoundScore, currentRoundTotalScore, fontColor }) => {
-    const fontSize = useSharedValue(calculateFontSize(containerWidth));
+    const fontScale = useSharedValue(currentRoundScore == 0 ? 0 : 1.1);
     const opacity = useSharedValue(1);
+    const baseFontSize = calculateFontSize(containerWidth);
 
     const animatedStyles = useAnimatedStyle(() => {
         return {
-            fontSize: fontSize.value,
+            fontSize: Math.max(1, baseFontSize * fontScale.value),
             opacity: opacity.value,
         };
     });
 
     useEffect(() => {
-        fontSize.value = withTiming(
-            currentRoundScore == 0 ? 1 : calculateFontSize(containerWidth) * 1.1,
+        fontScale.value = withTiming(
+            currentRoundScore == 0 ? 0 : 1.1,
             { duration: animationDuration },
         );
         opacity.value = withTiming(
             currentRoundScore == 0 ? 0 : 1,
             { duration: animationDuration },
         );
-    }, [currentRoundScore, containerWidth]);
+    }, [currentRoundScore, fontScale, opacity]);
 
     return (
         <Animated.View entering={enteringAnimation} exiting={ZoomOutFadeOut}>

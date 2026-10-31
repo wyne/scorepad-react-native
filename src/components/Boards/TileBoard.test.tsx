@@ -105,14 +105,9 @@ describe('TileBoard', () => {
     };
 
     beforeEach(() => {
-        jest.useFakeTimers();
         mockPlayerTileMount.mockClear();
         mockPlayerTileRender.mockClear();
         mockPlayerTileUnmount.mockClear();
-    });
-    afterEach(() => {
-        jest.clearAllTimers();
-        jest.useRealTimers();
     });
 
     it('should render null when no players are available', () => {
@@ -287,7 +282,7 @@ describe('TileBoard', () => {
             </Provider>
         );
 
-        const safeAreaView = getByTestId('safe-area-view');
+        const safeAreaView = getByTestId('tile-board-viewport');
         
         // Trigger layout event with specific dimensions
         fireEvent(safeAreaView, 'layout', {
@@ -333,7 +328,7 @@ describe('TileBoard', () => {
             </Provider>
         );
 
-        const safeAreaView = getByTestId('safe-area-view');
+        const safeAreaView = getByTestId('tile-board-viewport');
         
         // Trigger layout with 400x600 dimensions
         fireEvent(safeAreaView, 'layout', {
@@ -376,7 +371,7 @@ describe('TileBoard', () => {
             </Provider>
         );
 
-        const safeAreaView = getByTestId('safe-area-view');
+        const safeAreaView = getByTestId('tile-board-viewport');
         
         // Trigger layout event
         fireEvent(safeAreaView, 'layout', {
@@ -426,7 +421,7 @@ describe('TileBoard', () => {
             </Provider>
         );
 
-        const safeAreaView = getByTestId('safe-area-view');
+        const safeAreaView = getByTestId('tile-board-viewport');
         
         fireEvent(safeAreaView, 'layout', {
             nativeEvent: {
@@ -501,7 +496,7 @@ describe('TileBoard', () => {
             </Provider>
         );
 
-        const safeAreaView = getByTestId('safe-area-view');
+        const safeAreaView = getByTestId('tile-board-viewport');
         
         fireEvent(safeAreaView, 'layout', {
             nativeEvent: {
@@ -517,6 +512,27 @@ describe('TileBoard', () => {
         expect(getByText('Index: 1')).toBeTruthy(); // player-2
         expect(getByText('Index: 2')).toBeTruthy(); // player-3
         expect(getByText('Index: 3')).toBeTruthy(); // player-4
+    });
+
+    it('sizes tiles from the content viewport after bottom-sheet padding', () => {
+        const store = createMockStore({
+            settings: { currentGameId: 'game-1' },
+            games: { entities: { 'game-1': mockGame }, ids: ['game-1'] },
+            players: { entities: mockPlayers, ids: mockGame.playerIds },
+        });
+        const { getByTestId, getAllByText } = render(
+            <Provider store={store}>
+                <TileBoard showHint={false} />
+            </Provider>
+        );
+
+        expect(getByTestId('safe-area-view').props.onLayout).toBeUndefined();
+        // A 600-point outer board leaves 518 points after the 82-point strip.
+        fireEvent(getByTestId('tile-board-viewport'), 'layout', {
+            nativeEvent: { layout: { width: 400, height: 518 } },
+        });
+        expect(getAllByText('Height: 259')).toHaveLength(4);
+        expect(getAllByText('Width: 200')).toHaveLength(4);
     });
 
     it('should handle layout changes after initial render', () => {
@@ -545,7 +561,7 @@ describe('TileBoard', () => {
             </Provider>
         );
 
-        const safeAreaView = getByTestId('safe-area-view');
+        const safeAreaView = getByTestId('tile-board-viewport');
         
         // Initial layout
         fireEvent(safeAreaView, 'layout', {
@@ -573,14 +589,10 @@ describe('TileBoard', () => {
             },
         });
 
-        // Keep the old topology mounted while it fades away.
-        expect(getByTestId('tile-grid-2x1')).toBeTruthy();
-
-        act(() => jest.advanceTimersByTime(100));
-
-        // Switch topology only after fade-out (2x1 grid: width=400/2=200, height=200/1=200).
+        // Commit the complete new grid at once, preserving the existing tiles.
         expect(getAllByText('Width: 200')).toHaveLength(2);
         expect(getByTestId('tile-grid-1x2')).toBeTruthy();
+        expect(mockPlayerTileRender).toHaveBeenCalledTimes(2);
         // Keep the tile instances alive instead of overlapping an exiting grid
         // with a newly mounted one, which causes visible flicker.
         expect(mockPlayerTileMount).toHaveBeenCalledTimes(2);

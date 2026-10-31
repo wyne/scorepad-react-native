@@ -1,12 +1,8 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 
-import Animated, {
-    useSharedValue,
-    useAnimatedStyle,
-    withTiming
-} from 'react-native-reanimated';
+import Animated from 'react-native-reanimated';
 
-import { calculateFontSize, animationDuration, multiLineScoreSizeMultiplier, scoreMathOpacity } from './Helpers';
+import { calculateFontSize, multiLineScoreSizeMultiplier, scoreMathOpacity } from './Helpers';
 
 interface Props {
     currentRoundScore: number;
@@ -15,23 +11,7 @@ interface Props {
 }
 
 const ScoreRound: React.FunctionComponent<Props> = ({ containerWidth, currentRoundScore, fontColor }) => {
-    const fontSize = useSharedValue(calculateFontSize(containerWidth));
-
-    const animatedStyles = useAnimatedStyle(() => {
-        return {
-            fontSize: fontSize.value,
-        };
-    });
-
     const d = currentRoundScore;
-
-    useEffect(() => {
-        fontSize.value = withTiming(
-            calculateFontSize(containerWidth) * multiLineScoreSizeMultiplier,
-            { duration: animationDuration }
-        );
-
-    }, [currentRoundScore, containerWidth]);
 
     if (currentRoundScore == 0) {
         return <></>;
@@ -41,7 +21,8 @@ const ScoreRound: React.FunctionComponent<Props> = ({ containerWidth, currentRou
         <Animated.View>
             <Animated.Text numberOfLines={1}
                 allowFontScaling={false}
-                style={[animatedStyles, {
+                style={[{
+                    fontSize: calculateFontSize(containerWidth) * multiLineScoreSizeMultiplier,
                     fontVariant: ['tabular-nums'],
                     color: fontColor,
                     opacity: scoreMathOpacity

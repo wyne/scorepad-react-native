@@ -270,7 +270,9 @@ describe('GameScreen', () => {
         it('fills the screen with the board when flat', () => {
             const { getByTestId } = renderGame();
 
-            expect(StyleSheet.flatten(getByTestId('game-board-area').props.style)).toEqual({ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0 });
+            expect(StyleSheet.flatten(getByTestId('game-board-area').props.style)).toEqual({
+                position: 'absolute', top: 0, right: 0, bottom: 0, left: 0,
+            });
         });
 
         it('keeps the board to the left of the fold in landscape', () => {
@@ -279,8 +281,7 @@ describe('GameScreen', () => {
             const { getByTestId } = renderGame();
 
             const style = StyleSheet.flatten(getByTestId('game-board-area').props.style);
-            expect(style).toMatchObject({ left: 0, top: 0, bottom: 0, width: width / 2 - 16 });
-            expect(getByTestId('game-board-area').props.layout).toBeTruthy();
+            expect(style).toEqual({ position: 'absolute', left: 0, top: 0, bottom: 0, width: width / 2 - 16 });
             expect(getByTestId('game-board-area').findByProps({ testID: 'locked-game-hint' })).toBeTruthy();
         });
 
@@ -290,7 +291,7 @@ describe('GameScreen', () => {
             const { getByTestId } = renderGame();
 
             const style = StyleSheet.flatten(getByTestId('game-board-area').props.style);
-            expect(style).toMatchObject({ left: 0, right: 0, top: 0, height: height / 2 - 16 - 88 });
+            expect(style).toEqual({ position: 'absolute', left: 0, right: 0, top: 0, height: height / 2 - 16 - 88 });
         });
     });
 });
