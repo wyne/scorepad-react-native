@@ -1,4 +1,4 @@
-import { PayloadAction, ThunkAction, UnknownAction, createAsyncThunk, createEntityAdapter, createSelector, createSlice } from '@reduxjs/toolkit';
+import { PayloadAction, ThunkAction, UnknownAction, Update, createAsyncThunk, createEntityAdapter, createSelector, createSlice } from '@reduxjs/toolkit';
 import { getContrastRatio } from 'colorsheet';
 import * as Crypto from 'expo-crypto';
 
@@ -34,6 +34,21 @@ export interface GameState {
     scoring?: ScoringRules;
 }
 
+/** A finished game rests on its last round, where the header's Final is. */
+const restOnLastRound = (game: GameState): GameState => {
+    const lastRound = Math.max(game.roundTotal - 1, 0);
+    return game.locked && game.roundCurrent !== lastRound ? { ...game, roundCurrent: lastRound } : game;
+};
+
+/** Moves locked games to their last round, for saved and restored games. */
+export const restLockedGamesOnLastRound = (
+    entities: Record<string, GameState | undefined>,
+): Record<string, GameState> => Object.fromEntries(
+    Object.entries(entities)
+        .filter((entry): entry is [string, GameState] => entry[1] !== undefined)
+        .map(([id, game]) => [id, restOnLastRound(game)]),
+);
+
 const gamesAdapter = createEntityAdapter({
     sortComparer: (a: GameState, b: GameState) => (
         b.dateCreated - a.dateCreated || a.id.localeCompare(b.id)
@@ -57,7 +72,13 @@ const gamesSlice = createSlice({
     name: 'games',
     initialState,
     reducers: {
-        updateGame: gamesAdapter.updateOne,
+        updateGame(state, action: PayloadAction<Update<GameState, string>>) {
+            gamesAdapter.updateOne(state, action.payload);
+            const game = state.entities[action.payload.id];
+            if (game && action.payload.changes.locked) {
+                game.roundCurrent = restOnLastRound(game).roundCurrent;
+            }
+        },
         roundNext(state, action: PayloadAction<string>) {
             const game = state.entities[action.payload];
             if (!game) { return; }
@@ -139,7 +160,7 @@ const gamesSlice = createSlice({
             });
         },
         restoreAllGames(state, action: PayloadAction<Record<string, GameState>>) {
-            gamesAdapter.setAll(state, action.payload);
+            gamesAdapter.setAll(state, restLockedGamesOnLastRound(action.payload));
         },
 
     }

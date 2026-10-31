@@ -10,6 +10,7 @@ import { useAppDispatch, useAppSelector, useAppStore } from '../../../../redux/h
 import { playerRoundScoreIncrement } from '../../../../redux/PlayersSlice';
 import { setLastUsedInteractionType } from '../../../../redux/SettingsSlice';
 import { logEvent } from '../../../Analytics';
+import { useLockedHint } from '../../LockedHintContext';
 import { useMenuOpen } from '../../MenuOpenContext';
 import { InteractionType } from '../InteractionType';
 
@@ -144,6 +145,7 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
     const panY = useSharedValue(0);
 
     const { menuOpen } = useMenuOpen();
+    const { showLockedHint } = useLockedHint();
 
     const getCurrentRoundIndex = useCallback(() => {
         const state = store.getState();
@@ -188,6 +190,13 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
         })
         .onFinalize(() => {
             runOnJS(secondaryHoldStop)();
+        });
+
+    // The pan is off in a locked game; a tap there explains why.
+    const lockedTapGesture = Gesture.Tap()
+        .enabled(currentGameLocked && !menuOpen)
+        .onEnd(() => {
+            runOnJS(showLockedHint)();
         });
 
     const overlayAnimatedStyle = useAnimatedStyle(() => ({
@@ -257,7 +266,7 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
                 </View>
             )}
 
-            <GestureDetector gesture={panGesture}>
+            <GestureDetector gesture={Gesture.Race(panGesture, lockedTapGesture)}>
                 <ReAnimated.View
                     testID={`swipe-overlay-${index}`}
                     style={[

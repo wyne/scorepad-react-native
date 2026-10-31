@@ -2,7 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { configureStore } from '@reduxjs/toolkit';
 import { persistStore, persistReducer, createMigrate } from 'redux-persist';
 
-import gamesReducer from './GamesSlice';
+import gamesReducer, { GameState, restLockedGamesOnLastRound } from './GamesSlice';
 import scoresReducer from './PlayersSlice';
 import settingsReducer from './SettingsSlice';
 
@@ -64,11 +64,21 @@ export const settingsPersistConfig = {
     ],
 };
 
-const gamesPersistConfig = {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const gamesMigrations: any = {
+    1: (state: { entities?: Record<string, GameState> } | undefined) => {
+        // Games locked before locking moved them to their last round.
+        if (!state?.entities) return state;
+        return { ...state, entities: restLockedGamesOnLastRound(state.entities) };
+    },
+};
+
+export const gamesPersistConfig = {
     key: 'games',
-    version: 0,
+    version: 1,
     storage: AsyncStorage,
     whitelist: ['entities', 'ids'],
+    migrate: createMigrate(gamesMigrations),
 };
 
 const playersPersistConfig = {

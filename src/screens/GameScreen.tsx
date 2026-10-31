@@ -13,6 +13,7 @@ import ListBoard from '../components/Boards/ListBoard';
 import TileBoard from '../components/Boards/TileBoard';
 import { useGameOptionsHeaderItems } from '../components/Buttons/GameOptionsButton';
 import { InteractionType } from '../components/Interactions/InteractionType';
+import LockedGameHint from '../components/LockedGameHint';
 import ChooseWinnersSheet from '../components/Sheets/ChooseWinnersSheet';
 import GameOverSheet from '../components/Sheets/GameOverSheet';
 import GestureInfoSheet from '../components/Sheets/GestureInfoSheet';
@@ -71,6 +72,8 @@ const GameScreen: React.FunctionComponent<Props> = ({ navigation }) => {
                         <TileBoard showHint={showHint} />
                     </Animated.View>
                 }
+
+                <LockedGameHint top={(scrollUnderHeader ? headerHeight : 0) + 8} />
 
                 <PointValuesSheet />
                 <ChooseWinnersSheet />

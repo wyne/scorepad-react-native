@@ -8,6 +8,7 @@ import { useAppDispatch, useAppSelector, useAppStore } from '../../../../redux/h
 import { playerRoundScoreIncrement } from '../../../../redux/PlayersSlice';
 import { setLastUsedInteractionType } from '../../../../redux/SettingsSlice';
 import { logEvent } from '../../../Analytics';
+import { useLockedHint } from '../../LockedHintContext';
 import { useMenuOpen } from '../../MenuOpenContext';
 import { ScoreParticle } from '../../PlayerTiles/AdditionTile/ScoreParticle';
 import { InteractionType } from '../InteractionType';
@@ -32,6 +33,7 @@ export const HalfTileTouchSurface: React.FunctionComponent<Props> = (
     onRender?.(playerId);
 
     const { menuOpen } = useMenuOpen();
+    const { showLockedHint } = useLockedHint();
     const showPointParticles = useAppSelector(state => state.settings.showPointParticles);
     const dispatch = useAppDispatch();
     const store = useAppStore();
@@ -69,8 +71,11 @@ export const HalfTileTouchSurface: React.FunctionComponent<Props> = (
     };
 
     const scoreChangeHandler = (addend: number, secondaryHold = false) => {
-        if (currentGameLocked) return;
         if (menuOpen) return;
+        if (currentGameLocked) {
+            showLockedHint();
+            return;
+        }
         const currentRoundIndex = getCurrentRoundIndex();
 
         if (showPointParticles) {

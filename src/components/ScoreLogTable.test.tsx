@@ -77,13 +77,13 @@ jest.mock('./ScoreLog/TotalScoreColumn', () => {
 });
 
 jest.mock('./ScoreLog/RoundScoreColumn', () => {
-    return function MockRoundScoreColumn({ round, isCurrentRound }: { round: number; isCurrentRound: boolean }) {
+    return function MockRoundScoreColumn({ round, isCurrentRound, disabled }: { round: number; isCurrentRound: boolean; disabled?: boolean }) {
         const mockReact = jest.requireActual('react');
         const { View, Text } = jest.requireActual('react-native');
         return mockReact.createElement(
             View,
             { testID: `round-score-column-${round}` },
-            mockReact.createElement(Text, {}, `Round ${round + 1} ${isCurrentRound ? '(Current)' : ''}`)
+            mockReact.createElement(Text, {}, `Round ${round + 1} ${isCurrentRound ? '(Current)' : ''}${disabled ? '(Disabled)' : ''}`)
         );
     };
 });
@@ -287,6 +287,33 @@ describe('ScoreLogTable', () => {
 
         // Round 2 (index 2) should be marked as current
         expect(getByText('Round 3 (Current)')).toBeTruthy();
+    });
+
+    it('does not let you pick a round once the game is locked', () => {
+        const store = createMockStore({
+            settings: {
+                currentGameId: 'game-1',
+            },
+            games: {
+                entities: {
+                    'game-1': { ...mockGame, locked: true },
+                },
+                ids: ['game-1'],
+            },
+            players: {
+                entities: mockPlayers,
+                ids: ['player-1', 'player-2'],
+            },
+        });
+
+        const { getByText, queryByText } = render(
+            <Provider store={store}>
+                <ScoreLogTable />
+            </Provider>
+        );
+
+        expect(getByText('Round 3 (Current)(Disabled)')).toBeTruthy();
+        expect(queryByText('Round 1 (Disabled)')).toBeTruthy();
     });
 
     it('should handle sort by player index when player name column is pressed', () => {
