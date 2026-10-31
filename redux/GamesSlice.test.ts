@@ -8,6 +8,7 @@ import gamesReducer, {
     gameSave,
     GameState,
     roundNext,
+    restoreAllGames,
     roundPrevious,
     selectAllGames,
     setGameScoring,
@@ -57,6 +58,14 @@ describe('games reducer', () => {
         store.dispatch(updateGame({ id: 'game1', changes: { locked: true } }));
 
         expect(store.getState().entities.game1?.roundCurrent).toBe(2);
+    });
+
+    it('moves restored locked games to their last round', () => {
+        store.dispatch(restoreAllGames({
+            game2: { id: 'game2', title: 'Game 2', dateCreated: 0, playerIds: [], roundCurrent: 0, roundTotal: 3, locked: true },
+        }));
+
+        expect(store.getState().entities.game2?.roundCurrent).toBe(2);
     });
 
     it('leaves the round alone for other updates', () => {

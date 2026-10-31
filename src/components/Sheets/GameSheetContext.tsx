@@ -10,18 +10,31 @@ export const gameSheetExpandedIndex = 2;
 
 const GameSheetContext = createContext<React.RefObject<BottomSheet | null> | null>(null);
 
+/**
+ * A snap index for the game sheet to open to once it mounts, for when it is
+ * asked to open while hidden (fullscreen).
+ */
+const GameSheetPendingIndexContext = createContext<React.RefObject<number | null> | null>(null);
+
 export const GameSheetContextProvider: React.FC<React.PropsWithChildren> = (props) => {
     const gameSheetRef = useRef<BottomSheet>(null);
+    const pendingIndexRef = useRef<number | null>(null);
 
     return (
         <GameSheetContext.Provider value={gameSheetRef} >
-            <BottomSheetModalProvider>
-                {props.children}
-            </BottomSheetModalProvider>
+            <GameSheetPendingIndexContext.Provider value={pendingIndexRef}>
+                <BottomSheetModalProvider>
+                    {props.children}
+                </BottomSheetModalProvider>
+            </GameSheetPendingIndexContext.Provider>
         </GameSheetContext.Provider>
     );
 };
 
 export const useGameSheetContext = () => {
     return useContext(GameSheetContext);
+};
+
+export const useGameSheetPendingIndex = () => {
+    return useContext(GameSheetPendingIndexContext);
 };

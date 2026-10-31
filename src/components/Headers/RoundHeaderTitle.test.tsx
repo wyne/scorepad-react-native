@@ -7,7 +7,7 @@ import { Provider } from 'react-redux';
 import gamesReducer, { updateGame } from '../../../redux/GamesSlice';
 import playersReducer from '../../../redux/PlayersSlice';
 import { ScoringRules } from '../../../redux/ScoringRules';
-import settingsReducer, { initialState as initialSettings } from '../../../redux/SettingsSlice';
+import settingsReducer, { initialState as initialSettings, toggleHomeFullscreen } from '../../../redux/SettingsSlice';
 
 import RoundHeaderTitle from './RoundHeaderTitle';
 
@@ -48,9 +48,11 @@ jest.mock('../Sheets/GameOverSheetContext', () => ({
 }));
 
 const mockSnapToIndex = jest.fn();
+const mockPendingIndex: { current: number | null } = { current: null };
 jest.mock('../Sheets/GameSheetContext', () => ({
     gameSheetExpandedIndex: 2,
     useGameSheetContext: () => ({ current: { snapToIndex: mockSnapToIndex } }),
+    useGameSheetPendingIndex: () => mockPendingIndex,
 }));
 
 const mockHideLockedHint = jest.fn();
@@ -92,6 +94,7 @@ describe('RoundHeaderTitle', () => {
     beforeEach(() => {
         jest.clearAllMocks();
         mockLockedHintVisible = false;
+        mockPendingIndex.current = null;
     });
 
     const lock = (store: ReturnType<typeof createStore>) => {
@@ -107,6 +110,18 @@ describe('RoundHeaderTitle', () => {
 
         expect(mockSnapToIndex).toHaveBeenCalledWith(2);
         expect(mockHideLockedHint).toHaveBeenCalled();
+    });
+
+    it('leaves fullscreen and opens the sheet to unlock when Final is tapped', () => {
+        const store = lock(createStore(2, 3));
+        store.dispatch(toggleHomeFullscreen());
+        const { getByTestId } = renderTitle(store);
+
+        fireEvent.press(getByTestId('final-pill'));
+
+        expect(store.getState().settings.home_fullscreen).toBe(false);
+        expect(mockPendingIndex.current).toBe(2);
+        expect(mockSnapToIndex).not.toHaveBeenCalled();
     });
 
     it('does not offer the Final pill while the game is unlocked', () => {

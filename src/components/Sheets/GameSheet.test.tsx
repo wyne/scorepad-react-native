@@ -42,7 +42,7 @@ jest.mock('@gorhom/bottom-sheet', () => {
         }));
         
         return (
-            <View testID="bottom-sheet" style={{ backgroundColor: 'rgb(30,40,50)' }} topInset={props.topInset}>
+            <View testID="bottom-sheet" style={{ backgroundColor: 'rgb(30,40,50)' }} topInset={props.topInset} initialIndex={props.index}>
                 {props.handleComponent ? <props.handleComponent /> : null}
                 {props.children}
             </View>
@@ -190,12 +190,14 @@ jest.mock('react-native-safe-area-context', () => ({
 }));
 
 // Mock GameSheetContext
+const mockPendingIndex: { current: number | null } = { current: null };
 jest.mock('./GameSheetContext', () => ({
     useGameSheetContext: jest.fn(() => ({
         current: {
             snapToIndex: jest.fn(),
         },
     })),
+    useGameSheetPendingIndex: () => mockPendingIndex,
 }));
 
 // Mock Alert
@@ -400,6 +402,34 @@ describe('GameSheet', () => {
         );
 
         expect(getByTestId('unlock-button')).toBeTruthy();
+    });
+
+    it('opens to a point asked for while it was hidden', () => {
+        mockPendingIndex.current = 2;
+        const store = createMockStore({
+            settings: {
+                currentGameId: 'game-1',
+            },
+            games: {
+                entities: {
+                    'game-1': { ...mockGame, locked: true },
+                },
+                ids: ['game-1'],
+            },
+            players: {
+                entities: mockPlayers,
+                ids: ['player-1', 'player-2'],
+            },
+        });
+
+        const { getByTestId } = render(
+            <Provider store={store}>
+                <GameSheet {...defaultProps} />
+            </Provider>
+        );
+
+        expect(getByTestId('bottom-sheet').props.initialIndex).toBe(2);
+        expect(mockPendingIndex.current).toBeNull();
     });
 
     it('should show choose winners button when game is unlocked', () => {

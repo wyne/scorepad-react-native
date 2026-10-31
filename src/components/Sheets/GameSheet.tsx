@@ -22,7 +22,7 @@ import ScoreLogTable from '../ScoreLogTable';
 import { scoringShortSummary } from '../ScoringRow';
 
 import { useChooseWinnersSheetContext } from './ChooseWinnersSheetContext';
-import { useGameSheetContext } from './GameSheetContext';
+import { useGameSheetContext, useGameSheetPendingIndex } from './GameSheetContext';
 import SheetBackground from './SheetBackground';
 
 /**
@@ -51,6 +51,7 @@ const GameSheet: React.FunctionComponent = () => {
 
     // ref
     const gameSheetRef = useGameSheetContext();
+    const pendingIndexRef = useGameSheetPendingIndex();
 
     // variables
     const snapPoints = useMemo(() => [bottomSheetHeight, '60%', '100%'], []);
@@ -157,9 +158,15 @@ const GameSheet: React.FunctionComponent = () => {
         );
     };
 
+    // Asked to open while hidden (fullscreen): mount at that point instead.
+    const [initialIndex] = useState(() => pendingIndexRef?.current ?? 0);
+    useEffect(() => {
+        if (pendingIndexRef) pendingIndexRef.current = null;
+    }, [pendingIndexRef]);
+
     // State variable for the current snap point index
-    const [snapPointIndex, setSnapPointIndex] = useState(0);
-    const [shouldRenderContent, setShouldRenderContent] = useState(false);
+    const [snapPointIndex, setSnapPointIndex] = useState(initialIndex);
+    const [shouldRenderContent, setShouldRenderContent] = useState(initialIndex > 0);
     const hasMountedRef = useRef(false);
 
     useEffect(() => {
@@ -352,7 +359,7 @@ const GameSheet: React.FunctionComponent = () => {
             )}
             <BottomSheet
                 ref={gameSheetRef}
-                index={0}
+                index={initialIndex}
                 onChange={onSheetChange}
                 onAnimate={onAnimate}
                 snapPoints={snapPoints}

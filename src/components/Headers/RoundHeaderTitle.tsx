@@ -9,12 +9,13 @@ import { Icon } from 'react-native-elements/dist/icons/Icon';
 import { roundNext, roundPrevious, selectGameById, updateGame } from '../../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
 import { selectCurrentGameOverReason } from '../../../redux/selectors';
+import { toggleHomeFullscreen } from '../../../redux/SettingsSlice';
 import { logEvent } from '../../Analytics';
 import { LIQUID_GLASS } from '../../platform';
 import { useTheme } from '../../theme';
 import { useLockedHint } from '../LockedHintContext';
 import { useGameOverSheetContext } from '../Sheets/GameOverSheetContext';
-import { gameSheetExpandedIndex, useGameSheetContext } from '../Sheets/GameSheetContext';
+import { gameSheetExpandedIndex, useGameSheetContext, useGameSheetPendingIndex } from '../Sheets/GameSheetContext';
 
 const RoundHeaderTitle: React.FunctionComponent = () => {
     const theme = useTheme();
@@ -31,6 +32,8 @@ const RoundHeaderTitle: React.FunctionComponent = () => {
     const gameOverReason = useAppSelector(selectCurrentGameOverReason);
     const gameOverSheetRef = useGameOverSheetContext();
     const gameSheetRef = useGameSheetContext();
+    const gameSheetPendingIndex = useGameSheetPendingIndex();
+    const fullscreen = useAppSelector(state => state.settings.home_fullscreen);
     const { lockedHintVisible, hideLockedHint } = useLockedHint();
 
     if (currentGameId == null) return null;
@@ -141,6 +144,12 @@ const RoundHeaderTitle: React.FunctionComponent = () => {
     const openUnlock = () => {
         hideLockedHint();
         void Haptics.selectionAsync();
+        // Fullscreen hides the sheet: leave it, and the sheet opens once it mounts.
+        if (fullscreen) {
+            if (gameSheetPendingIndex) gameSheetPendingIndex.current = gameSheetExpandedIndex;
+            dispatch(toggleHomeFullscreen());
+            return;
+        }
         gameSheetRef?.current?.snapToIndex(gameSheetExpandedIndex);
     };
 
