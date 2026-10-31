@@ -8,7 +8,7 @@ import { shallowEqual } from 'react-redux';
 
 import { selectGameById } from '../../../redux/GamesSlice';
 import { useAppSelector } from '../../../redux/hooks';
-import { useGameFoldSplit } from '../../hooks/useExpandedGameLayout';
+import type { GameFoldSplit } from '../../hooks/useExpandedGameLayout';
 import DialOverlay from '../Interactions/Dial/DialOverlay';
 import { useLockedHint } from '../LockedHintContext';
 import { useMenuOpen } from '../MenuOpenContext';
@@ -173,12 +173,13 @@ const MemoizedPlayerRow = React.memo(PlayerRow);
 
 interface ListBoardProps {
     showHint: boolean;
+    foldSplit?: GameFoldSplit | null;
     /** Space at the top the rows can scroll under, e.g. a transparent header. */
     topInset?: number;
     onPlayerRowRender?: (id: string) => void;
 }
 
-const ListBoard: React.FC<ListBoardProps> = ({ showHint, topInset = 0, onPlayerRowRender }) => {
+const ListBoard: React.FC<ListBoardProps> = ({ showHint, foldSplit = null, topInset = 0, onPlayerRowRender }) => {
     const { playerIds, locked } = useAppSelector((state) => {
         const currentGameId = state.settings.currentGameId;
         const currentGame = currentGameId ? selectGameById(state, currentGameId) : undefined;
@@ -191,7 +192,6 @@ const ListBoard: React.FC<ListBoardProps> = ({ showHint, topInset = 0, onPlayerR
     const fullscreen = useAppSelector(state => state.settings.home_fullscreen);
     // The game sheet covers the bottom of the board unless it is hidden
     // (fullscreen) or docked beside it on a partially open iPhone Duo.
-    const foldSplit = useGameFoldSplit();
     const sheetOverBoard = !fullscreen && foldSplit == null;
     const { menuOpen } = useMenuOpen();
     const { showLockedHint } = useLockedHint();
@@ -349,4 +349,4 @@ const styles = StyleSheet.create({
     }
 });
 
-export default ListBoard;
+export default React.memo(ListBoard);

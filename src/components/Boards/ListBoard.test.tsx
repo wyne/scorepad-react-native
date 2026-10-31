@@ -18,11 +18,6 @@ jest.mock('../Interactions/Dial/DialOverlay', () => {
     };
 });
 
-let mockFoldSplit: 'columns' | 'rows' | null = null;
-jest.mock('../../hooks/useExpandedGameLayout', () => ({
-    useGameFoldSplit: () => mockFoldSplit,
-}));
-
 jest.mock('react-native-reanimated', () => {
     const { View } = jest.requireActual('react-native');
     return {
@@ -104,7 +99,6 @@ function fireLayouts(getByTestId: ReturnType<typeof render>['getByTestId']) {
 describe('ListBoard', () => {
     beforeEach(() => {
         mockMenuOpen = false;
-        mockFoldSplit = null;
         mockSafeAreaInsets = { top: 0, bottom: 0, left: 0, right: 0 };
     });
 
@@ -159,11 +153,10 @@ describe('ListBoard', () => {
     });
 
     it('does not apply the far-right window inset to the board beside the fold', () => {
-        mockFoldSplit = 'columns';
         mockSafeAreaInsets = { top: 0, bottom: 0, left: 24, right: 16 };
         const store = createStore();
         const { getByTestId, getByText } = render(
-            <Provider store={store}><ListBoard showHint={false} /></Provider>
+            <Provider store={store}><ListBoard foldSplit="columns" showHint={false} /></Provider>
         );
 
         expect(StyleSheet.flatten(getByTestId('list-board-scroll').props.contentContainerStyle)).toEqual(

@@ -24,13 +24,19 @@ jest.mock('react-native-safe-area-context', () => ({
 
 jest.mock('react-native-reanimated', () => {
     const View = jest.requireActual('react-native').View;
-    const builder = { duration: jest.fn() };
+    const builder = { duration: jest.fn(), easing: jest.fn() };
     builder.duration.mockReturnValue(builder);
+    builder.easing.mockReturnValue(builder);
     return {
         __esModule: true,
         default: { View },
+        Easing: {
+            cubic: jest.fn(),
+            out: jest.fn(() => jest.fn()),
+        },
         FadeIn: builder,
         FadeOut: builder,
+        LinearTransition: builder,
     };
 });
 
@@ -274,6 +280,7 @@ describe('GameScreen', () => {
 
             const style = StyleSheet.flatten(getByTestId('game-board-area').props.style);
             expect(style).toMatchObject({ left: 0, top: 0, bottom: 0, width: width / 2 - 16 });
+            expect(getByTestId('game-board-area').props.layout).toBeTruthy();
             expect(getByTestId('game-board-area').findByProps({ testID: 'locked-game-hint' })).toBeTruthy();
         });
 

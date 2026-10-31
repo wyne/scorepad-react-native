@@ -1,4 +1,4 @@
-import React, { memo, useEffect, useState } from 'react';
+import React, { memo, useCallback, useMemo, useState } from 'react';
 
 import { LayoutChangeEvent, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -6,87 +6,79 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { selectGameById } from '../../../redux/GamesSlice';
 import { useAppSelector } from '../../../redux/hooks';
 import { bottomSheetHeight } from '../../components/Sheets/GameSheet';
-import { useGameFoldSplit } from '../../hooks/useExpandedGameLayout';
+import type { GameFoldSplit } from '../../hooks/useExpandedGameLayout';
 import { useTheme } from '../../theme';
 
 import PlayerTile from './PlayerTile';
 
-const TileBoard: React.FC<{ showHint: boolean }> = ({ showHint }) => {
+interface TileBoardProps {
+    showHint: boolean;
+    foldSplit?: GameFoldSplit | null;
+}
+
+interface BoardSize {
+    width: number;
+    height: number;
+}
+
+const TileBoard: React.FC<TileBoardProps> = ({ showHint, foldSplit = null }) => {
     const theme = useTheme();
     const fullscreen = useAppSelector(state => state.settings.home_fullscreen);
-    // Docked beside the board on a partially open iPhone Duo, the game sheet
-    // no longer covers the bottom of the board.
-    const foldSplit = useGameFoldSplit();
     const playerIds = useAppSelector(state => {
         const currentGameId = state.settings.currentGameId;
         return currentGameId ? selectGameById(state, currentGameId)?.playerIds : undefined;
     });
     const visiblePlayerIds = playerIds ?? [];
-
-    const [rows, setRows] = useState<number>(0);
-    const [cols, setCols] = useState<number>(0);
-
-    const [width, setWidth] = useState<number | null>(null);
-    const [height, setHeight] = useState<number | null>(null);
-
+    const [boardSize, setBoardSize] = useState<BoardSize | null>(null);
     const playerCount = visiblePlayerIds.length;
 
-    const desiredAspectRatio = 1;
-
-    const layoutHandler = (e: LayoutChangeEvent) => {
+    const layoutHandler = useCallback((e: LayoutChangeEvent) => {
         const { width, height } = e.nativeEvent.layout;
+        const nextSize = { width: Math.round(width), height: Math.round(height) };
 
-        setWidth(Math.round(width));
-        setHeight(Math.round(height));
-        calcGrid();
-    };
-    const calcGrid = () => {
+        setBoardSize(currentSize =>
+            currentSize?.width === nextSize.width && currentSize.height === nextSize.height
+                ? currentSize
+                : nextSize
+        );
+    }, []);
+
+    // The old layout path stored width, height, rows, and columns independently,
+    // then recalculated once with stale dimensions and again in an effect. Derive
+    // the complete grid from one size snapshot so a resize has no intermediate
+    // arrangement for React to render.
+    const grid = useMemo(() => {
+        if (boardSize == null || playerCount === 0) return null;
+
         let closestAspectRatio = Number.MAX_SAFE_INTEGER;
         let bestRowCount = 1;
 
-        if (width == null || height == null) return;
+        for (let rows = 1; rows <= playerCount; rows++) {
+            const cols = Math.ceil(playerCount / rows);
 
-        for (let rows = 1; rows <= visiblePlayerIds.length; rows++) {
-            const cols = Math.ceil(visiblePlayerIds.length / rows);
-
-            if (visiblePlayerIds.length % rows > 0 && rows - visiblePlayerIds.length % rows > 1) {
+            if (playerCount % rows > 0 && rows - playerCount % rows > 1) {
                 continue;
             }
 
-            const w = width / cols;
-            const h = height / rows;
+            const w = boardSize.width / cols;
+            const h = boardSize.height / rows;
             const ratio = w / h;
 
-            if (Math.abs(desiredAspectRatio - ratio) < Math.abs(desiredAspectRatio - closestAspectRatio)) {
+            if (Math.abs(1 - ratio) < Math.abs(1 - closestAspectRatio)) {
                 closestAspectRatio = ratio;
                 bestRowCount = rows;
             }
         }
 
-        setRows(bestRowCount);
-        setCols(Math.ceil(visiblePlayerIds.length / bestRowCount));
-    };
-
-    useEffect(() => {
-        if (width == null || height == null) return;
-        calcGrid();
-    }, [playerCount, width, height]);
-
-    type DimensionValue = (rows: number, cols: number) => {
-        width: number;
-        height: number;
-    };
-
-    const calculateTileDimensions: DimensionValue = (rows: number, cols: number) => {
-        if (width == null || height == null) return { width: 0, height: 0 };
-
-        const dims = {
-            width: Math.round(width / cols),
-            height: Math.round(height / rows)
+        const rows = bestRowCount;
+        const cols = Math.ceil(playerCount / rows);
+        return {
+            rows,
+            cols,
+            tileWidth: Math.round(boardSize.width / cols),
+            tileHeight: Math.round(boardSize.height / rows),
         };
-
-        return dims;
-    };
+    }, [boardSize, playerCount]);
 
     if (visiblePlayerIds.length === 0) return null;
 
@@ -101,14 +93,14 @@ const TileBoard: React.FC<{ showHint: boolean }> = ({ showHint }) => {
             }]
         } onLayout={layoutHandler} >
             {visiblePlayerIds.map((id, index) => (
-                width != null && height != null && rows != 0 && cols != 0 &&
+                grid != null &&
                 <PlayerTile
                     key={id}
                     playerId={id}
-                    cols={cols}
-                    rows={rows}
-                    width={calculateTileDimensions(rows, cols).width}
-                    height={calculateTileDimensions(rows, cols).height}
+                    cols={grid.cols}
+                    rows={grid.rows}
+                    width={grid.tileWidth}
+                    height={grid.tileHeight}
                     index={index}
                     showHint={showHint}
                 />

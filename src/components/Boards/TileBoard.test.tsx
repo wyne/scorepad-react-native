@@ -46,6 +46,7 @@ jest.mock('react-native-reanimated', () => {
 });
 
 // Mock PlayerTile component
+const mockPlayerTileRender = jest.fn();
 jest.mock('./PlayerTile', () => {
     return function MockPlayerTile({ playerId, cols, rows, width, height, index }: {
         playerId: string;
@@ -55,6 +56,7 @@ jest.mock('./PlayerTile', () => {
         height: number;
         index: number;
     }) {
+        mockPlayerTileRender();
         const { View, Text } = jest.requireActual('react-native');
         return (
             <View testID={`player-tile-${playerId}`}>
@@ -112,6 +114,8 @@ describe('TileBoard', () => {
             scores: [15, 8],
         },
     };
+
+    beforeEach(() => mockPlayerTileRender.mockClear());
 
     it('should render null when no players are available', () => {
         const store = createMockStore({
@@ -559,6 +563,7 @@ describe('TileBoard', () => {
         expect(getAllByText('Width: 200')).toHaveLength(2);
 
         // Change layout dimensions
+        mockPlayerTileRender.mockClear();
         fireEvent(safeAreaView, 'layout', {
             nativeEvent: {
                 layout: {
@@ -570,5 +575,18 @@ describe('TileBoard', () => {
 
         // Should recalculate and update dimensions (2x1 grid: width=400/2=200, height=200/1=200)
         expect(getAllByText('Width: 200')).toHaveLength(2);
+        // One render per tile: there is no stale-grid intermediate pass.
+        expect(mockPlayerTileRender).toHaveBeenCalledTimes(2);
+
+        mockPlayerTileRender.mockClear();
+        fireEvent(safeAreaView, 'layout', {
+            nativeEvent: {
+                layout: {
+                    width: 400,
+                    height: 200,
+                },
+            },
+        });
+        expect(mockPlayerTileRender).not.toHaveBeenCalled();
     });
 });

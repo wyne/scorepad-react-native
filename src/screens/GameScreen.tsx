@@ -5,7 +5,7 @@ import { ParamListBase } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake';
 import { Platform, StyleSheet, View, useWindowDimensions } from 'react-native';
-import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
+import Animated, { Easing, FadeIn, FadeOut, LinearTransition } from 'react-native-reanimated';
 
 import { useAppSelector } from '../../redux/hooks';
 import { selectInteractionType } from '../../redux/selectors';
@@ -36,6 +36,10 @@ function useKeepScreenAwake(active: boolean): void {
 interface Props {
     navigation: NativeStackNavigationProp<ParamListBase>;
 }
+
+const BOARD_LAYOUT_TRANSITION = LinearTransition
+    .duration(280)
+    .easing(Easing.out(Easing.cubic));
 
 const GameScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     const currentGameId = useAppSelector(state => state.settings.currentGameId);
@@ -75,18 +79,18 @@ const GameScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     return (
         <View style={{ flex: 1, paddingTop }} testID="game-screen">
             <View style={{ flex: 1 }}>
-                <View style={boardStyle} testID="game-board-area">
+                <Animated.View layout={BOARD_LAYOUT_TRANSITION} style={boardStyle} testID="game-board-area">
                     {isDial
                         ? <Animated.View key="rows" entering={FadeIn.duration(220)} exiting={FadeOut.duration(180)} style={StyleSheet.absoluteFill}>
-                            <ListBoard showHint={showHint} topInset={scrollUnderHeader ? headerHeight : 0} />
+                            <ListBoard foldSplit={foldSplit} showHint={showHint} topInset={scrollUnderHeader ? headerHeight : 0} />
                         </Animated.View>
                         : <Animated.View key="flex" entering={FadeIn.duration(220)} exiting={FadeOut.duration(180)} style={StyleSheet.absoluteFill}>
-                            <TileBoard showHint={showHint} />
+                            <TileBoard foldSplit={foldSplit} showHint={showHint} />
                         </Animated.View>
                     }
 
                     <LockedGameHint top={(scrollUnderHeader ? headerHeight : 0) + 8} />
-                </View>
+                </Animated.View>
 
                 <PointValuesSheet />
                 <ChooseWinnersSheet />
