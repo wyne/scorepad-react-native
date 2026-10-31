@@ -5,7 +5,7 @@
 | Tool | Version | Notes |
 |------|---------|-------|
 | nvm | latest | Node version manager |
-| Node.js | 22.23.4 (via `.nvmrc`) | Installed via `nvm` |
+| Node.js | 24.22.2 (via `.nvmrc`) | Installed via `nvm` |
 | npm | (bundled with Node) | Used for all JS dependencies |
 | EAS CLI | latest | Required for building and submitting |
 | JDK | 17 | Android builds only |
@@ -19,7 +19,7 @@
 # Install nvm — https://github.com/nvm-sh/nvm
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
 
-# From the project root — installs and activates the version in .nvmrc (22.23.4)
+# From the project root — installs and activates the version in .nvmrc (24.22.2)
 nvm install
 nvm use
 ```
