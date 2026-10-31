@@ -105,9 +105,14 @@ describe('TileBoard', () => {
     };
 
     beforeEach(() => {
+        jest.useFakeTimers();
         mockPlayerTileMount.mockClear();
         mockPlayerTileRender.mockClear();
         mockPlayerTileUnmount.mockClear();
+    });
+    afterEach(() => {
+        jest.clearAllTimers();
+        jest.useRealTimers();
     });
 
     it('should render null when no players are available', () => {
@@ -568,11 +573,14 @@ describe('TileBoard', () => {
             },
         });
 
-        // Should recalculate and update dimensions (2x1 grid: width=400/2=200, height=200/1=200)
+        // Keep the old topology mounted while it fades away.
+        expect(getByTestId('tile-grid-2x1')).toBeTruthy();
+
+        act(() => jest.advanceTimersByTime(100));
+
+        // Switch topology only after fade-out (2x1 grid: width=400/2=200, height=200/1=200).
         expect(getAllByText('Width: 200')).toHaveLength(2);
         expect(getByTestId('tile-grid-1x2')).toBeTruthy();
-        // One render per tile: there is no stale-grid intermediate pass.
-        expect(mockPlayerTileRender).toHaveBeenCalledTimes(2);
         // Keep the tile instances alive instead of overlapping an exiting grid
         // with a newly mounted one, which causes visible flicker.
         expect(mockPlayerTileMount).toHaveBeenCalledTimes(2);
