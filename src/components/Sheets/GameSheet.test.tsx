@@ -95,12 +95,7 @@ jest.mock('react-native-reanimated', () => {
         withTiming: jest.fn((value) => value),
         FadeIn: {
             delay: jest.fn(() => ({ delay: jest.fn() })),
-            duration: jest.fn(() => ({ reduceMotion: jest.fn() })),
         },
-        SlideInDown: { duration: jest.fn() },
-        SlideInRight: { duration: jest.fn() },
-        ReduceMotion: { Never: 'never' },
-        useReducedMotion: jest.fn(() => false),
         interpolate: jest.fn(),
         Extrapolate: {
             CLAMP: 'clamp',

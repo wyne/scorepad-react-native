@@ -1,11 +1,11 @@
-import React, { useEffect, useLayoutEffect, useMemo } from 'react';
+import React, { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 
 import { useHeaderHeight } from '@react-navigation/elements';
 import { ParamListBase } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake';
 import { Platform, StyleSheet, View, useWindowDimensions } from 'react-native';
-import Animated, { FadeIn, FadeOut, LayoutAnimationConfig } from 'react-native-reanimated';
+import Animated, { Easing, FadeIn, FadeOut, LayoutAnimationsValues, useReducedMotion, withTiming } from 'react-native-reanimated';
 
 import { useAppSelector } from '../../redux/hooks';
 import { selectInteractionType } from '../../redux/selectors';
@@ -32,6 +32,58 @@ function useKeepScreenAwake(active: boolean): void {
         };
     }, [active]);
 }
+
+// How long a fold change keeps the board resize animation armed. The layout
+// change lands in the same commit; this only has to outlast that commit, so a
+// later rotation doesn't animate.
+const BOARD_RESIZE_WINDOW_MS = 400;
+
+/**
+ * Moves the board from its old frame to its new one as a single unit when the
+ * iPhone Duo folds or unfolds. The board is laid out at its new size at once;
+ * this starts it stretched over the old frame, anchored at the top left, and
+ * eases it into place, so the tiles never animate on their own. With Reduce
+ * Motion it fades in instead.
+ */
+export const boardResizeTransition = (reduceMotion: boolean) => (values: LayoutAnimationsValues) => {
+    'worklet';
+    const target = {
+        originX: values.targetOriginX,
+        originY: values.targetOriginY,
+        width: values.targetWidth,
+        height: values.targetHeight,
+    };
+
+    if (reduceMotion || !(values.targetWidth > 0 && values.targetHeight > 0)) {
+        return {
+            initialValues: { ...target, opacity: 0 },
+            animations: { opacity: withTiming(1, { duration: 200 }) },
+        };
+    }
+
+    const timing = { duration: 280, easing: Easing.out(Easing.cubic) };
+    // Scaling is about the center, so shift by half the size change to keep
+    // the top left corner fixed.
+    return {
+        initialValues: {
+            ...target,
+            transform: [
+                { translateX: (values.currentWidth - values.targetWidth) / 2 },
+                { translateY: (values.currentHeight - values.targetHeight) / 2 },
+                { scaleX: values.currentWidth / values.targetWidth },
+                { scaleY: values.currentHeight / values.targetHeight },
+            ],
+        },
+        animations: {
+            transform: [
+                { translateX: withTiming(0, timing) },
+                { translateY: withTiming(0, timing) },
+                { scaleX: withTiming(1, timing) },
+                { scaleY: withTiming(1, timing) },
+            ],
+        },
+    };
+};
 
 interface Props {
     navigation: NativeStackNavigationProp<ParamListBase>;
@@ -71,29 +123,42 @@ const GameScreen: React.FunctionComponent<Props> = ({ navigation }) => {
         height: Math.max(0, (foldSplit === 'rows' ? windowHeight / 2 - FOLD_GAP / 2 : windowHeight) - paddingTop),
     }), [foldSplit, windowWidth, windowHeight, paddingTop]);
 
+    // Animate the board's resize only when folding or unfolding changes it,
+    // not when the window rotates or the header changes height.
+    const reduceMotion = useReducedMotion();
+    const boardResize = useMemo(() => boardResizeTransition(reduceMotion), [reduceMotion]);
+    const lastFoldSplitRef = useRef(foldSplit);
+    const animateBoardUntilRef = useRef(0);
+    if (lastFoldSplitRef.current !== foldSplit) {
+        // Columns to rows is a rotation while folded: leave that to the system.
+        if ((lastFoldSplitRef.current == null) !== (foldSplit == null)) {
+            animateBoardUntilRef.current = Date.now() + BOARD_RESIZE_WINDOW_MS;
+        }
+        lastFoldSplitRef.current = foldSplit;
+    }
+    const animateBoardResize = Date.now() < animateBoardUntilRef.current;
+
     if (typeof currentGameId == 'undefined') return null;
 
     return (
         <View style={{ flex: 1, paddingTop }} testID="game-screen">
             <View style={{ flex: 1 }}>
-                <View style={[styles.boardArea, boardSize]} testID="game-board-area">
-                    {/* Folding or unfolding remounts the board so it fades in at its
-                        new size while the sheet slides in (see GameSheet). The old
-                        board leaves at once: faded out, it would overlap the sheet
-                        at its old size. */}
-                    <LayoutAnimationConfig key={foldSplit ?? 'flat'} skipExiting>
-                        {isDial
-                            ? <Animated.View key="rows" entering={FadeIn.duration(220)} exiting={FadeOut.duration(180)} style={StyleSheet.absoluteFill}>
-                                <ListBoard foldSplit={foldSplit} showHint={showHint} topInset={scrollUnderHeader ? headerHeight : 0} />
-                            </Animated.View>
-                            : <Animated.View key="flex" entering={FadeIn.duration(220)} exiting={FadeOut.duration(180)} style={StyleSheet.absoluteFill}>
-                                <TileBoard boardSize={boardSize} foldSplit={foldSplit} showHint={showHint} />
-                            </Animated.View>
-                        }
-                    </LayoutAnimationConfig>
+                <Animated.View
+                    layout={animateBoardResize ? boardResize : undefined}
+                    style={[styles.boardArea, boardSize]}
+                    testID="game-board-area"
+                >
+                    {isDial
+                        ? <Animated.View key="rows" entering={FadeIn.duration(220)} exiting={FadeOut.duration(180)} style={StyleSheet.absoluteFill}>
+                            <ListBoard foldSplit={foldSplit} showHint={showHint} topInset={scrollUnderHeader ? headerHeight : 0} />
+                        </Animated.View>
+                        : <Animated.View key="flex" entering={FadeIn.duration(220)} exiting={FadeOut.duration(180)} style={StyleSheet.absoluteFill}>
+                            <TileBoard boardSize={boardSize} foldSplit={foldSplit} showHint={showHint} />
+                        </Animated.View>
+                    }
 
                     <LockedGameHint top={(scrollUnderHeader ? headerHeight : 0) + 8} />
-                </View>
+                </Animated.View>
 
                 <PointValuesSheet />
                 <ChooseWinnersSheet />

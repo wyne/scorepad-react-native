@@ -10,7 +10,7 @@ import playersReducer from '../../redux/PlayersSlice';
 import settingsReducer from '../../redux/SettingsSlice';
 import { useNavigationMock } from '../../test/test-helpers';
 
-import GameScreen from './GameScreen';
+import GameScreen, { boardResizeTransition } from './GameScreen';
 
 const mockHeaderItems = [{ type: 'menu', label: 'Game Options' }];
 
@@ -37,7 +37,8 @@ jest.mock('react-native-reanimated', () => {
         FadeIn: builder,
         FadeOut: builder,
         LinearTransition: builder,
-        LayoutAnimationConfig: ({ children }: { children: React.ReactNode }) => children,
+        useReducedMotion: jest.fn(() => false),
+        withTiming: jest.fn((value: number) => value),
     };
 });
 
@@ -297,6 +298,40 @@ describe('GameScreen', () => {
             const style = StyleSheet.flatten(getByTestId('game-board-area').props.style);
             expect(style).toEqual({ position: 'absolute', left: 0, width, top: 0, height: height / 2 - 16 - 88 });
             expect(getByTestId('tile-board').props.boardSize).toEqual({ width, height: height / 2 - 16 - 88 });
+        });
+    });
+
+    describe('boardResizeTransition', () => {
+        // Folding into book mode in landscape: the full-width board moves to the left half.
+        const values = {
+            currentOriginX: 0, currentOriginY: 0, currentWidth: 951, currentHeight: 600,
+            targetOriginX: 0, targetOriginY: 0, targetWidth: 459, targetHeight: 600,
+        } as Parameters<ReturnType<typeof boardResizeTransition>>[0];
+
+        it('starts the new board stretched over the old frame, anchored at the top left', () => {
+            const { initialValues, animations } = boardResizeTransition(false)(values);
+
+            expect(initialValues).toMatchObject({ originX: 0, originY: 0, width: 459, height: 600 });
+            expect((initialValues as { transform: unknown }).transform).toEqual([
+                { translateX: 246 },
+                { translateY: 0 },
+                { scaleX: 951 / 459 },
+                { scaleY: 1 },
+            ]);
+            expect((animations as { transform: unknown }).transform).toEqual([
+                { translateX: 0 },
+                { translateY: 0 },
+                { scaleX: 1 },
+                { scaleY: 1 },
+            ]);
+        });
+
+        it('fades the board in instead with Reduce Motion', () => {
+            const { initialValues, animations } = boardResizeTransition(true)(values);
+
+            expect(initialValues).toMatchObject({ width: 459, height: 600, opacity: 0 });
+            expect(initialValues).not.toHaveProperty('transform');
+            expect(animations).toEqual({ opacity: 1 });
         });
     });
 });
