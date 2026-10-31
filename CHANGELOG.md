@@ -1,5 +1,33 @@
 # Changelog
 
+## [3.4.0](https://github.com/wyne/scorepad-react-native/compare/v3.3.0...v3.4.0) (2026-10-31)
+
+
+### Features
+
+* add round limit and target score end conditions to game modes ([#781](https://github.com/wyne/scorepad-react-native/issues/781)) ([cc52b79](https://github.com/wyne/scorepad-react-native/commit/cc52b79b649f5efbd1912fd7a608b7723c5ffda8))
+* allow up to 50 players, with the Dial above 20 ([#786](https://github.com/wyne/scorepad-react-native/issues/786)) ([e14ce15](https://github.com/wyne/scorepad-react-native/commit/e14ce15e4d2c4f2b66317dbf8f01a4cf8dc3b461))
+* keep the score table steady while the game sheet opens ([#784](https://github.com/wyne/scorepad-react-native/issues/784)) ([7a7fa5f](https://github.com/wyne/scorepad-react-native/commit/7a7fa5f3798b6f3dad5522ffbd34a5dcf917b60e))
+* move the locked state to the Final pill ([#787](https://github.com/wyne/scorepad-react-native/issues/787)) ([f3bbc89](https://github.com/wyne/scorepad-react-native/commit/f3bbc89ea8cc10f7ccf33c13d3c81dfc87a697ca))
+* suggest recent players when naming a player ([#772](https://github.com/wyne/scorepad-react-native/issues/772)) ([7de90b5](https://github.com/wyne/scorepad-react-native/commit/7de90b537fa741d6cc68c1f01b906c96fd36f89d))
+
+
+### Bug Fixes
+
+* don't show feature notifications on fresh installs ([#780](https://github.com/wyne/scorepad-react-native/issues/780)) ([f29a3d5](https://github.com/wyne/scorepad-react-native/commit/f29a3d5467eb32c1d4ad12a7e7b3caf875b75ef6))
+* remove Done checkmark from Edit Game for existing games ([#785](https://github.com/wyne/scorepad-react-native/issues/785)) ([3fd5938](https://github.com/wyne/scorepad-react-native/commit/3fd5938a4588714106299e539e564ffecf9e004f))
+
+
+### Refactors
+
+* replace react-native-elements with @rneui/base ([#790](https://github.com/wyne/scorepad-react-native/issues/790)) ([4e04f41](https://github.com/wyne/scorepad-react-native/commit/4e04f4159e1ef62f2cc8def0db0d5bd5f48e51b8))
+
+
+### Miscellaneous
+
+* **deps:** upgrade React Native Firebase to 27 ([#789](https://github.com/wyne/scorepad-react-native/issues/789)) ([b864a5d](https://github.com/wyne/scorepad-react-native/commit/b864a5de1eed0bf0da995421bbf6e996b518cba8))
+* **deps:** upgrade to Expo SDK 58 ([#788](https://github.com/wyne/scorepad-react-native/issues/788)) ([01d5514](https://github.com/wyne/scorepad-react-native/commit/01d5514bd72c212e8d528421eed2c3b93394d39b))
+
 ## [3.3.0](https://github.com/wyne/scorepad-react-native/compare/v3.2.0...v3.3.0) (2026-10-29)
 
 
