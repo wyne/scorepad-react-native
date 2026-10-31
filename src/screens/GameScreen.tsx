@@ -1,4 +1,4 @@
-import React, { useEffect, useLayoutEffect } from 'react';
+import React, { useEffect, useLayoutEffect, useMemo } from 'react';
 
 import { useHeaderHeight } from '@react-navigation/elements';
 import { ParamListBase } from '@react-navigation/native';
@@ -63,24 +63,25 @@ const GameScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     const foldSplit = useGameFoldSplit();
     const { width: windowWidth, height: windowHeight } = useWindowDimensions();
     const paddingTop = scrollUnderHeader ? 0 : headerHeight;
-    const boardStyle = foldSplit === 'columns'
-        ? [styles.boardFirstColumn, { width: windowWidth / 2 - FOLD_GAP / 2 }]
-        : foldSplit === 'rows'
-            ? [styles.boardFirstRow, { height: windowHeight / 2 - FOLD_GAP / 2 - paddingTop }]
-            : StyleSheet.absoluteFill;
+    // Give the board and its tiles the same geometry in this render. Measuring
+    // the resized native board first exposes an old grid inside the new bounds.
+    const boardSize = useMemo(() => ({
+        width: Math.max(0, foldSplit === 'columns' ? windowWidth / 2 - FOLD_GAP / 2 : windowWidth),
+        height: Math.max(0, (foldSplit === 'rows' ? windowHeight / 2 - FOLD_GAP / 2 : windowHeight) - paddingTop),
+    }), [foldSplit, windowWidth, windowHeight, paddingTop]);
 
     if (typeof currentGameId == 'undefined') return null;
 
     return (
         <View style={{ flex: 1, paddingTop }} testID="game-screen">
             <View style={{ flex: 1 }}>
-                <View style={boardStyle} testID="game-board-area">
+                <View style={[styles.boardArea, boardSize]} testID="game-board-area">
                     {isDial
                         ? <View key="rows" style={StyleSheet.absoluteFill}>
                             <ListBoard foldSplit={foldSplit} showHint={showHint} topInset={scrollUnderHeader ? headerHeight : 0} />
                         </View>
                         : <View key="flex" style={StyleSheet.absoluteFill}>
-                            <TileBoard foldSplit={foldSplit} showHint={showHint} />
+                            <TileBoard boardSize={boardSize} foldSplit={foldSplit} showHint={showHint} />
                         </View>
                     }
 
@@ -97,17 +98,10 @@ const GameScreen: React.FunctionComponent<Props> = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-    boardFirstColumn: {
-        position: 'absolute',
-        top: 0,
-        bottom: 0,
-        left: 0,
-    },
-    boardFirstRow: {
+    boardArea: {
         position: 'absolute',
         top: 0,
         left: 0,
-        right: 0,
     },
 });
 

@@ -1,7 +1,7 @@
-import React, { memo, useCallback, useMemo, useState } from 'react';
+import React, { memo, useMemo } from 'react';
 
-import { LayoutChangeEvent, StyleSheet, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { StyleSheet, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { selectGameById } from '../../../redux/GamesSlice';
 import { useAppSelector } from '../../../redux/hooks';
@@ -12,6 +12,7 @@ import { useTheme } from '../../theme';
 import PlayerTile from './PlayerTile';
 
 interface TileBoardProps {
+    boardSize: BoardSize;
     showHint: boolean;
     foldSplit?: GameFoldSplit | null;
 }
@@ -21,35 +22,26 @@ interface BoardSize {
     height: number;
 }
 
-const TileBoard: React.FC<TileBoardProps> = ({ showHint, foldSplit = null }) => {
+const TileBoard: React.FC<TileBoardProps> = ({ boardSize, showHint, foldSplit = null }) => {
     const theme = useTheme();
+    const insets = useSafeAreaInsets();
     const fullscreen = useAppSelector(state => state.settings.home_fullscreen);
     const playerIds = useAppSelector(state => {
         const currentGameId = state.settings.currentGameId;
         return currentGameId ? selectGameById(state, currentGameId)?.playerIds : undefined;
     });
     const visiblePlayerIds = playerIds ?? [];
-    const [boardSize, setBoardSize] = useState<BoardSize | null>(null);
     const playerCount = visiblePlayerIds.length;
     const paddingBottom = foldSplit ? 0 : fullscreen ? 20 : bottomSheetHeight + 2;
+    const paddingRight = foldSplit === 'columns' ? 0 : insets.right;
+    const contentWidth = Math.max(0, boardSize.width - insets.left - paddingRight);
+    const contentHeight = Math.max(0, boardSize.height - paddingBottom);
 
-    const layoutHandler = useCallback((e: LayoutChangeEvent) => {
-        const { width, height } = e.nativeEvent.layout;
-        const nextSize = { width: Math.round(width), height: Math.round(height) };
-
-        setBoardSize(currentSize =>
-            currentSize?.width === nextSize.width && currentSize.height === nextSize.height
-                ? currentSize
-                : nextSize
-        );
-    }, []);
-
-    // The old layout path stored width, height, rows, and columns independently,
-    // then recalculated once with stale dimensions and again in an effect. Derive
-    // the complete grid from one content-size snapshot, after safe-area and
-    // bottom-sheet padding, so tile geometry matches the space it actually fills.
+    // Insets, grid geometry, and text bounds use the same render snapshot.
+    // Native safe-area padding and onLayout-driven grid state otherwise resize
+    // the board first, then the tiles, then their text in separate commits.
     const grid = useMemo(() => {
-        if (boardSize == null || playerCount === 0) return null;
+        if (!(contentWidth > 0 && contentHeight > 0) || playerCount === 0) return null;
 
         let closestAspectRatio = Number.MAX_SAFE_INTEGER;
         let bestRowCount = 1;
@@ -61,8 +53,8 @@ const TileBoard: React.FC<TileBoardProps> = ({ showHint, foldSplit = null }) => 
                 continue;
             }
 
-            const w = boardSize.width / cols;
-            const h = boardSize.height / rows;
+            const w = contentWidth / cols;
+            const h = contentHeight / rows;
             const ratio = w / h;
 
             if (Math.abs(1 - ratio) < Math.abs(1 - closestAspectRatio)) {
@@ -76,24 +68,26 @@ const TileBoard: React.FC<TileBoardProps> = ({ showHint, foldSplit = null }) => 
         return {
             rows,
             cols,
-            tileWidth: Math.round(boardSize.width / cols),
-            tileHeight: Math.round(boardSize.height / rows),
+            tileWidth: contentWidth / cols,
+            tileHeight: contentHeight / rows,
         };
-    }, [boardSize, playerCount]);
+    }, [contentWidth, contentHeight, playerCount]);
 
     if (visiblePlayerIds.length === 0) return null;
 
     return (
         // Docked on the left half, the board stops short of the vertical bar's
         // inset on the right.
-        <SafeAreaView edges={foldSplit === 'columns' ? ['left'] : ['left', 'right']} style={
+        <View testID="tile-board" style={
             [styles.contentStyle,
             {
                 paddingBottom,
+                paddingLeft: insets.left,
+                paddingRight,
                 backgroundColor: theme.background,
             }]
         } >
-            <View style={styles.contentStyle} onLayout={layoutHandler} testID="tile-board-viewport">
+            <View style={{ width: contentWidth, height: contentHeight }} testID="tile-board-viewport">
                 {grid != null && (
                     <View style={styles.tileGrid} testID={`tile-grid-${grid.rows}x${grid.cols}`}>
                         {visiblePlayerIds.map((id, index) => (
@@ -111,7 +105,7 @@ const TileBoard: React.FC<TileBoardProps> = ({ showHint, foldSplit = null }) => 
                     </View>
                 )}
             </View>
-        </SafeAreaView>
+        </View>
     );
 };
 

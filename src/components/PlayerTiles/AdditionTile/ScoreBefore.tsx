@@ -23,14 +23,14 @@ const ScoreBefore: React.FunctionComponent<Props> = ({
 }) => {
     const scoreBefore = currentRoundTotalScore - currentRoundScore;
 
-    const fontScale = useSharedValue(currentRoundScore == 0 ? singleLineScoreSizeMultiplier : multiLineScoreSizeMultiplier);
+    const scaleFactor = currentRoundScore == 0 ? singleLineScoreSizeMultiplier : multiLineScoreSizeMultiplier;
+    const fontScale = useSharedValue(scaleFactor);
     const fontOpacity = useSharedValue(100);
     const baseFontSize = calculateFontSize(containerWidth);
 
     const animatedStyles = useAnimatedStyle(() => {
         return {
-            fontSize: baseFontSize * fontScale.value,
-            fontWeight: currentRoundScore == 0 ? 'bold' : 'normal',
+            transform: [{ scale: fontScale.value / scaleFactor }],
             opacity: fontOpacity.value / 100,
         };
     });
@@ -53,6 +53,10 @@ const ScoreBefore: React.FunctionComponent<Props> = ({
                 allowFontScaling={false}
                 numberOfLines={1}
                 style={[animatedStyles, {
+                    // Text layout must update in React's geometry commit, not
+                    // in a later Reanimated mapper update on the UI thread.
+                    fontSize: baseFontSize * scaleFactor,
+                    fontWeight: currentRoundScore == 0 ? 'bold' : 'normal',
                     fontVariant: ['tabular-nums'],
                     color: fontColor,
                 }]}>

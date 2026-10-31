@@ -79,9 +79,9 @@ jest.mock('../components/Buttons/GameOptionsButton', () => ({
 }));
 
 jest.mock('../components/Boards/TileBoard', () => {
-    return function MockTileBoard() {
+    return function MockTileBoard({ boardSize }: { boardSize: { width: number; height: number } }) {
         const { View, Text } = jest.requireActual('react-native');
-        return <View testID="tile-board"><Text>TileBoard</Text></View>;
+        return <View testID="tile-board" boardSize={boardSize}><Text>TileBoard</Text></View>;
     };
 });
 
@@ -269,29 +269,33 @@ describe('GameScreen', () => {
 
         it('fills the screen with the board when flat', () => {
             const { getByTestId } = renderGame();
+            const { width, height } = Dimensions.get('window');
 
             expect(StyleSheet.flatten(getByTestId('game-board-area').props.style)).toEqual({
-                position: 'absolute', top: 0, right: 0, bottom: 0, left: 0,
+                position: 'absolute', top: 0, left: 0, width, height: height - 88,
             });
+            expect(getByTestId('tile-board').props.boardSize).toEqual({ width, height: height - 88 });
         });
 
         it('keeps the board to the left of the fold in landscape', () => {
             mockUseGameFoldSplit.mockReturnValue('columns');
-            const { width } = Dimensions.get('window');
+            const { width, height } = Dimensions.get('window');
             const { getByTestId } = renderGame();
 
             const style = StyleSheet.flatten(getByTestId('game-board-area').props.style);
-            expect(style).toEqual({ position: 'absolute', left: 0, top: 0, bottom: 0, width: width / 2 - 16 });
+            expect(style).toEqual({ position: 'absolute', left: 0, top: 0, height: height - 88, width: width / 2 - 16 });
+            expect(getByTestId('tile-board').props.boardSize).toEqual({ width: width / 2 - 16, height: height - 88 });
             expect(getByTestId('game-board-area').findByProps({ testID: 'locked-game-hint' })).toBeTruthy();
         });
 
         it('keeps the board above the fold in portrait, below the header', () => {
             mockUseGameFoldSplit.mockReturnValue('rows');
-            const { height } = Dimensions.get('window');
+            const { width, height } = Dimensions.get('window');
             const { getByTestId } = renderGame();
 
             const style = StyleSheet.flatten(getByTestId('game-board-area').props.style);
-            expect(style).toEqual({ position: 'absolute', left: 0, right: 0, top: 0, height: height / 2 - 16 - 88 });
+            expect(style).toEqual({ position: 'absolute', left: 0, width, top: 0, height: height / 2 - 16 - 88 });
+            expect(getByTestId('tile-board').props.boardSize).toEqual({ width, height: height / 2 - 16 - 88 });
         });
     });
 });
