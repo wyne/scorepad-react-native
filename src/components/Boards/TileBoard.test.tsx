@@ -27,29 +27,10 @@ jest.mock('react-native-safe-area-context', () => ({
     },
 }));
 
-// Mock react-native-reanimated
-jest.mock('react-native-reanimated', () => {
-    const View = jest.requireActual('react-native').View;
-    
-    return {
-        __esModule: true,
-        default: {
-            View: View,
-        },
-        FadeIn: {
-            delay: jest.fn(() => ({ duration: jest.fn(() => ({ easing: jest.fn() })) })),
-        },
-        FadeOut: {
-            duration: jest.fn(() => ({})),
-        },
-        Easing: {
-            ease: jest.fn(),
-        },
-    };
-});
-
 // Mock PlayerTile component
 const mockPlayerTileRender = jest.fn();
+const mockPlayerTileMount = jest.fn();
+const mockPlayerTileUnmount = jest.fn();
 jest.mock('./PlayerTile', () => {
     return function MockPlayerTile({ playerId, cols, rows, width, height, index }: {
         playerId: string;
@@ -60,6 +41,11 @@ jest.mock('./PlayerTile', () => {
         index: number;
     }) {
         mockPlayerTileRender();
+        const { useEffect } = jest.requireActual('react');
+        useEffect(() => {
+            mockPlayerTileMount();
+            return () => mockPlayerTileUnmount();
+        }, []);
         const { View, Text } = jest.requireActual('react-native');
         return (
             <View testID={`player-tile-${playerId}`}>
@@ -118,7 +104,11 @@ describe('TileBoard', () => {
         },
     };
 
-    beforeEach(() => mockPlayerTileRender.mockClear());
+    beforeEach(() => {
+        mockPlayerTileMount.mockClear();
+        mockPlayerTileRender.mockClear();
+        mockPlayerTileUnmount.mockClear();
+    });
 
     it('should render null when no players are available', () => {
         const store = createMockStore({
@@ -565,6 +555,7 @@ describe('TileBoard', () => {
         // Should initially have certain dimensions (1x2 grid: width=200/1=200, height=400/2=200)
         expect(getAllByText('Width: 200')).toHaveLength(2);
         expect(getByTestId('tile-grid-2x1')).toBeTruthy();
+        expect(mockPlayerTileMount).toHaveBeenCalledTimes(2);
 
         // Change layout dimensions
         mockPlayerTileRender.mockClear();
@@ -582,6 +573,10 @@ describe('TileBoard', () => {
         expect(getByTestId('tile-grid-1x2')).toBeTruthy();
         // One render per tile: there is no stale-grid intermediate pass.
         expect(mockPlayerTileRender).toHaveBeenCalledTimes(2);
+        // Keep the tile instances alive instead of overlapping an exiting grid
+        // with a newly mounted one, which causes visible flicker.
+        expect(mockPlayerTileMount).toHaveBeenCalledTimes(2);
+        expect(mockPlayerTileUnmount).not.toHaveBeenCalled();
 
         mockPlayerTileRender.mockClear();
         fireEvent(safeAreaView, 'layout', {

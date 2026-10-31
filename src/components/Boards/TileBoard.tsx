@@ -1,7 +1,6 @@
 import React, { memo, useCallback, useMemo, useState } from 'react';
 
-import { LayoutChangeEvent, StyleSheet } from 'react-native';
-import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
+import { LayoutChangeEvent, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { selectGameById } from '../../../redux/GamesSlice';
@@ -94,10 +93,7 @@ const TileBoard: React.FC<TileBoardProps> = ({ showHint, foldSplit = null }) => 
             }]
         } onLayout={layoutHandler} >
             {grid != null && (
-                <Animated.View
-                    entering={FadeIn.delay(90).duration(140)}
-                    exiting={FadeOut.duration(90)}
-                    key={`${grid.rows}x${grid.cols}`}
+                <View
                     style={styles.tileGrid}
                     testID={`tile-grid-${grid.rows}x${grid.cols}`}
                 >
@@ -113,7 +109,7 @@ const TileBoard: React.FC<TileBoardProps> = ({ showHint, foldSplit = null }) => 
                             showHint={showHint}
                         />
                     ))}
-                </Animated.View>
+                </View>
             )}
         </SafeAreaView>
     );
