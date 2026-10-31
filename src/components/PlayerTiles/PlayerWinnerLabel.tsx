@@ -1,7 +1,7 @@
 import React from 'react';
 
+import { Icon } from '@rneui/base';
 import { StyleSheet, Text, View } from 'react-native';
-import { Icon } from 'react-native-elements';
 
 interface PlayerWinnerLabelProps {
     fontColor: string;

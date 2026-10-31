@@ -3,8 +3,8 @@ import React, { useLayoutEffect, useMemo, useRef } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackHeaderItem, NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ParamListBase } from '@react-navigation/routers';
+import { Icon } from '@rneui/base';
 import { View } from 'react-native';
-import { Icon } from 'react-native-elements/dist/icons/Icon';
 
 import { useAppSelector } from '../../../redux/hooks';
 import { logEvent } from '../../Analytics';

@@ -25,7 +25,7 @@ jest.mock('../ColorPalette', () => ({
     getPalette: jest.fn(() => ['#ffffff']),
 }));
 
-jest.mock('react-native-elements', () => ({
+jest.mock('@rneui/base', () => ({
     Icon: () => null,
 }));
 

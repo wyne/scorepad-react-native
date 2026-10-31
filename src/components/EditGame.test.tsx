@@ -11,8 +11,8 @@ import settingsReducer from '../../redux/SettingsSlice';
 
 import EditGame from './EditGame';
 
-// Mock react-native-elements
-jest.mock('react-native-elements', () => {
+// Mock @rneui/base
+jest.mock('@rneui/base', () => {
     const React = jest.requireActual('react');
     const { Pressable, TextInput } = jest.requireActual('react-native');
 

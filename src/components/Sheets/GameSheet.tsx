@@ -3,8 +3,8 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import BottomSheet, { BottomSheetBackdrop, BottomSheetBackdropProps, BottomSheetHandle, BottomSheetHandleProps, BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { ParamListBase, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { Button } from '@rneui/base';
 import { Alert, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View, useWindowDimensions } from 'react-native';
-import { Button } from 'react-native-elements';
 import Animated, { Extrapolate, FadeIn, interpolate, runOnJS, useAnimatedReaction, useAnimatedStyle, useDerivedValue, useSharedValue, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 

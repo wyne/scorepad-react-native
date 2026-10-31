@@ -25,7 +25,7 @@ jest.mock('react-native-reanimated', () => {
     };
 });
 
-jest.mock('react-native-elements', () => ({
+jest.mock('@rneui/base', () => ({
     Icon: () => null,
 }));
 

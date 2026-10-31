@@ -1,7 +1,7 @@
 import React, { memo, useMemo } from 'react';
 
+import { Icon } from '@rneui/base';
 import { StyleSheet, Text, View } from 'react-native';
-import { Icon } from 'react-native-elements/dist/icons/Icon';
 
 import { makeSelectPlayerColors } from '../../../redux/GamesSlice';
 import { useAppSelector } from '../../../redux/hooks';

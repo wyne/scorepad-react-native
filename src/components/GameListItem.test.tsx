@@ -70,8 +70,8 @@ jest.mock('react-native-reanimated', () => {
     };
 });
 
-// Mock react-native-elements ListItem and Icon
-jest.mock('react-native-elements', () => {
+// Mock @rneui/base ListItem and Icon
+jest.mock('@rneui/base', () => {
     const { View, Text, TouchableOpacity } = jest.requireActual('react-native');
 
     const ListItem = ({ children, onPress, testID }: {

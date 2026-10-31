@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 
+import { Icon } from '@rneui/base';
 import { Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { Icon } from 'react-native-elements';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { setGameScoring } from '../../redux/GamesSlice';

@@ -1,7 +1,7 @@
 import React from 'react';
 
+import { Icon } from '@rneui/base';
 import { StyleSheet, Text } from 'react-native';
-import { Icon } from 'react-native-elements';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 
 import { useTheme } from '../theme';

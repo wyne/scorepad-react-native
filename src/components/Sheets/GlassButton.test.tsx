@@ -8,7 +8,7 @@ import settingsReducer, { initialState as initialSettingsState } from '../../../
 
 import GlassButton from './GlassButton';
 
-jest.mock('react-native-elements', () => ({
+jest.mock('@rneui/base', () => ({
     Icon: () => null,
 }));
 

@@ -1,10 +1,10 @@
 import React from 'react';
 
 import { MenuAction, MenuView } from '@react-native-menu/menu';
+import { Icon } from '@rneui/base';
 import { GlassView } from 'expo-glass-effect';
 import * as Haptics from 'expo-haptics';
 import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
-import { Icon } from 'react-native-elements/dist/icons/Icon';
 
 import { roundNext, roundPrevious, selectGameById, updateGame } from '../../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../../redux/hooks';

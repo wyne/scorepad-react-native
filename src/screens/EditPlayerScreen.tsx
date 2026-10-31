@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { ParamListBase, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { Input } from '@rneui/base';
 import {
     Keyboard,
     Platform,
@@ -14,7 +15,6 @@ import {
     TouchableOpacity,
     View
 } from 'react-native';
-import { Input } from 'react-native-elements';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
@@ -55,7 +55,9 @@ const EditPlayerScreen: React.FC<EditPlayerScreenProps> = ({
 }) => {
 
     const theme = useTheme();
-    const inputRef = React.useRef<TextInputInstance>(null);
+    // @rneui/base types Input's ref as both the Input instance and a TextInput
+    // instance, so the ref has to satisfy both. Only focus()/blur() are used.
+    const inputRef = React.useRef<Input & TextInputInstance>(null);
     const selectedNameRef = useRef<string | null>(null);
 
     const dismissInput = useCallback(() => {

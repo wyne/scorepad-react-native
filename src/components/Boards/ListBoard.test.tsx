@@ -39,7 +39,7 @@ jest.mock('react-native-safe-area-context', () => ({
     useSafeAreaInsets: () => mockSafeAreaInsets,
 }));
 
-jest.mock('react-native-elements', () => ({
+jest.mock('@rneui/base', () => ({
     Icon: () => null,
 }));
 

@@ -38,7 +38,7 @@ jest.mock('@react-native-menu/menu', () => ({
     },
 }));
 
-jest.mock('react-native-elements/dist/icons/Icon', () => ({
+jest.mock('@rneui/base', () => ({
     Icon: () => null,
 }));
 

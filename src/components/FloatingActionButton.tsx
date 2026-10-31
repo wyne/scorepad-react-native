@@ -5,8 +5,8 @@ import { buttonStyle, contentShape, frame, glassEffect, shapes } from '@expo/ui/
 import { MenuAction, MenuView } from '@react-native-menu/menu';
 import { ParamListBase } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { Icon } from '@rneui/base';
 import { Keyboard, StyleSheet, View } from 'react-native';
-import { Icon } from 'react-native-elements';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { MORE_PLAYERS_LABEL, morePlayerCountOptions, playerCountLabel, playerCountOptions, useNewGameMenu } from '../hooks/useNewGameMenu';
