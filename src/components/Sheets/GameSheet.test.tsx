@@ -823,9 +823,9 @@ describe('GameSheet', () => {
             expect(mockNavigate).toHaveBeenCalledWith('ScoringRules');
         });
 
-        it('shows free play for a game without rules', () => {
-            const { getByText } = renderWith(true);
-            expect(getByText('Free play')).toBeTruthy();
+        it('is hidden for a free play game', () => {
+            const { queryByTestId } = renderWith(true);
+            expect(queryByTestId('game-sheet-scoring-rule')).toBeNull();
         });
 
         it('stays for a game with rules after the flag is turned off', () => {

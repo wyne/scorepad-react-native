@@ -184,6 +184,9 @@ const ScoringRulesScreen: React.FunctionComponent = () => {
 
     const step = rules.end?.type === 'target' ? TARGET_STEP : 1;
     const currentEndType: EndType = rules.end?.type ?? 'none';
+    // A free play game has no rules yet, so nothing is checked. Otherwise the
+    // default options look chosen already and tapping away leaves free play.
+    const isFreePlay = !currentGame.scoring;
 
     return (
         <ScrollView
@@ -200,7 +203,7 @@ const ScoringRulesScreen: React.FunctionComponent = () => {
                 <SectionLabel inset={30}>Winner</SectionLabel>
                 <View style={[styles.section, { backgroundColor: theme.backgroundSecondary }]}>
                     {winnerOptions.map((option, index) => {
-                        const selected = rules.winner === option.value;
+                        const selected = !isFreePlay && rules.winner === option.value;
                         return (
                             <React.Fragment key={option.value}>
                                 {index > 0 && <View style={[styles.separator, { backgroundColor: theme.separator }]} />}
@@ -225,7 +228,7 @@ const ScoringRulesScreen: React.FunctionComponent = () => {
                 <SectionLabel inset={30}>Game ends</SectionLabel>
                 <View style={[styles.section, { backgroundColor: theme.backgroundSecondary }]}>
                     {endOptions.map((option, index) => {
-                        const selected = currentEndType === option.value;
+                        const selected = !isFreePlay && currentEndType === option.value;
                         return (
                             <React.Fragment key={option.value}>
                                 {index > 0 && <View style={[styles.separator, { backgroundColor: theme.separator }]} />}
