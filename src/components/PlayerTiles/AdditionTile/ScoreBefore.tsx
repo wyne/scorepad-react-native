@@ -28,9 +28,11 @@ const ScoreBefore: React.FunctionComponent<Props> = ({
     const fontOpacity = useSharedValue(100);
     const baseFontSize = calculateFontSize(containerWidth);
 
+    // A score change animates the font size itself, so the lines around it
+    // move with it as it resizes.
     const animatedStyles = useAnimatedStyle(() => {
         return {
-            transform: [{ scale: fontScale.value / scaleFactor }],
+            fontSize: baseFontSize * fontScale.value,
             opacity: fontOpacity.value / 100,
         };
     });
@@ -50,6 +52,9 @@ const ScoreBefore: React.FunctionComponent<Props> = ({
     return (
         <Animated.View entering={enteringAnimation}>
             <Animated.Text
+                // A resize mounts fresh text at the new size, so it lands in
+                // the same commit as the tile instead of a frame later.
+                key={baseFontSize}
                 allowFontScaling={false}
                 numberOfLines={1}
                 style={[animatedStyles, {
