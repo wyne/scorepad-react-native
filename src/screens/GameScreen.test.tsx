@@ -37,6 +37,7 @@ jest.mock('react-native-reanimated', () => {
         FadeIn: builder,
         FadeOut: builder,
         LinearTransition: builder,
+        LayoutAnimationConfig: ({ children }: { children: React.ReactNode }) => children,
     };
 });
 

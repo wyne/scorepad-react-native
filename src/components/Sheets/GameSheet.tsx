@@ -5,7 +5,7 @@ import { ParamListBase, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Button } from '@rneui/base';
 import { Alert, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View, useWindowDimensions } from 'react-native';
-import Animated, { Extrapolate, FadeIn, interpolate, runOnJS, useAnimatedReaction, useAnimatedStyle, useDerivedValue, useSharedValue, withTiming } from 'react-native-reanimated';
+import Animated, { Extrapolate, FadeIn, interpolate, ReduceMotion, runOnJS, SlideInDown, SlideInRight, useAnimatedReaction, useAnimatedStyle, useDerivedValue, useReducedMotion, useSharedValue, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { asyncRematchGame, selectGameById, updateGame } from '../../../redux/GamesSlice';
@@ -47,6 +47,22 @@ const GameSheet: React.FunctionComponent = () => {
     // in landscape it carries the round picker.
     const foldSplit = useGameFoldSplit();
     const docked = foldSplit != null;
+
+    // Docking slides the sheet in from the fold side as the board fades in on
+    // its own half (see GameScreen); undocking fades the collapsed sheet in.
+    // Reduce Motion fades in both cases. Nothing animates on the first mount.
+    const reduceMotion = useReducedMotion();
+    const hasMountedSheetRef = useRef(false);
+    useEffect(() => {
+        hasMountedSheetRef.current = true;
+    }, []);
+    const sheetEntering = !hasMountedSheetRef.current
+        ? undefined
+        : foldSplit == null || reduceMotion
+            ? FadeIn.duration(200).reduceMotion(ReduceMotion.Never)
+            : foldSplit === 'columns'
+                ? SlideInRight.duration(250)
+                : SlideInDown.duration(250);
     const currentGameId = useAppSelector(state => state.settings.currentGameId);
     const game = useAppSelector(state => selectGameById(state, currentGameId || ''));
     const gameTitle = game?.title;
@@ -368,7 +384,12 @@ const GameSheet: React.FunctionComponent = () => {
     if (currentGameId == undefined) return null;
 
     return (
-        <>
+        <Animated.View
+            key={foldSplit ?? 'flat'}
+            entering={sheetEntering}
+            pointerEvents="box-none"
+            style={StyleSheet.absoluteFill}
+        >
             {expandedLayout && !docked && (
                 <Animated.View
                     style={[
@@ -381,10 +402,10 @@ const GameSheet: React.FunctionComponent = () => {
                     <RoundHeaderTitle />
                 </Animated.View>
             )}
+            {/* Keyed above: docking and undocking change the snap points, so the
+                sheet starts over at its first point rather than carry an index
+                over. */}
             <BottomSheet
-                // Docking and undocking change the snap points, so start the
-                // sheet over at its first point rather than carry an index over.
-                key={foldSplit ?? 'flat'}
                 ref={gameSheetRef}
                 index={docked ? 0 : initialIndex}
                 onChange={onSheetChange}
@@ -530,7 +551,7 @@ const GameSheet: React.FunctionComponent = () => {
                 </BottomSheetScrollView>
 
             </BottomSheet>
-        </>
+        </Animated.View>
     );
 };
 

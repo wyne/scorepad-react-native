@@ -5,6 +5,7 @@ import { ParamListBase } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake';
 import { Platform, StyleSheet, View, useWindowDimensions } from 'react-native';
+import Animated, { FadeIn, FadeOut, LayoutAnimationConfig } from 'react-native-reanimated';
 
 import { useAppSelector } from '../../redux/hooks';
 import { selectInteractionType } from '../../redux/selectors';
@@ -76,14 +77,20 @@ const GameScreen: React.FunctionComponent<Props> = ({ navigation }) => {
         <View style={{ flex: 1, paddingTop }} testID="game-screen">
             <View style={{ flex: 1 }}>
                 <View style={[styles.boardArea, boardSize]} testID="game-board-area">
-                    {isDial
-                        ? <View key="rows" style={StyleSheet.absoluteFill}>
-                            <ListBoard foldSplit={foldSplit} showHint={showHint} topInset={scrollUnderHeader ? headerHeight : 0} />
-                        </View>
-                        : <View key="flex" style={StyleSheet.absoluteFill}>
-                            <TileBoard boardSize={boardSize} foldSplit={foldSplit} showHint={showHint} />
-                        </View>
-                    }
+                    {/* Folding or unfolding remounts the board so it fades in at its
+                        new size while the sheet slides in (see GameSheet). The old
+                        board leaves at once: faded out, it would overlap the sheet
+                        at its old size. */}
+                    <LayoutAnimationConfig key={foldSplit ?? 'flat'} skipExiting>
+                        {isDial
+                            ? <Animated.View key="rows" entering={FadeIn.duration(220)} exiting={FadeOut.duration(180)} style={StyleSheet.absoluteFill}>
+                                <ListBoard foldSplit={foldSplit} showHint={showHint} topInset={scrollUnderHeader ? headerHeight : 0} />
+                            </Animated.View>
+                            : <Animated.View key="flex" entering={FadeIn.duration(220)} exiting={FadeOut.duration(180)} style={StyleSheet.absoluteFill}>
+                                <TileBoard boardSize={boardSize} foldSplit={foldSplit} showHint={showHint} />
+                            </Animated.View>
+                        }
+                    </LayoutAnimationConfig>
 
                     <LockedGameHint top={(scrollUnderHeader ? headerHeight : 0) + 8} />
                 </View>
