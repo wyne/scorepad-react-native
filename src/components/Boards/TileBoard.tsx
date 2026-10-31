@@ -91,7 +91,9 @@ const TileBoard: React.FC<{ showHint: boolean }> = ({ showHint }) => {
     if (visiblePlayerIds.length === 0) return null;
 
     return (
-        <SafeAreaView edges={['left', 'right']} style={
+        // Docked on the left half, the board stops short of the vertical bar's
+        // inset on the right.
+        <SafeAreaView edges={foldSplit === 'columns' ? ['left'] : ['left', 'right']} style={
             [styles.contentStyle,
             {
                 paddingBottom: foldSplit ? 0 : fullscreen ? 20 : bottomSheetHeight + 2, // Add 2 to account for the border

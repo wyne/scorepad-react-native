@@ -404,7 +404,7 @@ const GameSheet: React.FunctionComponent = () => {
                 // to half width and the backdrop drops out). Use the fixed points.
                 enableDynamicSizing={!expandedLayout && !docked}
                 enablePanDownToClose={false}
-                topInset={topInset}
+                topInset={foldSplit === 'columns' ? topInset + 8 : topInset}
                 // The library appends its own `left: 0, right: 0` after this style, so
                 // set the width rather than moving the right edge.
                 style={animatedWidthStyle}
@@ -413,7 +413,7 @@ const GameSheet: React.FunctionComponent = () => {
             >
                 <BottomSheetScrollView overScrollMode="always">
                     <Animated.View style={animatedSafeAreaStyle}>
-                        <View style={styles.sheetHeaderContainer}>
+                        <View style={[styles.sheetHeaderContainer, docked && styles.dockedSheetHeader]}>
                             <TouchableWithoutFeedback onPress={() => sheetTitlePress()}>
                                 <View testID="game-title-button" style={[styles.sheetTitleView]}>
                                     <Text style={[styles.sheetTitle, { color: theme.text }]} numberOfLines={1}>
@@ -541,6 +541,10 @@ const styles = StyleSheet.create({
         height: bottomSheetHeight,
         alignItems: 'center',
         justifyContent: 'center',
+    },
+    // Docked, the sheet has no handle above the title.
+    dockedSheetHeader: {
+        paddingTop: 16,
     },
     dockedRoundPicker: {
         alignItems: 'center',
