@@ -261,7 +261,10 @@ const GameSheet: React.FunctionComponent = () => {
      * next one. Tied to the sheet's index, so it tracks the drag.
      */
     const animatedWidth = useDerivedValue(() => {
-        if (foldSplit === 'columns') return containerWidth / 2 - FOLD_GAP / 2;
+        // Docked on the right half, stop short of the vertical bar: the sheet
+        // sits above the navigator, so it would cover Back and the other bar
+        // buttons.
+        if (foldSplit === 'columns') return containerWidth / 2 - FOLD_GAP / 2 - insets.right;
         if (!expandedLayout) return containerWidth;
 
         return interpolate(
@@ -282,9 +285,9 @@ const GameSheet: React.FunctionComponent = () => {
     // inset: on the iPhone Duo the vertical bar's inset on the right only
     // matters once the sheet is wide enough to extend under it.
     const animatedSafeAreaStyle = useAnimatedStyle(() => {
-        // Docked on the right half, the sheet reaches the vertical bar but not
-        // the left edge.
-        if (foldSplit === 'columns') return { paddingLeft: 0, paddingRight: insets.right };
+        // Docked on the right half, the sheet already ends at the vertical bar
+        // and starts past the fold, so neither inset applies.
+        if (foldSplit === 'columns') return { paddingLeft: 0, paddingRight: 0 };
 
         return {
             paddingLeft: insets.left,
