@@ -71,9 +71,11 @@ jest.mock('../components/Sheets/GameSheet', () => ({ bottomSheetHeight: 80 }));
 jest.mock('../hooks/useExpandedGameLayout', () => ({
     ...jest.requireActual('../hooks/useExpandedGameLayout'),
     useGameFoldSplit: jest.fn(() => null),
+    useExpandedGameLayout: jest.fn(() => false),
 }));
 
 const mockUseGameFoldSplit: jest.Mock = jest.requireMock('../hooks/useExpandedGameLayout').useGameFoldSplit;
+const mockUseExpandedGameLayout: jest.Mock = jest.requireMock('../hooks/useExpandedGameLayout').useExpandedGameLayout;
 
 // Mock the components that GameScreen uses
 jest.mock('../components/Buttons/GameOptionsButton', () => ({
@@ -269,7 +271,29 @@ describe('GameScreen', () => {
             );
         };
 
-        afterEach(() => mockUseGameFoldSplit.mockReturnValue(null));
+        afterEach(() => {
+            mockUseGameFoldSplit.mockReturnValue(null);
+            mockUseExpandedGameLayout.mockReturnValue(false);
+        });
+
+        describe('in landscape on the inner display', () => {
+            beforeEach(() => mockUseExpandedGameLayout.mockReturnValue(true));
+
+            it('leaves the header band (88) below the board too when docked', () => {
+                mockUseGameFoldSplit.mockReturnValue('columns');
+                const { height } = Dimensions.get('window');
+                const { getByTestId } = renderGame();
+
+                expect(getByTestId('tile-board').props.boardSize.height).toBe(height - 88 - 88);
+            });
+
+            it('leaves the header band between the board and the collapsed sheet when flat', () => {
+                const { height } = Dimensions.get('window');
+                const { getByTestId } = renderGame();
+
+                expect(getByTestId('tile-board').props.boardSize.height).toBe(height - 88 - 80 - 88);
+            });
+        });
 
         it('fills the screen with the board when flat, above the collapsed sheet', () => {
             const { getByTestId } = renderGame();

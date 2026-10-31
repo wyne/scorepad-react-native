@@ -19,7 +19,7 @@ import GameOverSheet from '../components/Sheets/GameOverSheet';
 import { bottomSheetHeight } from '../components/Sheets/GameSheet';
 import GestureInfoSheet from '../components/Sheets/GestureInfoSheet';
 import PointValuesSheet from '../components/Sheets/PointValuesSheet';
-import { FOLD_GAP, useGameFoldSplit, useVerticalBarLayout } from '../hooks/useExpandedGameLayout';
+import { FOLD_GAP, useExpandedGameLayout, useGameFoldSplit, useVerticalBarLayout } from '../hooks/useExpandedGameLayout';
 import { useGestureHint } from '../hooks/useGestureHint';
 
 function useKeepScreenAwake(active: boolean): void {
@@ -125,10 +125,22 @@ const GameScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     const foldSplit = useGameFoldSplit();
     const { width: windowWidth, height: windowHeight } = useWindowDimensions();
     const paddingTop = scrollUnderHeader ? 0 : headerHeight;
+    const expandedLayout = useExpandedGameLayout();
     // Room for the collapsed game sheet below the tiles (the dial list scrolls
     // under it instead). It's part of the board's frame rather than padding
     // inside the board, so folding and unfolding animate it with the board.
-    const boardBottomInset = isDial || foldSplit ? 0 : fullscreen ? 20 : bottomSheetHeight + 2;
+    // On the iPhone Duo's inner display in landscape the empty header leaves a
+    // band above the tiles. Leave the same band below them, so the board sits
+    // evenly between the top edge and what's below it: the screen edge when
+    // the sheet is docked or hidden, the collapsed sheet when it isn't.
+    const evenMargin = expandedLayout && !isDial ? paddingTop : 0;
+    const boardBottomInset = isDial || foldSplit === 'rows'
+        ? 0
+        : foldSplit === 'columns'
+            ? evenMargin
+            : fullscreen
+                ? Math.max(20, evenMargin)
+                : bottomSheetHeight + Math.max(2, evenMargin);
     // Give the board and its tiles the same geometry in this render. Measuring
     // the resized native board first exposes an old grid inside the new bounds.
     const boardSize = useMemo(() => ({
