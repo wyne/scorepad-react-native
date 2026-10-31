@@ -130,7 +130,6 @@ export default {
       dark: { backgroundColor: '#000000' },
     }],
     'expo-status-bar',
-    './plugins/withIosSceneLifecycle',
     './plugins/withTouchVisualizer',
     'expo-font',
     '@react-native-firebase/app',

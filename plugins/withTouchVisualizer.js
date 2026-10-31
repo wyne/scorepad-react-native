@@ -41,13 +41,15 @@ const withTouchVisualizerAppDelegate = (config) =>
       throw new Error('withTouchVisualizer: could not find "import ReactAppDependencyProvider" in AppDelegate');
     }
 
+    // SDK 58 starts React Native from SceneDelegate, so start the visualizer
+    // just before didFinishLaunching hands off to it.
     const beforeInit = contents;
     contents = contents.replace(
-      'factory.startReactNative(',
-      '#if DEBUG\n    var tvConfig = Configuration()\n    tvConfig.color = .systemGray\n    tvConfig.defaultSize = CGSize(width: 30.0, height: 30.0)\n    Visualizer.start(tvConfig)\n    #endif\n    factory.startReactNative('
+      'return super.application(application, didFinishLaunchingWithOptions',
+      '#if DEBUG\n    var tvConfig = Configuration()\n    tvConfig.color = .systemGray\n    tvConfig.defaultSize = CGSize(width: 30.0, height: 30.0)\n    Visualizer.start(tvConfig)\n    #endif\n    return super.application(application, didFinishLaunchingWithOptions'
     );
     if (contents === beforeInit) {
-      throw new Error('withTouchVisualizer: could not find "factory.startReactNative(" in AppDelegate');
+      throw new Error('withTouchVisualizer: could not find "return super.application(application, didFinishLaunchingWithOptions" in AppDelegate');
     }
 
     config.modResults.contents = contents;

@@ -1,0 +1,13 @@
+diff --git a/node_modules/@react-native-firebase/app/plugin/build/ios/appDelegate.js b/node_modules/@react-native-firebase/app/plugin/build/ios/appDelegate.js
+index 68bc955..1e4e000 100644
+--- a/node_modules/@react-native-firebase/app/plugin/build/ios/appDelegate.js
++++ b/node_modules/@react-native-firebase/app/plugin/build/ios/appDelegate.js
+@@ -61,7 +61,7 @@ function modifyObjcAppDelegate(contents) {
+ }
+ function modifySwiftAppDelegate(contents) {
+     const methodInvocationBlock = `FirebaseApp.configure()`;
+-    const methodInvocationLineMatcher = /(?:self\.moduleName\s*=\s*"([^"]*)")|(?:factory\.startReactNative\()/;
++    const methodInvocationLineMatcher = /(?:self\.moduleName\s*=\s*"([^"]*)")|(?:factory\.startReactNative\()|(?:return\s+super\.application\(\s*application\s*,\s*didFinishLaunchingWithOptions:\s*launchOptions\s*\))/;
+     // Add import
+     if (!contents.includes('import FirebaseCore')) {
+         contents = contents.replace(/import Expo/g, `import Expo
