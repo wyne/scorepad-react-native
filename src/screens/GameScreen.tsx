@@ -5,7 +5,7 @@ import { ParamListBase } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake';
 import { Platform, StyleSheet, View, useWindowDimensions } from 'react-native';
-import Animated, { Easing, FadeIn, FadeOut, LayoutAnimationsValues, useReducedMotion, withTiming } from 'react-native-reanimated';
+import Animated, { Easing, FadeIn, FadeOut, LayoutAnimationsValues, LinearTransition, useReducedMotion, withTiming } from 'react-native-reanimated';
 
 import { useAppSelector } from '../../redux/hooks';
 import { selectInteractionType } from '../../redux/selectors';
@@ -86,6 +86,13 @@ export const boardResizeTransition = (reduceMotion: boolean) => (values: LayoutA
     };
 };
 
+/**
+ * The dial list resizes its frame instead: its rows keep their height and
+ * just narrow or widen, so a short list doesn't move at all when only the
+ * height changes, where scaling would stretch it.
+ */
+const listBoardResize = LinearTransition.duration(280).easing(Easing.out(Easing.cubic));
+
 interface Props {
     navigation: NativeStackNavigationProp<ParamListBase>;
 }
@@ -150,7 +157,7 @@ const GameScreen: React.FunctionComponent<Props> = ({ navigation }) => {
         <View style={{ flex: 1, paddingTop }} testID="game-screen">
             <View style={{ flex: 1 }}>
                 <Animated.View
-                    layout={animateBoardResize ? boardResize : undefined}
+                    layout={animateBoardResize ? (isDial ? listBoardResize : boardResize) : undefined}
                     style={[styles.boardArea, boardSize]}
                     testID="game-board-area"
                 >
