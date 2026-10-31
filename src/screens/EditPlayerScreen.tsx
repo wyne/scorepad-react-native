@@ -3,15 +3,14 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { ParamListBase, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import {
-    NativeSyntheticEvent,
     Keyboard,
     Platform,
     ScrollView,
     StyleSheet,
     Text,
-    TextInput,
-    TextInputEndEditingEventData,
-    TextInputSubmitEditingEventData,
+    TextInputEndEditingEvent,
+    TextInputInstance,
+    TextInputSubmitEditingEvent,
     TouchableOpacity,
     View
 } from 'react-native';
@@ -56,7 +55,7 @@ const EditPlayerScreen: React.FC<EditPlayerScreenProps> = ({
 }) => {
 
     const theme = useTheme();
-    const inputRef = React.useRef<TextInput>(null);
+    const inputRef = React.useRef<TextInputInstance>(null);
     const selectedNameRef = useRef<string | null>(null);
 
     const dismissInput = useCallback(() => {
@@ -130,14 +129,14 @@ const EditPlayerScreen: React.FC<EditPlayerScreenProps> = ({
     if (typeof currentGame == 'undefined') return null;
     if (index == null) { return null; }
 
-    const onEndEditingHandler = (e: NativeSyntheticEvent<TextInputEndEditingEventData>) => {
+    const onEndEditingHandler = (e: TextInputEndEditingEvent) => {
         const text = selectedNameRef.current ?? e.nativeEvent.text;
         selectedNameRef.current = null;
 
         commitPlayerName(text);
     };
 
-    const onSubmitEditingHandler = (e: NativeSyntheticEvent<TextInputSubmitEditingEventData>) => {
+    const onSubmitEditingHandler = (e: TextInputSubmitEditingEvent) => {
         commitPlayerName(e.nativeEvent.text);
     };
 

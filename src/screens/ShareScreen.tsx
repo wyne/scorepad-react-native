@@ -3,7 +3,7 @@ import React, { useRef } from 'react';
 import { ParamListBase } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import * as Sharing from 'expo-sharing';
-import { Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Platform, ScrollView, StyleSheet, Text, View, ViewInstance } from 'react-native';
 import { Button, Icon } from 'react-native-elements';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { captureRef } from 'react-native-view-shot';
@@ -29,7 +29,7 @@ const ShareScreen: React.FunctionComponent<Props> = ({ navigation }) => {
         state => selectGameById(state, currentGameId ?? '')?.roundTotal || 0
     );
     const currentGame = useAppSelector(selectCurrentGame);
-    const scoreboardImageEl = useRef<View>(null);
+    const scoreboardImageEl = useRef<ViewInstance>(null);
 
     if (typeof currentGameId == 'undefined') return null;
     if (typeof currentGame == 'undefined') return null;

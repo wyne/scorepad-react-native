@@ -2,13 +2,12 @@ import React, { useEffect, useState } from 'react';
 
 import { useNavigation } from '@react-navigation/native';
 import {
-    NativeSyntheticEvent,
     Platform,
     StyleSheet,
     Text,
-    TextInput,
-    TextInputEndEditingEventData,
-    TextInputSubmitEditingEventData,
+    TextInputEndEditingEvent,
+    TextInputInstance,
+    TextInputSubmitEditingEvent,
     View
 } from 'react-native';
 import { Input } from 'react-native-elements';
@@ -27,7 +26,7 @@ const EditGame = ({ }) => {
     const dispatch = useAppDispatch();
     const currentGame = useAppSelector(selectCurrentGame);
     const [localTitle, setLocalTitle] = useState(currentGame?.title ?? '');
-    const inputRef = React.useRef<TextInput>(null);
+    const inputRef = React.useRef<TextInputInstance>(null);
 
     const navigation = useNavigation();
 
@@ -53,12 +52,12 @@ const EditGame = ({ }) => {
 
     if (typeof currentGame == 'undefined') return null;
 
-    const onEndEditingHandler = (e: NativeSyntheticEvent<TextInputEndEditingEventData>) => {
+    const onEndEditingHandler = (e: TextInputEndEditingEvent) => {
         const text = e.nativeEvent.text;
         commitTitle(text);
     };
 
-    const onSubmitEditingHandler = (e: NativeSyntheticEvent<TextInputSubmitEditingEventData>) => {
+    const onSubmitEditingHandler = (e: TextInputSubmitEditingEvent) => {
         const text = e.nativeEvent.text;
         commitTitle(text);
     };

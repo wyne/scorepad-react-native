@@ -1,6 +1,6 @@
 import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
 
-import { LayoutChangeEvent, Platform, StyleSheet, View } from 'react-native';
+import { LayoutChangeEvent, Platform, ScrollViewInstance, StyleSheet, View } from 'react-native';
 import { TouchableOpacity, ScrollView } from 'react-native-gesture-handler';
 import Animated, { FadeIn } from 'react-native-reanimated';
 
@@ -51,7 +51,7 @@ const ScoreLogTable: React.FunctionComponent<Props> = ({ showRounds = true }) =>
 
     const theme = useTheme();
 
-    const scoreLogScrollViewEl = useRef<ScrollView>(null);
+    const scoreLogScrollViewEl = useRef<ScrollViewInstance>(null);
 
     // Remember the round offset when the round changes
     const onLayoutHandler = useCallback((event: LayoutChangeEvent, round: number) => {
