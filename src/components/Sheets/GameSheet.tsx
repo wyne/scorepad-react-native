@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import BottomSheet, { BottomSheetBackdrop, BottomSheetBackdropProps, BottomSheetHandle, BottomSheetHandleProps, BottomSheetScrollView } from '@gorhom/bottom-sheet';
+import { getDefaultHeaderHeight } from '@react-navigation/elements';
 import { ParamListBase, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Button } from '@rneui/base';
@@ -13,7 +14,7 @@ import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
 import { updatePlayer } from '../../../redux/PlayersSlice';
 import { selectGameModesVisible } from '../../../redux/selectors';
 import { logEvent } from '../../Analytics';
-import { FOLD_GAP, useExpandedGameLayout, useExpandedGameSplit, useGameFoldSplit } from '../../hooks/useExpandedGameLayout';
+import { FOLD_GAP, useExpandedGameLayout, useExpandedGameSplit, useGameFoldSplit, useVerticalBarLayout } from '../../hooks/useExpandedGameLayout';
 import { useTheme } from '../../theme';
 import BigButton from '../BigButtons/BigButton';
 import RoundHeaderTitle from '../Headers/RoundHeaderTitle';
@@ -74,6 +75,14 @@ const GameSheet: React.FunctionComponent = () => {
 
     const insets = useSafeAreaInsets();
     const topInset = insets.top;
+    // Docked beside the board, the sheet starts just below the header: on the
+    // iPhone Duo the header is empty (its items are in the vertical bar), so
+    // only the status area; elsewhere below the header's Back button. The
+    // sheet sits above the navigator, so it can't measure the header itself.
+    const verticalBars = useVerticalBarLayout();
+    const dockedTopInset = (verticalBars
+        ? topInset
+        : getDefaultHeaderHeight({ width: containerWidth, height: containerHeight }, false, topInset)) + 8;
 
     // Stable key for animated children to force remount on each mount
     const mountKey = useRef(Date.now()).current;
@@ -401,7 +410,7 @@ const GameSheet: React.FunctionComponent = () => {
                 // to half width and the backdrop drops out). Use the fixed points.
                 enableDynamicSizing={!expandedLayout && !docked}
                 enablePanDownToClose={false}
-                topInset={foldSplit === 'columns' ? topInset + 8 : topInset}
+                topInset={foldSplit === 'columns' ? dockedTopInset : topInset}
                 // The library appends its own `left: 0, right: 0` after this style, so
                 // set the width rather than moving the right edge.
                 style={animatedWidthStyle}

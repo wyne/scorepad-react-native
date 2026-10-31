@@ -19,7 +19,7 @@ import { MenuOpenContextProvider } from './components/MenuOpenContext';
 import GameSheet from './components/Sheets/GameSheet';
 import { GestureInfoSheetContextProvider } from './components/Sheets/GestureInfoSheetContext';
 import { useAnalyticsUserProperties } from './hooks/useAnalyticsUserProperties';
-import { useRoundPickerInBottomStrip, useVerticalBarLayout } from './hooks/useExpandedGameLayout';
+import { useRoundPickerOutOfHeader, useVerticalBarLayout } from './hooks/useExpandedGameLayout';
 import EditPlayerScreen from './screens/EditPlayerScreen';
 import ScoringRulesScreen from './screens/ScoringRulesScreen';
 import ShareScreen from './screens/ShareScreen';
@@ -85,7 +85,9 @@ export const Navigation = () => {
     const fullscreen = useAppSelector(state => state.settings.home_fullscreen);
     // On the iPhone Duo's inner display the round picker sits beside the game
     // sheet instead of in the header, and the header collapses (see GameSheet).
-    const roundPickerInHeader = !useRoundPickerInBottomStrip();
+    // On a partially open foldable it moves into the sheet docked beside the
+    // board.
+    const roundPickerInHeader = !useRoundPickerOutOfHeader();
     // With vertical bars (iPhone Duo), headers drop their background (see
     // bareHeaderOptions). iOS also scrolls the list's header title away with
     // the content, so that title moves into the list (see ListScreen) and the

@@ -5,6 +5,7 @@ import type { Hinge as HingeState } from 'expo-hinge';
 import { Platform, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { useFold } from '../../modules/fold-features';
 import { useAppSelector } from '../../redux/hooks';
 
 // The shortest landscape iPhone window is well under this; the iPhone Duo's
@@ -76,12 +77,12 @@ export const useExpandedGameSplit = (): { sheetWidth: number; pickerWidth: numbe
 export const FOLD_GAP = 32;
 
 /**
- * How the game screen splits across a partially open iPhone Duo: the board
- * on one half and the game sheet, docked open, on the other (Apple's overlay
- * arrangement). In landscape the fold runs top to bottom, so the halves are
- * columns; in portrait it runs across, so they are rows. Null when the device
- * is flat or closed, in fullscreen (which hides the sheet), and on devices
- * without a hinge.
+ * How the game screen splits across a partially open foldable (the iPhone Duo,
+ * or an Android foldable like the Pixel Fold): the board on one half and the
+ * game sheet, docked open, on the other (Apple's overlay arrangement). A fold
+ * running top to bottom makes the halves columns; one running across makes
+ * them rows. Null when the device is flat or closed, in fullscreen (which hides
+ * the sheet), and on devices without a hinge.
  */
 export type GameFoldSplit = 'columns' | 'rows';
 
@@ -139,7 +140,7 @@ const updateFoldSplitFromHinge = (hinge: HingeState | null) => {
 const getFoldSplitSnapshot = (): boolean => foldSplitActive;
 
 const subscribeToSettledFoldSplit = (listener: () => void): (() => void) => {
-    if (Platform.OS !== 'ios') return () => {};
+    if (Platform.OS !== 'ios' && Platform.OS !== 'android') return () => {};
 
     foldSplitListeners.add(listener);
     if (hingeSubscription == null) {
@@ -166,11 +167,20 @@ export const useGameFoldSplit = (): GameFoldSplit | null => {
     );
     const { width, height } = useWindowDimensions();
     const fullscreen = useAppSelector(state => state.settings.home_fullscreen);
+    const fold = useFold();
 
-    // Android foldables fold along a different axis for the same window
-    // shape, so this only covers the iPhone Duo for now.
-    if (Platform.OS !== 'ios' || fullscreen || !settledFoldSplit) return null;
+    if (fullscreen || !settledFoldSplit) return null;
 
+    // On Android the window manager says which way the fold runs: a fold line
+    // running top to bottom splits the window into columns. The shape of the
+    // window doesn't tell: the Pixel Fold's inner screen is nearly square.
+    if (Platform.OS === 'android') {
+        if (fold == null) return null;
+        return fold.orientation === 'vertical' ? 'columns' : 'rows';
+    }
+
+    // On the iPhone Duo the fold always crosses the long side.
+    if (Platform.OS !== 'ios') return null;
     return width > height ? 'columns' : 'rows';
 };
 
@@ -185,4 +195,16 @@ export const useRoundPickerInBottomStrip = (): boolean => {
     const fullscreen = useAppSelector(state => state.settings.home_fullscreen);
 
     return expanded && !fullscreen;
+};
+
+/**
+ * Whether the round picker has moved out of the header into the game sheet:
+ * beside it in the iPhone Duo's expanded layout, or inside it when it docks on
+ * one side of the fold (see GameSheet).
+ */
+export const useRoundPickerOutOfHeader = (): boolean => {
+    const inBottomStrip = useRoundPickerInBottomStrip();
+    const foldSplit = useGameFoldSplit();
+
+    return inBottomStrip || foldSplit === 'columns';
 };

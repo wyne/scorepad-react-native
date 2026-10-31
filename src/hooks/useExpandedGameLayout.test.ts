@@ -27,6 +27,11 @@ jest.mock('../../redux/hooks', () => ({
 
 let mockFullscreen = false;
 
+let mockFold: { orientation: 'vertical' | 'horizontal' } | null = null;
+jest.mock('../../modules/fold-features', () => ({
+    useFold: () => mockFold,
+}));
+
 const addHingeListener: jest.Mock = jest.requireMock('expo-hinge').addHingeListener;
 
 jest.mock('react-native/Libraries/Utilities/useWindowDimensions', () => ({
@@ -131,6 +136,7 @@ describe('useGameFoldSplit', () => {
         jest.useFakeTimers();
         setPlatform('ios');
         mockFullscreen = false;
+        mockFold = null;
         mockCurrentHinge = null;
         mockHingeListener = null;
         addHingeListener.mockClear();
@@ -189,12 +195,40 @@ describe('useGameFoldSplit', () => {
         expect(split.result.current).toBeNull();
     });
 
-    it('does not split on Android', () => {
-        setPlatform('android');
-        setHinge('partiallyOpen');
-        setWindow(951, 669);
-        expect(renderSplit().result.current).toBeNull();
-        expect(addHingeListener).not.toHaveBeenCalled();
+    describe('on Android', () => {
+        beforeEach(() => setPlatform('android'));
+
+        // The Pixel Fold's inner screen is nearly square and, held like a
+        // book, slightly taller than wide: the fold's direction comes from the
+        // window manager, not the window's shape.
+        it('splits into columns along a vertical fold, even in a portrait window', () => {
+            mockFold = { orientation: 'vertical' };
+            setHinge('partiallyOpen');
+            setWindow(692, 717);
+            const split = renderSplit();
+
+            settleHinge();
+            expect(split.result.current).toBe('columns');
+        });
+
+        it('splits into rows along a horizontal fold, even in a landscape window', () => {
+            mockFold = { orientation: 'horizontal' };
+            setHinge('partiallyOpen');
+            setWindow(717, 692);
+            const split = renderSplit();
+
+            settleHinge();
+            expect(split.result.current).toBe('rows');
+        });
+
+        it('does not split without a fold across the window', () => {
+            setHinge('partiallyOpen');
+            setWindow(717, 692);
+            const split = renderSplit();
+
+            settleHinge();
+            expect(split.result.current).toBeNull();
+        });
     });
 
     it('does not expose transient book mode while the hinge continues to fully open', () => {
