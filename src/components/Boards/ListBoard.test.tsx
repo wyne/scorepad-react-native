@@ -12,9 +12,9 @@ import settingsReducer, { toggleHomeFullscreen } from '../../../redux/SettingsSl
 jest.mock('../Sheets/GameSheet', () => ({ bottomSheetHeight: 80 }));
 
 jest.mock('../Interactions/Dial/DialOverlay', () => {
-    return function MockDialOverlay() {
+    return function MockDialOverlay(props: Record<string, unknown>) {
         const { View } = jest.requireActual('react-native');
-        return <View testID="inline-expand-overlay" />;
+        return <View testID="inline-expand-overlay" {...props} />;
     };
 });
 
@@ -150,6 +150,25 @@ describe('ListBoard', () => {
                 paddingRight: 28,
             })
         );
+    });
+
+    it('does not apply the far-right window inset to the board beside the fold', () => {
+        mockSafeAreaInsets = { top: 0, bottom: 0, left: 24, right: 16 };
+        const store = createStore();
+        const { getByTestId, getByText } = render(
+            <Provider store={store}><ListBoard foldSplit="columns" showHint={false} /></Provider>
+        );
+
+        expect(StyleSheet.flatten(getByTestId('list-board-scroll').props.contentContainerStyle)).toEqual(
+            expect.objectContaining({
+                paddingLeft: 36,
+                paddingRight: 12,
+            })
+        );
+
+        fireLayouts(getByTestId);
+        fireEvent.press(getByText('Player 1'));
+        expect(getByTestId('inline-expand-overlay').props.safeAreaRight).toBe(0);
     });
 
     it('uses the bottom safe area when fullscreen removes the bottom sheet clearance', () => {

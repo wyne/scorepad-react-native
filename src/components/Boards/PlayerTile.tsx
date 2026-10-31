@@ -1,20 +1,24 @@
 import React from 'react';
 
 import { getContrastRatio } from 'colorsheet';
-import { DimensionValue, StyleSheet } from 'react-native';
-import Animated, { Easing, FadeIn } from 'react-native-reanimated';
+import { DimensionValue, StyleSheet, View } from 'react-native';
 import { shallowEqual } from 'react-redux';
 
 import { selectGameById } from '../../../redux/GamesSlice';
 import { useAppSelector } from '../../../redux/hooks';
 import { selectInteractionType } from '../../../redux/selectors';
 import { getPalette } from '../../ColorPalette';
-import { useTheme } from '../../theme';
 import { interactionComponents } from '../Interactions/InteractionComponents';
 import { InteractionType } from '../Interactions/InteractionType';
 import AdditionTile from '../PlayerTiles/AdditionTile/AdditionTile';
 import PlayerIndexLabel from '../PlayerTiles/PlayerIndexLabel';
 import PlayerWinnerLabel from '../PlayerTiles/PlayerWinnerLabel';
+
+// Space around each tile, so neighbouring tiles sit twice this far apart.
+export const TILE_BORDER = 3;
+// The usual corner radius of a tile's slot (the tile plus the space around
+// it), for corners not drawn concentric with the display.
+export const TILE_RADIUS = 20;
 
 interface Props {
     index: number;
@@ -24,6 +28,11 @@ interface Props {
     width: number;
     height: number;
     showHint: boolean;
+    // Per-corner radii, for corners drawn concentric with the display's.
+    radiusTopLeft?: number;
+    radiusTopRight?: number;
+    radiusBottomLeft?: number;
+    radiusBottomRight?: number;
 }
 
 const PlayerTile: React.FunctionComponent<Props> = React.memo(({
@@ -34,8 +43,11 @@ const PlayerTile: React.FunctionComponent<Props> = React.memo(({
     rows,
     playerId,
     showHint,
+    radiusTopLeft,
+    radiusTopRight,
+    radiusBottomLeft,
+    radiusBottomRight,
 }) => {
-    const theme = useTheme();
     const playerIndexLabel = useAppSelector(state => state.settings.showPlayerIndex);
     const { bg, fg, isWinner } = useAppSelector(state => {
         const currentGameId = state.settings.currentGameId;
@@ -68,38 +80,46 @@ const PlayerTile: React.FunctionComponent<Props> = React.memo(({
     if (!(width > 0 && height > 0)) return null;
     if (Number.isNaN(width) || Number.isNaN(height)) return null;
 
+    // The gap around the tile is padding, not a border in the background color:
+    // with uneven corner radii a border leaves a faint seam along its edge.
+    const inner = (radius: number | undefined) => (radius ?? TILE_RADIUS) - TILE_BORDER;
+
     return (
-        <Animated.View
-            entering={FadeIn.delay(25 * index + 50).duration(400).easing(Easing.ease)}
-            style={[
-                styles.playerCard,
-                {
-                    backgroundColor: bg,
-                    borderColor: theme.background,
-                    width: widthPerc,
-                    height: heightPerc,
-                    borderBottomLeftRadius: playerIndexLabel ? 7 : undefined,
-                }]}>
-            <PlayerIndexLabel index={index} fontColor={fg} enabled={playerIndexLabel} />
-            <PlayerWinnerLabel fontColor={fg} enabled={isWinner} />
-            <InteractionComponent index={index} fontColor={fg} playerId={playerId} showHint={showHint} tileHeight={height}>
-                <AdditionTile
-                    playerId={playerId}
-                    fontColor={fg}
-                    maxWidth={width}
-                    maxHeight={height}
-                    index={index}
-                />
-            </InteractionComponent>
-        </Animated.View>
+        <View style={[styles.playerSlot, { width: widthPerc, height: heightPerc }]}>
+            <View
+                style={[
+                    styles.playerCard,
+                    {
+                        backgroundColor: bg,
+                        borderTopLeftRadius: inner(radiusTopLeft),
+                        borderTopRightRadius: inner(radiusTopRight),
+                        // The player number sits in this corner, tucked into a tighter curve.
+                        borderBottomLeftRadius: playerIndexLabel ? inner(7) : inner(radiusBottomLeft),
+                        borderBottomRightRadius: inner(radiusBottomRight),
+                    }]}>
+                <PlayerIndexLabel index={index} fontColor={fg} enabled={playerIndexLabel} />
+                <PlayerWinnerLabel fontColor={fg} enabled={isWinner} />
+                <InteractionComponent index={index} fontColor={fg} playerId={playerId} showHint={showHint} tileHeight={height}>
+                    <AdditionTile
+                        playerId={playerId}
+                        fontColor={fg}
+                        maxWidth={width}
+                        maxHeight={height}
+                        index={index}
+                    />
+                </InteractionComponent>
+            </View>
+        </View>
     );
 });
 
 const styles = StyleSheet.create({
-    playerCard: {
-        borderRadius: 20,
-        borderWidth: 3,
+    playerSlot: {
         flexGrow: 1,
+        padding: TILE_BORDER,
+    },
+    playerCard: {
+        flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
         overflow: 'hidden',

@@ -2,6 +2,7 @@ import React from 'react';
 
 import { configureStore } from '@reduxjs/toolkit';
 import { render } from '@testing-library/react-native';
+import { Dimensions, StyleSheet } from 'react-native';
 import { Provider } from 'react-redux';
 
 import gamesReducer from '../../redux/GamesSlice';
@@ -9,7 +10,7 @@ import playersReducer from '../../redux/PlayersSlice';
 import settingsReducer from '../../redux/SettingsSlice';
 import { useNavigationMock } from '../../test/test-helpers';
 
-import GameScreen from './GameScreen';
+import GameScreen, { boardResizeTransition } from './GameScreen';
 
 const mockHeaderItems = [{ type: 'menu', label: 'Game Options' }];
 
@@ -23,13 +24,21 @@ jest.mock('react-native-safe-area-context', () => ({
 
 jest.mock('react-native-reanimated', () => {
     const View = jest.requireActual('react-native').View;
-    const builder = { duration: jest.fn() };
+    const builder = { duration: jest.fn(), easing: jest.fn() };
     builder.duration.mockReturnValue(builder);
+    builder.easing.mockReturnValue(builder);
     return {
         __esModule: true,
         default: { View },
+        Easing: {
+            cubic: jest.fn(),
+            out: jest.fn(() => jest.fn()),
+        },
         FadeIn: builder,
         FadeOut: builder,
+        LinearTransition: builder,
+        useReducedMotion: jest.fn(() => false),
+        withTiming: jest.fn((value: number) => value),
     };
 });
 
@@ -57,6 +66,17 @@ jest.mock('@gorhom/bottom-sheet', () => {
     };
 });
 
+jest.mock('../components/Sheets/GameSheet', () => ({ bottomSheetHeight: 80 }));
+
+jest.mock('../hooks/useExpandedGameLayout', () => ({
+    ...jest.requireActual('../hooks/useExpandedGameLayout'),
+    useGameFoldSplit: jest.fn(() => null),
+    useRoundPickerInBottomStrip: jest.fn(() => false),
+}));
+
+const mockUseGameFoldSplit: jest.Mock = jest.requireMock('../hooks/useExpandedGameLayout').useGameFoldSplit;
+const mockUseRoundPickerInBottomStrip: jest.Mock = jest.requireMock('../hooks/useExpandedGameLayout').useRoundPickerInBottomStrip;
+
 // Mock the components that GameScreen uses
 jest.mock('../components/Buttons/GameOptionsButton', () => ({
     __esModule: true,
@@ -65,9 +85,9 @@ jest.mock('../components/Buttons/GameOptionsButton', () => ({
 }));
 
 jest.mock('../components/Boards/TileBoard', () => {
-    return function MockTileBoard() {
+    return function MockTileBoard({ boardSize }: { boardSize: { width: number; height: number } }) {
         const { View, Text } = jest.requireActual('react-native');
-        return <View testID="tile-board"><Text>TileBoard</Text></View>;
+        return <View testID="tile-board" boardSize={boardSize}><Text>TileBoard</Text></View>;
     };
 });
 
@@ -75,6 +95,13 @@ jest.mock('../components/Boards/ListBoard', () => {
     return function MockListBoard() {
         const { View, Text } = jest.requireActual('react-native');
         return <View testID="list-board"><Text>ListBoard</Text></View>;
+    };
+});
+
+jest.mock('../components/LockedGameHint', () => {
+    return function MockLockedGameHint() {
+        const { View } = jest.requireActual('react-native');
+        return <View testID="locked-game-hint" />;
     };
 });
 
@@ -227,5 +254,119 @@ describe('GameScreen', () => {
 
         const options = (navigation.setOptions as jest.Mock).mock.calls.at(-1)[0];
         expect(options.unstable_headerRightItems()).toBe(mockHeaderItems);
+    });
+
+    describe('on a partially open iPhone Duo', () => {
+        const renderGame = (settings: Record<string, unknown> = {}) => {
+            const store = createMockStore({
+                settings: { currentGameId: 'game-1', ...settings },
+                games: { entities: { 'game-1': mockGame }, ids: ['game-1'] },
+                players: { entities: mockPlayers, ids: ['player-1', 'player-2'] },
+            });
+
+            return render(
+                <Provider store={store}>
+                    <GameScreen navigation={navigation} />
+                </Provider>
+            );
+        };
+
+        afterEach(() => {
+            mockUseGameFoldSplit.mockReturnValue(null);
+            mockUseRoundPickerInBottomStrip.mockReturnValue(false);
+        });
+
+        describe('in landscape on the inner display, with an empty header', () => {
+            beforeEach(() => mockUseRoundPickerInBottomStrip.mockReturnValue(true));
+
+            it('lets the board take the empty header band when docked', () => {
+                mockUseGameFoldSplit.mockReturnValue('columns');
+                const { height } = Dimensions.get('window');
+                const { getByTestId } = renderGame();
+
+                expect(getByTestId('game-screen').props.style).toMatchObject({ paddingTop: 0 });
+                expect(getByTestId('tile-board').props.boardSize.height).toBe(height);
+            });
+
+            it('lets the board take the empty header band above the collapsed sheet when flat', () => {
+                const { height } = Dimensions.get('window');
+                const { getByTestId } = renderGame();
+
+                expect(getByTestId('tile-board').props.boardSize.height).toBe(height - 82);
+            });
+        });
+
+        it('fills the screen with the board when flat, above the collapsed sheet', () => {
+            const { getByTestId } = renderGame();
+            const { width, height } = Dimensions.get('window');
+
+            // Header (88) and the collapsed sheet (80 + 2) are outside the board's frame.
+            expect(StyleSheet.flatten(getByTestId('game-board-area').props.style)).toEqual({
+                position: 'absolute', top: 0, left: 0, width, height: height - 88 - 82,
+            });
+            expect(getByTestId('tile-board').props.boardSize).toEqual({ width, height: height - 88 - 82 });
+        });
+
+        it('keeps only a small bottom margin in fullscreen, which hides the sheet', () => {
+            const { getByTestId } = renderGame({ home_fullscreen: true });
+            const { height } = Dimensions.get('window');
+
+            expect(getByTestId('tile-board').props.boardSize.height).toBe(height - 88 - 20);
+        });
+
+        it('keeps the board to the left of the fold in landscape', () => {
+            mockUseGameFoldSplit.mockReturnValue('columns');
+            const { width, height } = Dimensions.get('window');
+            const { getByTestId } = renderGame();
+
+            const style = StyleSheet.flatten(getByTestId('game-board-area').props.style);
+            expect(style).toEqual({ position: 'absolute', left: 0, top: 0, height: height - 88, width: width / 2 - 16 });
+            expect(getByTestId('tile-board').props.boardSize).toEqual({ width: width / 2 - 16, height: height - 88 });
+            expect(getByTestId('game-board-area').findByProps({ testID: 'locked-game-hint' })).toBeTruthy();
+        });
+
+        it('keeps the board above the fold in portrait, below the header', () => {
+            mockUseGameFoldSplit.mockReturnValue('rows');
+            const { width, height } = Dimensions.get('window');
+            const { getByTestId } = renderGame();
+
+            const style = StyleSheet.flatten(getByTestId('game-board-area').props.style);
+            expect(style).toEqual({ position: 'absolute', left: 0, width, top: 0, height: height / 2 - 16 - 88 });
+            expect(getByTestId('tile-board').props.boardSize).toEqual({ width, height: height / 2 - 16 - 88 });
+        });
+    });
+
+    describe('boardResizeTransition', () => {
+        // Folding into book mode in landscape: the full-width board moves to the left half.
+        const values = {
+            currentOriginX: 0, currentOriginY: 0, currentWidth: 951, currentHeight: 600,
+            targetOriginX: 0, targetOriginY: 0, targetWidth: 459, targetHeight: 600,
+        } as Parameters<ReturnType<typeof boardResizeTransition>>[0];
+
+        it('starts the new board stretched over the old frame, anchored at the top left', () => {
+            const { initialValues, animations } = boardResizeTransition(false)(values);
+
+            expect(initialValues).toMatchObject({ originX: 0, originY: 0, width: 459, height: 600 });
+            expect((initialValues as { transform: unknown }).transform).toEqual([
+                { translateX: 246 },
+                { translateY: 0 },
+                { scaleX: 951 / 459 },
+                { scaleY: 1 },
+            ]);
+            expect((animations as { transform: unknown }).transform).toEqual([
+                { translateX: 0 },
+                { translateY: 0 },
+                { scaleX: 1 },
+                { scaleY: 1 },
+            ]);
+        });
+
+        it('fades the board in instead with Reduce Motion', () => {
+            const { initialValues, animations } = boardResizeTransition(true)(values);
+
+            expect(initialValues).toMatchObject({ width: 459, height: 600, opacity: 0 });
+            expect(initialValues).not.toHaveProperty('transform');
+            expect(animations).toEqual({ opacity: 1 });
+        });
     });
 });

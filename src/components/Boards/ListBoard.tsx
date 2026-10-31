@@ -8,6 +8,7 @@ import { shallowEqual } from 'react-redux';
 
 import { selectGameById } from '../../../redux/GamesSlice';
 import { useAppSelector } from '../../../redux/hooks';
+import type { GameFoldSplit } from '../../hooks/useExpandedGameLayout';
 import DialOverlay from '../Interactions/Dial/DialOverlay';
 import { useLockedHint } from '../LockedHintContext';
 import { useMenuOpen } from '../MenuOpenContext';
@@ -172,12 +173,13 @@ const MemoizedPlayerRow = React.memo(PlayerRow);
 
 interface ListBoardProps {
     showHint: boolean;
+    foldSplit?: GameFoldSplit | null;
     /** Space at the top the rows can scroll under, e.g. a transparent header. */
     topInset?: number;
     onPlayerRowRender?: (id: string) => void;
 }
 
-const ListBoard: React.FC<ListBoardProps> = ({ showHint, topInset = 0, onPlayerRowRender }) => {
+const ListBoard: React.FC<ListBoardProps> = ({ showHint, foldSplit = null, topInset = 0, onPlayerRowRender }) => {
     const { playerIds, locked } = useAppSelector((state) => {
         const currentGameId = state.settings.currentGameId;
         const currentGame = currentGameId ? selectGameById(state, currentGameId) : undefined;
@@ -188,6 +190,9 @@ const ListBoard: React.FC<ListBoardProps> = ({ showHint, topInset = 0, onPlayerR
         };
     }, shallowEqual);
     const fullscreen = useAppSelector(state => state.settings.home_fullscreen);
+    // The game sheet covers the bottom of the board unless it is hidden
+    // (fullscreen) or docked beside it on a partially open iPhone Duo.
+    const sheetOverBoard = !fullscreen && foldSplit == null;
     const { menuOpen } = useMenuOpen();
     const { showLockedHint } = useLockedHint();
     const insets = useSafeAreaInsets();
@@ -229,11 +234,14 @@ const ListBoard: React.FC<ListBoardProps> = ({ showHint, topInset = 0, onPlayerR
     }, []);
 
     if (!playerIds?.length) return null;
+    // In the side-by-side layout the window's right inset belongs to the
+    // docked sheet, not to the board that ends at the fold.
+    const boardRightInset = foldSplit === 'columns' ? 0 : insets.right;
     const scrollInsets = {
         top: topInset,
-        bottom: fullscreen ? insets.bottom + 10 : bottomSheetHeight + 10,
+        bottom: sheetOverBoard ? bottomSheetHeight + 10 : insets.bottom + 10,
         left: insets.left + ROW_BOARD_PADDING,
-        right: insets.right + ROW_BOARD_PADDING,
+        right: boardRightInset + ROW_BOARD_PADDING,
     };
 
     return (
@@ -269,10 +277,10 @@ const ListBoard: React.FC<ListBoardProps> = ({ showHint, topInset = 0, onPlayerR
                     playerIds={playerIds}
                     initialIndex={playerIds.indexOf(selectedId)}
                     boardWidth={boardLayout.width}
-                    boardHeight={boardLayout.height - (fullscreen ? 0 : bottomSheetHeight)}
+                    boardHeight={boardLayout.height - (sheetOverBoard ? bottomSheetHeight : 0)}
                     safeAreaTop={insets.top + topInset}
                     safeAreaLeft={insets.left}
-                    safeAreaRight={insets.right}
+                    safeAreaRight={boardRightInset}
                     showHint={showHint}
                     onClose={handleClose}
                     svOpacity={svOverlayOpacity}
@@ -341,4 +349,4 @@ const styles = StyleSheet.create({
     }
 });
 
-export default ListBoard;
+export default React.memo(ListBoard);

@@ -1,7 +1,38 @@
-import { renderHook } from '@testing-library/react-native';
+import { act, renderHook } from '@testing-library/react-native';
 import { Platform } from 'react-native';
 
-import { useExpandedGameLayout, useVerticalBarLayout } from './useExpandedGameLayout';
+import { useExpandedGameLayout, useGameFoldSplit, useVerticalBarLayout } from './useExpandedGameLayout';
+
+type MockHinge = {
+    angle: number;
+    status: 'closed' | 'partiallyOpen' | 'fullyOpen' | 'unknown';
+} | null;
+type MockHingeStatus = NonNullable<MockHinge>['status'];
+
+let mockCurrentHinge: MockHinge = null;
+let mockHingeListener: ((event: { hinge: MockHinge }) => void) | null = null;
+
+jest.mock('expo-hinge', () => ({
+    getHinge: jest.fn(() => mockCurrentHinge),
+    addHingeListener: jest.fn((listener: (event: { hinge: MockHinge }) => void) => {
+        mockHingeListener = listener;
+        return { remove: jest.fn() };
+    }),
+}));
+
+jest.mock('../../redux/hooks', () => ({
+    useAppSelector: jest.fn((selector: (state: unknown) => unknown) =>
+        selector({ settings: { home_fullscreen: mockFullscreen } })),
+}));
+
+let mockFullscreen = false;
+
+let mockFold: { orientation: 'vertical' | 'horizontal' } | null = null;
+jest.mock('../../modules/fold-features', () => ({
+    useFold: () => mockFold,
+}));
+
+const addHingeListener: jest.Mock = jest.requireMock('expo-hinge').addHingeListener;
 
 jest.mock('react-native/Libraries/Utilities/useWindowDimensions', () => ({
     __esModule: true,
@@ -87,5 +118,182 @@ describe('useVerticalBarLayout', () => {
         setPlatform('android');
         setWindow(466, 678);
         expect(verticalBars()).toBe(false);
+    });
+});
+
+describe('useGameFoldSplit', () => {
+    const renderSplit = () => renderHook(() => useGameFoldSplit());
+    const setHinge = (status: MockHingeStatus | null) => {
+        mockCurrentHinge = status == null ? null : { status, angle: 120 };
+    };
+    const emitHinge = (hinge: MockHinge) => {
+        mockCurrentHinge = hinge;
+        mockHingeListener?.({ hinge });
+    };
+    const settleHinge = () => act(() => jest.advanceTimersByTime(250));
+
+    beforeEach(() => {
+        jest.useFakeTimers();
+        setPlatform('ios');
+        mockFullscreen = false;
+        mockFold = null;
+        mockCurrentHinge = null;
+        mockHingeListener = null;
+        addHingeListener.mockClear();
+    });
+    afterEach(() => {
+        jest.clearAllTimers();
+        jest.useRealTimers();
+    });
+    afterAll(() => {
+        setPlatform('ios');
+        mockCurrentHinge = null;
+    });
+
+    it('splits into columns when partially open in landscape', () => {
+        setHinge('partiallyOpen');
+        setWindow(951, 669);
+        const split = renderSplit();
+
+        expect(split.result.current).toBeNull();
+        settleHinge();
+        expect(split.result.current).toBe('columns');
+    });
+
+    it('splits into rows when partially open in portrait', () => {
+        setHinge('partiallyOpen');
+        setWindow(669, 951);
+        const split = renderSplit();
+
+        settleHinge();
+        expect(split.result.current).toBe('rows');
+    });
+
+    it('does not split when flat or closed', () => {
+        setWindow(951, 669);
+        setHinge('fullyOpen');
+        const flat = renderSplit();
+        expect(flat.result.current).toBeNull();
+        flat.unmount();
+        setHinge('closed');
+        expect(renderSplit().result.current).toBeNull();
+    });
+
+    it('does not split without a hinge', () => {
+        setHinge(null);
+        setWindow(951, 669);
+        expect(renderSplit().result.current).toBeNull();
+    });
+
+    it('does not split in fullscreen, which hides the sheet', () => {
+        mockFullscreen = true;
+        setHinge('partiallyOpen');
+        setWindow(951, 669);
+        const split = renderSplit();
+
+        settleHinge();
+        expect(split.result.current).toBeNull();
+    });
+
+    describe('on Android', () => {
+        beforeEach(() => setPlatform('android'));
+
+        // The Pixel Fold's inner screen is nearly square and, held like a
+        // book, slightly taller than wide: the fold's direction comes from the
+        // window manager, not the window's shape.
+        it('splits into columns along a vertical fold, even in a portrait window', () => {
+            mockFold = { orientation: 'vertical' };
+            setHinge('partiallyOpen');
+            setWindow(692, 717);
+            const split = renderSplit();
+
+            settleHinge();
+            expect(split.result.current).toBe('columns');
+        });
+
+        it('splits into rows along a horizontal fold, even in a landscape window', () => {
+            mockFold = { orientation: 'horizontal' };
+            setHinge('partiallyOpen');
+            setWindow(717, 692);
+            const split = renderSplit();
+
+            settleHinge();
+            expect(split.result.current).toBe('rows');
+        });
+
+        it('does not split without a fold across the window', () => {
+            setHinge('partiallyOpen');
+            setWindow(717, 692);
+            const split = renderSplit();
+
+            settleHinge();
+            expect(split.result.current).toBeNull();
+        });
+    });
+
+    it('does not expose transient book mode while the hinge continues to fully open', () => {
+        setHinge('closed');
+        setWindow(951, 669);
+        let renderCount = 0;
+        const split = renderHook(() => {
+            renderCount += 1;
+            return useGameFoldSplit();
+        });
+
+        act(() => emitHinge({ status: 'partiallyOpen', angle: 90 }));
+        act(() => jest.advanceTimersByTime(150));
+        act(() => emitHinge({ status: 'partiallyOpen', angle: 140 }));
+        act(() => jest.advanceTimersByTime(150));
+
+        expect(split.result.current).toBeNull();
+        act(() => emitHinge({ status: 'fullyOpen', angle: 180 }));
+        act(() => jest.advanceTimersByTime(250));
+
+        expect(split.result.current).toBeNull();
+        expect(renderCount).toBe(1);
+    });
+
+    it('enters book mode only after hinge motion has settled', () => {
+        setHinge('closed');
+        setWindow(951, 669);
+        const split = renderSplit();
+
+        act(() => emitHinge({ status: 'partiallyOpen', angle: 90 }));
+        act(() => jest.advanceTimersByTime(200));
+        act(() => emitHinge({ status: 'partiallyOpen', angle: 120 }));
+        act(() => jest.advanceTimersByTime(249));
+        expect(split.result.current).toBeNull();
+
+        act(() => jest.advanceTimersByTime(1));
+        expect(split.result.current).toBe('columns');
+    });
+
+    it('shares one native subscription and ignores angle-only changes', () => {
+        setHinge('partiallyOpen');
+        setWindow(951, 669);
+        let renderCount = 0;
+
+        const first = renderHook(() => {
+            renderCount += 1;
+            return useGameFoldSplit();
+        });
+        const second = renderSplit();
+
+        expect(first.result.current).toBeNull();
+        expect(second.result.current).toBeNull();
+        expect(addHingeListener).toHaveBeenCalledTimes(1);
+
+        settleHinge();
+        expect(first.result.current).toBe('columns');
+        expect(second.result.current).toBe('columns');
+        expect(renderCount).toBe(2);
+
+        act(() => emitHinge({ status: 'partiallyOpen', angle: 121 }));
+        expect(renderCount).toBe(2);
+
+        act(() => emitHinge({ status: 'fullyOpen', angle: 180 }));
+        expect(first.result.current).toBeNull();
+        expect(second.result.current).toBeNull();
+        expect(renderCount).toBe(3);
     });
 });
