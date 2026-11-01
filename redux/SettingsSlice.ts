@@ -17,7 +17,7 @@ export interface SettingsState {
     lastUsedInteractionType?: InteractionType;
     lastStoreReviewPrompt: number;
     devMenuEnabled?: boolean;
-    // Developer flag: offer game modes when setting up a game. Games that
+    // Offer game modes when setting up a game (Settings > Features). Games that
     // already have a mode keep it when this is turned off.
     gameModesEnabled?: boolean;
     appOpens: number;
