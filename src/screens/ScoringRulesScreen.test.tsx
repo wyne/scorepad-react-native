@@ -64,11 +64,19 @@ describe('ScoringRulesScreen', () => {
         jest.clearAllMocks();
     });
 
-    it('shows highest score as the rule for a free play game', () => {
-        const { getByTestId } = renderScreen(createStore([0]));
+    it('checks nothing for a free play game, so picking highest score saves it', () => {
+        const store = createStore([0]);
+        const { getByTestId } = renderScreen(store);
 
-        expect(getByTestId('scoring-winner-high').props.accessibilityState).toEqual({ selected: true });
+        expect(getByTestId('scoring-winner-high').props.accessibilityState).toEqual({ selected: false });
         expect(getByTestId('scoring-winner-low').props.accessibilityState).toEqual({ selected: false });
+        expect(getByTestId('scoring-end-none').props.accessibilityState).toEqual({ selected: false });
+
+        fireEvent.press(getByTestId('scoring-winner-high'));
+
+        expect(store.getState().games.entities['game-1']?.scoring).toEqual({ winner: 'high' });
+        expect(getByTestId('scoring-winner-high').props.accessibilityState).toEqual({ selected: true });
+        expect(getByTestId('scoring-end-none').props.accessibilityState).toEqual({ selected: true });
     });
 
     it('changes the rule right away before anyone has scored', () => {
@@ -139,7 +147,7 @@ describe('ScoringRulesScreen', () => {
         };
 
         it('defaults to never, with no value to edit', () => {
-            const { getByTestId, queryByTestId } = renderScreen(createStore([0]));
+            const { getByTestId, queryByTestId } = renderScreen(createStore([0], { winner: 'high' }));
 
             expect(getByTestId('scoring-end-none').props.accessibilityState).toEqual({ selected: true });
             expect(queryByTestId('scoring-end-value')).toBeNull();

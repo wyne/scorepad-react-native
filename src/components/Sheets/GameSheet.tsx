@@ -449,7 +449,7 @@ const GameSheet: React.FunctionComponent = () => {
                                 </View>
                             </TouchableWithoutFeedback>
 
-                            {showScoringRule &&
+                            {showScoringRule && game?.scoring &&
                                 <TouchableOpacity
                                     testID="game-sheet-scoring-rule"
                                     accessibilityRole="button"
