@@ -1,574 +1,250 @@
 import React from 'react';
 
 import { configureStore } from '@reduxjs/toolkit';
-import { act, fireEvent, render } from '@testing-library/react-native';
+import { act, render } from '@testing-library/react-native';
+import { StyleSheet } from 'react-native';
 import { Provider } from 'react-redux';
 
 import gamesReducer, { updateGame } from '../../../redux/GamesSlice';
 import playersReducer from '../../../redux/PlayersSlice';
 import settingsReducer from '../../../redux/SettingsSlice';
 
-// Mock the GameSheet import to avoid bottom sheet issues
-jest.mock('../Sheets/GameSheet', () => ({
-    bottomSheetHeight: 80,
-}));
-
 import TileBoard from './TileBoard';
 
-// Mock react-native-safe-area-context
+jest.mock('../Sheets/GameSheet', () => ({ bottomSheetHeight: 80 }));
+
+let mockInsets = { top: 0, bottom: 0, left: 0, right: 0 };
 jest.mock('react-native-safe-area-context', () => ({
-    SafeAreaView: ({ children, onLayout, style }: {
-        children: React.ReactNode;
-        onLayout?: (event: { nativeEvent: { layout: { width: number; height: number } } }) => void;
-        style?: object;
-    }) => {
-        const { View } = jest.requireActual('react-native');
-        return <View onLayout={onLayout} style={style} testID="safe-area-view">{children}</View>;
-    },
+    useSafeAreaInsets: () => mockInsets,
 }));
 
-// Mock react-native-reanimated
-jest.mock('react-native-reanimated', () => {
-    const View = jest.requireActual('react-native').View;
-    
-    return {
-        __esModule: true,
-        default: {
-            View: View,
-        },
-        FadeIn: {
-            delay: jest.fn(() => ({ duration: jest.fn(() => ({ easing: jest.fn() })) })),
-        },
-        Easing: {
-            ease: jest.fn(),
-        },
-    };
-});
+const mockPlayerTileRender = jest.fn();
+const mockPlayerTileMount = jest.fn();
+const mockPlayerTileUnmount = jest.fn();
+let mockDisplayRadius = 0;
+jest.mock('../../../modules/display-corners', () => ({
+    useDisplayCornerRadius: () => mockDisplayRadius,
+}));
 
-// Mock PlayerTile component
-jest.mock('./PlayerTile', () => {
-    return function MockPlayerTile({ playerId, cols, rows, width, height, index }: {
-        playerId: string;
-        cols: number;
-        rows: number;
-        width: number;
-        height: number;
-        index: number;
+let mockVerticalBars = false;
+jest.mock('../../hooks/useExpandedGameLayout', () => ({
+    useVerticalBarLayout: () => mockVerticalBars,
+}));
+
+jest.mock('./PlayerTile', () => ({
+    __esModule: true,
+    TILE_BORDER: 3,
+    TILE_RADIUS: 20,
+    default: function MockPlayerTile({
+        playerId, cols, rows, width, height, index,
+        radiusTopLeft, radiusTopRight, radiusBottomLeft, radiusBottomRight,
+    }: {
+        playerId: string; cols: number; rows: number; width: number; height: number; index: number;
+        radiusTopLeft?: number; radiusTopRight?: number; radiusBottomLeft?: number; radiusBottomRight?: number;
     }) {
+        const { useEffect } = jest.requireActual('react');
         const { View, Text } = jest.requireActual('react-native');
+        mockPlayerTileRender();
+        useEffect(() => {
+            mockPlayerTileMount();
+            return () => mockPlayerTileUnmount();
+        }, []);
         return (
             <View testID={`player-tile-${playerId}`}>
-                <Text>Player: {playerId}</Text>
                 <Text>Cols: {cols}</Text>
                 <Text>Rows: {rows}</Text>
                 <Text>Width: {width}</Text>
                 <Text>Height: {height}</Text>
                 <Text>Index: {index}</Text>
+                <Text testID={`radii-${playerId}`}>{[radiusTopLeft, radiusTopRight, radiusBottomLeft, radiusBottomRight].join(',')}</Text>
             </View>
         );
-    };
+    },
+}));
+
+const createMockStore = (initialState: Parameters<typeof configureStore>[0]['preloadedState']) => configureStore({
+    reducer: { settings: settingsReducer, games: gamesReducer, players: playersReducer },
+    preloadedState: initialState,
 });
 
-const createMockStore = (initialState: Parameters<typeof configureStore>[0]['preloadedState']) => {
-    return configureStore({
-        reducer: {
-            settings: settingsReducer,
-            games: gamesReducer,
-            players: playersReducer,
-        },
-        preloadedState: initialState,
-    });
-};
-
 describe('TileBoard', () => {
+    const playerIds = ['player-1', 'player-2', 'player-3', 'player-4'];
     const mockGame = {
-        id: 'game-1',
-        title: 'Test Game',
-        dateCreated: Date.now(),
-        roundCurrent: 1,
-        roundTotal: 3,
-        playerIds: ['player-1', 'player-2', 'player-3', 'player-4'],
+        id: 'game-1', title: 'Test Game', dateCreated: 0, roundCurrent: 1, roundTotal: 3, playerIds,
+    };
+    const players = Object.fromEntries(playerIds.map(id => [id, { id, playerName: id, scores: [10, 15] }]));
+
+    const renderBoard = ({
+        ids = playerIds,
+        size = { width: 400, height: 600 },
+        fullscreen = false,
+        foldSplit = null,
+    }: {
+        ids?: string[];
+        size?: { width: number; height: number };
+        fullscreen?: boolean;
+        foldSplit?: 'columns' | 'rows' | null;
+    } = {}) => {
+        const store = createMockStore({
+            settings: { currentGameId: 'game-1', home_fullscreen: fullscreen },
+            games: { entities: { 'game-1': { ...mockGame, playerIds: ids } }, ids: ['game-1'] },
+            players: { entities: players, ids: playerIds },
+        });
+        const element = (nextSize = size, nextSplit = foldSplit) => (
+            <Provider store={store}>
+                <TileBoard boardSize={nextSize} showHint={false} foldSplit={nextSplit} />
+            </Provider>
+        );
+        return { ...render(element()), store, element };
     };
 
-    const mockPlayers = {
-        'player-1': {
-            id: 'player-1',
-            playerName: 'Player 1',
-            scores: [10, 15],
-        },
-        'player-2': {
-            id: 'player-2',
-            playerName: 'Player 2',
-            scores: [5, 20],
-        },
-        'player-3': {
-            id: 'player-3',
-            playerName: 'Player 3',
-            scores: [8, 12],
-        },
-        'player-4': {
-            id: 'player-4',
-            playerName: 'Player 4',
-            scores: [15, 8],
-        },
-    };
+    beforeEach(() => {
+        mockInsets = { top: 0, bottom: 0, left: 0, right: 0 };
+        mockDisplayRadius = 0;
+        mockVerticalBars = false;
+        mockPlayerTileRender.mockClear();
+        mockPlayerTileMount.mockClear();
+        mockPlayerTileUnmount.mockClear();
+    });
 
-    it('should render null when no players are available', () => {
-        const store = createMockStore({
-            settings: {
-                currentGameId: 'game-1',
-            },
-            games: {
-                entities: {
-                    'game-1': {
-                        ...mockGame,
-                        playerIds: [],
-                    },
-                },
-                ids: ['game-1'],
-            },
-            players: {
-                entities: {},
-                ids: [],
-            },
-        });
+    it('renders nothing when no players are available', () => {
+        expect(renderBoard({ ids: [] }).toJSON()).toBeNull();
+    });
 
-        const { toJSON } = render(
-            <Provider store={store}>
-                <TileBoard showHint={false} />
-            </Provider>
-        );
-
+    it('renders players immediately when they become available after an empty state', () => {
+        const { store, getByTestId, toJSON } = renderBoard({ ids: [] });
         expect(toJSON()).toBeNull();
-    });
-
-    it('should render safely when players become available after an empty state', () => {
-        const store = createMockStore({
-            settings: {
-                currentGameId: 'game-1',
-            },
-            games: {
-                entities: {
-                    'game-1': {
-                        ...mockGame,
-                        playerIds: [],
-                    },
-                },
-                ids: ['game-1'],
-            },
-            players: {
-                entities: mockPlayers,
-                ids: ['player-1'],
-            },
-        });
-
-        const { getByTestId, toJSON } = render(
-            <Provider store={store}>
-                <TileBoard showHint={false} />
-            </Provider>
-        );
-
-        expect(toJSON()).toBeNull();
-
-        act(() => {
-            store.dispatch(updateGame({
-                id: 'game-1',
-                changes: { playerIds: ['player-1'] },
-            }));
-        });
-
-        expect(getByTestId('safe-area-view')).toBeTruthy();
-    });
-
-    it('should render null when playerIds is null', () => {
-        const store = createMockStore({
-            settings: {
-                currentGameId: 'game-1',
-            },
-            games: {
-                entities: {
-                    'game-1': {
-                        ...mockGame,
-                        playerIds: undefined,
-                    },
-                },
-                ids: ['game-1'],
-            },
-            players: {
-                entities: mockPlayers,
-                ids: ['player-1', 'player-2'],
-            },
-        });
-
-        const { toJSON } = render(
-            <Provider store={store}>
-                <TileBoard showHint={false} />
-            </Provider>
-        );
-
-        expect(toJSON()).toBeNull();
-    });
-
-    it('should render safe area view when players are available', () => {
-        const store = createMockStore({
-            settings: {
-                currentGameId: 'game-1',
-            },
-            games: {
-                entities: {
-                    'game-1': mockGame,
-                },
-                ids: ['game-1'],
-            },
-            players: {
-                entities: mockPlayers,
-                ids: ['player-1', 'player-2', 'player-3', 'player-4'],
-            },
-        });
-
-        const { getByTestId } = render(
-            <Provider store={store}>
-                <TileBoard showHint={false} />
-            </Provider>
-        );
-
-        expect(getByTestId('safe-area-view')).toBeTruthy();
-    });
-
-    it('should not render tiles before layout is calculated', () => {
-        const store = createMockStore({
-            settings: {
-                currentGameId: 'game-1',
-            },
-            games: {
-                entities: {
-                    'game-1': mockGame,
-                },
-                ids: ['game-1'],
-            },
-            players: {
-                entities: mockPlayers,
-                ids: ['player-1', 'player-2', 'player-3', 'player-4'],
-            },
-        });
-
-        const { queryByTestId } = render(
-            <Provider store={store}>
-                <TileBoard showHint={false} />
-            </Provider>
-        );
-
-        // Before layout event, no tiles should be rendered
-        expect(queryByTestId('player-tile-player-1')).toBeNull();
-    });
-
-    it('should render tiles after layout event with calculated grid', () => {
-        const store = createMockStore({
-            settings: {
-                currentGameId: 'game-1',
-            },
-            games: {
-                entities: {
-                    'game-1': mockGame,
-                },
-                ids: ['game-1'],
-            },
-            players: {
-                entities: mockPlayers,
-                ids: ['player-1', 'player-2', 'player-3', 'player-4'],
-            },
-        });
-
-        const { getByTestId, getAllByText } = render(
-            <Provider store={store}>
-                <TileBoard showHint={false} />
-            </Provider>
-        );
-
-        const safeAreaView = getByTestId('safe-area-view');
-        
-        // Trigger layout event with specific dimensions
-        fireEvent(safeAreaView, 'layout', {
-            nativeEvent: {
-                layout: {
-                    width: 400,
-                    height: 600,
-                },
-            },
-        });
-
-        // After layout, tiles should be rendered
+        act(() => store.dispatch(updateGame({ id: 'game-1', changes: { playerIds: ['player-1'] } })));
         expect(getByTestId('player-tile-player-1')).toBeTruthy();
-        expect(getByTestId('player-tile-player-2')).toBeTruthy();
-        expect(getByTestId('player-tile-player-3')).toBeTruthy();
-        expect(getByTestId('player-tile-player-4')).toBeTruthy();
-
-        // Check that grid calculations are passed to tiles
-        expect(getAllByText('Cols: 2')).toHaveLength(4); // 4 players in 2x2 grid
-        expect(getAllByText('Rows: 2')).toHaveLength(4);
     });
 
-    it('should calculate correct tile dimensions', () => {
-        const store = createMockStore({
-            settings: {
-                currentGameId: 'game-1',
-            },
-            games: {
-                entities: {
-                    'game-1': mockGame,
-                },
-                ids: ['game-1'],
-            },
-            players: {
-                entities: mockPlayers,
-                ids: ['player-1', 'player-2', 'player-3', 'player-4'],
-            },
+    it('renders safely when playerIds is undefined', () => {
+        const { store, toJSON } = renderBoard();
+        act(() => store.dispatch(updateGame({ id: 'game-1', changes: { playerIds: undefined } })));
+        expect(toJSON()).toBeNull();
+    });
+
+    it('renders the complete grid on the first render without waiting for a native layout event', () => {
+        const { getByTestId, getAllByText } = renderBoard();
+        expect(getByTestId('tile-grid-2x2')).toBeTruthy();
+        expect(getAllByText('Width: 200')).toHaveLength(4);
+        expect(getAllByText('Height: 300')).toHaveLength(4);
+        expect(getByTestId('tile-board-viewport').props.onLayout).toBeUndefined();
+        expect(mockPlayerTileRender).toHaveBeenCalledTimes(4);
+    });
+
+    it('uses the same inset snapshot for native padding and tile geometry', () => {
+        mockInsets = { top: 0, bottom: 0, left: 12, right: 28 };
+        const { getByTestId, getAllByText } = renderBoard({ size: { width: 440, height: 600 } });
+        expect(StyleSheet.flatten(getByTestId('tile-board').props.style)).toMatchObject({
+            paddingLeft: 12, paddingRight: 28,
         });
-
-        const { getByTestId, getAllByText } = render(
-            <Provider store={store}>
-                <TileBoard showHint={false} />
-            </Provider>
-        );
-
-        const safeAreaView = getByTestId('safe-area-view');
-        
-        // Trigger layout with 400x600 dimensions
-        fireEvent(safeAreaView, 'layout', {
-            nativeEvent: {
-                layout: {
-                    width: 400,
-                    height: 600,
-                },
-            },
-        });
-
-        // For 2x2 grid: width = 400/2 = 200, height = 600/2 = 300
         expect(getAllByText('Width: 200')).toHaveLength(4);
         expect(getAllByText('Height: 300')).toHaveLength(4);
     });
 
-    it('should handle different player counts and calculate optimal grid', () => {
-        const store = createMockStore({
-            settings: {
-                currentGameId: 'game-1',
-            },
-            games: {
-                entities: {
-                    'game-1': {
-                        ...mockGame,
-                        playerIds: ['player-1', 'player-2', 'player-3'], // 3 players
-                    },
-                },
-                ids: ['game-1'],
-            },
-            players: {
-                entities: mockPlayers,
-                ids: ['player-1', 'player-2', 'player-3'],
-            },
-        });
-
-        const { getByTestId, getAllByText } = render(
-            <Provider store={store}>
-                <TileBoard showHint={false} />
-            </Provider>
-        );
-
-        const safeAreaView = getByTestId('safe-area-view');
-        
-        // Trigger layout event
-        fireEvent(safeAreaView, 'layout', {
-            nativeEvent: {
-                layout: {
-                    width: 300,
-                    height: 400,
-                },
-            },
-        });
-
-        // For 3 players, should calculate optimal grid (likely 3x1 or 1x3)
-        expect(getByTestId('player-tile-player-1')).toBeTruthy();
-        expect(getByTestId('player-tile-player-2')).toBeTruthy();
-        expect(getByTestId('player-tile-player-3')).toBeTruthy();
-
-        // Check that all tiles have the same grid configuration
-        const colsTexts = getAllByText(/Cols: \d+/);
-        const rowsTexts = getAllByText(/Rows: \d+/);
-        expect(colsTexts).toHaveLength(3);
-        expect(rowsTexts).toHaveLength(3);
+    it('leaves room for the game sheet to the board size it is given', () => {
+        const { getByTestId, getAllByText } = renderBoard({ size: { width: 400, height: 600 } });
+        expect(StyleSheet.flatten(getByTestId('tile-board').props.style).paddingBottom).toBeUndefined();
+        expect(getAllByText('Height: 300')).toHaveLength(4);
     });
 
-    it('should handle single player', () => {
-        const store = createMockStore({
-            settings: {
-                currentGameId: 'game-1',
-            },
-            games: {
-                entities: {
-                    'game-1': {
-                        ...mockGame,
-                        playerIds: ['player-1'],
-                    },
-                },
-                ids: ['game-1'],
-            },
-            players: {
-                entities: mockPlayers,
-                ids: ['player-1'],
-            },
+    it('uses only the left inset in a column split', () => {
+        mockInsets = { top: 0, bottom: 0, left: 12, right: 28 };
+        const { getByTestId, getAllByText } = renderBoard({
+            foldSplit: 'columns', size: { width: 412, height: 600 },
         });
-
-        const { getByTestId, getByText } = render(
-            <Provider store={store}>
-                <TileBoard showHint={false} />
-            </Provider>
-        );
-
-        const safeAreaView = getByTestId('safe-area-view');
-        
-        fireEvent(safeAreaView, 'layout', {
-            nativeEvent: {
-                layout: {
-                    width: 300,
-                    height: 400,
-                },
-            },
+        expect(StyleSheet.flatten(getByTestId('tile-board').props.style)).toMatchObject({
+            paddingLeft: 12, paddingRight: 0,
         });
-
-        expect(getByTestId('player-tile-player-1')).toBeTruthy();
-        // Single player should be 1x1 grid
-        expect(getByText('Cols: 1')).toBeTruthy();
-        expect(getByText('Rows: 1')).toBeTruthy();
-        expect(getByText('Width: 300')).toBeTruthy();
-        expect(getByText('Height: 400')).toBeTruthy();
+        expect(getAllByText('Width: 200')).toHaveLength(4);
+        expect(getAllByText('Height: 300')).toHaveLength(4);
     });
 
-    it('should adjust padding for bottom sheet', () => {
-        const store = createMockStore({
-            settings: {
-                currentGameId: 'game-1',
-            },
-            games: {
-                entities: {
-                    'game-1': mockGame,
-                },
-                ids: ['game-1'],
-            },
-            players: {
-                entities: mockPlayers,
-                ids: ['player-1', 'player-2'],
-            },
-        });
-
-        const { getByTestId } = render(
-            <Provider store={store}>
-                <TileBoard showHint={false} />
-            </Provider>
-        );
-
-        const safeAreaView = getByTestId('safe-area-view');
-        expect(safeAreaView.props.style).toEqual(
-            expect.arrayContaining([
-                expect.objectContaining({
-                    paddingBottom: 82, // bottomSheetHeight (80) + 2
-                }),
-            ])
-        );
+    it('keeps both side insets in a row split', () => {
+        mockInsets = { top: 0, bottom: 0, left: 12, right: 28 };
+        const { getAllByText } = renderBoard({ foldSplit: 'rows', size: { width: 440, height: 600 } });
+        expect(getAllByText('Width: 200')).toHaveLength(4);
+        expect(getAllByText('Height: 300')).toHaveLength(4);
     });
 
-    it('should pass correct index to each tile', () => {
-        const store = createMockStore({
-            settings: {
-                currentGameId: 'game-1',
-            },
-            games: {
-                entities: {
-                    'game-1': mockGame,
-                },
-                ids: ['game-1'],
-            },
-            players: {
-                entities: mockPlayers,
-                ids: ['player-1', 'player-2', 'player-3', 'player-4'],
-            },
-        });
-
-        const { getByTestId, getByText } = render(
-            <Provider store={store}>
-                <TileBoard showHint={false} />
-            </Provider>
-        );
-
-        const safeAreaView = getByTestId('safe-area-view');
-        
-        fireEvent(safeAreaView, 'layout', {
-            nativeEvent: {
-                layout: {
-                    width: 400,
-                    height: 400,
-                },
-            },
-        });
-
-        // Check that each tile has the correct index
-        expect(getByText('Index: 0')).toBeTruthy(); // player-1
-        expect(getByText('Index: 1')).toBeTruthy(); // player-2
-        expect(getByText('Index: 2')).toBeTruthy(); // player-3
-        expect(getByText('Index: 3')).toBeTruthy(); // player-4
+    it('handles one player and preserves each player index', () => {
+        const single = renderBoard({ ids: ['player-1'] });
+        expect(single.getByTestId('tile-grid-1x1')).toBeTruthy();
+        expect(single.getByText('Width: 400')).toBeTruthy();
+        expect(single.getByText('Height: 600')).toBeTruthy();
+        single.unmount();
+        const all = renderBoard();
+        for (let index = 0; index < playerIds.length; index++) expect(all.getByText(`Index: ${index}`)).toBeTruthy();
     });
 
-    it('should handle layout changes after initial render', () => {
-        const store = createMockStore({
-            settings: {
-                currentGameId: 'game-1',
-            },
-            games: {
-                entities: {
-                    'game-1': {
-                        ...mockGame,
-                        playerIds: ['player-1', 'player-2'],
-                    },
-                },
-                ids: ['game-1'],
-            },
-            players: {
-                entities: mockPlayers,
-                ids: ['player-1', 'player-2'],
-            },
+    it('keeps a consistent grid for an incomplete final row', () => {
+        const { getAllByText } = renderBoard({ ids: playerIds.slice(0, 3) });
+        expect(getAllByText('Cols: 2')).toHaveLength(3);
+        expect(getAllByText('Rows: 2')).toHaveLength(3);
+    });
+
+    it('commits new grid and text bounds in one render without remounting any tile', () => {
+        const { getByTestId, getAllByText, rerender, element } = renderBoard({
+            ids: ['player-1', 'player-2'], size: { width: 200, height: 400 },
         });
+        expect(getByTestId('tile-grid-2x1')).toBeTruthy();
+        mockPlayerTileRender.mockClear();
 
-        const { getByTestId, getAllByText } = render(
-            <Provider store={store}>
-                <TileBoard showHint={false} />
-            </Provider>
-        );
+        const nextSize = { width: 400, height: 200 };
+        rerender(element(nextSize));
 
-        const safeAreaView = getByTestId('safe-area-view');
-        
-        // Initial layout
-        fireEvent(safeAreaView, 'layout', {
-            nativeEvent: {
-                layout: {
-                    width: 200,
-                    height: 400,
-                },
-            },
-        });
-
-        // Should initially have certain dimensions (1x2 grid: width=200/1=200, height=400/2=200)
+        expect(getByTestId('tile-grid-1x2')).toBeTruthy();
         expect(getAllByText('Width: 200')).toHaveLength(2);
+        expect(getAllByText('Height: 200')).toHaveLength(2);
+        expect(mockPlayerTileRender).toHaveBeenCalledTimes(2);
+        expect(mockPlayerTileMount).toHaveBeenCalledTimes(2);
+        expect(mockPlayerTileUnmount).not.toHaveBeenCalled();
 
-        // Change layout dimensions
-        fireEvent(safeAreaView, 'layout', {
-            nativeEvent: {
-                layout: {
-                    width: 400,
-                    height: 200,
-                },
-            },
+        mockPlayerTileRender.mockClear();
+        rerender(element(nextSize));
+        expect(mockPlayerTileRender).not.toHaveBeenCalled();
+    });
+
+    it('does not render invalid tile bounds in a collapsed viewport', () => {
+        const { queryByTestId } = renderBoard({ size: { width: 0, height: 0 } });
+        expect(queryByTestId('player-tile-player-1')).toBeNull();
+    });
+
+    describe('on the iPhone Duo', () => {
+        // The jest window is 750 × 1334; the board fills it from the top left.
+        const fullWindow = { width: 750, height: 1334 };
+        const radii = (getByTestId: (id: string) => { props: Record<string, unknown> }, id: string) =>
+            String(getByTestId(`radii-${id}`).props.children).split(',').map(Number);
+
+        beforeEach(() => {
+            mockVerticalBars = true;
         });
 
-        // Should recalculate and update dimensions (2x1 grid: width=400/2=200, height=200/1=200)
-        expect(getAllByText('Width: 200')).toHaveLength(2);
+        it('makes the margin around the board match the gap between tiles', () => {
+            const { getByTestId, getAllByText } = renderBoard({ size: fullWindow });
+
+            expect(StyleSheet.flatten(getByTestId('tile-board-viewport').props.style)).toMatchObject({
+                margin: 3, width: 744, height: 1328,
+            });
+            expect(getAllByText('Width: 372')).toHaveLength(4);
+        });
+
+        it('draws tile corners in a screen corner concentric with the display', () => {
+            mockDisplayRadius = 50;
+            const { getByTestId } = renderBoard({ size: fullWindow });
+
+            // Each tile's outer edge sits 3pt in from the screen's edge.
+            expect(radii(getByTestId, 'player-1')).toEqual([47, 20, 20, 20]);
+            expect(radii(getByTestId, 'player-2')).toEqual([20, 47, 20, 20]);
+            expect(radii(getByTestId, 'player-3')).toEqual([20, 20, 47, 20]);
+            expect(radii(getByTestId, 'player-4')).toEqual([20, 20, 20, 47]);
+        });
+
+        it('keeps the usual radius when the display reports none', () => {
+            const { getByTestId } = renderBoard({ size: fullWindow });
+
+            expect(radii(getByTestId, 'player-1')).toEqual([20, 20, 20, 20]);
+        });
     });
 });
