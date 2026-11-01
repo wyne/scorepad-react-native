@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.4.1](https://github.com/wyne/scorepad-react-native/compare/v3.4.0...v3.4.1) (2026-11-01)
+
+
+### Bug Fixes
+
+* unblock production release preflight ([#795](https://github.com/wyne/scorepad-react-native/issues/795)) ([b8876de](https://github.com/wyne/scorepad-react-native/commit/b8876dee3696774b465b3e799e5f8ad73536a840))
+
 ## [3.4.0](https://github.com/wyne/scorepad-react-native/compare/v3.3.0...v3.4.0) (2026-11-01)
 
 
