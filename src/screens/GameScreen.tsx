@@ -107,19 +107,22 @@ const headerHeights = new Map<string, number>();
  */
 const useStableHeaderHeight = (): { headerHeight: number; headerKnown: boolean } => {
     const measured = useHeaderHeight();
-
     const { width, height } = useWindowDimensions();
     const key = `${Math.round(width)}x${Math.round(height)}`;
     const lastKeyRef = useRef(key);
-    const lastMeasuredRef = useRef(measured);
+    // After the window changes size, the header keeps reporting the old
+    // display's height until it is measured again, over as many renders as
+    // that takes. Until the measurement moves off that stale value, it says
+    // nothing about the new window size.
+    const staleMeasurementRef = useRef<number | null>(null);
 
-    // A new measurement after the window settled belongs to this window size.
-    // Right after a size change the measurement is still the old display's.
-    const sizeChanged = lastKeyRef.current !== key;
-    const measurementChanged = lastMeasuredRef.current !== measured;
-    lastKeyRef.current = key;
-    lastMeasuredRef.current = measured;
-    if (!sizeChanged || measurementChanged) headerHeights.set(key, measured);
+    if (lastKeyRef.current !== key) {
+        lastKeyRef.current = key;
+        staleMeasurementRef.current = measured;
+    } else if (staleMeasurementRef.current != null && measured !== staleMeasurementRef.current) {
+        staleMeasurementRef.current = null;
+    }
+    if (staleMeasurementRef.current == null) headerHeights.set(key, measured);
 
     const known = headerHeights.get(key);
     return { headerHeight: known ?? measured, headerKnown: known != null };

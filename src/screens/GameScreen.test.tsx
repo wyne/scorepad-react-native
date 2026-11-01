@@ -418,18 +418,27 @@ describe('GameScreen', () => {
         const view = render(screen());
         expect(paddingTop(view)).toBe(82);
 
-        // Another display: its header is measured on the next render.
+        // Another display: its header is measured a few renders later, and the
+        // renders before that still report the first display's height.
         dims.mockReturnValue({ width: 669, height: 951, scale: 3, fontScale: 1 });
         mockHeaderHeight = 82;
+        view.rerender(screen());
+        view.rerender(screen());
         view.rerender(screen());
         mockHeaderHeight = 50;
         view.rerender(screen());
         expect(paddingTop(view)).toBe(50);
 
-        // Back on the first display, before its header is measured again.
+        // Back on the first display, before its header is measured again, over
+        // several stale renders: neither display's height is overwritten.
         dims.mockReturnValue({ width: 466, height: 678, scale: 3, fontScale: 1 });
         view.rerender(screen());
+        view.rerender(screen());
         expect(paddingTop(view)).toBe(82);
+
+        dims.mockReturnValue({ width: 669, height: 951, scale: 3, fontScale: 1 });
+        view.rerender(screen());
+        expect(paddingTop(view)).toBe(50);
 
         dims.mockRestore();
         mockHeaderHeight = 88;
