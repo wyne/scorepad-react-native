@@ -20,7 +20,7 @@ import GameOverSheet from '../components/Sheets/GameOverSheet';
 import { bottomSheetHeight } from '../components/Sheets/GameSheet';
 import GestureInfoSheet from '../components/Sheets/GestureInfoSheet';
 import PointValuesSheet from '../components/Sheets/PointValuesSheet';
-import { FOLD_TRANSITION_SLOWDOWN, addHingeClosingListener, useFoldSplitBounds, useGameFoldSplit, useRoundPickerInBottomStrip, useVerticalBarLayout } from '../hooks/useExpandedGameLayout';
+import { addHingeClosingListener, useFoldSplitBounds, useGameFoldSplit, useRoundPickerInBottomStrip, useVerticalBarLayout } from '../hooks/useExpandedGameLayout';
 import { useGestureHint } from '../hooks/useGestureHint';
 
 function useKeepScreenAwake(active: boolean): void {
@@ -59,11 +59,11 @@ export const boardResizeTransition = (reduceMotion: boolean) => (values: LayoutA
     if (reduceMotion || !(values.targetWidth > 0 && values.targetHeight > 0)) {
         return {
             initialValues: { ...target, opacity: 0 },
-            animations: { opacity: withTiming(1, { duration: 200 * FOLD_TRANSITION_SLOWDOWN }) },
+            animations: { opacity: withTiming(1, { duration: 200 }) },
         };
     }
 
-    const timing = { duration: 280 * FOLD_TRANSITION_SLOWDOWN, easing: Easing.out(Easing.cubic) };
+    const timing = { duration: 280, easing: Easing.out(Easing.cubic) };
     // Scaling is about the center, so shift by half the size change to keep
     // the top left corner fixed.
     return {
@@ -92,7 +92,7 @@ export const boardResizeTransition = (reduceMotion: boolean) => (values: LayoutA
  * just narrow or widen, so a short list doesn't move at all when only the
  * height changes, where scaling would stretch it.
  */
-const listBoardResize = LinearTransition.duration(280 * FOLD_TRANSITION_SLOWDOWN).easing(Easing.out(Easing.cubic));
+const listBoardResize = LinearTransition.duration(280).easing(Easing.out(Easing.cubic));
 
 // The header's measured height for each window size. Moving between the iPhone
 // Duo's displays changes the window and the header in the same instant, but
@@ -159,7 +159,7 @@ const useDisplaySwitchCurtain = (windowKey: string, headerKnown: boolean): { hid
         if (closingFrom == null) return;
         const reveal = () => {
             setClosingFrom(null);
-            opacity.value = withTiming(1, { duration: 150 * FOLD_TRANSITION_SLOWDOWN });
+            opacity.value = withTiming(1, { duration: 150 });
         };
         if (arrived) {
             reveal();

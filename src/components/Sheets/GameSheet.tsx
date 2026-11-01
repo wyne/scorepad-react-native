@@ -14,7 +14,7 @@ import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
 import { updatePlayer } from '../../../redux/PlayersSlice';
 import { selectGameModesVisible } from '../../../redux/selectors';
 import { logEvent } from '../../Analytics';
-import { FOLD_TRANSITION_SLOWDOWN, useExpandedGameLayout, useExpandedGameSplit, useFoldSplitBounds, useGameFoldSplit, useVerticalBarLayout } from '../../hooks/useExpandedGameLayout';
+import { useExpandedGameLayout, useExpandedGameSplit, useFoldSplitBounds, useGameFoldSplit, useVerticalBarLayout } from '../../hooks/useExpandedGameLayout';
 import { useTheme } from '../../theme';
 import BigButton from '../BigButtons/BigButton';
 import RoundHeaderTitle from '../Headers/RoundHeaderTitle';
@@ -34,8 +34,8 @@ export const bottomSheetHeight = 80;
 const BUTTON_TILE_MAX_WIDTH = 260;
 
 // A fade is gentle enough to keep with Reduce Motion on.
-const SHEET_FADE_IN = FadeIn.duration(200 * FOLD_TRANSITION_SLOWDOWN).reduceMotion(ReduceMotion.Never);
-const SHEET_FADE_OUT = FadeOut.duration(150 * FOLD_TRANSITION_SLOWDOWN).reduceMotion(ReduceMotion.Never);
+const SHEET_FADE_IN = FadeIn.duration(200).reduceMotion(ReduceMotion.Never);
+const SHEET_FADE_OUT = FadeOut.duration(150).reduceMotion(ReduceMotion.Never);
 const BUTTON_TILE_MARGIN = 5;
 
 const GameSheet: React.FunctionComponent = () => {
