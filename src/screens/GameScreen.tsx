@@ -94,6 +94,32 @@ export const boardResizeTransition = (reduceMotion: boolean) => (values: LayoutA
  */
 const listBoardResize = LinearTransition.duration(280 * FOLD_TRANSITION_SLOWDOWN).easing(Easing.out(Easing.cubic));
 
+// The header's measured height for each window size. Moving between the iPhone
+// Duo's displays changes the window and the header in the same instant, but
+// the header's height is only measured after the first render on the new
+// display, so for a frame the board sits under the header. Once a display's
+// header has been seen, its height is known in that first render.
+const headerHeights = new Map<string, number>();
+
+/** The header's height, remembered per window size (see headerHeights). */
+const useStableHeaderHeight = (): number => {
+    const measured = useHeaderHeight();
+    const { width, height } = useWindowDimensions();
+    const key = `${Math.round(width)}x${Math.round(height)}`;
+    const lastKeyRef = useRef(key);
+    const lastMeasuredRef = useRef(measured);
+
+    // A new measurement after the window settled belongs to this window size.
+    // Right after a size change the measurement is still the old display's.
+    const sizeChanged = lastKeyRef.current !== key;
+    const measurementChanged = lastMeasuredRef.current !== measured;
+    lastKeyRef.current = key;
+    lastMeasuredRef.current = measured;
+    if (!sizeChanged || measurementChanged) headerHeights.set(key, measured);
+
+    return headerHeights.get(key) ?? measured;
+};
+
 interface Props {
     navigation: NativeStackNavigationProp<ParamListBase>;
 }
@@ -103,7 +129,7 @@ const GameScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     const keepScreenAwake = useAppSelector(state => state.settings.keepScreenAwake);
     const fullscreen = useAppSelector(state => state.settings.home_fullscreen);
     const interactionType = useAppSelector(state => selectInteractionType(state, currentGameId));
-    const headerHeight = useHeaderHeight();
+    const headerHeight = useStableHeaderHeight();
     const showHint = useGestureHint();
     const isDial = interactionType === InteractionType.Dial;
     // With vertical bars (iPhone Duo) the header has no background (see

@@ -14,8 +14,9 @@ import GameScreen, { boardResizeTransition } from './GameScreen';
 
 const mockHeaderItems = [{ type: 'menu', label: 'Game Options' }];
 
+let mockHeaderHeight = 88;
 jest.mock('@react-navigation/elements', () => ({
-    useHeaderHeight: () => 88,
+    useHeaderHeight: () => mockHeaderHeight,
 }));
 
 let mockInsets = { top: 0, bottom: 0, left: 0, right: 0 };
@@ -393,5 +394,42 @@ describe('GameScreen', () => {
             expect(initialValues).not.toHaveProperty('transform');
             expect(animations).toEqual({ opacity: 1 });
         });
+    });
+
+    it('uses the header height it last measured at a window size on returning to it', () => {
+        const store = createMockStore({
+            settings: { currentGameId: 'game-1' },
+            games: { entities: { 'game-1': mockGame }, ids: ['game-1'] },
+            players: { entities: mockPlayers, ids: ['player-1', 'player-2'] },
+        });
+        const dims = jest.spyOn(jest.requireActual('react-native'), 'useWindowDimensions');
+        const screen = () => (
+            <Provider store={store}>
+                <GameScreen navigation={navigation} />
+            </Provider>
+        );
+        const paddingTop = (view: ReturnType<typeof render>) =>
+            StyleSheet.flatten(view.getByTestId('game-screen').props.style).paddingTop;
+
+        dims.mockReturnValue({ width: 466, height: 678, scale: 3, fontScale: 1 });
+        mockHeaderHeight = 82;
+        const view = render(screen());
+        expect(paddingTop(view)).toBe(82);
+
+        // Another display: its header is measured on the next render.
+        dims.mockReturnValue({ width: 669, height: 951, scale: 3, fontScale: 1 });
+        mockHeaderHeight = 82;
+        view.rerender(screen());
+        mockHeaderHeight = 50;
+        view.rerender(screen());
+        expect(paddingTop(view)).toBe(50);
+
+        // Back on the first display, before its header is measured again.
+        dims.mockReturnValue({ width: 466, height: 678, scale: 3, fontScale: 1 });
+        view.rerender(screen());
+        expect(paddingTop(view)).toBe(82);
+
+        dims.mockRestore();
+        mockHeaderHeight = 88;
     });
 });
