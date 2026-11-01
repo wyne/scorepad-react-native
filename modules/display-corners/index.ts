@@ -46,7 +46,10 @@ export const useDisplayCornerRadius = (): number => {
     const fillsDisplay = sizeKey(window.width, window.height) === displayKey;
     const [radius, setRadius] = useState(() => settledRadii.get(displayKey) ?? 0);
 
+    // The native side measures the window's corners, which are the display's
+    // only while the window fills it, so only ask (and cache) then.
     useEffect(() => {
+        if (!fillsDisplay) return;
         const settled = settledRadii.get(displayKey);
         if (settled != null) {
             setRadius(settled);
@@ -59,7 +62,7 @@ export const useDisplayCornerRadius = (): number => {
         return () => {
             active = false;
         };
-    }, [displayKey]);
+    }, [displayKey, fillsDisplay]);
 
     // Until a new display's radius arrives, use none rather than the old one.
     const current = settledRadii.get(displayKey) ?? radius;

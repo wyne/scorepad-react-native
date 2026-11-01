@@ -238,14 +238,30 @@ describe('useGameFoldSplit', () => {
             expect(split.result.current).toBe('rows');
         });
 
-        it('decides from the window manager alone, not the hinge sensor', () => {
+        it('waits for the hinge to stop moving when a hinge angle sensor exists', () => {
+            mockFold = halfOpenFold('vertical');
+            setWindow(692, 717);
+            const split = renderSplit();
+
+            // The window manager reports half open throughout a continuous opening.
+            for (let angle = 60; angle <= 160; angle += 20) {
+                act(() => emitHinge({ status: 'partiallyOpen', angle }));
+                act(() => jest.advanceTimersByTime(100));
+            }
+            expect(split.result.current).toBeNull();
+
+            act(() => jest.advanceTimersByTime(150));
+            expect(split.result.current).toBe('columns');
+        });
+
+        it('takes half open from the window manager, not the hinge sensor', () => {
             setHinge('partiallyOpen');
             setWindow(717, 692);
             const split = renderSplit();
 
             settleHinge();
+            // The hinge sensor alone never turns book mode on.
             expect(split.result.current).toBeNull();
-            expect(addHingeListener).not.toHaveBeenCalled();
 
             act(() => {
                 mockFold = halfOpenFold('vertical');

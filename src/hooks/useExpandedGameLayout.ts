@@ -96,7 +96,9 @@ const FOLD_SETTLE_DELAY_MS = 250;
 const MEANINGFUL_HINGE_ANGLE_DELTA = 3;
 
 let foldSplitActive = false;
-let hingeSubscription: { remove: () => void } | null = null;
+let nativeSubscriptions: { remove: () => void }[] | null = null;
+// Android: whether the window manager reports the fold half open.
+let androidFoldHalfOpen = false;
 let foldSettleTimer: ReturnType<typeof setTimeout> | null = null;
 let lastMotionAngle: number | null = null;
 const foldSplitListeners = new Set<() => void>();
@@ -114,6 +116,23 @@ const cancelPendingFoldSplit = () => {
     lastMotionAngle = null;
 };
 
+const restartFoldSettleTimer = () => {
+    if (foldSettleTimer != null) clearTimeout(foldSettleTimer);
+    foldSettleTimer = setTimeout(() => {
+        foldSettleTimer = null;
+        lastMotionAngle = null;
+        publishFoldSplit(true);
+    }, FOLD_SETTLE_DELAY_MS);
+};
+
+// Whether an angle sample is far enough from the last one that restarted the
+// settle timer to count as the hinge still moving. Records it if so.
+const hingeMoved = (angle: number): boolean => {
+    if (lastMotionAngle != null && Math.abs(angle - lastMotionAngle) < MEANINGFUL_HINGE_ANGLE_DELTA) return false;
+    lastMotionAngle = angle;
+    return true;
+};
+
 const updateFoldSplitFromHinge = (hinge: HingeState | null) => {
     if (hinge?.status !== 'partiallyOpen') {
         cancelPendingFoldSplit();
@@ -125,35 +144,30 @@ const updateFoldSplitFromHinge = (hinge: HingeState | null) => {
     // the partial status above dismisses it immediately.
     if (foldSplitActive) return;
 
-    const movedMeaningfully = lastMotionAngle == null
-        || Math.abs(hinge.angle - lastMotionAngle) >= MEANINGFUL_HINGE_ANGLE_DELTA;
-    if (!movedMeaningfully && foldSettleTimer != null) return;
-
-    lastMotionAngle = hinge.angle;
-    if (foldSettleTimer != null) clearTimeout(foldSettleTimer);
-    foldSettleTimer = setTimeout(() => {
-        foldSettleTimer = null;
-        lastMotionAngle = null;
-        publishFoldSplit(true);
-    }, FOLD_SETTLE_DELAY_MS);
+    if (!hingeMoved(hinge.angle) && foldSettleTimer != null) return;
+    restartFoldSettleTimer();
 };
 
-// On Android the window manager's fold state decides on its own: it's the same
-// source the split's direction and position come from, so the three never
-// disagree. It has no angle, so each change restarts the settle delay.
+// On Android the window manager's fold state decides whether the device is half
+// open: it's the same source the split's direction and position come from, so
+// the three never disagree, and it works without a hinge angle sensor.
 const updateFoldSplitFromFold = (fold: Fold | null) => {
-    if (fold?.state !== 'halfOpened') {
+    androidFoldHalfOpen = fold?.state === 'halfOpened';
+    if (!androidFoldHalfOpen) {
         cancelPendingFoldSplit();
         publishFoldSplit(false);
         return;
     }
-    if (foldSplitActive) return;
+    if (foldSplitActive || foldSettleTimer != null) return;
+    restartFoldSettleTimer();
+};
 
-    if (foldSettleTimer != null) clearTimeout(foldSettleTimer);
-    foldSettleTimer = setTimeout(() => {
-        foldSettleTimer = null;
-        publishFoldSplit(true);
-    }, FOLD_SETTLE_DELAY_MS);
+// The window manager reports half open throughout a continuous opening, so where
+// a hinge angle sensor exists its samples keep the settle delay running while
+// the hinge is still moving. They never turn book mode on or off themselves.
+const updateFoldMotionFromHinge = (hinge: HingeState | null) => {
+    if (!androidFoldHalfOpen || foldSplitActive || hinge == null) return;
+    if (hingeMoved(hinge.angle)) restartFoldSettleTimer();
 };
 
 const getFoldSplitSnapshot = (): boolean => foldSplitActive;
@@ -162,12 +176,15 @@ const subscribeToSettledFoldSplit = (listener: () => void): (() => void) => {
     if (Platform.OS !== 'ios' && Platform.OS !== 'android') return () => {};
 
     foldSplitListeners.add(listener);
-    if (hingeSubscription == null) {
+    if (nativeSubscriptions == null) {
         if (Platform.OS === 'android') {
-            hingeSubscription = addFoldListener(({ fold }) => updateFoldSplitFromFold(fold));
+            nativeSubscriptions = [
+                addFoldListener(({ fold }) => updateFoldSplitFromFold(fold)),
+                Hinge.addHingeListener(({ hinge }) => updateFoldMotionFromHinge(hinge)),
+            ];
             updateFoldSplitFromFold(getFold());
         } else {
-            hingeSubscription = Hinge.addHingeListener(({ hinge }) => updateFoldSplitFromHinge(hinge));
+            nativeSubscriptions = [Hinge.addHingeListener(({ hinge }) => updateFoldSplitFromHinge(hinge))];
             updateFoldSplitFromHinge(Hinge.getHinge());
         }
     }
@@ -175,10 +192,11 @@ const subscribeToSettledFoldSplit = (listener: () => void): (() => void) => {
     return () => {
         foldSplitListeners.delete(listener);
         if (foldSplitListeners.size === 0) {
-            hingeSubscription?.remove();
-            hingeSubscription = null;
+            nativeSubscriptions?.forEach(subscription => subscription.remove());
+            nativeSubscriptions = null;
             cancelPendingFoldSplit();
             foldSplitActive = false;
+            androidFoldHalfOpen = false;
         }
     };
 };

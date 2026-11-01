@@ -3,11 +3,13 @@ import { Dimensions } from 'react-native';
 
 import { useDisplayCornerRadius } from './index';
 
-jest.mock('expo', () => ({
-    requireOptionalNativeModule: () => ({
-        getDisplayCornerRadiusAsync: jest.fn(() => Promise.resolve(55)),
-    }),
-}));
+jest.mock('expo', () => {
+    const nativeModule = { getDisplayCornerRadiusAsync: jest.fn(() => Promise.resolve(55)) };
+    return { requireOptionalNativeModule: () => nativeModule };
+});
+
+const getDisplayCornerRadiusAsync: jest.Mock =
+    jest.requireMock('expo').requireOptionalNativeModule().getDisplayCornerRadiusAsync;
 
 jest.mock('react-native/Libraries/Utilities/useWindowDimensions', () => ({
     __esModule: true,
@@ -23,6 +25,21 @@ const setSizes = (window: [number, number], screen: [number, number]) => {
 };
 
 describe('useDisplayCornerRadius', () => {
+    // Each test uses its own display size, since radii are cached per display.
+    it('does not measure a window that does not fill the display, and measures it once it does', async () => {
+        setSizes([694, 1024], [1024, 1366]);
+        const { result, rerender } = renderHook(() => useDisplayCornerRadius());
+        await act(async () => {});
+        expect(result.current).toBe(0);
+        expect(getDisplayCornerRadiusAsync).not.toHaveBeenCalled();
+
+        setSizes([1024, 1366], [1024, 1366]);
+        rerender({});
+        await act(async () => {});
+        expect(result.current).toBe(55);
+        expect(getDisplayCornerRadiusAsync).toHaveBeenCalledTimes(1);
+    });
+
     it('reports the display\'s radius when the window fills the display', async () => {
         setSizes([951, 669], [951, 669]);
         const { result } = renderHook(() => useDisplayCornerRadius());
@@ -31,7 +48,7 @@ describe('useDisplayCornerRadius', () => {
     });
 
     it('reports none for a window that does not fill the display', async () => {
-        setSizes([694, 1024], [1366, 1024]);
+        setSizes([500, 800], [800, 1100]);
         const { result } = renderHook(() => useDisplayCornerRadius());
         await act(async () => {});
         expect(result.current).toBe(0);
