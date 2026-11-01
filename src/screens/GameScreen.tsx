@@ -6,6 +6,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake';
 import { Platform, StyleSheet, View, useWindowDimensions } from 'react-native';
 import Animated, { Easing, FadeIn, FadeOut, LayoutAnimationsValues, LinearTransition, useReducedMotion, withTiming } from 'react-native-reanimated';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useAppSelector } from '../../redux/hooks';
 import { selectInteractionType } from '../../redux/selectors';
@@ -19,7 +20,7 @@ import GameOverSheet from '../components/Sheets/GameOverSheet';
 import { bottomSheetHeight } from '../components/Sheets/GameSheet';
 import GestureInfoSheet from '../components/Sheets/GestureInfoSheet';
 import PointValuesSheet from '../components/Sheets/PointValuesSheet';
-import { useFoldSplitBounds, useGameFoldSplit, useRoundPickerInBottomStrip, useVerticalBarLayout } from '../hooks/useExpandedGameLayout';
+import { FOLD_TRANSITION_SLOWDOWN, useFoldSplitBounds, useGameFoldSplit, useRoundPickerInBottomStrip, useVerticalBarLayout } from '../hooks/useExpandedGameLayout';
 import { useGestureHint } from '../hooks/useGestureHint';
 
 function useKeepScreenAwake(active: boolean): void {
@@ -58,11 +59,11 @@ export const boardResizeTransition = (reduceMotion: boolean) => (values: LayoutA
     if (reduceMotion || !(values.targetWidth > 0 && values.targetHeight > 0)) {
         return {
             initialValues: { ...target, opacity: 0 },
-            animations: { opacity: withTiming(1, { duration: 200 }) },
+            animations: { opacity: withTiming(1, { duration: 200 * FOLD_TRANSITION_SLOWDOWN }) },
         };
     }
 
-    const timing = { duration: 280, easing: Easing.out(Easing.cubic) };
+    const timing = { duration: 280 * FOLD_TRANSITION_SLOWDOWN, easing: Easing.out(Easing.cubic) };
     // Scaling is about the center, so shift by half the size change to keep
     // the top left corner fixed.
     return {
@@ -91,7 +92,7 @@ export const boardResizeTransition = (reduceMotion: boolean) => (values: LayoutA
  * just narrow or widen, so a short list doesn't move at all when only the
  * height changes, where scaling would stretch it.
  */
-const listBoardResize = LinearTransition.duration(280).easing(Easing.out(Easing.cubic));
+const listBoardResize = LinearTransition.duration(280 * FOLD_TRANSITION_SLOWDOWN).easing(Easing.out(Easing.cubic));
 
 interface Props {
     navigation: NativeStackNavigationProp<ParamListBase>;
@@ -136,11 +137,20 @@ const GameScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     const boardBottomInset = isDial || foldSplit ? 0 : fullscreen ? 20 : bottomSheetHeight + 2;
     // Give the board and its tiles the same geometry in this render. Measuring
     // the resized native board first exposes an old grid inside the new bounds.
+    // The tiles' frame stays inside the safe area at the sides (the dial list
+    // pads its own scroll content instead), so the frame is exactly where the
+    // tiles are: the fold resize animates from one to the other, and padding
+    // inside it would stretch the new layout over the old padding.
+    const insets = useSafeAreaInsets();
+    const insetLeft = isDial ? 0 : insets.left;
+    // Docked on the left half, the board stops short of the vertical bar
+    // anyway.
+    const insetRight = isDial || foldSplit === 'columns' ? 0 : insets.right;
     const boardSize = useMemo(() => ({
-        width: Math.max(0, foldSplit === 'columns' ? boardEnd : windowWidth),
+        width: Math.max(0, (foldSplit === 'columns' ? boardEnd : windowWidth) - insetLeft - insetRight),
         height: Math.max(0, (foldSplit === 'rows' ? boardEnd : windowHeight) - paddingTop - boardBottomInset),
-    }), [foldSplit, boardEnd, windowWidth, windowHeight, paddingTop, boardBottomInset]);
-    const boardOrigin = useMemo(() => ({ x: 0, y: paddingTop }), [paddingTop]);
+    }), [foldSplit, boardEnd, windowWidth, windowHeight, paddingTop, boardBottomInset, insetLeft, insetRight]);
+    const boardOrigin = useMemo(() => ({ x: insetLeft, y: paddingTop }), [insetLeft, paddingTop]);
 
     // Animate the board's resize only when folding or unfolding changes it,
     // not when the window rotates or the header changes height.
@@ -164,7 +174,7 @@ const GameScreen: React.FunctionComponent<Props> = ({ navigation }) => {
             <View style={{ flex: 1 }}>
                 <Animated.View
                     layout={animateBoardResize ? (isDial ? listBoardResize : boardResize) : undefined}
-                    style={[styles.boardArea, boardSize]}
+                    style={[styles.boardArea, { left: insetLeft }, boardSize]}
                     testID="game-board-area"
                 >
                     {isDial
@@ -172,7 +182,7 @@ const GameScreen: React.FunctionComponent<Props> = ({ navigation }) => {
                             <ListBoard foldSplit={foldSplit} showHint={showHint} topInset={scrollUnderHeader ? headerHeight : 0} />
                         </Animated.View>
                         : <Animated.View key="flex" entering={FadeIn.duration(220)} exiting={FadeOut.duration(180)} style={StyleSheet.absoluteFill}>
-                            <TileBoard boardOrigin={boardOrigin} boardSize={boardSize} foldSplit={foldSplit} showHint={showHint} />
+                            <TileBoard boardOrigin={boardOrigin} boardSize={boardSize} showHint={showHint} />
                         </Animated.View>
                     }
 

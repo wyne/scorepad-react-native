@@ -70,6 +70,13 @@ export const useExpandedGameSplit = (): { sheetWidth: number; pickerWidth: numbe
 };
 
 /**
+ * Multiplies the durations of the fold transitions (the board's resize and the
+ * sheet's cross-fade). Raised in dev builds while tuning them frame by frame;
+ * set it back to 1 once they're settled.
+ */
+export const FOLD_TRANSITION_SLOWDOWN = __DEV__ ? 5 : 1;
+
+/**
  * The least space kept clear across the fold when the game screen splits
  * around it. On Android the fold's own width is used when it's wider.
  */

@@ -18,8 +18,9 @@ jest.mock('@react-navigation/elements', () => ({
     useHeaderHeight: () => 88,
 }));
 
+let mockInsets = { top: 0, bottom: 0, left: 0, right: 0 };
 jest.mock('react-native-safe-area-context', () => ({
-    useSafeAreaInsets: () => ({ top: 0, bottom: 0, left: 0, right: 0 }),
+    useSafeAreaInsets: () => mockInsets,
 }));
 
 jest.mock('react-native-reanimated', () => {
@@ -85,9 +86,12 @@ jest.mock('../components/Buttons/GameOptionsButton', () => ({
 }));
 
 jest.mock('../components/Boards/TileBoard', () => {
-    return function MockTileBoard({ boardSize }: { boardSize: { width: number; height: number } }) {
+    return function MockTileBoard({ boardSize, boardOrigin }: {
+        boardSize: { width: number; height: number };
+        boardOrigin?: { x: number; y: number };
+    }) {
         const { View, Text } = jest.requireActual('react-native');
-        return <View testID="tile-board" boardSize={boardSize}><Text>TileBoard</Text></View>;
+        return <View testID="tile-board" boardSize={boardSize} boardOrigin={boardOrigin}><Text>TileBoard</Text></View>;
     };
 });
 
@@ -272,6 +276,7 @@ describe('GameScreen', () => {
         };
 
         afterEach(() => {
+            mockInsets = { top: 0, bottom: 0, left: 0, right: 0 };
             mockUseGameFoldSplit.mockReturnValue(null);
             mockUseRoundPickerInBottomStrip.mockReturnValue(false);
         });
@@ -312,6 +317,26 @@ describe('GameScreen', () => {
             const { height } = Dimensions.get('window');
 
             expect(getByTestId('tile-board').props.boardSize.height).toBe(height - 88 - 20);
+        });
+
+        // The board's frame is exactly where the tiles are, so the fold resize
+        // animates from the old tiles rather than from padding beside them.
+        it('keeps the tiles\' frame inside the side safe areas', () => {
+            mockInsets = { top: 0, bottom: 0, left: 12, right: 28 };
+            const { width } = Dimensions.get('window');
+            const { getByTestId } = renderGame();
+
+            expect(StyleSheet.flatten(getByTestId('game-board-area').props.style)).toMatchObject({ left: 12, width: width - 40 });
+            expect(getByTestId('tile-board').props.boardOrigin).toEqual({ x: 12, y: 88 });
+        });
+
+        it('ignores the right safe area when docked on the left half', () => {
+            mockInsets = { top: 0, bottom: 0, left: 12, right: 28 };
+            mockUseGameFoldSplit.mockReturnValue('columns');
+            const { width } = Dimensions.get('window');
+            const { getByTestId } = renderGame();
+
+            expect(StyleSheet.flatten(getByTestId('game-board-area').props.style)).toMatchObject({ left: 12, width: width / 2 - 16 - 12 });
         });
 
         it('keeps the board to the left of the fold in landscape', () => {
