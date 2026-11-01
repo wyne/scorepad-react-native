@@ -1,23 +1,22 @@
 import React, { memo, useMemo } from 'react';
 
 import { StyleSheet, View, useWindowDimensions } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useDisplayCornerRadius } from '../../../modules/display-corners';
 import { selectGameById } from '../../../redux/GamesSlice';
 import { useAppSelector } from '../../../redux/hooks';
-import { useVerticalBarLayout, type GameFoldSplit } from '../../hooks/useExpandedGameLayout';
+import { useVerticalBarLayout } from '../../hooks/useExpandedGameLayout';
 import { useTheme } from '../../theme';
 
 import PlayerTile, { TILE_BORDER, TILE_RADIUS } from './PlayerTile';
 
 interface TileBoardProps {
+    // The board's frame, already inside the safe area (see GameScreen).
     boardSize: BoardSize;
     // Where the board's top left corner sits in the window, so tiles in a
     // screen corner can follow the display's curve.
     boardOrigin?: { x: number; y: number };
     showHint: boolean;
-    foldSplit?: GameFoldSplit | null;
 }
 
 interface BoardSize {
@@ -25,9 +24,8 @@ interface BoardSize {
     height: number;
 }
 
-const TileBoard: React.FC<TileBoardProps> = ({ boardSize, boardOrigin = { x: 0, y: 0 }, showHint, foldSplit = null }) => {
+const TileBoard: React.FC<TileBoardProps> = ({ boardSize, boardOrigin = { x: 0, y: 0 }, showHint }) => {
     const theme = useTheme();
-    const insets = useSafeAreaInsets();
     const window = useWindowDimensions();
     const displayRadius = useDisplayCornerRadius();
     // On the iPhone Duo the tiles run to the screen's edges, so match the
@@ -39,8 +37,7 @@ const TileBoard: React.FC<TileBoardProps> = ({ boardSize, boardOrigin = { x: 0, 
     });
     const visiblePlayerIds = playerIds ?? [];
     const playerCount = visiblePlayerIds.length;
-    const paddingRight = foldSplit === 'columns' ? 0 : insets.right;
-    const contentWidth = Math.max(0, boardSize.width - insets.left - paddingRight - edgeInset * 2);
+    const contentWidth = Math.max(0, boardSize.width - edgeInset * 2);
     // The space for the collapsed game sheet is already outside `boardSize`
     // (see GameScreen), so folding animates it with the board's frame.
     const contentHeight = Math.max(0, boardSize.height - edgeInset * 2);
@@ -87,7 +84,7 @@ const TileBoard: React.FC<TileBoardProps> = ({ boardSize, boardOrigin = { x: 0, 
     const cornerRadii = useMemo(() => {
         if (grid == null) return [];
 
-        const originX = boardOrigin.x + insets.left + edgeInset;
+        const originX = boardOrigin.x + edgeInset;
         const originY = boardOrigin.y + edgeInset;
         const lastRowCount = playerCount - (grid.rows - 1) * grid.cols;
         const concentric = (...distances: number[]) =>
@@ -110,21 +107,12 @@ const TileBoard: React.FC<TileBoardProps> = ({ boardSize, boardOrigin = { x: 0, 
                 bottomRight: concentric(right, bottom),
             };
         });
-    }, [grid, boardOrigin.x, boardOrigin.y, insets.left, edgeInset, playerCount, contentWidth, window.width, window.height, displayRadius]);
+    }, [grid, boardOrigin.x, boardOrigin.y, edgeInset, playerCount, contentWidth, window.width, window.height, displayRadius]);
 
     if (visiblePlayerIds.length === 0) return null;
 
     return (
-        // Docked on the left half, the board stops short of the vertical bar's
-        // inset on the right.
-        <View testID="tile-board" style={
-            [styles.contentStyle,
-            {
-                paddingLeft: insets.left,
-                paddingRight,
-                backgroundColor: theme.background,
-            }]
-        } >
+        <View testID="tile-board" style={[styles.contentStyle, { backgroundColor: theme.background }]}>
             <View style={{ width: contentWidth, height: contentHeight, margin: edgeInset }} testID="tile-board-viewport">
                 {grid != null && (
                     <View style={styles.tileGrid} testID={`tile-grid-${grid.rows}x${grid.cols}`}>

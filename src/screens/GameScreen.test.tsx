@@ -14,12 +14,14 @@ import GameScreen, { boardResizeTransition } from './GameScreen';
 
 const mockHeaderItems = [{ type: 'menu', label: 'Game Options' }];
 
+let mockHeaderHeight = 88;
 jest.mock('@react-navigation/elements', () => ({
-    useHeaderHeight: () => 88,
+    useHeaderHeight: () => mockHeaderHeight,
 }));
 
+let mockInsets = { top: 0, bottom: 0, left: 0, right: 0 };
 jest.mock('react-native-safe-area-context', () => ({
-    useSafeAreaInsets: () => ({ top: 0, bottom: 0, left: 0, right: 0 }),
+    useSafeAreaInsets: () => mockInsets,
 }));
 
 jest.mock('react-native-reanimated', () => {
@@ -38,6 +40,8 @@ jest.mock('react-native-reanimated', () => {
         FadeOut: builder,
         LinearTransition: builder,
         useReducedMotion: jest.fn(() => false),
+        useSharedValue: (value: number) => ({ value }),
+        useAnimatedStyle: (style: () => object) => style(),
         withTiming: jest.fn((value: number) => value),
     };
 });
@@ -85,9 +89,12 @@ jest.mock('../components/Buttons/GameOptionsButton', () => ({
 }));
 
 jest.mock('../components/Boards/TileBoard', () => {
-    return function MockTileBoard({ boardSize }: { boardSize: { width: number; height: number } }) {
+    return function MockTileBoard({ boardSize, boardOrigin }: {
+        boardSize: { width: number; height: number };
+        boardOrigin?: { x: number; y: number };
+    }) {
         const { View, Text } = jest.requireActual('react-native');
-        return <View testID="tile-board" boardSize={boardSize}><Text>TileBoard</Text></View>;
+        return <View testID="tile-board" boardSize={boardSize} boardOrigin={boardOrigin}><Text>TileBoard</Text></View>;
     };
 });
 
@@ -272,6 +279,7 @@ describe('GameScreen', () => {
         };
 
         afterEach(() => {
+            mockInsets = { top: 0, bottom: 0, left: 0, right: 0 };
             mockUseGameFoldSplit.mockReturnValue(null);
             mockUseRoundPickerInBottomStrip.mockReturnValue(false);
         });
@@ -302,7 +310,7 @@ describe('GameScreen', () => {
 
             // Header (88) and the collapsed sheet (80 + 2) are outside the board's frame.
             expect(StyleSheet.flatten(getByTestId('game-board-area').props.style)).toEqual({
-                position: 'absolute', top: 0, left: 0, width, height: height - 88 - 82,
+                position: 'absolute', top: 0, left: 0, opacity: 1, width, height: height - 88 - 82,
             });
             expect(getByTestId('tile-board').props.boardSize).toEqual({ width, height: height - 88 - 82 });
         });
@@ -314,13 +322,33 @@ describe('GameScreen', () => {
             expect(getByTestId('tile-board').props.boardSize.height).toBe(height - 88 - 20);
         });
 
+        // The board's frame is exactly where the tiles are, so the fold resize
+        // animates from the old tiles rather than from padding beside them.
+        it('keeps the tiles\' frame inside the side safe areas', () => {
+            mockInsets = { top: 0, bottom: 0, left: 12, right: 28 };
+            const { width } = Dimensions.get('window');
+            const { getByTestId } = renderGame();
+
+            expect(StyleSheet.flatten(getByTestId('game-board-area').props.style)).toMatchObject({ left: 12, width: width - 40 });
+            expect(getByTestId('tile-board').props.boardOrigin).toEqual({ x: 12, y: 88 });
+        });
+
+        it('ignores the right safe area when docked on the left half', () => {
+            mockInsets = { top: 0, bottom: 0, left: 12, right: 28 };
+            mockUseGameFoldSplit.mockReturnValue('columns');
+            const { width } = Dimensions.get('window');
+            const { getByTestId } = renderGame();
+
+            expect(StyleSheet.flatten(getByTestId('game-board-area').props.style)).toMatchObject({ left: 12, width: width / 2 - 16 - 12 });
+        });
+
         it('keeps the board to the left of the fold in landscape', () => {
             mockUseGameFoldSplit.mockReturnValue('columns');
             const { width, height } = Dimensions.get('window');
             const { getByTestId } = renderGame();
 
             const style = StyleSheet.flatten(getByTestId('game-board-area').props.style);
-            expect(style).toEqual({ position: 'absolute', left: 0, top: 0, height: height - 88, width: width / 2 - 16 });
+            expect(style).toEqual({ position: 'absolute', left: 0, top: 0, opacity: 1, height: height - 88, width: width / 2 - 16 });
             expect(getByTestId('tile-board').props.boardSize).toEqual({ width: width / 2 - 16, height: height - 88 });
             expect(getByTestId('game-board-area').findByProps({ testID: 'locked-game-hint' })).toBeTruthy();
         });
@@ -331,7 +359,7 @@ describe('GameScreen', () => {
             const { getByTestId } = renderGame();
 
             const style = StyleSheet.flatten(getByTestId('game-board-area').props.style);
-            expect(style).toEqual({ position: 'absolute', left: 0, width, top: 0, height: height / 2 - 16 - 88 });
+            expect(style).toEqual({ position: 'absolute', left: 0, width, top: 0, opacity: 1, height: height / 2 - 16 - 88 });
             expect(getByTestId('tile-board').props.boardSize).toEqual({ width, height: height / 2 - 16 - 88 });
         });
     });
@@ -368,5 +396,51 @@ describe('GameScreen', () => {
             expect(initialValues).not.toHaveProperty('transform');
             expect(animations).toEqual({ opacity: 1 });
         });
+    });
+
+    it('uses the header height it last measured at a window size on returning to it', () => {
+        const store = createMockStore({
+            settings: { currentGameId: 'game-1' },
+            games: { entities: { 'game-1': mockGame }, ids: ['game-1'] },
+            players: { entities: mockPlayers, ids: ['player-1', 'player-2'] },
+        });
+        const dims = jest.spyOn(jest.requireActual('react-native'), 'useWindowDimensions');
+        const screen = () => (
+            <Provider store={store}>
+                <GameScreen navigation={navigation} />
+            </Provider>
+        );
+        const paddingTop = (view: ReturnType<typeof render>) =>
+            StyleSheet.flatten(view.getByTestId('game-screen').props.style).paddingTop;
+
+        dims.mockReturnValue({ width: 466, height: 678, scale: 3, fontScale: 1 });
+        mockHeaderHeight = 82;
+        const view = render(screen());
+        expect(paddingTop(view)).toBe(82);
+
+        // Another display: its header is measured a few renders later, and the
+        // renders before that still report the first display's height.
+        dims.mockReturnValue({ width: 669, height: 951, scale: 3, fontScale: 1 });
+        mockHeaderHeight = 82;
+        view.rerender(screen());
+        view.rerender(screen());
+        view.rerender(screen());
+        mockHeaderHeight = 50;
+        view.rerender(screen());
+        expect(paddingTop(view)).toBe(50);
+
+        // Back on the first display, before its header is measured again, over
+        // several stale renders: neither display's height is overwritten.
+        dims.mockReturnValue({ width: 466, height: 678, scale: 3, fontScale: 1 });
+        view.rerender(screen());
+        view.rerender(screen());
+        expect(paddingTop(view)).toBe(82);
+
+        dims.mockReturnValue({ width: 669, height: 951, scale: 3, fontScale: 1 });
+        view.rerender(screen());
+        expect(paddingTop(view)).toBe(50);
+
+        dims.mockRestore();
+        mockHeaderHeight = 88;
     });
 });

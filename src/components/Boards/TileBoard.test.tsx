@@ -13,11 +13,6 @@ import TileBoard from './TileBoard';
 
 jest.mock('../Sheets/GameSheet', () => ({ bottomSheetHeight: 80 }));
 
-let mockInsets = { top: 0, bottom: 0, left: 0, right: 0 };
-jest.mock('react-native-safe-area-context', () => ({
-    useSafeAreaInsets: () => mockInsets,
-}));
-
 const mockPlayerTileRender = jest.fn();
 const mockPlayerTileMount = jest.fn();
 const mockPlayerTileUnmount = jest.fn();
@@ -78,28 +73,25 @@ describe('TileBoard', () => {
         ids = playerIds,
         size = { width: 400, height: 600 },
         fullscreen = false,
-        foldSplit = null,
     }: {
         ids?: string[];
         size?: { width: number; height: number };
         fullscreen?: boolean;
-        foldSplit?: 'columns' | 'rows' | null;
     } = {}) => {
         const store = createMockStore({
             settings: { currentGameId: 'game-1', home_fullscreen: fullscreen },
             games: { entities: { 'game-1': { ...mockGame, playerIds: ids } }, ids: ['game-1'] },
             players: { entities: players, ids: playerIds },
         });
-        const element = (nextSize = size, nextSplit = foldSplit) => (
+        const element = (nextSize = size) => (
             <Provider store={store}>
-                <TileBoard boardSize={nextSize} showHint={false} foldSplit={nextSplit} />
+                <TileBoard boardSize={nextSize} showHint={false} />
             </Provider>
         );
         return { ...render(element()), store, element };
     };
 
     beforeEach(() => {
-        mockInsets = { top: 0, bottom: 0, left: 0, right: 0 };
         mockDisplayRadius = 0;
         mockVerticalBars = false;
         mockPlayerTileRender.mockClear();
@@ -133,38 +125,9 @@ describe('TileBoard', () => {
         expect(mockPlayerTileRender).toHaveBeenCalledTimes(4);
     });
 
-    it('uses the same inset snapshot for native padding and tile geometry', () => {
-        mockInsets = { top: 0, bottom: 0, left: 12, right: 28 };
-        const { getByTestId, getAllByText } = renderBoard({ size: { width: 440, height: 600 } });
-        expect(StyleSheet.flatten(getByTestId('tile-board').props.style)).toMatchObject({
-            paddingLeft: 12, paddingRight: 28,
-        });
-        expect(getAllByText('Width: 200')).toHaveLength(4);
-        expect(getAllByText('Height: 300')).toHaveLength(4);
-    });
-
     it('leaves room for the game sheet to the board size it is given', () => {
         const { getByTestId, getAllByText } = renderBoard({ size: { width: 400, height: 600 } });
         expect(StyleSheet.flatten(getByTestId('tile-board').props.style).paddingBottom).toBeUndefined();
-        expect(getAllByText('Height: 300')).toHaveLength(4);
-    });
-
-    it('uses only the left inset in a column split', () => {
-        mockInsets = { top: 0, bottom: 0, left: 12, right: 28 };
-        const { getByTestId, getAllByText } = renderBoard({
-            foldSplit: 'columns', size: { width: 412, height: 600 },
-        });
-        expect(StyleSheet.flatten(getByTestId('tile-board').props.style)).toMatchObject({
-            paddingLeft: 12, paddingRight: 0,
-        });
-        expect(getAllByText('Width: 200')).toHaveLength(4);
-        expect(getAllByText('Height: 300')).toHaveLength(4);
-    });
-
-    it('keeps both side insets in a row split', () => {
-        mockInsets = { top: 0, bottom: 0, left: 12, right: 28 };
-        const { getAllByText } = renderBoard({ foldSplit: 'rows', size: { width: 440, height: 600 } });
-        expect(getAllByText('Width: 200')).toHaveLength(4);
         expect(getAllByText('Height: 300')).toHaveLength(4);
     });
 

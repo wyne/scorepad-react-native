@@ -315,6 +315,42 @@ describe('useGameFoldSplit', () => {
         expect(split.result.current).toBe('columns');
     });
 
+    // Recorded on the iPhone Duo simulator opening from the cover display: the
+    // last few degrees arrive slowly, still partially open, before fully open.
+    it('does not enter book mode while the hinge creeps the last degrees to flat', () => {
+        setHinge('closed');
+        setWindow(951, 669);
+        const split = renderSplit();
+
+        // (The JS thread was busy with the move to the inner display here, so
+        // the gap after this sample held up the settle timer as well.)
+        act(() => emitHinge({ status: 'partiallyOpen', angle: 23.3 }));
+        act(() => jest.advanceTimersByTime(200));
+        for (const angle of [155.9, 164.6, 168, 169.8, 171.2, 172.2, 173.5, 173.9]) {
+            act(() => emitHinge({ status: 'partiallyOpen', angle }));
+            act(() => jest.advanceTimersByTime(20));
+        }
+        act(() => jest.advanceTimersByTime(556));
+        expect(split.result.current).toBeNull();
+
+        act(() => emitHinge({ status: 'fullyOpen', angle: 180 }));
+        expect(split.result.current).toBeNull();
+    });
+
+    it('enters book mode when the hinge comes back from nearly flat', () => {
+        setHinge('closed');
+        setWindow(951, 669);
+        const split = renderSplit();
+
+        act(() => emitHinge({ status: 'partiallyOpen', angle: 170 }));
+        act(() => jest.advanceTimersByTime(300));
+        expect(split.result.current).toBeNull();
+
+        act(() => emitHinge({ status: 'partiallyOpen', angle: 120 }));
+        settleHinge();
+        expect(split.result.current).toBe('columns');
+    });
+
     it('settles despite sensor jitter while the device rests half open', () => {
         setHinge('closed');
         setWindow(951, 669);
