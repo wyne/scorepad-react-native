@@ -116,7 +116,20 @@ let foldSettleTimer: ReturnType<typeof setTimeout> | null = null;
 let lastMotionAngle: number | null = null;
 const foldSplitListeners = new Set<() => void>();
 
+// Closing the iPhone Duo: the hinge reports closed a moment before the app
+// moves to the cover display. Listeners get the chance to hold the layout
+// still through the move (see GameScreen).
+let lastHingeStatus: HingeState['status'] | null = null;
+const hingeClosingListeners = new Set<() => void>();
+
+/** Calls `listener` when the hinge starts reporting closed. iOS only. */
+export const addHingeClosingListener = (listener: () => void): (() => void) => {
+    hingeClosingListeners.add(listener);
+    return () => hingeClosingListeners.delete(listener);
+};
+
 const publishFoldSplit = (active: boolean) => {
+
     if (active === foldSplitActive) return;
 
     foldSplitActive = active;
@@ -147,6 +160,11 @@ const hingeMoved = (angle: number): boolean => {
 };
 
 const updateFoldSplitFromHinge = (hinge: HingeState | null) => {
+    const status = hinge?.status ?? null;
+    if (status === 'closed' && lastHingeStatus !== 'closed') {
+        hingeClosingListeners.forEach(notify => notify());
+    }
+    lastHingeStatus = status;
     if (hinge?.status !== 'partiallyOpen') {
         cancelPendingFoldSplit();
         publishFoldSplit(false);

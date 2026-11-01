@@ -1,11 +1,11 @@
-import React, { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 
 import { useHeaderHeight } from '@react-navigation/elements';
 import { ParamListBase } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake';
 import { Platform, StyleSheet, View, useWindowDimensions } from 'react-native';
-import Animated, { Easing, FadeIn, FadeOut, LayoutAnimationsValues, LinearTransition, useReducedMotion, withTiming } from 'react-native-reanimated';
+import Animated, { Easing, FadeIn, FadeOut, LayoutAnimationsValues, LinearTransition, SharedValue, useAnimatedStyle, useReducedMotion, useSharedValue, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useAppSelector } from '../../redux/hooks';
@@ -20,7 +20,7 @@ import GameOverSheet from '../components/Sheets/GameOverSheet';
 import { bottomSheetHeight } from '../components/Sheets/GameSheet';
 import GestureInfoSheet from '../components/Sheets/GestureInfoSheet';
 import PointValuesSheet from '../components/Sheets/PointValuesSheet';
-import { FOLD_TRANSITION_SLOWDOWN, useFoldSplitBounds, useGameFoldSplit, useRoundPickerInBottomStrip, useVerticalBarLayout } from '../hooks/useExpandedGameLayout';
+import { FOLD_TRANSITION_SLOWDOWN, addHingeClosingListener, useFoldSplitBounds, useGameFoldSplit, useRoundPickerInBottomStrip, useVerticalBarLayout } from '../hooks/useExpandedGameLayout';
 import { useGestureHint } from '../hooks/useGestureHint';
 
 function useKeepScreenAwake(active: boolean): void {
@@ -101,9 +101,13 @@ const listBoardResize = LinearTransition.duration(280 * FOLD_TRANSITION_SLOWDOWN
 // header has been seen, its height is known in that first render.
 const headerHeights = new Map<string, number>();
 
-/** The header's height, remembered per window size (see headerHeights). */
-const useStableHeaderHeight = (): number => {
+/**
+ * The header's height, remembered per window size (see headerHeights), and
+ * whether it has been measured at this window size yet.
+ */
+const useStableHeaderHeight = (): { headerHeight: number; headerKnown: boolean } => {
     const measured = useHeaderHeight();
+
     const { width, height } = useWindowDimensions();
     const key = `${Math.round(width)}x${Math.round(height)}`;
     const lastKeyRef = useRef(key);
@@ -117,7 +121,55 @@ const useStableHeaderHeight = (): number => {
     lastMeasuredRef.current = measured;
     if (!sizeChanged || measurementChanged) headerHeights.set(key, measured);
 
-    return headerHeights.get(key) ?? measured;
+    const known = headerHeights.get(key);
+    return { headerHeight: known ?? measured, headerKnown: known != null };
+};
+
+// The longest the board stays hidden after the hinge closes, in case the
+// window or the header never reports a change.
+const DISPLAY_SWITCH_TIMEOUT_MS = 700;
+
+/**
+ * Hides the board while the iPhone Duo closes onto its cover display. React
+ * Native learns the cover's window size about 300ms after the switch, and the
+ * header's height a few frames after that, so the board would first show the
+ * inner display's layout clipped, then its own layout under the header, then
+ * jump down. Instead it stays hidden from the moment the hinge reports closed
+ * until both have arrived, and fades in.
+ */
+const useDisplaySwitchCurtain = (windowKey: string, headerKnown: boolean): { hidden: boolean; opacity: SharedValue<number> } => {
+    const [closingFrom, setClosingFrom] = useState<string | null>(null);
+    const opacity = useSharedValue(1);
+    const verticalBars = useVerticalBarLayout();
+    const windowKeyRef = useRef(windowKey);
+    windowKeyRef.current = windowKey;
+
+    // Only the inner display closes onto another display.
+    const onInnerDisplay = verticalBars && windowKey.split('x').map(Number).every(side => side >= 600);
+    useEffect(() => {
+        if (!onInnerDisplay) return;
+        return addHingeClosingListener(() => {
+            opacity.value = 0;
+            setClosingFrom(windowKeyRef.current);
+        });
+    }, [onInnerDisplay, opacity]);
+
+    const arrived = closingFrom != null && windowKey !== closingFrom && headerKnown;
+    useEffect(() => {
+        if (closingFrom == null) return;
+        const reveal = () => {
+            setClosingFrom(null);
+            opacity.value = withTiming(1, { duration: 150 * FOLD_TRANSITION_SLOWDOWN });
+        };
+        if (arrived) {
+            reveal();
+            return;
+        }
+        const timeout = setTimeout(reveal, DISPLAY_SWITCH_TIMEOUT_MS);
+        return () => clearTimeout(timeout);
+    }, [closingFrom, arrived, opacity]);
+
+    return { hidden: closingFrom != null, opacity };
 };
 
 interface Props {
@@ -129,7 +181,7 @@ const GameScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     const keepScreenAwake = useAppSelector(state => state.settings.keepScreenAwake);
     const fullscreen = useAppSelector(state => state.settings.home_fullscreen);
     const interactionType = useAppSelector(state => selectInteractionType(state, currentGameId));
-    const headerHeight = useStableHeaderHeight();
+    const { headerHeight, headerKnown } = useStableHeaderHeight();
     const showHint = useGestureHint();
     const isDial = interactionType === InteractionType.Dial;
     // With vertical bars (iPhone Duo) the header has no background (see
@@ -191,7 +243,12 @@ const GameScreen: React.FunctionComponent<Props> = ({ navigation }) => {
         }
         lastFoldSplitRef.current = foldSplit;
     }
-    const animateBoardResize = Date.now() < animateBoardUntilRef.current;
+    const { width: curtainWidth, height: curtainHeight } = useWindowDimensions();
+    const curtain = useDisplaySwitchCurtain(`${Math.round(curtainWidth)}x${Math.round(curtainHeight)}`, headerKnown);
+    const curtainStyle = useAnimatedStyle(() => ({ opacity: curtain.opacity.value }));
+    // Closing onto the cover display, the board is hidden (see
+    // useDisplaySwitchCurtain): leaving book mode on the way doesn't animate.
+    const animateBoardResize = !curtain.hidden && Date.now() < animateBoardUntilRef.current;
 
     if (typeof currentGameId == 'undefined') return null;
 
@@ -200,7 +257,7 @@ const GameScreen: React.FunctionComponent<Props> = ({ navigation }) => {
             <View style={{ flex: 1 }}>
                 <Animated.View
                     layout={animateBoardResize ? (isDial ? listBoardResize : boardResize) : undefined}
-                    style={[styles.boardArea, { left: insetLeft }, boardSize]}
+                    style={[styles.boardArea, { left: insetLeft }, boardSize, curtainStyle]}
                     testID="game-board-area"
                 >
                     {isDial

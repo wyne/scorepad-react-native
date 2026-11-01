@@ -40,6 +40,8 @@ jest.mock('react-native-reanimated', () => {
         FadeOut: builder,
         LinearTransition: builder,
         useReducedMotion: jest.fn(() => false),
+        useSharedValue: (value: number) => ({ value }),
+        useAnimatedStyle: (style: () => object) => style(),
         withTiming: jest.fn((value: number) => value),
     };
 });
@@ -308,7 +310,7 @@ describe('GameScreen', () => {
 
             // Header (88) and the collapsed sheet (80 + 2) are outside the board's frame.
             expect(StyleSheet.flatten(getByTestId('game-board-area').props.style)).toEqual({
-                position: 'absolute', top: 0, left: 0, width, height: height - 88 - 82,
+                position: 'absolute', top: 0, left: 0, opacity: 1, width, height: height - 88 - 82,
             });
             expect(getByTestId('tile-board').props.boardSize).toEqual({ width, height: height - 88 - 82 });
         });
@@ -346,7 +348,7 @@ describe('GameScreen', () => {
             const { getByTestId } = renderGame();
 
             const style = StyleSheet.flatten(getByTestId('game-board-area').props.style);
-            expect(style).toEqual({ position: 'absolute', left: 0, top: 0, height: height - 88, width: width / 2 - 16 });
+            expect(style).toEqual({ position: 'absolute', left: 0, top: 0, opacity: 1, height: height - 88, width: width / 2 - 16 });
             expect(getByTestId('tile-board').props.boardSize).toEqual({ width: width / 2 - 16, height: height - 88 });
             expect(getByTestId('game-board-area').findByProps({ testID: 'locked-game-hint' })).toBeTruthy();
         });
@@ -357,7 +359,7 @@ describe('GameScreen', () => {
             const { getByTestId } = renderGame();
 
             const style = StyleSheet.flatten(getByTestId('game-board-area').props.style);
-            expect(style).toEqual({ position: 'absolute', left: 0, width, top: 0, height: height / 2 - 16 - 88 });
+            expect(style).toEqual({ position: 'absolute', left: 0, width, top: 0, opacity: 1, height: height / 2 - 16 - 88 });
             expect(getByTestId('tile-board').props.boardSize).toEqual({ width, height: height / 2 - 16 - 88 });
         });
     });
