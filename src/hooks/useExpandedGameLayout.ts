@@ -101,6 +101,12 @@ const FOLD_SETTLE_DELAY_MS = 250;
 // Hinge angle sensors jitter by a degree or so at rest; a smaller threshold
 // would keep restarting the settle timer on a device sitting half open.
 const MEANINGFUL_HINGE_ANGLE_DELTA = 3;
+// Opening from the cover display, the hinge creeps through its last few
+// degrees still reporting partially open, with samples arriving as rarely as
+// every half second, so it looks settled before it reaches flat. Nobody holds
+// a book that open, so past this angle a partially open hinge doesn't start
+// book mode (it can still stay in it, until the hinge reports fully open).
+const NEARLY_FLAT_HINGE_ANGLE = 160;
 
 let foldSplitActive = false;
 let nativeSubscriptions: { remove: () => void }[] | null = null;
@@ -151,6 +157,11 @@ const updateFoldSplitFromHinge = (hinge: HingeState | null) => {
     // the partial status above dismisses it immediately.
     if (foldSplitActive) return;
 
+    if (hinge.angle > NEARLY_FLAT_HINGE_ANGLE) {
+        cancelPendingFoldSplit();
+        return;
+    }
+
     if (!hingeMoved(hinge.angle) && foldSettleTimer != null) return;
     restartFoldSettleTimer();
 };
@@ -174,6 +185,10 @@ const updateFoldSplitFromFold = (fold: Fold | null) => {
 // the hinge is still moving. They never turn book mode on or off themselves.
 const updateFoldMotionFromHinge = (hinge: HingeState | null) => {
     if (!androidFoldHalfOpen || foldSplitActive || hinge == null) return;
+    if (hinge.angle > NEARLY_FLAT_HINGE_ANGLE) {
+        cancelPendingFoldSplit();
+        return;
+    }
     if (hingeMoved(hinge.angle)) restartFoldSettleTimer();
 };
 
