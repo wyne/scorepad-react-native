@@ -14,8 +14,8 @@ web-build/
 assets-src/
 assets-stores/
 node_modules/
-ios/
-android/
+/ios/
+/android/
 dist/
 
 # Native
