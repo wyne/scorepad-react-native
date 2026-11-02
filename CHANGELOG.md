@@ -1,5 +1,20 @@
 # Changelog
 
+## [3.4.2](https://github.com/wyne/scorepad-react-native/compare/v3.4.1...v3.4.2) (2026-11-02)
+
+
+### Bug Fixes
+
+* make Game Modes a public setting and fix switches flipping together ([#797](https://github.com/wyne/scorepad-react-native/issues/797)) ([332bf4d](https://github.com/wyne/scorepad-react-native/commit/332bf4d0a27848e8afd20701caa150ab5b38ecff))
+* respect settings sheet safe areas ([#802](https://github.com/wyne/scorepad-react-native/issues/802)) ([0732668](https://github.com/wyne/scorepad-react-native/commit/0732668a5fd470bed89c9c5b5923c61efcbc5030))
+* show winner label as a top tab on the player tile ([#798](https://github.com/wyne/scorepad-react-native/issues/798)) ([898e554](https://github.com/wyne/scorepad-react-native/commit/898e5548f25aac17f784721b4e13e5f877cb65f4))
+* sync native controls with app appearance ([#801](https://github.com/wyne/scorepad-react-native/issues/801)) ([a33a59f](https://github.com/wyne/scorepad-react-native/commit/a33a59fb3bc30246eec94dd227d8fcb56d0fe1c9))
+
+
+### Miscellaneous
+
+* refresh App Store screenshots and add iPhone Duo set ([#799](https://github.com/wyne/scorepad-react-native/issues/799)) ([f5dfaf7](https://github.com/wyne/scorepad-react-native/commit/f5dfaf7f5fdbdc3c1e85d7b22b4f662834681120))
+
 ## [3.4.1](https://github.com/wyne/scorepad-react-native/compare/v3.4.0...v3.4.1) (2026-11-01)
 
 
