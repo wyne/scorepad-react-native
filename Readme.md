@@ -3,7 +3,7 @@
 
 An open-source, multi-platform score keeping app with per-round score history.
 
-<img src="assets-stores/apple/iOS%20Phones%20-%206.7%20(Island)/01.png" height="500" alt="ScorePad game board">
+<img src="assets-stores/apple/iPhone%206.1/01-board.jpg" height="500" alt="ScorePad game board">
 
 ## Download
 
