@@ -97,19 +97,39 @@ const SLOTS = {
   },
 };
 
-// Device frame proportions, relative to canvas width.
+// Device frames. Width, top and bezel are fractions of the canvas.
+// Stacked frames run off the bottom edge by `crop` of their own height, so the
+// cut is always deliberate; `top` is the highest the frame may start and
+// `width` the widest it may be. Side frames sit fully inside, centred.
 const FRAMES = {
-  phone: { width: 0.68, top: 0.335, radius: 0.13, bezel: 0.022, island: true },
-  cover: { width: 0.64, top: 0.38, radius: 0.10, bezel: 0.020, island: false },
+  phone: { width: 0.68, top: 0.335, crop: 0.16, radius: 0.13, bezel: 0.022, island: true },
+  cover: { width: 0.64, top: 0.38, crop: 0.16, radius: 0.10, bezel: 0.020, island: false },
   wide: { width: 0.56, side: true, radius: 0.045, bezel: 0.008, island: false },
-  tall: { width: 0.76, top: 0.31, radius: 0.06, bezel: 0.012, island: false },
+  tall: { width: 0.76, top: 0.31, crop: 0.16, radius: 0.06, bezel: 0.012, island: false },
 };
 
-function template([w, h], frameKind, img, c) {
+// Pixel size of a PNG, read from its IHDR chunk.
+function pngSize(buf) {
+  return [buf.readUInt32BE(16), buf.readUInt32BE(20)];
+}
+
+function layout([w, h], f, [iw, ih]) {
+  const bez = w * f.bezel;
+  if (f.side) return { devW: w * f.width, bez, top: null };
+  // Height that puts the bottom `crop` of the frame below the canvas edge.
+  let devH = (h - h * f.top) / (1 - f.crop);
+  let devW = (devH - 2 * bez) * (iw / ih) + 2 * bez;
+  if (devW > w * f.width) {
+    devW = w * f.width;
+    devH = (devW - 2 * bez) * (ih / iw) + 2 * bez;
+  }
+  return { devW, bez, top: h - devH * (1 - f.crop) };
+}
+
+function template([w, h], frameKind, img, imgSize, c) {
   const f = FRAMES[frameKind];
   const u = (f.side ? w * 0.30 : Math.min(w, h)) / 100; // type scales with the text column
-  const devW = w * f.width;
-  const bez = w * f.bezel;
+  const { devW, bez, top } = layout([w, h], f, imgSize);
   const lines = c.lines
     .map((l, i) => `<span class="${i === c.hi ? 'hi' : ''}">${l}</span>`)
     .join('<br>');
@@ -139,7 +159,7 @@ function template([w, h], frameKind, img, c) {
   p { color: rgba(255,255,255,0.72); font-size: ${u * 3.6}px; line-height: 1.35; margin-top: ${u * 2.6}px; font-weight: 500; }
   .device {
     position: absolute; width: ${devW}px;
-    ${f.side ? `right: ${w * 0.04}px; top: 50%; transform: translateY(-50%);` : `left: ${(w - devW) / 2}px; top: ${h * f.top}px;`}
+    ${f.side ? `right: ${w * 0.04}px; top: 50%; transform: translateY(-50%);` : `left: ${(w - devW) / 2}px; top: ${top}px;`}
     padding: ${bez}px; background: #050505; border-radius: ${devW * f.radius}px;
     box-shadow: 0 0 0 ${u * 0.35}px #2c2c2e, 0 ${u * 4}px ${u * 10}px rgba(0,0,0,0.6);
   }
@@ -166,8 +186,9 @@ function template([w, h], frameKind, img, c) {
     fs.mkdirSync(dir, { recursive: true });
     const page = await browser.newPage({ viewport: { width: size[0], height: size[1] } });
     for (const [name, raw, copyKey] of shots) {
-      const img = 'data:image/png;base64,' + fs.readFileSync(path.join(RAW, raw)).toString('base64');
-      await page.setContent(template(size, frame, img, COPY[copyKey]), { waitUntil: 'load' });
+      const buf = fs.readFileSync(path.join(RAW, raw));
+      const img = 'data:image/png;base64,' + buf.toString('base64');
+      await page.setContent(template(size, frame, img, pngSize(buf), COPY[copyKey]), { waitUntil: 'load' });
       // JPEG avoids the alpha channel App Store Connect rejects; quality 95 is visually lossless.
       await page.screenshot({ path: path.join(dir, `${name}.jpg`), type: 'jpeg', quality: 95 });
       console.log(`${slot}/${name}.jpg`);
