@@ -2,6 +2,7 @@ import React from 'react';
 
 import { configureStore } from '@reduxjs/toolkit';
 import { fireEvent, render } from '@testing-library/react-native';
+import { StyleSheet } from 'react-native';
 import { Provider } from 'react-redux';
 
 import settingsReducer, { initialState as initialSettings } from '../../redux/SettingsSlice';
@@ -17,6 +18,11 @@ jest.mock('../components/AppInfo/RotatingIcon', () => () => null);
 jest.mock('expo-application', () => ({
     nativeApplicationVersion: '1.0.0',
     nativeBuildVersion: '1',
+}));
+
+let mockSafeAreaInsets = { top: 0, bottom: 0, left: 0, right: 0 };
+jest.mock('react-native-safe-area-context', () => ({
+    useSafeAreaInsets: () => mockSafeAreaInsets,
 }));
 
 const navigation = { setOptions: jest.fn(), goBack: jest.fn(), navigate: jest.fn() };
@@ -36,6 +42,20 @@ const renderScreen = (devMenuEnabled: boolean) => {
 };
 
 describe('AppSettingsScreen', () => {
+    beforeEach(() => {
+        jest.clearAllMocks();
+        mockSafeAreaInsets = { top: 0, bottom: 0, left: 0, right: 0 };
+    });
+
+    it('keeps sheet content inside horizontal safe areas', () => {
+        mockSafeAreaInsets = { top: 0, bottom: 0, left: 12, right: 96 };
+        const { screen } = renderScreen(false);
+
+        expect(StyleSheet.flatten(screen.getByTestId('settings-scroll-view').props.contentContainerStyle)).toEqual(
+            expect.objectContaining({ paddingLeft: 12, paddingRight: 96 })
+        );
+    });
+
     it('shows the Game Modes switch without the developer menu', () => {
         const { store, screen } = renderScreen(false);
 
