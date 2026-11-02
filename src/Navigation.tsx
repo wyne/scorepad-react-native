@@ -90,9 +90,8 @@ export const Navigation = () => {
     // board.
     const roundPickerInHeader = !useRoundPickerOutOfHeader();
     // With vertical bars (iPhone Duo), headers drop their background (see
-    // bareHeaderOptions). iOS also scrolls the list's header title away with
-    // the content, so that title moves into the list (see ListScreen) and the
-    // list's header collapses.
+    // bareHeaderOptions). The list's title is a large title in the list
+    // itself (see ListScreen), so there the list's header collapses.
     const verticalBars = useVerticalBarLayout();
     // Opaque headers (pushed screens) have the same problem: their background
     // starts below the strip and stops short of the vertical bar, so it reads
@@ -135,7 +134,11 @@ export const Navigation = () => {
                             options={{
                                 freezeOnBlur: true,
                                 orientation: 'portrait',
-                                title: 'ScorePad',
+                                // Shown as a large title in the list (see ListScreen), so
+                                // the header itself shows none. The title still names
+                                // the back button on screens pushed from here.
+                                title: 'Games',
+                                headerTitle: '',
                                 headerTransparent: isIOS,
                                 headerBlurEffect: isIOS ? 'systemChromeMaterial' : undefined,
                                 headerShadowVisible: isAndroid,
