@@ -33,6 +33,8 @@ SETS = {
         (1398, 2034),
         [
             ("01-board", "duo-cover.png", "Keep score\nwith it closed."),
+            ("02-dial", "duo-cover-dial.png", "Big rounds?\nSpin the dial."),
+            ("03-history", "duo-cover-history.png", "Every round,\nsaved."),
         ],
     ),
     "iPhone Duo inner (landscape)": (
