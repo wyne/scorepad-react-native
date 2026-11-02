@@ -4,11 +4,11 @@ import { useHeaderHeight } from '@react-navigation/elements';
 import { ParamListBase, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import * as Crypto from 'expo-crypto';
-import { Platform, StyleSheet, Text } from 'react-native';
+import { PixelRatio, Platform, StyleSheet, Text, View } from 'react-native';
 import Animated, { Easing, LinearTransition } from 'react-native-reanimated';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { selectGameIds } from '../../redux/GamesSlice';
+import { selectGameById, selectGameIds } from '../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { increaseAppOpens, setInstallId, setRollingGameCounter } from '../../redux/SettingsSlice';
 import { logEvent } from '../Analytics';
@@ -19,6 +19,7 @@ import { useVerticalBarLayout } from '../hooks/useExpandedGameLayout';
 import { useNewGameHeaderItems } from '../hooks/useNewGameMenu';
 import { useStoreReviewPrompt } from '../hooks/useStoreReviewPrompt';
 import { useTheme } from '../theme';
+import { timeAgo } from '../timeAgo';
 
 interface Props {
     navigation: NativeStackNavigationProp<ParamListBase, string, undefined>;
@@ -30,16 +31,22 @@ const ListScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     const devMenuEnabled = useAppSelector(state => state.settings.devMenuEnabled);
     const installId = useAppSelector(state => state.settings.installId);
     const gameIds = useAppSelector(state => selectGameIds(state));
+    // Games are kept newest first, so the first one is the latest.
+    const latestCreated = useAppSelector(state => {
+        const latestId = selectGameIds(state)[0];
+        return latestId === undefined ? undefined : selectGameById(state, latestId as string)?.dateCreated;
+    });
     const dispatch = useAppDispatch();
 
     const rollingGameCounter = useAppSelector(state => state.settings.rollingGameCounter);
     const headerHeight = useHeaderHeight();
     const listHeaderInset = Platform.OS === 'ios' ? headerHeight : 0;
     const insets = useSafeAreaInsets();
-    // With vertical bars (iPhone Duo), iOS scrolls the header title away with
-    // the content, so the title is part of the list and the header collapses
-    // (see Navigation). The new game button moves from the floating action
-    // button into the vertical bar, next to the other controls.
+    // The title is a large title at the top of the list, with a count of the
+    // games under it, rather than a title in the header (see Navigation).
+    // With vertical bars (iPhone Duo) the header collapses entirely, and the
+    // new game button moves from the floating action button into the
+    // vertical bar, next to the other controls.
     const verticalBars = useVerticalBarLayout();
     const listBottomInset = verticalBars
         ? insets.bottom + FAB_LIST_CLEARANCE
@@ -112,9 +119,17 @@ const ListScreen: React.FunctionComponent<Props> = ({ navigation }) => {
                 contentInsetAdjustmentBehavior="never"
                 scrollIndicatorInsets={{ top: listHeaderInset, bottom: listBottomInset }}
                 itemLayoutAnimation={LinearTransition.easing(Easing.ease)}
-                ListHeaderComponent={verticalBars
-                    ? <Text accessibilityRole="header" style={[styles.listTitle, { color: theme.text }]}>ScorePad</Text>
-                    : undefined}
+                ListHeaderComponent={
+                    <View testID="game-list-header" style={styles.listHeader}>
+                        <Text accessibilityRole="header" style={[styles.largeTitle, { color: theme.text }]}>Games</Text>
+                        {gameIds.length > 0 && (
+                            <Text testID="game-list-summary" style={[styles.summary, { color: theme.textSecondary }]}>
+                                {gameSummary(gameIds.length, latestCreated)}
+                            </Text>
+                        )}
+                        <View style={[styles.headerSeparator, { backgroundColor: theme.separator }]} />
+                    </View>
+                }
                 ListEmptyComponent={
                     <>
                         <Text style={{ textAlign: 'center', padding: 30, paddingBottom: 10, fontSize: 16, fontWeight: 'bold', color: theme.text }}>No Games</Text>
@@ -135,13 +150,34 @@ const ListScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     );
 };
 
+/** "3 games · latest 2h ago" */
+export function gameSummary(count: number, latestCreated: number | undefined): string {
+    const games = `${count} ${count === 1 ? 'game' : 'games'}`;
+
+    return latestCreated ? `${games} · latest ${timeAgo(latestCreated)}` : games;
+}
+
 const styles = StyleSheet.create({
-    // Matches the native header title it stands in for.
-    listTitle: {
-        fontSize: 17,
-        fontWeight: '600',
+    listHeader: {
+        paddingTop: 4,
+    },
+    // Matches an iOS large navigation title.
+    largeTitle: {
+        fontSize: 34,
+        lineHeight: 41,
+        fontWeight: '700',
         paddingHorizontal: 16,
-        paddingVertical: 12,
+    },
+    summary: {
+        fontSize: 15,
+        marginTop: 2,
+        paddingHorizontal: 16,
+    },
+    // Lines up with the separators between the rows below it.
+    headerSeparator: {
+        marginTop: 12,
+        marginLeft: 16,
+        height: PixelRatio.roundToNearestPixel(1),
     },
 });
 

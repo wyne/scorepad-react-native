@@ -12,7 +12,7 @@ import playersReducer from '../../redux/PlayersSlice';
 import settingsReducer from '../../redux/SettingsSlice';
 import { FAB_BOTTOM_MARGIN, FAB_EDGE_MARGIN, FAB_LIST_CLEARANCE, FAB_SIZE } from '../components/FloatingActionButton';
 
-import ListScreen from './ListScreen';
+import ListScreen, { gameSummary } from './ListScreen';
 
 // Mock dependencies
 jest.mock('@react-navigation/elements', () => ({
@@ -182,7 +182,7 @@ describe('ListScreen', () => {
         expect(getByText('Tap the + button to create a new game.')).toBeTruthy();
     });
 
-    it('moves the title into the list and new game into the header with vertical bars', () => {
+    it('shows a large title in the list, and moves new game into the header with vertical bars', () => {
         const createStore = () => createMockStore({
             settings: { appOpens: 1, devMenuEnabled: false, installId: 'existing-id', rollingGameCounter: 0 },
             games: { entities: {}, ids: [] },
@@ -191,13 +191,13 @@ describe('ListScreen', () => {
 
         mockVerticalBars = false;
         const regular = render(<Provider store={createStore()}><ListScreen navigation={mockNavigation} /></Provider>);
-        expect(regular.queryByText('ScorePad')).toBeNull();
+        expect(regular.getByText('Games')).toBeTruthy();
         expect(regular.getByTestId('add-game-button-container')).toBeTruthy();
         regular.unmount();
 
         mockVerticalBars = true;
         const duo = render(<Provider store={createStore()}><ListScreen navigation={mockNavigation} /></Provider>);
-        expect(duo.getByText('ScorePad')).toBeTruthy();
+        expect(duo.getByText('Games')).toBeTruthy();
         expect(duo.queryByTestId('add-game-button-container')).toBeNull();
         expect(mockNavigation.setOptions).toHaveBeenCalledWith(
             expect.objectContaining({ unstable_headerRightItems: expect.any(Function) })
@@ -232,6 +232,40 @@ describe('ListScreen', () => {
         expect(getByTestId('game-list-item-game-1')).toBeTruthy();
         expect(getByTestId('game-list-item-game-2')).toBeTruthy();
         expect(queryByText('No Games')).toBeNull();
+    });
+
+    it('counts the games under the title, and leaves the count out with none', () => {
+        const store = createMockStore({
+            settings: { appOpens: 1, devMenuEnabled: false, installId: 'existing-id', rollingGameCounter: 2 },
+            games: {
+                entities: { 'game-1': mockGame1, 'game-2': mockGame2 },
+                ids: ['game-1', 'game-2'],
+            },
+            players: {
+                entities: mockPlayers,
+                ids: ['player-1', 'player-2', 'player-3', 'player-4'],
+            },
+        });
+        const withGames = render(<Provider store={store}><ListScreen navigation={mockNavigation} /></Provider>);
+        expect(withGames.getByTestId('game-list-summary').props.children).toMatch(/^2 games · latest /);
+        withGames.unmount();
+
+        const empty = render(
+            <Provider store={createMockStore({
+                settings: { appOpens: 1, devMenuEnabled: false, installId: 'existing-id', rollingGameCounter: 0 },
+                games: { entities: {}, ids: [] },
+                players: { entities: {}, ids: [] },
+            })}>
+                <ListScreen navigation={mockNavigation} />
+            </Provider>
+        );
+        expect(empty.getByText('Games')).toBeTruthy();
+        expect(empty.queryByTestId('game-list-summary')).toBeNull();
+    });
+
+    it('summarizes the game count and the latest game', () => {
+        expect(gameSummary(1, undefined)).toBe('1 game');
+        expect(gameSummary(3, Date.now() - 2 * 3600000)).toBe('3 games · latest 2h ago');
     });
 
     it('should generate and set installId when not present', async () => {
