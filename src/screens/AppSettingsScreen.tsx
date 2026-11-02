@@ -4,6 +4,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ParamListBase } from '@react-navigation/routers';
 import * as Application from 'expo-application';
 import { Alert, Linking, Platform, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { exportBackup, importBackup } from '../../redux/backup';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
@@ -60,6 +61,7 @@ const DisclosureRow = ({ label, onPress, testID }: { label: string; onPress: () 
 
 const AppSettingsScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     const theme = useTheme();
+    const insets = useSafeAreaInsets();
 
     useLayoutEffect(() => {
         navigation.setOptions({
@@ -186,9 +188,14 @@ const AppSettingsScreen: React.FunctionComponent<Props> = ({ navigation }) => {
 
     return (
         <ScrollView
-            contentContainerStyle={{ paddingBottom: 50 }}
+            contentContainerStyle={{
+                paddingBottom: 50,
+                paddingLeft: insets.left,
+                paddingRight: insets.right,
+            }}
             overScrollMode="always"
             style={{ backgroundColor: theme.background, flex: 1 }}
+            testID="settings-scroll-view"
         >
             <View style={[styles.iconWrapper, { alignItems: 'center' }]}>
                 <RotatingIcon />
