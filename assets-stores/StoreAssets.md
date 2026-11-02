@@ -7,8 +7,8 @@ App Store screenshots live here. They are excluded from EAS builds via `.easigno
 | Path | Contents |
 | --- | --- |
 | `raw/` | Unedited simulator captures (no captions) |
-| `render.py` | Adds captions and renders every slot from `raw/` |
-| `apple/<slot>/NN-name.png` | Final files to upload to App Store Connect |
+| `render.cjs` | HTML/CSS caption template; renders every slot from `raw/` with Playwright |
+| `apple/<slot>/NN-name.jpg` | Final files to upload to App Store Connect |
 | `feature-graphic.png` | Google Play feature graphic (1024×500) |
 
 ## Slots
@@ -26,6 +26,7 @@ Spec: https://developer.apple.com/help/app-store-connect/reference/app-informati
 
 1. Load sample data from the in-app dev menu and capture on the simulator
    (`xcrun simctl io booted screenshot raw/<name>.png`), or use the e2e flow in `docs/build-ios.md`.
-2. Edit captions or the shot list in `render.py`.
-3. `pip install pillow && python3 assets-stores/render.py`
+   For the iPhone Duo outer display, add `--display=<outer display id>`; without it simctl captures the inner display.
+2. Edit captions (`COPY`), the shot list (`SLOTS`) or the look (`template()`) in `render.cjs`.
+3. `npm i --no-save playwright && npx playwright install chromium && node assets-stores/render.cjs`
 4. Upload the files in `apple/` to App Store Connect by hand.
