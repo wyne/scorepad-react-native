@@ -97,7 +97,12 @@ export interface AnalyticsEventParams {
     menu_edit: { round_count: number; player_count: number };
     about_gestures: Record<string, never>;
     app_info: Record<string, never>;
-    share_image: Record<string, never>;
+    share_image: {
+        format: 'scoreboard' | 'standings' | 'winner';
+        rounds_shown: boolean;
+        details_shown: boolean;
+    };
+    share_text: { rounds_shown: boolean; details_shown: boolean };
 
     // ── App-level ───────────────────────────────────────────────────────────
     game_list: {

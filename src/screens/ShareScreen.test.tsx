@@ -3,6 +3,7 @@ import React from 'react';
 import { configureStore } from '@reduxjs/toolkit';
 import { fireEvent, render, waitFor } from '@testing-library/react-native';
 import * as Sharing from 'expo-sharing';
+import { Share } from 'react-native';
 import { captureRef } from 'react-native-view-shot';
 import { Provider } from 'react-redux';
 
@@ -28,32 +29,6 @@ jest.mock('expo-font', () => ({
     isLoaded: () => true,
     loadAsync: () => Promise.resolve(),
 }));
-
-// Mock the components that ShareScreen uses
-jest.mock('../components/ScoreLog/PlayerNameColumn', () => {
-    return function MockPlayerNameColumn() {
-        const { View, Text } = jest.requireActual('react-native');
-        return <View testID="player-name-column"><Text>PlayerNameColumn</Text></View>;
-    };
-});
-
-jest.mock('../components/ScoreLog/RoundScoreColumn', () => {
-    return function MockRoundScoreColumn({ round, isCurrentRound, disabled }: { round: number; isCurrentRound: boolean; disabled: boolean }) {
-        const { View, Text } = jest.requireActual('react-native');
-        return (
-            <View testID={`round-score-column-${round}`}>
-                <Text>Round {round} - Current: {isCurrentRound.toString()} - Disabled: {disabled.toString()}</Text>
-            </View>
-        );
-    };
-});
-
-jest.mock('../components/ScoreLog/TotalScoreColumn', () => {
-    return function MockTotalScoreColumn() {
-        const { View, Text } = jest.requireActual('react-native');
-        return <View testID="total-score-column"><Text>TotalScoreColumn</Text></View>;
-    };
-});
 
 // Mock navigation
 const mockNavigation = {
@@ -164,327 +139,131 @@ describe('ShareScreen', () => {
         expect(toJSON()).toBeNull();
     });
 
-    it('should render share screen with game data when current game exists', () => {
+    const renderWithGame = (game = mockGame) => {
         const store = createMockStore({
-            settings: {
-                currentGameId: 'game-1',
-            },
-            games: {
-                entities: {
-                    'game-1': mockGame,
-                },
-                ids: ['game-1'],
-            },
-            players: {
-                entities: mockPlayers,
-                ids: ['player-1', 'player-2'],
-            },
+            settings: { currentGameId: 'game-1' },
+            games: { entities: { 'game-1': game }, ids: ['game-1'] },
+            players: { entities: mockPlayers, ids: ['player-1', 'player-2'] },
         });
-
-        const { getByText, getByTestId } = render(
+        return render(
             <Provider store={store}>
                 <ShareScreen navigation={mockNavigation} />
             </Provider>
         );
+    };
 
-        // Check that game title is displayed
+    it('previews the scoreboard with standings, leader and rounds', () => {
+        const { getByText, getAllByText, getByTestId } = renderWithGame();
+
         expect(getByText('Test Game')).toBeTruthy();
-        
-        // Check that creation date is displayed
-        expect(getByText(/Created:/)).toBeTruthy();
-        
-        // Check that instructions text is displayed
-        expect(getByText(/You can edit the game title or player names before sharing/)).toBeTruthy();
-        
-        // Check that edit button is displayed
-        expect(getByText(' Edit before sharing')).toBeTruthy();
-        
-        // Check that share button is displayed
-        expect(getByText(' Share as image...')).toBeTruthy();
-        
-        // Check that score columns are rendered
-        expect(getByTestId('player-name-column')).toBeTruthy();
-        expect(getByTestId('total-score-column')).toBeTruthy();
+        expect(getByText(/3 rounds · 2 players/)).toBeTruthy();
+        expect(getByText('Player 2 leads with 50')).toBeTruthy();
+        expect(getByText('+5')).toBeTruthy();
+        expect(getAllByText('Player 1').length).toBeGreaterThan(0);
+        expect(getByTestId('share-scoreboard')).toBeTruthy();
+        expect(getByTestId('share-round-0')).toBeTruthy();
+        expect(getByTestId('share-round-2')).toBeTruthy();
     });
 
-    it('should add bottom scroll padding below the share button', () => {
-        const store = createMockStore({
-            settings: {
-                currentGameId: 'game-1',
-            },
-            games: {
-                entities: {
-                    'game-1': mockGame,
-                },
-                ids: ['game-1'],
-            },
-            players: {
-                entities: mockPlayers,
-                ids: ['player-1', 'player-2'],
-            },
-        });
-
-        const { getByTestId } = render(
-            <Provider store={store}>
-                <ShareScreen navigation={mockNavigation} />
-            </Provider>
-        );
+    it('leaves space below the content for the share buttons', () => {
+        const { getByTestId } = renderWithGame();
 
         expect(getByTestId('share-screen-scroll').props.contentContainerStyle).toEqual({
-            paddingBottom: 114,
+            paddingBottom: 130,
         });
     });
 
-    it('should render correct number of round columns based on roundTotal', () => {
-        const store = createMockStore({
-            settings: {
-                currentGameId: 'game-1',
-            },
-            games: {
-                entities: {
-                    'game-1': mockGame,
-                },
-                ids: ['game-1'],
-            },
-            players: {
-                entities: mockPlayers,
-                ids: ['player-1', 'player-2'],
-            },
-        });
+    it('hides round columns and details when toggled off', () => {
+        const { getByTestId, queryByTestId, queryByText } = renderWithGame();
 
-        const { getByTestId } = render(
-            <Provider store={store}>
-                <ShareScreen navigation={mockNavigation} />
-            </Provider>
-        );
+        fireEvent(getByTestId('share-toggle-rounds'), 'valueChange', false);
+        fireEvent(getByTestId('share-toggle-details'), 'valueChange', false);
 
-        // Should render 3 round columns (roundTotal = 3)
-        expect(getByTestId('round-score-column-0')).toBeTruthy();
-        expect(getByTestId('round-score-column-1')).toBeTruthy();
-        expect(getByTestId('round-score-column-2')).toBeTruthy();
+        expect(queryByTestId('share-round-0')).toBeNull();
+        expect(queryByText(/3 rounds · 2 players/)).toBeNull();
     });
 
-    it('should navigate to EditGame screen when edit button is pressed', () => {
-        const store = createMockStore({
-            settings: {
-                currentGameId: 'game-1',
-            },
-            games: {
-                entities: {
-                    'game-1': mockGame,
-                },
-                ids: ['game-1'],
-            },
-            players: {
-                entities: mockPlayers,
-                ids: ['player-1', 'player-2'],
-            },
-        });
+    it('switches between formats', () => {
+        const { getByTestId, queryByTestId, getByText } = renderWithGame();
 
-        const { getByText } = render(
-            <Provider store={store}>
-                <ShareScreen navigation={mockNavigation} />
-            </Provider>
-        );
+        fireEvent.press(getByTestId('share-format-standings'));
+        expect(getByTestId('share-standings')).toBeTruthy();
+        expect(queryByTestId('share-scoreboard')).toBeNull();
 
-        const editButton = getByText(' Edit before sharing');
-        fireEvent.press(editButton);
+        fireEvent.press(getByTestId('share-format-winner'));
+        expect(getByText('by 5 points')).toBeTruthy();
+    });
+
+    it('opens the editor from the edit row', () => {
+        const { getByText } = renderWithGame();
+
+        fireEvent.press(getByText('Edit title & names'));
 
         expect(mockNavigation.navigate).toHaveBeenCalledWith('EditGame', { source: 'share_screen' });
     });
 
-    it('should capture and share image when share button is pressed', async () => {
+    it('captures and shares the card as an image', async () => {
         const mockCaptureRef = jest.mocked(captureRef);
         const mockShareAsync = jest.mocked(Sharing.shareAsync);
         const mockLogEvent = jest.mocked(Analytics.logEvent);
-
-        const mockUri = 'file://test-image.png';
-        mockCaptureRef.mockResolvedValue(mockUri);
+        mockCaptureRef.mockResolvedValue('file://test-image.png');
         mockShareAsync.mockResolvedValue(undefined);
         mockLogEvent.mockResolvedValue();
 
-        const store = createMockStore({
-            settings: {
-                currentGameId: 'game-1',
-            },
-            games: {
-                entities: {
-                    'game-1': mockGame,
-                },
-                ids: ['game-1'],
-            },
-            players: {
-                entities: mockPlayers,
-                ids: ['player-1', 'player-2'],
-            },
-        });
-
-        const { getByText } = render(
-            <Provider store={store}>
-                <ShareScreen navigation={mockNavigation} />
-            </Provider>
-        );
-
-        const shareButton = getByText(' Share as image...');
-        fireEvent.press(shareButton);
+        const { getByText } = renderWithGame();
+        fireEvent.press(getByText('Share Image'));
 
         await waitFor(() => {
-            expect(mockCaptureRef).toHaveBeenCalledWith(
-                expect.anything(),
-                {
-                    result: 'tmpfile',
-                    quality: 1,
-                    format: 'png',
-                    fileName: undefined,
-                }
-            );
+            expect(mockCaptureRef).toHaveBeenCalledWith(expect.anything(), {
+                result: 'tmpfile',
+                quality: 1,
+                format: 'png',
+                fileName: undefined,
+            });
         });
-
         await waitFor(() => {
-            expect(mockShareAsync).toHaveBeenCalledWith(
-                mockUri,
-                {
-                    mimeType: 'image/png',
-                    dialogTitle: 'Share Scoreboard',
-                    UTI: 'image/png',
-                }
-            );
+            expect(mockShareAsync).toHaveBeenCalledWith('file://test-image.png', {
+                mimeType: 'image/png',
+                dialogTitle: 'Share Scoreboard',
+                UTI: 'image/png',
+            });
         });
-
-        await waitFor(() => {
-            expect(mockLogEvent).toHaveBeenCalledWith('share_image');
+        expect(mockLogEvent).toHaveBeenCalledWith('share_image', {
+            format: 'scoreboard', rounds_shown: true, details_shown: true,
         });
     });
 
-    it('should handle captureRef errors gracefully', async () => {
-        const mockLogEvent = jest.mocked(Analytics.logEvent);
-        mockLogEvent.mockResolvedValue();
+    it('does not log a share when capturing fails', async () => {
+        const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+        jest.mocked(captureRef).mockRejectedValue(new Error('nope'));
 
-        const store = createMockStore({
-            settings: {
-                currentGameId: 'game-1',
-            },
-            games: {
-                entities: {
-                    'game-1': mockGame,
-                },
-                ids: ['game-1'],
-            },
-            players: {
-                entities: mockPlayers,
-                ids: ['player-1', 'player-2'],
-            },
-        });
+        const { getByText } = renderWithGame();
+        fireEvent.press(getByText('Share Image'));
 
-        const { getByText } = render(
-            <Provider store={store}>
-                <ShareScreen navigation={mockNavigation} />
-            </Provider>
-        );
+        await waitFor(() => expect(errorSpy).toHaveBeenCalled());
+        expect(Analytics.logEvent).not.toHaveBeenCalled();
+        errorSpy.mockRestore();
+    });
 
-        const shareButton = getByText(' Share as image...');
-        fireEvent.press(shareButton);
+    it('shares the scoreboard as text', async () => {
+        const shareSpy = jest.spyOn(Share, 'share').mockResolvedValue({ action: 'sharedAction', activityType: undefined });
 
-        // Should handle errors gracefully
+        const { getByText } = renderWithGame();
+        fireEvent.press(getByText('Share Text'));
+
+        await waitFor(() => expect(shareSpy).toHaveBeenCalled());
+        const message = shareSpy.mock.calls[0][0] as { message: string };
+        expect(message.message).toContain('1. Player 2 – 50');
+        expect(message.message).toContain('Rounds');
         await waitFor(() => {
-            expect(mockLogEvent).toHaveBeenCalledWith('share_image');
+            expect(Analytics.logEvent).toHaveBeenCalledWith('share_text', { rounds_shown: true, details_shown: true });
         });
     });
 
-    it('should handle game with zero rounds', () => {
-        const gameWithNoRounds = {
-            ...mockGame,
-            roundTotal: 0,
-        };
+    it('handles a game with zero rounds', () => {
+        const { getByText, queryByTestId } = renderWithGame({ ...mockGame, roundTotal: 0 });
 
-        const store = createMockStore({
-            settings: {
-                currentGameId: 'game-1',
-            },
-            games: {
-                entities: {
-                    'game-1': gameWithNoRounds,
-                },
-                ids: ['game-1'],
-            },
-            players: {
-                entities: mockPlayers,
-                ids: ['player-1', 'player-2'],
-            },
-        });
-
-        const { getByText, getByTestId, queryByTestId } = render(
-            <Provider store={store}>
-                <ShareScreen navigation={mockNavigation} />
-            </Provider>
-        );
-
-        // Should still render the basic components
         expect(getByText('Test Game')).toBeTruthy();
-        expect(getByTestId('player-name-column')).toBeTruthy();
-        expect(getByTestId('total-score-column')).toBeTruthy();
-        
-        // Should not render any round columns
-        expect(queryByTestId('round-score-column-0')).toBeNull();
-    });
-
-    it('should format date correctly in the display', () => {
-        const store = createMockStore({
-            settings: {
-                currentGameId: 'game-1',
-            },
-            games: {
-                entities: {
-                    'game-1': mockGame,
-                },
-                ids: ['game-1'],
-            },
-            players: {
-                entities: mockPlayers,
-                ids: ['player-1', 'player-2'],
-            },
-        });
-
-        const { getByText } = render(
-            <Provider store={store}>
-                <ShareScreen navigation={mockNavigation} />
-            </Provider>
-        );
-
-        // The date should be formatted using toLocaleDateString and toLocaleTimeString
-        const expectedDate = new Date(mockGame.dateCreated).toLocaleDateString();
-        const expectedTime = new Date(mockGame.dateCreated).toLocaleTimeString();
-        
-        expect(getByText(new RegExp(expectedDate))).toBeTruthy();
-        expect(getByText(new RegExp(expectedTime))).toBeTruthy();
-    });
-
-    it('should pass correct props to RoundScoreColumn components', () => {
-        const store = createMockStore({
-            settings: {
-                currentGameId: 'game-1',
-            },
-            games: {
-                entities: {
-                    'game-1': mockGame,
-                },
-                ids: ['game-1'],
-            },
-            players: {
-                entities: mockPlayers,
-                ids: ['player-1', 'player-2'],
-            },
-        });
-
-        const { getByText } = render(
-            <Provider store={store}>
-                <ShareScreen navigation={mockNavigation} />
-            </Provider>
-        );
-
-        // Check that RoundScoreColumn components receive correct props
-        expect(getByText('Round 0 - Current: false - Disabled: true')).toBeTruthy();
-        expect(getByText('Round 1 - Current: false - Disabled: true')).toBeTruthy();
-        expect(getByText('Round 2 - Current: false - Disabled: true')).toBeTruthy();
+        expect(queryByTestId('share-round-0')).toBeNull();
     });
 });
