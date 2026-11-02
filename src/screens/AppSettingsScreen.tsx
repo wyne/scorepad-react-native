@@ -20,6 +20,44 @@ interface Props {
     navigation: NativeStackNavigationProp<ParamListBase, string, undefined>;
 }
 
+// These live outside the screen on purpose. Declared inside it, each render
+// made new component types, so every row remounted whenever a setting
+// changed. On iOS the remounted switches reused native views from other rows
+// and animated their old state, so flipping one switch showed another flip too.
+const Section = ({ children, title }: { children: React.ReactNode, title: string; }) => {
+    const theme = useTheme();
+    return (
+        <>
+            <SectionLabel inset={40}>{title}</SectionLabel>
+            <View style={[styles.section, { backgroundColor: theme.backgroundSecondary }]}>
+                {children}
+            </View>
+        </>
+    );
+};
+const SectionItem = ({ children }: { children: React.ReactNode; }) => (
+    <View style={styles.sectionItem}>
+        {children}
+    </View>
+);
+const SectionItemText = ({ text }: { text: string; }) => {
+    const theme = useTheme();
+    return <Text style={[styles.sectionItemText, { color: theme.text }]}>{text}</Text>;
+};
+const SectionSeparator = () => {
+    const theme = useTheme();
+    return <View style={{ height: 1, backgroundColor: theme.separator }} />;
+};
+const DisclosureRow = ({ label, onPress, testID }: { label: string; onPress: () => void; testID?: string; }) => {
+    const theme = useTheme();
+    return (
+        <TouchableOpacity testID={testID} style={styles.disclosureRow} onPress={onPress}>
+            <Text style={[styles.disclosureLabel, { color: theme.text }]}>{label}</Text>
+            <Text style={[styles.disclosureArrow, { color: theme.separator }]}>›</Text>
+        </TouchableOpacity>
+    );
+};
+
 const AppSettingsScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     const theme = useTheme();
 
@@ -33,31 +71,6 @@ const AppSettingsScreen: React.FunctionComponent<Props> = ({ navigation }) => {
             ),
         });
     }, [navigation, theme.tint]);
-    const Section = ({ children, title }: { children: React.ReactNode, title: string; }) => (
-        <>
-            <SectionLabel inset={40}>{title}</SectionLabel>
-            <View style={[styles.section, { backgroundColor: theme.backgroundSecondary }]}>
-                {children}
-            </View>
-        </>
-    );
-    const SectionItem = ({ children }: { children: React.ReactNode; }) => (
-        <View style={styles.sectionItem}>
-            {children}
-        </View>
-    );
-    const SectionItemText = ({ text }: { text: string; }) => (
-        <Text style={[styles.sectionItemText, { color: theme.text }]}>{text}</Text>
-    );
-    const SectionSeparator = () => (
-        <View style={{ height: 1, backgroundColor: theme.separator }} />
-    );
-    const DisclosureRow = ({ label, onPress, testID }: { label: string; onPress: () => void; testID?: string; }) => (
-        <TouchableOpacity testID={testID} style={styles.disclosureRow} onPress={onPress}>
-            <Text style={[styles.disclosureLabel, { color: theme.text }]}>{label}</Text>
-            <Text style={[styles.disclosureArrow, { color: theme.separator }]}>›</Text>
-        </TouchableOpacity>
-    );
     const buildNumber = Application.nativeBuildVersion;
     const appVersion = Application.nativeApplicationVersion;
 
@@ -204,11 +217,21 @@ const AppSettingsScreen: React.FunctionComponent<Props> = ({ navigation }) => {
                     <View style={styles.labelRow}>
                         {isUnseen && <View style={[styles.featureDot, { backgroundColor: theme.warning }]} />}
                         <SectionItemText text="Keep Screen Awake" />
-                            <View style={[styles.betaPill, { backgroundColor: theme.separator }]}>
+                        <View style={[styles.betaPill, { backgroundColor: theme.separator }]}>
                             <Text style={[styles.betaPillText, { color: theme.text }]}>Beta</Text>
                         </View>
                     </View>
                     <Switch onValueChange={toggleKeepAwake} value={keepScreenAwake} ios_backgroundColor={theme.separator} />
+                </SectionItem>
+                <SectionSeparator />
+                <SectionItem>
+                    <View style={styles.labelRow}>
+                        <SectionItemText text="Game Modes" />
+                        <View style={[styles.betaPill, { backgroundColor: theme.separator }]}>
+                            <Text style={[styles.betaPillText, { color: theme.text }]}>Beta</Text>
+                        </View>
+                    </View>
+                    <Switch testID="game-modes-switch" onValueChange={toggleGameModes} value={gameModesEnabled} ios_backgroundColor={theme.separator} />
                 </SectionItem>
             </Section>
 
@@ -236,16 +259,6 @@ const AppSettingsScreen: React.FunctionComponent<Props> = ({ navigation }) => {
 
             {devMenuEnabled && (
                 <Section title="Developer">
-                    <SectionItem>
-                        <View style={styles.labelRow}>
-                            <SectionItemText text="Game Modes" />
-                            <View style={[styles.betaPill, { backgroundColor: theme.separator }]}>
-                                <Text style={[styles.betaPillText, { color: theme.text }]}>Beta</Text>
-                            </View>
-                        </View>
-                        <Switch testID="game-modes-switch" onValueChange={toggleGameModes} value={gameModesEnabled} ios_backgroundColor={theme.separator} />
-                    </SectionItem>
-                    <SectionSeparator />
                     <DisclosureRow label="Reset Feature Notifications" onPress={() => {
                         Alert.alert(
                             'Reset Feature Notifications',
