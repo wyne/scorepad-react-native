@@ -33,4 +33,17 @@ describe('PlayerWinnerLabel', () => {
             ])
         );
     });
+
+    it('should tint the tab with the font color', () => {
+        const { getByText } = render(
+            <PlayerWinnerLabel fontColor="#FFFFFF" enabled={true} />
+        );
+
+        const tab = getByText('WINNER').parent?.parent;
+        expect(tab?.props.style).toEqual(
+            expect.arrayContaining([
+                expect.objectContaining({ backgroundColor: '#FFFFFF29' }),
+            ])
+        );
+    });
 });
