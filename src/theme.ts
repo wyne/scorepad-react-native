@@ -1,4 +1,6 @@
-import { useColorScheme } from 'react-native';
+import { useEffect } from 'react';
+
+import { Appearance, useColorScheme } from 'react-native';
 
 import { useAppSelector } from '../redux/hooks';
 
@@ -73,6 +75,19 @@ const darkColors: ThemeColors = {
   badgeBlue: '#4DA6E8',
   badgeRed: '#E07070',
 };
+
+/**
+ * Keep native iOS/Android controls in the same appearance as the app theme.
+ * Without this, an in-app Light override on a dark device leaves navigation
+ * buttons and other native materials using the device's dark appearance.
+ */
+export function useSyncNativeAppearance(): void {
+  const preference = useAppSelector(state => state.settings.colorScheme);
+
+  useEffect(() => {
+    Appearance.setColorScheme(preference === 'system' ? 'auto' : preference);
+  }, [preference]);
+}
 
 export function useTheme(): ThemeColors {
   const preference = useAppSelector(state => state.settings.colorScheme);

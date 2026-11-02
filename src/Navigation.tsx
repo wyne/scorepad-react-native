@@ -23,7 +23,7 @@ import { useRoundPickerOutOfHeader, useVerticalBarLayout } from './hooks/useExpa
 import EditPlayerScreen from './screens/EditPlayerScreen';
 import ScoringRulesScreen from './screens/ScoringRulesScreen';
 import ShareScreen from './screens/ShareScreen';
-import { useTheme } from './theme';
+import { useSyncNativeAppearance, useTheme } from './theme';
 
 export type RootStackParamList = {
     List: undefined;
@@ -70,6 +70,7 @@ const collapsedHeaderOptions: NativeStackNavigationOptions = {
 
 export const Navigation = () => {
     useAnalyticsUserProperties();
+    useSyncNativeAppearance();
     const navigationRef = useNavigationContainerRef<RootStackParamList>();
     const theme = useTheme();
     const isAndroid = Platform.OS === 'android';
