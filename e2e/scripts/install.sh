@@ -35,6 +35,8 @@ for UDID in "${UDIDS[@]}"; do
 done
 
 for UDID in "${UDIDS[@]}"; do
+  echo "  → resetting app data on $UDID"
+  xcrun simctl uninstall "$UDID" com.wyne.scorepad 2>/dev/null || true
   echo "  → installing on $UDID"
   xcrun simctl install "$UDID" "$APP"
 done
