@@ -103,7 +103,13 @@ export interface AnalyticsEventParams {
         details_shown: boolean;
         result_shown: boolean;
     };
-    share_text: { rounds_shown: boolean; details_shown: boolean };
+    share_text: {
+        format: 'scoreboard' | 'standings' | 'winner';
+        rounds_shown: boolean;
+        details_shown: boolean;
+        result_shown: boolean;
+    };
+    save_image: { format: 'scoreboard' | 'standings' | 'winner' };
 
     // ── App-level ───────────────────────────────────────────────────────────
     game_list: {

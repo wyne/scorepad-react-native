@@ -64,6 +64,11 @@ describe('describeResult', () => {
         expect(result.margin).toBeUndefined();
     });
 
+    it('crowns nobody when a game ends without picking winners', () => {
+        const g = game({ locked: true, winnerIds: [] });
+        expect(describeResult(g, buildShareRows(g, players))).toEqual({ winnerIds: [], headline: 'Final scores' });
+    });
+
     it('handles a game without players', () => {
         expect(describeResult(game({ playerIds: [] }), [])).toEqual({ winnerIds: [], headline: '' });
     });
@@ -79,7 +84,10 @@ describe('describeGame', () => {
 describe('buildShareText', () => {
     it('lists standings and round scores', () => {
         const g = game();
-        const text = buildShareText(g, buildShareRows(g, players), { showRounds: true, showDetails: false });
+        const rows = buildShareRows(g, players);
+        const text = buildShareText(g, rows, describeResult(g, rows), {
+            format: 'scoreboard', showRounds: true, showDetails: false, showResult: false,
+        });
         expect(text).toBe([
             'Scrabble',
             '',
@@ -96,8 +104,36 @@ describe('buildShareText', () => {
 
     it('leaves out rounds and adds details when asked', () => {
         const g = game();
-        const text = buildShareText(g, buildShareRows(g, players), { showRounds: false, showDetails: true });
+        const rows = buildShareRows(g, players);
+        const text = buildShareText(g, rows, describeResult(g, rows), {
+            format: 'scoreboard', showRounds: false, showDetails: true, showResult: false,
+        });
         expect(text).not.toContain('Rounds');
         expect(text.split('\n')[1]).toContain('3 rounds');
+    });
+
+    it('follows the format and result options', () => {
+        const g = game({ locked: true, winnerIds: ['a'] });
+        const rows = buildShareRows(g, players);
+        const result = describeResult(g, rows);
+
+        const standings = buildShareText(g, rows, result, {
+            format: 'standings', showRounds: true, showDetails: false, showResult: true,
+        });
+        expect(standings).toContain('Ann wins with 16');
+        expect(standings).toContain('2. Ann – 16 🏆');
+        expect(standings).not.toContain('Rounds');
+
+        const noResult = buildShareText(g, rows, result, {
+            format: 'standings', showRounds: false, showDetails: false, showResult: false,
+        });
+        expect(noResult).not.toContain('wins');
+        expect(noResult).not.toContain('🏆');
+
+        // The Winner format always names the winner.
+        const winner = buildShareText(g, rows, result, {
+            format: 'winner', showRounds: false, showDetails: false, showResult: false,
+        });
+        expect(winner).toContain('Ann wins with 16');
     });
 });

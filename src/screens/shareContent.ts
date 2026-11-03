@@ -59,15 +59,18 @@ const joinNames = (names: string[]): string => {
 
 /**
  * Who won a finished game (the winners picked when it ended), or who leads one
- * still going.
+ * still going. A game finished without picking winners has none: its scores
+ * are final, and the score leader isn't crowned in their place.
  */
 export const describeResult = (game: GameState, rows: ShareRow[]): ShareResult => {
     if (rows.length === 0) return { winnerIds: [], headline: '' };
 
-    const finished = !!game.locked && (game.winnerIds?.length ?? 0) > 0;
+    const finished = !!game.locked;
     const winnerIds = finished
         ? rows.filter(row => game.winnerIds?.includes(row.id)).map(row => row.id)
         : leadingPlayerIds(game.scoring, rows);
+    if (winnerIds.length === 0) return { winnerIds: [], headline: 'Final scores' };
+
     const winners = rows.filter(row => winnerIds.includes(row.id));
     const names = joinNames(winners.map(row => row.name));
     const total = winners[0]?.total ?? 0;
@@ -97,18 +100,41 @@ export const describeGame = (game: GameState): string => {
     return `${date} · ${rounds} · ${players}`;
 };
 
-/** The scoreboard as plain text, for pasting into a chat. */
+export interface ShareOptions {
+    format: ShareFormat;
+    showRounds: boolean;
+    showDetails: boolean;
+    showResult: boolean;
+}
+
+/**
+ * The share card as plain text, for pasting into a chat: the same format and
+ * options as the image. Winners are marked in the standings, so a winner
+ * picked by hand shows even when they aren't first on points.
+ */
 export const buildShareText = (
     game: GameState,
     rows: ShareRow[],
-    options: { showRounds: boolean; showDetails: boolean },
+    result: ShareResult,
+    options: ShareOptions,
 ): string => {
     const lines = [game.title];
     if (options.showDetails) lines.push(describeGame(game));
-    lines.push('');
-    rows.forEach(row => lines.push(`${row.rank}. ${row.name} – ${row.total}`));
 
-    if (options.showRounds && game.roundTotal > 1) {
+    // The Winner card is the result, so it always leads with it.
+    const showResult = options.format === 'winner' || options.showResult;
+    if (showResult && result.headline !== '') {
+        const margin = result.margin != null ? ` (+${result.margin})` : '';
+        lines.push('', `${result.headline}${margin}`);
+    }
+
+    lines.push('');
+    rows.forEach(row => {
+        const crown = showResult && result.winnerIds.includes(row.id) ? ' 🏆' : '';
+        lines.push(`${row.rank}. ${row.name} – ${row.total}${crown}`);
+    });
+
+    if (options.format === 'scoreboard' && options.showRounds && game.roundTotal > 1) {
         const width = Math.max(...rows.map(row => row.name.length));
         lines.push('', 'Rounds');
         rows.forEach(row => lines.push(`${row.name.padEnd(width)}  ${row.scores.join(' ')}`));

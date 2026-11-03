@@ -23,6 +23,7 @@ import { useAppSelector } from '../../redux/hooks';
 import { selectCurrentGame } from '../../redux/selectors';
 import { logEvent } from '../Analytics';
 import { FOLD_GAP } from '../hooks/useExpandedGameLayout';
+import { canSaveToPhotos, saveImageToPhotos } from '../savePhoto';
 import { ThemeColors, useTheme } from '../theme';
 
 import {
@@ -154,11 +155,17 @@ const ShareCard: React.FunctionComponent<CardProps> = ({
             <View style={[styles.card, styles.winnerCard, { minWidth, backgroundColor: lead?.color ?? theme.backgroundSecondary }]}>
                 <Text style={[styles.winnerTitle, { color: fg }]}>{title}</Text>
                 {showDetails && <Text style={[styles.winnerDetails, { color: fg }]}>{details}</Text>}
-                <Text style={styles.winnerCrown}>♛</Text>
-                <Text style={[styles.winnerName, { color: fg }]} numberOfLines={2}>
-                    {winners.map(row => row.name).join(' & ')}
-                </Text>
-                <Text style={[styles.winnerTotal, { color: fg }]}>{lead?.total ?? ''}</Text>
+                {lead ? (
+                    <>
+                        <Text style={styles.winnerCrown}>♛</Text>
+                        <Text style={[styles.winnerName, { color: fg }]} numberOfLines={2}>
+                            {winners.map(row => row.name).join(' & ')}
+                        </Text>
+                        <Text style={[styles.winnerTotal, { color: fg }]}>{lead.total}</Text>
+                    </>
+                ) : (
+                    <Text style={[styles.winnerName, styles.noWinner, { color: fg }]}>{result.headline}</Text>
+                )}
                 {result.margin != null && (
                     <Text style={[styles.winnerMargin, { color: fg }]}>
                         {result.margin === 1 ? 'by 1 point' : `by ${result.margin} points`}
@@ -190,7 +197,9 @@ const ShareCard: React.FunctionComponent<CardProps> = ({
             {showDetails && <Text style={[styles.cardDetails, { color: theme.textSecondary }]}>{details}</Text>}
             {showResult && result.headline !== '' && (
                 <View style={[styles.headline, { backgroundColor: theme.backgroundTertiary }]}>
-                    <View style={[styles.headlineDot, { backgroundColor: rows.find(row => result.winnerIds.includes(row.id))?.color, borderColor: theme.separator }]} />
+                    {result.winnerIds.length > 0 && (
+                        <View style={[styles.headlineDot, { backgroundColor: rows.find(row => result.winnerIds.includes(row.id))?.color, borderColor: theme.separator }]} />
+                    )}
                     <Text style={[styles.headlineText, { color: theme.text }]} numberOfLines={1}>{result.headline}</Text>
                     {result.margin != null && <Text style={[styles.headlineMargin, { color: theme.textSecondary }]}>+{result.margin}</Text>}
                 </View>
@@ -215,6 +224,7 @@ const ShareScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     const [showRounds, setShowRounds] = useState(true);
     const [showDetails, setShowDetails] = useState(true);
     const [showResult, setShowResult] = useState(true);
+    const [saved, setSaved] = useState(false);
 
     const rows = useMemo(() => (game ? buildShareRows(game, players) : []), [game, players]);
     const result = useMemo(() => (game ? describeResult(game, rows) : { winnerIds: [], headline: '' }), [game, rows]);
@@ -227,16 +237,19 @@ const ShareScreen: React.FunctionComponent<Props> = ({ navigation }) => {
         : width - insets.left - insets.right;
     const cardMinWidth = paneWidth - SIDE_PADDING * 2;
 
-    const shareImage = async () => {
-        if (cardRef.current == null) return;
+    const captureCard = () => {
+        if (cardRef.current == null) return Promise.reject(new Error('Share card is not mounted'));
+        return captureRef(cardRef.current, {
+            result: 'tmpfile',
+            quality: 1,
+            format: 'png',
+            fileName: Platform.OS === 'android' ? 'scorepad-scoreboard' : undefined,
+        });
+    };
 
+    const shareImage = async () => {
         try {
-            const uri = await captureRef(cardRef.current, {
-                result: 'tmpfile',
-                quality: 1,
-                format: 'png',
-                fileName: Platform.OS === 'android' ? 'scorepad-scoreboard' : undefined,
-            });
+            const uri = await captureCard();
 
             await Sharing.shareAsync(uri, {
                 mimeType: 'image/png',
@@ -252,10 +265,24 @@ const ShareScreen: React.FunctionComponent<Props> = ({ navigation }) => {
         }
     };
 
+    const saveImage = async () => {
+        try {
+            await saveImageToPhotos(await captureCard());
+            setSaved(true);
+            setTimeout(() => setSaved(false), 2000);
+            void logEvent('save_image', { format });
+        } catch (error) {
+            console.error('Failed to save image:', error);
+        }
+    };
+
     const shareText = async () => {
         try {
-            await Share.share({ message: buildShareText(game, rows, { showRounds, showDetails }) });
-            void logEvent('share_text', { rounds_shown: showRounds, details_shown: showDetails });
+            const message = buildShareText(game, rows, result, { format, showRounds, showDetails, showResult });
+            await Share.share({ message });
+            void logEvent('share_text', {
+                format, rounds_shown: showRounds, details_shown: showDetails, result_shown: showResult,
+            });
         } catch (error) {
             console.error('Failed to share text:', error);
         }
@@ -373,8 +400,19 @@ const ShareScreen: React.FunctionComponent<Props> = ({ navigation }) => {
                 accessibilityRole="button"
                 onPress={shareText}
             >
-                <Text style={[styles.buttonLabel, { color: theme.tint }]}>Share Text</Text>
+                <Text style={[styles.buttonLabel, { color: theme.tint }]}>{canSaveToPhotos ? 'Text' : 'Share Text'}</Text>
             </TouchableOpacity>
+            {canSaveToPhotos && (
+                <TouchableOpacity
+                    style={[styles.button, styles.secondaryButton, { backgroundColor: theme.backgroundSecondary }]}
+                    accessibilityRole="button"
+                    accessibilityLabel="Save to Photos"
+                    onPress={saveImage}
+                >
+                    <Icon name={saved ? 'check' : 'file-download'} type="material" size={20} color={theme.tint} />
+                    <Text style={[styles.buttonLabel, { color: theme.tint }]}>{saved ? 'Saved' : 'Save'}</Text>
+                </TouchableOpacity>
+            )}
             <TouchableOpacity
                 style={[styles.button, styles.primaryButton, { backgroundColor: theme.tint }]}
                 accessibilityRole="button"
@@ -596,6 +634,9 @@ const styles = StyleSheet.create({
         fontWeight: '800',
         textAlign: 'center',
     },
+    noWinner: {
+        marginTop: 16,
+    },
     winnerTotal: {
         fontSize: 72,
         fontVariant: ['tabular-nums'],
@@ -706,6 +747,7 @@ const styles = StyleSheet.create({
     },
     secondaryButton: {
         flex: 1,
+        gap: 4,
     },
     primaryButton: {
         flex: 2,

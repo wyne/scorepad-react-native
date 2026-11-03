@@ -7,10 +7,11 @@ import { Share } from 'react-native';
 import { captureRef } from 'react-native-view-shot';
 import { Provider } from 'react-redux';
 
-import gamesReducer from '../../redux/GamesSlice';
+import gamesReducer, { GameState } from '../../redux/GamesSlice';
 import playersReducer from '../../redux/PlayersSlice';
 import settingsReducer from '../../redux/SettingsSlice';
 import * as Analytics from '../Analytics';
+import { saveImageToPhotos } from '../savePhoto';
 
 import ShareScreen from './ShareScreen';
 
@@ -18,6 +19,10 @@ import ShareScreen from './ShareScreen';
 jest.mock('expo-sharing');
 jest.mock('react-native-view-shot');
 jest.mock('../Analytics');
+jest.mock('../savePhoto', () => ({
+    canSaveToPhotos: true,
+    saveImageToPhotos: jest.fn(() => Promise.resolve()),
+}));
 jest.mock('react-native-safe-area-context', () => ({
     SafeAreaView: ({ children }: { children: React.ReactNode }) => {
         const { View } = jest.requireActual('react-native');
@@ -65,7 +70,7 @@ const createMockStore = (initialState: Parameters<typeof configureStore>[0]['pre
 };
 
 describe('ShareScreen', () => {
-    const mockGame = {
+    const mockGame: GameState = {
         id: 'game-1',
         title: 'Test Game',
         dateCreated: 1609459200000, // January 1, 2021
@@ -266,15 +271,36 @@ describe('ShareScreen', () => {
         const shareSpy = jest.spyOn(Share, 'share').mockResolvedValue({ action: 'sharedAction', activityType: undefined });
 
         const { getByText } = renderWithGame();
-        fireEvent.press(getByText('Share Text'));
+        fireEvent.press(getByText('Text'));
 
         await waitFor(() => expect(shareSpy).toHaveBeenCalled());
         const message = shareSpy.mock.calls[0][0] as { message: string };
         expect(message.message).toContain('1. Player 2 – 50');
         expect(message.message).toContain('Rounds');
         await waitFor(() => {
-            expect(Analytics.logEvent).toHaveBeenCalledWith('share_text', { rounds_shown: true, details_shown: true });
+            expect(Analytics.logEvent).toHaveBeenCalledWith('share_text', {
+                format: 'scoreboard', rounds_shown: true, details_shown: true, result_shown: true,
+            });
         });
+    });
+
+    it('saves the card to Photos', async () => {
+        jest.mocked(captureRef).mockResolvedValue('file://saved.png');
+
+        const { getByLabelText, findByText } = renderWithGame();
+        fireEvent.press(getByLabelText('Save to Photos'));
+
+        await findByText('Saved');
+        expect(saveImageToPhotos).toHaveBeenCalledWith('file://saved.png');
+        expect(Analytics.logEvent).toHaveBeenCalledWith('save_image', { format: 'scoreboard' });
+    });
+
+    it('shows final scores, not a winner, for a game ended without winners', () => {
+        const { getByTestId, getAllByText, queryByText } = renderWithGame({ ...mockGame, locked: true, winnerIds: [] });
+
+        expect(queryByText(/leads with|wins with/)).toBeNull();
+        fireEvent.press(getByTestId('share-format-winner'));
+        expect(getAllByText('Final scores').length).toBeGreaterThan(0);
     });
 
     it('handles a game with zero rounds', () => {
