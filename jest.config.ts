@@ -37,10 +37,13 @@ const config: Config = {
     coverageReporters: ['text', 'lcov', 'html', 'json-summary'],
     coverageThreshold: {
         global: {
-            branches: 18,
-            functions: 20,
-            lines: 25,
-            statements: 24,
+            // Keep a small buffer below the current baseline while preventing
+            // large, unnoticed coverage regressions. Raise these as new tests
+            // land rather than resetting them to historical minimums.
+            branches: 68,
+            functions: 69,
+            lines: 75,
+            statements: 73,
         },
     },
     watchman: false,
