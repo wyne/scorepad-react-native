@@ -9,11 +9,13 @@ import { shallowEqual } from 'react-redux';
 
 import { selectGameById } from '../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
+import { grandTotalScore } from '../../redux/scoreUtils';
+import { leadingPlayerIds } from '../../redux/ScoringRules';
 import { setCurrentGameId } from '../../redux/SettingsSlice';
 import { logEvent } from '../Analytics';
+import { getPalette } from '../ColorPalette';
 import { useTheme } from '../theme';
 
-import GameListItemPlayerName from './GameListItemPlayerName';
 import AbstractPopupMenu from './PopupMenu/AbstractPopupMenu';
 
 const DAY_MS = 86400000;
@@ -49,32 +51,76 @@ function shortDate(dateMs: number): string {
 }
 
 /**
- * How long ago, plus the date once "3mo ago" stops being enough to place it.
- *
- * Under a day the relative form is already the precise one — appending a date
- * there would only ever say today.
+ * When the game was made, in the corner of its row: relative under a day,
+ * where it's the precise form, and the calendar date after that.
  */
-function formatCreated(dateMs: number | undefined): string {
+export function formatCreated(dateMs: number | undefined): string {
     if (!dateMs) return '';
-
-    const relative = timeAgo(dateMs);
-    if (Date.now() - dateMs < DAY_MS) return relative;
-
-    return `${relative} · ${shortDate(dateMs)}`;
+    if (Date.now() - dateMs < DAY_MS) return timeAgo(dateMs);
+    return shortDate(dateMs);
 }
+
+/** Names the way a sentence lists them: "A", "A and B", "A, B and C". */
+export function joinNames(names: string[]): string {
+    if (names.length <= 1) return names[0] ?? '';
+    return `${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}`;
+}
+
+export interface GameResult {
+    /** The players the line is about: the winners, or whoever leads. */
+    playerIds: string[];
+    text: string;
+}
+
+/**
+ * How the game stands, in one line. A finished game names its winners; one in
+ * play names the leader and the round. Before anyone has scored there is no
+ * leader, so it says so.
+ */
+export function gameResult(
+    game: { locked?: boolean; winnerIds?: string[]; roundTotal: number; scoring?: Parameters<typeof leadingPlayerIds>[0]; },
+    players: { id: string; name: string; total: number; }[],
+): GameResult {
+    const nameOf = (id: string) => players.find(p => p.id === id)?.name ?? '';
+    const totalOf = (id: string) => players.find(p => p.id === id)?.total ?? 0;
+    const winnerIds = (game.winnerIds ?? []).filter(id => players.some(p => p.id === id));
+
+    if (game.locked && winnerIds.length > 0) {
+        const names = joinNames(winnerIds.map(nameOf));
+        const verb = winnerIds.length > 1 ? 'tied with' : 'won with';
+        return { playerIds: winnerIds, text: `${names} ${verb} ${totalOf(winnerIds[0])}` };
+    }
+
+    const round = `Round ${game.roundTotal}`;
+    if (players.every(p => p.total === 0)) {
+        return { playerIds: [], text: `${round} · No scores yet` };
+    }
+
+    const leaders = leadingPlayerIds(game.scoring, players);
+    const names = joinNames(leaders.map(nameOf));
+    const verb = leaders.length > 1 ? 'tied at' : 'leads with';
+    return { playerIds: leaders, text: `${names} ${verb} ${totalOf(leaders[0])} · ${round}` };
+}
+
+/** How many player colors the row shows before the rest are left to the names. */
+const MAX_STACK = 6;
 
 export type Props = {
     navigation: NativeStackNavigationProp<ParamListBase, string, undefined>;
     gameId: string;
     index: number;
     showSeparator?: boolean;
+    /** Round the top corners: the first row of its day's group. */
+    first?: boolean;
+    /** Round the bottom corners: the last row of its day's group. */
+    last?: boolean;
     /** Test-only render probe for selector invalidation regressions. */
     onRender?: (id: string) => void;
     /** Test-only render probe for popup menu selector invalidation regressions. */
     onMenuRender?: (id: string) => void;
 };
 
-const GameListItem: React.FunctionComponent<Props> = ({ navigation, gameId, index, showSeparator = false, onMenuRender, onRender }) => {
+const GameListItem: React.FunctionComponent<Props> = ({ navigation, gameId, index, showSeparator = false, first = false, last = false, onMenuRender, onRender }) => {
     onRender?.(gameId);
 
     const theme = useTheme();
@@ -83,8 +129,10 @@ const GameListItem: React.FunctionComponent<Props> = ({ navigation, gameId, inde
         dateCreated,
         gameTitle,
         locked,
+        palette,
         playerIds,
         roundCount,
+        scoring,
         winnerIds,
     } = useAppSelector(state => {
         const game = selectGameById(state, gameId);
@@ -93,34 +141,44 @@ const GameListItem: React.FunctionComponent<Props> = ({ navigation, gameId, inde
             dateCreated: game?.dateCreated,
             gameTitle: game?.title,
             locked: game?.locked,
+            palette: game?.palette,
             playerIds: game?.playerIds,
             roundCount: game?.roundTotal,
+            scoring: game?.scoring,
             winnerIds: game?.winnerIds,
         };
     }, shallowEqual);
+
+    // Entities keep their identity until they change, so this only re-renders
+    // the row when one of its players does.
+    const playerEntities = useAppSelector(
+        state => (playerIds ?? []).map(id => state.players.entities[id]),
+        shallowEqual,
+    );
+
+    const players = useMemo(() => {
+        const colors = getPalette(palette || 'original') || getPalette('original');
+        return (playerIds ?? []).map((id, seat) => {
+            const player = playerEntities[seat];
+            return {
+                id,
+                name: player?.playerName ?? '',
+                total: grandTotalScore(player?.scores),
+                color: player?.color || colors[seat % colors.length],
+            };
+        });
+    }, [playerIds, playerEntities, palette]);
+
+    const result = useMemo(() => (
+        roundCount == null ? undefined : gameResult({ locked, winnerIds, roundTotal: roundCount, scoring }, players)
+    ), [locked, winnerIds, roundCount, scoring, players]);
 
     const setCurrentGameCallback = useCallback(() => {
         dispatch(setCurrentGameId(gameId));
     }, [dispatch, gameId]);
 
-    /**
-     * Winners lead the player line.
-     *
-     * That line truncates, and the result of a finished game is the last thing
-     * that should be cut from it — with the roster in play order a winner far
-     * enough down simply disappeared. Sorting is stable, so within each group
-     * the play order is kept.
-     */
-    const orderedPlayerIds = useMemo(() => {
-        const ids = playerIds ?? [];
-        if (!winnerIds?.length) return ids;
-
-        return [...ids].sort((a, b) =>
-            Number(winnerIds.includes(b)) - Number(winnerIds.includes(a)));
-    }, [playerIds, winnerIds]);
-
     if (gameId == null) { return null; }
-    if (gameTitle == null || roundCount == null || playerIds == null) { return null; }
+    if (gameTitle == null || roundCount == null || playerIds == null || result == null) { return null; }
 
     /**
      * Choose Game and navigate to GameScreen
@@ -137,73 +195,103 @@ const GameListItem: React.FunctionComponent<Props> = ({ navigation, gameId, inde
         });
     };
 
+    const finished = locked && (winnerIds?.length ?? 0) > 0;
+    // The result line already names its players, so the line below lists
+    // everyone else. Its colors still cover the whole table, featured first.
+    const others = players.filter(p => !result.playerIds.includes(p.id));
+    const stack = [
+        ...players.filter(p => result.playerIds.includes(p.id)),
+        ...others,
+    ].slice(0, MAX_STACK);
+
     return (
         <Animated.View collapsable={false} entering={FadeInUp.duration(200).delay(100 + index * 100)}>
-            {showSeparator && (
-                <View testID={`game-list-separator-${gameId}`} pointerEvents="none" style={[styles.separator, { backgroundColor: theme.separator }]} />
-            )}
-            <AbstractPopupMenu
-                key={'menu' + gameId}
-                gameId={gameId}
-                setCurrentGameCallback={setCurrentGameCallback}
-                chooseGameHandler={chooseGameHandler}
-                navigation={navigation}
-                index={index}
-                onRender={onMenuRender}
-            >
-                <ListItem testID="game-list-item"
-                    onPress={Platform.OS == 'android' ? undefined : chooseGameHandler}
-                    containerStyle={{ backgroundColor: theme.backgroundSecondary }}
+            <View style={[
+                styles.group,
+                { backgroundColor: theme.backgroundSecondary },
+                first && styles.groupFirst,
+                last && styles.groupLast,
+            ]}>
+                {showSeparator && (
+                    <View testID={`game-list-separator-${gameId}`} pointerEvents="none" style={[styles.separator, { backgroundColor: theme.separator }]} />
+                )}
+                <AbstractPopupMenu
+                    key={'menu' + gameId}
+                    gameId={gameId}
+                    setCurrentGameCallback={setCurrentGameCallback}
+                    chooseGameHandler={chooseGameHandler}
+                    navigation={navigation}
+                    index={index}
+                    onRender={onMenuRender}
                 >
-                    <View style={styles.row}>
-                        <ListItem.Content style={styles.content}>
-                            <ListItem.Title style={[styles.title, { color: theme.text }]}>
-                                {gameTitle}
-                                {locked && <Icon name='lock-closed-outline' type='ionicon' size={14} color={theme.success} style={{ paddingHorizontal: 4 }} />}
-                            </ListItem.Title>
+                    <ListItem testID="game-list-item"
+                        onPress={Platform.OS == 'android' ? undefined : chooseGameHandler}
+                        containerStyle={{ backgroundColor: theme.backgroundSecondary }}
+                    >
+                        <View style={styles.row}>
+                            <ListItem.Content style={styles.content}>
+                                <View style={styles.titleRow}>
+                                    <ListItem.Title style={[styles.title, { color: theme.text }]} numberOfLines={1}>
+                                        {gameTitle}
+                                        {locked && <Icon name='lock-closed-outline' type='ionicon' size={14} color={theme.success} style={{ paddingHorizontal: 4 }} />}
+                                    </ListItem.Title>
+                                    <Text style={[styles.timestamp, { color: theme.textTertiary }]} testID="game-list-created">
+                                        {formatCreated(dateCreated)}
+                                    </Text>
+                                </View>
 
-                            {/* One run of text, so the names wrap and truncate
-                              * together instead of each being its own block.
-                              *
-                              * Two lines rather than one: the column is ~29
-                              * characters wide, and players default to names as
-                              * long as "Player 1", so a single line cut an
-                              * ordinary three-player game short. Two covers past
-                              * the 91st percentile of player counts while still
-                              * keeping every row the same height. */}
-                            <Text style={[styles.players, { color: theme.textSecondary }]} numberOfLines={2} testID="game-list-players">
-                                {orderedPlayerIds.map((playerId, index) => (
-                                    <GameListItemPlayerName key={playerId} playerId={playerId} last={index == orderedPlayerIds.length - 1} isWinner={winnerIds?.includes(playerId) === true} />
-                                ))}
-                            </Text>
+                                <Text style={[styles.result, { color: theme.text }]} numberOfLines={1} testID="game-list-result">
+                                    {finished && <Icon name="trophy" type="ionicon" size={13} color={theme.warning} />}
+                                    {finished && ' '}
+                                    {result.text}
+                                </Text>
 
-                            {/* Metadata trails the content it describes rather
-                              * than splitting the title from the players. */}
-                            <Text style={[styles.timestamp, { color: theme.textTertiary }]}>
-                                {formatCreated(dateCreated)}
-                            </Text>
-                        </ListItem.Content>
-                        <View style={styles.badgeGroup}>
-                            <Text style={[styles.badge, { color: theme.badgeBlue }]}>
-                                {playerIds.length}
-                            </Text>
-                            <Icon color={theme.badgeBlue} name='users' type='font-awesome-5' size={13} />
+                                <View style={styles.playersRow}>
+                                    <View style={styles.stack} testID="game-list-colors">
+                                        {stack.map((player, i) => (
+                                            <View
+                                                key={player.id}
+                                                style={[
+                                                    styles.stackDot,
+                                                    { backgroundColor: player.color, borderColor: theme.backgroundSecondary },
+                                                    i > 0 && styles.stackOverlap,
+                                                ]}
+                                            />
+                                        ))}
+                                    </View>
+                                    {others.length > 0 &&
+                                        <Text style={[styles.players, { color: theme.textSecondary }]} numberOfLines={1} testID="game-list-players">
+                                            {others.map(p => p.name).join(', ')}
+                                        </Text>
+                                    }
+                                </View>
+                            </ListItem.Content>
+                            <ListItem.Chevron iconStyle={{ color: theme.textTertiary }} />
                         </View>
-                        <View style={styles.badgeGroup}>
-                            <Text style={[styles.badge, { color: theme.badgeRed }]}>
-                                {roundCount}
-                            </Text>
-                            <Icon color={theme.badgeRed} name='circle-notch' type='font-awesome-5' size={13} />
-                        </View>
-                        <ListItem.Chevron iconStyle={{ color: theme.textTertiary }} />
-                    </View>
-                </ListItem>
-            </AbstractPopupMenu>
+                    </ListItem>
+                </AbstractPopupMenu>
+            </View>
         </Animated.View>
     );
 };
 
+const GROUP_RADIUS = 12;
+const DOT_SIZE = 14;
+
 const styles = StyleSheet.create({
+    // Rows sit in inset groups, one per day, like a settings list.
+    group: {
+        marginHorizontal: 16,
+        overflow: 'hidden',
+    },
+    groupFirst: {
+        borderTopLeftRadius: GROUP_RADIUS,
+        borderTopRightRadius: GROUP_RADIUS,
+    },
+    groupLast: {
+        borderBottomLeftRadius: GROUP_RADIUS,
+        borderBottomRightRadius: GROUP_RADIUS,
+    },
     separator: {
         marginLeft: 16,
         flexShrink: 0,
@@ -214,33 +302,47 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         flex: 1,
-        gap: 14,
+        gap: 10,
     },
     content: {
         flex: 1,
-        // Three text lines that were previously flush against each other.
         gap: 3,
     },
-    players: {
-        fontSize: 15,
+    titleRow: {
+        flexDirection: 'row',
+        alignItems: 'baseline',
+        gap: 8,
     },
     title: {
+        flex: 1,
         fontWeight: '600',
     },
     timestamp: {
         fontSize: 13,
     },
-    /**
-     * Counts are the least important thing in the row. At 20pt they read before
-     * the game title; at 15 they sit with the secondary text where they belong.
-     */
-    badge: {
+    result: {
         fontSize: 15,
     },
-    badgeGroup: {
+    playersRow: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 4,
+        gap: 8,
+    },
+    stack: {
+        flexDirection: 'row',
+    },
+    stackDot: {
+        width: DOT_SIZE,
+        height: DOT_SIZE,
+        borderRadius: DOT_SIZE / 2,
+        borderWidth: 2,
+    },
+    stackOverlap: {
+        marginLeft: -5,
+    },
+    players: {
+        flex: 1,
+        fontSize: 13,
     },
 });
 

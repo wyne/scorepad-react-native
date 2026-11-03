@@ -12,7 +12,7 @@ import playersReducer from '../../redux/PlayersSlice';
 import settingsReducer from '../../redux/SettingsSlice';
 import { FAB_BOTTOM_MARGIN, FAB_EDGE_MARGIN, FAB_LIST_CLEARANCE, FAB_SIZE } from '../components/FloatingActionButton';
 
-import ListScreen from './ListScreen';
+import ListScreen, { buildListRows } from './ListScreen';
 
 // Mock dependencies
 jest.mock('@react-navigation/elements', () => ({
@@ -570,5 +570,33 @@ describe('ListScreen dev_menu_enabled param', () => {
         expect(logEvent).toHaveBeenCalledWith('game_list', expect.objectContaining({
             dev_menu_enabled: false,
         }));
+    });
+});
+
+describe('buildListRows', () => {
+    const now = new Date(2026, 10, 3, 20, 0).getTime();
+    const thisMorning = new Date(2026, 10, 3, 9, 0).getTime();
+    const lastWeek = new Date(2026, 9, 28, 19, 0).getTime();
+
+    it('groups today apart from earlier games, each under a header', () => {
+        const rows = buildListRows(['a', 'b', 'c'], [now, thisMorning, lastWeek], now);
+
+        expect(rows).toEqual([
+            { kind: 'header', key: 'header-Today', label: 'Today' },
+            { kind: 'game', key: 'a', index: 0, first: true, last: false },
+            { kind: 'game', key: 'b', index: 1, first: false, last: true },
+            { kind: 'header', key: 'header-Earlier', label: 'Earlier' },
+            { kind: 'game', key: 'c', index: 2, first: true, last: true },
+        ]);
+    });
+
+    it('drops the header when nothing is from today', () => {
+        const rows = buildListRows(['c'], [lastWeek], now);
+
+        expect(rows).toEqual([{ kind: 'game', key: 'c', index: 0, first: true, last: true }]);
+    });
+
+    it('is empty with no games', () => {
+        expect(buildListRows([], [], now)).toEqual([]);
     });
 });

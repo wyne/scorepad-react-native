@@ -12,7 +12,7 @@ import playersReducer from '../../redux/PlayersSlice';
 import settingsReducer from '../../redux/SettingsSlice';
 import ListScreen from '../screens/ListScreen';
 
-import GameListItem from './GameListItem';
+import GameListItem, { gameResult } from './GameListItem';
 
 jest.mock('../Analytics', () => ({
     logEvent: jest.fn(),
@@ -212,7 +212,7 @@ describe('GameListItem', () => {
         expect(queryAllByTestId(/^game-list-separator-/)).toHaveLength(0);
     });
 
-    it('should render game title, players, and badges for a valid game', () => {
+    it('should render the title, who leads, and everyone else', () => {
         const store = createMockStore(populatedState);
 
         const { getByText, getByTestId } = render(
@@ -223,8 +223,8 @@ describe('GameListItem', () => {
 
         expect(getByTestId('game-list-item')).toBeTruthy();
         expect(getByText('Test Game')).toBeTruthy();
-        expect(getByText('Player 1, ')).toBeTruthy();
-        expect(getByText('Player 2')).toBeTruthy();
+        expect(getByTestId('game-list-result')).toHaveTextContent('Player 1 leads with 10 · Round 3');
+        expect(getByTestId('game-list-players')).toHaveTextContent('Player 2');
     });
 
     it('should emphasize the game title', () => {
@@ -241,13 +241,14 @@ describe('GameListItem', () => {
         );
     });
 
-    it('should put winners first so a truncated player line still shows them', () => {
+    it('leads a finished game with its winner and lists everyone else after', () => {
         const store = createMockStore({
             ...populatedState,
             games: {
                 entities: {
                     'game-1': {
                         ...mockGame,
+                        locked: true,
                         playerIds: ['player-1', 'player-2', 'player-3'],
                         winnerIds: ['player-3'],
                     },
@@ -269,13 +270,40 @@ describe('GameListItem', () => {
             </Provider>
         );
 
-        // The names render as one Text, so assert the order of the elements
-        // that build it rather than hunting for separate text nodes.
-        const line = getByTestId('game-list-players');
-        const renderedIds = (line.props.children as { props: { playerId: string; }; }[])
-            .map(child => child.props.playerId);
+        expect(getByTestId('game-list-result')).toHaveTextContent('Player 3 won with 20');
+        expect(getByTestId('game-list-players')).toHaveTextContent('Player 1, Player 2');
+    });
 
-        expect(renderedIds).toEqual(['player-3', 'player-1', 'player-2']);
+    describe('gameResult', () => {
+        const players = [
+            { id: 'a', name: 'Ann', total: 30 },
+            { id: 'b', name: 'Bo', total: 12 },
+            { id: 'c', name: 'Cy', total: 30 },
+        ];
+
+        it('names every winner of a tie', () => {
+            expect(gameResult({ locked: true, winnerIds: ['a', 'c'], roundTotal: 4 }, players).text)
+                .toBe('Ann and Cy tied with 30');
+        });
+
+        it('names tied leaders while the game is in play', () => {
+            expect(gameResult({ roundTotal: 4 }, players).text).toBe('Ann and Cy tied at 30 · Round 4');
+        });
+
+        it('follows a lowest-score-wins rule', () => {
+            expect(gameResult({ roundTotal: 2, scoring: { winner: 'low' } }, players).text)
+                .toBe('Bo leads with 12 · Round 2');
+        });
+
+        it('says so before anyone has scored', () => {
+            const unscored = players.map(p => ({ ...p, total: 0 }));
+            expect(gameResult({ roundTotal: 1 }, unscored)).toEqual({ playerIds: [], text: 'Round 1 · No scores yet' });
+        });
+
+        it('falls back to the leader when a locked game has no winners', () => {
+            expect(gameResult({ locked: true, winnerIds: [], roundTotal: 3 }, players).text)
+                .toBe('Ann and Cy tied at 30 · Round 3');
+        });
     });
 
     describe('created timestamp', () => {
@@ -301,7 +329,7 @@ describe('GameListItem', () => {
             expect(getByText('3h ago')).toBeTruthy();
         });
 
-        it('adds the weekday and date once it is days old', () => {
+        it('switches to the weekday and date once it is days old', () => {
             const threeDaysAgo = Date.now() - 3 * 86400000;
             const { getByText } = renderWithDate(threeDaysAgo);
 
@@ -309,7 +337,7 @@ describe('GameListItem', () => {
                 weekday: 'short', month: 'short', day: 'numeric',
             });
 
-            expect(getByText(`3d ago · ${expected}`)).toBeTruthy();
+            expect(getByText(expected)).toBeTruthy();
         });
 
         it('trades the weekday for the year once out of this year', () => {
@@ -323,7 +351,7 @@ describe('GameListItem', () => {
                 month: 'short', day: 'numeric', year: 'numeric',
             });
 
-            expect(getByText(`2y ago · ${expected}`)).toBeTruthy();
+            expect(getByText(expected)).toBeTruthy();
         });
     });
 
