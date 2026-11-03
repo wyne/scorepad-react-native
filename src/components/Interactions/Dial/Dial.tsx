@@ -5,7 +5,6 @@ interface Props {
     fontColor: string;
     index: number;
     playerId: string;
-    showHint?: boolean;
 }
 
 // Stub — ListBoard renders when Dial is active, so this component

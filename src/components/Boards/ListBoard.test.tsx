@@ -105,7 +105,7 @@ describe('ListBoard', () => {
     it('opens the overlay when the game is unlocked and menu is closed', () => {
         const store = createStore();
         const { getByTestId, queryByTestId, getByText } = render(
-            <Provider store={store}><ListBoard showHint={false} /></Provider>
+            <Provider store={store}><ListBoard /></Provider>
         );
 
         expect(queryByTestId('inline-expand-overlay')).toBeNull();
@@ -117,7 +117,7 @@ describe('ListBoard', () => {
     it('does not open the overlay when the game is locked', () => {
         const store = createStore({ locked: true });
         const { getByTestId, queryByTestId, getByText } = render(
-            <Provider store={store}><ListBoard showHint={false} /></Provider>
+            <Provider store={store}><ListBoard /></Provider>
         );
 
         fireLayouts(getByTestId);
@@ -129,7 +129,7 @@ describe('ListBoard', () => {
         mockMenuOpen = true;
         const store = createStore();
         const { getByTestId, queryByTestId, getByText } = render(
-            <Provider store={store}><ListBoard showHint={false} /></Provider>
+            <Provider store={store}><ListBoard /></Provider>
         );
 
         fireLayouts(getByTestId);
@@ -141,7 +141,7 @@ describe('ListBoard', () => {
         mockSafeAreaInsets = { top: 0, bottom: 0, left: 24, right: 16 };
         const store = createStore();
         const { getByTestId } = render(
-            <Provider store={store}><ListBoard showHint={false} /></Provider>
+            <Provider store={store}><ListBoard /></Provider>
         );
 
         expect(StyleSheet.flatten(getByTestId('list-board-scroll').props.contentContainerStyle)).toEqual(
@@ -156,7 +156,7 @@ describe('ListBoard', () => {
         mockSafeAreaInsets = { top: 0, bottom: 0, left: 24, right: 16 };
         const store = createStore();
         const { getByTestId, getByText } = render(
-            <Provider store={store}><ListBoard foldSplit="columns" showHint={false} /></Provider>
+            <Provider store={store}><ListBoard foldSplit="columns" /></Provider>
         );
 
         expect(StyleSheet.flatten(getByTestId('list-board-scroll').props.contentContainerStyle)).toEqual(
@@ -176,7 +176,7 @@ describe('ListBoard', () => {
         const store = createStore();
         store.dispatch(toggleHomeFullscreen());
         const { getByTestId } = render(
-            <Provider store={store}><ListBoard showHint={false} /></Provider>
+            <Provider store={store}><ListBoard /></Provider>
         );
 
         expect(StyleSheet.flatten(getByTestId('list-board-scroll').props.contentContainerStyle)).toEqual(
@@ -190,7 +190,7 @@ describe('ListBoard', () => {
         mockSafeAreaInsets = { top: 0, bottom: 0, left: 0, right: 0 };
         const store = createStore();
         const { getByTestId } = render(
-            <Provider store={store}><ListBoard showHint={false} topInset={24} /></Provider>
+            <Provider store={store}><ListBoard topInset={24} /></Provider>
         );
         const scroll = getByTestId('list-board-scroll');
 
@@ -205,7 +205,7 @@ describe('ListBoard', () => {
         const onPlayerRowRender = jest.fn();
 
         render(
-            <Provider store={store}><ListBoard showHint={false} onPlayerRowRender={onPlayerRowRender} /></Provider>
+            <Provider store={store}><ListBoard onPlayerRowRender={onPlayerRowRender} /></Provider>
         );
 
         expect(onPlayerRowRender).toHaveBeenCalledTimes(2);
@@ -226,7 +226,7 @@ describe('ListBoard', () => {
         const onPlayerRowRender = jest.fn();
 
         const { getAllByText } = render(
-            <Provider store={store}><ListBoard showHint={false} onPlayerRowRender={onPlayerRowRender} /></Provider>
+            <Provider store={store}><ListBoard onPlayerRowRender={onPlayerRowRender} /></Provider>
         );
 
         expect(onPlayerRowRender).toHaveBeenCalledTimes(2);
@@ -245,33 +245,33 @@ describe('ListBoard', () => {
 describe('ListBoard — winner pill', () => {
     it('shows WINNER for a winner when the game is locked', () => {
         const store = createStore({ locked: true, winnerIds: ['player-1'] });
-        const { getAllByText } = render(<Provider store={store}><ListBoard showHint={false} /></Provider>);
+        const { getAllByText } = render(<Provider store={store}><ListBoard /></Provider>);
         expect(getAllByText('WINNER').length).toBeGreaterThanOrEqual(1);
     });
 
     it('does not show WINNER for a non-winner when the game is locked', () => {
         // player-1 is NOT a winner; only player-2 is
         const store = createStore({ locked: true, winnerIds: ['player-2'] }, ['player-1']);
-        const { queryByText } = render(<Provider store={store}><ListBoard showHint={false} /></Provider>);
+        const { queryByText } = render(<Provider store={store}><ListBoard /></Provider>);
         expect(queryByText('WINNER')).toBeNull();
     });
 
     it('does not show WINNER when the game is unlocked', () => {
         const store = createStore({ locked: false, winnerIds: ['player-1'] });
-        const { queryByText } = render(<Provider store={store}><ListBoard showHint={false} /></Provider>);
+        const { queryByText } = render(<Provider store={store}><ListBoard /></Provider>);
         expect(queryByText('WINNER')).toBeNull();
     });
 
     it('hides PREV and RND labels when the game is locked', () => {
         const store = createStore({ locked: true });
-        const { queryByText } = render(<Provider store={store}><ListBoard showHint={false} /></Provider>);
+        const { queryByText } = render(<Provider store={store}><ListBoard /></Provider>);
         expect(queryByText('PREV')).toBeNull();
         expect(queryByText('RND')).toBeNull();
     });
 
     it('shows PREV and RND labels when the game is unlocked', () => {
         const store = createStore({ locked: false });
-        const { getAllByText } = render(<Provider store={store}><ListBoard showHint={false} /></Provider>);
+        const { getAllByText } = render(<Provider store={store}><ListBoard /></Provider>);
         expect(getAllByText('PREV').length).toBeGreaterThanOrEqual(1);
         expect(getAllByText('RND').length).toBeGreaterThanOrEqual(1);
     });

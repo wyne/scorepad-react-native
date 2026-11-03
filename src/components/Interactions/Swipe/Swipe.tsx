@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import * as Haptics from 'expo-haptics';
-import { Animated, StyleSheet, Text, View } from 'react-native';
+import { Animated, StyleSheet, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import ReAnimated, { runOnJS, useAnimatedReaction, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 
@@ -10,6 +10,7 @@ import { useAppDispatch, useAppSelector, useAppStore } from '../../../../redux/h
 import { playerRoundScoreIncrement } from '../../../../redux/PlayersSlice';
 import { setLastUsedInteractionType } from '../../../../redux/SettingsSlice';
 import { logEvent } from '../../../Analytics';
+import { useGestureNudge } from '../../GestureNudgeContext';
 import { useLockedHint } from '../../LockedHintContext';
 import { useMenuOpen } from '../../MenuOpenContext';
 import { InteractionType } from '../InteractionType';
@@ -19,28 +20,20 @@ interface HalfTapProps {
     fontColor: string;
     index: number;
     playerId: string;
-    showHint?: boolean;
-    tileHeight?: number;
     /** Test-only render probe for selector invalidation regressions. */
     onRender?: (id: string) => void;
 }
 
 const notchSize = 50;
 
-const HINT_MIN_HEIGHT = 200;
-
 const SwipeVertical: React.FC<HalfTapProps> = ({
     children,
     index,
     playerId,
-    fontColor,
-    showHint,
-    tileHeight,
     onRender,
 }) => {
     onRender?.(playerId);
 
-    const hintVisible = showHint && (!tileHeight || tileHeight >= HINT_MIN_HEIGHT);
     //#region Selector setup
 
     const currentGameId = useAppSelector(state => state.settings.currentGameId);
@@ -146,12 +139,20 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
 
     const { menuOpen } = useMenuOpen();
     const { showLockedHint } = useLockedHint();
+    const { reportMiss } = useGestureNudge();
+    // Whether the current drag has changed the score yet. A drag that ends
+    // without scoring (usually a tap) counts as a miss for the nudge toast.
+    const scoredThisGesture = useRef(false);
 
     const getCurrentRoundIndex = useCallback(() => {
         const state = store.getState();
         const currentGameId = state.settings.currentGameId;
         return currentGameId ? selectGameById(state, currentGameId)?.roundCurrent ?? 0 : 0;
     }, [store]);
+
+    const beginGesture = useCallback(() => {
+        scoredThisGesture.current = false;
+    }, []);
 
     const endGesture = useCallback((translationY: number) => {
         if (menuOpen) return;
@@ -165,13 +166,15 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
             notches: -Math.round((translationY || 0) / notchSize),
             interaction: 'swipe-vertical',
         });
+        if (!scoredThisGesture.current && !secondaryHold) reportMiss(InteractionType.SwipeVertical);
         secondaryHoldStop();
-    }, [index, currentGameId, secondaryHold, addendOne, addendTwo, getCurrentRoundIndex, menuOpen]);
+    }, [index, currentGameId, secondaryHold, addendOne, addendTwo, getCurrentRoundIndex, menuOpen, reportMiss]);
 
     const panGesture = Gesture.Pan()
         .enabled(!currentGameLocked && !menuOpen)
         .minDistance(0)
         .onBegin(() => {
+            runOnJS(beginGesture)();
             runOnJS(secondaryHoldStart)();
         })
         .onUpdate((event) => {
@@ -220,6 +223,7 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
         }
 
+        scoredThisGesture.current = true;
         dispatch(playerRoundScoreIncrement(playerId, currentRoundIndex, scoreDelta));
         dispatch(setLastUsedInteractionType(InteractionType.SwipeVertical));
     };
@@ -259,13 +263,6 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
                 {children}
             </Animated.View>
 
-            {hintVisible && (
-                <View style={StyleSheet.absoluteFill} pointerEvents="none">
-                    <Text style={[styles.swipeHintTop, { color: fontColor }]}>▲</Text>
-                    <Text style={[styles.swipeHintBottom, { color: fontColor }]}>▼</Text>
-                </View>
-            )}
-
             <GestureDetector gesture={Gesture.Race(panGesture, lockedTapGesture)}>
                 <ReAnimated.View
                     testID={`swipe-overlay-${index}`}
@@ -298,19 +295,5 @@ const styles = StyleSheet.create({
     sliderBottom: {
         top: '100%',
         backgroundColor: 'rgba(0,0,0,0.15)',
-    },
-    swipeHintTop: {
-        position: 'absolute',
-        top: 6,
-        alignSelf: 'center',
-        fontSize: 16,
-        opacity: 0.2,
-    },
-    swipeHintBottom: {
-        position: 'absolute',
-        bottom: 6,
-        alignSelf: 'center',
-        fontSize: 16,
-        opacity: 0.2,
     },
 });

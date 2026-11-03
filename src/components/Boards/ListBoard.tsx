@@ -172,14 +172,15 @@ const PlayerRow: React.FC<PlayerRowProps> = ({ playerId, index, svDimmed, disabl
 const MemoizedPlayerRow = React.memo(PlayerRow);
 
 interface ListBoardProps {
-    showHint: boolean;
     foldSplit?: GameFoldSplit | null;
     /** Space at the top the rows can scroll under, e.g. a transparent header. */
     topInset?: number;
+    /** Drawn above the rows but below an open dial, e.g. the gesture toast. */
+    overlay?: React.ReactNode;
     onPlayerRowRender?: (id: string) => void;
 }
 
-const ListBoard: React.FC<ListBoardProps> = ({ showHint, foldSplit = null, topInset = 0, onPlayerRowRender }) => {
+const ListBoard: React.FC<ListBoardProps> = ({ foldSplit = null, topInset = 0, overlay, onPlayerRowRender }) => {
     const { playerIds, locked } = useAppSelector((state) => {
         const currentGameId = state.settings.currentGameId;
         const currentGame = currentGameId ? selectGameById(state, currentGameId) : undefined;
@@ -272,6 +273,8 @@ const ListBoard: React.FC<ListBoardProps> = ({ showHint, foldSplit = null, topIn
                 ))}
             </ScrollView>
 
+            {overlay}
+
             {selectedId !== null && boardLayout !== null && (
                 <DialOverlay
                     playerIds={playerIds}
@@ -281,7 +284,6 @@ const ListBoard: React.FC<ListBoardProps> = ({ showHint, foldSplit = null, topIn
                     safeAreaTop={insets.top + topInset}
                     safeAreaLeft={insets.left}
                     safeAreaRight={boardRightInset}
-                    showHint={showHint}
                     onClose={handleClose}
                     svOpacity={svOverlayOpacity}
                     svSlideY={svOverlaySlideY}

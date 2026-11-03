@@ -112,6 +112,20 @@ jest.mock('../components/LockedGameHint', () => {
     };
 });
 
+jest.mock('../components/GestureHintToast', () => {
+    return function MockGestureHintToast() {
+        const { View } = jest.requireActual('react-native');
+        return <View testID="gesture-hint-toast" />;
+    };
+});
+
+jest.mock('../components/GestureNudge', () => {
+    return function MockGestureNudge() {
+        const { View } = jest.requireActual('react-native');
+        return <View testID="gesture-nudge" />;
+    };
+});
+
 jest.mock('../components/Sheets/PointValuesSheet', () => {
     return function MockPointValuesSheet() {
         const { View, Text } = jest.requireActual('react-native');
@@ -351,6 +365,9 @@ describe('GameScreen', () => {
             expect(style).toEqual({ position: 'absolute', left: 0, top: 0, opacity: 1, height: height - 88, width: width / 2 - 16 });
             expect(getByTestId('tile-board').props.boardSize).toEqual({ width: width / 2 - 16, height: height - 88 });
             expect(getByTestId('game-board-area').findByProps({ testID: 'locked-game-hint' })).toBeTruthy();
+            // The gesture toasts stay on the board's half too.
+            expect(getByTestId('game-board-area').findByProps({ testID: 'gesture-hint-toast' })).toBeTruthy();
+            expect(getByTestId('game-board-area').findByProps({ testID: 'gesture-nudge' })).toBeTruthy();
         });
 
         it('keeps the board above the fold in portrait, below the header', () => {

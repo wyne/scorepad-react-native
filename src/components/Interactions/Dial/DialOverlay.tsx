@@ -88,7 +88,6 @@ interface PlayerDialPageProps {
     swipeDragX: SharedValue<number>;
     onDone: () => void;
     onDismiss: () => void;
-    showHint: boolean;
 }
 
 const PlayerDialPage: React.FC<PlayerDialPageProps> = ({
@@ -103,7 +102,6 @@ const PlayerDialPage: React.FC<PlayerDialPageProps> = ({
     swipeDragX,
     onDone,
     onDismiss,
-    showHint,
 }) => {
     const dispatch = useAppDispatch();
     const player = useAppSelector(state => selectPlayerById(state, playerId));
@@ -265,7 +263,6 @@ const PlayerDialPage: React.FC<PlayerDialPageProps> = ({
                             dialSize={lsDialSize}
                             landscape
                             menuOpen={menuOpen}
-                            showHint={showHint}
                         />
                     </View>
 
@@ -336,7 +333,6 @@ const PlayerDialPage: React.FC<PlayerDialPageProps> = ({
                         addendTwo={addendTwo}
                         dialSize={dialSize}
                         menuOpen={menuOpen}
-                        showHint={showHint}
                     />
                 </View>
 
@@ -372,7 +368,6 @@ interface Props {
     /** Side insets the card keeps clear of, e.g. a landscape notch or the iPhone Duo's vertical bar. */
     safeAreaLeft?: number;
     safeAreaRight?: number;
-    showHint: boolean;
     onClose: () => void;
     svOpacity: SharedValue<number>;
     svSlideY: SharedValue<number>;
@@ -386,7 +381,6 @@ const DialOverlay: React.FC<Props> = ({
     safeAreaTop,
     safeAreaLeft = 0,
     safeAreaRight = 0,
-    showHint,
     onClose,
     svOpacity,
     svSlideY,
@@ -488,10 +482,9 @@ const DialOverlay: React.FC<Props> = ({
                 swipeDragX={swipeDragX}
                 onDone={handleDone}
                 onDismiss={handleDismiss}
-                showHint={showHint}
             />
         </View>
-    ), [targetWidth, cardLayout.width, cardLayout.height, boardHeight, addendOne, addendTwo, menuOpen, swipeDragY, swipeDragX, handleDone, handleDismiss, showHint]);
+    ), [targetWidth, cardLayout.width, cardLayout.height, boardHeight, addendOne, addendTwo, menuOpen, swipeDragY, swipeDragX, handleDone, handleDismiss]);
 
     if (!currentGame) return null;
 
