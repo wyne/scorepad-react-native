@@ -118,35 +118,11 @@ jest.mock('react-native-safe-area-context', () => ({
 
 // Mock @rneui/base
 jest.mock('@rneui/base', () => ({
-    Button: ({ title, onPress, testID }: {
-        title: string;
-        onPress: () => void;
-        testID?: string;
-    }) => {
-        const { TouchableOpacity, Text } = jest.requireActual('react-native');
-        return (
-            <TouchableOpacity onPress={onPress} testID={testID}>
-                <Text>{title}</Text>
-            </TouchableOpacity>
-        );
+    Icon: () => {
+        const { View } = jest.requireActual('react-native');
+        return <View />;
     },
 }));
-
-// Mock components
-jest.mock('../BigButtons/BigButton', () => {
-    return function MockBigButton({ text, onPress, testID }: {
-        text: string;
-        onPress: () => void;
-        testID?: string;
-    }) {
-        const { TouchableOpacity, Text } = jest.requireActual('react-native');
-        return (
-            <TouchableOpacity onPress={onPress} testID={testID || `big-button-${text.toLowerCase()}`}>
-                <Text>{text}</Text>
-            </TouchableOpacity>
-        );
-    };
-});
 
 jest.mock('../Icons/RematchIcon', () => {
     return function MockRematchIcon() {
@@ -386,7 +362,7 @@ describe('GameSheet', () => {
         );
 
         expect(queryByText('Locked')).toBeNull();
-        expect(getByText('Unlock')).toBeTruthy();
+        expect(getByText('Unlock to keep scoring')).toBeTruthy();
     });
 
     it('should show unlock button when game is locked', () => {
@@ -580,7 +556,7 @@ describe('GameSheet', () => {
             </Provider>
         );
 
-        expect(getByTestId('big-button-reset')).toBeTruthy();
+        expect(getByTestId('reset-button')).toBeTruthy();
     });
 
     it('should not show reset button when game is locked', () => {
@@ -607,7 +583,7 @@ describe('GameSheet', () => {
             </Provider>
         );
 
-        expect(queryByTestId('big-button-reset')).toBeNull();
+        expect(queryByTestId('reset-button')).toBeNull();
     });
 
     it('should show rematch button', () => {
@@ -633,7 +609,7 @@ describe('GameSheet', () => {
             </Provider>
         );
 
-        expect(getByTestId('big-button-rematch')).toBeTruthy();
+        expect(getByTestId('rematch-button')).toBeTruthy();
     });
 
     it('should show alert when reset button is pressed', async () => {
@@ -659,7 +635,7 @@ describe('GameSheet', () => {
             </Provider>
         );
 
-        const resetButton = getByTestId('big-button-reset');
+        const resetButton = getByTestId('reset-button');
         fireEvent.press(resetButton);
 
         await waitFor(() => {
@@ -697,7 +673,7 @@ describe('GameSheet', () => {
             </Provider>
         );
 
-        const rematchButton = getByTestId('big-button-rematch');
+        const rematchButton = getByTestId('rematch-button');
         fireEvent.press(rematchButton);
 
         await waitFor(() => {
@@ -735,7 +711,7 @@ describe('GameSheet', () => {
             </Provider>
         );
 
-        const editButton = getByText('Edit Game and Players');
+        const editButton = getByText('Edit game & players');
         fireEvent.press(editButton);
 
         await waitFor(() => {
@@ -770,7 +746,7 @@ describe('GameSheet', () => {
             </Provider>
         );
 
-        expect(queryByText('Edit Game and Players')).toBeNull();
+        expect(queryByText('Edit game & players')).toBeNull();
     });
 
     it('should clear winnerIds when unlocking', async () => {
@@ -806,6 +782,68 @@ describe('GameSheet', () => {
             const game = state.games.entities['game-1'];
             expect(game?.locked).toBe(false);
             expect(game?.winnerIds).toEqual([]);
+        });
+    });
+
+    describe('finished game', () => {
+        const renderFinished = (winnerIds: string[], scores: [number[], number[]]) => {
+            const store = createMockStore({
+                settings: { currentGameId: 'game-1' },
+                games: {
+                    entities: { 'game-1': { ...mockGame, locked: true, winnerIds } },
+                    ids: ['game-1'],
+                },
+                players: {
+                    entities: {
+                        'player-1': { ...mockPlayers['player-1'], scores: scores[0] },
+                        'player-2': { ...mockPlayers['player-2'], scores: scores[1] },
+                    },
+                    ids: ['player-1', 'player-2'],
+                },
+            });
+            return render(
+                <Provider store={store}>
+                    <GameSheet {...defaultProps} />
+                </Provider>
+            );
+        };
+
+        it('leads with the result and the winning margin', () => {
+            const { getByTestId, getByText } = renderFinished(['player-1'], [[40, 30], [20, 10]]);
+
+            expect(getByTestId('game-result-banner')).toBeTruthy();
+            expect(getByText('Player 1')).toBeTruthy();
+            expect(getByText('by 40')).toBeTruthy();
+        });
+
+        it('names every winner of a tie, without a margin', () => {
+            const { getByText, queryByText } = renderFinished(['player-1', 'player-2'], [[30], [30]]);
+
+            expect(getByText('Player 1 and Player 2')).toBeTruthy();
+            expect(queryByText(/^by /)).toBeNull();
+        });
+
+        it('makes Rematch the main action in place of Choose Winners', () => {
+            const { getByTestId, queryByTestId } = renderFinished(['player-1'], [[40], [20]]);
+
+            expect(getByTestId('rematch-primary-button')).toBeTruthy();
+            expect(queryByTestId('choose-winners-button')).toBeNull();
+            expect(queryByTestId('rematch-button')).toBeNull();
+        });
+
+        it('shows no result while the game is in play', () => {
+            const store = createMockStore({
+                settings: { currentGameId: 'game-1' },
+                games: { entities: { 'game-1': mockGame }, ids: ['game-1'] },
+                players: { entities: mockPlayers, ids: ['player-1', 'player-2'] },
+            });
+            const { queryByTestId } = render(
+                <Provider store={store}>
+                    <GameSheet {...defaultProps} />
+                </Provider>
+            );
+
+            expect(queryByTestId('game-result-banner')).toBeNull();
         });
     });
 

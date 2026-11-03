@@ -4,9 +4,8 @@ import BottomSheet, { BottomSheetBackdrop, BottomSheetBackdropProps, BottomSheet
 import { getDefaultHeaderHeight } from '@react-navigation/elements';
 import { ParamListBase, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { Button } from '@rneui/base';
 import { Alert, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View, useWindowDimensions } from 'react-native';
-import Animated, { Extrapolate, FadeIn, FadeOut, interpolate, ReduceMotion, runOnJS, useAnimatedReaction, useAnimatedStyle, useDerivedValue, useSharedValue, withTiming } from 'react-native-reanimated';
+import Animated, { Extrapolate, FadeIn, FadeOut, interpolate, ReduceMotion, runOnJS, useAnimatedReaction, useAnimatedStyle, useDerivedValue, useSharedValue } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { asyncRematchGame, selectGameById, updateGame } from '../../../redux/GamesSlice';
@@ -16,13 +15,12 @@ import { selectGameModesVisible } from '../../../redux/selectors';
 import { logEvent } from '../../Analytics';
 import { useExpandedGameLayout, useExpandedGameSplit, useFoldSplitBounds, useGameFoldSplit, useVerticalBarLayout } from '../../hooks/useExpandedGameLayout';
 import { useTheme } from '../../theme';
-import BigButton from '../BigButtons/BigButton';
 import RoundHeaderTitle from '../Headers/RoundHeaderTitle';
-import RematchIcon from '../Icons/RematchIcon';
 import ScoreLogTable from '../ScoreLogTable';
 import { scoringShortSummary } from '../ScoringRow';
 
 import { useChooseWinnersSheetContext } from './ChooseWinnersSheetContext';
+import GameSheetActions, { GameResultBanner } from './GameSheetActions';
 import { useGameSheetContext, useGameSheetPendingIndex } from './GameSheetContext';
 import SheetBackground from './SheetBackground';
 
@@ -31,12 +29,9 @@ import SheetBackground from './SheetBackground';
  */
 export const bottomSheetHeight = 80;
 
-const BUTTON_TILE_MAX_WIDTH = 260;
-
 // A fade is gentle enough to keep with Reduce Motion on.
 const SHEET_FADE_IN = FadeIn.duration(200).reduceMotion(ReduceMotion.Never);
 const SHEET_FADE_OUT = FadeOut.duration(150).reduceMotion(ReduceMotion.Never);
-const BUTTON_TILE_MARGIN = 5;
 
 const GameSheet: React.FunctionComponent = () => {
     const theme = useTheme();
@@ -85,8 +80,6 @@ const GameSheet: React.FunctionComponent = () => {
         ? topInset
         : getDefaultHeaderHeight({ width: containerWidth, height: containerHeight }, false, topInset)) + 8;
 
-    // Stable key for animated children to force remount on each mount
-    const mountKey = useRef(Date.now()).current;
 
     /**
      * Unlock the game and clear winners
@@ -326,36 +319,6 @@ const GameSheet: React.FunctionComponent = () => {
     });
 
     /**
-     * Locking the game removes Edit Game and Reset, and the remaining buttons
-     * rebalance. This is animated directly (fade, then collapse) rather than
-     * with layout transitions, which also fire on every resize and would chase
-     * the sheet's width while it is dragged. Everything here is derived from
-     * the sheet width and lockProgress on the UI thread, so each frame is laid
-     * out once. The removed items unmount once collapsed.
-     */
-    const lockProgress = useSharedValue(gameLocked ? 1 : 0);
-    const [renderUnlockedItems, setRenderUnlockedItems] = useState(!gameLocked);
-    useEffect(() => {
-        if (!gameLocked) setRenderUnlockedItems(true);
-        lockProgress.value = withTiming(gameLocked ? 1 : 0, { duration: 600 }, (finished) => {
-            if (finished && gameLocked) runOnJS(setRenderUnlockedItems)(false);
-        });
-    }, [gameLocked, lockProgress]);
-
-    const editButtonHeight = useSharedValue(0);
-    const animatedEditButtonStyle = useAnimatedStyle(() => ({
-        opacity: interpolate(lockProgress.value, [0, 0.4], [1, 0], Extrapolate.CLAMP),
-        maxHeight: editButtonHeight.value > 0
-            ? interpolate(lockProgress.value, [0.4, 1], [editButtonHeight.value, 0], Extrapolate.CLAMP)
-            : 9999, // not measured yet: no limit
-    }));
-    const animatedResetButtonStyle = useAnimatedStyle(() => ({
-        opacity: interpolate(lockProgress.value, [0, 0.4], [1, 0], Extrapolate.CLAMP),
-        maxWidth: interpolate(lockProgress.value, [0.4, 1], [BUTTON_TILE_MAX_WIDTH, 0], Extrapolate.CLAMP),
-        marginHorizontal: interpolate(lockProgress.value, [0.4, 1], [BUTTON_TILE_MARGIN, 0], Extrapolate.CLAMP),
-    }));
-
-    /**
      * The round picker beside the collapsed sheet fades out as the sheet
      * grows over it.
      */
@@ -477,81 +440,28 @@ const GameSheet: React.FunctionComponent = () => {
                                 </View>
                             }
 
+                            <GameResultBanner />
+
                             <ScoreLogTable showRounds={docked || shouldRenderContent} />
 
-                            <Text style={{ color: theme.text, marginHorizontal: 5, marginBottom: 10 }}>
+                            <Text style={{ color: theme.textSecondary, fontSize: 13, marginHorizontal: 5, marginTop: 4, marginBottom: 10 }}>
                                 Tap the player column or total score column to change sorting.
                             </Text>
 
-                            {renderUnlockedItems &&
-                                <Animated.View style={[styles.collapsible, animatedEditButtonStyle]}>
-                                    <Animated.View
-                                        entering={FadeIn.delay(400)}
-                                        // Keep its natural height while the wrapper collapses around
-                                        // it, and only record that height when fully expanded, so an
-                                        // unlock grows it back to the real size.
-                                        style={styles.noShrink}
-                                        onLayout={(e) => {
-                                            if (lockProgress.value === 0) editButtonHeight.value = e.nativeEvent.layout.height;
-                                        }}
-                                    >
-                                        <Button title="Edit Game and Players"
-                                            type="clear"
-                                            testID="edit-game-and-players"
-                                            accessibilityLabel="Edit Game and Players"
-                                            titleStyle={{ color: theme.tint }}
-                                            style={{
-                                                margin: 5, marginTop: 15,
-                                                backgroundColor: theme.background === '#000000' ? 'rgba(0,0,0,.2)' : '#FFFFFF', borderRadius: 10
-                                            }}
-                                            onPress={() => {
-
-                                                logEvent('edit_game', {
-                                                    game_id: currentGameId
-                                                });
-                                                navigation.navigate('EditGame', { source: 'edit_game' });
-                                            }
-                                            }
-                                        />
-                                    </Animated.View>
-                                </Animated.View>
-                            }
-
-                            <View key={mountKey + 'a'} style={styles.buttonRow}>
-                                <BigButton text="Share"
-                                    color={theme.tint}
-                                    icon="share-outline"
-                                    onPress={() => navigation.navigate('Share')}
-                                    style={styles.buttonTile}
-                                    testID="share-button"
-                                />
-
-                                <BigButton text={gameLocked ? 'Unlock' : 'Choose Winners'}
-                                    color={gameLocked ? theme.warning : theme.success}
-                                    icon={gameLocked ? 'lock-closed-outline' : 'lock-open-outline'}
-                                    onPress={gameLocked ? unlockGame : () => chooseWinnersSheetRef?.current?.present()}
-                                    style={styles.buttonTile}
-                                    testID={gameLocked ? 'unlock-button' : 'choose-winners-button'}
-                                />
-                            </View>
-
-                            <View key={mountKey + 'b'} style={styles.buttonRow}>
-                                {renderUnlockedItems &&
-                                    <BigButton text="Reset"
-                                        color={theme.destructive}
-                                        icon="backspace-outline"
-                                        onPress={resetGameHandler}
-                                        style={[styles.buttonTile, styles.collapsible, animatedResetButtonStyle]}
-                                    />
-                                }
-
-                                <BigButton text="Rematch"
-                                    color={theme.warning}
-                                    icon={<RematchIcon fill={theme.warning} />}
-                                    onPress={rematchGameHandler}
-                                    style={styles.buttonTile}
-                                />
-                            </View>
+                            <GameSheetActions
+                                locked={gameLocked === true}
+                                onShare={() => navigation.navigate('Share')}
+                                onChooseWinners={() => chooseWinnersSheetRef?.current?.present()}
+                                onUnlock={unlockGame}
+                                onRematch={rematchGameHandler}
+                                onReset={resetGameHandler}
+                                onEditGame={() => {
+                                    logEvent('edit_game', {
+                                        game_id: currentGameId
+                                    });
+                                    navigation.navigate('EditGame', { source: 'edit_game' });
+                                }}
+                            />
                         </Animated.View>
                     </Animated.View>
                 </BottomSheetScrollView>
@@ -603,38 +513,11 @@ const styles = StyleSheet.create({
         fontSize: 20,
         paddingHorizontal: 10,
     },
-    buttonRow: {
-        flexDirection: 'row',
-        justifyContent: 'center',
-        paddingVertical: 10,
-    },
-    // Two tiles share a row and grow with the sheet; a lone tile stays the
-    // same size and is centered.
-    buttonTile: {
-        width: '47%',
-        maxWidth: BUTTON_TILE_MAX_WIDTH,
-        marginHorizontal: BUTTON_TILE_MARGIN,
-    },
-    collapsible: {
-        overflow: 'hidden',
-    },
-    noShrink: {
-        flexShrink: 0,
-    },
     // 15 plus each child's own 5pt margin lines content up with the title
     // at the app's 20pt gutter.
     sheetContent: {
         paddingVertical: 10,
         paddingHorizontal: 15,
-    },
-    shareButton: {
-        width: 100,
-        margin: 5,
-        padding: 10,
-        paddingHorizontal: 20,
-        backgroundColor: 'rgba(0,0,0,.2)',
-        borderRadius: 10,
-        alignItems: 'center'
     },
 });
 
