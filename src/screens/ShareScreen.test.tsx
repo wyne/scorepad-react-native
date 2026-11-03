@@ -176,8 +176,8 @@ describe('ShareScreen', () => {
     it('hides round columns and details when toggled off', () => {
         const { getByTestId, queryByTestId, queryByText } = renderWithGame();
 
-        fireEvent(getByTestId('share-toggle-rounds'), 'valueChange', false);
-        fireEvent(getByTestId('share-toggle-details'), 'valueChange', false);
+        fireEvent.press(getByTestId('share-toggle-rounds'));
+        fireEvent.press(getByTestId('share-toggle-details'));
 
         expect(queryByTestId('share-round-0')).toBeNull();
         expect(queryByText(/3 rounds · 2 players/)).toBeNull();
@@ -194,10 +194,18 @@ describe('ShareScreen', () => {
         expect(getByText('by 5 points')).toBeTruthy();
     });
 
-    it('opens the editor from the edit row', () => {
-        const { getByText } = renderWithGame();
+    it('keeps the controls above the scrolling preview', () => {
+        const { getByTestId } = renderWithGame();
 
-        fireEvent.press(getByText('Edit title & names'));
+        const scroll = getByTestId('share-screen-scroll');
+        expect(scroll.findAll(node => node.props.testID === 'share-format-scoreboard')).toHaveLength(0);
+        expect(scroll.findAll(node => node.props.testID === 'share-preview').length).toBeGreaterThan(0);
+    });
+
+    it('opens the editor from the edit chip', () => {
+        const { getByTestId } = renderWithGame();
+
+        fireEvent.press(getByTestId('share-edit'));
 
         expect(mockNavigation.navigate).toHaveBeenCalledWith('EditGame', { source: 'share_screen' });
     });

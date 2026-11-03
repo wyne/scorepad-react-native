@@ -91,7 +91,7 @@ const ScoreboardTable: React.FunctionComponent<{ rows: ShareRow[]; result: Share
                 {header('Player', 'left')}
                 {rows.map((row, i) => (
                     <View key={row.id} style={[cellStyle(i), styles.nameCell]}>
-                        <View style={[styles.colorBar, { backgroundColor: row.color }]} />
+                        <View style={[styles.colorBar, { backgroundColor: row.color, borderColor: theme.separator }]} />
                         <Text style={[styles.name, { color: theme.text }]} numberOfLines={1}>{row.name}</Text>
                         {result.winnerIds.includes(row.id) && <Text style={styles.crown}> ♛</Text>}
                     </View>
@@ -171,7 +171,7 @@ const ShareCard: React.FunctionComponent<CardProps> = ({
                                 i > 0 && { borderTopColor: theme.separator, borderTopWidth: StyleSheet.hairlineWidth },
                             ]}>
                                 <Text style={[styles.rank, { color: theme.textTertiary }]}>{row.rank}</Text>
-                                <View style={[styles.colorBar, { backgroundColor: row.color }]} />
+                                <View style={[styles.colorBar, { backgroundColor: row.color, borderColor: theme.separator }]} />
                                 <Text style={[styles.name, styles.flex, { color: theme.text }]} numberOfLines={1}>{row.name}</Text>
                                 <Text style={[styles.total, { color: theme.text }]}>{row.total}</Text>
                             </View>
@@ -189,7 +189,7 @@ const ShareCard: React.FunctionComponent<CardProps> = ({
             {showDetails && <Text style={[styles.cardDetails, { color: theme.textSecondary }]}>{details}</Text>}
             {result.headline !== '' && (
                 <View style={[styles.headline, { backgroundColor: theme.backgroundTertiary }]}>
-                    <View style={[styles.headlineDot, { backgroundColor: rows.find(row => result.winnerIds.includes(row.id))?.color }]} />
+                    <View style={[styles.headlineDot, { backgroundColor: rows.find(row => result.winnerIds.includes(row.id))?.color, borderColor: theme.separator }]} />
                     <Text style={[styles.headlineText, { color: theme.text }]} numberOfLines={1}>{result.headline}</Text>
                     {result.margin != null && <Text style={[styles.headlineMargin, { color: theme.textSecondary }]}>+{result.margin}</Text>}
                 </View>
@@ -275,9 +275,8 @@ const ShareScreen: React.FunctionComponent<Props> = ({ navigation }) => {
         </ScrollView>
     );
 
-    const options = (
-        <View style={styles.options}>
-            <View style={[styles.segmented, { backgroundColor: theme.backgroundTertiary }]}>
+    const formatPicker = (
+        <View style={[styles.segmented, { backgroundColor: theme.backgroundTertiary }]}>
                 {FORMATS.map(([value, label]) => {
                     const selected = format === value;
                     return (
@@ -295,8 +294,15 @@ const ShareScreen: React.FunctionComponent<Props> = ({ navigation }) => {
                         </TouchableOpacity>
                     );
                 })}
-            </View>
+        </View>
+    );
 
+    const editGame = () => navigation.navigate('EditGame', { source: 'share_screen' });
+
+    // Two-pane layout: a settings-style list beside the preview.
+    const options = (
+        <View style={styles.options}>
+            {formatPicker}
             <View style={[styles.group, { backgroundColor: theme.backgroundSecondary }]}>
                 <View style={styles.groupRow}>
                     <Text style={[styles.groupLabel, { color: theme.text }]}>Round-by-round scores</Text>
@@ -313,11 +319,37 @@ const ShareScreen: React.FunctionComponent<Props> = ({ navigation }) => {
                 <TouchableOpacity
                     style={styles.groupRow}
                     accessibilityRole="button"
-                    onPress={() => navigation.navigate('EditGame', { source: 'share_screen' })}
+                    onPress={editGame}
                 >
                     <Text style={[styles.groupLabel, { color: theme.text }]}>Edit title & names</Text>
                     <Icon name="chevron-right" color={theme.textTertiary} />
                 </TouchableOpacity>
+            </View>
+        </View>
+    );
+
+    const chip = (testID: string, label: string, icon: string, on: boolean | undefined, onPress: () => void) => (
+        <TouchableOpacity
+            testID={testID}
+            accessibilityRole={on === undefined ? 'button' : 'checkbox'}
+            accessibilityState={on === undefined ? undefined : { checked: on }}
+            onPress={onPress}
+            style={[styles.chip, { backgroundColor: on ? theme.tint : theme.backgroundSecondary }]}
+        >
+            <Icon name={icon} type="material" size={16} color={on ? '#FFFFFF' : theme.tint} />
+            <Text style={[styles.chipLabel, { color: on ? '#FFFFFF' : theme.tint }]}>{label}</Text>
+        </TouchableOpacity>
+    );
+
+    // Single pane: compact controls that stay above the preview, so a long
+    // scoreboard never pushes them off screen.
+    const compactOptions = (
+        <View style={styles.compactOptions}>
+            {formatPicker}
+            <View style={styles.chips}>
+                {chip('share-toggle-rounds', 'Rounds', showRounds ? 'check' : 'add', showRounds, () => setShowRounds(!showRounds))}
+                {chip('share-toggle-details', 'Date', showDetails ? 'check' : 'add', showDetails, () => setShowDetails(!showDetails))}
+                {chip('share-edit', 'Edit names', 'edit', undefined, editGame)}
             </View>
         </View>
     );
@@ -368,10 +400,10 @@ const ShareScreen: React.FunctionComponent<Props> = ({ navigation }) => {
             paddingLeft: insets.left,
             paddingRight: insets.right,
         }]}>
+            {compactOptions}
             <ScrollView testID="share-screen-scroll"
                 contentContainerStyle={{ paddingBottom: insets.bottom + 96 }}>
                 {preview}
-                {options}
             </ScrollView>
             <View style={[styles.floatingActions, { left: insets.left, right: insets.right, backgroundColor: theme.background }]}>
                 {actions}
@@ -419,6 +451,7 @@ const styles = StyleSheet.create({
     },
     headlineDot: {
         borderRadius: 5,
+        borderWidth: StyleSheet.hairlineWidth,
         height: 10,
         marginRight: 8,
         width: 10,
@@ -470,6 +503,7 @@ const styles = StyleSheet.create({
     },
     colorBar: {
         borderRadius: 2,
+        borderWidth: StyleSheet.hairlineWidth,
         height: 16,
         marginRight: 8,
         width: 4,
@@ -614,6 +648,28 @@ const styles = StyleSheet.create({
     },
     groupLabel: {
         fontSize: 16,
+    },
+    compactOptions: {
+        gap: 10,
+        paddingHorizontal: SIDE_PADDING,
+        paddingTop: 8,
+    },
+    chips: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        gap: 8,
+    },
+    chip: {
+        alignItems: 'center',
+        borderRadius: 16,
+        flexDirection: 'row',
+        gap: 4,
+        minHeight: 32,
+        paddingHorizontal: 12,
+    },
+    chipLabel: {
+        fontSize: 14,
+        fontWeight: '600',
     },
     separator: {
         height: StyleSheet.hairlineWidth,
