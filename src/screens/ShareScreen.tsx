@@ -60,6 +60,7 @@ interface CardProps {
     result: ShareResult;
     showRounds: boolean;
     showDetails: boolean;
+    showResult: boolean;
     minWidth: number;
     theme: ThemeColors;
 }
@@ -142,7 +143,7 @@ const Standings: React.FunctionComponent<{ rows: ShareRow[]; theme: ThemeColors 
 };
 
 const ShareCard: React.FunctionComponent<CardProps> = ({
-    title, details, format, rows, result, showRounds, showDetails, minWidth, theme,
+    title, details, format, rows, result, showRounds, showDetails, showResult, minWidth, theme,
 }) => {
     if (format === 'winner') {
         const winners = rows.filter(row => result.winnerIds.includes(row.id));
@@ -187,7 +188,7 @@ const ShareCard: React.FunctionComponent<CardProps> = ({
         <View style={[styles.card, { minWidth, backgroundColor: theme.backgroundSecondary }]}>
             <Text style={[styles.cardTitle, { color: theme.text }]}>{title}</Text>
             {showDetails && <Text style={[styles.cardDetails, { color: theme.textSecondary }]}>{details}</Text>}
-            {result.headline !== '' && (
+            {showResult && result.headline !== '' && (
                 <View style={[styles.headline, { backgroundColor: theme.backgroundTertiary }]}>
                     <View style={[styles.headlineDot, { backgroundColor: rows.find(row => result.winnerIds.includes(row.id))?.color, borderColor: theme.separator }]} />
                     <Text style={[styles.headlineText, { color: theme.text }]} numberOfLines={1}>{result.headline}</Text>
@@ -213,6 +214,7 @@ const ShareScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     const [format, setFormat] = useState<ShareFormat>('scoreboard');
     const [showRounds, setShowRounds] = useState(true);
     const [showDetails, setShowDetails] = useState(true);
+    const [showResult, setShowResult] = useState(true);
 
     const rows = useMemo(() => (game ? buildShareRows(game, players) : []), [game, players]);
     const result = useMemo(() => (game ? describeResult(game, rows) : { winnerIds: [], headline: '' }), [game, rows]);
@@ -242,7 +244,9 @@ const ShareScreen: React.FunctionComponent<Props> = ({ navigation }) => {
                 UTI: 'image/png',
             });
 
-            void logEvent('share_image', { format, rounds_shown: showRounds, details_shown: showDetails });
+            void logEvent('share_image', {
+                format, rounds_shown: showRounds, details_shown: showDetails, result_shown: showResult,
+            });
         } catch (error) {
             console.error('Failed to capture or share image:', error);
         }
@@ -268,6 +272,7 @@ const ShareScreen: React.FunctionComponent<Props> = ({ navigation }) => {
                     result={result}
                     showRounds={showRounds}
                     showDetails={showDetails}
+                    showResult={showResult}
                     minWidth={cardMinWidth}
                     theme={theme}
                 />
@@ -316,6 +321,12 @@ const ShareScreen: React.FunctionComponent<Props> = ({ navigation }) => {
                         ios_backgroundColor={theme.separator} />
                 </View>
                 <View style={[styles.separator, { backgroundColor: theme.separator }]} />
+                <View style={styles.groupRow}>
+                    <Text style={[styles.groupLabel, { color: theme.text }]}>Who's winning</Text>
+                    <Switch testID="share-toggle-result" value={showResult} onValueChange={setShowResult}
+                        ios_backgroundColor={theme.separator} />
+                </View>
+                <View style={[styles.separator, { backgroundColor: theme.separator }]} />
                 <TouchableOpacity
                     style={styles.groupRow}
                     accessibilityRole="button"
@@ -349,7 +360,8 @@ const ShareScreen: React.FunctionComponent<Props> = ({ navigation }) => {
             <View style={styles.chips}>
                 {chip('share-toggle-rounds', 'Rounds', showRounds ? 'check' : 'add', showRounds, () => setShowRounds(!showRounds))}
                 {chip('share-toggle-details', 'Date', showDetails ? 'check' : 'add', showDetails, () => setShowDetails(!showDetails))}
-                {chip('share-edit', 'Edit names', 'edit', undefined, editGame)}
+                {chip('share-toggle-result', 'Result', showResult ? 'check' : 'add', showResult, () => setShowResult(!showResult))}
+                {chip('share-edit', 'Edit', 'edit', undefined, editGame)}
             </View>
         </View>
     );
@@ -651,6 +663,7 @@ const styles = StyleSheet.create({
     },
     compactOptions: {
         gap: 10,
+        paddingBottom: 12,
         paddingHorizontal: SIDE_PADDING,
         paddingTop: 8,
     },

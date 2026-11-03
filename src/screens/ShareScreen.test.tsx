@@ -183,6 +183,15 @@ describe('ShareScreen', () => {
         expect(queryByText(/3 rounds · 2 players/)).toBeNull();
     });
 
+    it('hides the result line when toggled off', () => {
+        const { getByTestId, queryByText } = renderWithGame();
+
+        fireEvent.press(getByTestId('share-toggle-result'));
+
+        expect(queryByText('Player 2 leads with 50')).toBeNull();
+        expect(queryByText('+5')).toBeNull();
+    });
+
     it('switches between formats', () => {
         const { getByTestId, queryByTestId, getByText } = renderWithGame();
 
@@ -237,7 +246,7 @@ describe('ShareScreen', () => {
             });
         });
         expect(mockLogEvent).toHaveBeenCalledWith('share_image', {
-            format: 'scoreboard', rounds_shown: true, details_shown: true,
+            format: 'scoreboard', rounds_shown: true, details_shown: true, result_shown: true,
         });
     });
 

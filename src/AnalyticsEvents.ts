@@ -101,6 +101,7 @@ export interface AnalyticsEventParams {
         format: 'scoreboard' | 'standings' | 'winner';
         rounds_shown: boolean;
         details_shown: boolean;
+        result_shown: boolean;
     };
     share_text: { rounds_shown: boolean; details_shown: boolean };
 
