@@ -3,14 +3,15 @@ import React, { useEffect } from 'react';
 import { StyleSheet } from 'react-native';
 import Animated, { Easing, interpolate, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 
+import {
+    estimateParticleTextSize,
+    getParticlePlacement,
+    PARTICLE_BOX_HEIGHT,
+    PARTICLE_BOX_WIDTH,
+} from './ScoreParticlePlacement';
+
 /** How long a particle lives, from the tap until it has faded out. */
 export const PARTICLE_DURATION = 750;
-
-// How far the number drifts away from the score over its life.
-const DRIFT = 62;
-// The box the number is centered in, so it can be placed by its center.
-const BOX_WIDTH = 140;
-const BOX_HEIGHT = 64;
 
 type Props = {
     value: string;
@@ -23,13 +24,25 @@ type Props = {
     color: string;
     /** A hold adds the larger step, so its number is drawn larger. */
     large?: boolean;
+    /** Size of the half-tile touch surface; the tile clips the particle at its outer edge. */
+    containerWidth: number;
+    containerHeight: number;
 };
 
 /**
  * A score change drawn under the finger: it pops in, then drifts away from
  * the score while it fades.
  */
-export const ScoreParticle: React.FunctionComponent<Props> = React.memo(({ value, x, y, direction, color, large = false }) => {
+export const ScoreParticle: React.FunctionComponent<Props> = React.memo(({
+    value,
+    x,
+    y,
+    direction,
+    color,
+    large = false,
+    containerWidth,
+    containerHeight,
+}) => {
     const progress = useSharedValue(0);
     // A little sideways jitter keeps quick repeat taps from stacking exactly.
     const [jitter] = React.useState(() => (Math.random() - 0.5) * 14);
@@ -39,6 +52,11 @@ export const ScoreParticle: React.FunctionComponent<Props> = React.memo(({ value
     }, [progress]);
 
     const sign = direction === 'up' ? -1 : 1;
+    const fontSize = large ? 40 : 30;
+    const text = estimateParticleTextSize(value, fontSize);
+    const placement = getParticlePlacement(
+        x, y, direction, containerWidth, containerHeight, jitter, text.width, text.height
+    );
 
     const animatedStyle = useAnimatedStyle(() => {
         const t = progress.value * PARTICLE_DURATION;
@@ -46,7 +64,7 @@ export const ScoreParticle: React.FunctionComponent<Props> = React.memo(({ value
         return {
             opacity: interpolate(t, [0, 90, 330, PARTICLE_DURATION], [0, 1, 1, 0], 'clamp'),
             transform: [
-                { translateY: sign * DRIFT * drift },
+                { translateY: sign * placement.drift * drift },
                 { scale: interpolate(t, [0, 140, 260], [0.55, 1.15, 1], 'clamp') },
             ],
         };
@@ -57,11 +75,11 @@ export const ScoreParticle: React.FunctionComponent<Props> = React.memo(({ value
     return (
         <Animated.View
             pointerEvents="none"
-            style={[styles.box, { left: x - BOX_WIDTH / 2 + jitter, top: y - BOX_HEIGHT / 2 }, animatedStyle]}
+            style={[styles.box, { left: placement.left, top: placement.top }, animatedStyle]}
         >
             <Animated.Text
                 allowFontScaling={false}
-                style={[styles.text, { color, fontSize: large ? 40 : 30, textShadowColor: shadowColor }]}
+                style={[styles.text, { color, fontSize, textShadowColor: shadowColor }]}
             >
                 {value}
             </Animated.Text>
@@ -72,8 +90,8 @@ export const ScoreParticle: React.FunctionComponent<Props> = React.memo(({ value
 const styles = StyleSheet.create({
     box: {
         position: 'absolute',
-        width: BOX_WIDTH,
-        height: BOX_HEIGHT,
+        width: PARTICLE_BOX_WIDTH,
+        height: PARTICLE_BOX_HEIGHT,
         alignItems: 'center',
         justifyContent: 'center',
     },
