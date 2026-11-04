@@ -4,6 +4,7 @@ import { StyleSheet } from 'react-native';
 import Animated, { Easing, interpolate, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 
 import {
+    estimateParticleTextSize,
     getParticlePlacement,
     PARTICLE_BOX_HEIGHT,
     PARTICLE_BOX_WIDTH,
@@ -23,7 +24,7 @@ type Props = {
     color: string;
     /** A hold adds the larger step, so its number is drawn larger. */
     large?: boolean;
-    /** Bounds of the half-tile touch surface that clips the particle. */
+    /** Size of the half-tile touch surface; the tile clips the particle at its outer edge. */
     containerWidth: number;
     containerHeight: number;
 };
@@ -51,7 +52,11 @@ export const ScoreParticle: React.FunctionComponent<Props> = React.memo(({
     }, [progress]);
 
     const sign = direction === 'up' ? -1 : 1;
-    const placement = getParticlePlacement(x, y, direction, containerWidth, containerHeight, jitter);
+    const fontSize = large ? 40 : 30;
+    const text = estimateParticleTextSize(value, fontSize);
+    const placement = getParticlePlacement(
+        x, y, direction, containerWidth, containerHeight, jitter, text.width, text.height
+    );
 
     const animatedStyle = useAnimatedStyle(() => {
         const t = progress.value * PARTICLE_DURATION;
@@ -74,7 +79,7 @@ export const ScoreParticle: React.FunctionComponent<Props> = React.memo(({
         >
             <Animated.Text
                 allowFontScaling={false}
-                style={[styles.text, { color, fontSize: large ? 40 : 30, textShadowColor: shadowColor }]}
+                style={[styles.text, { color, fontSize, textShadowColor: shadowColor }]}
             >
                 {value}
             </Animated.Text>

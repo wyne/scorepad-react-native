@@ -1,48 +1,56 @@
-import { getParticlePlacement } from './ScoreParticlePlacement';
+import { estimateParticleTextSize, getParticlePlacement } from './ScoreParticlePlacement';
+
+// "+1" at 30pt: 36 wide, 36 tall.
+const TEXT_W = 36;
+const TEXT_H = 36;
+
+const place = (x: number, y: number, direction: 'up' | 'down', w: number, h: number, jitter = 0) =>
+    getParticlePlacement(x, y, direction, w, h, jitter, TEXT_W, TEXT_H);
+
+describe('estimateParticleTextSize', () => {
+    it('scales with the number of characters and the font size', () => {
+        expect(estimateParticleTextSize('+1', 30)).toEqual({ width: 36, height: 36 });
+        expect(estimateParticleTextSize('−10', 40)).toEqual({ width: 72, height: 48 });
+    });
+});
 
 describe('getParticlePlacement', () => {
-    it('keeps an interior particle under the touch and uses the available outward drift', () => {
-        expect(getParticlePlacement(100, 80, 'up', 240, 160, 0)).toEqual({
-            left: 30,
-            top: 48,
-            drift: 48,
-        });
+    it('keeps an interior particle under the touch with its full drift', () => {
+        // Box is 140x64, so its left/top sit 70/32 before the touch point.
+        expect(place(100, 80, 'up', 240, 160)).toEqual({ left: 30, top: 48, drift: 62 });
+    });
+
+    it('keeps a particle near the side edge close to the finger', () => {
+        // On a 171pt tile a tap 15pt from the edge stays at 18pt (half the text), not 70pt.
+        expect(place(15, 80, 'up', 171, 154).left).toBe(18 - 70);
+        expect(place(165, 80, 'up', 171, 154).left).toBe(171 - 18 - 70);
+    });
+
+    it('shortens drift only by the text height near the outer edge', () => {
+        expect(place(100, 50, 'up', 240, 160).drift).toBe(32);
+        expect(place(100, 110, 'down', 240, 160).drift).toBe(32);
     });
 
     it('clamps an add particle inside the top-left edge', () => {
-        expect(getParticlePlacement(0, 0, 'up', 240, 160, -7)).toEqual({
-            left: 0,
-            top: 0,
-            drift: 0,
-        });
+        expect(place(0, 0, 'up', 240, 160, -7)).toEqual({ left: 18 - 70, top: 18 - 32, drift: 0 });
     });
 
     it('clamps a subtract particle inside the bottom-right edge', () => {
-        expect(getParticlePlacement(240, 160, 'down', 240, 160, 7)).toEqual({
-            left: 100,
-            top: 96,
-            drift: 0,
-        });
+        expect(place(240, 160, 'down', 240, 160, 7)).toEqual({ left: 222 - 70, top: 142 - 32, drift: 0 });
     });
 
     it('does not shift a particle away from a touch at the score-side edge', () => {
-        expect(getParticlePlacement(120, 160, 'up', 240, 160, 0)).toEqual({
-            left: 50,
-            top: 128,
-            drift: 62,
-        });
-        expect(getParticlePlacement(120, 0, 'down', 240, 160, 0)).toEqual({
-            left: 50,
-            top: -32,
-            drift: 62,
-        });
+        expect(place(120, 160, 'up', 240, 160)).toEqual({ left: 50, top: 128, drift: 62 });
+        expect(place(120, 0, 'down', 240, 160)).toEqual({ left: 50, top: -32, drift: 62 });
     });
 
-    it('centers the particle box when the surface is narrower than it', () => {
-        expect(getParticlePlacement(0, 50, 'up', 100, 120, 0)).toEqual({
-            left: -20,
-            top: 18,
-            drift: 18,
-        });
+    it('lets particles on narrow tiles follow the finger', () => {
+        // A 3-column tile is narrower than the 140pt box but much wider than the text.
+        expect(place(20, 60, 'up', 110, 120).left).toBe(20 - 70);
+        expect(place(100, 60, 'up', 110, 120).left).toBe(110 - 18 - 70);
+    });
+
+    it('centers the text when the surface is narrower than it', () => {
+        expect(place(0, 50, 'up', 30, 120).left).toBe(15 - 70);
     });
 });
