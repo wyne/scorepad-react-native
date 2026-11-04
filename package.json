@@ -20,6 +20,7 @@
     "install:ipa": "scripts/install-ipa.sh",
     "postinstall": "patch-package",
     "e2e": "wdio run e2e/wdio.config.ts",
+    "e2e:android": "wdio run e2e/wdio.android.config.ts",
     "e2e:install": "e2e/scripts/install.sh",
     "e2e:record": "e2e/scripts/record.sh"
   },
