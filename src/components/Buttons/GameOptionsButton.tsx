@@ -2,19 +2,21 @@ import React, { useLayoutEffect, useMemo, useRef } from 'react';
 
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { MenuAction, MenuView } from '@react-native-menu/menu';
-import type { NativeStackHeaderItem, NativeStackHeaderItemMenuAction } from '@react-navigation/native-stack';
+import type { NativeStackHeaderItem, NativeStackHeaderItemMenuAction, NativeStackHeaderItemMenuSubmenu } from '@react-navigation/native-stack';
 import { type SFSymbol, SymbolView } from 'expo-symbols';
 import { StyleSheet, View, Text, Platform } from 'react-native';
 
 import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
-import { selectInteractionType, selectIsDialOnly } from '../../../redux/selectors';
+import { selectInteractionType, selectIsDialOnly, selectPlayerNumbers } from '../../../redux/selectors';
 import { toggleHomeFullscreen, markFeatureNotificationSeen } from '../../../redux/SettingsSlice';
 import { logEvent } from '../../Analytics';
 import { FEATURE_DIAL_GESTURE, MAX_TILE_PLAYERS } from '../../constants';
 import { useApplyInteractionType } from '../../hooks/useApplyInteractionType';
+import { useApplyPlayerNumbers } from '../../hooks/useApplyPlayerNumbers';
 import { useTheme } from '../../theme';
 import { InteractionType } from '../Interactions/InteractionType';
 import { useMenuOpen } from '../MenuOpenContext';
+import { PlayerNumberStyle } from '../PlayerTiles/PlayerNumberStyle';
 import { useGameSheetContext } from '../Sheets/GameSheetContext';
 import { useGestureInfoSheetContext } from '../Sheets/GestureInfoSheetContext';
 import { usePointValuesSheetContext } from '../Sheets/PointValuesSheetContext';
@@ -26,6 +28,20 @@ type GameOptionAction = {
     image: SFSymbol;
     state?: 'on' | 'off';
     disabled?: boolean;
+    // Shown as a submenu of these choices instead of a single action.
+    subactions?: GameOptionAction[];
+};
+
+const PLAYER_NUMBER_CHOICES: { style: PlayerNumberStyle; title: string; image: SFSymbol }[] = [
+    { style: 'off', title: 'Off', image: 'circle.slash' },
+    { style: 'badge', title: 'Badge', image: '1.square' },
+    { style: 'big', title: 'Big', image: 'textformat.size.larger' },
+];
+
+const PLAYER_NUMBER_TITLES: Record<PlayerNumberStyle, string> = {
+    off: 'Off',
+    badge: 'Badge',
+    big: 'Big',
 };
 
 /**
@@ -40,6 +56,7 @@ const useGameOptions = () => {
     const interactionType = useAppSelector(state => selectInteractionType(state, currentGameId));
     const dialOnly = useAppSelector(state => selectIsDialOnly(state, currentGameId));
     const fullscreen = useAppSelector(state => state.settings.home_fullscreen);
+    const playerNumbers = useAppSelector(state => selectPlayerNumbers(state, currentGameId));
     const installId = useAppSelector(state => state.settings.installId);
     const addendOne = useAppSelector(state => state.settings.addendOne);
     const addendTwo = useAppSelector(state => state.settings.addendTwo);
@@ -87,9 +104,22 @@ const useGameOptions = () => {
                 : 'arrow.up.left.and.arrow.down.right',
             state: fullscreen ? 'on' : 'off',
         },
+        {
+            id: 'player-numbers',
+            title: 'Player Numbers',
+            subtitle: PLAYER_NUMBER_TITLES[playerNumbers],
+            image: 'number',
+            subactions: PLAYER_NUMBER_CHOICES.map(({ style, title, image }) => ({
+                id: `player-numbers-${style}`,
+                title,
+                image,
+                state: playerNumbers === style ? 'on' : 'off',
+            })),
+        },
     ];
 
     const applyGesture = useApplyInteractionType();
+    const applyPlayerNumbers = useApplyPlayerNumbers();
 
     const handleAction = (event: string) => {
         switch (event) {
@@ -110,6 +140,15 @@ const useGameOptions = () => {
             case 'fullscreen':
                 dispatch(toggleHomeFullscreen());
                 logEvent('fullscreen', { fullscreen: !fullscreen });
+                break;
+            case 'player-numbers-off':
+                applyPlayerNumbers('off');
+                break;
+            case 'player-numbers-badge':
+                applyPlayerNumbers('badge');
+                break;
+            case 'player-numbers-big':
+                applyPlayerNumbers('big');
                 break;
             case 'about-gestures':
                 gestureInfoSheetRef?.current?.present();
@@ -165,6 +204,17 @@ export const useGameOptionsHeaderItems = (): NativeStackHeaderItem[] => {
     return useMemo(() => {
         if (currentGameId == null) return [];
 
+        const toNativeItem = (action: GameOptionAction): NativeStackHeaderItemMenuAction | NativeStackHeaderItemMenuSubmenu => (
+            action.subactions
+                ? {
+                    type: 'submenu',
+                    label: action.title,
+                    icon: { type: 'sfSymbol', name: action.image },
+                    items: action.subactions.map(toNativeAction),
+                }
+                : toNativeAction(action)
+        );
+
         const toNativeAction = (action: GameOptionAction): NativeStackHeaderItemMenuAction => ({
             type: 'action',
             label: action.title,
@@ -190,13 +240,13 @@ export const useGameOptionsHeaderItems = (): NativeStackHeaderItem[] => {
                         type: 'submenu',
                         label: 'Point Gestures',
                         inline: true,
-                        items: gestureActions.map(toNativeAction),
+                        items: gestureActions.map(toNativeItem),
                     },
                     {
                         type: 'submenu',
                         label: 'Settings',
                         inline: true,
-                        items: settingsActions.map(toNativeAction),
+                        items: settingsActions.map(toNativeItem),
                     },
                 ],
             },
@@ -216,10 +266,11 @@ const GameOptionsButton: React.FunctionComponent = () => {
 
     if (currentGameId == null) return null;
 
-    const toMenuAction = ({ disabled, ...action }: GameOptionAction): MenuAction => ({
+    const toMenuAction = ({ disabled, subactions, ...action }: GameOptionAction): MenuAction => ({
         ...action,
         attributes: disabled ? { disabled: true } : undefined,
         imageColor: theme.text,
+        subactions: subactions?.map(toMenuAction),
     });
 
     const menuActions: MenuAction[] = Platform.OS === 'android'

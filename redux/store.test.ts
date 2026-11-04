@@ -36,7 +36,7 @@ describe('Redux Store Configuration', () => {
                 'currentGameId',
                 'onboarded',
                 'showPointParticles',
-                'showPlayerIndex',
+                'playerNumbers',
                 'interactionType',
                 'lastStoreReviewPrompt',
                 'devMenuEnabled',

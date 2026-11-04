@@ -30,7 +30,7 @@ describe('useAnalyticsUserProperties', () => {
         const store = makeStore({
             keepScreenAwake: true,
             showPointParticles: false,
-            showPlayerIndex: true,
+            playerNumbers: 'badge',
             colorScheme: 'dark',
         });
 
@@ -38,7 +38,7 @@ describe('useAnalyticsUserProperties', () => {
 
         expect(mockSet).toHaveBeenCalledWith('keep_screen_awake', 'true');
         expect(mockSet).toHaveBeenCalledWith('point_particles', 'false');
-        expect(mockSet).toHaveBeenCalledWith('player_index', 'true');
+        expect(mockSet).toHaveBeenCalledWith('player_numbers', 'badge');
         expect(mockSet).toHaveBeenCalledWith('color_scheme', 'dark');
     });
 

@@ -6,12 +6,12 @@ import { shallowEqual } from 'react-redux';
 
 import { selectGameById } from '../../../redux/GamesSlice';
 import { useAppSelector } from '../../../redux/hooks';
-import { selectInteractionType } from '../../../redux/selectors';
+import { selectInteractionType, selectPlayerNumbers } from '../../../redux/selectors';
 import { getPalette } from '../../ColorPalette';
 import { interactionComponents } from '../Interactions/InteractionComponents';
 import { InteractionType } from '../Interactions/InteractionType';
 import AdditionTile from '../PlayerTiles/AdditionTile/AdditionTile';
-import PlayerIndexLabel from '../PlayerTiles/PlayerIndexLabel';
+import { PlayerNumberBadge, PlayerNumberGhost } from '../PlayerTiles/PlayerNumber';
 import PlayerWinnerLabel from '../PlayerTiles/PlayerWinnerLabel';
 
 // Space around each tile, so neighbouring tiles sit twice this far apart.
@@ -46,7 +46,7 @@ const PlayerTile: React.FunctionComponent<Props> = React.memo(({
     radiusBottomLeft,
     radiusBottomRight,
 }) => {
-    const playerIndexLabel = useAppSelector(state => state.settings.showPlayerIndex);
+    const playerNumbers = useAppSelector(state => selectPlayerNumbers(state, state.settings.currentGameId));
     const { bg, fg, isWinner } = useAppSelector(state => {
         const currentGameId = state.settings.currentGameId;
         const currentGame = currentGameId ? selectGameById(state, currentGameId) : undefined;
@@ -91,11 +91,15 @@ const PlayerTile: React.FunctionComponent<Props> = React.memo(({
                         backgroundColor: bg,
                         borderTopLeftRadius: inner(radiusTopLeft),
                         borderTopRightRadius: inner(radiusTopRight),
-                        // The player number sits in this corner, tucked into a tighter curve.
-                        borderBottomLeftRadius: playerIndexLabel ? inner(7) : inner(radiusBottomLeft),
+                        borderBottomLeftRadius: inner(radiusBottomLeft),
                         borderBottomRightRadius: inner(radiusBottomRight),
                     }]}>
-                <PlayerIndexLabel index={index} fontColor={fg} enabled={playerIndexLabel} />
+                {playerNumbers === 'big' && (
+                    <PlayerNumberGhost index={index} color={fg + '21'} shortEdge={Math.min(width, height)} />
+                )}
+                {playerNumbers === 'badge' && (
+                    <PlayerNumberBadge index={index} color={fg} background={fg + '29'} />
+                )}
                 <PlayerWinnerLabel fontColor={fg} enabled={isWinner} />
                 <InteractionComponent index={index} fontColor={fg} playerId={playerId}>
                     <AdditionTile

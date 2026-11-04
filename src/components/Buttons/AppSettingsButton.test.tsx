@@ -26,7 +26,7 @@ const createTestStore = () =>
                 currentGameId: 'game-1',
                 onboarded: undefined,
                 showPointParticles: true,
-                showPlayerIndex: true,
+                playerNumbers: 'badge',
                 interactionType: 'SwipeVertical',
                 lastStoreReviewPrompt: 0,
                 appOpens: 0,

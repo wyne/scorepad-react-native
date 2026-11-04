@@ -1,6 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 import { InteractionType } from '../src/components/Interactions/InteractionType';
+import { PlayerNumberStyle } from '../src/components/PlayerTiles/PlayerNumberStyle';
 import { FEATURE_NOTIFICATIONS } from '../src/constants';
 
 export interface SettingsState {
@@ -10,7 +11,9 @@ export interface SettingsState {
     addendTwo: number;
     currentGameId: string | undefined;
     showPointParticles: boolean;
-    showPlayerIndex: boolean;
+    // Default player number style for games that haven't picked one. Set to
+    // the style most recently chosen from a game's options menu.
+    playerNumbers: PlayerNumberStyle;
     interactionType: InteractionType;
     // The gesture the user most recently *used* (committed a score with).
     // Drives the gesture hint: undefined means "never used a gesture" (new user).
@@ -35,7 +38,7 @@ export const initialState: SettingsState = {
     addendTwo: 10,
     currentGameId: undefined,
     showPointParticles: false,
-    showPlayerIndex: false,
+    playerNumbers: 'off',
     interactionType: InteractionType.SwipeVertical,
     lastUsedInteractionType: undefined,
     lastStoreReviewPrompt: 0,
@@ -66,8 +69,8 @@ const settingsSlice = createSlice({
         toggleShowPointParticles(state) {
             state.showPointParticles = !state.showPointParticles;
         },
-        toggleShowPlayerIndex(state) {
-            state.showPlayerIndex = !state.showPlayerIndex;
+        setPlayerNumbers(state, action: PayloadAction<PlayerNumberStyle>) {
+            state.playerNumbers = action.payload;
         },
         setMultiplier(state, action: PayloadAction<number>) {
             state.multiplier = action.payload;
@@ -135,7 +138,7 @@ export const {
     setAddendOne,
     setAddendTwo,
     toggleShowPointParticles,
-    toggleShowPlayerIndex,
+    setPlayerNumbers,
     setInteractionType,
     setLastUsedInteractionType,
     setLastStoreReviewPrompt,

@@ -13,11 +13,11 @@ import { setUserProperty } from '../Analytics';
 export const useAnalyticsUserProperties = () => {
     const keepScreenAwake = useAppSelector(state => state.settings.keepScreenAwake);
     const pointParticles = useAppSelector(state => state.settings.showPointParticles);
-    const playerIndex = useAppSelector(state => state.settings.showPlayerIndex);
+    const playerNumbers = useAppSelector(state => state.settings.playerNumbers);
     const colorScheme = useAppSelector(state => state.settings.colorScheme);
 
     useEffect(() => { void setUserProperty('keep_screen_awake', String(keepScreenAwake)); }, [keepScreenAwake]);
     useEffect(() => { void setUserProperty('point_particles', String(pointParticles)); }, [pointParticles]);
-    useEffect(() => { void setUserProperty('player_index', String(playerIndex)); }, [playerIndex]);
+    useEffect(() => { void setUserProperty('player_numbers', playerNumbers); }, [playerNumbers]);
     useEffect(() => { void setUserProperty('color_scheme', colorScheme); }, [colorScheme]);
 };

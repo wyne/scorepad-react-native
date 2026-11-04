@@ -8,7 +8,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { exportBackup, importBackup } from '../../redux/backup';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
-import { markFeatureNotificationSeen, resetSeenFeatureNotifications, setColorScheme, setGameModesEnabled, setKeepScreenAwake, toggleShowPlayerIndex, toggleShowPointParticles } from '../../redux/SettingsSlice';
+import { markFeatureNotificationSeen, resetSeenFeatureNotifications, setColorScheme, setGameModesEnabled, setKeepScreenAwake, toggleShowPointParticles } from '../../redux/SettingsSlice';
 import { logEvent } from '../Analytics';
 import RotatingIcon from '../components/AppInfo/RotatingIcon';
 import { loadSeedData } from '../components/AppInfo/SeedData';
@@ -77,7 +77,6 @@ const AppSettingsScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     const appVersion = Application.nativeApplicationVersion;
 
     const showPointParticles = useAppSelector(state => state.settings.showPointParticles);
-    const showPlayerIndex = useAppSelector(state => state.settings.showPlayerIndex);
     const devMenuEnabled = useAppSelector(state => state.settings.devMenuEnabled);
     const installId = useAppSelector(state => state.settings.installId);
     const seenFeatureNotifications = useAppSelector(state => state.settings.seenFeatureNotifications);
@@ -102,14 +101,6 @@ const AppSettingsScreen: React.FunctionComponent<Props> = ({ navigation }) => {
         logEvent('toggle_feature', {
             feature: 'point_particles',
             value: !showPointParticles,
-            install_id: installId
-        });
-    };
-    const togglePlayerIndexSwitch = () => {
-        dispatch(toggleShowPlayerIndex());
-        logEvent('toggle_feature', {
-            feature: 'player_index',
-            value: !showPlayerIndex,
             install_id: installId
         });
     };
@@ -211,13 +202,6 @@ const AppSettingsScreen: React.FunctionComponent<Props> = ({ navigation }) => {
                 <SectionItem>
                     <SectionItemText text="Particle Effect (tap-only)" />
                     <Switch onValueChange={toggleParticleSwitch} value={showPointParticles} ios_backgroundColor={theme.separator} />
-                </SectionItem>
-                <SectionSeparator />
-                <SectionItem>
-                    <View style={styles.labelRow}>
-                        <SectionItemText text="Player Numbers" />
-                    </View>
-                    <Switch onValueChange={togglePlayerIndexSwitch} value={showPlayerIndex} ios_backgroundColor={theme.separator} />
                 </SectionItem>
                 <SectionSeparator />
                 <SectionItem>

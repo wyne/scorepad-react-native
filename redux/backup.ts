@@ -4,6 +4,7 @@ import * as Sharing from 'expo-sharing';
 import { Alert } from 'react-native';
 
 import { InteractionType } from '../src/components/Interactions/InteractionType';
+import { isPlayerNumberStyle } from '../src/components/PlayerTiles/PlayerNumberStyle';
 import { SortDirectionKey, SortSelectorKey } from '../src/components/ScoreLog/SortHelper';
 
 import { GameState, restoreAllGames } from './GamesSlice';
@@ -81,6 +82,7 @@ const isGameState = (
     ) return false;
     if (value.palette !== undefined && typeof value.palette !== 'string') return false;
     if (value.interactionType !== undefined && !isInteractionType(value.interactionType)) return false;
+    if (value.playerNumbers !== undefined && !isPlayerNumberStyle(value.playerNumbers)) return false;
     if (value.scoring !== undefined && !isScoringRules(value.scoring)) return false;
 
     return true;
@@ -110,7 +112,8 @@ const isSettingsState = (value: unknown, gameEntities: Record<string, unknown>):
         && isFiniteNumber(value.addendTwo)
         && currentGameIdIsValid
         && typeof value.showPointParticles === 'boolean'
-        && typeof value.showPlayerIndex === 'boolean'
+        // Backups from before player number styles carry the old on/off switch.
+        && (isPlayerNumberStyle(value.playerNumbers) || typeof value.showPlayerIndex === 'boolean')
         && isInteractionType(value.interactionType)
         && (value.lastUsedInteractionType === undefined || isInteractionType(value.lastUsedInteractionType))
         && isFiniteNumber(value.lastStoreReviewPrompt)
@@ -151,9 +154,15 @@ export const parseBackupData = (value: unknown): BackupData | undefined => {
     }
     if (!isSettingsState(value.settings, gameEntities)) return undefined;
 
-    const settings = Object.fromEntries(
+    const { showPlayerIndex, ...savedSettings } = Object.fromEntries(
         Object.entries(value.settings).filter(([key]) => key !== '_persist')
-    ) as unknown as SettingsState;
+    );
+    const settings = {
+        ...savedSettings,
+        playerNumbers: isPlayerNumberStyle(savedSettings.playerNumbers)
+            ? savedSettings.playerNumbers
+            : showPlayerIndex === true ? 'badge' : 'off',
+    } as unknown as SettingsState;
 
     return {
         version: BACKUP_VERSION,
