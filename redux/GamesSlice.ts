@@ -375,25 +375,27 @@ export const makeSelectPlayerColors = () => createSelector(
             return ['#000000', '#FFFFFF'];
         }
 
-        const paletteName = game.palette;
-        const playerIds = game.playerIds;
-
-        const playerIndex = playerIds.indexOf(playerId);
-
-        const palette = getPalette(paletteName || 'original') || getPalette('original');
-        const paletteBG = palette[playerIndex % palette.length];
-
-        const bg = playerColor || paletteBG;
-
-        const blackContrast = getContrastRatio(bg, '#000').number;
-        const whiteContrast = getContrastRatio(bg, '#fff').number;
-
-        // +1 to give a slight preference to white
-        const fg = blackContrast >= whiteContrast + 1 ? '#000000' : '#FFFFFF';
-
-        return [bg, fg];
+        return playerColorPair(game, playerId, playerColor);
     }
 );
+
+/**
+ * A player's background color (their own, or the game palette's for their
+ * seat) and a readable text color on it.
+ */
+export const playerColorPair = (game: GameState, playerId: string, playerColor?: string): [string, string] => {
+    const palette = getPalette(game.palette || 'original') || getPalette('original');
+    const playerIndex = game.playerIds.indexOf(playerId);
+    const bg = playerColor || palette[playerIndex % palette.length];
+
+    const blackContrast = getContrastRatio(bg, '#000').number;
+    const whiteContrast = getContrastRatio(bg, '#fff').number;
+
+    // +1 to give a slight preference to white
+    const fg = blackContrast >= whiteContrast + 1 ? '#000000' : '#FFFFFF';
+
+    return [bg, fg];
+};
 
 
 export const {

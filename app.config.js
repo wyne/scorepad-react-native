@@ -87,6 +87,8 @@ export default {
       CFBundleDisplayName: displayName,
       RCTAsyncStorageExcludeFromBackup: false,
       ITSAppUsesNonExemptEncryption: false,
+      // Without this, iOS leaves "Save Image" out of the share sheet.
+      NSPhotoLibraryAddUsageDescription: 'Save scoreboard images to your photo library.',
     },
     googleServicesFile: googleServicesFile,
   },
