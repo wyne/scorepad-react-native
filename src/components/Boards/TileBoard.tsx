@@ -16,7 +16,6 @@ interface TileBoardProps {
     // Where the board's top left corner sits in the window, so tiles in a
     // screen corner can follow the display's curve.
     boardOrigin?: { x: number; y: number };
-    showHint: boolean;
 }
 
 interface BoardSize {
@@ -24,7 +23,7 @@ interface BoardSize {
     height: number;
 }
 
-const TileBoard: React.FC<TileBoardProps> = ({ boardSize, boardOrigin = { x: 0, y: 0 }, showHint }) => {
+const TileBoard: React.FC<TileBoardProps> = ({ boardSize, boardOrigin = { x: 0, y: 0 } }) => {
     const theme = useTheme();
     const window = useWindowDimensions();
     const displayRadius = useDisplayCornerRadius();
@@ -129,7 +128,6 @@ const TileBoard: React.FC<TileBoardProps> = ({ boardSize, boardOrigin = { x: 0, 
                                 radiusTopRight={cornerRadii[index]?.topRight}
                                 radiusBottomLeft={cornerRadii[index]?.bottomLeft}
                                 radiusBottomRight={cornerRadii[index]?.bottomRight}
-                                showHint={showHint}
                             />
                         ))}
                     </View>

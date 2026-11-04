@@ -119,7 +119,6 @@ const defaultProps = {
     safeAreaTop: 0,
     safeAreaLeft: 0,
     safeAreaRight: 0,
-    showHint: false,
     onClose: jest.fn(),
     svOpacity: mkSv(1),
     svSlideY: mkSv(0),

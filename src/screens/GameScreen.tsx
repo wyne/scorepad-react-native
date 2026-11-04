@@ -13,6 +13,8 @@ import { selectInteractionType } from '../../redux/selectors';
 import ListBoard from '../components/Boards/ListBoard';
 import TileBoard from '../components/Boards/TileBoard';
 import { useGameOptionsHeaderItems } from '../components/Buttons/GameOptionsButton';
+import GestureHintToast from '../components/GestureHintToast';
+import GestureNudge from '../components/GestureNudge';
 import { InteractionType } from '../components/Interactions/InteractionType';
 import LockedGameHint from '../components/LockedGameHint';
 import ChooseWinnersSheet from '../components/Sheets/ChooseWinnersSheet';
@@ -21,7 +23,6 @@ import { bottomSheetHeight } from '../components/Sheets/GameSheet';
 import GestureInfoSheet from '../components/Sheets/GestureInfoSheet';
 import PointValuesSheet from '../components/Sheets/PointValuesSheet';
 import { addHingeClosingListener, useFoldSplitBounds, useGameFoldSplit, useRoundPickerInBottomStrip, useVerticalBarLayout } from '../hooks/useExpandedGameLayout';
-import { useGestureHint } from '../hooks/useGestureHint';
 
 function useKeepScreenAwake(active: boolean): void {
     useEffect(() => {
@@ -185,7 +186,6 @@ const GameScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     const fullscreen = useAppSelector(state => state.settings.home_fullscreen);
     const interactionType = useAppSelector(state => selectInteractionType(state, currentGameId));
     const { headerHeight, headerKnown } = useStableHeaderHeight();
-    const showHint = useGestureHint();
     const isDial = interactionType === InteractionType.Dial;
     // With vertical bars (iPhone Duo) the header has no background (see
     // Navigation): let the dial list scroll up under it, and under the round
@@ -255,6 +255,8 @@ const GameScreen: React.FunctionComponent<Props> = ({ navigation }) => {
 
     if (typeof currentGameId == 'undefined') return null;
 
+    const toastTop = (scrollUnderHeader ? headerHeight : 0) + 8;
+
     return (
         <View style={{ flex: 1, paddingTop }} testID="game-screen">
             <View style={{ flex: 1 }}>
@@ -265,14 +267,20 @@ const GameScreen: React.FunctionComponent<Props> = ({ navigation }) => {
                 >
                     {isDial
                         ? <Animated.View key="rows" entering={FadeIn.duration(220)} exiting={FadeOut.duration(180)} style={StyleSheet.absoluteFill}>
-                            <ListBoard foldSplit={foldSplit} showHint={showHint} topInset={scrollUnderHeader ? headerHeight : 0} />
+                            <ListBoard
+                                foldSplit={foldSplit}
+                                topInset={scrollUnderHeader ? headerHeight : 0}
+                                overlay={<GestureHintToast top={toastTop} />}
+                            />
                         </Animated.View>
                         : <Animated.View key="flex" entering={FadeIn.duration(220)} exiting={FadeOut.duration(180)} style={StyleSheet.absoluteFill}>
-                            <TileBoard boardOrigin={boardOrigin} boardSize={boardSize} showHint={showHint} />
+                            <TileBoard boardOrigin={boardOrigin} boardSize={boardSize} />
+                            <GestureHintToast top={toastTop} />
                         </Animated.View>
                     }
 
-                    <LockedGameHint top={(scrollUnderHeader ? headerHeight : 0) + 8} />
+                    <LockedGameHint top={toastTop} />
+                    <GestureNudge top={toastTop} />
                 </Animated.View>
 
                 <PointValuesSheet />

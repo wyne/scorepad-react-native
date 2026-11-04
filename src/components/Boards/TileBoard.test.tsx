@@ -85,7 +85,7 @@ describe('TileBoard', () => {
         });
         const element = (nextSize = size) => (
             <Provider store={store}>
-                <TileBoard boardSize={nextSize} showHint={false} />
+                <TileBoard boardSize={nextSize} />
             </Provider>
         );
         return { ...render(element()), store, element };
