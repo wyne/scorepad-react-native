@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
 import * as Haptics from 'expo-haptics';
-import { StyleSheet, TouchableHighlight, View } from 'react-native';
+import { GestureResponderEvent, StyleSheet, TouchableHighlight, View } from 'react-native';
 
 import { selectGameById } from '../../../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector, useAppStore } from '../../../../redux/hooks';
@@ -10,12 +10,15 @@ import { setLastUsedInteractionType } from '../../../../redux/SettingsSlice';
 import { logEvent } from '../../../Analytics';
 import { useLockedHint } from '../../LockedHintContext';
 import { useMenuOpen } from '../../MenuOpenContext';
-import { ScoreParticle } from '../../PlayerTiles/AdditionTile/ScoreParticle';
+import { PARTICLE_DURATION, ScoreParticle } from '../../PlayerTiles/AdditionTile/ScoreParticle';
 import { InteractionType } from '../InteractionType';
 
 type ScoreParticleProps = {
     key: string;
     value: string;
+    x: number;
+    y: number;
+    large: boolean;
 };
 
 type Props = {
@@ -59,17 +62,19 @@ export const HalfTileTouchSurface: React.FunctionComponent<Props> = (
         return currentGameId ? selectGameById(state, currentGameId)?.roundCurrent ?? 0 : 0;
     };
 
-    const addParticle = (addend: number) => {
+    const addParticle = (addend: number, event: GestureResponderEvent | undefined, large: boolean) => {
         const key = Math.random().toString(36).substring(7);
-        const value = `${scoreType == 'increment' ? '+' : '-'}${addend}`;
+        const value = `${scoreType == 'increment' ? '+' : '−'}${addend}`;
+        const x = event?.nativeEvent?.locationX ?? 0;
+        const y = event?.nativeEvent?.locationY ?? 0;
 
         setTimeout(() => {
             setParticles((particles) => particles.filter((p) => p.key !== key));
-        }, 800);
-        setParticles((particles) => [...particles, { key, value }]);
+        }, PARTICLE_DURATION + 50);
+        setParticles((particles) => [...particles, { key, value, x, y, large }]);
     };
 
-    const scoreChangeHandler = (addend: number, secondaryHold = false) => {
+    const scoreChangeHandler = (addend: number, event?: GestureResponderEvent, secondaryHold = false) => {
         if (menuOpen) return;
         if (currentGameLocked) {
             showLockedHint();
@@ -78,7 +83,7 @@ export const HalfTileTouchSurface: React.FunctionComponent<Props> = (
         const currentRoundIndex = getCurrentRoundIndex();
 
         if (showPointParticles) {
-            addParticle(addend);
+            addParticle(addend, event, secondaryHold);
         }
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
         logEvent('score_change', {
@@ -99,13 +104,19 @@ export const HalfTileTouchSurface: React.FunctionComponent<Props> = (
             style={[styles.surface, scoreType == 'increment' ? styles.surfaceAdd : styles.surfaceSubtract]}
             underlayColor={currentGameLocked || menuOpen ? 'transparent' : fontColor + '30'}
             activeOpacity={menuOpen ? 1 : 1}
-            onPress={() => scoreChangeHandler(addendOne)}
-            onLongPress={() => scoreChangeHandler(addendTwo, true)}>
-            <View style={[StyleSheet.absoluteFill,
-                scoreType === 'increment' ? styles.particleContainerTop : styles.particleContainerBottom
-            ]}>
+            onPress={(e) => scoreChangeHandler(addendOne, e)}
+            onLongPress={(e) => scoreChangeHandler(addendTwo, e, true)}>
+            <View style={StyleSheet.absoluteFill} pointerEvents="none">
                 {particles.map((particle) => (
-                    <ScoreParticle key={particle.key} id={particle.key} value={particle.value} />
+                    <ScoreParticle
+                        key={particle.key}
+                        value={particle.value}
+                        x={particle.x}
+                        y={particle.y}
+                        direction={scoreType === 'increment' ? 'up' : 'down'}
+                        color={fontColor}
+                        large={particle.large}
+                    />
                 ))}
             </View>
         </TouchableHighlight>
@@ -124,15 +135,5 @@ const styles = StyleSheet.create({
     surfaceSubtract: {
         top: '50%',
         bottom: 0,
-    },
-    particleContainerTop: {
-        alignItems: 'center',
-        justifyContent: 'flex-start',
-        paddingTop: 8,
-    },
-    particleContainerBottom: {
-        alignItems: 'center',
-        justifyContent: 'flex-end',
-        paddingBottom: 8,
     },
 });

@@ -1,55 +1,87 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
-import { Text, DimensionValue } from 'react-native';
-import Animated, { FadeOut } from 'react-native-reanimated';
+import { StyleSheet } from 'react-native';
+import Animated, { Easing, interpolate, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
+
+/** How long a particle lives, from the tap until it has faded out. */
+export const PARTICLE_DURATION = 750;
+
+// How far the number drifts away from the score over its life.
+const DRIFT = 62;
+// The box the number is centered in, so it can be placed by its center.
+const BOX_WIDTH = 140;
+const BOX_HEIGHT = 64;
 
 type Props = {
-    id: string;
     value: string;
+    /** Where the finger touched, in the touch surface's coordinates. */
+    x: number;
+    y: number;
+    /** Drift up for points added, down for points taken away. */
+    direction: 'up' | 'down';
+    /** The tile's ink, black or white, so the number reads on any player color. */
+    color: string;
+    /** A hold adds the larger step, so its number is drawn larger. */
+    large?: boolean;
 };
 
-export const ScoreParticle: React.FunctionComponent<Props> = React.memo(({ id, value }) => {
-    const randomRotation: string = `${Math.floor(Math.random() * 30) - 15}deg`;
-    const randomTop = Math.floor(Math.random() * 10);
-    const randomLeft = Math.floor(Math.random() * 100);
+/**
+ * A score change drawn under the finger: it pops in, then drifts away from
+ * the score while it fades.
+ */
+export const ScoreParticle: React.FunctionComponent<Props> = React.memo(({ value, x, y, direction, color, large = false }) => {
+    const progress = useSharedValue(0);
+    // A little sideways jitter keeps quick repeat taps from stacking exactly.
+    const [jitter] = React.useState(() => (Math.random() - 0.5) * 14);
 
-    let left: DimensionValue | undefined, right: DimensionValue | undefined;
-    let top: DimensionValue | undefined, bottom: DimensionValue | undefined;
+    useEffect(() => {
+        progress.value = withTiming(1, { duration: PARTICLE_DURATION, easing: Easing.linear });
+    }, [progress]);
 
-    if (value.indexOf('-') > -1) {
-        bottom = `${randomTop}%`;
-    } else {
-        top = `${randomTop}%`;
-    }
+    const sign = direction === 'up' ? -1 : 1;
 
-    if (randomLeft > 50) {
-        right = `${100 - randomLeft}%`;
-    } else {
-        left = `${randomLeft}%`;
-    }
+    const animatedStyle = useAnimatedStyle(() => {
+        const t = progress.value * PARTICLE_DURATION;
+        const drift = 1 - Math.pow(1 - progress.value, 3);
+        return {
+            opacity: interpolate(t, [0, 90, 330, PARTICLE_DURATION], [0, 1, 1, 0], 'clamp'),
+            transform: [
+                { translateY: sign * DRIFT * drift },
+                { scale: interpolate(t, [0, 140, 260], [0.55, 1.15, 1], 'clamp') },
+            ],
+        };
+    });
 
-    return <Animated.View exiting={FadeOut.withInitialValues({ opacity: 0.7 })}
-        key={id}
-        style={{
-            position: 'absolute',
-            top: top,
-            bottom: bottom,
-            left: left,
-            right: right,
-            transform: [{ rotate: randomRotation }],
-            backgroundColor: 'white',
-            borderRadius: 100,
-            borderWidth: 2,
-            borderColor: 'black',
-            padding: 8,
-        }}
-    >
-        <Text style={{
-            color: 'black',
-            fontSize: 20,
-            fontWeight: 'bold',
-            textAlign: 'center',
-            fontVariant: ['tabular-nums'],
-        }}>{value}</Text>
-    </Animated.View>;
+    const shadowColor = color.toLowerCase().startsWith('#000') ? 'rgba(255,255,255,0.35)' : 'rgba(0,0,0,0.35)';
+
+    return (
+        <Animated.View
+            pointerEvents="none"
+            style={[styles.box, { left: x - BOX_WIDTH / 2 + jitter, top: y - BOX_HEIGHT / 2 }, animatedStyle]}
+        >
+            <Animated.Text
+                allowFontScaling={false}
+                style={[styles.text, { color, fontSize: large ? 40 : 30, textShadowColor: shadowColor }]}
+            >
+                {value}
+            </Animated.Text>
+        </Animated.View>
+    );
+});
+
+const styles = StyleSheet.create({
+    box: {
+        position: 'absolute',
+        width: BOX_WIDTH,
+        height: BOX_HEIGHT,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    text: {
+        fontWeight: '800',
+        textAlign: 'center',
+        fontVariant: ['tabular-nums'],
+        textShadowOffset: { width: 0, height: 1 },
+        textShadowRadius: 3,
+    },
 });

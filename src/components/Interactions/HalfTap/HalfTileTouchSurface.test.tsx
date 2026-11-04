@@ -18,8 +18,10 @@ jest.mock('expo-haptics', () => ({
   impactAsync: function () { },
   ImpactFeedbackStyle: { Light: 'Light', Medium: 'Medium', Heavy: 'Heavy' },
 }));
+const mockScoreParticle = jest.fn();
 jest.mock('../../PlayerTiles/AdditionTile/ScoreParticle', () => ({
-  ScoreParticle: function () { return null; },
+  PARTICLE_DURATION: 750,
+  ScoreParticle: function (props: unknown) { mockScoreParticle(props); return null; },
 }));
 
 let mockMenuOpen = false;
@@ -33,6 +35,7 @@ jest.mock('../../LockedHintContext', () => ({
 }));
 
 beforeEach(() => {
+  mockScoreParticle.mockClear();
   mockMenuOpen = false;
   mockShowLockedHint.mockClear();
 });
@@ -115,6 +118,22 @@ describe('HalfTileTouchSurface', () => {
     expect(dispatch).toHaveBeenCalledWith(
       playerRoundScoreIncrement('player-1', 0, -10)
     );
+  });
+
+  it('draws the particle where the finger touched, drifting up on the add half', () => {
+    const { surface } = renderSurface({ scoreType: 'increment' });
+    fireEvent.press(surface, { nativeEvent: { locationX: 40, locationY: 22 } });
+    expect(mockScoreParticle).toHaveBeenLastCalledWith(expect.objectContaining({
+      value: '+3', x: 40, y: 22, direction: 'up', color: 'white', large: false,
+    }));
+  });
+
+  it('draws a larger particle drifting down for a hold on the subtract half', () => {
+    const { surface } = renderSurface({ scoreType: 'decrement' });
+    fireEvent(surface, 'longPress', { nativeEvent: { locationX: 12, locationY: 90 } });
+    expect(mockScoreParticle).toHaveBeenLastCalledWith(expect.objectContaining({
+      value: '−10', x: 12, y: 90, direction: 'down', large: true,
+    }));
   });
 
   it('targets the game\'s current round', () => {
