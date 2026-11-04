@@ -139,7 +139,7 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
 
     const { menuOpen } = useMenuOpen();
     const { showLockedHint } = useLockedHint();
-    const { reportMiss } = useGestureNudge();
+    const { reportMiss, reportSuccess } = useGestureNudge();
     // Whether the current drag has changed the score yet. A drag that ends
     // without scoring (usually a tap) counts as a miss for the nudge toast.
     const scoredThisGesture = useRef(false);
@@ -166,9 +166,10 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
             notches: -Math.round((translationY || 0) / notchSize),
             interaction: 'swipe-vertical',
         });
-        if (!scoredThisGesture.current && !secondaryHold) reportMiss(InteractionType.SwipeVertical);
+        if (scoredThisGesture.current) reportSuccess();
+        else if (!secondaryHold) reportMiss(InteractionType.SwipeVertical);
         secondaryHoldStop();
-    }, [index, currentGameId, secondaryHold, addendOne, addendTwo, getCurrentRoundIndex, menuOpen, reportMiss]);
+    }, [index, currentGameId, secondaryHold, addendOne, addendTwo, getCurrentRoundIndex, menuOpen, reportMiss, reportSuccess]);
 
     const panGesture = Gesture.Pan()
         .enabled(!currentGameLocked && !menuOpen)

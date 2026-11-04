@@ -6,8 +6,9 @@ import { Provider } from 'react-redux';
 
 import gamesReducer from '../../redux/GamesSlice';
 import playersReducer from '../../redux/PlayersSlice';
-import settingsReducer, { initialState as settingsInitialState, setLastUsedInteractionType } from '../../redux/SettingsSlice';
+import settingsReducer, { initialState as settingsInitialState, setInteractionType, setLastUsedInteractionType } from '../../redux/SettingsSlice';
 
+import { GestureHintContextProvider } from './GestureHintContext';
 import GestureHintToast from './GestureHintToast';
 import { InteractionType } from './Interactions/InteractionType';
 
@@ -51,9 +52,17 @@ const createStore = ({ interactionType = InteractionType.SwipeVertical, lastUsed
     } as Parameters<typeof configureStore>[0]['preloadedState'],
 });
 
+const Screen = ({ store, showToast = true }: { store: ReturnType<typeof createStore>; showToast?: boolean }) => (
+    <Provider store={store}>
+        <GestureHintContextProvider>
+            {showToast && <GestureHintToast top={8} />}
+        </GestureHintContextProvider>
+    </Provider>
+);
+
 const renderToast = (store = createStore()) => ({
     store,
-    ...render(<Provider store={store}><GestureHintToast top={8} /></Provider>),
+    ...render(<Screen store={store} />),
 });
 
 beforeEach(() => {
@@ -90,6 +99,23 @@ describe('GestureHintToast', () => {
         const { getByTestId, queryByTestId } = renderToast();
         fireEvent.press(getByTestId('gesture-hint-got-it'));
         expect(queryByTestId('gesture-hint-toast')).toBeNull();
+    });
+
+    it('stays dismissed after leaving and reopening the game', () => {
+        const store = createStore();
+        const { getByTestId, queryByTestId, rerender } = renderToast(store);
+        fireEvent.press(getByTestId('gesture-hint-got-it'));
+        rerender(<Screen store={store} showToast={false} />);
+        rerender(<Screen store={store} />);
+        expect(queryByTestId('gesture-hint-toast')).toBeNull();
+    });
+
+    it('comes back after switching to a gesture not yet used', () => {
+        const store = createStore();
+        const { getByTestId, queryByTestId } = renderToast(store);
+        fireEvent.press(getByTestId('gesture-hint-got-it'));
+        act(() => { store.dispatch(setInteractionType(InteractionType.HalfTap)); });
+        expect(queryByTestId('gesture-hint-toast')).toBeTruthy();
     });
 
     it('opens How to Score from How it works', () => {

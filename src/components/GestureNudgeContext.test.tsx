@@ -28,11 +28,12 @@ jest.mock('@rneui/base', () => ({
 }));
 
 const Trigger = () => {
-    const { reportMiss } = useGestureNudge();
+    const { reportMiss, reportSuccess } = useGestureNudge();
     return (
         <>
             <Pressable testID="miss-swipe" onPress={() => reportMiss(InteractionType.SwipeVertical)}><Text>Swipe</Text></Pressable>
             <Pressable testID="miss-dial" onPress={() => reportMiss(InteractionType.Dial)}><Text>Dial</Text></Pressable>
+            <Pressable testID="success" onPress={reportSuccess}><Text>Score</Text></Pressable>
             <Pressable testID="miss-tap" onPress={() => reportMiss(InteractionType.HalfTap)}><Text>Tap</Text></Pressable>
         </>
     );
@@ -67,6 +68,14 @@ describe('GestureNudge', () => {
         fireEvent.press(getByTestId('miss-swipe'));
         fireEvent.press(getByTestId('miss-swipe'));
         expect(getByText('Swipe up or down to change a score.')).toBeTruthy();
+    });
+
+    it('starts over after a gesture scores', () => {
+        const { getByTestId, queryByTestId } = renderNudge();
+        fireEvent.press(getByTestId('miss-swipe'));
+        fireEvent.press(getByTestId('success'));
+        fireEvent.press(getByTestId('miss-swipe'));
+        expect(queryByTestId('gesture-nudge')).toBeNull();
     });
 
     it('uses the dial message for dial misses', () => {

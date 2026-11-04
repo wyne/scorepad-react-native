@@ -21,12 +21,15 @@ type GestureNudgeContextType = {
     nudgeMessage: string | null;
     /** Report a gesture that changed no score (e.g. a tap in swipe mode). */
     reportMiss: (type: InteractionType) => void;
+    /** Report a gesture that scored, so a later miss starts a fresh count. */
+    reportSuccess: () => void;
     hideNudge: () => void;
 };
 
 const GestureNudgeContext = createContext<GestureNudgeContextType>({
     nudgeMessage: null,
     reportMiss: () => {},
+    reportSuccess: () => {},
     hideNudge: () => {},
 });
 
@@ -64,6 +67,10 @@ export const GestureNudgeContextProvider: React.FC<PropsWithChildren> = ({ child
         timer.current = setTimeout(() => setNudgeMessage(null), NUDGE_DURATION_MS);
     }, []);
 
+    const reportSuccess = useCallback(() => {
+        lastMiss.current = null;
+    }, []);
+
     const hideNudge = useCallback(() => {
         clearTimer();
         setNudgeMessage(null);
@@ -72,8 +79,8 @@ export const GestureNudgeContextProvider: React.FC<PropsWithChildren> = ({ child
     useEffect(() => clearTimer, []);
 
     const value = useMemo(
-        () => ({ nudgeMessage, reportMiss, hideNudge }),
-        [nudgeMessage, reportMiss, hideNudge],
+        () => ({ nudgeMessage, reportMiss, reportSuccess, hideNudge }),
+        [nudgeMessage, reportMiss, reportSuccess, hideNudge],
     );
 
     return (

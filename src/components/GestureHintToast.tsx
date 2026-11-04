@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
@@ -9,10 +9,10 @@ import { logEvent } from '../Analytics';
 import { useGestureHint } from '../hooks/useGestureHint';
 import { useTheme } from '../theme';
 
+import { useGestureHintDismissal } from './GestureHintContext';
 import { useGestureNudge } from './GestureNudgeContext';
 import { gestureDemoLabel, gestureToastCopy } from './Interactions/gestureCopy';
 import GestureDemo from './Interactions/GestureDemo';
-import { InteractionType } from './Interactions/InteractionType';
 import { useLockedHint } from './LockedHintContext';
 import { useGestureInfoSheetContext } from './Sheets/GestureInfoSheetContext';
 
@@ -38,14 +38,14 @@ const GestureHintToast: React.FunctionComponent<Props> = ({ top }) => {
     const { nudgeMessage } = useGestureNudge();
     // Dismissing hides the toast for this gesture until the app restarts or
     // the gesture changes; using the gesture hides it for good.
-    const [dismissedFor, setDismissedFor] = useState<InteractionType | null>(null);
+    const { dismissedFor, dismissHint } = useGestureHintDismissal();
 
     if (!showHint || dismissedFor === interactionType || lockedHintVisible || nudgeMessage) return null;
 
     const { title, body } = gestureToastCopy(interactionType, addendOne, addendTwo);
 
     const dismiss = (action: 'got_it' | 'how_it_works') => {
-        setDismissedFor(interactionType);
+        dismissHint(interactionType);
         logEvent('gesture_hint_action', { interaction_type: interactionType, action });
     };
 

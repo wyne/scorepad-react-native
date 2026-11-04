@@ -274,7 +274,7 @@ const DialControl: React.FC<Props> = ({
 
     // A touch on the ring that ends without turning it (and without holding
     // for the larger step) changed nothing: tell the nudge toast.
-    const { reportMiss } = useGestureNudge();
+    const { reportMiss, reportSuccess } = useGestureNudge();
     const handleMiss = useCallback(() => {
         if (isSecondaryRef.current) return;
         reportMiss(InteractionType.Dial);
@@ -282,7 +282,8 @@ const DialControl: React.FC<Props> = ({
 
     const flushPendingChange = useCallback((newVal: number) => {
         onChange(newVal);
-    }, [onChange]);
+        reportSuccess();
+    }, [onChange, reportSuccess]);
 
     const panGesture = Gesture.Pan()
         .enabled(!menuOpen)

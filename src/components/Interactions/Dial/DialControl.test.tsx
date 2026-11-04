@@ -75,8 +75,9 @@ jest.mock('expo-haptics', () => ({
 }));
 
 const mockReportMiss = jest.fn();
+const mockReportSuccess = jest.fn();
 jest.mock('../../GestureNudgeContext', () => ({
-    useGestureNudge: () => ({ nudgeMessage: null, reportMiss: mockReportMiss, hideNudge: () => {} }),
+    useGestureNudge: () => ({ nudgeMessage: null, reportMiss: mockReportMiss, reportSuccess: mockReportSuccess, hideNudge: () => {} }),
 }));
 
 import { InteractionType } from '../InteractionType';
@@ -221,6 +222,7 @@ describe('DialControl misfire nudge', () => {
         pan().onUpdate({ x: 172, y: 100 });
         pan().onEnd();
         expect(onChange).toHaveBeenCalled();
+        expect(mockReportSuccess).toHaveBeenCalled();
         expect(mockReportMiss).not.toHaveBeenCalled();
     });
 

@@ -68,13 +68,15 @@ jest.mock('../../LockedHintContext', () => ({
 }));
 
 const mockReportMiss = jest.fn();
+const mockReportSuccess = jest.fn();
 jest.mock('../../GestureNudgeContext', () => ({
-  useGestureNudge: function () { return { nudgeMessage: null, reportMiss: mockReportMiss, hideNudge: function () { } }; },
+  useGestureNudge: function () { return { nudgeMessage: null, reportMiss: mockReportMiss, reportSuccess: mockReportSuccess, hideNudge: function () { } }; },
 }));
 
 beforeEach(() => {
   mockShowLockedHint.mockClear();
   mockReportMiss.mockClear();
+  mockReportSuccess.mockClear();
   (globalThis as any).__ph = {};
   (globalThis as any).__react = undefined;
   jest.useRealTimers();
@@ -283,5 +285,6 @@ describe('SwipeVertical', () => {
     });
 
     expect(mockReportMiss).not.toHaveBeenCalled();
+    expect(mockReportSuccess).toHaveBeenCalled();
   });
 });
