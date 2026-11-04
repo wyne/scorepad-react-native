@@ -1,5 +1,20 @@
 # Changelog
 
+## [3.6.0](https://github.com/wyne/scorepad-react-native/compare/v3.5.0...v3.6.0) (2026-11-04)
+
+
+### Features
+
+* choose player number style per game from the options menu ([#817](https://github.com/wyne/scorepad-react-native/issues/817)) ([5110479](https://github.com/wyne/scorepad-react-native/commit/5110479ff94ee43652f83ded15972c175989ef7e))
+
+
+### Bug Fixes
+
+* **dial:** keep dial score and new total in sync with the saved score ([#820](https://github.com/wyne/scorepad-react-native/issues/820)) ([dc71cbd](https://github.com/wyne/scorepad-react-native/commit/dc71cbd820e75382e6a327106a7ffb6cc88aea70))
+* keep tap score particles visible at tile edges ([#822](https://github.com/wyne/scorepad-react-native/issues/822)) ([f4ddcff](https://github.com/wyne/scorepad-react-native/commit/f4ddcffa6f9887fe6f8be8ae84bf701eea5d4abd))
+* redesign the tap score particle ([#819](https://github.com/wyne/scorepad-react-native/issues/819)) ([fdc4b94](https://github.com/wyne/scorepad-react-native/commit/fdc4b94b440b63447d5e03b32c576c5aada975b9))
+* rename the Fullscreen menu option to Hide/Show Score Sheet ([#818](https://github.com/wyne/scorepad-react-native/issues/818)) ([ac94633](https://github.com/wyne/scorepad-react-native/commit/ac946334d4afc76ecd4a8e7ea3240f0ec74e8165))
+
 ## [3.5.0](https://github.com/wyne/scorepad-react-native/compare/v3.4.2...v3.5.0) (2026-11-04)
 
 
