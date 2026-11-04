@@ -1,12 +1,11 @@
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 
 import * as Haptics from 'expo-haptics';
-import { Pressable, StyleSheet, Text, TextInput, TextInputProps, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
     Easing,
     runOnJS,
-    SharedValue,
     useAnimatedProps,
     useAnimatedStyle,
     useSharedValue,
@@ -16,12 +15,6 @@ import Animated, {
     withTiming,
 } from 'react-native-reanimated';
 import Svg, { Circle, Line, Path } from 'react-native-svg';
-
-// Extend TextInputProps to include Reanimated's animated text content prop
-type AnimatedTextInputProps = TextInputProps & {
-    text?: string;
-};
-const AnimatedTextInput = Animated.createAnimatedComponent(TextInput as React.ComponentType<AnimatedTextInputProps>);
 
 import { useGestureNudge } from '../../GestureNudgeContext';
 import { SECONDARY_HOLD_ACTIVATION_MS, SECONDARY_HOLD_INDICATOR_DELAY_MS } from '../interactionConstants';
@@ -39,7 +32,6 @@ const CENTER_VALUE_MIN_SCALE = 0.62;
 const CENTER_VALUE_TARGET_CHARS = 4;
 
 export function getCenterValueFontScale(value: number): number {
-    'worklet';
     const textLength = value > 0 ? String(value).length + 1 : String(value).length;
     return Math.max(CENTER_VALUE_MIN_SCALE, Math.min(1, CENTER_VALUE_TARGET_CHARS / textLength));
 }
@@ -50,7 +42,6 @@ function inkA(ink: string, a: number): string {
 }
 
 function fmtSigned(v: number): string {
-    'worklet';
     if (v > 0) return '+' + v;
     return String(v);
 }
@@ -64,12 +55,14 @@ function wrapDelta(delta: number): number {
 }
 
 interface Props {
-    svValue: SharedValue<number>;
+    /** The round score as saved in the store. */
+    value: number;
+    /** Total of all rounds before this one. */
+    previousTotal: number;
     onChange: (v: number) => void;
     onToggleMode: (active: boolean) => void;
     isSecondary: boolean;
     ink: string;
-    svNewTotal: SharedValue<number>;
     addendOne: number;
     addendTwo: number;
     dialSize: number;
@@ -78,12 +71,12 @@ interface Props {
 }
 
 const DialControl: React.FC<Props> = ({
-    svValue,
+    value,
+    previousTotal,
     onChange,
     onToggleMode,
     isSecondary,
     ink,
-    svNewTotal,
     addendOne,
     addendTwo,
     dialSize: D,
@@ -106,9 +99,16 @@ const DialControl: React.FC<Props> = ({
     const numScaleStyle = useAnimatedStyle(() => ({
         transform: [{ scale: numScale.value }],
     }));
-    const centerNumberFitStyle = useAnimatedStyle(() => ({
-        fontSize: D * CENTER_VALUE_BASE_FONT_RATIO * getCenterValueFontScale(svValue.value),
-    }));
+
+    // Score state lives on the JS thread only. The UI thread just turns finger
+    // movement into notch counts, so the round score and new total are always
+    // drawn from the same number and the next turn starts from the saved score.
+    const [dragValue, setDragValue] = useState<number | null>(null);
+    const shownValue = dragValue ?? value;
+    const latestValueRef = useRef(value); // saved score, or the one just sent to the store
+    useLayoutEffect(() => { latestValueRef.current = value; }, [value]);
+    const dragBaseRef = useRef(value);
+    const dragPendingRef = useRef(value);
 
     const popNumber = useCallback(() => {
         numScale.value = withSequence(
@@ -125,22 +125,21 @@ const DialControl: React.FC<Props> = ({
     const isSecondaryRef = useRef(isSecondary);
     isSecondaryRef.current = isSecondary;
 
+    const addendsRef = useRef({ addendOne, addendTwo });
+    addendsRef.current = { addendOne, addendTwo };
+    const onChangeRef = useRef(onChange);
+    onChangeRef.current = onChange;
+    const onToggleModeRef = useRef(onToggleMode);
+    onToggleModeRef.current = onToggleMode;
+
     // Shared values for worklet access
-    const svInc = useSharedValue(addendOne);
     const svAccDeg = useSharedValue(0);
     const svLastAngle = useSharedValue(0);
     const svStartX = useSharedValue(0);
     const svStartY = useSharedValue(0);
     const svHasMoved = useSharedValue(false);
-    const svStartValue = useSharedValue(0);
-    // Optimistic drag state: update visible shared values during the gesture,
-    // then commit only the final pending score to Redux once the gesture closes.
-    const svStartNewTotal = useSharedValue(0);
-    const svPendingValue = useSharedValue(0);
     const svLastStep = useSharedValue(0);
     const svDidFlush = useSharedValue(true);
-
-    useEffect(() => { svInc.value = isSecondary ? addendTwo : addendOne; }, [isSecondary, addendOne, addendTwo]);
 
     const lpTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
     useEffect(() => () => clearTimeout(lpTimer.current), []);
@@ -197,13 +196,14 @@ const DialControl: React.FC<Props> = ({
         lpTimer.current = setTimeout(() => {
             if (!svHasMoved.value) {
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-                onToggleMode(true);
+                isSecondaryRef.current = true;
+                onToggleModeRef.current(true);
                 svAccDeg.value = 0;
                 // Snap ring back on activation
                 holdProgress.value = withTiming(0, { duration: 120, easing: Easing.out(Easing.cubic) });
             }
         }, SECONDARY_HOLD_ACTIVATION_MS);
-    }, [onToggleMode]);
+    }, []);
 
     const stopLongPress = useCallback(() => {
         clearTimeout(lpTimer.current);
@@ -214,14 +214,6 @@ const DialControl: React.FC<Props> = ({
         if (isSecondaryRef.current) popNumber();
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }, [popNumber]);
-
-    const centerValueAnimProps = useAnimatedProps(() => ({
-        text: fmtSigned(svValue.value),
-    }));
-
-    const newTotalAnimProps = useAnimatedProps(() => ({
-        text: String(svNewTotal.value),
-    }));
 
     // Notch indicator — position and visibility driven by UI-thread SharedValues
     const notchAnimProps = useAnimatedProps(() => {
@@ -268,33 +260,49 @@ const DialControl: React.FC<Props> = ({
         strokeOpacity: svIsDragging.value && Math.abs(svAccDeg.value) >= 360 ? 0.9 : 0,
     }));
 
-    const handleDeactivate = useCallback(() => {
-        onToggleMode(false);
-    }, [onToggleMode]);
-
     // A touch on the ring that ends without turning it (and without holding
     // for the larger step) changed nothing: tell the nudge toast.
     const { reportMiss, reportSuccess } = useGestureNudge();
-    const handleMiss = useCallback(() => {
-        if (isSecondaryRef.current) return;
-        reportMiss(InteractionType.Dial);
-    }, [reportMiss]);
+    const reportMissRef = useRef(reportMiss);
+    reportMissRef.current = reportMiss;
+    const reportSuccessRef = useRef(reportSuccess);
+    reportSuccessRef.current = reportSuccess;
 
-    const flushPendingChange = useCallback((newVal: number) => {
-        onChange(newVal);
-        reportSuccess();
-    }, [onChange, reportSuccess]);
+    const beginDrag = useCallback(() => {
+        dragBaseRef.current = latestValueRef.current;
+        dragPendingRef.current = latestValueRef.current;
+        startLongPress();
+    }, [startLongPress]);
 
-    const panGesture = Gesture.Pan()
+    const dragToStep = useCallback((steps: number) => {
+        const { addendOne: one, addendTwo: two } = addendsRef.current;
+        const newVal = dragBaseRef.current + steps * (isSecondaryRef.current ? two : one);
+        dragPendingRef.current = newVal;
+        setDragValue(newVal);
+        handleBumpFeedback();
+    }, [handleBumpFeedback]);
+
+    const endDrag = useCallback((hasMoved: boolean) => {
+        const pending = dragPendingRef.current;
+        if (pending !== dragBaseRef.current) {
+            latestValueRef.current = pending;
+            onChangeRef.current(pending);
+            reportSuccessRef.current();
+        } else if (!hasMoved && !isSecondaryRef.current) {
+            reportMissRef.current(InteractionType.Dial);
+        }
+        setDragValue(null);
+        stopLongPress();
+        isSecondaryRef.current = false;
+        onToggleModeRef.current(false);
+    }, [stopLongPress]);
+
+    const panGesture = useMemo(() => Gesture.Pan()
         .enabled(!menuOpen)
         .minDistance(0)
         .onBegin((e) => {
-            svStartValue.value = svValue.value; // round score at gesture start, before optimistic dial updates
-            // Capture the gesture baseline so live total = start total + round delta.
-            svStartNewTotal.value = svNewTotal.value; // total score at gesture start, before optimistic dial updates
-            svPendingValue.value = svValue.value; // latest optimistic round score waiting to be flushed to Redux
-            svLastStep.value = 0; // last emitted notch offset from svStartValue
-            svDidFlush.value = false; // reset one-shot guard for the eventual Redux flush
+            svLastStep.value = 0; // last emitted notch offset from the drag start
+            svDidFlush.value = false; // reset one-shot guard for the end-of-drag commit
             svAccDeg.value = 0; // accumulated rotation degrees since gesture start
             svHasMoved.value = false; // long-press hold is still possible until movement passes threshold
             svStartX.value = e.x; // touch start x, used to detect movement beyond hold threshold
@@ -307,7 +315,7 @@ const DialControl: React.FC<Props> = ({
             svTrailStartDeg.value = angle;
             svIsDragging.value = true;
 
-            runOnJS(startLongPress)();
+            runOnJS(beginDrag)();
         })
         .onUpdate((e) => {
             const dx2 = e.x - svStartX.value;
@@ -329,42 +337,36 @@ const DialControl: React.FC<Props> = ({
             if (steps === svLastStep.value) return;
 
             svLastStep.value = steps;
-            const newVal = svStartValue.value + steps * svInc.value;
-            svPendingValue.value = newVal;
-            svValue.value = newVal;
-            svNewTotal.value = svStartNewTotal.value + newVal - svStartValue.value;
-            runOnJS(handleBumpFeedback)();
+            runOnJS(dragToStep)(steps);
         })
         .onEnd(() => {
-            // onFinalize can run after onEnd, so guard the JS/Redux commit.
+            // onFinalize can run after onEnd, so guard the commit.
             if (!svDidFlush.value) {
                 svDidFlush.value = true;
-                if (svPendingValue.value !== svStartValue.value) {
-                    runOnJS(flushPendingChange)(svPendingValue.value);
-                } else if (!svHasMoved.value) {
-                    runOnJS(handleMiss)();
-                }
+                runOnJS(endDrag)(svHasMoved.value);
             }
             svIsDragging.value = false;
             svAccDeg.value = 0;
-            runOnJS(stopLongPress)();
-            runOnJS(handleDeactivate)();
         })
         .onFinalize(() => {
-            // onEnd can run before onFinalize, so guard the JS/Redux commit.
+            // onEnd can run before onFinalize, so guard the commit.
             if (!svDidFlush.value) {
                 svDidFlush.value = true;
-                if (svPendingValue.value !== svStartValue.value) {
-                    runOnJS(flushPendingChange)(svPendingValue.value);
-                } else if (!svHasMoved.value) {
-                    runOnJS(handleMiss)();
-                }
+                runOnJS(endDrag)(svHasMoved.value);
             }
             svIsDragging.value = false;
             svAccDeg.value = 0;
-            runOnJS(stopLongPress)();
-            runOnJS(handleDeactivate)();
-        });
+        }), [
+        menuOpen, C, beginDrag, dragToStep, endDrag, stopLongPress,
+        svAccDeg, svDidFlush, svHasMoved, svIsDragging, svLastAngle, svLastStep, svStartX, svStartY, svTrailStartDeg,
+    ]);
+
+    const stepBy = useCallback((delta: number) => {
+        const newVal = latestValueRef.current + delta;
+        latestValueRef.current = newVal;
+        onChange(newVal);
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }, [onChange]);
 
     // --- SVG geometry ---
     const ringColor = isSecondary ? ACCENT : ink;
@@ -451,14 +453,16 @@ const DialControl: React.FC<Props> = ({
                     <View style={StyleSheet.absoluteFill} pointerEvents="none">
                         <View style={styles.centerValue}>
                             <Animated.View style={[numScaleStyle, { width: D * 0.62 }]}>
-                                <AnimatedTextInput
-                                    animatedProps={centerValueAnimProps}
-                                    defaultValue={fmtSigned(svValue.value)}
-                                    style={[styles.centerNumber, centerNumberFitStyle, { color: ink, padding: 0, backgroundColor: 'transparent' }]}
-                                    editable={false}
-                                    caretHidden={true}
-                                    underlineColorAndroid="transparent"
-                                />
+                                <Text
+                                    testID="dial-round-value"
+                                    numberOfLines={1}
+                                    style={[styles.centerNumber, {
+                                        color: ink,
+                                        fontSize: D * CENTER_VALUE_BASE_FONT_RATIO * getCenterValueFontScale(shownValue),
+                                    }]}
+                                >
+                                    {fmtSigned(shownValue)}
+                                </Text>
                             </Animated.View>
                             <Text style={[styles.centerLabel, { color: inkA(ink, 0.62), fontSize: D * 0.049 }]}>
                                 THIS ROUND
@@ -473,10 +477,7 @@ const DialControl: React.FC<Props> = ({
                 <Pressable
                     testID="btn-decrement"
                     disabled={menuOpen}
-                    onPress={() => {
-                        onChange(svValue.value - addendOne);
-                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    }}
+                    onPress={() => stepBy(-addendOne)}
                     style={({ pressed }) => [
                         styles.stepBtn,
                         { backgroundColor: inkA(ink, pressed ? 0.26 : 0.15), width: D * 0.265, height: D * 0.224 },
@@ -489,14 +490,13 @@ const DialControl: React.FC<Props> = ({
 
                 {!landscape && (
                     <View style={styles.newTotalCol} pointerEvents="none">
-                        <AnimatedTextInput
-                            animatedProps={newTotalAnimProps}
-                            defaultValue={String(svNewTotal.value)}
-                            style={[styles.newTotalNumber, { color: ink, fontSize: D * 0.18, padding: 0, backgroundColor: 'transparent', textAlign: 'center' }]}
-                            editable={false}
-                            caretHidden={true}
-                            underlineColorAndroid="transparent"
-                        />
+                        <Text
+                            testID="dial-new-total"
+                            numberOfLines={1}
+                            style={[styles.newTotalNumber, { color: ink, fontSize: D * 0.18, textAlign: 'center' }]}
+                        >
+                            {previousTotal + shownValue}
+                        </Text>
                         <Text style={[styles.newTotalLabel, { color: inkA(ink, 0.62), fontSize: D * 0.044 }]}>
                             NEW TOTAL
                         </Text>
@@ -506,10 +506,7 @@ const DialControl: React.FC<Props> = ({
                 <Pressable
                     testID="btn-increment"
                     disabled={menuOpen}
-                    onPress={() => {
-                        onChange(svValue.value + addendOne);
-                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    }}
+                    onPress={() => stepBy(addendOne)}
                     style={({ pressed }) => [
                         styles.stepBtn,
                         { backgroundColor: inkA(ink, pressed ? 0.26 : 0.15), width: D * 0.265, height: D * 0.224 },

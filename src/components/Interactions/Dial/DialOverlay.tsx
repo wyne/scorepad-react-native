@@ -119,15 +119,9 @@ const PlayerDialPage: React.FC<PlayerDialPageProps> = ({
     });
     const lastLoggedValueRef = useRef(currentRoundScore);
 
-    // Stable SharedValue refs — same object identity every render, so React.memo(DialControl)
-    // skips re-renders when score changes. The displayed numbers update via Reanimated on the UI thread.
-    const svRoundScore = useSharedValue(currentRoundScore);
-    const svScoreTotal = useSharedValue(currentRoundTotalScore);
     useLayoutEffect(() => {
-        svRoundScore.value = currentRoundScore;
-        svScoreTotal.value = currentRoundTotalScore;
         lastLoggedValueRef.current = currentRoundScore;
-    }, [currentRoundScore, currentRoundTotalScore]);
+    }, [currentRoundScore]);
 
     const [isSecondary, setIsSecondary] = useState(false);
 
@@ -252,12 +246,12 @@ const PlayerDialPage: React.FC<PlayerDialPageProps> = ({
                     {/* Center: dial */}
                     <View style={styles.lsCenter}>
                         <DialControl
-                            svValue={svRoundScore}
+                            value={currentRoundScore}
+                            previousTotal={previousTotal}
                             onChange={handleChange}
                             onToggleMode={setIsSecondary}
                             isSecondary={isSecondary}
                             ink={ink}
-                            svNewTotal={svScoreTotal}
                             addendOne={addendOne}
                             addendTwo={addendTwo}
                             dialSize={lsDialSize}
@@ -323,12 +317,12 @@ const PlayerDialPage: React.FC<PlayerDialPageProps> = ({
                 {/* Dial */}
                 <View style={styles.dialWrap}>
                     <DialControl
-                        svValue={svRoundScore}
+                        value={currentRoundScore}
+                        previousTotal={previousTotal}
                         onChange={handleChange}
                         onToggleMode={setIsSecondary}
                         isSecondary={isSecondary}
                         ink={ink}
-                        svNewTotal={svScoreTotal}
                         addendOne={addendOne}
                         addendTwo={addendTwo}
                         dialSize={dialSize}
