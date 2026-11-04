@@ -6,12 +6,12 @@ import type { NativeStackHeaderItem, NativeStackHeaderItemMenuAction } from '@re
 import { type SFSymbol, SymbolView } from 'expo-symbols';
 import { StyleSheet, View, Text, Platform } from 'react-native';
 
-import { setGameInteractionType } from '../../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
 import { selectInteractionType, selectIsDialOnly } from '../../../redux/selectors';
-import { toggleHomeFullscreen, setInteractionType, markFeatureNotificationSeen } from '../../../redux/SettingsSlice';
+import { toggleHomeFullscreen, markFeatureNotificationSeen } from '../../../redux/SettingsSlice';
 import { logEvent } from '../../Analytics';
 import { FEATURE_DIAL_GESTURE, MAX_TILE_PLAYERS } from '../../constants';
+import { useApplyInteractionType } from '../../hooks/useApplyInteractionType';
 import { useTheme } from '../../theme';
 import { InteractionType } from '../Interactions/InteractionType';
 import { useMenuOpen } from '../MenuOpenContext';
@@ -74,7 +74,7 @@ const useGameOptions = () => {
             image: 'dial.min',
             state: isDial ? 'on' : 'off',
         },
-        { id: 'about-gestures', title: 'About Gestures', image: 'info.circle' },
+        { id: 'about-gestures', title: 'How to Score', image: 'info.circle' },
     ];
 
     const settingsActions: GameOptionAction[] = [
@@ -89,26 +89,18 @@ const useGameOptions = () => {
         },
     ];
 
-    // Set the gesture for the current game, and update the global default so
-    // new games inherit the most recently chosen gesture.
-    const applyInteractionType = (type: InteractionType, eventName: string) => {
-        if (currentGameId) {
-            dispatch(setGameInteractionType({ gameId: currentGameId, interactionType: type }));
-        }
-        dispatch(setInteractionType(type));
-        logEvent('set_interaction', { interaction_type: eventName, game_id: currentGameId });
-    };
+    const applyGesture = useApplyInteractionType();
 
     const handleAction = (event: string) => {
         switch (event) {
             case 'swipe':
-                applyInteractionType(InteractionType.SwipeVertical, 'swipe_vertical');
+                applyGesture(InteractionType.SwipeVertical);
                 break;
             case 'tap':
-                applyInteractionType(InteractionType.HalfTap, 'half_tap');
+                applyGesture(InteractionType.HalfTap);
                 break;
             case 'dial':
-                applyInteractionType(InteractionType.Dial, 'radial_gesture');
+                applyGesture(InteractionType.Dial);
                 break;
             case 'point-values':
                 gameSheetRef?.current?.snapToIndex(0);

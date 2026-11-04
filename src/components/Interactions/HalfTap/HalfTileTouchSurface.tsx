@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
 import * as Haptics from 'expo-haptics';
-import { StyleSheet, Text, TouchableHighlight, View } from 'react-native';
+import { StyleSheet, TouchableHighlight, View } from 'react-native';
 
 import { selectGameById } from '../../../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector, useAppStore } from '../../../../redux/hooks';
@@ -23,13 +23,12 @@ type Props = {
     playerId: string;
     fontColor: string;
     scoreType: 'increment' | 'decrement';
-    showHint?: boolean;
     /** Test-only render probe for selector invalidation regressions. */
     onRender?: (id: string) => void;
 };
 
 export const HalfTileTouchSurface: React.FunctionComponent<Props> = (
-    { playerIndex, fontColor, playerId, scoreType, showHint, onRender }: Props) => {
+    { playerIndex, fontColor, playerId, scoreType, onRender }: Props) => {
     onRender?.(playerId);
 
     const { menuOpen } = useMenuOpen();
@@ -103,13 +102,8 @@ export const HalfTileTouchSurface: React.FunctionComponent<Props> = (
             onPress={() => scoreChangeHandler(addendOne)}
             onLongPress={() => scoreChangeHandler(addendTwo, true)}>
             <View style={[StyleSheet.absoluteFill,
-                scoreType === 'increment' ? styles.hintContainerTop : styles.hintContainerBottom
+                scoreType === 'increment' ? styles.particleContainerTop : styles.particleContainerBottom
             ]}>
-                {showHint && (
-                    <Text style={[styles.hintLabel, { color: fontColor }]}>
-                        {scoreType === 'increment' ? '+' : '−'}
-                    </Text>
-                )}
                 {particles.map((particle) => (
                     <ScoreParticle key={particle.key} id={particle.key} value={particle.value} />
                 ))}
@@ -131,19 +125,14 @@ const styles = StyleSheet.create({
         top: '50%',
         bottom: 0,
     },
-    hintContainerTop: {
+    particleContainerTop: {
         alignItems: 'center',
         justifyContent: 'flex-start',
         paddingTop: 8,
     },
-    hintContainerBottom: {
+    particleContainerBottom: {
         alignItems: 'center',
         justifyContent: 'flex-end',
         paddingBottom: 8,
-    },
-    hintLabel: {
-        fontSize: 42,
-        fontWeight: '200',
-        opacity: 0.2,
     },
 });

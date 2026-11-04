@@ -50,9 +50,10 @@ jest.mock('react-native-gesture-handler', () => ({
     Gesture: {
         Pan: () => {
             const b: Record<string, (...args: unknown[]) => unknown> = {};
-            const fluent = () => b;
+            const handlers: Record<string, unknown> = {};
+            (globalThis as any).__dialPan = handlers;
             ['enabled', 'minDistance', 'onBegin', 'onUpdate', 'onEnd', 'onFinalize']
-                .forEach((m) => { b[m] = fluent; });
+                .forEach((m) => { b[m] = (fn: unknown) => { handlers[m] = fn; return b; }; });
             return b;
         },
     },
@@ -72,6 +73,14 @@ jest.mock('expo-haptics', () => ({
     impactAsync: jest.fn(),
     ImpactFeedbackStyle: { Light: 'Light', Medium: 'Medium', Heavy: 'Heavy' },
 }));
+
+const mockReportMiss = jest.fn();
+const mockReportSuccess = jest.fn();
+jest.mock('../../GestureNudgeContext', () => ({
+    useGestureNudge: () => ({ nudgeMessage: null, reportMiss: mockReportMiss, reportSuccess: mockReportSuccess, hideNudge: () => {} }),
+}));
+
+import { InteractionType } from '../InteractionType';
 
 import DialControl, { getCenterValueFontScale } from './DialControl';
 
@@ -191,5 +200,36 @@ describe('DialControl — menuOpen', () => {
         const { getByTestId } = render(<DialControl {...defaultProps} menuOpen={false} />);
         expect(getByTestId('btn-decrement').props.accessibilityState?.disabled).toBeFalsy();
         expect(getByTestId('btn-increment').props.accessibilityState?.disabled).toBeFalsy();
+    });
+});
+
+describe('DialControl misfire nudge', () => {
+    const pan = () => (globalThis as any).__dialPan as Record<string, (e?: unknown) => void>;
+
+    it('reports a miss when the ring is tapped without turning', () => {
+        render(<DialControl {...defaultProps} />);
+        pan().onBegin({ x: 100, y: 28 });
+        pan().onEnd();
+        pan().onFinalize();
+        expect(mockReportMiss).toHaveBeenCalledTimes(1);
+        expect(mockReportMiss).toHaveBeenCalledWith(InteractionType.Dial);
+    });
+
+    it('does not report a miss after a turn that scores', () => {
+        const onChange = jest.fn();
+        render(<DialControl {...defaultProps} onChange={onChange} />);
+        pan().onBegin({ x: 100, y: 28 });
+        pan().onUpdate({ x: 172, y: 100 });
+        pan().onEnd();
+        expect(onChange).toHaveBeenCalled();
+        expect(mockReportSuccess).toHaveBeenCalled();
+        expect(mockReportMiss).not.toHaveBeenCalled();
+    });
+
+    it('does not report a miss while hold mode is on', () => {
+        render(<DialControl {...defaultProps} isSecondary />);
+        pan().onBegin({ x: 100, y: 28 });
+        pan().onEnd();
+        expect(mockReportMiss).not.toHaveBeenCalled();
     });
 });

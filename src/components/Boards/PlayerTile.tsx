@@ -27,7 +27,6 @@ interface Props {
     rows: number;
     width: number;
     height: number;
-    showHint: boolean;
     // Per-corner radii, for corners drawn concentric with the display's.
     radiusTopLeft?: number;
     radiusTopRight?: number;
@@ -42,7 +41,6 @@ const PlayerTile: React.FunctionComponent<Props> = React.memo(({
     cols,
     rows,
     playerId,
-    showHint,
     radiusTopLeft,
     radiusTopRight,
     radiusBottomLeft,
@@ -99,7 +97,7 @@ const PlayerTile: React.FunctionComponent<Props> = React.memo(({
                     }]}>
                 <PlayerIndexLabel index={index} fontColor={fg} enabled={playerIndexLabel} />
                 <PlayerWinnerLabel fontColor={fg} enabled={isWinner} />
-                <InteractionComponent index={index} fontColor={fg} playerId={playerId} showHint={showHint} tileHeight={height}>
+                <InteractionComponent index={index} fontColor={fg} playerId={playerId}>
                     <AdditionTile
                         playerId={playerId}
                         fontColor={fg}

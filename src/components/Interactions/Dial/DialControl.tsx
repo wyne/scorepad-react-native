@@ -23,7 +23,9 @@ type AnimatedTextInputProps = TextInputProps & {
 };
 const AnimatedTextInput = Animated.createAnimatedComponent(TextInput as React.ComponentType<AnimatedTextInputProps>);
 
+import { useGestureNudge } from '../../GestureNudgeContext';
 import { SECONDARY_HOLD_ACTIVATION_MS, SECONDARY_HOLD_INDICATOR_DELAY_MS } from '../interactionConstants';
+import { InteractionType } from '../InteractionType';
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 const AnimatedLine = Animated.createAnimatedComponent(Line);
@@ -73,7 +75,6 @@ interface Props {
     dialSize: number;
     landscape?: boolean;
     menuOpen?: boolean;
-    showHint?: boolean;
 }
 
 const DialControl: React.FC<Props> = ({
@@ -88,7 +89,6 @@ const DialControl: React.FC<Props> = ({
     dialSize: D,
     landscape = false,
     menuOpen = false,
-    showHint = false,
 }) => {
     const C = D / 2;
     const R = D * 0.36;    // ring centre radius
@@ -108,34 +108,6 @@ const DialControl: React.FC<Props> = ({
     }));
     const centerNumberFitStyle = useAnimatedStyle(() => ({
         fontSize: D * CENTER_VALUE_BASE_FONT_RATIO * getCenterValueFontScale(svValue.value),
-    }));
-
-    const arrowBob = useSharedValue(0);
-    const arrowOpacity = useSharedValue(0.4);
-
-    useEffect(() => {
-        if (!showHint) return;
-        arrowBob.value = withRepeat(
-            withSequence(
-                withTiming(-7, { duration: 750, easing: Easing.inOut(Easing.quad) }),
-                withTiming(0, { duration: 750, easing: Easing.inOut(Easing.quad) }),
-            ), -1, false,
-        );
-        arrowOpacity.value = withRepeat(
-            withSequence(
-                withTiming(0.9, { duration: 750, easing: Easing.inOut(Easing.quad) }),
-                withTiming(0.4, { duration: 750, easing: Easing.inOut(Easing.quad) }),
-            ), -1, false,
-        );
-    }, [showHint]);
-
-    const leftArrowStyle = useAnimatedStyle(() => ({
-        opacity: arrowOpacity.value,
-        transform: [{ rotate: '-145deg' }, { translateY: arrowBob.value }],
-    }));
-    const rightArrowStyle = useAnimatedStyle(() => ({
-        opacity: arrowOpacity.value,
-        transform: [{ rotate: '145deg' }, { translateY: arrowBob.value }],
     }));
 
     const popNumber = useCallback(() => {
@@ -300,9 +272,18 @@ const DialControl: React.FC<Props> = ({
         onToggleMode(false);
     }, [onToggleMode]);
 
+    // A touch on the ring that ends without turning it (and without holding
+    // for the larger step) changed nothing: tell the nudge toast.
+    const { reportMiss, reportSuccess } = useGestureNudge();
+    const handleMiss = useCallback(() => {
+        if (isSecondaryRef.current) return;
+        reportMiss(InteractionType.Dial);
+    }, [reportMiss]);
+
     const flushPendingChange = useCallback((newVal: number) => {
         onChange(newVal);
-    }, [onChange]);
+        reportSuccess();
+    }, [onChange, reportSuccess]);
 
     const panGesture = Gesture.Pan()
         .enabled(!menuOpen)
@@ -360,6 +341,8 @@ const DialControl: React.FC<Props> = ({
                 svDidFlush.value = true;
                 if (svPendingValue.value !== svStartValue.value) {
                     runOnJS(flushPendingChange)(svPendingValue.value);
+                } else if (!svHasMoved.value) {
+                    runOnJS(handleMiss)();
                 }
             }
             svIsDragging.value = false;
@@ -373,6 +356,8 @@ const DialControl: React.FC<Props> = ({
                 svDidFlush.value = true;
                 if (svPendingValue.value !== svStartValue.value) {
                     runOnJS(flushPendingChange)(svPendingValue.value);
+                } else if (!svHasMoved.value) {
+                    runOnJS(handleMiss)();
                 }
             }
             svIsDragging.value = false;
@@ -480,22 +465,6 @@ const DialControl: React.FC<Props> = ({
                             </Text>
                         </View>
                     </View>
-
-                    {/* Rotation hint arrows — top-left (CCW) and top-right (CW) */}
-                    {showHint && (
-                        <View style={StyleSheet.absoluteFill} pointerEvents="none">
-                            <Animated.View style={[styles.rotHint, {
-                                top: D * 0.18, left: D * 0.06,
-                            }, leftArrowStyle]}>
-                                <Text style={{ color: ink, fontSize: D * 0.1 }}>▲</Text>
-                            </Animated.View>
-                            <Animated.View style={[styles.rotHint, {
-                                top: D * 0.18, right: D * 0.06,
-                            }, rightArrowStyle]}>
-                                <Text style={{ color: ink, fontSize: D * 0.1 }}>▲</Text>
-                            </Animated.View>
-                        </View>
-                    )}
                 </View>
             </GestureDetector>
 
@@ -620,9 +589,6 @@ const styles = StyleSheet.create({
         fontWeight: '800',
         letterSpacing: 1.5,
         marginTop: 4,
-    },
-    rotHint: {
-        position: 'absolute',
     },
 });
 

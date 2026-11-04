@@ -8,6 +8,7 @@ import { Provider } from 'react-redux';
 import gamesReducer, { roundNext, updateGame } from '../../../../redux/GamesSlice';
 import playersReducer, { playerRoundScoreIncrement } from '../../../../redux/PlayersSlice';
 import settingsReducer, { initialState as settingsInitialState } from '../../../../redux/SettingsSlice';
+import { InteractionType } from '../InteractionType';
 
 import SwipeVertical from './Swipe';
 
@@ -66,8 +67,16 @@ jest.mock('../../LockedHintContext', () => ({
   useLockedHint: function () { return { lockedHintVisible: false, showLockedHint: mockShowLockedHint, hideLockedHint: function () { } }; },
 }));
 
+const mockReportMiss = jest.fn();
+const mockReportSuccess = jest.fn();
+jest.mock('../../GestureNudgeContext', () => ({
+  useGestureNudge: function () { return { nudgeMessage: null, reportMiss: mockReportMiss, reportSuccess: mockReportSuccess, hideNudge: function () { } }; },
+}));
+
 beforeEach(() => {
   mockShowLockedHint.mockClear();
+  mockReportMiss.mockClear();
+  mockReportSuccess.mockClear();
   (globalThis as any).__ph = {};
   (globalThis as any).__react = undefined;
   jest.useRealTimers();
@@ -246,5 +255,36 @@ describe('SwipeVertical', () => {
 
     (globalThis as any).__tapEnd();
     expect(mockShowLockedHint).toHaveBeenCalledTimes(1);
+  });
+
+  it('reports a miss when a touch ends without scoring', () => {
+    const { dispatch } = renderSwipe();
+    const ph = (globalThis as any).__ph;
+    dispatch.mockClear();
+
+    act(() => {
+      ph.onBegin();
+      ph.onEnd({ translationY: 4 });
+      ph.onFinalize();
+    });
+
+    expect(dispatch).not.toHaveBeenCalledWith(expect.objectContaining({ type: playerRoundScoreIncrement.type }));
+    expect(mockReportMiss).toHaveBeenCalledWith(InteractionType.SwipeVertical);
+  });
+
+  it('does not report a miss when the swipe scores', () => {
+    renderSwipe();
+    const ph = (globalThis as any).__ph;
+
+    ph.onBegin();
+    ph.onUpdate({ translationY: -100 });
+    triggerReaction(100, 0);
+    act(() => {
+      ph.onEnd({ translationY: -100 });
+      ph.onFinalize();
+    });
+
+    expect(mockReportMiss).not.toHaveBeenCalled();
+    expect(mockReportSuccess).toHaveBeenCalled();
   });
 });
