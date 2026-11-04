@@ -24,8 +24,10 @@ export function joinNames(names: string[]): string {
 /**
  * The result of a finished game, in one line above the score table:
  * "Gertrude wins with 298", plus the winning margin when there is a single
- * winner and someone behind them. Renders nothing until the game is locked
- * with winners.
+ * winner and someone behind them. Several winners on the same total "tie
+ * with" it; winners chosen freely on different totals each get their own,
+ * "A (30) and B (12) win". Renders nothing until the game is locked with
+ * winners.
  */
 export const GameResultBanner: React.FunctionComponent = () => {
     const theme = useTheme();
@@ -42,6 +44,7 @@ export const GameResultBanner: React.FunctionComponent = () => {
     const totalOf = (id: string) => totals.find(t => t.id === id)?.total ?? 0;
     const names = winners.map(p => p?.playerName ?? '');
     const winningTotal = totalOf(winnerIds[0]);
+    const sharedTotal = winnerIds.every(id => totalOf(id) === winningTotal);
 
     const runnerUp = totals
         .filter(t => !winnerIds.includes(t.id))
@@ -62,9 +65,20 @@ export const GameResultBanner: React.FunctionComponent = () => {
         >
             <View style={[styles.bannerDot, { backgroundColor: color }]} />
             <Text style={[styles.bannerText, { color: theme.text }]} numberOfLines={1}>
-                <Text style={styles.bannerName}>{joinNames(names)}</Text>
-                {winnerIds.length > 1 ? ' win with ' : ' wins with '}
-                {winningTotal}
+                {sharedTotal ? (
+                    <>
+                        <Text style={styles.bannerName}>{joinNames(names)}</Text>
+                        {winnerIds.length > 1 ? ' tie with ' : ' wins with '}
+                        {winningTotal}
+                    </>
+                ) : (
+                    <>
+                        <Text style={styles.bannerName}>
+                            {joinNames(winnerIds.map((id, i) => `${names[i]} (${totalOf(id)})`))}
+                        </Text>
+                        {' win'}
+                    </>
+                )}
             </Text>
             {margin !== undefined && margin > 0 &&
                 <Text style={[styles.bannerMargin, { color: theme.textSecondary }]}>

@@ -817,9 +817,18 @@ describe('GameSheet', () => {
         });
 
         it('names every winner of a tie, without a margin', () => {
-            const { getByText, queryByText } = renderFinished(['player-1', 'player-2'], [[30], [30]]);
+            const { getByTestId, getByText, queryByText } = renderFinished(['player-1', 'player-2'], [[30], [30]]);
 
             expect(getByText('Player 1 and Player 2')).toBeTruthy();
+            expect(getByTestId('game-result-banner')).toHaveTextContent('Player 1 and Player 2 tie with 30');
+            expect(queryByText(/^by /)).toBeNull();
+        });
+
+        it('gives co-winners on different totals their own scores', () => {
+            const { getByTestId, queryByText } = renderFinished(['player-1', 'player-2'], [[30], [10]]);
+
+            expect(getByTestId('game-result-banner')).toHaveTextContent('Player 1 (30) and Player 2 (10) win');
+            expect(queryByText(/with 30/)).toBeNull();
             expect(queryByText(/^by /)).toBeNull();
         });
 
