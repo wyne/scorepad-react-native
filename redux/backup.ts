@@ -7,7 +7,7 @@ import { InteractionType } from '../src/components/Interactions/InteractionType'
 import { isPlayerNumberStyle } from '../src/components/PlayerTiles/PlayerNumberStyle';
 import { SortDirectionKey, SortSelectorKey } from '../src/components/ScoreLog/SortHelper';
 
-import { GameState, restoreAllGames } from './GamesSlice';
+import { backfillGamePlayerNumbers, GameState, restoreAllGames } from './GamesSlice';
 import { ScoreState, restoreAllPlayers } from './PlayersSlice';
 import { isScoringRules } from './ScoringRules';
 import { initialState as initialSettings, restoreSettings, SettingsState } from './SettingsSlice';
@@ -250,6 +250,8 @@ export const importBackup = async (): Promise<void> => {
         dispatch(restoreAllGames(backup.games.entities));
         dispatch(restoreAllPlayers(backup.players.entities));
         dispatch(restoreSettings(backup.settings));
+        // Games from older backups follow the restored default from here on.
+        dispatch(backfillGamePlayerNumbers(backup.settings.playerNumbers));
 
         Alert.alert('Restore Complete', 'Your data has been restored from the backup.');
     } catch {

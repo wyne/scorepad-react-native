@@ -5,7 +5,7 @@ import * as Crypto from 'expo-crypto';
 import { logEvent } from '../src/Analytics';
 import { getPalette } from '../src/ColorPalette';
 import { InteractionType } from '../src/components/Interactions/InteractionType';
-import { PlayerNumberStyle } from '../src/components/PlayerTiles/PlayerNumberStyle';
+import { isPlayerNumberStyle, PlayerNumberStyle } from '../src/components/PlayerTiles/PlayerNumberStyle';
 import { SortDirectionKey, SortSelectorKey } from '../src/components/ScoreLog/SortHelper';
 import logger from '../src/Logger';
 
@@ -29,9 +29,9 @@ export interface GameState {
     // Per-game gesture. When unset, falls back to the global default
     // (settings.interactionType) via selectInteractionType.
     interactionType?: InteractionType;
-    // Per-game player number style, set from the game options menu. New games
-    // start with the app settings default; games from before this setting
-    // existed have none and follow that default via selectPlayerNumbers.
+    // Per-game player number style, set from the game options menu. Games
+    // start with the app settings default: new games when created, older and
+    // restored games via backfillGamePlayerNumbers.
     playerNumbers?: PlayerNumberStyle;
     // Game mode rules. Unset means the original free play: highest wins and
     // the player picks winners. Set only while the game modes flag is on, but
@@ -161,6 +161,15 @@ const gamesSlice = createSlice({
                 id: action.payload.gameId,
                 changes: {
                     playerNumbers: action.payload.playerNumbers,
+                }
+            });
+        },
+        /** Give every game without a player number style the given one, so a
+         * later change to the app settings default leaves existing games alone. */
+        backfillGamePlayerNumbers(state, action: PayloadAction<PlayerNumberStyle>) {
+            Object.values(state.entities).forEach(game => {
+                if (game && !isPlayerNumberStyle(game.playerNumbers)) {
+                    game.playerNumbers = action.payload;
                 }
             });
         },
@@ -428,6 +437,7 @@ export const {
     reorderPlayers,
     setGameInteractionType,
     setGamePlayerNumbers,
+    backfillGamePlayerNumbers,
     setGameScoring,
     restoreAllGames,
 } = gamesSlice.actions;

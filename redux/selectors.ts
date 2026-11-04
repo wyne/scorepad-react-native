@@ -15,7 +15,8 @@ export const selectIsDialOnly = (state: RootState, gameId?: string): boolean => 
     return playerCount > MAX_TILE_PLAYERS;
 };
 
-/** The game's player number style, falling back to the global default. */
+/** The game's player number style. The global default only covers a game
+ * not yet backfilled, e.g. in the moment before rehydration finishes. */
 export const selectPlayerNumbers = (state: RootState, gameId?: string): PlayerNumberStyle => {
     const gameLevel = gameId ? selectGameById(state, gameId)?.playerNumbers : undefined;
     if (isPlayerNumberStyle(gameLevel)) return gameLevel;

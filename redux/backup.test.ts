@@ -206,6 +206,9 @@ describe('backup validation', () => {
             'Restore Complete',
             'Your data has been restored from the backup.'
         );
-        expect(mockDispatch).toHaveBeenCalledTimes(3);
+        expect(mockDispatch).toHaveBeenCalledTimes(4);
+        expect(mockDispatch).toHaveBeenLastCalledWith(
+            expect.objectContaining({ type: 'games/backfillGamePlayerNumbers', payload: 'off' })
+        );
     });
 });

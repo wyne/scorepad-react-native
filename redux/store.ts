@@ -2,7 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { configureStore } from '@reduxjs/toolkit';
 import { persistStore, persistReducer, createMigrate } from 'redux-persist';
 
-import gamesReducer, { GameState, restLockedGamesOnLastRound } from './GamesSlice';
+import gamesReducer, { backfillGamePlayerNumbers, GameState, restLockedGamesOnLastRound } from './GamesSlice';
 import scoresReducer from './PlayersSlice';
 import settingsReducer from './SettingsSlice';
 
@@ -119,6 +119,11 @@ export interface RootState {
 export type AppDispatch = typeof store.dispatch;
 export type AppStore = typeof store;
 
-export const persistor = persistStore(store);
+/** Pins games that predate per-game player numbers to the current default. */
+export const backfillPlayerNumbers = (target: AppStore) => {
+    target.dispatch(backfillGamePlayerNumbers(target.getState().settings.playerNumbers ?? 'off'));
+};
+
+export const persistor = persistStore(store, null, () => backfillPlayerNumbers(store));
 
 // exportData();
