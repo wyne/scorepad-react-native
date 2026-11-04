@@ -387,3 +387,28 @@ describe('selectPlayerGrandTotalScore', () => {
         expect(selectPlayerGrandTotalScore({ players } as RootState, '1')).toEqual(65);
     });
 });
+
+describe('players sort comparator with malformed stored players', () => {
+    it('does not throw when a stored player has a non-string id', () => {
+        const state = {
+            ids: ['1', 2],
+            entities: {
+                '1': { id: '1', playerName: 'A', scores: [5] },
+                2: { id: 2, playerName: 'B', scores: [5] },
+            },
+        } as unknown as Parameters<typeof playersReducer>[0];
+        expect(() => playersReducer(state, updatePlayer({ id: '1', changes: { playerName: 'Al' } }))).not.toThrow();
+    });
+
+    it('does not throw when a stored player has non-array scores', () => {
+        const state = {
+            ids: ['1', '2'],
+            entities: {
+                '1': { id: '1', playerName: 'A', scores: [5] },
+                '2': { id: '2', playerName: 'B', scores: { 0: 3 } },
+            },
+        } as unknown as Parameters<typeof playersReducer>[0];
+        const next = playersReducer(state, updatePlayer({ id: '1', changes: { playerName: 'Al' } }));
+        expect(next.entities['1'].playerName).toBe('Al');
+    });
+});

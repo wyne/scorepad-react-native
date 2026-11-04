@@ -13,10 +13,20 @@ export interface ScoreState {
     color?: string;
 }
 
+// Stored players can come from old persisted state or imports, so the
+// comparator must not assume `scores` is an array or `id` is a string.
+// The adapter re-sorts every player on each update, so one bad record
+// would otherwise crash any edit (e.g. typing a player name).
+const safeTotal = (scores: unknown): number => (
+    Array.isArray(scores) ? grandTotalScore(scores) : 0
+);
+
+const comparePlayers = (a: ScoreState, b: ScoreState): number => (
+    safeTotal(b.scores) - safeTotal(a.scores) || String(a.id).localeCompare(String(b.id))
+);
+
 const playersAdapter = createEntityAdapter({
-    sortComparer: (a: ScoreState, b: ScoreState) => (
-        grandTotalScore(b.scores) - grandTotalScore(a.scores) || a.id.localeCompare(b.id)
-    ),
+    sortComparer: comparePlayers,
 });
 
 const initialState = playersAdapter.getInitialState({
