@@ -81,11 +81,10 @@ const useGameOptions = () => {
         { id: 'point-values', title: 'Point Values', subtitle: pointValuesSubtitle, image: 'plusminus' },
         {
             id: 'fullscreen',
-            title: 'Fullscreen',
+            title: fullscreen ? 'Show Score Sheet' : 'Hide Score Sheet',
             image: fullscreen
                 ? 'arrow.down.right.and.arrow.up.left'
                 : 'arrow.up.left.and.arrow.down.right',
-            state: fullscreen ? 'on' : 'off',
         },
     ];
 
