@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 
 import * as Haptics from 'expo-haptics';
-import { GestureResponderEvent, StyleSheet, TouchableHighlight, View } from 'react-native';
+import { GestureResponderEvent, LayoutChangeEvent, StyleSheet, TouchableHighlight, View } from 'react-native';
 
 import { selectGameById } from '../../../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector, useAppStore } from '../../../../redux/hooks';
@@ -19,6 +19,8 @@ type ScoreParticleProps = {
     x: number;
     y: number;
     large: boolean;
+    containerWidth: number;
+    containerHeight: number;
 };
 
 type Props = {
@@ -41,6 +43,7 @@ export const HalfTileTouchSurface: React.FunctionComponent<Props> = (
     const store = useAppStore();
 
     const [particles, setParticles] = useState<ScoreParticleProps[]>([]);
+    const surfaceSize = useRef({ width: 0, height: 0 });
 
     const addendOne = useAppSelector(state => state.settings.addendOne);
     const addendTwo = useAppSelector(state => state.settings.addendTwo);
@@ -65,13 +68,21 @@ export const HalfTileTouchSurface: React.FunctionComponent<Props> = (
     const addParticle = (addend: number, event: GestureResponderEvent | undefined, large: boolean) => {
         const key = Math.random().toString(36).substring(7);
         const value = `${scoreType == 'increment' ? '+' : '−'}${addend}`;
-        const x = event?.nativeEvent?.locationX ?? 0;
-        const y = event?.nativeEvent?.locationY ?? 0;
+        const { width: containerWidth, height: containerHeight } = surfaceSize.current;
+        const x = event?.nativeEvent?.locationX ?? containerWidth / 2;
+        const y = event?.nativeEvent?.locationY ?? containerHeight / 2;
 
         setTimeout(() => {
             setParticles((particles) => particles.filter((p) => p.key !== key));
         }, PARTICLE_DURATION + 50);
-        setParticles((particles) => [...particles, { key, value, x, y, large }]);
+        setParticles((particles) => [...particles, {
+            key, value, x, y, large, containerWidth, containerHeight
+        }]);
+    };
+
+    const onLayout = (event: LayoutChangeEvent) => {
+        const { width, height } = event.nativeEvent.layout;
+        surfaceSize.current = { width, height };
     };
 
     const scoreChangeHandler = (addend: number, event?: GestureResponderEvent, secondaryHold = false) => {
@@ -104,6 +115,7 @@ export const HalfTileTouchSurface: React.FunctionComponent<Props> = (
             style={[styles.surface, scoreType == 'increment' ? styles.surfaceAdd : styles.surfaceSubtract]}
             underlayColor={currentGameLocked || menuOpen ? 'transparent' : fontColor + '30'}
             activeOpacity={menuOpen ? 1 : 1}
+            onLayout={onLayout}
             onPress={(e) => scoreChangeHandler(addendOne, e)}
             onLongPress={(e) => scoreChangeHandler(addendTwo, e, true)}>
             <View style={StyleSheet.absoluteFill} pointerEvents="none">
@@ -116,6 +128,8 @@ export const HalfTileTouchSurface: React.FunctionComponent<Props> = (
                         direction={scoreType === 'increment' ? 'up' : 'down'}
                         color={fontColor}
                         large={particle.large}
+                        containerWidth={particle.containerWidth}
+                        containerHeight={particle.containerHeight}
                     />
                 ))}
             </View>

@@ -122,17 +122,30 @@ describe('HalfTileTouchSurface', () => {
 
   it('draws the particle where the finger touched, drifting up on the add half', () => {
     const { surface } = renderSurface({ scoreType: 'increment' });
+    fireEvent(surface, 'layout', { nativeEvent: { layout: { width: 200, height: 100 } } });
     fireEvent.press(surface, { nativeEvent: { locationX: 40, locationY: 22 } });
     expect(mockScoreParticle).toHaveBeenLastCalledWith(expect.objectContaining({
       value: '+3', x: 40, y: 22, direction: 'up', color: 'white', large: false,
+      containerWidth: 200, containerHeight: 100,
     }));
   });
 
   it('draws a larger particle drifting down for a hold on the subtract half', () => {
     const { surface } = renderSurface({ scoreType: 'decrement' });
+    fireEvent(surface, 'layout', { nativeEvent: { layout: { width: 200, height: 100 } } });
     fireEvent(surface, 'longPress', { nativeEvent: { locationX: 12, locationY: 90 } });
     expect(mockScoreParticle).toHaveBeenLastCalledWith(expect.objectContaining({
       value: '−10', x: 12, y: 90, direction: 'down', large: true,
+      containerWidth: 200, containerHeight: 100,
+    }));
+  });
+
+  it('centers a particle for a non-pointer press', () => {
+    const { surface } = renderSurface();
+    fireEvent(surface, 'layout', { nativeEvent: { layout: { width: 200, height: 100 } } });
+    fireEvent.press(surface);
+    expect(mockScoreParticle).toHaveBeenLastCalledWith(expect.objectContaining({
+      x: 100, y: 50,
     }));
   });
 
