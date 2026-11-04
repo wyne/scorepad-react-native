@@ -8,7 +8,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { exportBackup, importBackup } from '../../redux/backup';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
-import { markFeatureNotificationSeen, resetSeenFeatureNotifications, setColorScheme, setGameModesEnabled, setKeepScreenAwake, setPlayerNumbers, toggleShowPointParticles } from '../../redux/SettingsSlice';
+import { markFeatureNotificationSeen, resetSeenFeatureNotifications, setColorScheme, setGameModesEnabled, setKeepScreenAwake, ParticleStyle, setParticleStyle, setPlayerNumbers, toggleShowPointParticles } from '../../redux/SettingsSlice';
 import { logEvent } from '../Analytics';
 import RotatingIcon from '../components/AppInfo/RotatingIcon';
 import { loadSeedData } from '../components/AppInfo/SeedData';
@@ -27,6 +27,11 @@ const PLAYER_NUMBER_OPTIONS: { style: PlayerNumberStyle; label: string }[] = [
 interface Props {
     navigation: NativeStackNavigationProp<ParamListBase, string, undefined>;
 }
+
+const PARTICLE_STYLES: { style: ParticleStyle; label: string; }[] = [
+    { style: 'float', label: 'Float' },
+    { style: 'fly', label: 'Fly to Score' },
+];
 
 // These live outside the screen on purpose. Declared inside it, each render
 // made new component types, so every row remounted whenever a setting
@@ -84,6 +89,7 @@ const AppSettingsScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     const appVersion = Application.nativeApplicationVersion;
 
     const showPointParticles = useAppSelector(state => state.settings.showPointParticles);
+    const particleStyle = useAppSelector(state => state.settings.particleStyle ?? 'float');
     const devMenuEnabled = useAppSelector(state => state.settings.devMenuEnabled);
     const installId = useAppSelector(state => state.settings.installId);
     const seenFeatureNotifications = useAppSelector(state => state.settings.seenFeatureNotifications);
@@ -211,6 +217,24 @@ const AppSettingsScreen: React.FunctionComponent<Props> = ({ navigation }) => {
                     <SectionItemText text="Particle Effect (tap-only)" />
                     <Switch onValueChange={toggleParticleSwitch} value={showPointParticles} ios_backgroundColor={theme.separator} />
                 </SectionItem>
+                {showPointParticles && PARTICLE_STYLES.map(({ style, label }) => (
+                    <React.Fragment key={style}>
+                        <SectionSeparator />
+                        <TouchableOpacity
+                            testID={`particle-style-${style}`}
+                            style={[styles.disclosureRow, styles.subOptionRow]}
+                            onPress={() => {
+                                dispatch(setParticleStyle(style));
+                                logEvent('particle_style_change', { style });
+                            }}
+                        >
+                            <Text style={[styles.disclosureLabel, { color: theme.text }]}>{label}</Text>
+                            {particleStyle === style && (
+                                <Text style={{ color: theme.tint, fontSize: 18 }}>✓</Text>
+                            )}
+                        </TouchableOpacity>
+                    </React.Fragment>
+                ))}
                 <SectionSeparator />
                 <SectionItem>
                     <View style={styles.labelRow}>
@@ -400,6 +424,9 @@ const styles = StyleSheet.create({
         fontSize: 13,
         marginHorizontal: 40,
         marginTop: 6,
+    },
+    subOptionRow: {
+        paddingLeft: 16,
     },
     disclosureArrow: {
         fontSize: 20,

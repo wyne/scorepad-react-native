@@ -125,7 +125,7 @@ describe('HalfTileTouchSurface', () => {
     fireEvent(surface, 'layout', { nativeEvent: { layout: { width: 200, height: 100 } } });
     fireEvent.press(surface, { nativeEvent: { locationX: 40, locationY: 22 } });
     expect(mockScoreParticle).toHaveBeenLastCalledWith(expect.objectContaining({
-      value: '+3', x: 40, y: 22, direction: 'up', color: 'white', large: false,
+      value: '+3', x: 40, y: 22, direction: 'up', color: 'white', large: false, variant: 'float',
       containerWidth: 200, containerHeight: 100,
     }));
   });

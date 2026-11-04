@@ -27,10 +27,10 @@ jest.mock('react-native-safe-area-context', () => ({
 
 const navigation = { setOptions: jest.fn(), goBack: jest.fn(), navigate: jest.fn() };
 
-const renderScreen = (devMenuEnabled: boolean) => {
+const renderScreen = (devMenuEnabled: boolean, showPointParticles = false) => {
     const store = configureStore({
         reducer: { settings: settingsReducer },
-        preloadedState: { settings: { ...initialSettings, devMenuEnabled } },
+        preloadedState: { settings: { ...initialSettings, devMenuEnabled, showPointParticles } },
     });
     const screen = render(
         <Provider store={store}>
@@ -72,6 +72,21 @@ describe('AppSettingsScreen', () => {
         fireEvent(toggle, 'valueChange', true);
 
         expect(store.getState().settings.gameModesEnabled).toBe(true);
+    });
+
+    it('hides the particle styles while particles are off', () => {
+        const { screen } = renderScreen(false);
+
+        expect(screen.queryByTestId('particle-style-fly')).toBeNull();
+    });
+
+    it('switches the particle style to fly to score', () => {
+        const { store, screen } = renderScreen(false, true);
+
+        expect(store.getState().settings.particleStyle).toBe('float');
+        fireEvent.press(screen.getByTestId('particle-style-fly'));
+
+        expect(store.getState().settings.particleStyle).toBe('fly');
     });
 
     it('keeps the same switch instance when a setting changes', () => {

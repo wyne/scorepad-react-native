@@ -84,6 +84,7 @@ export interface AnalyticsEventParams {
     gesture_nudge: { interaction_type: string };
     /** Color scheme preference change in settings. */
     theme_change: { theme: 'system' | 'light' | 'dark' };
+    particle_style_change: { style: 'float' | 'fly' };
     fullscreen: { fullscreen: boolean };
     addend_sheet: { install_id?: string };
     addend_one_change: { addend_one: number };
@@ -168,4 +169,5 @@ export type AnalyticsUserProperty =
     | 'keep_screen_awake'
     | 'point_particles'
     | 'player_numbers'
+    | 'particle_style'
     | 'color_scheme';

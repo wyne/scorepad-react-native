@@ -39,6 +39,7 @@ export const HalfTileTouchSurface: React.FunctionComponent<Props> = (
     const { menuOpen } = useMenuOpen();
     const { showLockedHint } = useLockedHint();
     const showPointParticles = useAppSelector(state => state.settings.showPointParticles);
+    const particleStyle = useAppSelector(state => state.settings.particleStyle ?? 'float');
     const dispatch = useAppDispatch();
     const store = useAppStore();
 
@@ -128,6 +129,7 @@ export const HalfTileTouchSurface: React.FunctionComponent<Props> = (
                         direction={scoreType === 'increment' ? 'up' : 'down'}
                         color={fontColor}
                         large={particle.large}
+                        variant={particleStyle}
                         containerWidth={particle.containerWidth}
                         containerHeight={particle.containerHeight}
                     />

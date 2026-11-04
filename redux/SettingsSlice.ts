@@ -4,6 +4,8 @@ import { InteractionType } from '../src/components/Interactions/InteractionType'
 import { PlayerNumberStyle } from '../src/components/PlayerTiles/PlayerNumberStyle';
 import { FEATURE_NOTIFICATIONS } from '../src/constants';
 
+export type ParticleStyle = 'float' | 'fly';
+
 export interface SettingsState {
     home_fullscreen: boolean;
     multiplier: number;
@@ -14,6 +16,8 @@ export interface SettingsState {
     // Player number style new games start with (Settings > Player Numbers).
     // Each game can then change its own from the game options menu.
     playerNumbers: PlayerNumberStyle;
+    // How a tap's score particle moves. Missing on saves from before the choice existed.
+    particleStyle?: ParticleStyle;
     interactionType: InteractionType;
     // The gesture the user most recently *used* (committed a score with).
     // Drives the gesture hint: undefined means "never used a gesture" (new user).
@@ -39,6 +43,7 @@ export const initialState: SettingsState = {
     currentGameId: undefined,
     showPointParticles: false,
     playerNumbers: 'off',
+    particleStyle: 'float',
     interactionType: InteractionType.SwipeVertical,
     lastUsedInteractionType: undefined,
     lastStoreReviewPrompt: 0,
@@ -71,6 +76,9 @@ const settingsSlice = createSlice({
         },
         setPlayerNumbers(state, action: PayloadAction<PlayerNumberStyle>) {
             state.playerNumbers = action.payload;
+        },
+        setParticleStyle(state, action: PayloadAction<ParticleStyle>) {
+            state.particleStyle = action.payload;
         },
         setMultiplier(state, action: PayloadAction<number>) {
             state.multiplier = action.payload;
@@ -139,6 +147,7 @@ export const {
     setAddendTwo,
     toggleShowPointParticles,
     setPlayerNumbers,
+    setParticleStyle,
     setInteractionType,
     setLastUsedInteractionType,
     setLastStoreReviewPrompt,

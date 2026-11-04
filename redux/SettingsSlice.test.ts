@@ -8,6 +8,7 @@ import settingsReducer, {
     setCurrentGameId,
     setLastUsedInteractionType,
     setMultiplier,
+    setParticleStyle,
     SettingsState } from './SettingsSlice';
 
 
@@ -26,6 +27,12 @@ describe('settings reducer', () => {
 
     it('marks every feature notification seen on a fresh install', () => {
         expect(store.getState().seenFeatureNotifications).toEqual(FEATURE_NOTIFICATIONS);
+    });
+
+    it('defaults to the float particle and switches to fly', () => {
+        expect(store.getState().particleStyle).toBe('float');
+        store.dispatch(setParticleStyle('fly'));
+        expect(store.getState().particleStyle).toBe('fly');
     });
 
     it('should handle setMultiplier', () => {
