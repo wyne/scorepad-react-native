@@ -8,14 +8,21 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { exportBackup, importBackup } from '../../redux/backup';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
-import { markFeatureNotificationSeen, resetSeenFeatureNotifications, setColorScheme, setGameModesEnabled, setKeepScreenAwake, toggleShowPointParticles } from '../../redux/SettingsSlice';
+import { markFeatureNotificationSeen, resetSeenFeatureNotifications, setColorScheme, setGameModesEnabled, setKeepScreenAwake, setPlayerNumbers, toggleShowPointParticles } from '../../redux/SettingsSlice';
 import { logEvent } from '../Analytics';
 import RotatingIcon from '../components/AppInfo/RotatingIcon';
 import { loadSeedData } from '../components/AppInfo/SeedData';
 import HeaderButton from '../components/Buttons/HeaderButton';
+import { PlayerNumberStyle } from '../components/PlayerTiles/PlayerNumberStyle';
 import SectionLabel from '../components/SectionLabel';
 import { FEATURE_KEEP_SCREEN_AWAKE } from '../constants';
 import { useTheme } from '../theme';
+
+const PLAYER_NUMBER_OPTIONS: { style: PlayerNumberStyle; label: string }[] = [
+    { style: 'off', label: 'Off' },
+    { style: 'badge', label: 'Badge' },
+    { style: 'big', label: 'Big' },
+];
 
 interface Props {
     navigation: NativeStackNavigationProp<ParamListBase, string, undefined>;
@@ -83,6 +90,7 @@ const AppSettingsScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     const keepScreenAwake = useAppSelector(state => state.settings.keepScreenAwake);
     const gameModesEnabled = useAppSelector(state => state.settings.gameModesEnabled ?? false);
     const colorScheme = useAppSelector(state => state.settings.colorScheme ?? 'system');
+    const playerNumbers = useAppSelector(state => state.settings.playerNumbers ?? 'off');
 
     const dispatch = useAppDispatch();
 
@@ -226,6 +234,30 @@ const AppSettingsScreen: React.FunctionComponent<Props> = ({ navigation }) => {
                 </SectionItem>
             </Section>
 
+            <Section title="Player Numbers">
+                {PLAYER_NUMBER_OPTIONS.map(({ style, label }, i, arr) => (
+                    <React.Fragment key={style}>
+                        <TouchableOpacity
+                            testID={`player-numbers-${style}`}
+                            style={[styles.disclosureRow]}
+                            onPress={() => {
+                                dispatch(setPlayerNumbers(style));
+                                logEvent('set_player_numbers', { player_numbers: style });
+                            }}
+                        >
+                            <Text style={[styles.disclosureLabel, { color: theme.text }]}>{label}</Text>
+                            {playerNumbers === style && (
+                                <Text style={{ color: theme.tint, fontSize: 18 }}>✓</Text>
+                            )}
+                        </TouchableOpacity>
+                        {i < arr.length - 1 && <SectionSeparator />}
+                    </React.Fragment>
+                ))}
+            </Section>
+            <Text style={[styles.sectionFooter, { color: theme.textTertiary }]}>
+                The style new games start with. Change it for one game from the game options menu.
+            </Text>
+
             <Section title="Appearance">
                 {(['system', 'light', 'dark'] as const).map((option, i, arr) => (
                     <React.Fragment key={option}>
@@ -363,6 +395,11 @@ const styles = StyleSheet.create({
     },
     disclosureLabel: {
         fontSize: 16,
+    },
+    sectionFooter: {
+        fontSize: 13,
+        marginHorizontal: 40,
+        marginTop: 6,
     },
     disclosureArrow: {
         fontSize: 20,

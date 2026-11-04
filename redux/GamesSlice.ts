@@ -29,8 +29,9 @@ export interface GameState {
     // Per-game gesture. When unset, falls back to the global default
     // (settings.interactionType) via selectInteractionType.
     interactionType?: InteractionType;
-    // Per-game player number style. When unset, falls back to the global
-    // default (settings.playerNumbers) via selectPlayerNumbers.
+    // Per-game player number style, set from the game options menu. New games
+    // start with the app settings default; games from before this setting
+    // existed have none and follow that default via selectPlayerNumbers.
     playerNumbers?: PlayerNumberStyle;
     // Game mode rules. Unset means the original free play: highest wins and
     // the player picks winners. Set only while the game modes flag is on, but
@@ -251,6 +252,8 @@ export const asyncRematchGame = createAsyncThunk(
             dateCreated: Date.now(),
             playerIds: playerIds,
             ...(game.scoring ? { scoring: { ...game.scoring } } : {}),
+            // A rematch keeps the numbers the players were looking at.
+            playerNumbers: game.playerNumbers ?? (getState() as RootState).settings?.playerNumbers,
         }));
 
         dispatch(setCurrentGameId(newGameId));
@@ -296,7 +299,7 @@ export const asyncCreateGame = createAsyncThunk(
     'games/create',
     async (
         { gameCount, playerCount }: { gameCount: number, playerCount: number; },
-        { dispatch }
+        { dispatch, getState }
     ) => {
         const newGameId = Crypto.randomUUID();
 
@@ -324,6 +327,9 @@ export const asyncCreateGame = createAsyncThunk(
             title: `Game ${gameCount + 1}`,
             dateCreated: Date.now(),
             playerIds: playerIds,
+            // Stamped from the app settings default, so changing that default
+            // later leaves this game's choice alone.
+            playerNumbers: (getState() as RootState).settings?.playerNumbers,
         }));
 
         dispatch(setCurrentGameId(newGameId));

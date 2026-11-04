@@ -11,8 +11,8 @@ export interface SettingsState {
     addendTwo: number;
     currentGameId: string | undefined;
     showPointParticles: boolean;
-    // Default player number style for games that haven't picked one. Set to
-    // the style most recently chosen from a game's options menu.
+    // Player number style new games start with (Settings > Player Numbers).
+    // Each game can then change its own from the game options menu.
     playerNumbers: PlayerNumberStyle;
     interactionType: InteractionType;
     // The gesture the user most recently *used* (committed a score with).

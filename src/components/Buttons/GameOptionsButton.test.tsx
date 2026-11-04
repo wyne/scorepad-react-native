@@ -159,14 +159,15 @@ describe('GameOptionsButton — player numbers', () => {
         ]);
     });
 
-    it('saves the choice on the game and as the default for new games', () => {
+    it('saves the choice on this game only, leaving the default for new games', () => {
         const store = createStore();
+        const defaultBefore = store.getState().settings.playerNumbers;
         render(<Provider store={store}><GameOptionsButton /></Provider>);
 
         act(() => capturedOnPressAction?.({ nativeEvent: { event: 'player-numbers-big' } }));
 
         expect(store.getState().games.entities['game-1']?.playerNumbers).toBe('big');
-        expect(store.getState().settings.playerNumbers).toBe('big');
+        expect(store.getState().settings.playerNumbers).toBe(defaultBefore);
         expect(findAction('player-numbers-big')?.state).toBe('on');
     });
 });

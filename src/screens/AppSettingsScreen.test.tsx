@@ -56,6 +56,14 @@ describe('AppSettingsScreen', () => {
         );
     });
 
+    it('sets the player number style new games start with', () => {
+        const { store, screen } = renderScreen(false);
+
+        fireEvent.press(screen.getByTestId('player-numbers-big'));
+
+        expect(store.getState().settings.playerNumbers).toBe('big');
+    });
+
     it('shows the Game Modes switch without the developer menu', () => {
         const { store, screen } = renderScreen(false);
 
