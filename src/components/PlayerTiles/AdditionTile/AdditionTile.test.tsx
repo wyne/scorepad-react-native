@@ -5,7 +5,7 @@ import { act, render } from '@testing-library/react-native';
 import { Provider } from 'react-redux';
 
 import gamesReducer, { roundNext } from '../../../../redux/GamesSlice';
-import playersReducer from '../../../../redux/PlayersSlice';
+import playersReducer, { updatePlayer } from '../../../../redux/PlayersSlice';
 import settingsReducer from '../../../../redux/SettingsSlice';
 
 import AdditionTile from './AdditionTile';
@@ -569,5 +569,35 @@ describe('AdditionTile', () => {
         expect(getByText('Before: 5')).toBeTruthy();
         expect(getByText('Round: 0')).toBeTruthy();
         expect(getByText('After: 5')).toBeTruthy();
+    });
+
+    it('renders and survives a rename when a stored player has malformed scores', () => {
+        const store = createMockStore({
+            settings: {
+                currentGameId: 'game-1',
+            },
+            games: {
+                entities: { 'game-1': mockGame },
+                ids: ['game-1'],
+            },
+            players: {
+                entities: {
+                    'player-1': { ...mockPlayer, scores: { 0: 3 } as unknown as number[] },
+                },
+                ids: ['player-1'],
+            },
+        });
+
+        const { getByText } = render(
+            <Provider store={store}>
+                <AdditionTile {...defaultProps} />
+            </Provider>
+        );
+
+        act(() => {
+            store.dispatch(updatePlayer({ id: 'player-1', changes: { playerName: 'Renamed' } }));
+        });
+
+        expect(getByText('After: 0')).toBeTruthy();
     });
 });

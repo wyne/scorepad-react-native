@@ -411,4 +411,19 @@ describe('players sort comparator with malformed stored players', () => {
         const next = playersReducer(state, updatePlayer({ id: '1', changes: { playerName: 'Al' } }));
         expect(next.entities['1'].playerName).toBe('Al');
     });
+
+    it('selectors and score updates tolerate non-array scores after an update', () => {
+        const state = {
+            ids: ['1'],
+            entities: { '1': { id: '1', playerName: 'A', scores: { 0: 3 } } },
+        } as unknown as Parameters<typeof playersReducer>[0];
+        const renamed = playersReducer(state, updatePlayer({ id: '1', changes: { playerName: 'Al' } }));
+        const root = { players: renamed } as RootState;
+        expect(selectPlayerGrandTotalScore(root, '1')).toBe(0);
+        expect(selectPlayerScoreByRound(root, '1', 0)).toBe(0);
+        expect(selectPlayerRoundStats(root, '1', 1).currentRoundTotalScore).toBe(0);
+
+        const incremented = playersReducer(renamed, playerRoundScoreIncrement('1', 0, 5));
+        expect(incremented.entities['1'].scores).toEqual([5]);
+    });
 });

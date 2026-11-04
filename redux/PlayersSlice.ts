@@ -1,7 +1,7 @@
 import { getCrashlytics, recordError } from '@react-native-firebase/crashlytics';
 import { PayloadAction, createEntityAdapter, createSelector, createSlice } from '@reduxjs/toolkit';
 
-import { grandTotalScore, totalScoreBeforeRound } from './scoreUtils';
+import { grandTotalScore, toScores, totalScoreBeforeRound } from './scoreUtils';
 import { RootState } from './store';
 
 type RoundIndex = number;
@@ -17,13 +17,16 @@ export interface ScoreState {
 // comparator must not assume `scores` is an array or `id` is a string.
 // The adapter re-sorts every player on each update, so one bad record
 // would otherwise crash any edit (e.g. typing a player name).
-const safeTotal = (scores: unknown): number => (
-    Array.isArray(scores) ? grandTotalScore(scores) : 0
+const comparePlayers = (a: ScoreState, b: ScoreState): number => (
+    grandTotalScore(b.scores) - grandTotalScore(a.scores) || String(a.id).localeCompare(String(b.id))
 );
 
-const comparePlayers = (a: ScoreState, b: ScoreState): number => (
-    safeTotal(b.scores) - safeTotal(a.scores) || String(a.id).localeCompare(String(b.id))
-);
+// Replace a malformed stored scores value with a real array before mutating it.
+const scoresForUpdate = (player: ScoreState | undefined): number[] => {
+    if (!player) return [];
+    if (!Array.isArray(player.scores)) player.scores = toScores(player.scores);
+    return player.scores;
+};
 
 const playersAdapter = createEntityAdapter({
     sortComparer: comparePlayers,
@@ -50,7 +53,7 @@ const scoresSlice = createSlice({
                 action: PayloadAction<string, string, { round: RoundIndex, multiplier: number; }>
             ) {
                 try {
-                    const scores = state?.entities[action.payload]?.scores || [];
+                    const scores = scoresForUpdate(state?.entities[action.payload]);
                     const round = action.meta.round;
                     const multiplier = action.meta.multiplier;
 
@@ -73,7 +76,7 @@ const scoresSlice = createSlice({
                 action: PayloadAction<string, string, { round: RoundIndex; value: number; }>
             ) {
                 try {
-                    const scores = state?.entities[action.payload]?.scores || [];
+                    const scores = scoresForUpdate(state?.entities[action.payload]);
                     if (scores[action.meta.round] === action.meta.value) return;
                     scores[action.meta.round] = action.meta.value;
                 } catch (error) {
@@ -134,7 +137,7 @@ export const selectPlayerScoreByRound = createSelector(
         (state: RootState, playerId: string) => playerId,
         (state: RootState, playerId: string, round: number) => round,
     ],
-    (entities, playerId, round) => entities[playerId]?.scores[round] || 0
+    (entities, playerId, round) => toScores(entities[playerId]?.scores)[round] || 0
 );
 
 export const selectPlayerGrandTotalScore = createSelector(
@@ -148,7 +151,7 @@ export const selectPlayerRoundStats = createSelector(
         (state: RootState, playerId: string, currentRoundIndex: number) => currentRoundIndex,
     ],
     (player, currentRoundIndex) => {
-        const scores = player?.scores ?? [];
+        const scores = toScores(player?.scores);
         const currentRoundScore = scores[currentRoundIndex] ?? 0;
         const previousTotal = totalScoreBeforeRound(scores, currentRoundIndex);
         const currentRoundTotalScore = previousTotal + currentRoundScore;

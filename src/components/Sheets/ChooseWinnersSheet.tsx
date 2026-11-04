@@ -13,6 +13,7 @@ import { shallowEqual } from 'react-redux';
 
 import { selectGameById, updateGame } from '../../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
+import { grandTotalScore } from '../../../redux/scoreUtils';
 import { compareTotals, leadingPlayerIds } from '../../../redux/ScoringRules';
 import { selectInteractionType } from '../../../redux/selectors';
 import { logEvent } from '../../Analytics';
@@ -42,7 +43,7 @@ const ChooseWinnersSheet: React.FunctionComponent = () => {
 
             return {
                 id,
-                totalScore: (p?.scores || []).reduce((a, b) => a + b, 0),
+                totalScore: grandTotalScore(p?.scores),
             };
         });
 
@@ -57,7 +58,7 @@ const ChooseWinnersSheet: React.FunctionComponent = () => {
                     p?.id,
                     {
                         name: p?.playerName || '',
-                        totalScore: (p?.scores || []).reduce((a, b) => a + b, 0),
+                        totalScore: grandTotalScore(p?.scores),
                     },
                 ])),
         [allPlayers]
