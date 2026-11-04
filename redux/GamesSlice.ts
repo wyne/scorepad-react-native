@@ -51,7 +51,7 @@ export const restLockedGamesOnLastRound = (
 
 const gamesAdapter = createEntityAdapter({
     sortComparer: (a: GameState, b: GameState) => (
-        b.dateCreated - a.dateCreated || a.id.localeCompare(b.id)
+        b.dateCreated - a.dateCreated || String(a.id).localeCompare(String(b.id))
     ),
 });
 

@@ -6,6 +6,7 @@ import { shallowEqual } from 'react-redux';
 
 import { selectGameById } from '../../../../redux/GamesSlice';
 import { useAppSelector } from '../../../../redux/hooks';
+import { grandTotalScore as sumScores, toScores, totalScoreBeforeRound } from '../../../../redux/scoreUtils';
 
 import { calculateFontSize } from './Helpers';
 import ScoreAfter from './ScoreAfter';
@@ -43,17 +44,15 @@ const AdditionTile: React.FunctionComponent<Props> = ({
         const currentGameId = state.settings.currentGameId;
         const currentGame = currentGameId ? selectGameById(state, currentGameId) : undefined;
         const player = state.players.entities[playerId];
-        const scores = player?.scores ?? [];
+        const scores = toScores(player?.scores);
         const currentRoundIndex = currentGame?.roundCurrent ?? 0;
         const currentRoundScore = scores[currentRoundIndex] ?? 0;
-        const previousTotal = scores.reduce(
-            (sum, s, i) => (i < currentRoundIndex ? sum + (s || 0) : sum), 0
-        );
+        const previousTotal = totalScoreBeforeRound(scores, currentRoundIndex);
 
         return {
             currentRoundScore,
             currentRoundTotalScore: previousTotal + currentRoundScore,
-            grandTotalScore: scores.reduce((sum, s) => sum + (s || 0), 0),
+            grandTotalScore: sumScores(scores),
             hasCurrentGame: typeof currentGame !== 'undefined',
             isLocked: currentGame?.locked === true,
             playerName: player?.playerName,

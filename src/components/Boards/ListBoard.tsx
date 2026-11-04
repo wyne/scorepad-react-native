@@ -8,6 +8,7 @@ import { shallowEqual } from 'react-redux';
 
 import { selectGameById } from '../../../redux/GamesSlice';
 import { useAppSelector } from '../../../redux/hooks';
+import { toScores, totalScoreBeforeRound } from '../../../redux/scoreUtils';
 import type { GameFoldSplit } from '../../hooks/useExpandedGameLayout';
 import DialOverlay from '../Interactions/Dial/DialOverlay';
 import { useLockedHint } from '../LockedHintContext';
@@ -60,11 +61,9 @@ const PlayerRow: React.FC<PlayerRowProps> = ({ playerId, index, svDimmed, disabl
         const currentGameId = state.settings.currentGameId;
         const currentGame = currentGameId ? selectGameById(state, currentGameId) : undefined;
         const currentRoundIndex = currentGame?.roundCurrent ?? 0;
-        const scores = player?.scores ?? [];
+        const scores = toScores(player?.scores);
         const currentRoundScore = scores[currentRoundIndex] ?? 0;
-        const previousTotal = scores.reduce(
-            (sum, s, i) => (i < currentRoundIndex ? sum + (s || 0) : sum), 0
-        );
+        const previousTotal = totalScoreBeforeRound(scores, currentRoundIndex);
 
         return {
             playerName: player?.playerName,
