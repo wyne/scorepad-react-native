@@ -113,6 +113,16 @@ export interface RootState {
 export type AppDispatch = typeof store.dispatch;
 export type AppStore = typeof store;
 
-export const persistor = persistStore(store);
+// Starting persistence schedules a rehydration timeout. Unit tests that import
+// the real store do not mount PersistGate, so that timeout has no consumer and
+// keeps Jest alive until it is force-exited. Production still starts
+// persistence immediately; tests can opt into it explicitly with
+// `persistor.persist()` when they need to exercise rehydration.
+export const persistor = persistStore(store, {
+    // redux-persist supports this at runtime, but its bundled TypeScript
+    // declaration omits the option.
+    // @ts-expect-error manualPersist is part of redux-persist's runtime API
+    manualPersist: process.env.NODE_ENV === 'test',
+});
 
 // exportData();
