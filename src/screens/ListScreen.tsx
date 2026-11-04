@@ -23,12 +23,12 @@ import { useTheme } from '../theme';
 
 export type ListRow =
     | { kind: 'header'; key: string; label: string; }
-    | { kind: 'game'; key: string; index: number; first: boolean; last: boolean; };
+    | { kind: 'game'; key: string; index: number; };
 
 /**
- * The list's rows: games in inset groups by day, with a header for each.
- * Today's games get their own group so the one you're in the middle of is
- * easy to find. When nothing is from today there's a single group and no
+ * The list's rows: games by day, with a header for each.
+ * Today's games get their own section so the one you're in the middle of is
+ * easy to find. When nothing is from today there's a single section and no
  * header, since "Earlier" on its own says nothing.
  */
 export function buildListRows(gameIds: string[], dates: number[], now: number = Date.now()): ListRow[] {
@@ -47,12 +47,10 @@ export function buildListRows(gameIds: string[], dates: number[], now: number = 
     groups.forEach(({ label, games }) => {
         if (games.length === 0) return;
         if (label) rows.push({ kind: 'header', key: `header-${label}`, label });
-        games.forEach((gameIndex, i) => rows.push({
+        games.forEach(gameIndex => rows.push({
             kind: 'game',
             key: gameIds[gameIndex],
             index: gameIndex,
-            first: i === 0,
-            last: i === games.length - 1,
         }));
     });
     return rows;
@@ -169,7 +167,7 @@ const ListScreen: React.FunctionComponent<Props> = ({ navigation }) => {
                 data={rows}
                 renderItem={({ item }) => item.kind === 'header'
                     ? <Text accessibilityRole="header" style={[styles.sectionHeader, { color: theme.textSecondary }]}>{item.label.toUpperCase()}</Text>
-                    : <GameListItem navigation={navigation} gameId={item.key} index={item.index} first={item.first} last={item.last} showSeparator={!item.first} />
+                    : <GameListItem navigation={navigation} gameId={item.key} index={item.index} />
                 }
                 keyExtractor={item => item.key}
             >

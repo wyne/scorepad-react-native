@@ -583,17 +583,17 @@ describe('buildListRows', () => {
 
         expect(rows).toEqual([
             { kind: 'header', key: 'header-Today', label: 'Today' },
-            { kind: 'game', key: 'a', index: 0, first: true, last: false },
-            { kind: 'game', key: 'b', index: 1, first: false, last: true },
+            { kind: 'game', key: 'a', index: 0 },
+            { kind: 'game', key: 'b', index: 1 },
             { kind: 'header', key: 'header-Earlier', label: 'Earlier' },
-            { kind: 'game', key: 'c', index: 2, first: true, last: true },
+            { kind: 'game', key: 'c', index: 2 },
         ]);
     });
 
     it('drops the header when nothing is from today', () => {
         const rows = buildListRows(['c'], [lastWeek], now);
 
-        expect(rows).toEqual([{ kind: 'game', key: 'c', index: 0, first: true, last: true }]);
+        expect(rows).toEqual([{ kind: 'game', key: 'c', index: 0 }]);
     });
 
     it('is empty with no games', () => {

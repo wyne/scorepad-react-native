@@ -170,49 +170,34 @@ describe('GameListItem', () => {
         mockContextMenuProps.current = null;
     });
 
-    it('keeps separators between games as the mounted list gains and loses rows', () => {
+    it('keeps each game as its own card as the mounted list gains and loses games', () => {
         const store = createMockStore(populatedState);
-        const { getByTestId, queryByTestId, queryAllByTestId, getByText } = render(
+        const { queryAllByTestId, getByText, queryByText } = render(
             <Provider store={store}>
                 <ListScreen navigation={mockNavigation} />
             </Provider>
         );
 
+        act(() => {
+            store.dispatch(gameSave({
+                ...mockGame,
+                id: 'game-2',
+                title: 'Game 2',
+                dateCreated: mockGame.dateCreated + 1000,
+            }));
+        });
+        expect(getByText('Game 2')).toBeTruthy();
+        expect(queryAllByTestId('game-list-item')).toHaveLength(2);
         expect(queryAllByTestId(/^game-list-separator-/)).toHaveLength(0);
 
-        // Prepend twice without remounting the screen, as creation/rematch do.
-        for (const number of [2, 3]) {
-            act(() => {
-                store.dispatch(gameSave({
-                    ...mockGame,
-                    id: `game-${number}`,
-                    title: `Game ${number}`,
-                    dateCreated: mockGame.dateCreated + number * 1000,
-                }));
-            });
-            expect(getByText(`Game ${number}`)).toBeTruthy();
-            // The newest game sorts to the top, so it draws no line of its own;
-            // the line belongs to the row it pushed down.
-            expect(queryByTestId(`game-list-separator-game-${number}`)).toBeNull();
-            expect(getByTestId('game-list-separator-game-1')).toBeTruthy();
-            expect(queryAllByTestId(/^game-list-separator-/)).toHaveLength(number - 1);
-        }
-
-        // Removing the trailing game must also remove the line above it.
         act(() => {
             store.dispatch(deleteGameAndPlayers('game-1'));
         });
-        expect(queryByTestId('game-list-separator-game-1')).toBeNull();
-        expect(getByTestId('game-list-separator-game-2')).toBeTruthy();
-
-        act(() => {
-            store.dispatch(deleteGameAndPlayers('game-3'));
-        });
-        expect(getByText('Game 2')).toBeTruthy();
-        expect(queryAllByTestId(/^game-list-separator-/)).toHaveLength(0);
+        expect(queryByText('Test Game')).toBeNull();
+        expect(queryAllByTestId('game-list-item')).toHaveLength(1);
     });
 
-    it('should render the title, who leads, and everyone else', () => {
+    it('should render the title, who leads, and the round', () => {
         const store = createMockStore(populatedState);
 
         const { getByText, getByTestId } = render(
@@ -223,8 +208,8 @@ describe('GameListItem', () => {
 
         expect(getByTestId('game-list-item')).toBeTruthy();
         expect(getByText('Test Game')).toBeTruthy();
-        expect(getByTestId('game-list-result')).toHaveTextContent('Player 1 leads with 10 · Round 3');
-        expect(getByTestId('game-list-players')).toHaveTextContent('Player 2');
+        expect(getByTestId('game-list-result')).toHaveTextContent('Player 1 leads with 10');
+        expect(getByTestId('game-list-status')).toHaveTextContent('Round 3');
     });
 
     it('should emphasize the game title', () => {
@@ -241,7 +226,7 @@ describe('GameListItem', () => {
         );
     });
 
-    it('leads a finished game with its winner and lists everyone else after', () => {
+    it('leads a finished game with its winner and marks it finished', () => {
         const store = createMockStore({
             ...populatedState,
             games: {
@@ -271,7 +256,8 @@ describe('GameListItem', () => {
         );
 
         expect(getByTestId('game-list-result')).toHaveTextContent('Player 3 won with 20');
-        expect(getByTestId('game-list-players')).toHaveTextContent('Player 1, Player 2');
+        expect(getByTestId('icon-trophy')).toBeTruthy();
+        expect(getByTestId('game-list-status')).toHaveTextContent('Finished');
     });
 
     describe('gameResult', () => {
@@ -287,22 +273,22 @@ describe('GameListItem', () => {
         });
 
         it('names tied leaders while the game is in play', () => {
-            expect(gameResult({ roundTotal: 4 }, players).text).toBe('Ann and Cy tied at 30 · Round 4');
+            expect(gameResult({ roundTotal: 4 }, players).text).toBe('Ann and Cy tied at 30');
         });
 
         it('follows a lowest-score-wins rule', () => {
             expect(gameResult({ roundTotal: 2, scoring: { winner: 'low' } }, players).text)
-                .toBe('Bo leads with 12 · Round 2');
+                .toBe('Bo leads with 12');
         });
 
         it('says so before anyone has scored', () => {
             const unscored = players.map(p => ({ ...p, total: 0 }));
-            expect(gameResult({ roundTotal: 1 }, unscored)).toEqual({ playerIds: [], text: 'Round 1 · No scores yet' });
+            expect(gameResult({ roundTotal: 1 }, unscored)).toEqual({ playerIds: [], text: 'No scores yet' });
         });
 
         it('falls back to the leader when a locked game has no winners', () => {
             expect(gameResult({ locked: true, winnerIds: [], roundTotal: 3 }, players).text)
-                .toBe('Ann and Cy tied at 30 · Round 3');
+                .toBe('Ann and Cy tied at 30');
         });
     });
 
@@ -355,7 +341,7 @@ describe('GameListItem', () => {
         });
     });
 
-    it('should show lock icon when game is locked', () => {
+    it('marks a locked game finished without a lock icon', () => {
         const store = createMockStore({
             ...populatedState,
             games: {
@@ -364,13 +350,14 @@ describe('GameListItem', () => {
             },
         });
 
-        const { getByTestId } = render(
+        const { getByTestId, queryByTestId } = render(
             <Provider store={store}>
                 <GameListItem navigation={mockNavigation} gameId="game-1" index={0} />
             </Provider>
         );
 
-        expect(getByTestId('icon-lock-closed-outline')).toBeTruthy();
+        expect(getByTestId('game-list-status')).toHaveTextContent('Finished');
+        expect(queryByTestId('icon-lock-closed-outline')).toBeNull();
     });
 
     it('should render null when the game is not in the store', () => {

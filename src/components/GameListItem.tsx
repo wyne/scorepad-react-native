@@ -3,7 +3,7 @@ import React, { memo, useCallback, useMemo } from 'react';
 import { ParamListBase } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Icon, ListItem } from '@rneui/base';
-import { PixelRatio, Platform, StyleSheet, Text, View } from 'react-native';
+import { Platform, StyleSheet, Text, View } from 'react-native';
 import Animated, { FadeInUp } from 'react-native-reanimated';
 import { shallowEqual } from 'react-redux';
 
@@ -74,8 +74,8 @@ export interface GameResult {
 
 /**
  * How the game stands, in one line. A finished game names its winners; one in
- * play names the leader and the round. Before anyone has scored there is no
- * leader, so it says so.
+ * play names the leader (the round is on the row's status pill). Before
+ * anyone has scored there is no leader, so it says so.
  */
 export function gameResult(
     game: { locked?: boolean; winnerIds?: string[]; roundTotal: number; scoring?: Parameters<typeof leadingPlayerIds>[0]; },
@@ -91,15 +91,14 @@ export function gameResult(
         return { playerIds: winnerIds, text: `${names} ${verb} ${totalOf(winnerIds[0])}` };
     }
 
-    const round = `Round ${game.roundTotal}`;
     if (players.every(p => p.total === 0)) {
-        return { playerIds: [], text: `${round} · No scores yet` };
+        return { playerIds: [], text: 'No scores yet' };
     }
 
     const leaders = leadingPlayerIds(game.scoring, players);
     const names = joinNames(leaders.map(nameOf));
     const verb = leaders.length > 1 ? 'tied at' : 'leads with';
-    return { playerIds: leaders, text: `${names} ${verb} ${totalOf(leaders[0])} · ${round}` };
+    return { playerIds: leaders, text: `${names} ${verb} ${totalOf(leaders[0])}` };
 }
 
 /** How many player colors the row shows before the rest are left to the names. */
@@ -109,18 +108,13 @@ export type Props = {
     navigation: NativeStackNavigationProp<ParamListBase, string, undefined>;
     gameId: string;
     index: number;
-    showSeparator?: boolean;
-    /** Round the top corners: the first row of its day's group. */
-    first?: boolean;
-    /** Round the bottom corners: the last row of its day's group. */
-    last?: boolean;
     /** Test-only render probe for selector invalidation regressions. */
     onRender?: (id: string) => void;
     /** Test-only render probe for popup menu selector invalidation regressions. */
     onMenuRender?: (id: string) => void;
 };
 
-const GameListItem: React.FunctionComponent<Props> = ({ navigation, gameId, index, showSeparator = false, first = false, last = false, onMenuRender, onRender }) => {
+const GameListItem: React.FunctionComponent<Props> = ({ navigation, gameId, index, onMenuRender, onRender }) => {
     onRender?.(gameId);
 
     const theme = useTheme();
@@ -195,26 +189,19 @@ const GameListItem: React.FunctionComponent<Props> = ({ navigation, gameId, inde
         });
     };
 
-    const finished = locked && (winnerIds?.length ?? 0) > 0;
-    // The result line already names its players, so the line below lists
-    // everyone else. Its colors still cover the whole table, featured first.
-    const others = players.filter(p => !result.playerIds.includes(p.id));
-    const stack = [
+    const hasWinners = locked && (winnerIds?.length ?? 0) > 0;
+    // The strip and the color stack lead with the players the result line is
+    // about: the winners, or whoever leads.
+    const featured = [
         ...players.filter(p => result.playerIds.includes(p.id)),
-        ...others,
-    ].slice(0, MAX_STACK);
+        ...players.filter(p => !result.playerIds.includes(p.id)),
+    ];
+    const accent = result.playerIds.length > 0 ? featured[0]?.color : theme.separator;
+    const stack = featured.slice(0, MAX_STACK);
 
     return (
         <Animated.View collapsable={false} entering={FadeInUp.duration(200).delay(100 + index * 100)}>
-            <View style={[
-                styles.group,
-                { backgroundColor: theme.backgroundSecondary },
-                first && styles.groupFirst,
-                last && styles.groupLast,
-            ]}>
-                {showSeparator && (
-                    <View testID={`game-list-separator-${gameId}`} pointerEvents="none" style={[styles.separator, { backgroundColor: theme.separator }]} />
-                )}
+            <View style={[styles.card, { backgroundColor: theme.backgroundSecondary }]}>
                 <AbstractPopupMenu
                     key={'menu' + gameId}
                     gameId={gameId}
@@ -226,48 +213,46 @@ const GameListItem: React.FunctionComponent<Props> = ({ navigation, gameId, inde
                 >
                     <ListItem testID="game-list-item"
                         onPress={Platform.OS == 'android' ? undefined : chooseGameHandler}
-                        containerStyle={{ backgroundColor: theme.backgroundSecondary }}
+                        containerStyle={[styles.itemContainer, { backgroundColor: theme.backgroundSecondary }]}
                     >
-                        <View style={styles.row}>
-                            <ListItem.Content style={styles.content}>
-                                <View style={styles.titleRow}>
-                                    <ListItem.Title style={[styles.title, { color: theme.text }]} numberOfLines={1}>
-                                        {gameTitle}
-                                        {locked && <Icon name='lock-closed-outline' type='ionicon' size={14} color={theme.success} style={{ paddingHorizontal: 4 }} />}
-                                    </ListItem.Title>
-                                    <Text style={[styles.timestamp, { color: theme.textTertiary }]} testID="game-list-created">
-                                        {formatCreated(dateCreated)}
+                        <View style={[styles.accent, { backgroundColor: accent }]} testID="game-list-accent" />
+                        <ListItem.Content style={styles.content}>
+                            <ListItem.Title style={[styles.title, { color: theme.text }]} numberOfLines={1}>
+                                {gameTitle}
+                            </ListItem.Title>
+
+                            <Text style={[styles.result, { color: theme.text }]} numberOfLines={1} testID="game-list-result">
+                                {hasWinners && <Icon name="trophy" type="ionicon" size={13} color={theme.warning} />}
+                                {hasWinners && ' '}
+                                {result.text}
+                            </Text>
+
+                            <View style={styles.detailsRow}>
+                                <View
+                                    testID="game-list-status"
+                                    style={[styles.pill, { backgroundColor: locked ? theme.success + '22' : theme.tint + '1C' }]}
+                                >
+                                    <Text style={[styles.pillText, { color: locked ? theme.success : theme.tint }]}>
+                                        {locked ? 'Finished' : `Round ${roundCount}`}
                                     </Text>
                                 </View>
-
-                                <Text style={[styles.result, { color: theme.text }]} numberOfLines={1} testID="game-list-result">
-                                    {finished && <Icon name="trophy" type="ionicon" size={13} color={theme.warning} />}
-                                    {finished && ' '}
-                                    {result.text}
-                                </Text>
-
-                                <View style={styles.playersRow}>
-                                    <View style={styles.stack} testID="game-list-colors">
-                                        {stack.map((player, i) => (
-                                            <View
-                                                key={player.id}
-                                                style={[
-                                                    styles.stackDot,
-                                                    { backgroundColor: player.color, borderColor: theme.backgroundSecondary },
-                                                    i > 0 && styles.stackOverlap,
-                                                ]}
-                                            />
-                                        ))}
-                                    </View>
-                                    {others.length > 0 &&
-                                        <Text style={[styles.players, { color: theme.textSecondary }]} numberOfLines={1} testID="game-list-players">
-                                            {others.map(p => p.name).join(', ')}
-                                        </Text>
-                                    }
+                                <View style={styles.stack} testID="game-list-colors">
+                                    {stack.map((player, i) => (
+                                        <View
+                                            key={player.id}
+                                            style={[
+                                                styles.stackDot,
+                                                { backgroundColor: player.color, borderColor: theme.backgroundSecondary },
+                                                i > 0 && styles.stackOverlap,
+                                            ]}
+                                        />
+                                    ))}
                                 </View>
-                            </ListItem.Content>
-                            <ListItem.Chevron iconStyle={{ color: theme.textTertiary }} />
-                        </View>
+                                <Text style={[styles.timestamp, { color: theme.textTertiary }]} testID="game-list-created">
+                                    {formatCreated(dateCreated)}
+                                </Text>
+                            </View>
+                        </ListItem.Content>
                     </ListItem>
                 </AbstractPopupMenu>
             </View>
@@ -275,58 +260,50 @@ const GameListItem: React.FunctionComponent<Props> = ({ navigation, gameId, inde
     );
 };
 
-const GROUP_RADIUS = 12;
+const CARD_RADIUS = 12;
 const DOT_SIZE = 14;
 
 const styles = StyleSheet.create({
-    // Rows sit in inset groups, one per day, like a settings list.
-    group: {
+    // Each game is its own card, so the list reads as separate games rather
+    // than one block with lines through it.
+    card: {
         marginHorizontal: 16,
+        marginBottom: 8,
+        borderRadius: CARD_RADIUS,
         overflow: 'hidden',
     },
-    groupFirst: {
-        borderTopLeftRadius: GROUP_RADIUS,
-        borderTopRightRadius: GROUP_RADIUS,
+    itemContainer: {
+        paddingLeft: 0,
+        paddingVertical: 11,
+        alignItems: 'stretch',
     },
-    groupLast: {
-        borderBottomLeftRadius: GROUP_RADIUS,
-        borderBottomRightRadius: GROUP_RADIUS,
-    },
-    separator: {
-        marginLeft: 16,
-        flexShrink: 0,
-        // Android densities can be fractional: 1dp is not always a whole pixel.
-        height: PixelRatio.roundToNearestPixel(1),
-    },
-    row: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        flex: 1,
-        gap: 10,
+    // The winner's (or leader's) color down the card's leading edge.
+    accent: {
+        width: 5,
+        marginVertical: -11,
     },
     content: {
-        flex: 1,
-        gap: 3,
-    },
-    titleRow: {
-        flexDirection: 'row',
-        alignItems: 'baseline',
-        gap: 8,
+        gap: 4,
     },
     title: {
-        flex: 1,
         fontWeight: '600',
-    },
-    timestamp: {
-        fontSize: 13,
     },
     result: {
         fontSize: 15,
     },
-    playersRow: {
+    detailsRow: {
         flexDirection: 'row',
         alignItems: 'center',
         gap: 8,
+    },
+    pill: {
+        borderRadius: 8,
+        paddingHorizontal: 7,
+        paddingVertical: 2,
+    },
+    pillText: {
+        fontSize: 12,
+        fontWeight: '600',
     },
     stack: {
         flexDirection: 'row',
@@ -340,8 +317,8 @@ const styles = StyleSheet.create({
     stackOverlap: {
         marginLeft: -5,
     },
-    players: {
-        flex: 1,
+    timestamp: {
+        marginLeft: 'auto',
         fontSize: 13,
     },
 });
