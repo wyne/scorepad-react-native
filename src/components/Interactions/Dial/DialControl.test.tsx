@@ -1,8 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React from 'react';
 
-import { fireEvent, render } from '@testing-library/react-native';
-import { SharedValue } from 'react-native-reanimated';
+import { act, fireEvent, render } from '@testing-library/react-native';
 
 jest.mock('react-native-reanimated', () => {
     const React = jest.requireActual('react');
@@ -26,7 +25,8 @@ jest.mock('react-native-reanimated', () => {
                 };
             },
         },
-        useSharedValue: (v: unknown) => ({ value: v }),
+        // Stable across renders, like the real hook.
+        useSharedValue: (v: unknown) => React.useRef({ value: v }).current,
         useAnimatedStyle: () => ({}),
         useAnimatedProps: (fn: () => Record<string, unknown>) => fn(),
         withTiming: (v: unknown) => v,
@@ -84,16 +84,13 @@ import { InteractionType } from '../InteractionType';
 
 import DialControl, { getCenterValueFontScale } from './DialControl';
 
-// Creates a mock SharedValue matching the shape returned by the Reanimated mock
-const mkSv = <T,>(v: T) => ({ value: v }) as unknown as SharedValue<T>;
-
 const defaultProps = {
-    svValue: mkSv(0),
+    value: 0,
+    previousTotal: 10,
     onChange: jest.fn(),
     onToggleMode: jest.fn(),
     isSecondary: false,
     ink: '#000',
-    svNewTotal: mkSv(10),
     addendOne: 1,
     addendTwo: 10,
     dialSize: 200,
@@ -122,13 +119,13 @@ describe('getCenterValueFontScale', () => {
 
 describe('DialControl — rendering', () => {
     it('shows the current round score in the dial center', () => {
-        const { getByDisplayValue } = render(<DialControl {...defaultProps} svValue={mkSv(5)} />);
-        expect(getByDisplayValue('+5')).toBeTruthy();
+        const { getByTestId } = render(<DialControl {...defaultProps} value={5} />);
+        expect(getByTestId('dial-round-value')).toHaveTextContent('+5');
     });
 
     it('shows a negative value correctly', () => {
-        const { getByDisplayValue } = render(<DialControl {...defaultProps} svValue={mkSv(-3)} />);
-        expect(getByDisplayValue('-3')).toBeTruthy();
+        const { getByTestId } = render(<DialControl {...defaultProps} value={-3} />);
+        expect(getByTestId('dial-round-value')).toHaveTextContent('-3');
     });
 
     it('shows addendOne on both buttons', () => {
@@ -137,9 +134,9 @@ describe('DialControl — rendering', () => {
         expect(getByText('+3')).toBeTruthy();
     });
 
-    it('shows NEW TOTAL value', () => {
-        const { getByDisplayValue, getByText } = render(<DialControl {...defaultProps} svNewTotal={mkSv(42)} />);
-        expect(getByDisplayValue('42')).toBeTruthy();
+    it('shows NEW TOTAL as previous total plus this round', () => {
+        const { getByTestId, getByText } = render(<DialControl {...defaultProps} previousTotal={40} value={2} />);
+        expect(getByTestId('dial-new-total')).toHaveTextContent('42');
         expect(getByText('NEW TOTAL')).toBeTruthy();
     });
 
@@ -169,21 +166,21 @@ describe('DialControl — rendering', () => {
 describe('DialControl — button taps', () => {
     it('calls onChange with value + addendOne on + tap', () => {
         const onChange = jest.fn();
-        const { getByTestId } = render(<DialControl {...defaultProps} svValue={mkSv(5)} addendOne={1} onChange={onChange} />);
+        const { getByTestId } = render(<DialControl {...defaultProps} value={5} addendOne={1} onChange={onChange} />);
         fireEvent.press(getByTestId('btn-increment'));
         expect(onChange).toHaveBeenCalledWith(6);
     });
 
     it('calls onChange with value - addendOne on − tap', () => {
         const onChange = jest.fn();
-        const { getByTestId } = render(<DialControl {...defaultProps} svValue={mkSv(5)} addendOne={1} onChange={onChange} />);
+        const { getByTestId } = render(<DialControl {...defaultProps} value={5} addendOne={1} onChange={onChange} />);
         fireEvent.press(getByTestId('btn-decrement'));
         expect(onChange).toHaveBeenCalledWith(4);
     });
 
     it('respects a custom addendOne', () => {
         const onChange = jest.fn();
-        const { getByTestId } = render(<DialControl {...defaultProps} svValue={mkSv(0)} addendOne={5} onChange={onChange} />);
+        const { getByTestId } = render(<DialControl {...defaultProps} value={0} addendOne={5} onChange={onChange} />);
         fireEvent.press(getByTestId('btn-increment'));
         expect(onChange).toHaveBeenCalledWith(5);
     });
@@ -231,5 +228,89 @@ describe('DialControl misfire nudge', () => {
         pan().onBegin({ x: 100, y: 28 });
         pan().onEnd();
         expect(mockReportMiss).not.toHaveBeenCalled();
+    });
+});
+
+describe('DialControl — turning keeps the score math consistent', () => {
+    const pan = () => (globalThis as any).__dialPan as Record<string, (e?: unknown) => void>;
+    // dialSize 200 → centre (100, 100), ring radius 72. One notch is 30°.
+    const TOP = { x: 100, y: 28 };
+    const ONE_NOTCH_CCW = { x: 64, y: 37.65 };
+    const ONE_NOTCH_CW = { x: 136, y: 37.65 };
+
+    const turn = (to: { x: number; y: number }) => {
+        act(() => {
+            pan().onBegin(TOP);
+            pan().onUpdate(to);
+        });
+    };
+    const release = () => {
+        act(() => {
+            pan().onEnd();
+            pan().onFinalize();
+        });
+    };
+
+    it('starts a turn from the saved round score, not from zero', () => {
+        // Regression: the row showed 0 + 6 = 6 while the dial showed +5 this
+        // round and a new total of 1 after turning back one notch.
+        const onChange = jest.fn();
+        const { getByTestId } = render(
+            <DialControl {...defaultProps} value={6} previousTotal={0} onChange={onChange} />
+        );
+
+        turn(ONE_NOTCH_CCW);
+        expect(getByTestId('dial-round-value')).toHaveTextContent('+5');
+        expect(getByTestId('dial-new-total')).toHaveTextContent('5');
+
+        release();
+        expect(onChange).toHaveBeenCalledTimes(1);
+        expect(onChange).toHaveBeenCalledWith(5);
+    });
+
+    it('keeps new total equal to previous total plus this round while turning', () => {
+        const { getByTestId } = render(<DialControl {...defaultProps} value={3} previousTotal={12} />);
+        turn({ x: 172, y: 100 }); // three notches clockwise
+        expect(getByTestId('dial-round-value')).toHaveTextContent('+6');
+        expect(getByTestId('dial-new-total')).toHaveTextContent('18');
+    });
+
+    it('builds on the last turn even before the saved score comes back', () => {
+        const onChange = jest.fn();
+        render(<DialControl {...defaultProps} value={0} onChange={onChange} />);
+
+        turn(ONE_NOTCH_CW);
+        release();
+        turn(ONE_NOTCH_CW);
+        release();
+
+        expect(onChange).toHaveBeenNthCalledWith(1, 1);
+        expect(onChange).toHaveBeenNthCalledWith(2, 2);
+    });
+
+    it('shows the saved score again after a turn that changes nothing', () => {
+        const onChange = jest.fn();
+        const { getByTestId } = render(<DialControl {...defaultProps} value={4} onChange={onChange} />);
+        turn(ONE_NOTCH_CW);
+        act(() => { pan().onUpdate(TOP); });
+        release();
+        expect(onChange).not.toHaveBeenCalled();
+        expect(getByTestId('dial-round-value')).toHaveTextContent('+4');
+    });
+
+    it('follows the saved score when it changes', () => {
+        const { getByTestId, rerender } = render(<DialControl {...defaultProps} value={2} previousTotal={5} />);
+        rerender(<DialControl {...defaultProps} value={9} previousTotal={5} />);
+        expect(getByTestId('dial-round-value')).toHaveTextContent('+9');
+        expect(getByTestId('dial-new-total')).toHaveTextContent('14');
+    });
+
+    it('steps the buttons from the latest value, not a stale one', () => {
+        const onChange = jest.fn();
+        const { getByTestId } = render(<DialControl {...defaultProps} value={5} onChange={onChange} />);
+        fireEvent.press(getByTestId('btn-increment'));
+        fireEvent.press(getByTestId('btn-increment'));
+        expect(onChange).toHaveBeenNthCalledWith(1, 6);
+        expect(onChange).toHaveBeenNthCalledWith(2, 7);
     });
 });
