@@ -1,5 +1,25 @@
 # Changelog
 
+## [3.5.0](https://github.com/wyne/scorepad-react-native/compare/v3.4.2...v3.5.0) (2026-11-04)
+
+
+### Features
+
+* lead game list rows with the result ([#811](https://github.com/wyne/scorepad-react-native/issues/811)) ([185b3dd](https://github.com/wyne/scorepad-react-native/commit/185b3dd2160aed6ddf29bfb2437db33f16c7bb9c))
+* teach scoring gestures off the tiles ([#812](https://github.com/wyne/scorepad-react-native/issues/812)) ([7d24308](https://github.com/wyne/scorepad-react-native/commit/7d2430860b58118b78abda3946cab41c34b943a0))
+
+
+### Bug Fixes
+
+* guard player sort against malformed stored players ([#813](https://github.com/wyne/scorepad-react-native/issues/813)) ([d0ffc80](https://github.com/wyne/scorepad-react-native/commit/d0ffc8089c0641d7ebfd78da4ef268f5dd7b23ee))
+* make score sheet actions follow the game state ([#805](https://github.com/wyne/scorepad-react-native/issues/805)) ([371f395](https://github.com/wyne/scorepad-react-native/commit/371f3959904c8d626a68b84159e5026b812243d0))
+* redesign share screen with live preview and formats ([#804](https://github.com/wyne/scorepad-react-native/issues/804)) ([c2c154d](https://github.com/wyne/scorepad-react-native/commit/c2c154dced4539fdbdf27f574c569a623612fae4))
+
+
+### Miscellaneous
+
+* **deps:** align Expo SDK 58 patch versions with expo-doctor ([#816](https://github.com/wyne/scorepad-react-native/issues/816)) ([618d64f](https://github.com/wyne/scorepad-react-native/commit/618d64f9e7cd2e8492263fa95f77b475930115b9))
+
 ## [3.4.2](https://github.com/wyne/scorepad-react-native/compare/v3.4.1...v3.4.2) (2026-11-02)
 
 
