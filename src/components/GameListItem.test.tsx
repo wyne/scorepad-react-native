@@ -318,12 +318,13 @@ describe('GameListItem', () => {
         };
 
         it('stays relative under a day, where a date would only say today', () => {
-            const { getByText } = renderWithDate(Date.now() - 3 * 60 * 60 * 1000);
+            const { getByText, queryByTestId } = renderWithDate(Date.now() - 3 * 60 * 60 * 1000);
 
             expect(getByText('3h ago')).toBeTruthy();
+            expect(queryByTestId('game-list-created-date')).toBeNull();
         });
 
-        it('switches to the weekday and date once it is days old', () => {
+        it('adds the weekday and date under how long ago once it is days old', () => {
             const threeDaysAgo = Date.now() - 3 * 86400000;
             const { getByText } = renderWithDate(threeDaysAgo);
 
@@ -331,6 +332,7 @@ describe('GameListItem', () => {
                 weekday: 'short', month: 'short', day: 'numeric',
             });
 
+            expect(getByText('3d ago')).toBeTruthy();
             expect(getByText(expected)).toBeTruthy();
         });
 
@@ -345,6 +347,7 @@ describe('GameListItem', () => {
                 month: 'short', day: 'numeric', year: 'numeric',
             });
 
+            expect(getByText('2y ago')).toBeTruthy();
             expect(getByText(expected)).toBeTruthy();
         });
     });

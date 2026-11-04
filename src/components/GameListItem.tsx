@@ -51,13 +51,15 @@ function shortDate(dateMs: number): string {
 }
 
 /**
- * When the game was made, in the corner of its row: relative under a day,
- * where it's the precise form, and the calendar date after that.
+ * When the game was made, for the card's right-hand column: how long ago, and
+ * the calendar date once "3d ago" stops being enough to place it. Under a day
+ * the relative form is already the precise one, and a date would only ever
+ * say today.
  */
-export function formatCreated(dateMs: number | undefined): string {
-    if (!dateMs) return '';
-    if (Date.now() - dateMs < DAY_MS) return timeAgo(dateMs);
-    return shortDate(dateMs);
+export function formatCreated(dateMs: number | undefined): { relative: string; date?: string; } {
+    if (!dateMs) return { relative: '' };
+    if (Date.now() - dateMs < DAY_MS) return { relative: timeAgo(dateMs) };
+    return { relative: timeAgo(dateMs), date: shortDate(dateMs) };
 }
 
 /** Names the way a sentence lists them: "A", "A and B", "A, B and C". */
@@ -208,6 +210,7 @@ const GameListItem: React.FunctionComponent<Props> = ({ navigation, gameId, inde
     // Dark palette colors (navy, forest) all but vanish on a dark card, so
     // the result dot gets a faint outline there.
     const isDark = theme.background === '#000000';
+    const created = formatCreated(dateCreated);
 
     return (
         <Animated.View collapsable={false} entering={FadeInUp.duration(200).delay(100 + index * 100)}>
@@ -277,8 +280,13 @@ const GameListItem: React.FunctionComponent<Props> = ({ navigation, gameId, inde
                                 </Text>
                             </View>
                             <Text style={[styles.timestamp, { color: theme.textTertiary }]} testID="game-list-created">
-                                {formatCreated(dateCreated)}
+                                {created.relative}
                             </Text>
+                            {created.date &&
+                                <Text style={[styles.timestamp, { color: theme.textTertiary }]} testID="game-list-created-date">
+                                    {created.date}
+                                </Text>
+                            }
                         </View>
                         <ListItem.Chevron iconStyle={{ color: theme.textTertiary }} />
                     </ListItem>
@@ -354,9 +362,10 @@ const styles = StyleSheet.create({
     },
     trailing: {
         alignItems: 'flex-end',
-        gap: 6,
+        gap: 3,
     },
     pill: {
+        marginBottom: 3,
         borderRadius: 8,
         paddingHorizontal: 7,
         paddingVertical: 2,
