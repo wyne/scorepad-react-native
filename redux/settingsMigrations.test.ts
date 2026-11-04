@@ -46,4 +46,16 @@ describe('settings migrations', () => {
         });
         expect(state.seenFeatureNotifications).toEqual(['keep_screen_awake']);
     });
+
+    it.each([[true, 'badge'], [false, 'off'], [undefined, 'off']])(
+        'turns the Player Numbers switch (%s) into the %s style',
+        async (showPlayerIndex, expected) => {
+            const state = await rehydrateSettings({
+                showPlayerIndex,
+                _persist: { version: 5, rehydrated: true },
+            });
+            expect(state.playerNumbers).toBe(expected);
+            expect(state).not.toHaveProperty('showPlayerIndex');
+        },
+    );
 });

@@ -2,7 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { configureStore } from '@reduxjs/toolkit';
 import { persistStore, persistReducer, createMigrate } from 'redux-persist';
 
-import gamesReducer, { GameState, restLockedGamesOnLastRound } from './GamesSlice';
+import gamesReducer, { backfillGamePlayerNumbers, GameState, restLockedGamesOnLastRound } from './GamesSlice';
 import scoresReducer from './PlayersSlice';
 import settingsReducer from './SettingsSlice';
 
@@ -34,11 +34,17 @@ const settingsMigrations: any = {
         // returning users would lose their badges.
         return { ...state, seenFeatureNotifications: state?.seenFeatureNotifications ?? [] };
     },
+    6: (state: Record<string, unknown> | undefined) => {
+        // The global Player Numbers switch became a per-game style. Games keep
+        // showing numbers if the switch was on, now as the badge.
+        const { showPlayerIndex, ...rest } = state ?? {};
+        return { ...rest, playerNumbers: showPlayerIndex === true ? 'badge' : 'off' };
+    },
 };
 
 export const settingsPersistConfig = {
     key: 'settings',
-    version: 5,
+    version: 6,
     storage: AsyncStorage,
     migrate: createMigrate(settingsMigrations),
     whitelist: [
@@ -49,7 +55,7 @@ export const settingsPersistConfig = {
         'currentGameId',
         'onboarded',
         'showPointParticles',
-        'showPlayerIndex',
+        'playerNumbers',
         'interactionType',
         'lastUsedInteractionType',
         'lastStoreReviewPrompt',
@@ -113,6 +119,11 @@ export interface RootState {
 export type AppDispatch = typeof store.dispatch;
 export type AppStore = typeof store;
 
-export const persistor = persistStore(store);
+/** Pins games that predate per-game player numbers to the current default. */
+export const backfillPlayerNumbers = (target: AppStore) => {
+    target.dispatch(backfillGamePlayerNumbers(target.getState().settings.playerNumbers ?? 'off'));
+};
+
+export const persistor = persistStore(store, null, () => backfillPlayerNumbers(store));
 
 // exportData();

@@ -1,6 +1,7 @@
 import { createSelector } from '@reduxjs/toolkit';
 
 import { InteractionType } from '../src/components/Interactions/InteractionType';
+import { isPlayerNumberStyle, PlayerNumberStyle } from '../src/components/PlayerTiles/PlayerNumberStyle';
 import { MAX_TILE_PLAYERS } from '../src/constants';
 
 import { selectAllGames, selectGameById } from './GamesSlice';
@@ -12,6 +13,14 @@ import { RootState } from './store';
 export const selectIsDialOnly = (state: RootState, gameId?: string): boolean => {
     const playerCount = gameId ? selectGameById(state, gameId)?.playerIds.length ?? 0 : 0;
     return playerCount > MAX_TILE_PLAYERS;
+};
+
+/** The game's player number style. The global default only covers a game
+ * not yet backfilled, e.g. in the moment before rehydration finishes. */
+export const selectPlayerNumbers = (state: RootState, gameId?: string): PlayerNumberStyle => {
+    const gameLevel = gameId ? selectGameById(state, gameId)?.playerNumbers : undefined;
+    if (isPlayerNumberStyle(gameLevel)) return gameLevel;
+    return isPlayerNumberStyle(state.settings.playerNumbers) ? state.settings.playerNumbers : 'off';
 };
 
 export const selectInteractionType = (state: RootState, gameId?: string): InteractionType => {

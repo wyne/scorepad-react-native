@@ -9,10 +9,12 @@ import { shallowEqual } from 'react-redux';
 import { selectGameById } from '../../../redux/GamesSlice';
 import { useAppSelector } from '../../../redux/hooks';
 import { toScores, totalScoreBeforeRound } from '../../../redux/scoreUtils';
+import { selectPlayerNumbers } from '../../../redux/selectors';
 import type { GameFoldSplit } from '../../hooks/useExpandedGameLayout';
 import DialOverlay from '../Interactions/Dial/DialOverlay';
 import { useLockedHint } from '../LockedHintContext';
 import { useMenuOpen } from '../MenuOpenContext';
+import { PlayerNumberBadge, PlayerNumberGhost, ROW_GHOST_INSET } from '../PlayerTiles/PlayerNumber';
 import { bottomSheetHeight } from '../Sheets/GameSheet';
 
 const ROW_BOARD_PADDING = 12;
@@ -56,6 +58,7 @@ const PlayerRow: React.FC<PlayerRowProps> = ({ playerId, index, svDimmed, disabl
         currentRoundScore,
         previousTotal,
         currentRoundTotalScore,
+        playerNumbers,
     } = useAppSelector((state) => {
         const player = state.players.entities[playerId];
         const currentGameId = state.settings.currentGameId;
@@ -73,6 +76,7 @@ const PlayerRow: React.FC<PlayerRowProps> = ({ playerId, index, svDimmed, disabl
             currentRoundScore,
             previousTotal,
             currentRoundTotalScore: previousTotal + currentRoundScore,
+            playerNumbers: selectPlayerNumbers(state, currentGameId),
         };
     }, shallowEqual);
     const breakdownOpacity = useSharedValue(1);
@@ -122,10 +126,18 @@ const PlayerRow: React.FC<PlayerRowProps> = ({ playerId, index, svDimmed, disabl
                 onPress={() => onRowPress(playerId)}
                 disabled={disabled}
                 style={({ pressed }) => [styles.row, { backgroundColor: color, opacity: pressed && !locked ? 0.78 : 1 }]}>
+                {playerNumbers === 'big' && <PlayerNumberGhost index={index} color={inkA(ink, 0.14)} />}
                 <View style={styles.rowInner}>
+                    {playerNumbers === 'badge' && (
+                        <PlayerNumberBadge index={index} color={ink} background={inkA(ink, 0.16)} inline />
+                    )}
                     {/* Player name */}
                     <Text
-                        style={[styles.playerName, { color: ink }]}
+                        style={[
+                            styles.playerName,
+                            { color: ink },
+                            playerNumbers === 'big' && { paddingLeft: ROW_GHOST_INSET },
+                        ]}
                         numberOfLines={1}
                         adjustsFontSizeToFit
                         minimumFontScale={0.6}>

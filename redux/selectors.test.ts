@@ -4,6 +4,7 @@ import { MAX_TILE_PLAYERS } from '../src/constants';
 import gamesReducer, { gameSave, selectAllGames } from './GamesSlice';
 import {
   selectInteractionType,
+  selectPlayerNumbers,
   selectIsDialOnly,
   selectCurrentGame,
   selectCurrentGameOverReason,
@@ -21,7 +22,7 @@ const mockState: Partial<RootState> = {
     addendTwo: 10,
     currentGameId: 'game-1',
     showPointParticles: true,
-    showPlayerIndex: true,
+    playerNumbers: 'badge',
     interactionType: InteractionType.SwipeVertical,
     lastStoreReviewPrompt: 1234567890,
     appOpens: 1,
@@ -51,6 +52,32 @@ const mockState: Partial<RootState> = {
 };
 
 describe('Redux selectors', () => {
+  describe('selectPlayerNumbers', () => {
+    const withGame = (playerNumbers: unknown, globalDefault: unknown = 'badge') => ({
+      ...mockState,
+      settings: { ...mockState.settings!, playerNumbers: globalDefault },
+      games: {
+        ...mockState.games!,
+        entities: {
+          'game-1': { ...mockState.games!.entities['game-1']!, playerNumbers },
+        },
+      },
+    } as RootState);
+
+    it('prefers the game\'s own style', () => {
+      expect(selectPlayerNumbers(withGame('big'), 'game-1')).toBe('big');
+    });
+
+    it('falls back to the global default when the game has none', () => {
+      expect(selectPlayerNumbers(withGame(undefined), 'game-1')).toBe('badge');
+      expect(selectPlayerNumbers(withGame('big'))).toBe('badge');
+    });
+
+    it('treats unknown values as off', () => {
+      expect(selectPlayerNumbers(withGame('huge', 'huge'), 'game-1')).toBe('off');
+    });
+  });
+
   describe('selectInteractionType', () => {
     it('should return valid interaction type from state', () => {
       const state = mockState as RootState;

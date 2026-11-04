@@ -77,6 +77,7 @@ export interface AnalyticsEventParams {
     set_game_palette: { game_id?: string; palette: string };
     /** Fired when the user switches the scoring interaction (swipe / half-tap / dial). */
     set_interaction: { interaction_type: string; game_id?: string };
+    set_player_numbers: { player_numbers: string; game_id?: string };
     /** First-use gesture toast: the player dismissed it or opened How to Score. */
     gesture_hint_action: { interaction_type: string; action: 'got_it' | 'how_it_works' };
     /** A scoring gesture missed twice in a row and the nudge toast appeared. */
@@ -166,5 +167,5 @@ export type AnalyticsEventName = keyof AnalyticsEventParams;
 export type AnalyticsUserProperty =
     | 'keep_screen_awake'
     | 'point_particles'
-    | 'player_index'
+    | 'player_numbers'
     | 'color_scheme';

@@ -102,6 +102,21 @@ describe('ListBoard', () => {
         mockSafeAreaInsets = { top: 0, bottom: 0, left: 0, right: 0 };
     });
 
+    it.each([
+        ['off', null],
+        ['badge', 'player-number-badge'],
+        ['big', 'player-number-ghost'],
+    ])('shows player numbers as %s', (playerNumbers, testID) => {
+        const store = createStore({ playerNumbers });
+        const { queryAllByTestId, queryAllByText } = render(
+            <Provider store={store}><ListBoard /></Provider>
+        );
+
+        expect(queryAllByTestId('player-number-badge')).toHaveLength(testID === 'player-number-badge' ? 2 : 0);
+        expect(queryAllByTestId('player-number-ghost')).toHaveLength(testID === 'player-number-ghost' ? 2 : 0);
+        expect(queryAllByText('2')).toHaveLength(testID ? 1 : 0);
+    });
+
     it('opens the overlay when the game is unlocked and menu is closed', () => {
         const store = createStore();
         const { getByTestId, queryByTestId, getByText } = render(

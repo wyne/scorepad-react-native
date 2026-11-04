@@ -4,6 +4,8 @@ import { configureStore, EntityState, Store } from '@reduxjs/toolkit';
 import gamesReducer, {
     asyncCreateGame,
     asyncRematchGame,
+    setGamePlayerNumbers,
+    backfillGamePlayerNumbers,
     deleteGameAndPlayers,
     gameSave,
     GameState,
@@ -228,6 +230,49 @@ describe('asyncRematchGame', () => {
 
         expect(finalState.players.entities[finalState.players.ids[2]]?.scores).toEqual([0]);
         expect(finalState.players.entities[finalState.players.ids[3]]?.scores).toEqual([0]);
+    });
+});
+
+describe('backfillGamePlayerNumbers', () => {
+    it('pins games without a style to the default and leaves chosen ones alone', () => {
+        const game = (id: string, playerNumbers?: string) => ({
+            id, title: id, dateCreated: 0, roundCurrent: 0, roundTotal: 1, playerIds: [], playerNumbers,
+        });
+        const state = gamesReducer(
+            { ids: ['a', 'b', 'c'], entities: { a: game('a'), b: game('b', 'big'), c: game('c', 'huge') } } as never,
+            backfillGamePlayerNumbers('badge'),
+        );
+
+        expect(state.entities.a?.playerNumbers).toBe('badge');
+        expect(state.entities.b?.playerNumbers).toBe('big');
+        expect(state.entities.c?.playerNumbers).toBe('badge');
+    });
+});
+
+describe('player numbers on new games', () => {
+    const createStore = (playerNumbers: 'off' | 'badge' | 'big') => configureStore({
+        reducer: { games: gamesReducer, players: playersReducer, settings: settingsReducer },
+        preloadedState: { settings: { ...initialSettings, playerNumbers } },
+    });
+
+    it('starts a new game with the app settings default', async () => {
+        const store = createStore('big');
+        await store.dispatch(asyncCreateGame({ gameCount: 0, playerCount: 2 }));
+
+        const gameId = store.getState().games.ids[0];
+        expect(store.getState().games.entities[gameId]?.playerNumbers).toBe('big');
+    });
+
+    it('keeps the original game\'s style on a rematch', async () => {
+        const store = createStore('off');
+        await store.dispatch(asyncCreateGame({ gameCount: 0, playerCount: 2 }));
+        const originalId = store.getState().games.ids[0];
+        store.dispatch(setGamePlayerNumbers({ gameId: originalId, playerNumbers: 'badge' }));
+
+        await store.dispatch(asyncRematchGame({ gameId: originalId }));
+
+        const rematchId = store.getState().games.ids.find(id => id !== originalId)!;
+        expect(store.getState().games.entities[rematchId]?.playerNumbers).toBe('badge');
     });
 });
 

@@ -97,6 +97,36 @@ describe('backup validation', () => {
         expect(parsed?.settings.gameModesEnabled).toBe(true);
     });
 
+    it('keeps the player number style and a game\'s own choice', () => {
+        const backup = createValidBackup();
+        backup.settings.playerNumbers = 'big';
+        (backup.games.entities['game-1'] as Record<string, unknown>).playerNumbers = 'badge';
+
+        const parsed = parseBackupData(backup);
+        expect(parsed?.settings.playerNumbers).toBe('big');
+        expect(parsed?.games.entities['game-1'].playerNumbers).toBe('badge');
+    });
+
+    it.each([[true, 'badge'], [false, 'off']])(
+        'turns the old Player Numbers switch (%s) into the %s style',
+        (showPlayerIndex, expected) => {
+            const backup = createValidBackup();
+            const settings: Record<string, unknown> = { ...backup.settings, showPlayerIndex };
+            delete settings.playerNumbers;
+            const legacy = { ...backup, settings };
+
+            const parsed = parseBackupData(legacy);
+            expect(parsed?.settings.playerNumbers).toBe(expected);
+            expect(parsed?.settings).not.toHaveProperty('showPlayerIndex');
+        },
+    );
+
+    it('rejects an unknown player number style', () => {
+        const backup = createValidBackup();
+        (backup.settings as Record<string, unknown>).playerNumbers = 'huge';
+        expect(parseBackupData(backup)).toBeUndefined();
+    });
+
     it('keeps a game\'s end condition', () => {
         const backup = createValidBackup();
         const scoring = { winner: 'low', end: { type: 'target', target: 100 } };
@@ -176,6 +206,9 @@ describe('backup validation', () => {
             'Restore Complete',
             'Your data has been restored from the backup.'
         );
-        expect(mockDispatch).toHaveBeenCalledTimes(3);
+        expect(mockDispatch).toHaveBeenCalledTimes(4);
+        expect(mockDispatch).toHaveBeenLastCalledWith(
+            expect.objectContaining({ type: 'games/backfillGamePlayerNumbers', payload: 'off' })
+        );
     });
 });

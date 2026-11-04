@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { configureStore } from '@reduxjs/toolkit';
-import { render } from '@testing-library/react-native';
+import { act, render } from '@testing-library/react-native';
 import { Provider } from 'react-redux';
 
 import gamesReducer from '../../../redux/GamesSlice';
@@ -13,17 +13,21 @@ jest.mock('../../Analytics');
 
 // Capture onCloseMenu so tests can trigger it
 let capturedOnCloseMenu: (() => void) | undefined;
-let capturedActions: { id: string; subactions?: { id: string; attributes?: { disabled?: boolean } }[] }[] = [];
+let capturedOnPressAction: ((e: { nativeEvent: { event: string } }) => void) | undefined;
+type CapturedAction = { id: string; state?: string; subtitle?: string; attributes?: { disabled?: boolean }; subactions?: CapturedAction[] };
+let capturedActions: CapturedAction[] = [];
 jest.mock('@react-native-menu/menu', () => {
     const { View } = jest.requireActual('react-native');
     return {
-        MenuView: ({ children, onCloseMenu, testID, actions }: {
+        MenuView: ({ children, onCloseMenu, onPressAction, testID, actions }: {
             children: React.ReactNode;
             onCloseMenu?: () => void;
+            onPressAction?: typeof capturedOnPressAction;
             testID?: string;
             actions: typeof capturedActions;
         }) => {
             capturedOnCloseMenu = onCloseMenu;
+            capturedOnPressAction = onPressAction;
             capturedActions = actions;
             return <View testID={testID}>{children}</View>;
         },
@@ -131,5 +135,39 @@ describe('GameOptionsButton — dial-only games', () => {
         expect(gestureAction('swipe')?.attributes?.disabled).toBe(true);
         expect(gestureAction('tap')?.attributes?.disabled).toBe(true);
         expect(gestureAction('dial')?.attributes?.disabled).toBeFalsy();
+    });
+});
+
+describe('GameOptionsButton — player numbers', () => {
+    const findAction = (id: string, actions = capturedActions): CapturedAction | undefined => {
+        for (const action of actions) {
+            if (action.id === id) return action;
+            const found = action.subactions && findAction(id, action.subactions);
+            if (found) return found;
+        }
+        return undefined;
+    };
+
+    it('offers Off, Badge and Big in a submenu, checking the current style', () => {
+        render(<Provider store={createStore()}><GameOptionsButton /></Provider>);
+        const submenu = findAction('player-numbers');
+        expect(submenu?.subtitle).toBe('Off');
+        expect(submenu?.subactions?.map(a => [a.id, a.state])).toEqual([
+            ['player-numbers-off', 'on'],
+            ['player-numbers-badge', 'off'],
+            ['player-numbers-big', 'off'],
+        ]);
+    });
+
+    it('saves the choice on this game only, leaving the default for new games', () => {
+        const store = createStore();
+        const defaultBefore = store.getState().settings.playerNumbers;
+        render(<Provider store={store}><GameOptionsButton /></Provider>);
+
+        act(() => capturedOnPressAction?.({ nativeEvent: { event: 'player-numbers-big' } }));
+
+        expect(store.getState().games.entities['game-1']?.playerNumbers).toBe('big');
+        expect(store.getState().settings.playerNumbers).toBe(defaultBefore);
+        expect(findAction('player-numbers-big')?.state).toBe('on');
     });
 });
