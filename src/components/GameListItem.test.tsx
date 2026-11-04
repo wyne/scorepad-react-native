@@ -275,6 +275,11 @@ describe('GameListItem', () => {
                 .toBe('Ann and Cy tied with 30');
         });
 
+        it('gives each co-winner their own total when they did not tie', () => {
+            expect(gameResult({ locked: true, winnerIds: ['a', 'b'], roundTotal: 4 }, players).text)
+                .toBe('Ann (30) and Bo (12) won');
+        });
+
         it('names tied leaders while the game is in play', () => {
             expect(gameResult({ roundTotal: 4 }, players).text).toBe('Ann and Cy tied at 30');
         });
@@ -361,6 +366,27 @@ describe('GameListItem', () => {
 
         expect(getByTestId('game-list-status')).toHaveTextContent('Finished');
         expect(queryByTestId('icon-lock-closed-outline')).toBeNull();
+    });
+
+    it('renders a game whose persisted scores are malformed instead of crashing', () => {
+        const store = createMockStore({
+            ...populatedState,
+            players: {
+                entities: {
+                    'player-1': { ...mockPlayers['player-1'], scores: { 0: 10 } as unknown as number[] },
+                    'player-2': mockPlayers['player-2'],
+                },
+                ids: ['player-1', 'player-2'],
+            },
+        });
+
+        const { getByTestId } = render(
+            <Provider store={store}>
+                <ListScreen navigation={mockNavigation} />
+            </Provider>
+        );
+
+        expect(getByTestId('game-list-result')).toHaveTextContent('Player 2 leads with 5');
     });
 
     it('should render null when the game is not in the store', () => {

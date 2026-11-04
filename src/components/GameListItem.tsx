@@ -86,9 +86,17 @@ export function gameResult(
     const winnerIds = (game.winnerIds ?? []).filter(id => players.some(p => p.id === id));
 
     if (game.locked && winnerIds.length > 0) {
-        const names = joinNames(winnerIds.map(nameOf));
-        const verb = winnerIds.length > 1 ? 'tied with' : 'won with';
-        return { playerIds: winnerIds, text: `${names} ${verb} ${totalOf(winnerIds[0])}` };
+        const totals = winnerIds.map(totalOf);
+        if (winnerIds.length === 1) {
+            return { playerIds: winnerIds, text: `${nameOf(winnerIds[0])} won with ${totals[0]}` };
+        }
+        // Free play lets players pick any winners, whatever their totals, so
+        // only call it a tie when the totals really are the same.
+        if (totals.every(total => total === totals[0])) {
+            return { playerIds: winnerIds, text: `${joinNames(winnerIds.map(nameOf))} tied with ${totals[0]}` };
+        }
+        const names = joinNames(winnerIds.map(id => `${nameOf(id)} (${totalOf(id)})`));
+        return { playerIds: winnerIds, text: `${names} won` };
     }
 
     if (players.every(p => p.total === 0)) {
@@ -157,7 +165,9 @@ const GameListItem: React.FunctionComponent<Props> = ({ navigation, gameId, inde
             return {
                 id,
                 name: player?.playerName ?? '',
-                total: grandTotalScore(player?.scores),
+                // A backup restore can leave scores malformed; a bad row must
+                // not take the whole home screen down with it.
+                total: grandTotalScore(Array.isArray(player?.scores) ? player.scores : []),
                 color: player?.color || colors[seat % colors.length],
             };
         });
