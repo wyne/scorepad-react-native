@@ -268,8 +268,9 @@ const GameListItem: React.FunctionComponent<Props> = ({ navigation, gameId, inde
                             </View>
                         </ListItem.Content>
 
-                        {/* Status and date stack beside the chevron, centered in the
-                          * card, so they line up down the right edge of the list. */}
+                        {/* Status and date stack at the card's right edge, centered,
+                          * so they line up down the list. No chevron: the card
+                          * itself reads as the button. */}
                         <View style={styles.trailing}>
                             <View
                                 testID="game-list-status"
@@ -288,7 +289,6 @@ const GameListItem: React.FunctionComponent<Props> = ({ navigation, gameId, inde
                                 </Text>
                             }
                         </View>
-                        <ListItem.Chevron iconStyle={{ color: theme.textTertiary }} />
                     </ListItem>
                 </AbstractPopupMenu>
             </View>
@@ -311,8 +311,7 @@ const styles = StyleSheet.create({
     },
     itemContainer: {
         paddingVertical: 12,
-        paddingLeft: 14,
-        paddingRight: 10,
+        paddingHorizontal: 14,
         gap: 10,
     },
     content: {

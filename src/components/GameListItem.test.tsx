@@ -200,7 +200,7 @@ describe('GameListItem', () => {
     it('should render the title, who leads, and the round', () => {
         const store = createMockStore(populatedState);
 
-        const { getByText, getByTestId } = render(
+        const { getByText, getByTestId, queryByTestId } = render(
             <Provider store={store}>
                 <GameListItem navigation={mockNavigation} gameId="game-1" index={0} />
             </Provider>
@@ -211,6 +211,7 @@ describe('GameListItem', () => {
         expect(getByTestId('game-list-result')).toHaveTextContent('Player 1 leads with 10');
         expect(getByTestId('game-list-status')).toHaveTextContent('Round 3');
         expect(getByTestId('game-list-players')).toHaveTextContent('Player 2');
+        expect(queryByTestId('chevron')).toBeNull();
     });
 
     it('should emphasize the game title', () => {
