@@ -58,6 +58,22 @@ const GAMES_SEED_DATA: GameSeed[] = [
         ],
     },
     {
+        // Long enough to wrap, and more players than the card's color stack holds.
+        title: 'Thanksgiving Family Yahtzee Tournament',
+        ageMs: 6 * DAY_MS,
+        players: [
+            { name: 'Aunt May', scores: [22, 31, 26] },
+            { name: 'Ben', scores: [18, 24, 30] },
+            { name: 'Cora', scores: [25, 19, 21] },
+            { name: 'Dev', scores: [14, 28, 17] },
+            { name: 'Eli', scores: [20, 16, 23] },
+            { name: 'Fay', scores: [12, 22, 19] },
+            { name: 'Gus', scores: [17, 13, 24] },
+            { name: 'Hana', scores: [21, 18, 11] },
+            { name: 'Ivan', scores: [9, 20, 15] },
+        ],
+    },
+    {
         title: 'Friday Night Hearts',
         ageMs: 19 * DAY_MS,
         winner: 3,

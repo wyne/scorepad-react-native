@@ -12,7 +12,7 @@ import playersReducer from '../../redux/PlayersSlice';
 import settingsReducer from '../../redux/SettingsSlice';
 import ListScreen from '../screens/ListScreen';
 
-import GameListItem, { gameResult } from './GameListItem';
+import GameListItem, { gameCounts, gameResult } from './GameListItem';
 
 jest.mock('../Analytics', () => ({
     logEvent: jest.fn(),
@@ -211,7 +211,40 @@ describe('GameListItem', () => {
         expect(getByTestId('game-list-result')).toHaveTextContent('Player 1 leads with 10');
         expect(getByTestId('game-list-status')).toHaveTextContent('Round 3');
         expect(getByTestId('game-list-players')).toHaveTextContent('Player 2');
+        expect(getByTestId('game-list-counts')).toHaveTextContent('2 players · 3 rounds');
+        expect(queryByTestId('game-list-colors-more')).toBeNull();
         expect(queryByTestId('chevron')).toBeNull();
+    });
+
+    it('caps the color stack and counts the players it leaves out', () => {
+        const ids = Array.from({ length: 9 }, (_, i) => `p${i}`);
+        const store = createMockStore({
+            ...populatedState,
+            games: {
+                entities: { 'game-1': { ...mockGame, playerIds: ids } },
+                ids: ['game-1'],
+            },
+            players: {
+                entities: Object.fromEntries(ids.map((id, i) => [id, { id, playerName: `P${i}`, scores: [i] }])),
+                ids,
+            },
+        });
+
+        const { getByTestId } = render(
+            <Provider store={store}>
+                <GameListItem navigation={mockNavigation} gameId="game-1" index={0} />
+            </Provider>
+        );
+
+        // Five colors plus a +4 chip keeps the stack six slots wide.
+        expect(getByTestId('game-list-colors').children).toHaveLength(6);
+        expect(getByTestId('game-list-colors-more')).toHaveTextContent('+4');
+        expect(getByTestId('game-list-counts')).toHaveTextContent('9 players · 3 rounds');
+    });
+
+    it('does not pluralize a single player or round', () => {
+        expect(gameCounts(1, 1)).toBe('1 player · 1 round');
+        expect(gameCounts(4, 12)).toBe('4 players · 12 rounds');
     });
 
     it('should emphasize the game title', () => {

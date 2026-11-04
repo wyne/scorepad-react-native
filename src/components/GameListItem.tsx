@@ -111,8 +111,15 @@ export function gameResult(
     return { playerIds: leaders, text: `${names} ${verb} ${totalOf(leaders[0])}` };
 }
 
-/** How many player colors the row shows before the rest are left to the names. */
+/** How many player colors the row shows; past that the last slot becomes a +N chip. */
 const MAX_STACK = 6;
+
+const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? '' : 's'}`;
+
+/** "4 players · 5 rounds": the counts the list showed as badges before cards. */
+export function gameCounts(playerCount: number, roundCount: number): string {
+    return `${plural(playerCount, 'player')} · ${plural(roundCount, 'round')}`;
+}
 
 export type Props = {
     navigation: NativeStackNavigationProp<ParamListBase, string, undefined>;
@@ -206,7 +213,11 @@ const GameListItem: React.FunctionComponent<Props> = ({ navigation, gameId, inde
     const featured = players.filter(p => result.playerIds.includes(p.id));
     const others = players.filter(p => !result.playerIds.includes(p.id));
     const resultColor = featured[0]?.color ?? theme.separator;
-    const stack = [...featured, ...others].slice(0, MAX_STACK);
+    const ordered = [...featured, ...others];
+    // A big table keeps one slot for the overflow count, so the stack never
+    // grows wider than MAX_STACK and still says how many it left out.
+    const stack = ordered.length > MAX_STACK ? ordered.slice(0, MAX_STACK - 1) : ordered;
+    const overflow = ordered.length - stack.length;
     // Dark palette colors (navy, forest) all but vanish on a dark card, so
     // the result dot gets a faint outline there.
     const isDark = theme.background === '#000000';
@@ -229,7 +240,7 @@ const GameListItem: React.FunctionComponent<Props> = ({ navigation, gameId, inde
                         containerStyle={[styles.itemContainer, { backgroundColor: theme.backgroundSecondary }]}
                     >
                         <ListItem.Content style={styles.content}>
-                            <ListItem.Title style={[styles.title, { color: theme.text }]} numberOfLines={1}>
+                            <ListItem.Title style={[styles.title, { color: theme.text }]} numberOfLines={2}>
                                 {gameTitle}
                             </ListItem.Title>
 
@@ -259,6 +270,19 @@ const GameListItem: React.FunctionComponent<Props> = ({ navigation, gameId, inde
                                             ]}
                                         />
                                     ))}
+                                    {overflow > 0 &&
+                                        <View
+                                            testID="game-list-colors-more"
+                                            style={[
+                                                styles.stackDot,
+                                                styles.stackMore,
+                                                styles.stackOverlap,
+                                                { backgroundColor: theme.separator, borderColor: theme.backgroundSecondary },
+                                            ]}
+                                        >
+                                            <Text style={[styles.stackMoreText, { color: theme.text }]}>+{overflow}</Text>
+                                        </View>
+                                    }
                                 </View>
                                 {others.length > 0 &&
                                     <Text style={[styles.players, { color: theme.textSecondary }]} numberOfLines={1} testID="game-list-players">
@@ -266,6 +290,10 @@ const GameListItem: React.FunctionComponent<Props> = ({ navigation, gameId, inde
                                     </Text>
                                 }
                             </View>
+
+                            <Text style={[styles.meta, { color: theme.textTertiary }]} testID="game-list-counts">
+                                {gameCounts(playerIds.length, roundCount)}
+                            </Text>
                         </ListItem.Content>
 
                         {/* Status and date stack at the card's right edge, centered,
@@ -354,6 +382,22 @@ const styles = StyleSheet.create({
     },
     stackOverlap: {
         marginLeft: -5,
+    },
+    stackMore: {
+        width: undefined,
+        minWidth: DOT_SIZE,
+        paddingHorizontal: 3,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    stackMoreText: {
+        fontSize: 8,
+        lineHeight: 10,
+        fontWeight: '700',
+        includeFontPadding: false,
+    },
+    meta: {
+        fontSize: 13,
     },
     players: {
         flex: 1,
