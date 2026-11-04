@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useEffect, useLayoutEffect, useRef } from 'react';
+import React, { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 
 import { useHeaderHeight } from '@react-navigation/elements';
 import { ParamListBase, useFocusEffect } from '@react-navigation/native';
@@ -7,6 +7,7 @@ import * as Crypto from 'expo-crypto';
 import { Platform, StyleSheet, Text } from 'react-native';
 import Animated, { Easing, LinearTransition } from 'react-native-reanimated';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { shallowEqual } from 'react-redux';
 
 import { selectGameIds } from '../../redux/GamesSlice';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
@@ -20,6 +21,41 @@ import { useNewGameHeaderItems } from '../hooks/useNewGameMenu';
 import { useStoreReviewPrompt } from '../hooks/useStoreReviewPrompt';
 import { useTheme } from '../theme';
 
+export type ListRow =
+    | { kind: 'header'; key: string; label: string; }
+    | { kind: 'game'; key: string; index: number; };
+
+/**
+ * The list's rows: games by day, with a header for each.
+ * Today's games get their own section so the one you're in the middle of is
+ * easy to find. When nothing is from today there's a single section and no
+ * header, since "Earlier" on its own says nothing.
+ */
+export function buildListRows(gameIds: string[], dates: number[], now: number = Date.now()): ListRow[] {
+    const startOfToday = new Date(now);
+    startOfToday.setHours(0, 0, 0, 0);
+
+    const today: number[] = [];
+    const earlier: number[] = [];
+    gameIds.forEach((_, i) => ((dates[i] ?? 0) >= startOfToday.getTime() ? today : earlier).push(i));
+
+    const groups = today.length > 0
+        ? [{ label: 'Today', games: today }, { label: 'Earlier', games: earlier }]
+        : [{ label: undefined, games: earlier }];
+
+    const rows: ListRow[] = [];
+    groups.forEach(({ label, games }) => {
+        if (games.length === 0) return;
+        if (label) rows.push({ kind: 'header', key: `header-${label}`, label });
+        games.forEach(gameIndex => rows.push({
+            kind: 'game',
+            key: gameIds[gameIndex],
+            index: gameIndex,
+        }));
+    });
+    return rows;
+}
+
 interface Props {
     navigation: NativeStackNavigationProp<ParamListBase, string, undefined>;
 }
@@ -30,6 +66,11 @@ const ListScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     const devMenuEnabled = useAppSelector(state => state.settings.devMenuEnabled);
     const installId = useAppSelector(state => state.settings.installId);
     const gameIds = useAppSelector(state => selectGameIds(state));
+    const gameDates = useAppSelector(
+        state => selectGameIds(state).map(id => state.games.entities[id]?.dateCreated ?? 0),
+        shallowEqual,
+    );
+    const rows = useMemo(() => buildListRows(gameIds as string[], gameDates), [gameIds, gameDates]);
     const dispatch = useAppDispatch();
 
     const rollingGameCounter = useAppSelector(state => state.settings.rollingGameCounter);
@@ -104,11 +145,11 @@ const ListScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     }, []);
 
     return (
-        <SafeAreaView edges={['left', 'right']} style={{ backgroundColor: theme.backgroundSecondary, flex: 1 }} testID="home-screen">
+        <SafeAreaView edges={['left', 'right']} style={{ backgroundColor: theme.background, flex: 1 }} testID="home-screen">
             <Animated.FlatList
                 testID="game-list"
                 alwaysBounceVertical
-                contentContainerStyle={{ flexGrow: 1, paddingTop: listHeaderInset, paddingBottom: listBottomInset }}
+                contentContainerStyle={{ flexGrow: 1, paddingTop: listHeaderInset + (rows[0]?.kind === 'game' ? 12 : 0), paddingBottom: listBottomInset }}
                 contentInsetAdjustmentBehavior="never"
                 scrollIndicatorInsets={{ top: listHeaderInset, bottom: listBottomInset }}
                 itemLayoutAnimation={LinearTransition.easing(Easing.ease)}
@@ -122,12 +163,13 @@ const ListScreen: React.FunctionComponent<Props> = ({ navigation }) => {
                     </>
                 }
                 overScrollMode="always"
-                style={{ backgroundColor: theme.backgroundSecondary }}
-                data={gameIds}
-                renderItem={({ item, index }) =>
-                    <GameListItem navigation={navigation} gameId={item as string} index={index} showSeparator={index > 0} />
+                style={{ backgroundColor: theme.background }}
+                data={rows}
+                renderItem={({ item }) => item.kind === 'header'
+                    ? <Text accessibilityRole="header" style={[styles.sectionHeader, { color: theme.textSecondary }]}>{item.label.toUpperCase()}</Text>
+                    : <GameListItem navigation={navigation} gameId={item.key} index={item.index} />
                 }
-                keyExtractor={item => item as string}
+                keyExtractor={item => item.key}
             >
             </Animated.FlatList>
             {!verticalBars && <FloatingActionButton navigation={navigation} />}
@@ -136,6 +178,13 @@ const ListScreen: React.FunctionComponent<Props> = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
+    sectionHeader: {
+        fontSize: 13,
+        letterSpacing: 0.3,
+        paddingHorizontal: 32,
+        paddingTop: 18,
+        paddingBottom: 6,
+    },
     // Matches the native header title it stands in for.
     listTitle: {
         fontSize: 17,

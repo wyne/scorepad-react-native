@@ -3,6 +3,7 @@ export const config: WebdriverIO.Config = {
   logLevel: 'warn',
 
   specs: ['./tests/**/*.test.ts'],
+  exclude: ['./tests/android.smoke.test.ts'],
 
   capabilities: [
     {

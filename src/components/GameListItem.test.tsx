@@ -12,7 +12,7 @@ import playersReducer from '../../redux/PlayersSlice';
 import settingsReducer from '../../redux/SettingsSlice';
 import ListScreen from '../screens/ListScreen';
 
-import GameListItem from './GameListItem';
+import GameListItem, { gameCounts, gameResult } from './GameListItem';
 
 jest.mock('../Analytics', () => ({
     logEvent: jest.fn(),
@@ -170,52 +170,37 @@ describe('GameListItem', () => {
         mockContextMenuProps.current = null;
     });
 
-    it('keeps separators between games as the mounted list gains and loses rows', () => {
+    it('keeps each game as its own card as the mounted list gains and loses games', () => {
         const store = createMockStore(populatedState);
-        const { getByTestId, queryByTestId, queryAllByTestId, getByText } = render(
+        const { queryAllByTestId, getByText, queryByText } = render(
             <Provider store={store}>
                 <ListScreen navigation={mockNavigation} />
             </Provider>
         );
 
+        act(() => {
+            store.dispatch(gameSave({
+                ...mockGame,
+                id: 'game-2',
+                title: 'Game 2',
+                dateCreated: mockGame.dateCreated + 1000,
+            }));
+        });
+        expect(getByText('Game 2')).toBeTruthy();
+        expect(queryAllByTestId('game-list-item')).toHaveLength(2);
         expect(queryAllByTestId(/^game-list-separator-/)).toHaveLength(0);
 
-        // Prepend twice without remounting the screen, as creation/rematch do.
-        for (const number of [2, 3]) {
-            act(() => {
-                store.dispatch(gameSave({
-                    ...mockGame,
-                    id: `game-${number}`,
-                    title: `Game ${number}`,
-                    dateCreated: mockGame.dateCreated + number * 1000,
-                }));
-            });
-            expect(getByText(`Game ${number}`)).toBeTruthy();
-            // The newest game sorts to the top, so it draws no line of its own;
-            // the line belongs to the row it pushed down.
-            expect(queryByTestId(`game-list-separator-game-${number}`)).toBeNull();
-            expect(getByTestId('game-list-separator-game-1')).toBeTruthy();
-            expect(queryAllByTestId(/^game-list-separator-/)).toHaveLength(number - 1);
-        }
-
-        // Removing the trailing game must also remove the line above it.
         act(() => {
             store.dispatch(deleteGameAndPlayers('game-1'));
         });
-        expect(queryByTestId('game-list-separator-game-1')).toBeNull();
-        expect(getByTestId('game-list-separator-game-2')).toBeTruthy();
-
-        act(() => {
-            store.dispatch(deleteGameAndPlayers('game-3'));
-        });
-        expect(getByText('Game 2')).toBeTruthy();
-        expect(queryAllByTestId(/^game-list-separator-/)).toHaveLength(0);
+        expect(queryByText('Test Game')).toBeNull();
+        expect(queryAllByTestId('game-list-item')).toHaveLength(1);
     });
 
-    it('should render game title, players, and badges for a valid game', () => {
+    it('should render the title, who leads, and the round', () => {
         const store = createMockStore(populatedState);
 
-        const { getByText, getByTestId } = render(
+        const { getByText, getByTestId, queryByTestId } = render(
             <Provider store={store}>
                 <GameListItem navigation={mockNavigation} gameId="game-1" index={0} />
             </Provider>
@@ -223,8 +208,43 @@ describe('GameListItem', () => {
 
         expect(getByTestId('game-list-item')).toBeTruthy();
         expect(getByText('Test Game')).toBeTruthy();
-        expect(getByText('Player 1, ')).toBeTruthy();
-        expect(getByText('Player 2')).toBeTruthy();
+        expect(getByTestId('game-list-result')).toHaveTextContent('Player 1 leads with 10');
+        expect(getByTestId('game-list-status')).toHaveTextContent('Round 3');
+        expect(getByTestId('game-list-players')).toHaveTextContent('Player 2');
+        expect(getByTestId('game-list-counts')).toHaveTextContent('2 players · 3 rounds');
+        expect(queryByTestId('game-list-colors-more')).toBeNull();
+        expect(queryByTestId('chevron')).toBeNull();
+    });
+
+    it('caps the color stack and counts the players it leaves out', () => {
+        const ids = Array.from({ length: 9 }, (_, i) => `p${i}`);
+        const store = createMockStore({
+            ...populatedState,
+            games: {
+                entities: { 'game-1': { ...mockGame, playerIds: ids } },
+                ids: ['game-1'],
+            },
+            players: {
+                entities: Object.fromEntries(ids.map((id, i) => [id, { id, playerName: `P${i}`, scores: [i] }])),
+                ids,
+            },
+        });
+
+        const { getByTestId } = render(
+            <Provider store={store}>
+                <GameListItem navigation={mockNavigation} gameId="game-1" index={0} />
+            </Provider>
+        );
+
+        // Five colors plus a +4 chip keeps the stack six slots wide.
+        expect(getByTestId('game-list-colors').children).toHaveLength(6);
+        expect(getByTestId('game-list-colors-more')).toHaveTextContent('+4');
+        expect(getByTestId('game-list-counts')).toHaveTextContent('9 players · 3 rounds');
+    });
+
+    it('does not pluralize a single player or round', () => {
+        expect(gameCounts(1, 1)).toBe('1 player · 1 round');
+        expect(gameCounts(4, 12)).toBe('4 players · 12 rounds');
     });
 
     it('should emphasize the game title', () => {
@@ -241,13 +261,14 @@ describe('GameListItem', () => {
         );
     });
 
-    it('should put winners first so a truncated player line still shows them', () => {
+    it('leads a finished game with its winner and marks it finished', () => {
         const store = createMockStore({
             ...populatedState,
             games: {
                 entities: {
                     'game-1': {
                         ...mockGame,
+                        locked: true,
                         playerIds: ['player-1', 'player-2', 'player-3'],
                         winnerIds: ['player-3'],
                     },
@@ -269,13 +290,48 @@ describe('GameListItem', () => {
             </Provider>
         );
 
-        // The names render as one Text, so assert the order of the elements
-        // that build it rather than hunting for separate text nodes.
-        const line = getByTestId('game-list-players');
-        const renderedIds = (line.props.children as { props: { playerId: string; }; }[])
-            .map(child => child.props.playerId);
+        expect(getByTestId('game-list-result')).toHaveTextContent('Player 3 won with 20');
+        expect(getByTestId('game-list-status')).toHaveTextContent('Finished');
+        expect(getByTestId('game-list-players')).toHaveTextContent('Player 1, Player 2');
+        // The winner sits third, so the dot takes the palette's third color.
+        expect(getByTestId('game-list-result-dot')).toHaveStyle({ backgroundColor: '#f5c800' });
+    });
 
-        expect(renderedIds).toEqual(['player-3', 'player-1', 'player-2']);
+    describe('gameResult', () => {
+        const players = [
+            { id: 'a', name: 'Ann', total: 30 },
+            { id: 'b', name: 'Bo', total: 12 },
+            { id: 'c', name: 'Cy', total: 30 },
+        ];
+
+        it('names every winner of a tie', () => {
+            expect(gameResult({ locked: true, winnerIds: ['a', 'c'], roundTotal: 4 }, players).text)
+                .toBe('Ann and Cy tied with 30');
+        });
+
+        it('gives each co-winner their own total when they did not tie', () => {
+            expect(gameResult({ locked: true, winnerIds: ['a', 'b'], roundTotal: 4 }, players).text)
+                .toBe('Ann (30) and Bo (12) won');
+        });
+
+        it('names tied leaders while the game is in play', () => {
+            expect(gameResult({ roundTotal: 4 }, players).text).toBe('Ann and Cy tied at 30');
+        });
+
+        it('follows a lowest-score-wins rule', () => {
+            expect(gameResult({ roundTotal: 2, scoring: { winner: 'low' } }, players).text)
+                .toBe('Bo leads with 12');
+        });
+
+        it('says so before anyone has scored', () => {
+            const unscored = players.map(p => ({ ...p, total: 0 }));
+            expect(gameResult({ roundTotal: 1 }, unscored)).toEqual({ playerIds: [], text: 'No scores yet' });
+        });
+
+        it('falls back to the leader when a locked game has no winners', () => {
+            expect(gameResult({ locked: true, winnerIds: [], roundTotal: 3 }, players).text)
+                .toBe('Ann and Cy tied at 30');
+        });
     });
 
     describe('created timestamp', () => {
@@ -296,12 +352,13 @@ describe('GameListItem', () => {
         };
 
         it('stays relative under a day, where a date would only say today', () => {
-            const { getByText } = renderWithDate(Date.now() - 3 * 60 * 60 * 1000);
+            const { getByText, queryByTestId } = renderWithDate(Date.now() - 3 * 60 * 60 * 1000);
 
             expect(getByText('3h ago')).toBeTruthy();
+            expect(queryByTestId('game-list-created-date')).toBeNull();
         });
 
-        it('adds the weekday and date once it is days old', () => {
+        it('adds the weekday and date under how long ago once it is days old', () => {
             const threeDaysAgo = Date.now() - 3 * 86400000;
             const { getByText } = renderWithDate(threeDaysAgo);
 
@@ -309,7 +366,8 @@ describe('GameListItem', () => {
                 weekday: 'short', month: 'short', day: 'numeric',
             });
 
-            expect(getByText(`3d ago · ${expected}`)).toBeTruthy();
+            expect(getByText('3d ago')).toBeTruthy();
+            expect(getByText(expected)).toBeTruthy();
         });
 
         it('trades the weekday for the year once out of this year', () => {
@@ -323,11 +381,12 @@ describe('GameListItem', () => {
                 month: 'short', day: 'numeric', year: 'numeric',
             });
 
-            expect(getByText(`2y ago · ${expected}`)).toBeTruthy();
+            expect(getByText('2y ago')).toBeTruthy();
+            expect(getByText(expected)).toBeTruthy();
         });
     });
 
-    it('should show lock icon when game is locked', () => {
+    it('marks a locked game finished without a lock icon', () => {
         const store = createMockStore({
             ...populatedState,
             games: {
@@ -336,13 +395,35 @@ describe('GameListItem', () => {
             },
         });
 
-        const { getByTestId } = render(
+        const { getByTestId, queryByTestId } = render(
             <Provider store={store}>
                 <GameListItem navigation={mockNavigation} gameId="game-1" index={0} />
             </Provider>
         );
 
-        expect(getByTestId('icon-lock-closed-outline')).toBeTruthy();
+        expect(getByTestId('game-list-status')).toHaveTextContent('Finished');
+        expect(queryByTestId('icon-lock-closed-outline')).toBeNull();
+    });
+
+    it('renders a game whose persisted scores are malformed instead of crashing', () => {
+        const store = createMockStore({
+            ...populatedState,
+            players: {
+                entities: {
+                    'player-1': { ...mockPlayers['player-1'], scores: { 0: 10 } as unknown as number[] },
+                    'player-2': mockPlayers['player-2'],
+                },
+                ids: ['player-1', 'player-2'],
+            },
+        });
+
+        const { getByTestId } = render(
+            <Provider store={store}>
+                <ListScreen navigation={mockNavigation} />
+            </Provider>
+        );
+
+        expect(getByTestId('game-list-result')).toHaveTextContent('Player 2 leads with 5');
     });
 
     it('should render null when the game is not in the store', () => {
