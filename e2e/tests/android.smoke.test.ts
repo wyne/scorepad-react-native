@@ -4,6 +4,10 @@ const androidText = (text: string) => (
   `android=new UiSelector().text("${text}")`
 );
 
+const byTestId = (id: string) => (
+  `android=new UiSelector().resourceId("${id}")`
+);
+
 async function tap(selector: string) {
   const element = $(selector);
   await element.waitForDisplayed({ timeout: 10000 });
@@ -36,37 +40,47 @@ async function swipeUp(selector: string) {
 
 describe('Android smoke flow', () => {
   it('creates, scores, and finishes a game', async () => {
+    console.log('→ wait for home');
     await browser.waitUntil(
       async () => {
         const onboarding = await $('~onboarding').isDisplayed().catch(() => false);
-        const home = await $('~home-screen').isDisplayed().catch(() => false);
+        const home = await $(byTestId('home-screen')).isDisplayed().catch(() => false);
         return onboarding || home;
       },
       { timeout: 20000, timeoutMsg: 'App did not reach onboarding or home' }
     );
     await dismissOnboardingIfPresent();
-    await $('~home-screen').waitForDisplayed({ timeout: 15000 });
+    await $(byTestId('home-screen')).waitForDisplayed({ timeout: 15000 });
 
-    await tap('~add-game-button');
+    console.log('→ create game');
+    await tap(byTestId('add-game-button'));
     await tap(androidText('2 Players'));
-    await $('~edit-game').waitForDisplayed({ timeout: 15000 });
+    await $(byTestId('edit-game')).waitForDisplayed({ timeout: 15000 });
     await tap('~Done');
-    await $('~game-screen').waitForDisplayed({ timeout: 15000 });
+    await $(byTestId('game-screen')).waitForDisplayed({ timeout: 15000 });
 
-    await swipeUp('~swipe-overlay-0');
-    await tap('~next-round-button');
-    await $('~Round 2. Select round').waitForDisplayed({ timeout: 10000 });
+    console.log('→ score and advance round');
+    await swipeUp(byTestId('swipe-overlay-0'));
+    await tap(byTestId('next-round-button'));
+    await $(androidText('2 of 2')).waitForDisplayed({ timeout: 10000 });
 
-    await tap('~game-options-menu');
+    console.log('→ open dial');
+    await tap(byTestId('game-options-menu'));
+    console.log('→ choose dial');
     await tap(androidText('Dial'));
-    await tap('~player-row-0');
-    await $('~dial-gesture-area').waitForDisplayed({ timeout: 10000 });
-    await tap('~overlay-backdrop');
+    console.log('→ choose first player');
+    await tap(byTestId('player-row-0'));
+    console.log('→ wait for dial');
+    await $(byTestId('dial-gesture-area')).waitForDisplayed({ timeout: 10000 });
+    console.log('→ close dial');
+    await tap(byTestId('overlay-backdrop'));
 
-    await tap('~game-title-button');
-    await tap('~choose-winners-button');
-    await tap('~winner-player-row-0');
-    await tap('~lock-game-button');
-    await $('~final-pill').waitForDisplayed({ timeout: 10000 });
+    console.log('→ choose winner and lock game');
+    await tap(byTestId('game-title-button'));
+    await tap(byTestId('choose-winners-button'));
+    await tap(byTestId('winner-player-row-0'));
+    await tap(byTestId('lock-game-button'));
+    await $(byTestId('final-pill')).waitForDisplayed({ timeout: 10000 });
+    console.log('→ game locked');
   });
 });
