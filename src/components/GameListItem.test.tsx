@@ -210,6 +210,7 @@ describe('GameListItem', () => {
         expect(getByText('Test Game')).toBeTruthy();
         expect(getByTestId('game-list-result')).toHaveTextContent('Player 1 leads with 10');
         expect(getByTestId('game-list-status')).toHaveTextContent('Round 3');
+        expect(getByTestId('game-list-players')).toHaveTextContent('Player 2');
     });
 
     it('should emphasize the game title', () => {
@@ -256,8 +257,10 @@ describe('GameListItem', () => {
         );
 
         expect(getByTestId('game-list-result')).toHaveTextContent('Player 3 won with 20');
-        expect(getByTestId('icon-trophy')).toBeTruthy();
         expect(getByTestId('game-list-status')).toHaveTextContent('Finished');
+        expect(getByTestId('game-list-players')).toHaveTextContent('Player 1, Player 2');
+        // The winner sits third, so the dot takes the palette's third color.
+        expect(getByTestId('game-list-result-dot')).toHaveStyle({ backgroundColor: '#f5c800' });
     });
 
     describe('gameResult', () => {

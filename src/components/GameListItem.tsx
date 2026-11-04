@@ -2,7 +2,7 @@ import React, { memo, useCallback, useMemo } from 'react';
 
 import { ParamListBase } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { Icon, ListItem } from '@rneui/base';
+import { ListItem } from '@rneui/base';
 import { Platform, StyleSheet, Text, View } from 'react-native';
 import Animated, { FadeInUp } from 'react-native-reanimated';
 import { shallowEqual } from 'react-redux';
@@ -189,15 +189,15 @@ const GameListItem: React.FunctionComponent<Props> = ({ navigation, gameId, inde
         });
     };
 
-    const hasWinners = locked && (winnerIds?.length ?? 0) > 0;
-    // The strip and the color stack lead with the players the result line is
-    // about: the winners, or whoever leads.
-    const featured = [
-        ...players.filter(p => result.playerIds.includes(p.id)),
-        ...players.filter(p => !result.playerIds.includes(p.id)),
-    ];
-    const accent = result.playerIds.length > 0 ? featured[0]?.color : theme.separator;
-    const stack = featured.slice(0, MAX_STACK);
+    // The result dot and the color stack lead with the players the result
+    // line is about: the winners, or whoever leads.
+    const featured = players.filter(p => result.playerIds.includes(p.id));
+    const others = players.filter(p => !result.playerIds.includes(p.id));
+    const resultColor = featured[0]?.color ?? theme.separator;
+    const stack = [...featured, ...others].slice(0, MAX_STACK);
+    // Dark palette colors (navy, forest) all but vanish on a dark card, so
+    // the result dot gets a faint outline there.
+    const isDark = theme.background === '#000000';
 
     return (
         <Animated.View collapsable={false} entering={FadeInUp.duration(200).delay(100 + index * 100)}>
@@ -215,27 +215,26 @@ const GameListItem: React.FunctionComponent<Props> = ({ navigation, gameId, inde
                         onPress={Platform.OS == 'android' ? undefined : chooseGameHandler}
                         containerStyle={[styles.itemContainer, { backgroundColor: theme.backgroundSecondary }]}
                     >
-                        <View style={[styles.accent, { backgroundColor: accent }]} testID="game-list-accent" />
                         <ListItem.Content style={styles.content}>
                             <ListItem.Title style={[styles.title, { color: theme.text }]} numberOfLines={1}>
                                 {gameTitle}
                             </ListItem.Title>
 
-                            <Text style={[styles.result, { color: theme.text }]} numberOfLines={1} testID="game-list-result">
-                                {hasWinners && <Icon name="trophy" type="ionicon" size={13} color={theme.warning} />}
-                                {hasWinners && ' '}
-                                {result.text}
-                            </Text>
-
-                            <View style={styles.detailsRow}>
+                            <View style={styles.resultRow}>
                                 <View
-                                    testID="game-list-status"
-                                    style={[styles.pill, { backgroundColor: locked ? theme.success + '22' : theme.tint + '1C' }]}
-                                >
-                                    <Text style={[styles.pillText, { color: locked ? theme.success : theme.tint }]}>
-                                        {locked ? 'Finished' : `Round ${roundCount}`}
-                                    </Text>
-                                </View>
+                                    testID="game-list-result-dot"
+                                    style={[
+                                        styles.resultDot,
+                                        { backgroundColor: resultColor },
+                                        isDark && styles.resultDotOutline,
+                                    ]}
+                                />
+                                <Text style={[styles.result, { color: theme.text }]} numberOfLines={1} testID="game-list-result">
+                                    {result.text}
+                                </Text>
+                            </View>
+
+                            <View style={styles.playersRow}>
                                 <View style={styles.stack} testID="game-list-colors">
                                     {stack.map((player, i) => (
                                         <View
@@ -248,11 +247,30 @@ const GameListItem: React.FunctionComponent<Props> = ({ navigation, gameId, inde
                                         />
                                     ))}
                                 </View>
-                                <Text style={[styles.timestamp, { color: theme.textTertiary }]} testID="game-list-created">
-                                    {formatCreated(dateCreated)}
-                                </Text>
+                                {others.length > 0 &&
+                                    <Text style={[styles.players, { color: theme.textSecondary }]} numberOfLines={1} testID="game-list-players">
+                                        {others.map(p => p.name).join(', ')}
+                                    </Text>
+                                }
                             </View>
                         </ListItem.Content>
+
+                        {/* Status and date stack beside the chevron, centered in the
+                          * card, so they line up down the right edge of the list. */}
+                        <View style={styles.trailing}>
+                            <View
+                                testID="game-list-status"
+                                style={[styles.pill, { backgroundColor: (locked ? theme.success : theme.tint) + (isDark ? '33' : '22') }]}
+                            >
+                                <Text style={[styles.pillText, { color: locked ? theme.success : theme.tint }]}>
+                                    {locked ? 'Finished' : `Round ${roundCount}`}
+                                </Text>
+                            </View>
+                            <Text style={[styles.timestamp, { color: theme.textTertiary }]} testID="game-list-created">
+                                {formatCreated(dateCreated)}
+                            </Text>
+                        </View>
+                        <ListItem.Chevron iconStyle={{ color: theme.textTertiary }} />
                     </ListItem>
                 </AbstractPopupMenu>
             </View>
@@ -262,6 +280,7 @@ const GameListItem: React.FunctionComponent<Props> = ({ navigation, gameId, inde
 
 const CARD_RADIUS = 12;
 const DOT_SIZE = 14;
+const RESULT_DOT_SIZE = 9;
 
 const styles = StyleSheet.create({
     // Each game is its own card, so the list reads as separate games rather
@@ -273,14 +292,10 @@ const styles = StyleSheet.create({
         overflow: 'hidden',
     },
     itemContainer: {
-        paddingLeft: 0,
-        paddingVertical: 11,
-        alignItems: 'stretch',
-    },
-    // The winner's (or leader's) color down the card's leading edge.
-    accent: {
-        width: 5,
-        marginVertical: -11,
+        paddingVertical: 12,
+        paddingLeft: 14,
+        paddingRight: 10,
+        gap: 10,
     },
     content: {
         gap: 4,
@@ -288,22 +303,28 @@ const styles = StyleSheet.create({
     title: {
         fontWeight: '600',
     },
+    resultRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 6,
+    },
+    resultDot: {
+        width: RESULT_DOT_SIZE,
+        height: RESULT_DOT_SIZE,
+        borderRadius: RESULT_DOT_SIZE / 2,
+    },
+    resultDotOutline: {
+        borderWidth: StyleSheet.hairlineWidth,
+        borderColor: 'rgba(255, 255, 255, 0.4)',
+    },
     result: {
+        flexShrink: 1,
         fontSize: 15,
     },
-    detailsRow: {
+    playersRow: {
         flexDirection: 'row',
         alignItems: 'center',
         gap: 8,
-    },
-    pill: {
-        borderRadius: 8,
-        paddingHorizontal: 7,
-        paddingVertical: 2,
-    },
-    pillText: {
-        fontSize: 12,
-        fontWeight: '600',
     },
     stack: {
         flexDirection: 'row',
@@ -317,8 +338,24 @@ const styles = StyleSheet.create({
     stackOverlap: {
         marginLeft: -5,
     },
+    players: {
+        flex: 1,
+        fontSize: 13,
+    },
+    trailing: {
+        alignItems: 'flex-end',
+        gap: 6,
+    },
+    pill: {
+        borderRadius: 8,
+        paddingHorizontal: 7,
+        paddingVertical: 2,
+    },
+    pillText: {
+        fontSize: 12,
+        fontWeight: '600',
+    },
     timestamp: {
-        marginLeft: 'auto',
         fontSize: 13,
     },
 });
