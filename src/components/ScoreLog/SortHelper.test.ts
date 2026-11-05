@@ -50,6 +50,7 @@ const createMockState = (
     showPointParticles: true,
     playerNumbers: 'badge',
     interactionType: InteractionType.SwipeVertical,
+    learnedInteractionTypes: [],
     home_fullscreen: false,
     lastStoreReviewPrompt: Date.now(),
     appOpens: 1,

@@ -93,11 +93,11 @@ describe('GestureNudge', () => {
         expect(queryByTestId('gesture-nudge')).toBeNull();
     });
 
-    it('has no nudge for tap misses', () => {
-        const { getByTestId, queryByTestId } = renderNudge();
+    it('explains tapping after two swipes in tap mode', () => {
+        const { getByTestId, getByText } = renderNudge();
         fireEvent.press(getByTestId('miss-tap'));
         fireEvent.press(getByTestId('miss-tap'));
-        expect(queryByTestId('gesture-nudge')).toBeNull();
+        expect(getByText('Tap the top half of a tile to add, the bottom half to subtract.')).toBeTruthy();
     });
 
     it('hides on its own after a moment', () => {

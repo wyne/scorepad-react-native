@@ -272,6 +272,20 @@ describe('SwipeVertical', () => {
     expect(mockReportMiss).toHaveBeenCalledWith(InteractionType.SwipeVertical);
   });
 
+  // A still tap never activates the pan, so onEnd doesn't fire; only onFinalize.
+  it('reports a miss for a still tap that never activates the pan', () => {
+    renderSwipe();
+    const ph = (globalThis as any).__ph;
+
+    act(() => {
+      ph.onBegin();
+      ph.onFinalize();
+    });
+
+    expect(mockReportMiss).toHaveBeenCalledTimes(1);
+    expect(mockReportMiss).toHaveBeenCalledWith(InteractionType.SwipeVertical);
+  });
+
   it('does not report a miss when the swipe scores', () => {
     renderSwipe();
     const ph = (globalThis as any).__ph;

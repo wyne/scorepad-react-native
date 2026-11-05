@@ -4,7 +4,8 @@ import { persistStore, persistReducer, createMigrate } from 'redux-persist';
 
 import gamesReducer, { backfillGamePlayerNumbers, GameState, restLockedGamesOnLastRound } from './GamesSlice';
 import scoresReducer from './PlayersSlice';
-import settingsReducer from './SettingsSlice';
+import { selectInferredLearnedInteractionTypes } from './selectors';
+import settingsReducer, { setLearnedInteractionTypes } from './SettingsSlice';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const settingsMigrations: any = {
@@ -40,11 +41,17 @@ const settingsMigrations: any = {
         const { showPlayerIndex, ...rest } = state ?? {};
         return { ...rest, playerNumbers: showPlayerIndex === true ? 'badge' : 'off' };
     },
+    7: (state: Record<string, unknown> | undefined) => {
+        // The gesture hint now remembers every gesture learned, not just the
+        // last one used. Left unset here, since settings can't see games:
+        // backfillLearnedGestures fills it in once everything is rehydrated.
+        return { ...state, learnedInteractionTypes: undefined };
+    },
 };
 
 export const settingsPersistConfig = {
     key: 'settings',
-    version: 6,
+    version: 7,
     storage: AsyncStorage,
     migrate: createMigrate(settingsMigrations),
     whitelist: [
@@ -58,6 +65,7 @@ export const settingsPersistConfig = {
         'playerNumbers',
         'interactionType',
         'lastUsedInteractionType',
+        'learnedInteractionTypes',
         'lastStoreReviewPrompt',
         'devMenuEnabled',
         'gameModesEnabled',
@@ -124,6 +132,16 @@ export const backfillPlayerNumbers = (target: AppStore) => {
     target.dispatch(backfillGamePlayerNumbers(target.getState().settings.playerNumbers ?? 'off'));
 };
 
-export const persistor = persistStore(store, null, () => backfillPlayerNumbers(store));
+/** After an upgrade, marks every gesture used in saved games as learned. */
+export const backfillLearnedGestures = (target: AppStore) => {
+    const state = target.getState();
+    if (state.settings.learnedInteractionTypes !== undefined) return;
+    target.dispatch(setLearnedInteractionTypes(selectInferredLearnedInteractionTypes(state)));
+};
+
+export const persistor = persistStore(store, null, () => {
+    backfillPlayerNumbers(store);
+    backfillLearnedGestures(store);
+});
 
 // exportData();

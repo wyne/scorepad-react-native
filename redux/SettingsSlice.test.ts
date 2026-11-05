@@ -7,6 +7,7 @@ import { FEATURE_NOTIFICATIONS } from '../src/constants';
 import settingsReducer, {
     setCurrentGameId,
     setLastUsedInteractionType,
+    markInteractionLearned,
     setMultiplier,
     SettingsState } from './SettingsSlice';
 
@@ -38,6 +39,17 @@ describe('settings reducer', () => {
         expect(store.getState().lastUsedInteractionType).toBeUndefined();
         store.dispatch(setLastUsedInteractionType(InteractionType.Dial));
         expect(store.getState().lastUsedInteractionType).toEqual(InteractionType.Dial);
+    });
+
+    it('remembers every gesture used or dismissed', () => {
+        store.dispatch(setLastUsedInteractionType(InteractionType.Dial));
+        store.dispatch(setLastUsedInteractionType(InteractionType.SwipeVertical));
+        store.dispatch(setLastUsedInteractionType(InteractionType.Dial));
+        store.dispatch(markInteractionLearned(InteractionType.HalfTap));
+        store.dispatch(markInteractionLearned(InteractionType.HalfTap));
+        expect(store.getState().learnedInteractionTypes).toEqual([
+            InteractionType.Dial, InteractionType.SwipeVertical, InteractionType.HalfTap,
+        ]);
     });
 
     it('no-ops setLastUsedInteractionType when the value is unchanged', () => {
