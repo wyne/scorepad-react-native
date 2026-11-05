@@ -111,7 +111,7 @@
     "@wdio/mocha-framework": "^10.1.0",
     "@wdio/spec-reporter": "^9.27.2",
     "babel-jest": "^30.5.2",
-    "eslint": "^8.47.0",
+    "eslint": "^10.14.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-import": "^2.29.0",
     "eslint-plugin-jest": "^27.2.3",
