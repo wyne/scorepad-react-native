@@ -7,9 +7,11 @@ import { importBackup, parseBackupData } from './backup';
 import { initialState as initialSettings } from './SettingsSlice';
 
 const mockDispatch = jest.fn();
+const mockBackfillLearnedGestures = jest.fn();
 let mockFileContent = '';
 
 jest.mock('./store', () => ({
+    backfillLearnedGestures: (...args: unknown[]) => mockBackfillLearnedGestures(...args),
     store: {
         dispatch: (...args: unknown[]) => mockDispatch(...args),
         getState: jest.fn(),
@@ -210,5 +212,6 @@ describe('backup validation', () => {
         expect(mockDispatch).toHaveBeenLastCalledWith(
             expect.objectContaining({ type: 'games/backfillGamePlayerNumbers', payload: 'off' })
         );
+        expect(mockBackfillLearnedGestures).toHaveBeenCalledTimes(1);
     });
 });

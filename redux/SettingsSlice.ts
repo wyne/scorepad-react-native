@@ -19,8 +19,9 @@ export interface SettingsState {
     // undefined means "never scored" (new user).
     lastUsedInteractionType?: InteractionType;
     // Every gesture the user has scored with or dismissed the first-use hint
-    // for. The hint shows only for gestures missing from this list.
-    learnedInteractionTypes: InteractionType[];
+    // for. The hint shows only for gestures missing from this list. Undefined
+    // until backfilled from saved games after an upgrade (see store.ts).
+    learnedInteractionTypes?: InteractionType[];
     lastStoreReviewPrompt: number;
     devMenuEnabled?: boolean;
     // Offer game modes when setting up a game (Settings > Features). Games that
@@ -100,6 +101,9 @@ const settingsSlice = createSlice({
             state.lastUsedInteractionType = action.payload;
             addLearned(state, action.payload);
         },
+        setLearnedInteractionTypes(state, action: PayloadAction<InteractionType[]>) {
+            state.learnedInteractionTypes = action.payload;
+        },
         markInteractionLearned(state, action: PayloadAction<InteractionType>) {
             addLearned(state, action.payload);
         },
@@ -155,6 +159,7 @@ export const {
     setInteractionType,
     setLastUsedInteractionType,
     markInteractionLearned,
+    setLearnedInteractionTypes,
     setLastStoreReviewPrompt,
     toggleDevMenuEnabled,
     setGameModesEnabled,

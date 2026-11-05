@@ -7,8 +7,9 @@ import { selectCurrentGame, selectInteractionType } from '../../redux/selectors'
 // never show it.
 export function useGestureHint(): boolean {
     const interactionType = useAppSelector(state => selectInteractionType(state, state.settings.currentGameId));
-    const learned = useAppSelector(state => state.settings.learnedInteractionTypes ?? []);
+    const learned = useAppSelector(state => state.settings.learnedInteractionTypes);
     const gameLocked = useAppSelector(state => selectCurrentGame(state)?.locked ?? false);
 
-    return !gameLocked && !learned.includes(interactionType);
+    // Undefined means an upgrade hasn't been backfilled yet: hold off.
+    return !gameLocked && learned !== undefined && !learned.includes(interactionType);
 }
