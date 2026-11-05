@@ -89,6 +89,23 @@ function inkA(ink: string, a: number): string {
     return ink === '#000' ? `rgba(0,0,0,${a})` : `rgba(255,255,255,${a})`;
 }
 
+/**
+ * Portrait dial size: as large as fits the card. The rest of the card is fixed chrome
+ * (header, step pill, fine-tune row, Done), so the dial takes whatever height is left,
+ * up to the card's inner width.
+ */
+export function portraitDialSize(pageWidth: number, pageHeight: number, scale: number): number {
+    // Chrome that scales with `scale`: paddings 30, header 90, two gaps 32, Done 48.
+    const scaledChrome = 200 * scale;
+    // Fixed chrome: handle 4 + prev-label gap 2, step pill 28, the dial's two gaps 20,
+    // new-total margin 4, and a little slack for font metrics.
+    const fixedChrome = 6 + 28 + 20 + 4 + 12;
+    // Below the ring, the new-total column is about 0.27 of the dial's size.
+    const byHeight = (pageHeight - scaledChrome - fixedChrome) / 1.27;
+    const byWidth = (pageWidth - 48 * scale) * 0.95;
+    return Math.max(120, Math.floor(Math.min(byHeight, byWidth)));
+}
+
 function bounded(value: number, min: number, max: number): number {
     return Math.min(Math.max(value, min), max);
 }
@@ -185,8 +202,9 @@ const PlayerDialPage: React.FC<PlayerDialPageProps> = ({
 
     const isDismissing = useSharedValue(false);
 
-    // Vertical-only dismiss gesture: fails on horizontal so FlatList keeps scroll
-    const dismissGesture = Gesture.Pan()
+    // Vertical-only dismiss gesture: fails on horizontal so FlatList keeps scroll.
+    // One per drag zone (header, and the space below the dial in portrait).
+    const makeDismissGesture = () => Gesture.Pan()
         .enabled(!menuOpen)
         .activeOffsetY([-10, 10])
         .failOffsetX([-8, 8])
@@ -218,6 +236,8 @@ const PlayerDialPage: React.FC<PlayerDialPageProps> = ({
             }
             isDismissing.value = false;
         });
+    const dismissGesture = makeDismissGesture();
+    const dismissGestureLower = makeDismissGesture();
 
     if (!player) return null;
 
@@ -319,7 +339,7 @@ const PlayerDialPage: React.FC<PlayerDialPageProps> = ({
         );
     }
 
-    const dialSize = Math.min(Math.round(pageHeight * 0.38), Math.round(pageWidth * 0.9), Math.round(240 * scale));
+    const dialSize = portraitDialSize(pageWidth, pageHeight, scale);
 
     return (
         <View style={cardStyle} testID="dial-card">
@@ -329,9 +349,10 @@ const PlayerDialPage: React.FC<PlayerDialPageProps> = ({
                 paddingTop: 14 * scale,
                 paddingBottom: 16 * scale,
             }]}>
-                {/* Top group: drag handle + name + prev total — also the swipe-to-dismiss zone */}
+                {/* Top group: drag handle + name + prev total, plus any spare space above
+                    the dial. The swipe-to-dismiss zone. */}
                 <GestureDetector gesture={dismissGesture}>
-                    <View style={[styles.topGroup, { gap: 8 * scale }]}>
+                    <View testID="dial-drag-upper" style={[styles.topGroup, styles.dragZone, { gap: 8 * scale }]}>
                         <View style={[styles.dragHandle, { backgroundColor: inkA(ink, 0.3) }]} />
                         <Text
                             style={[styles.name, { color: ink, fontSize: 32 * scale, lineHeight: 36 * scale }]}
@@ -363,6 +384,13 @@ const PlayerDialPage: React.FC<PlayerDialPageProps> = ({
                         menuOpen={menuOpen}
                     />
                 </View>
+
+                {/* Spare space below the dial: grows as much as the space above it, so the
+                    dial sits centred, and also drags to dismiss. Pulls back over its gap so
+                    it costs no height when there is nothing spare. */}
+                <GestureDetector gesture={dismissGestureLower}>
+                    <View testID="dial-drag-lower" style={[styles.dragZone, { marginTop: -16 * scale }]} />
+                </GestureDetector>
 
                 {/* Done */}
                 <Pressable
@@ -617,6 +645,10 @@ const styles = StyleSheet.create({
     dialWrap: {
         alignItems: 'center',
     },
+    dragZone: {
+        flexGrow: 1,
+        alignSelf: 'stretch',
+    },
     doneBtn: {
         width: '74%',
         maxWidth: 300,
@@ -624,7 +656,6 @@ const styles = StyleSheet.create({
         borderRadius: 14,
         alignItems: 'center',
         justifyContent: 'center',
-        marginTop: 'auto',
     },
     doneBtnText: {
         fontSize: 20,

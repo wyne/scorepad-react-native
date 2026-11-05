@@ -81,7 +81,7 @@ jest.mock('../../MenuOpenContext', () => ({
 }));
 
 
-import DialOverlay, { dismissExitDuration, dragOffset, shouldDismiss } from './DialOverlay';
+import DialOverlay, { dismissExitDuration, dragOffset, portraitDialSize, shouldDismiss } from './DialOverlay';
 
 const mkSv = <T,>(v: T) => ({ value: v }) as unknown as SharedValue<T>;
 
@@ -289,6 +289,17 @@ describe('DialOverlay', () => {
         expect(StyleSheet.flatten(getByTestId('dial-control').props.style).width).toBeGreaterThan(240);
     });
 
+    it('grows the portrait dial to fill the card, with drag zones above and below it', () => {
+        // iPhone 15-sized board: card 369 x 651.
+        const { getByTestId } = render(wrap(createStore(), jest.fn(), { boardWidth: 393, boardHeight: 675 }));
+        expect(StyleSheet.flatten(getByTestId('dial-card').props.style)).toEqual(
+            expect.objectContaining({ width: 369, height: 651 })
+        );
+        expect(StyleSheet.flatten(getByTestId('dial-control').props.style).width).toBe(300);
+        expect(StyleSheet.flatten(getByTestId('dial-drag-upper').props.style).flexGrow).toBe(1);
+        expect(StyleSheet.flatten(getByTestId('dial-drag-lower').props.style).flexGrow).toBe(1);
+    });
+
     it('keeps the card clear of the bottom safe area', () => {
         // Fullscreen: the board runs under the home indicator.
         const { getByTestId } = render(wrap(createStore(), jest.fn(), {
@@ -448,5 +459,19 @@ describe('shouldDismiss', () => {
     it('keeps the threshold within bounds on very short and very tall cards', () => {
         expect(shouldDismiss(79, 0, 200)).toBe(false);
         expect(shouldDismiss(161, 0, 2000)).toBe(true);
+    });
+});
+
+describe('portraitDialSize', () => {
+    it('takes the height left after the fixed chrome on a phone card', () => {
+        expect(portraitDialSize(369, 651, 1)).toBe(300);
+    });
+
+    it('is limited by the card width on a tall, narrow card', () => {
+        expect(portraitDialSize(300, 1000, 1)).toBe(239);
+    });
+
+    it('never shrinks below a usable minimum', () => {
+        expect(portraitDialSize(300, 400, 1)).toBe(120);
     });
 });
