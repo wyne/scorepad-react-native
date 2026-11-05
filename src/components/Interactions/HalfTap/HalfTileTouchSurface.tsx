@@ -8,10 +8,14 @@ import { useAppDispatch, useAppSelector, useAppStore } from '../../../../redux/h
 import { playerRoundScoreIncrement } from '../../../../redux/PlayersSlice';
 import { setLastUsedInteractionType } from '../../../../redux/SettingsSlice';
 import { logEvent } from '../../../Analytics';
+import { useGestureNudge } from '../../GestureNudgeContext';
 import { useLockedHint } from '../../LockedHintContext';
 import { useMenuOpen } from '../../MenuOpenContext';
 import { PARTICLE_DURATION, ScoreParticle } from '../../PlayerTiles/AdditionTile/ScoreParticle';
 import { InteractionType } from '../InteractionType';
+
+/** How far a touch must drag, in points, to count as a swipe. */
+const SWIPE_MISS_DISTANCE = 20;
 
 type ScoreParticleProps = {
     key: string;
@@ -44,6 +48,13 @@ export const HalfTileTouchSurface: React.FunctionComponent<Props> = (
 
     const [particles, setParticles] = useState<ScoreParticleProps[]>([]);
     const surfaceSize = useRef({ width: 0, height: 0 });
+
+    // A touch that drags away without scoring is someone swiping in tap mode:
+    // tell the nudge toast. onPressOut can fire before onPress, so the check
+    // waits a tick for onPress / onLongPress to run.
+    const { reportMiss, reportSuccess } = useGestureNudge();
+    const pressStart = useRef<{ x: number; y: number } | null>(null);
+    const scoredThisPress = useRef(false);
 
     const addendOne = useAppSelector(state => state.settings.addendOne);
     const addendTwo = useAppSelector(state => state.settings.addendTwo);
@@ -108,6 +119,24 @@ export const HalfTileTouchSurface: React.FunctionComponent<Props> = (
         });
         dispatch(playerRoundScoreIncrement(playerId, currentRoundIndex, scoreType == 'increment' ? addend : -addend));
         dispatch(setLastUsedInteractionType(InteractionType.HalfTap));
+        scoredThisPress.current = true;
+        reportSuccess();
+    };
+
+    const onPressIn = (event: GestureResponderEvent) => {
+        pressStart.current = { x: event.nativeEvent.pageX, y: event.nativeEvent.pageY };
+        scoredThisPress.current = false;
+    };
+
+    const onPressOut = (event: GestureResponderEvent) => {
+        const start = pressStart.current;
+        pressStart.current = null;
+        if (!start || menuOpen || currentGameLocked) return;
+        const moved = Math.hypot(event.nativeEvent.pageX - start.x, event.nativeEvent.pageY - start.y);
+        if (moved < SWIPE_MISS_DISTANCE) return;
+        setTimeout(() => {
+            if (!scoredThisPress.current) reportMiss(InteractionType.HalfTap);
+        }, 0);
     };
 
     return (
@@ -116,6 +145,8 @@ export const HalfTileTouchSurface: React.FunctionComponent<Props> = (
             underlayColor={currentGameLocked || menuOpen ? 'transparent' : fontColor + '30'}
             activeOpacity={menuOpen ? 1 : 1}
             onLayout={onLayout}
+            onPressIn={onPressIn}
+            onPressOut={onPressOut}
             onPress={(e) => scoreChangeHandler(addendOne, e)}
             onLongPress={(e) => scoreChangeHandler(addendTwo, e, true)}>
             <View style={StyleSheet.absoluteFill} pointerEvents="none">

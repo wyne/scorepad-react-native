@@ -34,7 +34,13 @@ jest.mock('../../LockedHintContext', () => ({
   useLockedHint: function () { return { lockedHintVisible: false, showLockedHint: mockShowLockedHint, hideLockedHint: function () { } }; },
 }));
 
+const mockReportMiss = jest.fn();
+jest.mock('../../GestureNudgeContext', () => ({
+  useGestureNudge: function () { return { nudgeMessage: null, reportMiss: mockReportMiss, reportSuccess: function () { }, hideNudge: function () { } }; },
+}));
+
 beforeEach(() => {
+  mockReportMiss.mockClear();
   mockScoreParticle.mockClear();
   mockMenuOpen = false;
   mockShowLockedHint.mockClear();
@@ -227,5 +233,56 @@ describe('HalfTap', () => {
     });
 
     expect(onRender).not.toHaveBeenCalled();
+  });
+});
+
+describe('HalfTileTouchSurface swipe nudge', () => {
+  const touch = (x: number, y: number) => ({ nativeEvent: { pageX: x, pageY: y, locationX: x, locationY: y } });
+
+  beforeEach(() => jest.useFakeTimers());
+  afterEach(() => jest.useRealTimers());
+
+  it('reports a miss when a touch drags away without scoring', () => {
+    const { surface, dispatch } = renderSurface();
+    dispatch.mockClear();
+    act(() => {
+      surface.props.onPressIn(touch(50, 50));
+      surface.props.onPressOut(touch(50, 120));
+      jest.runAllTimers();
+    });
+    expect(dispatch).not.toHaveBeenCalledWith(expect.objectContaining({ type: playerRoundScoreIncrement.type }));
+    expect(mockReportMiss).toHaveBeenCalledWith('half-tap');
+  });
+
+  it('does not report a miss for a tap that scores', () => {
+    const { surface } = renderSurface();
+    act(() => {
+      surface.props.onPressIn(touch(50, 50));
+      surface.props.onPressOut(touch(52, 51));
+      surface.props.onPress(touch(52, 51));
+      jest.runAllTimers();
+    });
+    expect(mockReportMiss).not.toHaveBeenCalled();
+  });
+
+  it('does not report a miss when a drag still scores', () => {
+    const { surface } = renderSurface();
+    act(() => {
+      surface.props.onPressIn(touch(50, 50));
+      surface.props.onPressOut(touch(50, 90));
+      surface.props.onPress(touch(50, 90));
+      jest.runAllTimers();
+    });
+    expect(mockReportMiss).not.toHaveBeenCalled();
+  });
+
+  it('does not report a miss in a locked game', () => {
+    const { surface } = renderSurface({ locked: true });
+    act(() => {
+      surface.props.onPressIn(touch(50, 50));
+      surface.props.onPressOut(touch(50, 120));
+      jest.runAllTimers();
+    });
+    expect(mockReportMiss).not.toHaveBeenCalled();
   });
 });
