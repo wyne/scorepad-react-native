@@ -24,6 +24,7 @@ const mockState: Partial<RootState> = {
     showPointParticles: true,
     playerNumbers: 'badge',
     interactionType: InteractionType.SwipeVertical,
+    learnedInteractionTypes: [],
     lastStoreReviewPrompt: 1234567890,
     appOpens: 1,
     installId: 'test-install-id',

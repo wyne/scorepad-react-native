@@ -16,8 +16,11 @@ export interface SettingsState {
     playerNumbers: PlayerNumberStyle;
     interactionType: InteractionType;
     // The gesture the user most recently *used* (committed a score with).
-    // Drives the gesture hint: undefined means "never used a gesture" (new user).
+    // undefined means "never scored" (new user).
     lastUsedInteractionType?: InteractionType;
+    // Every gesture the user has scored with or dismissed the first-use hint
+    // for. The hint shows only for gestures missing from this list.
+    learnedInteractionTypes: InteractionType[];
     lastStoreReviewPrompt: number;
     devMenuEnabled?: boolean;
     // Offer game modes when setting up a game (Settings > Features). Games that
@@ -41,6 +44,7 @@ export const initialState: SettingsState = {
     playerNumbers: 'off',
     interactionType: InteractionType.SwipeVertical,
     lastUsedInteractionType: undefined,
+    learnedInteractionTypes: [],
     lastStoreReviewPrompt: 0,
     appOpens: 0,
     // Seeded so the flag is always defined: logEvent strips undefined params,
@@ -53,6 +57,12 @@ export const initialState: SettingsState = {
     // Only used on a fresh install; existing users rehydrate their own list.
     seenFeatureNotifications: [...FEATURE_NOTIFICATIONS],
     colorScheme: 'system',
+};
+
+const addLearned = (state: SettingsState, type: InteractionType) => {
+    const learned = state.learnedInteractionTypes ?? [];
+    if (learned.includes(type)) return;
+    state.learnedInteractionTypes = [...learned, type];
 };
 
 const settingsSlice = createSlice({
@@ -85,10 +95,13 @@ const settingsSlice = createSlice({
             state.interactionType = action.payload;
         },
         setLastUsedInteractionType(state, action: PayloadAction<InteractionType>) {
-            // Guard so the per-score dispatch from interaction components is a
-            // no-op once already set — no state change means no re-render.
-            if (state.lastUsedInteractionType === action.payload) return;
+            // Called on every score: Immer returns the same state when nothing
+            // changes, so once set this causes no re-render.
             state.lastUsedInteractionType = action.payload;
+            addLearned(state, action.payload);
+        },
+        markInteractionLearned(state, action: PayloadAction<InteractionType>) {
+            addLearned(state, action.payload);
         },
         setLastStoreReviewPrompt(state, action: PayloadAction<number>) {
             state.lastStoreReviewPrompt = action.payload;
@@ -141,6 +154,7 @@ export const {
     setPlayerNumbers,
     setInteractionType,
     setLastUsedInteractionType,
+    markInteractionLearned,
     setLastStoreReviewPrompt,
     toggleDevMenuEnabled,
     setGameModesEnabled,

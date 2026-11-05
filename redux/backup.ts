@@ -116,6 +116,8 @@ const isSettingsState = (value: unknown, gameEntities: Record<string, unknown>):
         && (isPlayerNumberStyle(value.playerNumbers) || typeof value.showPlayerIndex === 'boolean')
         && isInteractionType(value.interactionType)
         && (value.lastUsedInteractionType === undefined || isInteractionType(value.lastUsedInteractionType))
+        && (value.learnedInteractionTypes === undefined
+            || (Array.isArray(value.learnedInteractionTypes) && value.learnedInteractionTypes.every(isInteractionType)))
         && isFiniteNumber(value.lastStoreReviewPrompt)
         && (value.devMenuEnabled === undefined || typeof value.devMenuEnabled === 'boolean')
         && (value.gameModesEnabled === undefined || typeof value.gameModesEnabled === 'boolean')
@@ -162,6 +164,9 @@ export const parseBackupData = (value: unknown): BackupData | undefined => {
         playerNumbers: isPlayerNumberStyle(savedSettings.playerNumbers)
             ? savedSettings.playerNumbers
             : showPlayerIndex === true ? 'badge' : 'off',
+        // Backups from before learned gestures: seed from the last one used.
+        learnedInteractionTypes: savedSettings.learnedInteractionTypes
+            ?? (savedSettings.lastUsedInteractionType ? [savedSettings.lastUsedInteractionType] : []),
     } as unknown as SettingsState;
 
     return {

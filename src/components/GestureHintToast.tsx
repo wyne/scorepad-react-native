@@ -3,13 +3,13 @@ import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 
-import { useAppSelector } from '../../redux/hooks';
+import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { selectInteractionType } from '../../redux/selectors';
+import { markInteractionLearned } from '../../redux/SettingsSlice';
 import { logEvent } from '../Analytics';
 import { useGestureHint } from '../hooks/useGestureHint';
 import { useTheme } from '../theme';
 
-import { useGestureHintDismissal } from './GestureHintContext';
 import { useGestureNudge } from './GestureNudgeContext';
 import { gestureDemoLabel, gestureToastCopy } from './Interactions/gestureCopy';
 import GestureDemo from './Interactions/GestureDemo';
@@ -24,8 +24,8 @@ interface Props {
 
 /**
  * Teaches the active scoring gesture once, off the tiles: a toast with a
- * looping demo that shows until the gesture is first used (see useGestureHint)
- * or dismissed. "How it works" opens the How to Score sheet.
+ * looping demo that shows until the gesture is first used or dismissed, once
+ * per gesture ever (see useGestureHint). "How it works" opens the How to Score sheet.
  */
 const GestureHintToast: React.FunctionComponent<Props> = ({ top }) => {
     const theme = useTheme();
@@ -36,16 +36,15 @@ const GestureHintToast: React.FunctionComponent<Props> = ({ top }) => {
     const gestureInfoSheetRef = useGestureInfoSheetContext();
     const { lockedHintVisible } = useLockedHint();
     const { nudgeMessage } = useGestureNudge();
-    // Dismissing hides the toast for this gesture until the app restarts or
-    // the gesture changes; using the gesture hides it for good.
-    const { dismissedFor, dismissHint } = useGestureHintDismissal();
+    const dispatch = useAppDispatch();
 
-    if (!showHint || dismissedFor === interactionType || lockedHintVisible || nudgeMessage) return null;
+    if (!showHint || lockedHintVisible || nudgeMessage) return null;
 
     const { title, body } = gestureToastCopy(interactionType, addendOne, addendTwo);
 
     const dismiss = (action: 'got_it' | 'how_it_works') => {
-        dismissHint(interactionType);
+        // Dismissing counts as learning the gesture: its hint won't come back.
+        dispatch(markInteractionLearned(interactionType));
         logEvent('gesture_hint_action', { interaction_type: interactionType, action });
     };
 

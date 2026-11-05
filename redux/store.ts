@@ -40,11 +40,17 @@ const settingsMigrations: any = {
         const { showPlayerIndex, ...rest } = state ?? {};
         return { ...rest, playerNumbers: showPlayerIndex === true ? 'badge' : 'off' };
     },
+    7: (state: Record<string, unknown> | undefined) => {
+        // The gesture hint now remembers every gesture learned, not just the
+        // last one used. Seed it so returning users don't see a hint again.
+        const lastUsed = state?.lastUsedInteractionType;
+        return { ...state, learnedInteractionTypes: lastUsed ? [lastUsed] : [] };
+    },
 };
 
 export const settingsPersistConfig = {
     key: 'settings',
-    version: 6,
+    version: 7,
     storage: AsyncStorage,
     migrate: createMigrate(settingsMigrations),
     whitelist: [
@@ -58,6 +64,7 @@ export const settingsPersistConfig = {
         'playerNumbers',
         'interactionType',
         'lastUsedInteractionType',
+        'learnedInteractionTypes',
         'lastStoreReviewPrompt',
         'devMenuEnabled',
         'gameModesEnabled',
