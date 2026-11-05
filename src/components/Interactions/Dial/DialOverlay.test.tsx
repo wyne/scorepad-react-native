@@ -79,7 +79,7 @@ jest.mock('../../MenuOpenContext', () => ({
 }));
 
 
-import DialOverlay from './DialOverlay';
+import DialOverlay, { dismissExitDuration } from './DialOverlay';
 
 const mkSv = <T,>(v: T) => ({ value: v }) as unknown as SharedValue<T>;
 
@@ -119,6 +119,7 @@ const defaultProps = {
     safeAreaTop: 0,
     safeAreaLeft: 0,
     safeAreaRight: 0,
+    safeAreaBottom: 0,
     onClose: jest.fn(),
     svOpacity: mkSv(1),
     svSlideY: mkSv(0),
@@ -254,6 +255,17 @@ describe('DialOverlay', () => {
         expect(StyleSheet.flatten(getByTestId('dial-control').props.style).width).toBeGreaterThan(240);
     });
 
+    it('keeps the card clear of the bottom safe area', () => {
+        // Fullscreen: the board runs under the home indicator.
+        const { getByTestId } = render(wrap(createStore(), jest.fn(), {
+            boardWidth: 393,
+            boardHeight: 700,
+            safeAreaBottom: 34,
+        }));
+
+        expect(StyleSheet.flatten(getByTestId('dial-card').props.style).height).toBe(700 - 12 - 34);
+    });
+
     it('keeps the page and card within the side safe area', () => {
         // iPhone Duo outer display: the vertical bar takes the right edge.
         const { getByTestId } = render(wrap(createStore(), jest.fn(), {
@@ -343,5 +355,22 @@ describe('DialOverlay', () => {
         act(() => { mockDialOnChange?.(5); });
 
         expect(mockLogEvent).not.toHaveBeenCalled();
+    });
+});
+
+describe('dismissExitDuration', () => {
+    it('matches a fast throw so the card leaves at the release speed', () => {
+        // Ease-out quad starts at 2 x distance / duration: 600 px at 4000 px/s is 300 ms.
+        expect(dismissExitDuration(600, 4000)).toBe(300);
+    });
+
+    it('uses a speed floor so slow releases still exit promptly', () => {
+        expect(dismissExitDuration(600, 0)).toBe(320);
+        expect(dismissExitDuration(100, 200)).toBe(200);
+    });
+
+    it('never runs shorter than the minimum', () => {
+        expect(dismissExitDuration(50, 10000)).toBe(150);
+        expect(dismissExitDuration(-10, 5000)).toBe(150);
     });
 });

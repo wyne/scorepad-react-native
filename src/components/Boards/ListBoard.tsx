@@ -249,6 +249,9 @@ const ListBoard: React.FC<ListBoardProps> = ({ foldSplit = null, topInset = 0, o
     // In the side-by-side layout the window's right inset belongs to the
     // docked sheet, not to the board that ends at the fold.
     const boardRightInset = foldSplit === 'columns' ? 0 : insets.right;
+    // Without the sheet over it the board runs to the bottom of the screen,
+    // except above the fold where the top half ends at the hinge.
+    const boardBottomInset = sheetOverBoard || foldSplit === 'rows' ? 0 : insets.bottom;
     const scrollInsets = {
         top: topInset,
         bottom: sheetOverBoard ? bottomSheetHeight + 10 : insets.bottom + 10,
@@ -295,6 +298,7 @@ const ListBoard: React.FC<ListBoardProps> = ({ foldSplit = null, topInset = 0, o
                     safeAreaTop={insets.top + topInset}
                     safeAreaLeft={insets.left}
                     safeAreaRight={boardRightInset}
+                    safeAreaBottom={boardBottomInset}
                     onClose={handleClose}
                     svOpacity={svOverlayOpacity}
                     svSlideY={svOverlaySlideY}

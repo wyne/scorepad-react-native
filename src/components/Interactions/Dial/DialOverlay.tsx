@@ -33,8 +33,22 @@ const CARD_WIDTH_SCALE = 0.74;
 const CARD_MAX_PORTRAIT_WIDTH = 560;
 const CARD_MAX_LANDSCAPE_WIDTH = 760;
 const CARD_MAX_HEIGHT = 720;
-const MIN_DISMISS_VELOCITY = 600; // px/s floor so slow releases still exit cleanly
+const MIN_DISMISS_VELOCITY = 1000; // px/s floor so slow releases still exit cleanly
+const MIN_EXIT_MS = 150;
+const MAX_EXIT_MS = 320;
 const LS_ACCENT = '#3a86ff'; // matches DialControl's ACCENT for the landscape step pill
+
+/**
+ * Duration for the swipe-away exit. The exit eases out (quad), whose starting speed is
+ * 2 x distance / duration, so this makes the card leave at the speed the finger let go
+ * instead of stopping and accelerating away.
+ */
+export function dismissExitDuration(remaining: number, velocityY: number): number {
+    'worklet';
+    const speed = Math.max(velocityY, MIN_DISMISS_VELOCITY);
+    const ms = (2 * Math.max(0, remaining) / speed) * 1000;
+    return Math.min(Math.max(ms, MIN_EXIT_MS), MAX_EXIT_MS);
+}
 
 function resistedDrag(t: number): number {
     'worklet';
@@ -165,11 +179,11 @@ const PlayerDialPage: React.FC<PlayerDialPageProps> = ({
         .onEnd((e) => {
             if (e.translationY > SWIPE_DISMISS_DISTANCE || e.velocityY > SWIPE_DISMISS_VELOCITY) {
                 isDismissing.value = true;
-                // Duration scales with velocity: fast throw exits quickly, slow release still exits
-                const exitVelocity = Math.max(e.velocityY, MIN_DISMISS_VELOCITY);
-                const duration = Math.max(150, 400 - exitVelocity / 5);
-                swipeDragY.value = withTiming(boardHeight, { duration, easing: Easing.in(Easing.cubic) },
-                    () => runOnJS(onDismiss)(),
+                const duration = dismissExitDuration(boardHeight - swipeDragY.value, e.velocityY);
+                swipeDragY.value = withTiming(boardHeight, { duration, easing: Easing.out(Easing.quad) },
+                    (finished) => {
+                        if (finished) runOnJS(onDismiss)();
+                    },
                 );
                 swipeDragX.value = withTiming(0, { duration, easing: Easing.out(Easing.quad) });
             } else {
@@ -177,8 +191,10 @@ const PlayerDialPage: React.FC<PlayerDialPageProps> = ({
                 swipeDragX.value = withSpring(0, { velocity: e.velocityX, damping: 26, stiffness: 300 });
             }
         })
-        .onFinalize(() => {
-            if (!isDismissing.value) {
+        // onFinalize runs right after onEnd; only reset here when the gesture was
+        // cancelled, or it would replace onEnd's velocity-carrying spring with a still one.
+        .onFinalize((_e, success) => {
+            if (!success && !isDismissing.value) {
                 swipeDragY.value = withSpring(0, { velocity: 0, damping: 26, stiffness: 300 });
                 swipeDragX.value = withSpring(0, { velocity: 0, damping: 26, stiffness: 300 });
             }
@@ -362,6 +378,8 @@ interface Props {
     /** Side insets the card keeps clear of, e.g. a landscape notch or the iPhone Duo's vertical bar. */
     safeAreaLeft?: number;
     safeAreaRight?: number;
+    /** Bottom inset the card keeps clear of, e.g. the home indicator when the board runs to the screen edge. */
+    safeAreaBottom?: number;
     onClose: () => void;
     svOpacity: SharedValue<number>;
     svSlideY: SharedValue<number>;
@@ -375,6 +393,7 @@ const DialOverlay: React.FC<Props> = ({
     safeAreaTop,
     safeAreaLeft = 0,
     safeAreaRight = 0,
+    safeAreaBottom = 0,
     onClose,
     svOpacity,
     svSlideY,
@@ -395,7 +414,8 @@ const DialOverlay: React.FC<Props> = ({
     const targetTop = marginTop;
     const targetLeft = safeAreaLeft;
     const targetWidth = Math.max(0, boardWidth - safeAreaLeft - safeAreaRight);
-    const targetHeight = boardHeight - marginTop - MARGIN_BOTTOM;
+    const marginBottom = Math.max(MARGIN_BOTTOM, safeAreaBottom);
+    const targetHeight = boardHeight - marginTop - marginBottom;
     const cardLayout = getDialCardLayout(targetWidth, targetHeight);
 
     const swipeDragY = useSharedValue(0);
@@ -419,6 +439,7 @@ const DialOverlay: React.FC<Props> = ({
         swipeDragY.value = withTiming(
             boardHeight,
             { duration: 250, easing: Easing.in(Easing.cubic) },
+            // Close even if interrupted: closing is already set, so nothing else would.
             () => runOnJS(then)(),
         );
     }, [svOpacity, boardHeight]);
