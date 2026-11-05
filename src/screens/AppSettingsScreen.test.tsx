@@ -27,10 +27,10 @@ jest.mock('react-native-safe-area-context', () => ({
 
 const navigation = { setOptions: jest.fn(), goBack: jest.fn(), navigate: jest.fn() };
 
-const renderScreen = (devMenuEnabled: boolean) => {
+const renderScreen = (devMenuEnabled: boolean, seenFeatureNotifications = initialSettings.seenFeatureNotifications) => {
     const store = configureStore({
         reducer: { settings: settingsReducer },
-        preloadedState: { settings: { ...initialSettings, devMenuEnabled } },
+        preloadedState: { settings: { ...initialSettings, devMenuEnabled, seenFeatureNotifications } },
     });
     const screen = render(
         <Provider store={store}>
@@ -62,6 +62,21 @@ describe('AppSettingsScreen', () => {
         fireEvent.press(screen.getByTestId('player-numbers-big'));
 
         expect(store.getState().settings.playerNumbers).toBe('big');
+    });
+
+    it('dots Game Modes until the screen is left once', () => {
+        const { store, screen } = renderScreen(false, ['keep_screen_awake', 'dial_gesture']);
+
+        expect(screen.getByTestId('game-modes-new-dot')).toBeTruthy();
+        screen.unmount();
+
+        expect(store.getState().settings.seenFeatureNotifications).toContain('game_modes');
+    });
+
+    it('hides the Game Modes dot once seen', () => {
+        const { screen } = renderScreen(false);
+
+        expect(screen.queryByTestId('game-modes-new-dot')).toBeNull();
     });
 
     it('shows the Game Modes switch without the developer menu', () => {
