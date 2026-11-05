@@ -2,12 +2,13 @@ import React from 'react';
 
 import { configureStore } from '@reduxjs/toolkit';
 import { act, fireEvent, render } from '@testing-library/react-native';
-import { StyleSheet } from 'react-native';
+import * as Haptics from 'expo-haptics';
+import { BackHandler, StyleSheet } from 'react-native';
 import { SharedValue } from 'react-native-reanimated';
 import { Provider } from 'react-redux';
 
 import gamesReducer, { gameSave } from '../../../../redux/GamesSlice';
-import playersReducer from '../../../../redux/PlayersSlice';
+import playersReducer, { playerAdd } from '../../../../redux/PlayersSlice';
 import settingsReducer from '../../../../redux/SettingsSlice';
 import * as Analytics from '../../../Analytics';
 
@@ -52,6 +53,7 @@ jest.mock('react-native-gesture-handler', () => ({
 
 jest.mock('expo-haptics', () => ({
     impactAsync: jest.fn(),
+    selectionAsync: jest.fn(),
     ImpactFeedbackStyle: { Light: 'Light', Medium: 'Medium' },
 }));
 
@@ -79,7 +81,7 @@ jest.mock('../../MenuOpenContext', () => ({
 }));
 
 
-import DialOverlay, { dismissExitDuration } from './DialOverlay';
+import DialOverlay, { dismissExitDuration, dragOffset, shouldDismiss } from './DialOverlay';
 
 const mkSv = <T,>(v: T) => ({ value: v }) as unknown as SharedValue<T>;
 
@@ -123,6 +125,7 @@ const defaultProps = {
     onClose: jest.fn(),
     svOpacity: mkSv(1),
     svSlideY: mkSv(0),
+    svDragY: mkSv(0),
 };
 
 const wrap = (
@@ -183,6 +186,37 @@ describe('DialOverlay', () => {
         fireEvent.press(getByText('Done'));
         fireEvent.press(getByText('Done'));
         expect(onClose).toHaveBeenCalledTimes(1);
+    });
+
+    it('closes on Android back instead of leaving the game', () => {
+        let onBack: Parameters<typeof BackHandler.addEventListener>[1] | undefined;
+        const spy = jest.spyOn(BackHandler, 'addEventListener').mockImplementation((_e, handler) => {
+            onBack = handler;
+            return { remove: jest.fn() };
+        });
+        const onClose = jest.fn();
+        render(wrap(createStore(), onClose));
+
+        let handled: boolean | null | undefined;
+        act(() => { handled = onBack?.({} as Parameters<NonNullable<typeof onBack>>[0]); });
+        expect(handled).toBe(true);
+        expect(onClose).toHaveBeenCalledTimes(1);
+        spy.mockRestore();
+    });
+
+    it('ticks a selection haptic when paging to another player', () => {
+        const store = createStore({ playerIds: ['player-1', 'player-2'] });
+        store.dispatch(playerAdd({ id: 'player-2', playerName: 'Player 2', scores: [0] }));
+        const { UNSAFE_getByProps } = render(wrap(store, jest.fn(), { playerIds: ['player-1', 'player-2'] }));
+        const list = UNSAFE_getByProps({ horizontal: true, pagingEnabled: true });
+        jest.mocked(Haptics.selectionAsync).mockClear();
+
+        act(() => { list.props.onMomentumScrollEnd({ nativeEvent: { contentOffset: { x: 400 } } }); });
+        expect(Haptics.selectionAsync).toHaveBeenCalledTimes(1);
+
+        // Settling back on the same page is not a change.
+        act(() => { list.props.onMomentumScrollEnd({ nativeEvent: { contentOffset: { x: 400 } } }); });
+        expect(Haptics.selectionAsync).toHaveBeenCalledTimes(1);
     });
 
     // --- backdrop ---
@@ -372,5 +406,47 @@ describe('dismissExitDuration', () => {
     it('never runs shorter than the minimum', () => {
         expect(dismissExitDuration(50, 10000)).toBe(150);
         expect(dismissExitDuration(-10, 5000)).toBe(150);
+    });
+});
+
+describe('dragOffset', () => {
+    it('follows the finger 1:1 downward', () => {
+        expect(dragOffset(0)).toBe(0);
+        expect(dragOffset(300)).toBe(300);
+    });
+
+    it('rubber-bands upward and never passes the limit', () => {
+        expect(dragOffset(-40)).toBe(-20);
+        expect(dragOffset(-1000)).toBeGreaterThan(-40);
+        expect(dragOffset(-1000)).toBeLessThan(-35);
+    });
+});
+
+describe('shouldDismiss', () => {
+    const card = 600; // threshold 150 px
+
+    it('stays open for a short, slow pull', () => {
+        expect(shouldDismiss(60, 0, card)).toBe(false);
+    });
+
+    it('dismisses a slow pull past a quarter of the card', () => {
+        expect(shouldDismiss(160, 0, card)).toBe(true);
+    });
+
+    it('counts the throw: a medium pull released moving down dismisses', () => {
+        expect(shouldDismiss(80, 600, card)).toBe(true);
+    });
+
+    it('dismisses a short hard flick', () => {
+        expect(shouldDismiss(15, 1500, card)).toBe(true);
+    });
+
+    it('cancels when flicked back up, however far it was dragged', () => {
+        expect(shouldDismiss(300, -500, card)).toBe(false);
+    });
+
+    it('keeps the threshold within bounds on very short and very tall cards', () => {
+        expect(shouldDismiss(79, 0, 200)).toBe(false);
+        expect(shouldDismiss(161, 0, 2000)).toBe(true);
     });
 });

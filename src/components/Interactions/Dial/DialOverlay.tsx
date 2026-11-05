@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 import * as Haptics from 'expo-haptics';
-import { FlatList, NativeScrollEvent, NativeSyntheticEvent, Pressable, StyleSheet, Text, View } from 'react-native';
+import { BackHandler, FlatList, NativeScrollEvent, NativeSyntheticEvent, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
     Easing,
@@ -24,8 +24,15 @@ import { InteractionType } from '../InteractionType';
 
 import DialControl from './DialControl';
 
-const SWIPE_DISMISS_DISTANCE = 50;
-const SWIPE_DISMISS_VELOCITY = 400;
+// Swipe-down dismiss: released where the throw would carry the card past a quarter
+// of its height, or thrown hard enough on its own. A clear upward flick always cancels.
+const DISMISS_FRACTION = 0.25;
+const DISMISS_MIN_DISTANCE = 80;
+const DISMISS_MAX_DISTANCE = 160;
+const DISMISS_FLING_VELOCITY = 1000;
+const DISMISS_CANCEL_VELOCITY = -300;
+const DISMISS_PROJECTION_S = 0.15; // seconds of release velocity added to the travel
+const DRAG_UP_LIMIT = 40; // upward pull rubber-bands toward this many px
 const MARGIN_BOTTOM = 12;
 const MARGIN_H = 12;
 const CARD_MIN_WIDE_WIDTH = 520;
@@ -50,10 +57,21 @@ export function dismissExitDuration(remaining: number, velocityY: number): numbe
     return Math.min(Math.max(ms, MIN_EXIT_MS), MAX_EXIT_MS);
 }
 
-function resistedDrag(t: number): number {
+/** Card offset for a vertical drag: 1:1 downward, rubber-banded upward. */
+export function dragOffset(t: number): number {
     'worklet';
-    if (t <= 0) return 0;
-    return t / (1 + t / 400); // nearly 1:1 at small pulls, strong resistance beyond ~150 px
+    if (t >= 0) return t;
+    const up = -t;
+    return -up / (1 + up / DRAG_UP_LIMIT);
+}
+
+/** Whether releasing a swipe at this travel and velocity should dismiss the card. */
+export function shouldDismiss(translationY: number, velocityY: number, cardHeight: number): boolean {
+    'worklet';
+    if (velocityY < DISMISS_CANCEL_VELOCITY) return false;
+    if (translationY > 0 && velocityY > DISMISS_FLING_VELOCITY) return true;
+    const threshold = Math.min(Math.max(cardHeight * DISMISS_FRACTION, DISMISS_MIN_DISTANCE), DISMISS_MAX_DISTANCE);
+    return translationY + velocityY * DISMISS_PROJECTION_S > threshold;
 }
 
 // TODO: see ListBoard.tsx — consolidate inkFor/inkA into shared colorUtils module
@@ -173,11 +191,11 @@ const PlayerDialPage: React.FC<PlayerDialPageProps> = ({
         .activeOffsetY([-10, 10])
         .failOffsetX([-8, 8])
         .onUpdate((e) => {
-            swipeDragY.value = resistedDrag(e.translationY);
+            swipeDragY.value = dragOffset(e.translationY);
             swipeDragX.value = e.translationX * 0.35;
         })
         .onEnd((e) => {
-            if (e.translationY > SWIPE_DISMISS_DISTANCE || e.velocityY > SWIPE_DISMISS_VELOCITY) {
+            if (shouldDismiss(e.translationY, e.velocityY, pageHeight)) {
                 isDismissing.value = true;
                 const duration = dismissExitDuration(boardHeight - swipeDragY.value, e.velocityY);
                 swipeDragY.value = withTiming(boardHeight, { duration, easing: Easing.out(Easing.quad) },
@@ -383,6 +401,8 @@ interface Props {
     onClose: () => void;
     svOpacity: SharedValue<number>;
     svSlideY: SharedValue<number>;
+    /** The card's vertical drag offset, shared so the board can follow it (e.g. un-dim the rows). */
+    svDragY: SharedValue<number>;
 }
 
 const DialOverlay: React.FC<Props> = ({
@@ -397,6 +417,7 @@ const DialOverlay: React.FC<Props> = ({
     onClose,
     svOpacity,
     svSlideY,
+    svDragY,
 }) => {
     const currentGame = useAppSelector(selectCurrentGame);
     const { menuOpen } = useMenuOpen();
@@ -418,7 +439,7 @@ const DialOverlay: React.FC<Props> = ({
     const targetHeight = boardHeight - marginTop - marginBottom;
     const cardLayout = getDialCardLayout(targetWidth, targetHeight);
 
-    const swipeDragY = useSharedValue(0);
+    const swipeDragY = svDragY;
     const swipeDragX = useSharedValue(0);
 
     const panelStyle = useAnimatedStyle(() => ({
@@ -434,15 +455,17 @@ const DialOverlay: React.FC<Props> = ({
         ],
     }));
 
+    // Same exit as a released swipe, from wherever the card is now.
     const slideOut = useCallback((then: () => void) => {
-        svOpacity.value = withTiming(0, { duration: 150 });
+        const duration = dismissExitDuration(boardHeight - swipeDragY.value, 0);
+        swipeDragX.value = withTiming(0, { duration, easing: Easing.out(Easing.quad) });
         swipeDragY.value = withTiming(
             boardHeight,
-            { duration: 250, easing: Easing.in(Easing.cubic) },
+            { duration, easing: Easing.out(Easing.quad) },
             // Close even if interrupted: closing is already set, so nothing else would.
             () => runOnJS(then)(),
         );
-    }, [svOpacity, boardHeight]);
+    }, [swipeDragY, swipeDragX, boardHeight]);
 
     // Close if the game becomes locked while the overlay is open
     useEffect(() => {
@@ -474,12 +497,22 @@ const DialOverlay: React.FC<Props> = ({
         slideOut(onClose);
     }, [slideOut, onClose]);
 
+    // Android back closes the dial instead of leaving the game
+    useEffect(() => {
+        const sub = BackHandler.addEventListener('hardwareBackPress', () => {
+            handleBackdropPress();
+            return true;
+        });
+        return () => sub.remove();
+    }, [handleBackdropPress]);
+
     // FlatList paged scroll: track active index
     const handleScrollEnd = useCallback((e: NativeSyntheticEvent<NativeScrollEvent>) => {
         swipeDragY.value = 0;
         swipeDragX.value = 0;
         const newIndex = Math.round(e.nativeEvent.contentOffset.x / targetWidth);
         if (newIndex === activeIndexRef.current) return;
+        Haptics.selectionAsync();
         setActiveIndex(newIndex);
     }, [targetWidth]);
 

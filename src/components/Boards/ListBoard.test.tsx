@@ -48,7 +48,7 @@ jest.mock('../MenuOpenContext', () => ({
     useMenuOpen: () => ({ menuOpen: mockMenuOpen, setMenuOpen: jest.fn() }),
 }));
 
-import ListBoard from './ListBoard';
+import ListBoard, { rowDimProgress } from './ListBoard';
 
 const createStore = (
     gameOverrides: Record<string, unknown> = {},
@@ -289,5 +289,25 @@ describe('ListBoard — winner pill', () => {
         const { getAllByText } = render(<Provider store={store}><ListBoard /></Provider>);
         expect(getAllByText('PREV').length).toBeGreaterThanOrEqual(1);
         expect(getAllByText('RND').length).toBeGreaterThanOrEqual(1);
+    });
+});
+
+describe('rowDimProgress', () => {
+    it('is fully dimmed while the dial is open and at rest', () => {
+        expect(rowDimProgress(1, 0, 600)).toBe(1);
+    });
+
+    it('brightens the rows as the card is dragged down', () => {
+        expect(rowDimProgress(1, 300, 600)).toBe(0.5);
+        expect(rowDimProgress(1, 900, 600)).toBe(0);
+    });
+
+    it('ignores the upward rubber band', () => {
+        expect(rowDimProgress(1, -30, 600)).toBe(1);
+    });
+
+    it('follows the open fade', () => {
+        expect(rowDimProgress(0.5, 0, 600)).toBe(0.5);
+        expect(rowDimProgress(0, 0, 600)).toBe(0);
     });
 });
