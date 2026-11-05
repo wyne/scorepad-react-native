@@ -166,10 +166,16 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
             notches: -Math.round((translationY || 0) / notchSize),
             interaction: 'swipe-vertical',
         });
+        secondaryHoldStop();
+    }, [index, currentGameId, secondaryHold, addendOne, addendTwo, getCurrentRoundIndex, menuOpen]);
+
+    // Runs for every touch, including a still tap that never activates the pan
+    // (onEnd only fires after activation), so a tap in swipe mode is a miss.
+    const finishGesture = useCallback(() => {
+        if (menuOpen) return;
         if (scoredThisGesture.current) reportSuccess();
         else if (!secondaryHold) reportMiss(InteractionType.SwipeVertical);
-        secondaryHoldStop();
-    }, [index, currentGameId, secondaryHold, addendOne, addendTwo, getCurrentRoundIndex, menuOpen, reportMiss, reportSuccess]);
+    }, [menuOpen, secondaryHold, reportMiss, reportSuccess]);
 
     const panGesture = Gesture.Pan()
         .enabled(!currentGameLocked && !menuOpen)
@@ -193,6 +199,7 @@ const SwipeVertical: React.FC<HalfTapProps> = ({
             runOnJS(endGesture)(event.translationY);
         })
         .onFinalize(() => {
+            runOnJS(finishGesture)();
             runOnJS(secondaryHoldStop)();
         });
 
