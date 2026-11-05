@@ -15,6 +15,7 @@ App Store screenshots live here. They are excluded from EAS builds via `.easigno
 
 | Folder | Size | App Store Connect slot |
 | --- | --- | --- |
+| `iPad 13` | 2064×2752 | iPad 13-inch, required for iPad |
 | `iPhone 6.1` | 1206×2622 | iPhone with Dynamic Island (medium), required |
 | `iPhone 6.9` | 1320×2868 | iPhone with Dynamic Island (large) |
 | `iPhone Duo outer` | 1398×2034 | iPhone Duo, outer display |
@@ -26,6 +27,8 @@ Spec: https://developer.apple.com/help/app-store-connect/reference/app-informati
 
 1. Load sample data from the in-app dev menu and capture on the simulator
    (`xcrun simctl io booted screenshot raw/<name>.png`), or use the e2e flow in `docs/build-ios.md`.
+   For iPad, capture on the iPad Pro 13-inch (M5) simulator in portrait as `raw/ipad-board.png`, `ipad-dial.png`,
+   `ipad-history.png`, `ipad-point-values.png` and `ipad-games.png` (same screens as the iPhone set).
    For the iPhone Duo outer display, add `--display=<outer display id>`; without it simctl captures the inner display.
 2. Edit captions (`COPY`), the shot list (`SLOTS`) or the look (`template()`) in `render.cjs`.
 3. `npm i --no-save playwright && npx playwright install chromium && node assets-stores/render.cjs`
