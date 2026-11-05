@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.6.1](https://github.com/wyne/scorepad-react-native/compare/v3.6.0...v3.6.1) (2026-11-05)
+
+
+### Bug Fixes
+
+* show each gesture hint once, ever, and fix swipe/tap nudges ([#824](https://github.com/wyne/scorepad-react-native/issues/824)) ([9cc2659](https://github.com/wyne/scorepad-react-native/commit/9cc2659c1c31b9ccd741de09715b6d4ffa356169))
+
 ## [3.6.0](https://github.com/wyne/scorepad-react-native/compare/v3.5.0...v3.6.0) (2026-11-04)
 
 
