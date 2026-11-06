@@ -1,5 +1,6 @@
 import { createSelector } from '@reduxjs/toolkit';
 
+import { getPalette } from '../src/ColorPalette';
 import { InteractionType } from '../src/components/Interactions/InteractionType';
 import { isPlayerNumberStyle, PlayerNumberStyle } from '../src/components/PlayerTiles/PlayerNumberStyle';
 import { MAX_TILE_PLAYERS } from '../src/constants';
@@ -47,6 +48,20 @@ export const selectCurrentGame = (state: RootState) => {
 
     return selectGameById(state, currentGameId);
 };
+/**
+ * A player's color, falling back to their seat's palette color. Players created
+ * before colors were stored per player have no `color` field.
+ */
+export const selectPlayerColor = (state: RootState, playerId: string, gameId = state.settings.currentGameId): string => {
+    const color = state.players.entities[playerId]?.color;
+    if (color) return color;
+
+    const game = gameId ? selectGameById(state, gameId) : undefined;
+    const palette = getPalette(game?.palette || 'original') || getPalette('original');
+    const seat = Math.max(game?.playerIds.indexOf(playerId) ?? 0, 0);
+    return palette[seat % palette.length];
+};
+
 export const selectLastStoreReviewPrompt = (state: RootState) => state.settings.lastStoreReviewPrompt;
 
 /** Names the app assigns to new players, e.g. "Player 3". */

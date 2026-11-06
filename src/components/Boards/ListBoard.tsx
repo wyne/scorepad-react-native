@@ -9,7 +9,7 @@ import { shallowEqual } from 'react-redux';
 import { selectGameById } from '../../../redux/GamesSlice';
 import { useAppSelector } from '../../../redux/hooks';
 import { toScores, totalScoreBeforeRound } from '../../../redux/scoreUtils';
-import { selectPlayerNumbers } from '../../../redux/selectors';
+import { selectPlayerColor, selectPlayerNumbers } from '../../../redux/selectors';
 import type { GameFoldSplit } from '../../hooks/useExpandedGameLayout';
 import DialOverlay from '../Interactions/Dial/DialOverlay';
 import { useLockedHint } from '../LockedHintContext';
@@ -70,7 +70,7 @@ const PlayerRow: React.FC<PlayerRowProps> = ({ playerId, index, svDimmed, disabl
 
         return {
             playerName: player?.playerName,
-            color: player?.color ?? '#555',
+            color: selectPlayerColor(state, playerId, currentGameId),
             locked: currentGame?.locked === true,
             isWinner: !!(currentGame?.locked && currentGame?.winnerIds?.includes(playerId)),
             currentRoundScore,
