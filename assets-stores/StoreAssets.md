@@ -43,3 +43,6 @@ Spec: https://developer.apple.com/help/app-store-connect/reference/app-informati
    Options: `--slot "iPad 13"` (repeatable), `--locale`, `--version`, `--no-duo`. Each display type's set is
    replaced as a whole. The iPhone Duo type (`APP_IPHONE_DUO`) isn't in Apple's published API spec yet; if it's
    rejected, rerun with `--no-duo` and upload those by hand.
+
+   From CI: Actions > **Upload App Store Screenshots** > Run workflow (same options as inputs). It needs repository
+   secrets `ASC_KEY_ID`, `ASC_ISSUER_ID` and `ASC_KEY_P8` (the full text of the .p8 file).

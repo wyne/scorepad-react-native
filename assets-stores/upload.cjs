@@ -10,7 +10,8 @@
  * the files in filename order. Other locales and display types are untouched.
  *
  * API key: App Store Connect > Users and Access > Integrations > App Store Connect API
- * (role App Manager or higher). Never commit the .p8; it is gitignored.
+ * (role App Manager or higher). Never commit the .p8; it is gitignored. In CI, pass the
+ * file's contents as ASC_KEY_P8 instead of ASC_KEY_PATH (see .github/workflows/store-screenshots.yml).
  */
 const crypto = require('crypto');
 const fs = require('fs');
@@ -58,9 +59,11 @@ function b64url(buf) {
 }
 
 function token() {
-  const { ASC_KEY_ID: kid, ASC_ISSUER_ID: iss, ASC_KEY_PATH: keyPath } = process.env;
-  if (!kid || !iss || !keyPath) throw new Error('Set ASC_KEY_ID, ASC_ISSUER_ID and ASC_KEY_PATH.');
-  const key = fs.readFileSync(keyPath.replace(/^~/, os.homedir()), 'utf8');
+  const { ASC_KEY_ID: kid, ASC_ISSUER_ID: iss, ASC_KEY_PATH: keyPath, ASC_KEY_P8: keyText } = process.env;
+  if (!kid || !iss || !(keyPath || keyText)) {
+    throw new Error('Set ASC_KEY_ID, ASC_ISSUER_ID and either ASC_KEY_PATH (.p8 file) or ASC_KEY_P8 (its contents).');
+  }
+  const key = keyText || fs.readFileSync(keyPath.replace(/^~/, os.homedir()), 'utf8');
   const now = Math.floor(Date.now() / 1000);
   const head = b64url(JSON.stringify({ alg: 'ES256', kid, typ: 'JWT' }));
   const body = b64url(JSON.stringify({ iss, iat: now, exp: now + 15 * 60, aud: 'appstoreconnect-v1' }));
