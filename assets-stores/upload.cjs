@@ -105,6 +105,25 @@ async function findLocalization({ locale, version }) {
   return { loc, versionString: v.attributes.versionString };
 }
 
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+// App Store Connect processes each image after the commit PATCH; wait until it
+// is COMPLETE so a rejected image fails the run instead of leaving a gap.
+async function waitForDelivery(id, file, timeoutMs = 10 * 60 * 1000) {
+  const start = Date.now();
+  for (;;) {
+    const res = await api('GET', `/v1/appScreenshots/${id}?fields[appScreenshots]=assetDeliveryState`);
+    const st = res.data.attributes.assetDeliveryState || {};
+    if (st.state === 'COMPLETE') return;
+    if (st.state === 'FAILED') {
+      const why = (st.errors || []).map((e) => `${e.code}: ${e.description}`).join('; ') || 'no details';
+      throw new Error(`App Store Connect rejected ${file}: ${why}`);
+    }
+    if (Date.now() - start > timeoutMs) throw new Error(`Timed out waiting for ${file} (state ${st.state})`);
+    await sleep(Number(process.env.ASC_POLL_MS) || 3000);
+  }
+}
+
 async function uploadSet(locId, type, files) {
   const sets = await api('GET', `/v1/appStoreVersionLocalizations/${locId}/appScreenshotSets?filter[screenshotDisplayType]=${type}`);
   let set = sets.data[0];
@@ -140,7 +159,11 @@ async function uploadSet(locId, type, files) {
       },
     });
     ids.push(shot.id);
-    console.log(`  ${path.relative(OUT, file)}`);
+    console.log(`  ${path.relative(OUT, file)} uploaded`);
+  }
+  for (const [i, id] of ids.entries()) {
+    await waitForDelivery(id, path.relative(OUT, files[i]));
+    console.log(`  ${path.relative(OUT, files[i])} processed`);
   }
   await api('PATCH', `/v1/appScreenshotSets/${set.id}/relationships/appScreenshots`, {
     data: ids.map((id) => ({ type: 'appScreenshots', id })),
@@ -169,7 +192,7 @@ async function uploadSet(locId, type, files) {
     console.log(`${s.type}`);
     await uploadSet(loc.id, s.type, s.files);
   }
-  console.log('Done. App Store Connect processes the images for a few minutes before they show.');
+  console.log('Done. Every screenshot finished processing.');
 })().catch((e) => {
   console.error(e.message);
   process.exit(1);

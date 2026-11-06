@@ -189,18 +189,21 @@ function template([w, h], frameKind, img, imgSize, c) {
 }
 
 (async () => {
+  // Fail before rendering anything, so a missing capture never leaves an old
+  // apple/<slot>/<name>.jpg in place looking freshly rendered.
+  const missing = [...new Set(Object.values(SLOTS).flatMap((s) => s.shots.map(([, raw]) => raw)))]
+    .filter((raw) => !fs.existsSync(path.join(RAW, raw)));
+  if (missing.length) {
+    console.error(`Missing raw captures:\n${missing.map((r) => `  raw/${r}`).join('\n')}`);
+    process.exit(1);
+  }
   const browser = await chromium.launch();
   for (const [slot, { size, frame, shots }] of Object.entries(SLOTS)) {
     const dir = path.join(OUT, slot);
     fs.mkdirSync(dir, { recursive: true });
     const page = await browser.newPage({ viewport: { width: size[0], height: size[1] } });
     for (const [name, raw, copyKey] of shots) {
-      const rawPath = path.join(RAW, raw);
-      if (!fs.existsSync(rawPath)) {
-        console.warn(`skip ${slot}/${name}: raw/${raw} missing`);
-        continue;
-      }
-      const buf = fs.readFileSync(rawPath);
+      const buf = fs.readFileSync(path.join(RAW, raw));
       const img = 'data:image/png;base64,' + buf.toString('base64');
       await page.setContent(template(size, frame, img, pngSize(buf), COPY[copyKey]), { waitUntil: 'load' });
       // JPEG avoids the alpha channel App Store Connect rejects; quality 95 is visually lossless.
