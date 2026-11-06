@@ -8,6 +8,7 @@ App Store screenshots live here. They are excluded from EAS builds via `.easigno
 | --- | --- |
 | `raw/` | Unedited simulator captures (no captions) |
 | `render.cjs` | HTML/CSS caption template; renders every slot from `raw/` with Playwright |
+| `upload.cjs` | Uploads `apple/` to App Store Connect through the API |
 | `apple/<slot>/NN-name.jpg` | Final files to upload to App Store Connect |
 | `feature-graphic.png` | Google Play feature graphic (1024×500) |
 
@@ -32,4 +33,13 @@ Spec: https://developer.apple.com/help/app-store-connect/reference/app-informati
    For the iPhone Duo outer display, add `--display=<outer display id>`; without it simctl captures the inner display.
 2. Edit captions (`COPY`), the shot list (`SLOTS`) or the look (`template()`) in `render.cjs`.
 3. `npm i --no-save playwright && npx playwright install chromium && node assets-stores/render.cjs`
-4. Upload the files in `apple/` to App Store Connect by hand.
+4. Upload with the App Store Connect API. Create a key under Users and Access > Integrations
+   (App Manager role), then, with an editable version in "Prepare for Submission":
+   ```sh
+   export ASC_KEY_ID=XXXXXXXXXX ASC_ISSUER_ID=xxxxxxxx-... ASC_KEY_PATH=~/AuthKey_XXXXXXXXXX.p8
+   node assets-stores/upload.cjs --dry-run   # list what goes where
+   node assets-stores/upload.cjs             # replace all sets for en-US
+   ```
+   Options: `--slot "iPad 13"` (repeatable), `--locale`, `--version`, `--no-duo`. Each display type's set is
+   replaced as a whole. The iPhone Duo type (`APP_IPHONE_DUO`) isn't in Apple's published API spec yet; if it's
+   rejected, rerun with `--no-duo` and upload those by hand.
