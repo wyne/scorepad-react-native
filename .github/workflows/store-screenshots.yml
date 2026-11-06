@@ -1,0 +1,70 @@
+# Uploads the rendered App Store screenshots in assets-stores/apple/ to the
+# editable App Store version ("Prepare for Submission") via the App Store
+# Connect API. Run it by hand from the Actions tab after the new version exists.
+#
+# Needs repository secrets ASC_KEY_ID, ASC_ISSUER_ID and ASC_KEY_P8 (the full
+# contents of the AuthKey_XXXX.p8 file). See assets-stores/StoreAssets.md.
+
+name: Upload App Store Screenshots
+
+on:
+  workflow_dispatch:
+    inputs:
+      slot:
+        description: 'Only this slot folder, e.g. "iPad 13" (blank = all)'
+        required: false
+        default: ''
+      version:
+        description: 'App Store version string (blank = the editable one)'
+        required: false
+        default: ''
+      locale:
+        description: 'Localization'
+        required: false
+        default: 'en-US'
+      include_duo:
+        description: 'Include iPhone Duo (API type not yet in Apple''s spec)'
+        type: boolean
+        default: true
+      dry_run:
+        description: 'Only list what would be uploaded'
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: store-screenshots
+  cancel-in-progress: false
+
+jobs:
+  upload:
+    name: Upload screenshots
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Use Node.js 24.x
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24.x
+
+      - name: Upload
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
+          SLOT: ${{ inputs.slot }}
+          VERSION: ${{ inputs.version }}
+          LOCALE: ${{ inputs.locale }}
+          INCLUDE_DUO: ${{ inputs.include_duo }}
+          DRY_RUN: ${{ inputs.dry_run }}
+        run: |
+          args=(--locale "$LOCALE")
+          [ -n "$SLOT" ] && args+=(--slot "$SLOT")
+          [ -n "$VERSION" ] && args+=(--version "$VERSION")
+          [ "$INCLUDE_DUO" = "true" ] || args+=(--no-duo)
+          [ "$DRY_RUN" = "true" ] && args+=(--dry-run)
+          node assets-stores/upload.cjs "${args[@]}"

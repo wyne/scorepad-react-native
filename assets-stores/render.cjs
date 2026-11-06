@@ -73,7 +73,15 @@ const IPHONE_SHOTS = [
   ['04-point-values', 'iphone-point-values.png', 'points'],
   ['05-games', 'iphone-games.png', 'games'],
 ];
+const IPAD_SHOTS = [
+  ['01-board', 'ipad-board.png', 'board'],
+  ['02-dial', 'ipad-dial.png', 'dial'],
+  ['03-history', 'ipad-history.png', 'history'],
+  ['04-point-values', 'ipad-point-values.png', 'points'],
+  ['05-games', 'ipad-games.png', 'games'],
+];
 const SLOTS = {
+  'iPad 13': { size: [2064, 2752], frame: 'tablet', shots: IPAD_SHOTS },
   'iPhone 6.9': { size: [1320, 2868], frame: 'phone', shots: IPHONE_SHOTS },
   'iPhone 6.1': { size: [1206, 2622], frame: 'phone', shots: IPHONE_SHOTS },
   'iPhone Duo outer': {
@@ -105,6 +113,7 @@ const FRAMES = {
   phone: { width: 0.68, top: 0.335, crop: 0.16, radius: 0.13, bezel: 0.022, island: true },
   cover: { width: 0.64, top: 0.38, crop: 0.16, radius: 0.10, bezel: 0.020, island: false },
   wide: { width: 0.56, side: true, radius: 0.045, bezel: 0.008, island: false },
+  tablet: { width: 0.74, top: 0.36, crop: 0.12, radius: 0.045, bezel: 0.018, island: false, type: 0.8 },
   tall: { width: 0.76, top: 0.31, crop: 0.16, radius: 0.06, bezel: 0.012, island: false },
 };
 
@@ -128,7 +137,7 @@ function layout([w, h], f, [iw, ih]) {
 
 function template([w, h], frameKind, img, imgSize, c) {
   const f = FRAMES[frameKind];
-  const u = (f.side ? w * 0.30 : Math.min(w, h)) / 100; // type scales with the text column
+  const u = (f.side ? w * 0.30 : Math.min(w, h)) * (f.type || 1) / 100; // type scales with the text column
   const { devW, bez, top } = layout([w, h], f, imgSize);
   const lines = c.lines
     .map((l, i) => `<span class="${i === c.hi ? 'hi' : ''}">${l}</span>`)
@@ -180,6 +189,14 @@ function template([w, h], frameKind, img, imgSize, c) {
 }
 
 (async () => {
+  // Fail before rendering anything, so a missing capture never leaves an old
+  // apple/<slot>/<name>.jpg in place looking freshly rendered.
+  const missing = [...new Set(Object.values(SLOTS).flatMap((s) => s.shots.map(([, raw]) => raw)))]
+    .filter((raw) => !fs.existsSync(path.join(RAW, raw)));
+  if (missing.length) {
+    console.error(`Missing raw captures:\n${missing.map((r) => `  raw/${r}`).join('\n')}`);
+    process.exit(1);
+  }
   const browser = await chromium.launch();
   for (const [slot, { size, frame, shots }] of Object.entries(SLOTS)) {
     const dir = path.join(OUT, slot);
