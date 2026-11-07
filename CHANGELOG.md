@@ -1,5 +1,13 @@
 # Changelog
 
+## [3.6.2](https://github.com/wyne/scorepad-react-native/compare/v3.6.1...v3.6.2) (2026-11-07)
+
+
+### Miscellaneous
+
+* add Google Play phone and tablet screenshots ([#834](https://github.com/wyne/scorepad-react-native/issues/834)) ([5b011b1](https://github.com/wyne/scorepad-react-native/commit/5b011b1de82f15f4869acb0170eb8c889843de2d))
+* add iPad App Store screenshots and refresh all sets on 3.6.1 ([#829](https://github.com/wyne/scorepad-react-native/issues/829)) ([304e044](https://github.com/wyne/scorepad-react-native/commit/304e0448976abb6d0489167d7ab4d084024e764d))
+
 ## [3.6.1](https://github.com/wyne/scorepad-react-native/compare/v3.6.0...v3.6.1) (2026-11-05)
 
 
