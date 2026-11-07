@@ -1,9 +1,11 @@
+import { getPalette } from '../src/ColorPalette';
 import { InteractionType } from '../src/components/Interactions/InteractionType';
 import { MAX_TILE_PLAYERS } from '../src/constants';
 
 import gamesReducer, { gameSave, selectAllGames } from './GamesSlice';
 import {
   selectInteractionType,
+  selectPlayerColor,
   selectPlayerNumbers,
   selectIsDialOnly,
   selectCurrentGame,
@@ -408,5 +410,36 @@ describe('selectRecentPlayerNames', () => {
 
     expect(selectAllGames(renamedState)).toBe(games);
     expect(selectRecentPlayerNames(renamedState)).toEqual(['Caroline', 'Alice', 'Bob']);
+  });
+});
+
+describe('selectPlayerColor', () => {
+  const withPlayers = (players: Record<string, { color?: string }>, palette?: string) => ({
+    ...mockState,
+    games: {
+      ...mockState.games!,
+      entities: {
+        'game-1': { ...mockState.games!.entities['game-1']!, playerIds: Object.keys(players), palette },
+      },
+    },
+    players: {
+      ids: Object.keys(players),
+      entities: Object.fromEntries(Object.entries(players).map(([id, p]) => [id, { id, playerName: id, scores: [0], ...p }])),
+    },
+  } as unknown as RootState);
+
+  it('uses the player\'s stored color', () => {
+    expect(selectPlayerColor(withPlayers({ a: { color: '#123456' } }), 'a')).toBe('#123456');
+  });
+
+  it('falls back to the seat\'s palette color for players saved without one', () => {
+    const state = withPlayers({ a: {}, b: {} }, 'original');
+    const palette = getPalette('original');
+    expect(selectPlayerColor(state, 'a')).toBe(palette[0]);
+    expect(selectPlayerColor(state, 'b')).toBe(palette[1]);
+  });
+
+  it('falls back to the original palette when the game has none', () => {
+    expect(selectPlayerColor(withPlayers({ a: {}, b: {} }), 'b')).toBe(getPalette('original')[1]);
   });
 });

@@ -16,7 +16,7 @@ import Animated, {
 
 import { useAppDispatch, useAppSelector } from '../../../../redux/hooks';
 import { playerRoundScoreSet, selectPlayerById, selectPlayerRoundStats } from '../../../../redux/PlayersSlice';
-import { selectCurrentGame } from '../../../../redux/selectors';
+import { selectCurrentGame, selectPlayerColor } from '../../../../redux/selectors';
 import { setLastUsedInteractionType } from '../../../../redux/SettingsSlice';
 import { logEvent } from '../../../Analytics';
 import { useMenuOpen } from '../../MenuOpenContext';
@@ -105,6 +105,7 @@ const PlayerDialPage: React.FC<PlayerDialPageProps> = ({
 }) => {
     const dispatch = useAppDispatch();
     const player = useAppSelector(state => selectPlayerById(state, playerId));
+    const playerColor = useAppSelector(state => selectPlayerColor(state, playerId));
     const currentRoundIndex = useAppSelector(state => selectCurrentGame(state)?.roundCurrent ?? 0);
     const { currentRoundScore, previousTotal, currentRoundTotalScore } = useAppSelector(
         state => selectPlayerRoundStats(state, playerId, currentRoundIndex)
@@ -187,8 +188,7 @@ const PlayerDialPage: React.FC<PlayerDialPageProps> = ({
 
     if (!player) return null;
 
-    const ink = inkFor(player.color ?? '#444');
-    const playerColor = player.color ?? '#444';
+    const ink = inkFor(playerColor);
     const isLandscape = pageWidth > pageHeight;
 
     const scale = bounded(Math.sqrt((pageWidth * pageHeight) / (376 * 660)), 1, 1.18);
