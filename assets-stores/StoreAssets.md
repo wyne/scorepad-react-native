@@ -10,6 +10,7 @@ App Store screenshots live here. They are excluded from EAS builds via `.easigno
 | `render.cjs` | HTML/CSS caption template; renders every slot from `raw/` with Playwright |
 | `upload.cjs` | Uploads `apple/` to App Store Connect through the API |
 | `apple/<slot>/NN-name.jpg` | Final files to upload to App Store Connect |
+| `google/<slot>/NN-name.jpg` | Final files to upload to Google Play Console |
 | `feature-graphic.png` | Google Play feature graphic (1024×500) |
 
 ## Slots
@@ -21,6 +22,17 @@ App Store screenshots live here. They are excluded from EAS builds via `.easigno
 | `iPhone 6.9` | 1320×2868 | iPhone with Dynamic Island (large) |
 | `iPhone Duo outer` | 1398×2034 | iPhone Duo, outer display |
 | `iPhone Duo inner (landscape)` / `(portrait)` | 2853×2007 / 2007×2853 | iPhone Duo, inner display |
+
+Google Play (`google/`):
+
+| Folder | Size | Play Console slot |
+| --- | --- | --- |
+| `phone` | 1080×1920 | Phone screenshots |
+| `tablet` | 1440×2560 | 7-inch and 10-inch tablet screenshots |
+
+Raws: `raw/android-*.png` (Pixel phone emulator, 1080×2424) and `raw/android-tablet-*.png` (1600×2560 tablet
+emulator), captured from a release preview build (`npm run android:preview`) with `adb exec-out screencap -p`,
+dark mode (`adb shell cmd uimode night yes`) and SystemUI demo mode for a clean 9:41 status bar.
 
 Spec: https://developer.apple.com/help/app-store-connect/reference/app-information/screenshot-specifications/
 
