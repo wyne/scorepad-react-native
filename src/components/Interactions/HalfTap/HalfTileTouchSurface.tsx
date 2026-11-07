@@ -8,10 +8,14 @@ import { useAppDispatch, useAppSelector, useAppStore } from '../../../../redux/h
 import { playerRoundScoreIncrement } from '../../../../redux/PlayersSlice';
 import { setLastUsedInteractionType } from '../../../../redux/SettingsSlice';
 import { logEvent } from '../../../Analytics';
+import { useGestureNudge } from '../../GestureNudgeContext';
 import { useLockedHint } from '../../LockedHintContext';
 import { useMenuOpen } from '../../MenuOpenContext';
 import { PARTICLE_DURATION, ScoreParticle } from '../../PlayerTiles/AdditionTile/ScoreParticle';
 import { InteractionType } from '../InteractionType';
+
+/** How far a touch must drag, in points, to count as a swipe. */
+const SWIPE_MISS_DISTANCE = 20;
 
 type ScoreParticleProps = {
     key: string;
@@ -44,6 +48,14 @@ export const HalfTileTouchSurface: React.FunctionComponent<Props> = (
 
     const [particles, setParticles] = useState<ScoreParticleProps[]>([]);
     const surfaceSize = useRef({ width: 0, height: 0 });
+
+    // A touch that drags 20pt or more and is released without scoring is
+    // someone swiping in tap mode: tell the nudge toast. Judged on the touch's
+    // own end, since onPressOut also fires when a finger only leaves the
+    // press area and may come back to score.
+    const { reportMiss, reportSuccess } = useGestureNudge();
+    const touchStart = useRef<{ x: number; y: number } | null>(null);
+    const scoredThisTouch = useRef(false);
 
     const addendOne = useAppSelector(state => state.settings.addendOne);
     const addendTwo = useAppSelector(state => state.settings.addendTwo);
@@ -108,6 +120,29 @@ export const HalfTileTouchSurface: React.FunctionComponent<Props> = (
         });
         dispatch(playerRoundScoreIncrement(playerId, currentRoundIndex, scoreType == 'increment' ? addend : -addend));
         dispatch(setLastUsedInteractionType(InteractionType.HalfTap));
+        scoredThisTouch.current = true;
+        reportSuccess();
+    };
+
+    const onTouchStart = (event: GestureResponderEvent) => {
+        touchStart.current = { x: event.nativeEvent.pageX, y: event.nativeEvent.pageY };
+        scoredThisTouch.current = false;
+    };
+
+    const onTouchEnd = (event: GestureResponderEvent) => {
+        const start = touchStart.current;
+        touchStart.current = null;
+        if (!start || menuOpen || currentGameLocked) return;
+        const moved = Math.hypot(event.nativeEvent.pageX - start.x, event.nativeEvent.pageY - start.y);
+        if (moved < SWIPE_MISS_DISTANCE) return;
+        // The same release may still deliver onPress; let it run first.
+        setTimeout(() => {
+            if (!scoredThisTouch.current) reportMiss(InteractionType.HalfTap);
+        }, 0);
+    };
+
+    const onTouchCancel = () => {
+        touchStart.current = null;
     };
 
     return (
@@ -118,7 +153,16 @@ export const HalfTileTouchSurface: React.FunctionComponent<Props> = (
             onLayout={onLayout}
             onPress={(e) => scoreChangeHandler(addendOne, e)}
             onLongPress={(e) => scoreChangeHandler(addendTwo, e, true)}>
-            <View style={StyleSheet.absoluteFill} pointerEvents="none">
+            {/* box-only makes this view the touch target, so its touch events
+                fire for the whole touch while the Touchable handles presses. */}
+            <View
+                style={StyleSheet.absoluteFill}
+                pointerEvents="box-only"
+                onTouchStart={onTouchStart}
+                onTouchEnd={onTouchEnd}
+                onTouchCancel={onTouchCancel}
+                testID="half-tap-touch-area"
+            >
                 {particles.map((particle) => (
                     <ScoreParticle
                         key={particle.key}

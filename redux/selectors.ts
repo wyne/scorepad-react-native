@@ -109,3 +109,20 @@ export const selectCurrentGameOverReason = createSelector(
         return gameOverReason(game.scoring, game.roundCurrent + 1, totals);
     },
 );
+
+/**
+ * Gestures a returning player has already used: the last one used, plus the
+ * gesture of every saved game with a score in it. Seeds the learned list so
+ * existing players don't see first-use hints for gestures they know.
+ */
+export const selectInferredLearnedInteractionTypes = (state: RootState): InteractionType[] => {
+    const learned = new Set<InteractionType>();
+    const lastUsed = state.settings.lastUsedInteractionType;
+    if (lastUsed) learned.add(lastUsed);
+    selectAllGames(state).forEach(game => {
+        const played = game.playerIds.some(id =>
+            state.players.entities[id]?.scores?.some(score => score !== 0));
+        if (played) learned.add(selectInteractionType(state, game.id));
+    });
+    return [...learned];
+};

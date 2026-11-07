@@ -11,7 +11,7 @@ import { backfillGamePlayerNumbers, GameState, restoreAllGames } from './GamesSl
 import { ScoreState, restoreAllPlayers } from './PlayersSlice';
 import { isScoringRules } from './ScoringRules';
 import { initialState as initialSettings, restoreSettings, SettingsState } from './SettingsSlice';
-import { store } from './store';
+import { backfillLearnedGestures, store } from './store';
 
 const BACKUP_VERSION = 1;
 
@@ -116,6 +116,8 @@ const isSettingsState = (value: unknown, gameEntities: Record<string, unknown>):
         && (isPlayerNumberStyle(value.playerNumbers) || typeof value.showPlayerIndex === 'boolean')
         && isInteractionType(value.interactionType)
         && (value.lastUsedInteractionType === undefined || isInteractionType(value.lastUsedInteractionType))
+        && (value.learnedInteractionTypes === undefined
+            || (Array.isArray(value.learnedInteractionTypes) && value.learnedInteractionTypes.every(isInteractionType)))
         && isFiniteNumber(value.lastStoreReviewPrompt)
         && (value.devMenuEnabled === undefined || typeof value.devMenuEnabled === 'boolean')
         && (value.gameModesEnabled === undefined || typeof value.gameModesEnabled === 'boolean')
@@ -162,6 +164,9 @@ export const parseBackupData = (value: unknown): BackupData | undefined => {
         playerNumbers: isPlayerNumberStyle(savedSettings.playerNumbers)
             ? savedSettings.playerNumbers
             : showPlayerIndex === true ? 'badge' : 'off',
+        // Backups from before learned gestures leave it unset, to be inferred
+        // from the restored games (backfillLearnedGestures).
+        learnedInteractionTypes: savedSettings.learnedInteractionTypes,
     } as unknown as SettingsState;
 
     return {
@@ -252,6 +257,7 @@ export const importBackup = async (): Promise<void> => {
         dispatch(restoreSettings(backup.settings));
         // Games from older backups follow the restored default from here on.
         dispatch(backfillGamePlayerNumbers(backup.settings.playerNumbers));
+        backfillLearnedGestures(store);
 
         Alert.alert('Restore Complete', 'Your data has been restored from the backup.');
     } catch {

@@ -9,6 +9,7 @@ import { InteractionType } from './Interactions/InteractionType';
 export const GESTURE_NUDGE_MESSAGES: Partial<Record<InteractionType, string>> = {
     [InteractionType.SwipeVertical]: 'Swipe up or down to change a score.',
     [InteractionType.Dial]: 'Turn the ring to change the score.',
+    [InteractionType.HalfTap]: 'Tap the top half of a tile to add, the bottom half to subtract.',
 };
 
 const NUDGE_DURATION_MS = 2500;
@@ -35,7 +36,8 @@ const GestureNudgeContext = createContext<GestureNudgeContextType>({
 
 /**
  * Explains a scoring gesture at the moment it goes wrong: two misses in a row
- * (a tap where a swipe was needed, a tap on the dial ring) show a one-line toast
+ * (a tap where a swipe was needed, a swipe where a tap was needed, a tap on
+ * the dial ring) show a one-line toast
  * like the locked-game hint. Capped per session so it never nags.
  */
 export const GestureNudgeContextProvider: React.FC<PropsWithChildren> = ({ children }) => {

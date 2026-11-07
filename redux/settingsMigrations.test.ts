@@ -58,4 +58,17 @@ describe('settings migrations', () => {
             expect(state).not.toHaveProperty('showPlayerIndex');
         },
     );
+
+    it('leaves learned gestures unset on upgrade, to be inferred from games', async () => {
+        const state = await rehydrateSettings({
+            lastUsedInteractionType: 'dial',
+            _persist: { version: 6, rehydrated: true },
+        });
+        expect(state.learnedInteractionTypes).toBeUndefined();
+    });
+
+    it('keeps learned gestures on a fresh install', async () => {
+        const state = await rehydrateSettings();
+        expect(state.learnedInteractionTypes).toEqual([]);
+    });
 });

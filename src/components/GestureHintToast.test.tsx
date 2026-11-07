@@ -8,7 +8,6 @@ import gamesReducer from '../../redux/GamesSlice';
 import playersReducer from '../../redux/PlayersSlice';
 import settingsReducer, { initialState as settingsInitialState, setInteractionType, setLastUsedInteractionType } from '../../redux/SettingsSlice';
 
-import { GestureHintContextProvider } from './GestureHintContext';
 import GestureHintToast from './GestureHintToast';
 import { InteractionType } from './Interactions/InteractionType';
 
@@ -41,12 +40,12 @@ jest.mock('./GestureNudgeContext', () => ({
     useGestureNudge: () => ({ nudgeMessage: mockNudge, reportMiss: () => {}, hideNudge: () => {} }),
 }));
 
-const createStore = ({ interactionType = InteractionType.SwipeVertical, lastUsed, locked = false }: {
-    interactionType?: InteractionType; lastUsed?: InteractionType; locked?: boolean;
+const createStore = ({ interactionType = InteractionType.SwipeVertical, learned = [], locked = false }: {
+    interactionType?: InteractionType; learned?: InteractionType[]; locked?: boolean;
 } = {}) => configureStore({
     reducer: { settings: settingsReducer, games: gamesReducer, players: playersReducer },
     preloadedState: {
-        settings: { ...settingsInitialState, currentGameId: 'game-1', interactionType, lastUsedInteractionType: lastUsed, addendOne: 2, addendTwo: 5 },
+        settings: { ...settingsInitialState, currentGameId: 'game-1', interactionType, learnedInteractionTypes: learned, addendOne: 2, addendTwo: 5 },
         games: { ids: ['game-1'], entities: { 'game-1': { id: 'game-1', title: 'Test', dateCreated: 0, roundCurrent: 0, roundTotal: 1, locked, playerIds: ['p1'] } } },
         players: { ids: ['p1'], entities: { p1: { id: 'p1', playerName: 'P1', scores: [0] } } },
     } as Parameters<typeof configureStore>[0]['preloadedState'],
@@ -54,9 +53,7 @@ const createStore = ({ interactionType = InteractionType.SwipeVertical, lastUsed
 
 const Screen = ({ store, showToast = true }: { store: ReturnType<typeof createStore>; showToast?: boolean }) => (
     <Provider store={store}>
-        <GestureHintContextProvider>
-            {showToast && <GestureHintToast top={8} />}
-        </GestureHintContextProvider>
+        {showToast && <GestureHintToast top={8} />}
     </Provider>
 );
 
@@ -84,7 +81,7 @@ describe('GestureHintToast', () => {
     });
 
     it('stays hidden once the gesture has been used', () => {
-        const { queryByTestId } = renderToast(createStore({ lastUsed: InteractionType.SwipeVertical }));
+        const { queryByTestId } = renderToast(createStore({ learned: [InteractionType.SwipeVertical] }));
         expect(queryByTestId('gesture-hint-toast')).toBeNull();
     });
 
@@ -108,6 +105,13 @@ describe('GestureHintToast', () => {
         rerender(<Screen store={store} showToast={false} />);
         rerender(<Screen store={store} />);
         expect(queryByTestId('gesture-hint-toast')).toBeNull();
+    });
+
+    it('stays dismissed after the app restarts', () => {
+        const store = createStore();
+        fireEvent.press(renderToast(store).getByTestId('gesture-hint-got-it'));
+        const saved = store.getState().settings.learnedInteractionTypes;
+        expect(renderToast(createStore({ learned: saved })).queryByTestId('gesture-hint-toast')).toBeNull();
     });
 
     it('comes back after switching to a gesture not yet used', () => {

@@ -34,7 +34,13 @@ jest.mock('../../LockedHintContext', () => ({
   useLockedHint: function () { return { lockedHintVisible: false, showLockedHint: mockShowLockedHint, hideLockedHint: function () { } }; },
 }));
 
+const mockReportMiss = jest.fn();
+jest.mock('../../GestureNudgeContext', () => ({
+  useGestureNudge: function () { return { nudgeMessage: null, reportMiss: mockReportMiss, reportSuccess: function () { }, hideNudge: function () { } }; },
+}));
+
 beforeEach(() => {
+  mockReportMiss.mockClear();
   mockScoreParticle.mockClear();
   mockMenuOpen = false;
   mockShowLockedHint.mockClear();
@@ -227,5 +233,75 @@ describe('HalfTap', () => {
     });
 
     expect(onRender).not.toHaveBeenCalled();
+  });
+});
+
+describe('HalfTileTouchSurface swipe nudge', () => {
+  const touch = (x: number, y: number) => ({ nativeEvent: { pageX: x, pageY: y, locationX: x, locationY: y } });
+  const area = (utils: ReturnType<typeof renderSurface>) => utils.surface.findByProps({ testID: 'half-tap-touch-area' });
+
+  beforeEach(() => jest.useFakeTimers());
+  afterEach(() => jest.useRealTimers());
+
+  it('reports one miss when a touch drags and is released without scoring', () => {
+    const utils = renderSurface();
+    utils.dispatch.mockClear();
+    const view = area(utils);
+    act(() => {
+      view.props.onTouchStart(touch(50, 50));
+      // Leaving the press area mid-touch is not a miss on its own.
+      utils.surface.props.onPressOut?.(touch(50, 120));
+      view.props.onTouchEnd(touch(50, 120));
+      jest.runAllTimers();
+    });
+    expect(utils.dispatch).not.toHaveBeenCalledWith(expect.objectContaining({ type: playerRoundScoreIncrement.type }));
+    expect(mockReportMiss).toHaveBeenCalledTimes(1);
+    expect(mockReportMiss).toHaveBeenCalledWith('half-tap');
+  });
+
+  it('does not report a miss for a tap that scores', () => {
+    const utils = renderSurface();
+    const view = area(utils);
+    act(() => {
+      view.props.onTouchStart(touch(50, 50));
+      view.props.onTouchEnd(touch(52, 51));
+      utils.surface.props.onPress(touch(52, 51));
+      jest.runAllTimers();
+    });
+    expect(mockReportMiss).not.toHaveBeenCalled();
+  });
+
+  it('does not report a miss when a touch leaves and returns to score', () => {
+    const utils = renderSurface();
+    const view = area(utils);
+    act(() => {
+      view.props.onTouchStart(touch(50, 50));
+      view.props.onTouchEnd(touch(50, 90));
+      utils.surface.props.onPress(touch(50, 90));
+      jest.runAllTimers();
+    });
+    expect(mockReportMiss).not.toHaveBeenCalled();
+  });
+
+  it('does not report a miss for a cancelled touch', () => {
+    const utils = renderSurface();
+    const view = area(utils);
+    act(() => {
+      view.props.onTouchStart(touch(50, 50));
+      view.props.onTouchCancel();
+      jest.runAllTimers();
+    });
+    expect(mockReportMiss).not.toHaveBeenCalled();
+  });
+
+  it('does not report a miss in a locked game', () => {
+    const utils = renderSurface({ locked: true });
+    const view = area(utils);
+    act(() => {
+      view.props.onTouchStart(touch(50, 50));
+      view.props.onTouchEnd(touch(50, 120));
+      jest.runAllTimers();
+    });
+    expect(mockReportMiss).not.toHaveBeenCalled();
   });
 });
