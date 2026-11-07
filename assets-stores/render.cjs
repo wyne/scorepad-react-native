@@ -5,7 +5,7 @@
  *   npm i --no-save playwright && npx playwright install chromium   # once
  *   node assets-stores/render.cjs
  *
- * Reads assets-stores/raw/*.png, writes assets-stores/apple/<slot>/NN-name.png.
+ * Reads assets-stores/raw/*.png, writes <store>/<slot>/NN-name.jpg (apple/ or google/).
  * Edit captions in SHOTS below; edit the look in template().
  */
 const fs = require('fs');
@@ -14,7 +14,6 @@ const { chromium } = require('playwright');
 
 const ROOT = __dirname;
 const RAW = path.join(ROOT, 'raw');
-const OUT = path.join(ROOT, 'apple');
 
 // Caption copy, shared across slots. `hi` marks which headline line is yellow.
 const COPY = {
@@ -80,7 +79,17 @@ const IPAD_SHOTS = [
   ['04-point-values', 'ipad-point-values.png', 'points'],
   ['05-games', 'ipad-games.png', 'games'],
 ];
+const ANDROID_SHOTS = (prefix) => [
+  ['01-board', `${prefix}-board.png`, 'board'],
+  ['02-dial', `${prefix}-dial.png`, 'dial'],
+  ['03-history', `${prefix}-history.png`, 'history'],
+  ['04-point-values', `${prefix}-point-values.png`, 'points'],
+  ['05-games', `${prefix}-games.png`, 'games'],
+];
 const SLOTS = {
+  // Google Play: 9:16, so the long side stays within 2x the short side.
+  'phone': { store: 'google', size: [1080, 1920], frame: 'android', shots: ANDROID_SHOTS('android') },
+  'tablet': { store: 'google', size: [1440, 2560], frame: 'tablet', shots: ANDROID_SHOTS('android-tablet') },
   'iPad 13': { size: [2064, 2752], frame: 'tablet', shots: IPAD_SHOTS },
   'iPhone 6.9': { size: [1320, 2868], frame: 'phone', shots: IPHONE_SHOTS },
   'iPhone 6.1': { size: [1206, 2622], frame: 'phone', shots: IPHONE_SHOTS },
@@ -113,6 +122,7 @@ const FRAMES = {
   phone: { width: 0.68, top: 0.335, crop: 0.16, radius: 0.13, bezel: 0.022, island: true },
   cover: { width: 0.64, top: 0.38, crop: 0.16, radius: 0.10, bezel: 0.020, island: false },
   wide: { width: 0.56, side: true, radius: 0.045, bezel: 0.008, island: false },
+  android: { width: 0.62, top: 0.36, crop: 0.16, radius: 0.10, bezel: 0.020, island: false, punch: true, type: 0.9 },
   tablet: { width: 0.74, top: 0.36, crop: 0.12, radius: 0.045, bezel: 0.018, island: false, type: 0.8 },
   tall: { width: 0.76, top: 0.31, crop: 0.16, radius: 0.06, bezel: 0.012, island: false },
 };
@@ -173,6 +183,11 @@ function template([w, h], frameKind, img, imgSize, c) {
     box-shadow: 0 0 0 ${u * 0.35}px #2c2c2e, 0 ${u * 4}px ${u * 10}px rgba(0,0,0,0.6);
   }
   .device img { display: block; width: 100%; border-radius: ${(devW - 2 * bez) * f.radius * 0.92}px; }
+  .punch {
+    position: absolute; left: 50%; transform: translateX(-50%);
+    top: ${bez + devW * 0.03}px; width: ${devW * 0.035}px; height: ${devW * 0.035}px;
+    background: #000; border-radius: 999px;
+  }
   .island {
     position: absolute; left: 50%; transform: translateX(-50%);
     top: ${bez + devW * 0.028}px; width: ${devW * 0.27}px; height: ${devW * 0.078}px;
@@ -184,7 +199,7 @@ function template([w, h], frameKind, img, imgSize, c) {
       <h1>${lines}</h1>
       <p>${c.sub}</p>
     </div>
-    <div class="device"><img src="${img}">${f.island ? '<div class="island"></div>' : ''}</div>
+    <div class="device"><img src="${img}">${f.island ? '<div class="island"></div>' : ''}${f.punch ? '<div class="punch"></div>' : ''}</div>
   </body></html>`;
 }
 
@@ -198,8 +213,8 @@ function template([w, h], frameKind, img, imgSize, c) {
     process.exit(1);
   }
   const browser = await chromium.launch();
-  for (const [slot, { size, frame, shots }] of Object.entries(SLOTS)) {
-    const dir = path.join(OUT, slot);
+  for (const [slot, { store = 'apple', size, frame, shots }] of Object.entries(SLOTS)) {
+    const dir = path.join(ROOT, store, slot);
     fs.mkdirSync(dir, { recursive: true });
     const page = await browser.newPage({ viewport: { width: size[0], height: size[1] } });
     for (const [name, raw, copyKey] of shots) {
@@ -208,7 +223,7 @@ function template([w, h], frameKind, img, imgSize, c) {
       await page.setContent(template(size, frame, img, pngSize(buf), COPY[copyKey]), { waitUntil: 'load' });
       // JPEG avoids the alpha channel App Store Connect rejects; quality 95 is visually lossless.
       await page.screenshot({ path: path.join(dir, `${name}.jpg`), type: 'jpeg', quality: 95 });
-      console.log(`${slot}/${name}.jpg`);
+      console.log(`${store}/${slot}/${name}.jpg`);
     }
     await page.close();
   }
