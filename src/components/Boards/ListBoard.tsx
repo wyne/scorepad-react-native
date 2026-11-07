@@ -1,4 +1,4 @@
-import React, { useCallback, useLayoutEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 
 import { Icon } from '@rneui/base';
 import { LayoutChangeEvent, LayoutRectangle, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
@@ -41,13 +41,16 @@ function inkA(ink: string, a: number): string {
 interface PlayerRowProps {
     playerId: string;
     index: number;
-    svDimmed: SharedValue<boolean>;
+    /** 0 to 1: how far the dial is open, for dimming the rows behind it. */
+    svDim: SharedValue<number>;
+    svDialDragY: SharedValue<number>;
+    dimRange: number;
     disabled: boolean;
     onRowPress: (id: string) => void;
     onRender?: (id: string) => void;
 }
 
-const PlayerRow: React.FC<PlayerRowProps> = ({ playerId, index, svDimmed, disabled, onRowPress, onRender }) => {
+const PlayerRow: React.FC<PlayerRowProps> = ({ playerId, index, svDim, svDialDragY, dimRange, disabled, onRowPress, onRender }) => {
     onRender?.(playerId);
 
     const {
@@ -86,7 +89,7 @@ const PlayerRow: React.FC<PlayerRowProps> = ({ playerId, index, svDimmed, disabl
     }, [currentRoundScore]);
 
     const rowStyle = useAnimatedStyle(() => ({
-        opacity: withTiming(svDimmed.value ? 0.28 : 1, { duration: 280 }),
+        opacity: 1 - (1 - DIMMED_ROW_OPACITY) * rowDimProgress(svDim.value, svDialDragY.value, dimRange),
     }));
     const breakdownStyle = useAnimatedStyle(() => ({ opacity: breakdownOpacity.value }));
 
@@ -180,6 +183,16 @@ const PlayerRow: React.FC<PlayerRowProps> = ({ playerId, index, svDimmed, disabl
     );
 };
 
+const DIMMED_ROW_OPACITY = 0.28;
+const DIM_DURATION_MS = 280;
+
+/** 0 to 1: how dimmed the rows are, given how far the dial is open and dragged down. */
+export function rowDimProgress(open: number, dragY: number, range: number): number {
+    'worklet';
+    const dragged = Math.min(Math.max(dragY / range, 0), 1);
+    return open * (1 - dragged);
+}
+
 const MemoizedPlayerRow = React.memo(PlayerRow);
 
 interface ListBoardProps {
@@ -210,13 +223,10 @@ const ListBoard: React.FC<ListBoardProps> = ({ foldSplit = null, topInset = 0, o
     const insets = useSafeAreaInsets();
     const [selectedId, setSelectedId] = useState<string | null>(null);
     const [boardLayout, setBoardLayout] = useState<LayoutRectangle | null>(null);
-    const svDimmed = useSharedValue(false);
+    const svDim = useSharedValue(0);
     const svOverlayOpacity = useSharedValue(0);
     const svOverlaySlideY = useSharedValue(20);
-
-    useLayoutEffect(() => {
-        svDimmed.value = selectedId !== null;
-    }, [selectedId]);
+    const svDialDragY = useSharedValue(0);
 
     const handleBoardLayout = useCallback((e: LayoutChangeEvent) => {
         setBoardLayout(e.nativeEvent.layout);
@@ -236,12 +246,17 @@ const ListBoard: React.FC<ListBoardProps> = ({ foldSplit = null, topInset = 0, o
             svOverlaySlideY.value = 20;
             svOverlayOpacity.value = withTiming(1, { duration: 160 });
             svOverlaySlideY.value = withTiming(0, { duration: 200, easing: Easing.out(Easing.cubic) });
+            svDialDragY.value = 0;
+            svDim.value = withTiming(1, { duration: DIM_DURATION_MS });
             setSelectedId(id);
         },
         [boardLayout, locked, menuOpen, showLockedHint]
     );
 
     const handleClose = useCallback(() => {
+        // A swipe or Done has already carried the card off and un-dimmed the rows;
+        // closing without that (e.g. the game got locked) fades them back here.
+        svDim.value = withTiming(0, { duration: DIM_DURATION_MS });
         setSelectedId(null);
     }, []);
 
@@ -249,6 +264,11 @@ const ListBoard: React.FC<ListBoardProps> = ({ foldSplit = null, topInset = 0, o
     // In the side-by-side layout the window's right inset belongs to the
     // docked sheet, not to the board that ends at the fold.
     const boardRightInset = foldSplit === 'columns' ? 0 : insets.right;
+    // Without the sheet over it the board runs to the bottom of the screen,
+    // except above the fold where the top half ends at the hinge.
+    // Rows are back to full brightness once the card is dragged this far down.
+    const dimRange = Math.max(1, (boardLayout?.height ?? 0) - (sheetOverBoard ? bottomSheetHeight : 0) - insets.top - topInset);
+    const boardBottomInset = sheetOverBoard || foldSplit === 'rows' ? 0 : insets.bottom;
     const scrollInsets = {
         top: topInset,
         bottom: sheetOverBoard ? bottomSheetHeight + 10 : insets.bottom + 10,
@@ -276,7 +296,9 @@ const ListBoard: React.FC<ListBoardProps> = ({ foldSplit = null, topInset = 0, o
                         key={id}
                         playerId={id}
                         index={index}
-                        svDimmed={svDimmed}
+                        svDim={svDim}
+                        svDialDragY={svDialDragY}
+                        dimRange={dimRange}
                         disabled={menuOpen}
                         onRowPress={handleRowPress}
                         onRender={onPlayerRowRender}
@@ -295,9 +317,11 @@ const ListBoard: React.FC<ListBoardProps> = ({ foldSplit = null, topInset = 0, o
                     safeAreaTop={insets.top + topInset}
                     safeAreaLeft={insets.left}
                     safeAreaRight={boardRightInset}
+                    safeAreaBottom={boardBottomInset}
                     onClose={handleClose}
                     svOpacity={svOverlayOpacity}
                     svSlideY={svOverlaySlideY}
+                    svDragY={svDialDragY}
                 />
             )}
         </View>

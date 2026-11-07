@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 import * as Haptics from 'expo-haptics';
-import { FlatList, NativeScrollEvent, NativeSyntheticEvent, Pressable, StyleSheet, Text, View } from 'react-native';
+import { BackHandler, FlatList, NativeScrollEvent, NativeSyntheticEvent, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
     Easing,
@@ -24,8 +24,15 @@ import { InteractionType } from '../InteractionType';
 
 import DialControl from './DialControl';
 
-const SWIPE_DISMISS_DISTANCE = 50;
-const SWIPE_DISMISS_VELOCITY = 400;
+// Swipe-down dismiss: released where the throw would carry the card past a quarter
+// of its height, or thrown hard enough on its own. A clear upward flick always cancels.
+const DISMISS_FRACTION = 0.25;
+const DISMISS_MIN_DISTANCE = 80;
+const DISMISS_MAX_DISTANCE = 160;
+const DISMISS_FLING_VELOCITY = 1000;
+const DISMISS_CANCEL_VELOCITY = -300;
+const DISMISS_PROJECTION_S = 0.15; // seconds of release velocity added to the travel
+const DRAG_UP_LIMIT = 40; // upward pull rubber-bands toward this many px
 const MARGIN_BOTTOM = 12;
 const MARGIN_H = 12;
 const CARD_MIN_WIDE_WIDTH = 520;
@@ -33,13 +40,38 @@ const CARD_WIDTH_SCALE = 0.74;
 const CARD_MAX_PORTRAIT_WIDTH = 560;
 const CARD_MAX_LANDSCAPE_WIDTH = 760;
 const CARD_MAX_HEIGHT = 720;
-const MIN_DISMISS_VELOCITY = 600; // px/s floor so slow releases still exit cleanly
+const MIN_DISMISS_VELOCITY = 1000; // px/s floor so slow releases still exit cleanly
+const MIN_EXIT_MS = 150;
+const MAX_EXIT_MS = 320;
 const LS_ACCENT = '#3a86ff'; // matches DialControl's ACCENT for the landscape step pill
 
-function resistedDrag(t: number): number {
+/**
+ * Duration for the swipe-away exit. The exit eases out (quad), whose starting speed is
+ * 2 x distance / duration, so this makes the card leave at the speed the finger let go
+ * instead of stopping and accelerating away.
+ */
+export function dismissExitDuration(remaining: number, velocityY: number): number {
     'worklet';
-    if (t <= 0) return 0;
-    return t / (1 + t / 400); // nearly 1:1 at small pulls, strong resistance beyond ~150 px
+    const speed = Math.max(velocityY, MIN_DISMISS_VELOCITY);
+    const ms = (2 * Math.max(0, remaining) / speed) * 1000;
+    return Math.min(Math.max(ms, MIN_EXIT_MS), MAX_EXIT_MS);
+}
+
+/** Card offset for a vertical drag: 1:1 downward, rubber-banded upward. */
+export function dragOffset(t: number): number {
+    'worklet';
+    if (t >= 0) return t;
+    const up = -t;
+    return -up / (1 + up / DRAG_UP_LIMIT);
+}
+
+/** Whether releasing a swipe at this travel and velocity should dismiss the card. */
+export function shouldDismiss(translationY: number, velocityY: number, cardHeight: number): boolean {
+    'worklet';
+    if (velocityY < DISMISS_CANCEL_VELOCITY) return false;
+    if (translationY > 0 && velocityY > DISMISS_FLING_VELOCITY) return true;
+    const threshold = Math.min(Math.max(cardHeight * DISMISS_FRACTION, DISMISS_MIN_DISTANCE), DISMISS_MAX_DISTANCE);
+    return translationY + velocityY * DISMISS_PROJECTION_S > threshold;
 }
 
 // TODO: see ListBoard.tsx — consolidate inkFor/inkA into shared colorUtils module
@@ -55,6 +87,23 @@ function inkFor(hex: string): string {
 
 function inkA(ink: string, a: number): string {
     return ink === '#000' ? `rgba(0,0,0,${a})` : `rgba(255,255,255,${a})`;
+}
+
+/**
+ * Portrait dial size: as large as fits the card. The rest of the card is fixed chrome
+ * (header, step pill, fine-tune row, Done), so the dial takes whatever height is left,
+ * up to the card's inner width.
+ */
+export function portraitDialSize(pageWidth: number, pageHeight: number, scale: number): number {
+    // Chrome that scales with `scale`: paddings 30, header 90, two gaps 32, Done 48.
+    const scaledChrome = 200 * scale;
+    // Fixed chrome: handle 4 + prev-label gap 2, step pill 28, the dial's two gaps 20,
+    // new-total margin 4, and a little slack for font metrics.
+    const fixedChrome = 6 + 28 + 20 + 4 + 12;
+    // Below the ring, the new-total column is about 0.27 of the dial's size.
+    const byHeight = (pageHeight - scaledChrome - fixedChrome) / 1.27;
+    const byWidth = (pageWidth - 48 * scale) * 0.95;
+    return Math.max(120, Math.floor(Math.min(byHeight, byWidth)));
 }
 
 function bounded(value: number, min: number, max: number): number {
@@ -153,23 +202,24 @@ const PlayerDialPage: React.FC<PlayerDialPageProps> = ({
 
     const isDismissing = useSharedValue(false);
 
-    // Vertical-only dismiss gesture: fails on horizontal so FlatList keeps scroll
-    const dismissGesture = Gesture.Pan()
+    // Vertical-only dismiss gesture: fails on horizontal so FlatList keeps scroll.
+    // One per drag zone (header, and the space below the dial in portrait).
+    const makeDismissGesture = () => Gesture.Pan()
         .enabled(!menuOpen)
         .activeOffsetY([-10, 10])
         .failOffsetX([-8, 8])
         .onUpdate((e) => {
-            swipeDragY.value = resistedDrag(e.translationY);
+            swipeDragY.value = dragOffset(e.translationY);
             swipeDragX.value = e.translationX * 0.35;
         })
         .onEnd((e) => {
-            if (e.translationY > SWIPE_DISMISS_DISTANCE || e.velocityY > SWIPE_DISMISS_VELOCITY) {
+            if (shouldDismiss(e.translationY, e.velocityY, pageHeight)) {
                 isDismissing.value = true;
-                // Duration scales with velocity: fast throw exits quickly, slow release still exits
-                const exitVelocity = Math.max(e.velocityY, MIN_DISMISS_VELOCITY);
-                const duration = Math.max(150, 400 - exitVelocity / 5);
-                swipeDragY.value = withTiming(boardHeight, { duration, easing: Easing.in(Easing.cubic) },
-                    () => runOnJS(onDismiss)(),
+                const duration = dismissExitDuration(boardHeight - swipeDragY.value, e.velocityY);
+                swipeDragY.value = withTiming(boardHeight, { duration, easing: Easing.out(Easing.quad) },
+                    (finished) => {
+                        if (finished) runOnJS(onDismiss)();
+                    },
                 );
                 swipeDragX.value = withTiming(0, { duration, easing: Easing.out(Easing.quad) });
             } else {
@@ -177,13 +227,17 @@ const PlayerDialPage: React.FC<PlayerDialPageProps> = ({
                 swipeDragX.value = withSpring(0, { velocity: e.velocityX, damping: 26, stiffness: 300 });
             }
         })
-        .onFinalize(() => {
-            if (!isDismissing.value) {
+        // onFinalize runs right after onEnd; only reset here when the gesture was
+        // cancelled, or it would replace onEnd's velocity-carrying spring with a still one.
+        .onFinalize((_e, success) => {
+            if (!success && !isDismissing.value) {
                 swipeDragY.value = withSpring(0, { velocity: 0, damping: 26, stiffness: 300 });
                 swipeDragX.value = withSpring(0, { velocity: 0, damping: 26, stiffness: 300 });
             }
             isDismissing.value = false;
         });
+    const dismissGesture = makeDismissGesture();
+    const dismissGestureLower = makeDismissGesture();
 
     if (!player) return null;
 
@@ -285,7 +339,7 @@ const PlayerDialPage: React.FC<PlayerDialPageProps> = ({
         );
     }
 
-    const dialSize = Math.min(Math.round(pageHeight * 0.38), Math.round(pageWidth * 0.9), Math.round(240 * scale));
+    const dialSize = portraitDialSize(pageWidth, pageHeight, scale);
 
     return (
         <View style={cardStyle} testID="dial-card">
@@ -295,9 +349,10 @@ const PlayerDialPage: React.FC<PlayerDialPageProps> = ({
                 paddingTop: 14 * scale,
                 paddingBottom: 16 * scale,
             }]}>
-                {/* Top group: drag handle + name + prev total — also the swipe-to-dismiss zone */}
+                {/* Top group: drag handle + name + prev total, plus any spare space above
+                    the dial. The swipe-to-dismiss zone. */}
                 <GestureDetector gesture={dismissGesture}>
-                    <View style={[styles.topGroup, { gap: 8 * scale }]}>
+                    <View testID="dial-drag-upper" style={[styles.topGroup, styles.dragZone, { gap: 8 * scale }]}>
                         <View style={[styles.dragHandle, { backgroundColor: inkA(ink, 0.3) }]} />
                         <Text
                             style={[styles.name, { color: ink, fontSize: 32 * scale, lineHeight: 36 * scale }]}
@@ -329,6 +384,13 @@ const PlayerDialPage: React.FC<PlayerDialPageProps> = ({
                         menuOpen={menuOpen}
                     />
                 </View>
+
+                {/* Spare space below the dial: grows as much as the space above it, so the
+                    dial sits centred, and also drags to dismiss. Pulls back over its gap so
+                    it costs no height when there is nothing spare. */}
+                <GestureDetector gesture={dismissGestureLower}>
+                    <View testID="dial-drag-lower" style={[styles.dragZone, { marginTop: -16 * scale }]} />
+                </GestureDetector>
 
                 {/* Done */}
                 <Pressable
@@ -362,9 +424,13 @@ interface Props {
     /** Side insets the card keeps clear of, e.g. a landscape notch or the iPhone Duo's vertical bar. */
     safeAreaLeft?: number;
     safeAreaRight?: number;
+    /** Bottom inset the card keeps clear of, e.g. the home indicator when the board runs to the screen edge. */
+    safeAreaBottom?: number;
     onClose: () => void;
     svOpacity: SharedValue<number>;
     svSlideY: SharedValue<number>;
+    /** The card's vertical drag offset, shared so the board can follow it (e.g. un-dim the rows). */
+    svDragY: SharedValue<number>;
 }
 
 const DialOverlay: React.FC<Props> = ({
@@ -375,9 +441,11 @@ const DialOverlay: React.FC<Props> = ({
     safeAreaTop,
     safeAreaLeft = 0,
     safeAreaRight = 0,
+    safeAreaBottom = 0,
     onClose,
     svOpacity,
     svSlideY,
+    svDragY,
 }) => {
     const currentGame = useAppSelector(selectCurrentGame);
     const { menuOpen } = useMenuOpen();
@@ -395,10 +463,11 @@ const DialOverlay: React.FC<Props> = ({
     const targetTop = marginTop;
     const targetLeft = safeAreaLeft;
     const targetWidth = Math.max(0, boardWidth - safeAreaLeft - safeAreaRight);
-    const targetHeight = boardHeight - marginTop - MARGIN_BOTTOM;
+    const marginBottom = Math.max(MARGIN_BOTTOM, safeAreaBottom);
+    const targetHeight = boardHeight - marginTop - marginBottom;
     const cardLayout = getDialCardLayout(targetWidth, targetHeight);
 
-    const swipeDragY = useSharedValue(0);
+    const swipeDragY = svDragY;
     const swipeDragX = useSharedValue(0);
 
     const panelStyle = useAnimatedStyle(() => ({
@@ -414,14 +483,17 @@ const DialOverlay: React.FC<Props> = ({
         ],
     }));
 
+    // Same exit as a released swipe, from wherever the card is now.
     const slideOut = useCallback((then: () => void) => {
-        svOpacity.value = withTiming(0, { duration: 150 });
+        const duration = dismissExitDuration(boardHeight - swipeDragY.value, 0);
+        swipeDragX.value = withTiming(0, { duration, easing: Easing.out(Easing.quad) });
         swipeDragY.value = withTiming(
             boardHeight,
-            { duration: 250, easing: Easing.in(Easing.cubic) },
+            { duration, easing: Easing.out(Easing.quad) },
+            // Close even if interrupted: closing is already set, so nothing else would.
             () => runOnJS(then)(),
         );
-    }, [svOpacity, boardHeight]);
+    }, [swipeDragY, swipeDragX, boardHeight]);
 
     // Close if the game becomes locked while the overlay is open
     useEffect(() => {
@@ -453,12 +525,22 @@ const DialOverlay: React.FC<Props> = ({
         slideOut(onClose);
     }, [slideOut, onClose]);
 
+    // Android back closes the dial instead of leaving the game
+    useEffect(() => {
+        const sub = BackHandler.addEventListener('hardwareBackPress', () => {
+            handleBackdropPress();
+            return true;
+        });
+        return () => sub.remove();
+    }, [handleBackdropPress]);
+
     // FlatList paged scroll: track active index
     const handleScrollEnd = useCallback((e: NativeSyntheticEvent<NativeScrollEvent>) => {
         swipeDragY.value = 0;
         swipeDragX.value = 0;
         const newIndex = Math.round(e.nativeEvent.contentOffset.x / targetWidth);
         if (newIndex === activeIndexRef.current) return;
+        Haptics.selectionAsync();
         setActiveIndex(newIndex);
     }, [targetWidth]);
 
@@ -563,6 +645,10 @@ const styles = StyleSheet.create({
     dialWrap: {
         alignItems: 'center',
     },
+    dragZone: {
+        flexGrow: 1,
+        alignSelf: 'stretch',
+    },
     doneBtn: {
         width: '74%',
         maxWidth: 300,
@@ -570,7 +656,6 @@ const styles = StyleSheet.create({
         borderRadius: 14,
         alignItems: 'center',
         justifyContent: 'center',
-        marginTop: 'auto',
     },
     doneBtnText: {
         fontSize: 20,
