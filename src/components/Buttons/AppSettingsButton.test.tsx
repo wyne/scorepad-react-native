@@ -16,7 +16,7 @@ jest.mock('@react-navigation/native', () => ({
 jest.mock('../../Analytics');
 jest.mock('expo-font'); // https://github.com/callstack/react-native-paper/issues/4561
 
-const createTestStore = () =>
+const createTestStore = (seenFeatureNotifications: string[] = []) =>
     configureStore({
         reducer: {
             settings: () => ({
@@ -32,7 +32,7 @@ const createTestStore = () =>
                 appOpens: 0,
                 installId: 'test-install-id',
                 keepScreenAwake: false,
-                seenFeatureNotifications: [],
+                seenFeatureNotifications,
             }),
         },
     });
@@ -44,8 +44,8 @@ describe('AppSettingsButton', () => {
     (useNavigation as jest.Mock).mockReturnValue(navigation);
   });
 
-  const renderComponent = () => {
-    const store = createTestStore();
+  const renderComponent = (seen?: string[]) => {
+    const store = createTestStore(seen);
     return render(
       <Provider store={store}>
         <AppSettingsButton />
@@ -69,5 +69,15 @@ describe('AppSettingsButton', () => {
     await waitFor(() => {
       expect(logEvent).toHaveBeenCalledWith('app_info');
     });
+  });
+
+  it('shows the new dot while Game Modes is unseen', () => {
+    const { getByTestId } = renderComponent(['keep_screen_awake', 'dial_gesture']);
+    expect(getByTestId('app-settings-button').children.length).toBeGreaterThan(1);
+  });
+
+  it('hides the new dot once every settings feature is seen', () => {
+    const { getByTestId } = renderComponent(['keep_screen_awake', 'dial_gesture', 'game_modes']);
+    expect(getByTestId('app-settings-button').children).toHaveLength(1);
   });
 });

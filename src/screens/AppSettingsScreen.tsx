@@ -15,7 +15,7 @@ import { loadSeedData } from '../components/AppInfo/SeedData';
 import HeaderButton from '../components/Buttons/HeaderButton';
 import { PlayerNumberStyle } from '../components/PlayerTiles/PlayerNumberStyle';
 import SectionLabel from '../components/SectionLabel';
-import { FEATURE_KEEP_SCREEN_AWAKE } from '../constants';
+import { FEATURE_GAME_MODES, FEATURE_KEEP_SCREEN_AWAKE, SETTINGS_FEATURE_NOTIFICATIONS } from '../constants';
 import { useTheme } from '../theme';
 
 const PLAYER_NUMBER_OPTIONS: { style: PlayerNumberStyle; label: string }[] = [
@@ -94,13 +94,14 @@ const AppSettingsScreen: React.FunctionComponent<Props> = ({ navigation }) => {
 
     const dispatch = useAppDispatch();
 
-    const isUnseen = !seenFeatureNotifications.includes(FEATURE_KEEP_SCREEN_AWAKE);
+    const isKeepAwakeUnseen = !seenFeatureNotifications.includes(FEATURE_KEEP_SCREEN_AWAKE);
+    const isGameModesUnseen = !seenFeatureNotifications.includes(FEATURE_GAME_MODES);
     const featureNotificationsResetRef = useRef(false);
 
     useEffect(() => {
         return () => {
             if (featureNotificationsResetRef.current) return;
-            dispatch(markFeatureNotificationSeen(FEATURE_KEEP_SCREEN_AWAKE));
+            SETTINGS_FEATURE_NOTIFICATIONS.forEach(f => dispatch(markFeatureNotificationSeen(f)));
         };
     }, [dispatch]);
 
@@ -214,7 +215,7 @@ const AppSettingsScreen: React.FunctionComponent<Props> = ({ navigation }) => {
                 <SectionSeparator />
                 <SectionItem>
                     <View style={styles.labelRow}>
-                        {isUnseen && <View style={[styles.featureDot, { backgroundColor: theme.warning }]} />}
+                        {isKeepAwakeUnseen && <View style={[styles.featureDot, { backgroundColor: theme.warning }]} />}
                         <SectionItemText text="Keep Screen Awake" />
                         <View style={[styles.betaPill, { backgroundColor: theme.separator }]}>
                             <Text style={[styles.betaPillText, { color: theme.text }]}>Beta</Text>
@@ -225,6 +226,7 @@ const AppSettingsScreen: React.FunctionComponent<Props> = ({ navigation }) => {
                 <SectionSeparator />
                 <SectionItem>
                     <View style={styles.labelRow}>
+                        {isGameModesUnseen && <View testID="game-modes-new-dot" style={[styles.featureDot, { backgroundColor: theme.warning }]} />}
                         <SectionItemText text="Game Modes" />
                         <View style={[styles.betaPill, { backgroundColor: theme.separator }]}>
                             <Text style={[styles.betaPillText, { color: theme.text }]}>Beta</Text>

@@ -8,7 +8,7 @@ import { View } from 'react-native';
 
 import { useAppSelector } from '../../../redux/hooks';
 import { logEvent } from '../../Analytics';
-import { FEATURE_KEEP_SCREEN_AWAKE } from '../../constants';
+import { SETTINGS_FEATURE_NOTIFICATIONS } from '../../constants';
 import { useTheme } from '../../theme';
 
 import HeaderButton from './HeaderButton';
@@ -17,7 +17,7 @@ type Navigation = NativeStackNavigationProp<ParamListBase>;
 
 const useAppSettingsButton = (navigation: Navigation) => {
     const hasUnseenFeature = useAppSelector(state =>
-        !state.settings.seenFeatureNotifications.includes(FEATURE_KEEP_SCREEN_AWAKE)
+        SETTINGS_FEATURE_NOTIFICATIONS.some(f => !state.settings.seenFeatureNotifications.includes(f))
     );
 
     const onPress = () => {

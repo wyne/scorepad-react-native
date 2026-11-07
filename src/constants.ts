@@ -9,6 +9,10 @@ export const MAX_PLAYERS = 50;
 export const MAX_TILE_PLAYERS = 20;
 export const FEATURE_KEEP_SCREEN_AWAKE = 'keep_screen_awake';
 export const FEATURE_DIAL_GESTURE = 'dial_gesture';
+export const FEATURE_GAME_MODES = 'game_modes';
+// Features whose "new" dot sits on a row of the App Settings screen. Any of
+// them unseen badges the settings button so people find the row.
+export const SETTINGS_FEATURE_NOTIFICATIONS = [FEATURE_KEEP_SCREEN_AWAKE, FEATURE_GAME_MODES];
 // Every feature that can show a "new" badge. Fresh installs start with all of
 // these marked seen, so badges only reach existing users who update.
-export const FEATURE_NOTIFICATIONS = [FEATURE_KEEP_SCREEN_AWAKE, FEATURE_DIAL_GESTURE];
+export const FEATURE_NOTIFICATIONS = [FEATURE_KEEP_SCREEN_AWAKE, FEATURE_DIAL_GESTURE, FEATURE_GAME_MODES];
