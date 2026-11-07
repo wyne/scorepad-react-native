@@ -1,4 +1,4 @@
-import { estimateParticleTextSize, getParticlePlacement } from './ScoreParticlePlacement';
+import { estimateParticleTextSize, getFlyPath, getParticlePlacement } from './ScoreParticlePlacement';
 
 // "+1" at 30pt: 36 wide, 36 tall.
 const TEXT_W = 36;
@@ -52,5 +52,29 @@ describe('getParticlePlacement', () => {
 
     it('centers the text when the surface is narrower than it', () => {
         expect(place(0, 50, 'up', 30, 120).left).toBe(15 - 70);
+    });
+});
+
+describe('getFlyPath', () => {
+    it('ends at the round score, just right of the tile middle', () => {
+        const up = place(40, 60, 'up', 200, 150);
+        const path = getFlyPath(up, 'up', 200, 150, TEXT_H);
+        // Start is the touch (40, 60); the score sits at (120, 150) in the add half.
+        expect(path.endX).toBe(80);
+        expect(path.endY).toBe(90);
+
+        const down = place(40, 60, 'down', 200, 150);
+        expect(getFlyPath(down, 'down', 200, 150, TEXT_H)).toEqual(expect.objectContaining({ endX: 80, endY: -60 }));
+    });
+
+    it('arcs up and over from the add half, and scoops up from the subtract half', () => {
+        expect(getFlyPath(place(40, 100, 'up', 200, 150), 'up', 200, 150, TEXT_H).controlY).toBe(-50);
+        expect(getFlyPath(place(40, 60, 'down', 200, 150), 'down', 200, 150, TEXT_H).controlY).toBe(50);
+    });
+
+    it('keeps the arc inside the tile near its outer edge', () => {
+        // Touch at y=30 in the add half: the arc may only rise to half the text height.
+        expect(getFlyPath(place(40, 30, 'up', 200, 150), 'up', 200, 150, TEXT_H).controlY).toBe(18 - 30);
+        expect(getFlyPath(place(40, 130, 'down', 200, 150), 'down', 200, 150, TEXT_H).controlY).toBe(132 - 130);
     });
 });

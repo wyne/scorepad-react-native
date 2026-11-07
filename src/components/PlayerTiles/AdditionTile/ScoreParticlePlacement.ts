@@ -53,3 +53,45 @@ export const getParticlePlacement = (
         drift: Math.min(PARTICLE_DRIFT, Math.max(0, availableDrift)),
     };
 };
+
+// How far the fly arc bows away from a straight line, before it heads into the score.
+const FLY_ARC = 50;
+
+type FlyPath = {
+    /** Quadratic curve control point and end, relative to the particle's start. */
+    controlX: number;
+    controlY: number;
+    endX: number;
+    endY: number;
+};
+
+/**
+ * The curve a fly particle follows from where it was placed into the round
+ * score, which sits at the tile's middle, just right of center. A particle in
+ * the top half arcs up and over into it; one in the bottom half dips and
+ * scoops up into it.
+ */
+export const getFlyPath = (
+    placement: ParticlePlacement,
+    direction: 'up' | 'down',
+    containerWidth: number,
+    containerHeight: number,
+    textHeight: number
+): FlyPath => {
+    const startX = placement.left + PARTICLE_BOX_WIDTH / 2;
+    const startY = placement.top + PARTICLE_BOX_HEIGHT / 2;
+    const targetX = containerWidth * 0.6;
+    // The add half's bottom edge, or the subtract half's top edge, is the tile's middle.
+    const targetY = direction === 'up' ? containerHeight : 0;
+    const halfTextHeight = textHeight / 2;
+    const controlY = direction === 'up'
+        ? Math.max(Math.min(startY, targetY) - FLY_ARC, halfTextHeight)
+        : Math.min(Math.max(startY, targetY) + FLY_ARC, containerHeight - halfTextHeight);
+
+    return {
+        controlX: (startX + targetX) / 2 - startX,
+        controlY: controlY - startY,
+        endX: targetX - startX,
+        endY: targetY - startY,
+    };
+};

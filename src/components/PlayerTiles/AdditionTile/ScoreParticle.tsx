@@ -5,6 +5,7 @@ import Animated, { Easing, interpolate, useAnimatedStyle, useSharedValue, withTi
 
 import {
     estimateParticleTextSize,
+    getFlyPath,
     getParticlePlacement,
     PARTICLE_BOX_HEIGHT,
     PARTICLE_BOX_WIDTH,
@@ -24,14 +25,24 @@ type Props = {
     color: string;
     /** A hold adds the larger step, so its number is drawn larger. */
     large?: boolean;
+    /**
+     * float: drift away from the score while fading.
+     * fly: pop under the finger, then arc into the round score.
+     */
+    variant?: 'float' | 'fly';
     /** Size of the half-tile touch surface; the tile clips the particle at its outer edge. */
     containerWidth: number;
     containerHeight: number;
 };
 
+/** How long a fly particle takes from the tap until it lands in the score. */
+export const FLY_DURATION = 460;
+const FLY_POP_END = 130;
+const FLY_HOLD_END = 190;
+
 /**
- * A score change drawn under the finger: it pops in, then drifts away from
- * the score while it fades.
+ * A score change drawn under the finger. It pops in, then either drifts away
+ * from the score while it fades, or flies into the score.
  */
 export const ScoreParticle: React.FunctionComponent<Props> = React.memo(({
     value,
@@ -40,6 +51,7 @@ export const ScoreParticle: React.FunctionComponent<Props> = React.memo(({
     direction,
     color,
     large = false,
+    variant = 'float',
     containerWidth,
     containerHeight,
 }) => {
@@ -58,12 +70,39 @@ export const ScoreParticle: React.FunctionComponent<Props> = React.memo(({
         x, y, direction, containerWidth, containerHeight, jitter, text.width, text.height
     );
 
+    const fly = getFlyPath(placement, direction, containerWidth, containerHeight, text.height);
+
     const animatedStyle = useAnimatedStyle(() => {
         const t = progress.value * PARTICLE_DURATION;
+        if (variant === 'fly') {
+            if (t < FLY_HOLD_END) {
+                return {
+                    opacity: interpolate(t, [0, 70], [0, 1], 'clamp'),
+                    transform: [
+                        { translateX: 0 },
+                        { translateY: 0 },
+                        { scale: interpolate(t, [0, FLY_POP_END, FLY_HOLD_END], [0.4, 1.12, 1], 'clamp') },
+                    ],
+                };
+            }
+            // Ease in and out along a curve from the touch into the score.
+            const raw = Math.min(1, (t - FLY_HOLD_END) / (FLY_DURATION - FLY_HOLD_END));
+            const k = raw < 0.5 ? 4 * raw * raw * raw : 1 - Math.pow(-2 * raw + 2, 3) / 2;
+            const u = 1 - k;
+            return {
+                opacity: t >= FLY_DURATION ? 0 : interpolate(k, [0, 0.8, 1], [1, 1, 0.2], 'clamp'),
+                transform: [
+                    { translateX: 2 * u * k * fly.controlX + k * k * fly.endX },
+                    { translateY: 2 * u * k * fly.controlY + k * k * fly.endY },
+                    { scale: interpolate(k, [0, 1], [1, 0.5], 'clamp') },
+                ],
+            };
+        }
         const drift = 1 - Math.pow(1 - progress.value, 3);
         return {
             opacity: interpolate(t, [0, 90, 330, PARTICLE_DURATION], [0, 1, 1, 0], 'clamp'),
             transform: [
+                { translateX: 0 },
                 { translateY: sign * placement.drift * drift },
                 { scale: interpolate(t, [0, 140, 260], [0.55, 1.15, 1], 'clamp') },
             ],

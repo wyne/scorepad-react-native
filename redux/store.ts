@@ -63,6 +63,7 @@ export const settingsPersistConfig = {
         'onboarded',
         'showPointParticles',
         'playerNumbers',
+        'particleStyle',
         'interactionType',
         'lastUsedInteractionType',
         'learnedInteractionTypes',

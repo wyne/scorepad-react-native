@@ -114,6 +114,7 @@ const isSettingsState = (value: unknown, gameEntities: Record<string, unknown>):
         && typeof value.showPointParticles === 'boolean'
         // Backups from before player number styles carry the old on/off switch.
         && (isPlayerNumberStyle(value.playerNumbers) || typeof value.showPlayerIndex === 'boolean')
+        && (value.particleStyle === undefined || ['float', 'fly'].includes(value.particleStyle as string))
         && isInteractionType(value.interactionType)
         && (value.lastUsedInteractionType === undefined || isInteractionType(value.lastUsedInteractionType))
         && (value.learnedInteractionTypes === undefined

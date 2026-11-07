@@ -14,10 +14,12 @@ export const useAnalyticsUserProperties = () => {
     const keepScreenAwake = useAppSelector(state => state.settings.keepScreenAwake);
     const pointParticles = useAppSelector(state => state.settings.showPointParticles);
     const playerNumbers = useAppSelector(state => state.settings.playerNumbers);
+    const particleStyle = useAppSelector(state => state.settings.particleStyle ?? 'float');
     const colorScheme = useAppSelector(state => state.settings.colorScheme);
 
     useEffect(() => { void setUserProperty('keep_screen_awake', String(keepScreenAwake)); }, [keepScreenAwake]);
     useEffect(() => { void setUserProperty('point_particles', String(pointParticles)); }, [pointParticles]);
     useEffect(() => { void setUserProperty('player_numbers', playerNumbers); }, [playerNumbers]);
+    useEffect(() => { void setUserProperty('particle_style', particleStyle); }, [particleStyle]);
     useEffect(() => { void setUserProperty('color_scheme', colorScheme); }, [colorScheme]);
 };
