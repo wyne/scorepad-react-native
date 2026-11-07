@@ -173,10 +173,17 @@ jest.mock('react-native-safe-area-context', () => ({
 // Mock GameSheetContext
 const mockPendingIndex: { current: number | null } = { current: null };
 let mockFoldSplit: 'columns' | 'rows' | null = null;
-jest.mock('../../hooks/useExpandedGameLayout', () => ({
-    ...jest.requireActual('../../hooks/useExpandedGameLayout'),
-    useGameFoldSplit: () => mockFoldSplit,
-}));
+// Docked across the iPhone Duo's fold. (Docking in a wide window is covered by
+// the hook's own tests; the test window would count as one.)
+jest.mock('../../hooks/useExpandedGameLayout', () => {
+    const actual = jest.requireActual('../../hooks/useExpandedGameLayout');
+    return {
+        ...actual,
+        useGameDock: () => mockFoldSplit,
+        useGameDockLayout: () => (mockFoldSplit == null ? null : `${mockFoldSplit}-fold`),
+        useGameDockBounds: (dock: 'columns' | 'rows' | null) => actual.useFoldSplitBounds(dock),
+    };
+});
 
 jest.mock('./GameSheetContext', () => ({
     useGameSheetContext: jest.fn(() => ({

@@ -22,7 +22,7 @@ import GameOverSheet from '../components/Sheets/GameOverSheet';
 import { bottomSheetHeight } from '../components/Sheets/GameSheet';
 import GestureInfoSheet from '../components/Sheets/GestureInfoSheet';
 import PointValuesSheet from '../components/Sheets/PointValuesSheet';
-import { addHingeClosingListener, useFoldSplitBounds, useGameFoldSplit, useRoundPickerInBottomStrip, useVerticalBarLayout } from '../hooks/useExpandedGameLayout';
+import { addHingeClosingListener, useGameDock, useGameDockBounds, useGameDockLayout, useVerticalBarLayout } from '../hooks/useExpandedGameLayout';
 
 function useKeepScreenAwake(active: boolean): void {
     useEffect(() => {
@@ -202,20 +202,16 @@ const GameScreen: React.FunctionComponent<Props> = ({ navigation }) => {
         navigation.setOptions({ unstable_headerRightItems: () => headerRightItems });
     }, [navigation, headerRightItems]);
 
-    // On a partially open iPhone Duo the board keeps to the half before the
-    // fold; the game sheet docks on the other half (see GameSheet).
-    const foldSplit = useGameFoldSplit();
+    // Where the game sheet docks open (across a fold, or in a wide window),
+    // the board keeps to the part of the window before it (see GameSheet).
+    const dock = useGameDock();
     const { width: windowWidth, height: windowHeight } = useWindowDimensions();
-    const { boardEnd } = useFoldSplitBounds(foldSplit);
-    // On the iPhone Duo's inner display in landscape the round picker moves out
-    // of the header (see GameSheet), which leaves it empty. The tiles take
-    // that band, so their top margin matches the small one at the bottom.
-    const headerEmpty = useRoundPickerInBottomStrip();
-    const paddingTop = scrollUnderHeader || (headerEmpty && !isDial) ? 0 : headerHeight;
+    const { boardEnd } = useGameDockBounds(dock);
+    const paddingTop = scrollUnderHeader ? 0 : headerHeight;
     // Room for the collapsed game sheet below the tiles (the dial list scrolls
     // under it instead). It's part of the board's frame rather than padding
     // inside the board, so folding and unfolding animate it with the board.
-    const boardBottomInset = isDial || foldSplit ? 0 : fullscreen ? 20 : bottomSheetHeight + 2;
+    const boardBottomInset = isDial || dock ? 0 : fullscreen ? 20 : bottomSheetHeight + 2;
     // Give the board and its tiles the same geometry in this render. Measuring
     // the resized native board first exposes an old grid inside the new bounds.
     // The tiles' frame stays inside the safe area at the sides (the dial list
@@ -226,25 +222,29 @@ const GameScreen: React.FunctionComponent<Props> = ({ navigation }) => {
     const insetLeft = isDial ? 0 : insets.left;
     // Docked on the left half, the board stops short of the vertical bar
     // anyway.
-    const insetRight = isDial || foldSplit === 'columns' ? 0 : insets.right;
+    const insetRight = isDial || dock === 'columns' ? 0 : insets.right;
     const boardSize = useMemo(() => ({
-        width: Math.max(0, (foldSplit === 'columns' ? boardEnd : windowWidth) - insetLeft - insetRight),
-        height: Math.max(0, (foldSplit === 'rows' ? boardEnd : windowHeight) - paddingTop - boardBottomInset),
-    }), [foldSplit, boardEnd, windowWidth, windowHeight, paddingTop, boardBottomInset, insetLeft, insetRight]);
+        width: Math.max(0, (dock === 'columns' ? boardEnd : windowWidth) - insetLeft - insetRight),
+        height: Math.max(0, (dock === 'rows' ? boardEnd : windowHeight) - paddingTop - boardBottomInset),
+    }), [dock, boardEnd, windowWidth, windowHeight, paddingTop, boardBottomInset, insetLeft, insetRight]);
     const boardOrigin = useMemo(() => ({ x: insetLeft, y: paddingTop }), [insetLeft, paddingTop]);
 
-    // Animate the board's resize only when folding or unfolding changes it,
-    // not when the window rotates or the header changes height.
+    // Animate the board's resize only when docking or undocking the sheet
+    // changes it (folding, unfolding, or showing and hiding the sheet), not
+    // when the window rotates or the header changes height.
     const reduceMotion = useReducedMotion();
     const boardResize = useMemo(() => boardResizeTransition(reduceMotion), [reduceMotion]);
-    const lastFoldSplitRef = useRef(foldSplit);
+    const dockLayout = useGameDockLayout();
+    const lastDockLayoutRef = useRef(dockLayout);
     const animateBoardUntilRef = useRef(0);
-    if (lastFoldSplitRef.current !== foldSplit) {
-        // Columns to rows is a rotation while folded: leave that to the system.
-        if ((lastFoldSplitRef.current == null) !== (foldSplit == null)) {
+    if (lastDockLayoutRef.current !== dockLayout) {
+        const last = lastDockLayoutRef.current;
+        // Docking or undocking, or moving the split between a panel and the
+        // fold. Columns to rows is a rotation: leave that to the system.
+        if ((last == null) !== (dockLayout == null) || last?.split('-')[0] === dockLayout?.split('-')[0]) {
             animateBoardUntilRef.current = Date.now() + BOARD_RESIZE_WINDOW_MS;
         }
-        lastFoldSplitRef.current = foldSplit;
+        lastDockLayoutRef.current = dockLayout;
     }
     const { width: curtainWidth, height: curtainHeight } = useWindowDimensions();
     const curtain = useDisplaySwitchCurtain(`${Math.round(curtainWidth)}x${Math.round(curtainHeight)}`, headerKnown);
@@ -268,7 +268,7 @@ const GameScreen: React.FunctionComponent<Props> = ({ navigation }) => {
                     {isDial
                         ? <Animated.View key="rows" entering={FadeIn.duration(220)} exiting={FadeOut.duration(180)} style={StyleSheet.absoluteFill}>
                             <ListBoard
-                                foldSplit={foldSplit}
+                                dock={dock}
                                 topInset={scrollUnderHeader ? headerHeight : 0}
                                 overlay={<GestureHintToast top={toastTop} />}
                             />

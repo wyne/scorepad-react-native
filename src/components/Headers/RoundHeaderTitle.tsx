@@ -11,7 +11,7 @@ import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
 import { selectCurrentGameOverReason } from '../../../redux/selectors';
 import { toggleHomeFullscreen } from '../../../redux/SettingsSlice';
 import { logEvent } from '../../Analytics';
-import { useGameFoldSplit } from '../../hooks/useExpandedGameLayout';
+import { useGameDock } from '../../hooks/useExpandedGameLayout';
 import { LIQUID_GLASS } from '../../platform';
 import { useTheme } from '../../theme';
 import { useLockedHint } from '../LockedHintContext';
@@ -35,9 +35,9 @@ const RoundHeaderTitle: React.FunctionComponent = () => {
     const gameSheetRef = useGameSheetContext();
     const gameSheetPendingIndex = useGameSheetPendingIndex();
     const fullscreen = useAppSelector(state => state.settings.home_fullscreen);
-    // Docked beside the board on a partially open iPhone Duo, the sheet is
+    // Docked beside or below the board (see useGameDock), the sheet is
     // already open and has a single snap point.
-    const sheetDocked = useGameFoldSplit() != null;
+    const sheetDocked = useGameDock() != null;
     const { lockedHintVisible, hideLockedHint } = useLockedHint();
 
     if (currentGameId == null) return null;

@@ -72,14 +72,18 @@ jest.mock('@gorhom/bottom-sheet', () => {
 
 jest.mock('../components/Sheets/GameSheet', () => ({ bottomSheetHeight: 80 }));
 
-jest.mock('../hooks/useExpandedGameLayout', () => ({
-    ...jest.requireActual('../hooks/useExpandedGameLayout'),
-    useGameFoldSplit: jest.fn(() => null),
-    useRoundPickerInBottomStrip: jest.fn(() => false),
-}));
-
-const mockUseGameFoldSplit: jest.Mock = jest.requireMock('../hooks/useExpandedGameLayout').useGameFoldSplit;
-const mockUseRoundPickerInBottomStrip: jest.Mock = jest.requireMock('../hooks/useExpandedGameLayout').useRoundPickerInBottomStrip;
+// Docked across the iPhone Duo's fold, which splits through the middle of the
+// window. (Docking in a wide window is covered by the hook's own tests.)
+let mockDock: 'columns' | 'rows' | null = null;
+jest.mock('../hooks/useExpandedGameLayout', () => {
+    const actual = jest.requireActual('../hooks/useExpandedGameLayout');
+    return {
+        ...actual,
+        useGameDock: () => mockDock,
+        useGameDockLayout: () => (mockDock == null ? null : `${mockDock}-fold`),
+        useGameDockBounds: (dock: 'columns' | 'rows' | null) => actual.useFoldSplitBounds(dock),
+    };
+});
 
 // Mock the components that GameScreen uses
 jest.mock('../components/Buttons/GameOptionsButton', () => ({
@@ -294,28 +298,7 @@ describe('GameScreen', () => {
 
         afterEach(() => {
             mockInsets = { top: 0, bottom: 0, left: 0, right: 0 };
-            mockUseGameFoldSplit.mockReturnValue(null);
-            mockUseRoundPickerInBottomStrip.mockReturnValue(false);
-        });
-
-        describe('in landscape on the inner display, with an empty header', () => {
-            beforeEach(() => mockUseRoundPickerInBottomStrip.mockReturnValue(true));
-
-            it('lets the board take the empty header band when docked', () => {
-                mockUseGameFoldSplit.mockReturnValue('columns');
-                const { height } = Dimensions.get('window');
-                const { getByTestId } = renderGame();
-
-                expect(getByTestId('game-screen').props.style).toMatchObject({ paddingTop: 0 });
-                expect(getByTestId('tile-board').props.boardSize.height).toBe(height);
-            });
-
-            it('lets the board take the empty header band above the collapsed sheet when flat', () => {
-                const { height } = Dimensions.get('window');
-                const { getByTestId } = renderGame();
-
-                expect(getByTestId('tile-board').props.boardSize.height).toBe(height - 82);
-            });
+            mockDock = null;
         });
 
         it('fills the screen with the board when flat, above the collapsed sheet', () => {
@@ -349,7 +332,7 @@ describe('GameScreen', () => {
 
         it('ignores the right safe area when docked on the left half', () => {
             mockInsets = { top: 0, bottom: 0, left: 12, right: 28 };
-            mockUseGameFoldSplit.mockReturnValue('columns');
+            mockDock = 'columns';
             const { width } = Dimensions.get('window');
             const { getByTestId } = renderGame();
 
@@ -357,7 +340,7 @@ describe('GameScreen', () => {
         });
 
         it('keeps the board to the left of the fold in landscape', () => {
-            mockUseGameFoldSplit.mockReturnValue('columns');
+            mockDock = 'columns';
             const { width, height } = Dimensions.get('window');
             const { getByTestId } = renderGame();
 
@@ -371,7 +354,7 @@ describe('GameScreen', () => {
         });
 
         it('keeps the board above the fold in portrait, below the header', () => {
-            mockUseGameFoldSplit.mockReturnValue('rows');
+            mockDock = 'rows';
             const { width, height } = Dimensions.get('window');
             const { getByTestId } = renderGame();
 

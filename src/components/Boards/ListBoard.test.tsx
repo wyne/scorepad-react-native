@@ -171,7 +171,7 @@ describe('ListBoard', () => {
         mockSafeAreaInsets = { top: 0, bottom: 0, left: 24, right: 16 };
         const store = createStore();
         const { getByTestId, getByText } = render(
-            <Provider store={store}><ListBoard foldSplit="columns" /></Provider>
+            <Provider store={store}><ListBoard dock="columns" /></Provider>
         );
 
         expect(StyleSheet.flatten(getByTestId('list-board-scroll').props.contentContainerStyle)).toEqual(

@@ -10,7 +10,7 @@ import { selectGameById } from '../../../redux/GamesSlice';
 import { useAppSelector } from '../../../redux/hooks';
 import { toScores, totalScoreBeforeRound } from '../../../redux/scoreUtils';
 import { selectPlayerNumbers } from '../../../redux/selectors';
-import type { GameFoldSplit } from '../../hooks/useExpandedGameLayout';
+import type { GameDock } from '../../hooks/useExpandedGameLayout';
 import DialOverlay from '../Interactions/Dial/DialOverlay';
 import { useLockedHint } from '../LockedHintContext';
 import { useMenuOpen } from '../MenuOpenContext';
@@ -183,7 +183,7 @@ const PlayerRow: React.FC<PlayerRowProps> = ({ playerId, index, svDimmed, disabl
 const MemoizedPlayerRow = React.memo(PlayerRow);
 
 interface ListBoardProps {
-    foldSplit?: GameFoldSplit | null;
+    dock?: GameDock | null;
     /** Space at the top the rows can scroll under, e.g. a transparent header. */
     topInset?: number;
     /** Drawn above the rows but below an open dial, e.g. the gesture toast. */
@@ -191,7 +191,7 @@ interface ListBoardProps {
     onPlayerRowRender?: (id: string) => void;
 }
 
-const ListBoard: React.FC<ListBoardProps> = ({ foldSplit = null, topInset = 0, overlay, onPlayerRowRender }) => {
+const ListBoard: React.FC<ListBoardProps> = ({ dock = null, topInset = 0, overlay, onPlayerRowRender }) => {
     const { playerIds, locked } = useAppSelector((state) => {
         const currentGameId = state.settings.currentGameId;
         const currentGame = currentGameId ? selectGameById(state, currentGameId) : undefined;
@@ -203,8 +203,8 @@ const ListBoard: React.FC<ListBoardProps> = ({ foldSplit = null, topInset = 0, o
     }, shallowEqual);
     const fullscreen = useAppSelector(state => state.settings.home_fullscreen);
     // The game sheet covers the bottom of the board unless it is hidden
-    // (fullscreen) or docked beside it on a partially open iPhone Duo.
-    const sheetOverBoard = !fullscreen && foldSplit == null;
+    // (fullscreen) or docked beside or below it.
+    const sheetOverBoard = !fullscreen && dock == null;
     const { menuOpen } = useMenuOpen();
     const { showLockedHint } = useLockedHint();
     const insets = useSafeAreaInsets();
@@ -247,8 +247,8 @@ const ListBoard: React.FC<ListBoardProps> = ({ foldSplit = null, topInset = 0, o
 
     if (!playerIds?.length) return null;
     // In the side-by-side layout the window's right inset belongs to the
-    // docked sheet, not to the board that ends at the fold.
-    const boardRightInset = foldSplit === 'columns' ? 0 : insets.right;
+    // docked sheet, not to the board that ends before it.
+    const boardRightInset = dock === 'columns' ? 0 : insets.right;
     const scrollInsets = {
         top: topInset,
         bottom: sheetOverBoard ? bottomSheetHeight + 10 : insets.bottom + 10,

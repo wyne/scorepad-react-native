@@ -84,10 +84,8 @@ export const Navigation = () => {
         : { ...DefaultTheme, colors: { ...DefaultTheme.colors, background: theme.background, card: theme.backgroundSecondary } };
 
     const fullscreen = useAppSelector(state => state.settings.home_fullscreen);
-    // On the iPhone Duo's inner display the round picker sits beside the game
-    // sheet instead of in the header, and the header collapses (see GameSheet).
-    // On a partially open foldable it moves into the sheet docked beside the
-    // board.
+    // With the game sheet docked beside the board, the round picker moves
+    // into the sheet (see GameSheet).
     const roundPickerInHeader = !useRoundPickerOutOfHeader();
     // With vertical bars (iPhone Duo), headers drop their background (see
     // bareHeaderOptions). iOS also scrolls the list's header title away with

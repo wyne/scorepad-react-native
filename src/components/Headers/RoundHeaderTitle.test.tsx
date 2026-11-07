@@ -43,6 +43,13 @@ jest.mock('@rneui/base', () => ({
 }));
 
 const mockPresent = jest.fn();
+// A phone-sized layout: the sheet isn't docked. (The test window is wide
+// enough to dock it.)
+jest.mock('../../hooks/useExpandedGameLayout', () => ({
+    ...jest.requireActual('../../hooks/useExpandedGameLayout'),
+    useGameDock: () => null,
+}));
+
 jest.mock('../Sheets/GameOverSheetContext', () => ({
     useGameOverSheetContext: jest.fn(() => ({ current: { present: mockPresent, close: jest.fn() } })),
 }));

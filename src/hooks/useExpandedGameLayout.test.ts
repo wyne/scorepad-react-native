@@ -1,7 +1,7 @@
 import { act, renderHook } from '@testing-library/react-native';
 import { Platform } from 'react-native';
 
-import { useExpandedGameLayout, useFoldSplitBounds, useGameFoldSplit, useVerticalBarLayout } from './useExpandedGameLayout';
+import { useAvailableGameDock, useFoldSplitBounds, useGameDock, useGameDockBounds, useGameDockLayout, useGameFoldSplit, useVerticalBarLayout } from './useExpandedGameLayout';
 
 type MockHinge = {
     angle: number;
@@ -34,6 +34,11 @@ type MockFold = {
 } | null;
 let mockFold: MockFold = null;
 let mockFoldListener: ((event: { fold: MockFold }) => void) | null = null;
+let mockInsets = { top: 0, right: 0, bottom: 0, left: 0 };
+jest.mock('react-native-safe-area-context', () => ({
+    useSafeAreaInsets: () => mockInsets,
+}));
+
 jest.mock('../../modules/fold-features', () => ({
     useFold: () => mockFold,
     getFold: () => mockFold,
@@ -62,37 +67,122 @@ const setPlatform = (os: 'ios' | 'android', isPad = false) => {
     Object.defineProperty(Platform, 'isPad', { value: isPad, configurable: true });
 };
 
-const expanded = () => renderHook(() => useExpandedGameLayout()).result.current;
+describe('useGameDock', () => {
+    const dock = () => renderHook(() => useGameDock()).result.current;
+    const available = () => renderHook(() => useAvailableGameDock()).result.current;
 
-describe('useExpandedGameLayout', () => {
-    beforeEach(() => setPlatform('ios'));
-    afterAll(() => setPlatform('ios'));
-
-    it('is true for the iPhone Duo inner display in landscape', () => {
-        setWindow(951, 669);
-        expect(expanded()).toBe(true);
+    beforeEach(() => {
+        setPlatform('ios');
+        mockFullscreen = false;
+        mockCurrentHinge = null;
+        mockFold = null;
+    });
+    afterAll(() => {
+        setPlatform('ios');
+        mockFullscreen = false;
     });
 
-    it('is false for a regular iPhone in landscape', () => {
-        setWindow(932, 430);
-        expect(expanded()).toBe(false);
-    });
-
-    it('is false in portrait', () => {
-        setWindow(669, 951);
-        expect(expanded()).toBe(false);
-    });
-
-    it('is false on iPad', () => {
+    it('docks beside the board on an iPad in landscape', () => {
         setPlatform('ios', true);
         setWindow(1366, 1024);
-        expect(expanded()).toBe(false);
+        expect(dock()).toBe('columns');
     });
 
-    it('is false on Android', () => {
-        setPlatform('android');
+    it('docks below the board on an iPad in portrait', () => {
+        setPlatform('ios', true);
+        setWindow(1024, 1366);
+        expect(dock()).toBe('rows');
+    });
+
+    it('docks on the flat iPhone Duo inner display in either orientation', () => {
         setWindow(951, 669);
-        expect(expanded()).toBe(false);
+        expect(dock()).toBe('columns');
+        setWindow(669, 951);
+        expect(dock()).toBe('rows');
+    });
+
+    it('docks on an unfolded Android foldable', () => {
+        setPlatform('android');
+        setWindow(841, 701);
+        expect(dock()).toBe('columns');
+    });
+
+    it('does not dock on phones in either orientation', () => {
+        setWindow(932, 430);
+        expect(dock()).toBeNull();
+        setWindow(430, 932);
+        expect(dock()).toBeNull();
+    });
+
+    it('does not dock in a narrow iPad Split View window', () => {
+        setPlatform('ios', true);
+        setWindow(507, 1024);
+        expect(dock()).toBeNull();
+    });
+
+    it('does not dock in fullscreen, but stays available to show again', () => {
+        setPlatform('ios', true);
+        setWindow(1366, 1024);
+        mockFullscreen = true;
+        expect(dock()).toBeNull();
+        expect(available()).toBe('columns');
+    });
+
+    it('is not available on phones', () => {
+        setWindow(932, 430);
+        expect(available()).toBeNull();
+    });
+});
+
+describe('useGameDockBounds', () => {
+    const bounds = (dock: 'columns' | 'rows') => renderHook(() => useGameDockBounds(dock)).result.current;
+
+    beforeEach(() => {
+        setPlatform('ios');
+        mockFullscreen = false;
+        mockCurrentHinge = null;
+        mockFold = null;
+        mockInsets = { top: 0, right: 0, bottom: 0, left: 0 };
+    });
+
+    it('gives the sheet a panel at the right edge in a wide window', () => {
+        setPlatform('ios', true);
+        setWindow(1366, 1024);
+        expect(bounds('columns')).toEqual({ boardEnd: 1366 - 420, sheetStart: 1366 - 420 });
+        setWindow(1180, 820);
+        expect(bounds('columns')).toEqual({ boardEnd: 1180 - 401, sheetStart: 1180 - 401 });
+    });
+
+    it('keeps the panel inside the iPhone Duo vertical bar', () => {
+        setWindow(951, 669);
+        mockInsets = { top: 24, right: 92, bottom: 0, left: 0 };
+        expect(bounds('columns')).toEqual({ boardEnd: 951 - 92 - 320, sheetStart: 951 - 92 - 320 });
+    });
+
+    it('gives the sheet about a third of the height below the board', () => {
+        setPlatform('ios', true);
+        setWindow(1024, 1366);
+        expect(bounds('rows')).toEqual({ boardEnd: 1366 - 437, sheetStart: 1366 - 437 });
+        setWindow(669, 951);
+        expect(bounds('rows')).toEqual({ boardEnd: 951 - 304, sheetStart: 951 - 304 });
+    });
+});
+
+describe('useGameDockLayout', () => {
+    const layout = () => renderHook(() => useGameDockLayout()).result.current;
+
+    beforeEach(() => {
+        setPlatform('ios');
+        mockFullscreen = false;
+        mockCurrentHinge = null;
+        mockFold = null;
+    });
+
+    it('is a panel in a wide window and null on phones', () => {
+        setWindow(951, 669);
+        expect(layout()).toBe('columns-panel');
+        setWindow(932, 430);
+        expect(layout()).toBeNull();
     });
 });
 
