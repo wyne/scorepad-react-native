@@ -31,7 +31,10 @@ interface GhostProps {
     shortEdge?: number;
 }
 
-const ROW_GHOST_SIZE = 84;
+// Sized so the digit's cap height (~0.72em) fits inside a list row (~51pt
+// tall), leaving it to bleed off the leading edge only. 84 overflowed the
+// row and was cut off at the bottom.
+const ROW_GHOST_SIZE = 56;
 
 /** An oversized, faded numeral bleeding off the edge of the tile or row. */
 export const PlayerNumberGhost: React.FC<GhostProps> = ({ index, color, shortEdge }) => {
@@ -45,7 +48,7 @@ export const PlayerNumberGhost: React.FC<GhostProps> = ({ index, color, shortEdg
                         color,
                         fontSize: ROW_GHOST_SIZE,
                         lineHeight: ROW_GHOST_SIZE,
-                        letterSpacing: -4,
+                        letterSpacing: -3,
                     }]}>
                     {label}
                 </Text>
