@@ -23,6 +23,7 @@ import { selectCurrentGame, selectRecentPlayerNames } from '../../redux/selector
 import { logEvent } from '../Analytics';
 import ColorSelector from '../components/ColorPalettes/ColorSelector';
 import SectionLabel from '../components/SectionLabel';
+import { readableContentStyle } from '../hooks/readableContent';
 import { useTheme } from '../theme';
 
 type RouteParams = {
@@ -198,7 +199,7 @@ const EditPlayerScreen: React.FC<EditPlayerScreenProps> = ({
         <SafeAreaView edges={['left', 'right']} style={{ flex: 1 }}>
             <ScrollView
                 style={{ flex: 1 }}
-                contentContainerStyle={styles.scrollContent}
+                contentContainerStyle={[styles.scrollContent, readableContentStyle]}
                 keyboardShouldPersistTaps="handled"
                 nestedScrollEnabled
             >

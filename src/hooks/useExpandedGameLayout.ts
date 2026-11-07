@@ -8,10 +8,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { addFoldListener, getFold, useFold, type Fold } from '../../modules/fold-features';
 import { useAppSelector } from '../../redux/hooks';
 
-// The shortest landscape iPhone window is well under this; the iPhone Duo's
-// unfolded inner display is well over it.
-const EXPANDED_MIN_HEIGHT = 600;
-
 // Regular iPhones are about 2.2:1 in either orientation; both iPhone Duo
 // displays are close to square (about 1.4-1.5:1).
 const VERTICAL_BAR_MAX_ASPECT_RATIO = 1.7;
@@ -32,41 +28,16 @@ export const useVerticalBarLayout = (): boolean => {
         && longSide / shortSide < VERTICAL_BAR_MAX_ASPECT_RATIO;
 };
 
-/**
- * Whether the game screen should use the expanded layout: the iPhone Duo's
- * inner display in landscape, where the system shows navigation bar items in
- * a vertical bar. There is no public signal for vertical bars in React Native,
- * so this is inferred from the window size.
- *
- * In this layout the round picker moves from the header into the bottom-right
- * half of the screen and the game sheet takes the bottom-left half, leaving
- * nothing in the header.
- */
-export const useExpandedGameLayout = (): boolean => {
+// A window whose shorter side is at least this wide has room to keep the game
+// sheet docked open beside or below the board: iPads, the iPhone Duo's inner
+// display, and Android tablets and unfolded foldables (Android's own tablet
+// breakpoint). Every phone, in either orientation, is under it.
+export const WIDE_WINDOW_MIN_SHORT_SIDE = 600;
+
+/** Whether the window is big enough for the wide layouts (see WIDE_WINDOW_MIN_SHORT_SIDE). */
+export const useWideWindow = (): boolean => {
     const { width, height } = useWindowDimensions();
-
-    return Platform.OS === 'ios'
-        && !Platform.isPad
-        && width > height
-        && height >= EXPANDED_MIN_HEIGHT;
-};
-
-/**
- * Where the bottom strip splits between the game sheet (left) and the round
- * picker (right) in the expanded layout: the middle of the board, which sits
- * inside the safe area, not the middle of the window (the vertical bar takes
- * the right edge).
- */
-export const useExpandedGameSplit = (): { sheetWidth: number; pickerWidth: number; pickerRight: number } => {
-    const { width } = useWindowDimensions();
-    const insets = useSafeAreaInsets();
-    const half = (width - insets.left - insets.right) / 2;
-
-    return {
-        sheetWidth: insets.left + half,
-        pickerWidth: half,
-        pickerRight: insets.right,
-    };
+    return Math.min(width, height) >= WIDE_WINDOW_MIN_SHORT_SIDE;
 };
 
 /**
@@ -234,17 +205,20 @@ const subscribeToSettledFoldSplit = (listener: () => void): (() => void) => {
     };
 };
 
-export const useGameFoldSplit = (): GameFoldSplit | null => {
+/**
+ * The fold split while the device is settled partially open, whether or not
+ * the game is in fullscreen. See useGameFoldSplit.
+ */
+const useSettledFoldSplit = (): GameFoldSplit | null => {
     const settledFoldSplit = useSyncExternalStore(
         subscribeToSettledFoldSplit,
         getFoldSplitSnapshot,
         () => false
     );
     const { width, height } = useWindowDimensions();
-    const fullscreen = useAppSelector(state => state.settings.home_fullscreen);
     const fold = useFold();
 
-    if (fullscreen || !settledFoldSplit) return null;
+    if (!settledFoldSplit) return null;
 
     // On Android the window manager also says which way the fold runs: a fold line
     // running top to bottom splits the window into columns. The shape of the
@@ -259,30 +233,78 @@ export const useGameFoldSplit = (): GameFoldSplit | null => {
     return width > height ? 'columns' : 'rows';
 };
 
-/**
- * Whether the game screen's round picker sits in the bottom strip beside the
- * game sheet instead of in the header. True in the expanded layout, except in
- * fullscreen, which hides the sheet and keeps the picker in the header. With
- * the picker out of the header, the header has no content and collapses.
- */
-export const useRoundPickerInBottomStrip = (): boolean => {
-    const expanded = useExpandedGameLayout();
+export const useGameFoldSplit = (): GameFoldSplit | null => {
+    const foldSplit = useSettledFoldSplit();
     const fullscreen = useAppSelector(state => state.settings.home_fullscreen);
 
-    return expanded && !fullscreen;
+    return fullscreen ? null : foldSplit;
 };
 
 /**
- * Whether the round picker has moved out of the header into the game sheet:
- * beside it in the iPhone Duo's expanded layout, or inside it when it docks on
- * one side of the fold (see GameSheet).
+ * How the game screen docks the game sheet open, if it does: beside the board
+ * (`columns`) or below it (`rows`). Docked, the sheet can't be dragged and the
+ * board keeps to the rest of the window.
+ *
+ * It docks wherever there's room for it: across the fold of a partially open
+ * foldable (see useGameFoldSplit), or in a wide window (see useWideWindow),
+ * beside the board in landscape and below it in portrait. Null on phones and
+ * in fullscreen, which hides the sheet so the board takes the whole window.
  */
-export const useRoundPickerOutOfHeader = (): boolean => {
-    const inBottomStrip = useRoundPickerInBottomStrip();
+export type GameDock = GameFoldSplit;
+
+const useWideWindowDock = (): GameDock | null => {
+    const { width, height } = useWindowDimensions();
+    const wide = useWideWindow();
+
+    if (!wide) return null;
+    return width > height ? 'columns' : 'rows';
+};
+
+/** Where the game sheet docks, ignoring fullscreen. */
+const useGameDockIgnoringFullscreen = (): GameDock | null => {
+    const foldSplit = useSettledFoldSplit();
+    const wideDock = useWideWindowDock();
+
+    return foldSplit ?? wideDock;
+};
+
+export const useGameDock = (): GameDock | null => {
+    const dock = useGameDockIgnoringFullscreen();
+    const fullscreen = useAppSelector(state => state.settings.home_fullscreen);
+
+    return fullscreen ? null : dock;
+};
+
+/**
+ * Where the game sheet docks when it's showing, even in fullscreen. Docking is
+ * when hiding and showing the sheet gets its own button in the header (see
+ * GameOptionsButton): on phones the collapsed sheet already stays out of the
+ * way.
+ */
+export const useAvailableGameDock = (): GameDock | null => useGameDockIgnoringFullscreen();
+
+/**
+ * Which docked layout the game screen has, if any: the dock's direction and
+ * whether it splits at a fold or takes a panel in a wide window. The iPhone
+ * Duo flat in landscape docks a panel beside the board, and folding it keeps
+ * the direction but moves the split to the fold, so this tells them apart
+ * where useGameDock doesn't.
+ */
+export type GameDockLayout = `${GameDock}-${'fold' | 'panel'}`;
+
+export const useGameDockLayout = (): GameDockLayout | null => {
+    const dock = useGameDock();
     const foldSplit = useGameFoldSplit();
 
-    return inBottomStrip || foldSplit === 'columns';
+    if (dock == null) return null;
+    return `${dock}-${foldSplit === dock ? 'fold' : 'panel'}`;
 };
+
+/**
+ * Whether the round picker has moved out of the header into the game sheet
+ * docked beside the board (see GameSheet).
+ */
+export const useRoundPickerOutOfHeader = (): boolean => useGameDock() === 'columns';
 
 /**
  * Where the game screen splits around the fold, along the split's axis (x for
@@ -306,4 +328,42 @@ export const useFoldSplitBounds = (foldSplit: GameFoldSplit | null): { boardEnd:
     const half = Math.max(size, FOLD_GAP) / 2;
 
     return { boardEnd: center - half, sheetStart: center + half };
+};
+
+// The docked sheet's size in a wide window, as a share of the window along
+// the split, within these limits: wide enough for a few rounds of scores
+// beside the board, and never so big that the board gets cramped.
+const DOCK_COLUMN_SHARE = 0.34;
+const DOCK_COLUMN_MIN = 320;
+const DOCK_COLUMN_MAX = 420;
+const DOCK_ROW_SHARE = 0.32;
+const DOCK_ROW_MIN = 300;
+const DOCK_ROW_MAX = 440;
+
+const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max);
+
+/**
+ * Where the board ends and the docked sheet starts (see useFoldSplitBounds).
+ * Across a fold the split follows the fold. In a wide window the sheet takes
+ * a panel at the trailing edge, inside the safe area (the iPhone Duo's
+ * vertical bar), or along the bottom.
+ */
+export const useGameDockBounds = (dock: GameDock | null): { boardEnd: number; sheetStart: number } => {
+    const { width, height } = useWindowDimensions();
+    const insets = useSafeAreaInsets();
+    const foldSplit = useGameFoldSplit();
+    const foldBounds = useFoldSplitBounds(dock);
+
+    if (dock == null || foldSplit === dock) return foldBounds;
+
+    if (dock === 'columns') {
+        const contentWidth = width - insets.left - insets.right;
+        const panel = Math.round(clamp(contentWidth * DOCK_COLUMN_SHARE, DOCK_COLUMN_MIN, DOCK_COLUMN_MAX));
+        const sheetStart = width - insets.right - panel;
+        return { boardEnd: sheetStart, sheetStart };
+    }
+
+    const panel = Math.round(clamp(height * DOCK_ROW_SHARE, DOCK_ROW_MIN, DOCK_ROW_MAX));
+    const sheetStart = height - panel;
+    return { boardEnd: sheetStart, sheetStart };
 };

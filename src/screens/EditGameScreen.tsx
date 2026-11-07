@@ -17,6 +17,7 @@ import PlayerListItem from '../components/PlayerListItem';
 import ScoringRow from '../components/ScoringRow';
 import SectionLabel from '../components/SectionLabel';
 import { MAX_PLAYERS, MAX_TILE_PLAYERS } from '../constants';
+import { readableContentStyle } from '../hooks/readableContent';
 import { useTheme } from '../theme';
 
 type RouteParams = {
@@ -121,8 +122,8 @@ const EditGameScreen: React.FunctionComponent<Props> = ({ navigation, route }) =
 
     return (
         // Left/right insets keep the content clear of landscape notches and the
-        // iPhone Duo's vertical bar.
-        <SafeAreaView edges={['left', 'right']} style={{ flex: 1 }} testID="edit-game">
+        // iPhone Duo's vertical bar. Wide windows keep it at a readable width.
+        <SafeAreaView edges={['left', 'right']} style={[{ flex: 1 }, readableContentStyle]} testID="edit-game">
 
             <SectionLabel inset={30}>Game title</SectionLabel>
             <EditGame />

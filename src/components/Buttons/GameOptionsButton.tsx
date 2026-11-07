@@ -4,7 +4,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { MenuAction, MenuView } from '@react-native-menu/menu';
 import type { NativeStackHeaderItem, NativeStackHeaderItemMenuAction, NativeStackHeaderItemMenuSubmenu } from '@react-navigation/native-stack';
 import { type SFSymbol, SymbolView } from 'expo-symbols';
-import { StyleSheet, View, Text, Platform } from 'react-native';
+import { StyleSheet, View, Text, Platform, Pressable } from 'react-native';
 
 import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
 import { selectInteractionType, selectIsDialOnly, selectPlayerNumbers } from '../../../redux/selectors';
@@ -13,6 +13,7 @@ import { logEvent } from '../../Analytics';
 import { FEATURE_DIAL_GESTURE, MAX_TILE_PLAYERS } from '../../constants';
 import { useApplyInteractionType } from '../../hooks/useApplyInteractionType';
 import { useApplyPlayerNumbers } from '../../hooks/useApplyPlayerNumbers';
+import { type GameDock, useAvailableGameDock } from '../../hooks/useExpandedGameLayout';
 import { useTheme } from '../../theme';
 import { InteractionType } from '../Interactions/InteractionType';
 import { useMenuOpen } from '../MenuOpenContext';
@@ -43,6 +44,10 @@ const PLAYER_NUMBER_TITLES: Record<PlayerNumberStyle, string> = {
     badge: 'Badge',
     big: 'Big',
 };
+
+/** The score sheet's own symbol: a panel on the side it docks on. */
+const scoreSheetSymbol = (dock: GameDock): SFSymbol =>
+    dock === 'rows' ? 'rectangle.bottomhalf.inset.filled' : 'sidebar.trailing';
 
 /**
  * Shared state and handlers for the game options menu. Rendered as a React
@@ -160,8 +165,14 @@ const useGameOptions = () => {
         if (showDialDot) dispatch(markFeatureNotificationSeen(FEATURE_DIAL_GESTURE));
     };
 
+    // Where there's room to dock the game sheet open (see useGameDock),
+    // hiding and showing it gets its own header button beside this menu.
+    const availableDock = useAvailableGameDock();
+
     return {
         currentGameId,
+        fullscreen,
+        availableDock,
         addendOne,
         addendTwo,
         isSwipe,
@@ -182,14 +193,16 @@ const useGameOptions = () => {
 export const useGameOptionsHeaderItems = (): NativeStackHeaderItem[] => {
     const theme = useTheme();
     const {
-        currentGameId, isSwipe, isDial, showDialDot,
+        currentGameId, fullscreen, availableDock, isSwipe, isDial, showDialDot,
         gestureActions, settingsActions, handleAction, markDialSeen,
     } = useGameOptions();
 
     // Keep the latest handlers in a ref so the items below only change when
     // what they display changes. Each new items array re-runs setOptions.
     const onActionRef = useRef<(id: string) => void>(() => {});
+    const handleActionRef = useRef(handleAction);
     useLayoutEffect(() => {
+        handleActionRef.current = handleAction;
         onActionRef.current = (id: string) => {
             handleAction(id);
             // UIMenu has no open/close callbacks here, so the "new" badge is
@@ -224,7 +237,7 @@ export const useGameOptionsHeaderItems = (): NativeStackHeaderItem[] => {
             onPress: () => onActionRef.current(action.id),
         });
 
-        return [{
+        const menu: NativeStackHeaderItem = {
             type: 'menu',
             label: 'Game Options',
             accessibilityLabel: 'Game Options',
@@ -249,17 +262,31 @@ export const useGameOptionsHeaderItems = (): NativeStackHeaderItem[] => {
                     },
                 ],
             },
-        }];
+        };
+
+        if (availableDock == null) return [menu];
+
+        const sheetToggle: NativeStackHeaderItem = {
+            type: 'button',
+            label: fullscreen ? 'Show Score Sheet' : 'Hide Score Sheet',
+            accessibilityLabel: fullscreen ? 'Show Score Sheet' : 'Hide Score Sheet',
+            icon: { type: 'sfSymbol', name: scoreSheetSymbol(availableDock) },
+            tintColor: theme.text,
+            selected: !fullscreen,
+            // Not a menu action, so it leaves the menu's 'new' badge alone.
+            onPress: () => handleActionRef.current('fullscreen'),
+        };
+        return [menu, sheetToggle];
         // gestureActions/settingsActions are rebuilt every render; actionsKey tracks their content.
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [currentGameId, isDial, isSwipe, showDialDot, theme.text, theme.warning, actionsKey]);
+    }, [currentGameId, fullscreen, availableDock, isDial, isSwipe, showDialDot, theme.text, theme.warning, actionsKey]);
 };
 
 const GameOptionsButton: React.FunctionComponent = () => {
     const theme = useTheme();
     const { setMenuOpen } = useMenuOpen();
     const {
-        currentGameId, addendOne, addendTwo, isSwipe, isDial, showDialDot,
+        currentGameId, fullscreen, availableDock, addendOne, addendTwo, isSwipe, isDial, showDialDot,
         gestureActions, settingsActions, handleAction, markDialSeen,
     } = useGameOptions();
 
@@ -289,7 +316,27 @@ const GameOptionsButton: React.FunctionComponent = () => {
             },
         ];
 
+    const sheetLabel = fullscreen ? 'Show Score Sheet' : 'Hide Score Sheet';
+    const sheetToggle = availableDock != null && (
+        <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={sheetLabel}
+            accessibilityState={{ selected: !fullscreen }}
+            onPress={() => handleAction('fullscreen')}
+            style={styles.button}
+            testID="score-sheet-toggle"
+        >
+            <MaterialCommunityIcons
+                name={availableDock === 'rows' ? 'dock-bottom' : 'dock-right'}
+                size={28}
+                color={fullscreen ? theme.textSecondary : theme.text}
+            />
+        </Pressable>
+    );
+
     return (
+        <View style={styles.content}>
+        {sheetToggle}
         <MenuView
             actions={menuActions}
             onOpenMenu={() => setMenuOpen(true)}
@@ -340,6 +387,7 @@ const GameOptionsButton: React.FunctionComponent = () => {
                 </View>
             </View>
         </MenuView>
+        </View>
     );
 };
 

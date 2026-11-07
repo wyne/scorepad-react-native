@@ -17,6 +17,7 @@ import {
 import { selectCurrentGame } from '../../redux/selectors';
 import { logEvent } from '../Analytics';
 import SectionLabel from '../components/SectionLabel';
+import { readableContentStyle } from '../hooks/readableContent';
 import { useTheme } from '../theme';
 
 type EndType = 'none' | EndCondition['type'];
@@ -198,8 +199,9 @@ const ScoringRulesScreen: React.FunctionComponent = () => {
             testID="scoring-rules"
         >
             {/* Left/right insets keep the rows clear of landscape notches and the
-                iPhone Duo's vertical bar, as on Edit Game. */}
-            <SafeAreaView edges={['left', 'right']}>
+                iPhone Duo's vertical bar, as on Edit Game, and wide windows keep
+                them at a readable width. */}
+            <SafeAreaView edges={['left', 'right']} style={readableContentStyle}>
                 <SectionLabel inset={30}>Winner</SectionLabel>
                 <View style={[styles.section, { backgroundColor: theme.backgroundSecondary }]}>
                     {winnerOptions.map((option, index) => {

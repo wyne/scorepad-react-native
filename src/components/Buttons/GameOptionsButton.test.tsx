@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { configureStore } from '@reduxjs/toolkit';
-import { act, render } from '@testing-library/react-native';
+import { act, fireEvent, render, renderHook } from '@testing-library/react-native';
 import { Provider } from 'react-redux';
 
 import gamesReducer from '../../../redux/GamesSlice';
@@ -57,7 +57,13 @@ jest.mock('../Sheets/GestureInfoSheetContext', () => ({
     useGestureInfoSheetContext: () => ({ current: null }),
 }));
 
-import GameOptionsButton from './GameOptionsButton';
+let mockAvailableDock: 'columns' | 'rows' | null = null;
+jest.mock('../../hooks/useExpandedGameLayout', () => ({
+    ...jest.requireActual('../../hooks/useExpandedGameLayout'),
+    useAvailableGameDock: () => mockAvailableDock,
+}));
+
+import GameOptionsButton, { useGameOptionsHeaderItems } from './GameOptionsButton';
 
 const createStore = (seenFeatureNotifications: string[] = [], playerIds: string[] = ['p1']) =>
     configureStore({
@@ -169,5 +175,45 @@ describe('GameOptionsButton — player numbers', () => {
         expect(store.getState().games.entities['game-1']?.playerNumbers).toBe('big');
         expect(store.getState().settings.playerNumbers).toBe(defaultBefore);
         expect(findAction('player-numbers-big')?.state).toBe('on');
+    });
+});
+
+describe('GameOptionsButton — score sheet toggle', () => {
+    afterEach(() => { mockAvailableDock = null; });
+
+    it('is not shown where the sheet does not dock', () => {
+        const { queryByTestId } = render(<Provider store={createStore()}><GameOptionsButton /></Provider>);
+        expect(queryByTestId('score-sheet-toggle')).toBeNull();
+    });
+
+    it('hides and shows the docked sheet', () => {
+        mockAvailableDock = 'columns';
+        const store = createStore();
+        const { getByTestId } = render(<Provider store={store}><GameOptionsButton /></Provider>);
+
+        expect(getByTestId('score-sheet-toggle').props.accessibilityLabel).toBe('Hide Score Sheet');
+        fireEvent.press(getByTestId('score-sheet-toggle'));
+        expect(store.getState().settings.home_fullscreen).toBe(true);
+        expect(getByTestId('score-sheet-toggle').props.accessibilityLabel).toBe('Show Score Sheet');
+    });
+
+    it('adds a native header button beside the menu, with a symbol for where the sheet docks', () => {
+        const store = createStore();
+        const wrapper = ({ children }: { children: React.ReactNode }) => <Provider store={store}>{children}</Provider>;
+        const items = () => renderHook(() => useGameOptionsHeaderItems(), { wrapper }).result.current;
+
+        expect(items().map(item => item.type)).toEqual(['menu']);
+
+        mockAvailableDock = 'rows';
+        const [, toggle] = items();
+        expect(toggle).toMatchObject({
+            type: 'button',
+            label: 'Hide Score Sheet',
+            selected: true,
+            icon: { type: 'sfSymbol', name: 'rectangle.bottomhalf.inset.filled' },
+        });
+
+        mockAvailableDock = 'columns';
+        expect(items()[1]).toMatchObject({ icon: { type: 'sfSymbol', name: 'sidebar.trailing' } });
     });
 });

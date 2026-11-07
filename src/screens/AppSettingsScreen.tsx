@@ -16,6 +16,7 @@ import HeaderButton from '../components/Buttons/HeaderButton';
 import { PlayerNumberStyle } from '../components/PlayerTiles/PlayerNumberStyle';
 import SectionLabel from '../components/SectionLabel';
 import { FEATURE_KEEP_SCREEN_AWAKE } from '../constants';
+import { readableContentStyle } from '../hooks/readableContent';
 import { useTheme } from '../theme';
 
 const PLAYER_NUMBER_OPTIONS: { style: PlayerNumberStyle; label: string }[] = [
@@ -187,11 +188,11 @@ const AppSettingsScreen: React.FunctionComponent<Props> = ({ navigation }) => {
 
     return (
         <ScrollView
-            contentContainerStyle={{
+            contentContainerStyle={[{
                 paddingBottom: 50,
                 paddingLeft: insets.left,
                 paddingRight: insets.right,
-            }}
+            }, readableContentStyle]}
             overScrollMode="always"
             style={{ backgroundColor: theme.background, flex: 1 }}
             testID="settings-scroll-view"
