@@ -101,8 +101,9 @@ describe('App Flow', () => {
     console.log(`Video saved: ${videoPath}`);
   });
 
-  it('navigates through a full game flow', async () => {
-    // Wait for app to settle on home screen (or dismiss onboarding first)
+  it('creates a known three-player game from a clean install', async () => {
+    // e2e:install removes the previous app first, so every run starts with the
+    // same empty store instead of depending on whichever games a simulator had.
     await browser.waitUntil(
       async () => {
         const onboarding = await $('~onboarding').isDisplayed().catch(() => false);
@@ -117,31 +118,20 @@ describe('App Flow', () => {
     await $('~home-screen').waitForDisplayed({ timeout: 15000 });
     await browser.saveScreenshot(path.join(screenshotsDir, 'home.png'));
 
-    console.log('→ tap game (index 2)');
-    const thirdGame = $$('~game-list-item')[2];
-    await thirdGame.waitForDisplayed({ timeout: 10000 });
-    const gameLoc = await thirdGame.getLocation();
-    const gameSize = await thirdGame.getSize();
-    await browser.execute('mobile: tap', {
-      x: Math.round(gameLoc.x + gameSize.width / 2),
-      y: Math.round(gameLoc.y + gameSize.height / 2),
-    });
-    await browser.saveScreenshot(path.join(screenshotsDir, 'game.png'));
-
-    console.log('→ open game sheet');
-    await browser.pause(2000);
-    await tap('~game-title-button');
-    await browser.pause(2000);
-    await browser.saveScreenshot(path.join(screenshotsDir, 'game-sheet.png'));
-
-    console.log('→ edit game');
-    await tap('~edit-game-and-players');
+    console.log('→ create a three-player game');
+    await tap('~add-game-button');
+    await tap('-ios predicate string:label == "3 Players"');
     await $('~edit-game').waitForDisplayed({ timeout: 15000 });
-    await browser.saveScreenshot(path.join(screenshotsDir, 'edit-game.png'));
+    const titleInput = $('~game-title-input');
+    await titleInput.waitForDisplayed({ timeout: 10000 });
+    await titleInput.clearValue();
+    await titleInput.setValue('E2E Game');
+    await tap('-ios predicate string:label == "Done"');
+    await $('~game-screen').waitForDisplayed({ timeout: 15000 });
+    await browser.saveScreenshot(path.join(screenshotsDir, 'game.png'));
+  });
 
-    console.log('→ save game');
-    await tap('-ios predicate string:label == "Save Game"');
-
+  it('scores with swipe and dial gestures across rounds', async () => {
     console.log('→ select swipe mode');
     await tap('~Game Options');
     await tap('-ios predicate string:label == "Swipe"');
@@ -153,6 +143,7 @@ describe('App Flow', () => {
 
     console.log('→ next round');
     await tap('~next-round-button');
+    await $('-ios predicate string:label == "Round 2. Select round"').waitForDisplayed({ timeout: 10000 });
 
     console.log('→ select dial mode');
     await tap('~Game Options');
@@ -160,6 +151,7 @@ describe('App Flow', () => {
 
     console.log('→ swipe dial (increase score)');
     await tap('~player-row-2');
+    await $('~dial-card').waitForDisplayed({ timeout: 10000 });
     await swipeDialRight(2);
     await browser.pause(500);
     await browser.saveScreenshot(path.join(screenshotsDir, 'dial.png'));
@@ -173,10 +165,12 @@ describe('App Flow', () => {
 
     console.log('→ dismiss addend modal');
     await tapAt(0.5, 0.37);
+  });
 
+  it('locks a winner and restores the finished game after relaunch', async () => {
     console.log('→ open game sheet');
     await tap('~game-title-button');
-    await browser.pause(1000);
+    await $('~choose-winners-button').waitForDisplayed({ timeout: 10000 });
 
     console.log('→ choose winners');
     await tap('~choose-winners-button');
@@ -185,5 +179,32 @@ describe('App Flow', () => {
 
     console.log('→ select top player');
     await tap('~winner-player-row-0');
+    await tap('~lock-game-button');
+    await $('~final-pill').waitForDisplayed({ timeout: 10000 });
+
+    console.log('→ relaunch and verify the locked game persists');
+    await browser.terminateApp(BUNDLE_ID);
+    await browser.activateApp(BUNDLE_ID);
+    await browser.waitUntil(
+      async () => (
+        await $('~game-screen').isDisplayed().catch(() => false)
+        || await $('~home-screen').isDisplayed().catch(() => false)
+      ),
+      { timeout: 20000, timeoutMsg: 'App did not restore to the game or home screen' }
+    );
+
+    if (await $('~home-screen').isDisplayed().catch(() => false)) {
+      const onlyGame = $$('~game-list-item')[0];
+      await onlyGame.waitForDisplayed({ timeout: 10000 });
+      const gameLoc = await onlyGame.getLocation();
+      const gameSize = await onlyGame.getSize();
+      await browser.execute('mobile: tap', {
+        x: Math.round(gameLoc.x + gameSize.width / 2),
+        y: Math.round(gameLoc.y + gameSize.height / 2),
+      });
+    }
+
+    await $('~game-screen').waitForDisplayed({ timeout: 15000 });
+    await $('~final-pill').waitForDisplayed({ timeout: 10000 });
   });
 });
