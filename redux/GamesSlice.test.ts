@@ -233,6 +233,32 @@ describe('asyncRematchGame', () => {
     });
 });
 
+describe('asyncRematchGame players', () => {
+    it('keeps every player with their name and color', async () => {
+        const store = configureStore({
+            reducer: { games: gamesReducer, players: playersReducer },
+        });
+        store.dispatch(playerAdd({ id: 'a', playerName: 'Ann', scores: [5], color: '#111111' }));
+        store.dispatch(playerAdd({ id: 'b', playerName: 'Ben', scores: [3], color: '#222222' }));
+        store.dispatch(playerAdd({ id: 'c', playerName: 'Cy', scores: [9], color: '#333333' }));
+        store.dispatch(gameSave({
+            id: 'old', title: 'Hearts', dateCreated: 1, roundCurrent: 0, roundTotal: 1,
+            playerIds: ['a', 'b', 'c'], palette: 'spring', locked: true,
+        }));
+
+        await store.dispatch(asyncRematchGame({ gameId: 'old' }));
+
+        const state = store.getState();
+        const rematch = Object.values(state.games.entities).find(game => game?.id !== 'old')!;
+        const players = rematch.playerIds.map(id => state.players.entities[id]);
+
+        expect(rematch.palette).toBe('spring');
+        expect(players.map(p => p?.playerName)).toEqual(['Ann', 'Ben', 'Cy']);
+        expect(players.map(p => p?.color)).toEqual(['#111111', '#222222', '#333333']);
+        expect(players.map(p => p?.scores)).toEqual([[0], [0], [0]]);
+    });
+});
+
 describe('backfillGamePlayerNumbers', () => {
     it('pins games without a style to the default and leaves chosen ones alone', () => {
         const game = (id: string, playerNumbers?: string) => ({
