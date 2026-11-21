@@ -237,20 +237,21 @@ export const asyncRematchGame = createAsyncThunk(
             return;
         }
 
-        game.playerIds.forEach(() => {
-            playerIds.push(Crypto.randomUUID());
-        });
+        const paletteName = game.palette || gameDefaults.palette;
+        const paletteColors = getPalette(paletteName);
 
-        playerIds.forEach((playerId) => {
-            const oldPlayerId = game.playerIds[playerIds.indexOf(playerId)];
+        game.playerIds.forEach((oldPlayerId, index) => {
+            const playerId = Crypto.randomUUID();
+            playerIds.push(playerId);
 
             const player = selectPlayerById(getState() as RootState, oldPlayerId);
-            const playerName = player?.playerName;
 
             dispatch(playerAdd({
                 id: playerId,
-                playerName: playerName || `Player ${playerIds.indexOf(playerId) + 1}`,
+                playerName: player?.playerName || `Player ${index + 1}`,
                 scores: [0],
+                // Keep each player's color; without one the board shows them grey.
+                color: player?.color || paletteColors[index % paletteColors.length],
             }));
         });
 
@@ -260,6 +261,7 @@ export const asyncRematchGame = createAsyncThunk(
             title: game.title,
             dateCreated: Date.now(),
             playerIds: playerIds,
+            palette: paletteName,
             ...(game.scoring ? { scoring: { ...game.scoring } } : {}),
             // A rematch keeps the numbers the players were looking at.
             playerNumbers: game.playerNumbers ?? (getState() as RootState).settings?.playerNumbers,
